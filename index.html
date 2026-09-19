@@ -6,29 +6,52 @@
     <title>ARCHI | 정수호</title>
     <style>
       * { box-sizing: border-box; }
-      body { margin: 0; overflow: hidden; background: #303133; color: #eee; }
+      body { margin: 0; overflow: hidden; background: #27292b; color: #eee; font: 14px Arial, sans-serif; }
       #stage { position: relative; width: 100%; height: 100dvh; overflow: hidden; touch-action: none; }
-      #player { position: absolute; top: 50%; width: min(256px, 64vw, 65dvh); aspect-ratio: 1; overflow: hidden; image-rendering: pixelated; user-select: none; pointer-events: none; }
+      #world { position: absolute; transform-origin: top left; background: #151f25; }
+      #background { position: absolute; inset: 0; overflow: hidden; pointer-events: none; user-select: none; }
+      #background img { position: absolute; width: 256px; height: 256px; image-rendering: pixelated; }
+      .solid { position: absolute; }
+      .boundary { background: #172126; border-inline: 4px solid #2b383e; }
+      .crate { background: #77817a; border: 5px solid #a0a790; box-shadow: inset 0 -10px #5b6762; }
+      .crate::after { content: ''; position: absolute; top: 8px; left: 12px; width: 34px; height: 8px; background: #d6bd6a; }
+      .cabinet { background: #737f7b; border: 5px solid #a3ada2; box-shadow: inset 0 -6px #52645e; }
+      .cabinet::after { content: ''; position: absolute; top: 14px; left: 40%; width: 20%; height: 4px; background: #273b38; }
+      #player { position: absolute; top: 0; left: 0; width: 192px; height: 192px; overflow: hidden; image-rendering: pixelated; user-select: none; pointer-events: none; }
       #player img { display: block; width: 100%; height: 100%; }
       #player #walk-sheet { width: 400%; height: 100%; }
-      #player[data-state="idle"] #walk-sheet, #player[data-state="walk"] #idle-sprite { display: none; }
-      nav { position: absolute; bottom: max(24px, env(safe-area-inset-bottom)); left: 50%; transform: translateX(-50%); display: flex; gap: 12px; }
-      button { width: 52px; height: 48px; padding: 0; border: 1px solid #6b6d70; border-radius: 4px; background: #252629; color: #e5e7e9; font: 24px Arial, sans-serif; cursor: pointer; touch-action: none; user-select: none; -webkit-user-select: none; }
+      #player:not([data-state="walk"]) #walk-sheet, #player[data-state="walk"] #idle-sprite { display: none; }
+      header { position: absolute; inset: max(24px, env(safe-area-inset-top)) max(24px, env(safe-area-inset-right)) auto max(24px, env(safe-area-inset-left)); display: flex; justify-content: space-between; gap: 16px; pointer-events: none; }
+      header strong { font-size: 18px; font-weight: 600; }
+      header span { color: #b8c6c0; font-size: 13px; }
+      nav { position: absolute; inset: auto max(24px, env(safe-area-inset-right)) max(24px, env(safe-area-inset-bottom)) max(24px, env(safe-area-inset-left)); display: flex; gap: 12px; }
+      button { width: 56px; height: 52px; flex-shrink: 0; padding: 0; border: 1px solid #6b6d70; border-radius: 4px; background: #252629; color: #e5e7e9; font: 24px Arial, sans-serif; cursor: pointer; touch-action: none; user-select: none; -webkit-user-select: none; }
+      #jump { margin-left: auto; }
       button:hover { border-color: #b9c6cf; }
       button.active, button:active { background: #bdd1dc; color: #22282e; }
       button:focus-visible { outline: 2px solid #c9dde5; outline-offset: 4px; }
+      @media (max-height: 480px) {
+        nav { bottom: max(12px, env(safe-area-inset-bottom)); }
+        button { width: 48px; height: 44px; }
+      }
     </style>
+    <script src="assets/vendor/matter.min.js" defer></script>
     <script src="player.js" defer></script>
   </head>
   <body>
-    <main id="stage" aria-label="정수호 플레이어">
-      <div id="player" role="img" aria-label="정수호" data-state="idle" data-frame="0">
-        <img id="idle-sprite" src="assets/player/jeong-suho.png" alt="" width="256" height="256" draggable="false" />
-        <img id="walk-sheet" src="assets/player/jeong-suho-walk.png" alt="" width="1024" height="256" draggable="false" />
+    <main id="stage" aria-label="ARCHI 17층 사이드뷰 스테이지">
+      <div id="world">
+        <div id="background" aria-hidden="true"></div>
+        <div id="player" role="img" aria-label="정수호" data-state="idle" data-frame="0">
+          <img id="idle-sprite" src="assets/player/jeong-suho.png" alt="" width="256" height="256" draggable="false" />
+          <img id="walk-sheet" src="assets/player/jeong-suho-walk.png" alt="" width="1024" height="256" draggable="false" />
+        </div>
       </div>
-      <nav aria-label="플레이어 이동">
+      <header><strong>ARCHI</strong><span>17F · 00:00</span></header>
+      <nav aria-label="플레이어 조작">
         <button type="button" data-direction="-1" aria-label="왼쪽 이동" title="왼쪽 이동 (A / ←)">←</button>
         <button type="button" data-direction="1" aria-label="오른쪽 이동" title="오른쪽 이동 (D / →)">→</button>
+        <button id="jump" type="button" aria-label="점프" title="점프 (Space / W / ↑)">↑</button>
       </nav>
     </main>
   </body>
