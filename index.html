@@ -10,6 +10,8 @@
       body { margin: 0; overflow: hidden; background: #27292b; color: #eee; font: 14px Arial, sans-serif; }
       #stage { position: relative; width: 100%; height: 100dvh; overflow: hidden; touch-action: none; }
       #world { position: absolute; transform-origin: top left; background: #151f25; }
+      #darkness { display: none; position: absolute; inset: 0; z-index: 1; pointer-events: none; background: radial-gradient(circle at var(--sight-x, 640px) var(--sight-y, 489px), #0000000d 0 90px, #000000e6 160px, #000 210px); }
+      #world[data-lights="off"]:is([data-room="office"], [data-room="corridor"]) #darkness { display: block; }
       #background { position: absolute; inset: 0; overflow: hidden; pointer-events: none; user-select: none; }
       #background img { position: absolute; width: 256px; height: 256px; image-rendering: pixelated; }
       #office-background { display: none; position: absolute; pointer-events: none; user-select: none; image-rendering: pixelated; }
@@ -22,6 +24,8 @@
       #world[data-room="corridor"] .office-door[data-room="office"] { display: none; }
       #dynamic-scene { position: absolute; inset: 0; display: none; }
       #dynamic-scene > .floor { background: #171b1a; border-top: 2px solid #626963; }
+      .solar-supply { position: absolute; width: 360px; height: 360px; overflow: hidden; pointer-events: none; image-rendering: pixelated; }
+      .solar-supply img { display: block; width: 200%; height: 100%; max-width: none; }
       #world[data-room="dynamic"] #dynamic-scene { display: block; }
       #world[data-room="dynamic"] #background,
       #world[data-room="dynamic"] #office-background,
@@ -43,16 +47,12 @@
       .elevator[data-open="true"] .elevator-panels::after { transform: translateX(38%); }
       .door.near { outline: 2px solid #96b7aa; }
       .elevator-indicator { position: absolute; transform: translateX(-50%); width: 86px; height: 26px; border: 2px solid #293b40; background: #081013; color: #9fd5ba; font: bold 19px/22px monospace; text-align: center; text-shadow: 0 0 5px #578873; pointer-events: none; }
-      #interaction-hint { position: absolute; z-index: 1; transform: translateX(-50%); padding: 6px 10px; background: #101b20; border: 1px solid #96b7aa; pointer-events: none; white-space: nowrap; }
+      #interaction-hint { position: absolute; z-index: 2; transform: translateX(-50%); padding: 6px 10px; background: #101b20; border: 1px solid #96b7aa; pointer-events: none; white-space: nowrap; }
       #interaction-status { position: absolute; bottom: 24px; width: 100%; text-align: center; text-shadow: 0 2px 4px #000; pointer-events: none; }
-      #room-transition { position: absolute; inset: 0; z-index: 5; background: #000; opacity: 0; pointer-events: none; transition: opacity .35s ease; }
-      #room-transition.visible { opacity: 1; }
+      #room-transition { position: fixed; inset: 0; z-index: 20; background: #000; opacity: 0; pointer-events: none; }
+      #room-transition.visible { pointer-events: auto; }
       .solid { position: absolute; }
       .boundary { background: #172126; border-inline: 4px solid #2b383e; }
-      .crate { background: #77817a; border: 5px solid #a0a790; box-shadow: inset 0 -10px #5b6762; }
-      .crate::after { content: ''; position: absolute; top: 8px; left: 12px; width: 34px; height: 8px; background: #d6bd6a; }
-      .cabinet { background: #737f7b; border: 5px solid #a3ada2; box-shadow: inset 0 -6px #52645e; }
-      .cabinet::after { content: ''; position: absolute; top: 14px; left: 40%; width: 20%; height: 4px; background: #273b38; }
       .desk { background: #5c5346; border: 5px solid #8f8168; box-shadow: inset 0 -8px #40392f; }
       .desk::after { content: ''; position: absolute; top: 10px; left: 14px; width: 40%; height: 18px; background: #2f6b63; box-shadow: 0 0 6px #3fa696; }
       .rig { background: #37524f; border: 5px solid #5f8b85; box-shadow: inset 0 -8px #233a38; }
@@ -67,9 +67,11 @@
       #player { position: absolute; top: 0; left: 0; width: 192px; height: 192px; overflow: hidden; image-rendering: pixelated; user-select: none; pointer-events: none; }
       #player img { display: none; width: 100%; height: 100%; }
       #player #walk-sheet { width: 600%; height: 100%; }
+      #player #run-sheet { width: 800%; height: 100%; }
       #player .action-sheet { width: 200%; height: 100%; }
       #player[data-state="idle"] #idle-sprite,
       #player[data-state="walk"] #walk-sheet,
+      #player[data-state="run"] #run-sheet,
       #player[data-state="jump"] #jump-sheet,
       #player[data-state="fall"] #jump-sheet,
       #player[data-state="interact"] #interact-sheet { display: block; }
@@ -77,6 +79,10 @@
       header { position: absolute; inset: max(24px, env(safe-area-inset-top)) max(24px, env(safe-area-inset-right)) auto max(24px, env(safe-area-inset-left)); display: flex; justify-content: space-between; gap: 16px; pointer-events: none; }
       header strong { font-size: 18px; font-weight: 600; }
       header span { color: #b8c6c0; font-size: 13px; }
+      #floor17-light-switch { display: flex; align-items: center; gap: 6px; min-height: 32px; font-size: 13px; white-space: nowrap; pointer-events: auto; cursor: pointer; }
+      #floor17-light-switch[hidden] { display: none; }
+      #floor17-lights { width: 18px; height: 18px; margin: 0; accent-color: #b9d0a6; cursor: pointer; }
+      #floor17-lights:focus-visible { outline: 2px solid #e2e9cc; outline-offset: 3px; }
       nav { position: absolute; inset: auto max(24px, env(safe-area-inset-right)) max(24px, env(safe-area-inset-bottom)) max(24px, env(safe-area-inset-left)); display: flex; gap: 12px; }
       nav button { width: 56px; height: 52px; flex-shrink: 0; padding: 0; border: 1px solid #6b6d70; border-radius: 4px; background: #252629; color: #e5e7e9; font: 24px Arial, sans-serif; cursor: pointer; touch-action: none; user-select: none; -webkit-user-select: none; }
       #interact { margin-left: auto; font-size: 18px; }
@@ -92,8 +98,9 @@
     <script src="player.js" defer></script>
   </head>
   <body>
-    <main id="stage" tabindex="-1" aria-label="ARCHI 17층 사이드뷰 스테이지">
-      <div id="world" data-room="corridor">
+    <main id="stage" tabindex="-1" aria-label="ARCHI 17층 사무실 사이드뷰 스테이지">
+      <div id="world" data-room="office" data-lights="on">
+        <div id="darkness" aria-hidden="true"></div>
         <div id="background" aria-hidden="true"></div>
         <img id="office-background" src="assets/background/floor17/office-interior.png" alt="" width="2172" height="724" draggable="false" />
         <div id="dynamic-scene" aria-hidden="true"></div>
@@ -101,11 +108,12 @@
         <div id="player" role="img" aria-label="정수호" data-state="idle" data-frame="0">
           <img id="idle-sprite" src="assets/player/jeong-suho.png" alt="" width="256" height="256" draggable="false" />
           <img id="walk-sheet" src="assets/player/jeong-suho-walk-six.png" alt="" width="1536" height="256" draggable="false" />
+          <img id="run-sheet" src="assets/player/jeong-suho-run-eight.png" alt="" width="2048" height="256" draggable="false" />
           <img id="jump-sheet" class="action-sheet" src="assets/player/jeong-suho-jump-fall.png" alt="" width="1774" height="887" draggable="false" />
           <img id="interact-sheet" class="action-sheet" src="assets/player/jeong-suho-interact.png" alt="" width="1774" height="887" draggable="false" />
         </div>
       </div>
-      <header><strong>ARCHI</strong><span>17F · 00:00</span></header>
+      <header><strong>ARCHI</strong><span>17F · 사무실</span><label id="floor17-light-switch"><input id="floor17-lights" type="checkbox" checked aria-label="17층 조명" /><output id="floor17-light-state">조명 켜짐</output></label></header>
       <nav aria-label="플레이어 조작">
         <button type="button" data-direction="-1" aria-label="왼쪽 이동" title="왼쪽 이동 (A / ←)">←</button>
         <button type="button" data-direction="1" aria-label="오른쪽 이동" title="오른쪽 이동 (D / →)">→</button>
@@ -113,8 +121,8 @@
         <button id="jump" type="button" aria-label="점프" title="점프 (Space / W / ↑)">↑</button>
       </nav>
       <div id="interaction-status" role="status" aria-live="polite"></div>
-      <div id="room-transition" aria-hidden="true"></div>
     </main>
+    <div id="room-transition" aria-hidden="true" data-phase="idle"></div>
     <div id="elevator-cabin" role="dialog" aria-modal="true" aria-label="엘리베이터 내부" tabindex="-1" hidden>
       <div id="cabin-scene" data-door="closed">
         <img id="cabin-art" src="assets/background/elevator/cabin-b2-to-17.png" width="1536" height="1024" alt="" draggable="false" />

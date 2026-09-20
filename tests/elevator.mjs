@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import { mkdir } from 'node:fs/promises';
 import { chromium } from 'playwright';
+import { finishSceneTransition, reachInitialCorridor } from './scene-transition.mjs';
 
 await mkdir('.local', { recursive: true });
 const browser = await chromium.launch();
@@ -12,22 +13,43 @@ try {
   await page.goto(new URL('../index.html', import.meta.url).href);
   await page.clock.pauseAt(new Date('2026-09-20T00:01:00Z'));
   await page.clock.runFor(100);
+  await reachInitialCorridor(page);
   const hold = async (key, ms) => {
     await page.keyboard.down(key);
     await page.clock.runFor(ms);
     await page.keyboard.up(key);
     await page.clock.runFor(34);
   };
-  await hold('d', 4000);
-  await page.keyboard.press('Space');
-  await hold('d', 400);
-  await page.clock.runFor(500);
-  await page.keyboard.press('Space');
-  await hold('d', 4400);
+  await hold('d', 8200);
   await page.keyboard.press('e');
   await page.clock.runFor(19400);
   await page.keyboard.press('e');
   const cabin = page.locator('#elevator-cabin');
+  const fade = page.locator('#room-transition');
+  assert(await cabin.isHidden(), 'Cabin must not appear before fade-out');
+  await page.clock.runFor(150);
+  assert(await cabin.isHidden());
+  const partialOpacity = Number(await fade.evaluate(el => getComputedStyle(el).opacity));
+  assert(partialOpacity > 0 && partialOpacity < 1, 'Fade must animate through partial black');
+  await page.keyboard.press('Escape');
+  await page.keyboard.press('e');
+  assert.equal(await fade.getAttribute('data-phase'), 'out', 'Repeated input cannot restart the transition');
+  for (let i = 0; i < 30 && await fade.getAttribute('data-phase') !== 'black'; i++) await page.clock.runFor(16);
+  assert.equal(await fade.getAttribute('data-phase'), 'black');
+  assert.equal(await fade.evaluate(el => getComputedStyle(el).opacity), '1');
+  assert(await cabin.isHidden(), 'Old scene remains until completely black');
+  await page.screenshot({ path: '.local/transition-black.png' });
+  await page.clock.runFor(17);
+  assert(await cabin.isVisible(), 'Scene switches behind the black overlay');
+  assert.equal(await fade.evaluate(el => getComputedStyle(el).opacity), '1');
+  assert(await page.evaluate(() => document.elementFromPoint(innerWidth / 2, innerHeight / 2).id === 'room-transition'),
+    'Black layer covers the cabin and intercepts pointer input');
+  assert(await cabin.evaluate(el => el.inert));
+  await page.locator('[data-floor="16"]').dispatchEvent('click');
+  assert.equal(await page.locator('[data-floor="16"]').getAttribute('aria-pressed'), 'false', 'Floor input blocked during fade');
+  await finishSceneTransition(page);
+  assert.equal(await cabin.evaluate(el => el.inert), false);
+  assert(await cabin.evaluate(el => document.activeElement === el), 'Focus moves into the cabin after fade-in');
   assert(await cabin.isVisible());
   assert(await page.locator('#stage').evaluate(el => el.inert));
   assert.equal(await page.locator('#cabin-art').evaluate(el => el.naturalWidth), 1536);
@@ -69,11 +91,19 @@ try {
   await page.clock.runFor(2400);
   assert.equal(await cabin.getAttribute('data-floor'), '16');
   await page.locator('#cabin-exit').click();
+  assert(await cabin.isVisible(), 'Cabin remains visible until departure fade reaches black');
+  assert.equal(await page.locator('header span').textContent(), '17F · 00:00');
+  await page.clock.runFor(150);
+  assert(await cabin.isVisible());
+  assert(await page.evaluate(() => document.elementFromPoint(innerWidth / 2, innerHeight / 2).id === 'room-transition'));
+  await page.keyboard.press('Escape');
+  await finishSceneTransition(page);
   assert.equal(await page.locator('header span').textContent(), '16F · 빈 층');
   await page.clock.runFor(100);
   assert(await page.locator('#player').evaluate(el =>
     Math.abs(new DOMMatrix(getComputedStyle(el).transform).m42 + 178 - 570) < 1));
   await page.keyboard.press('e');
+  await finishSceneTransition(page);
   assert(await cabin.isVisible(), 'Can reboard at the arrival floor');
   for (let floor = 15; floor >= 1; floor--) {
     await page.locator(`#cabin-floor-buttons [data-floor="${floor}"]`).click();
@@ -81,6 +111,7 @@ try {
     await page.clock.runFor(floor === 15 ? 5300 : 3600);
     assert.equal(await cabin.getAttribute('data-floor'), String(floor));
     await page.locator('#cabin-exit').click();
+    await finishSceneTransition(page);
     assert.equal(await page.locator('header span').textContent(), `${floor}F · 빈 층`);
     assert.equal(await page.locator('#dynamic-scene .solid').count(), 3, 'Only floor and boundary walls');
     assert.equal(await page.locator('#dynamic-scene .door').count(), 3, 'Three return elevators');
@@ -88,6 +119,7 @@ try {
     await page.clock.runFor(100);
     if (floor === 10) await page.screenshot({ path: '.local/empty-floor-10.png' });
     await page.keyboard.press('e');
+    await finishSceneTransition(page);
     assert(await cabin.isVisible(), `Floor ${floor} must allow reboarding`);
   }
   const seen = new Set();
@@ -99,10 +131,12 @@ try {
   }
   assert(seen.has('-1') && seen.has('-2') && !seen.has('0'), 'Basement travel skips floor zero');
   await page.locator('#cabin-exit').click();
+  await finishSceneTransition(page);
   assert.equal(await page.locator('header span').textContent(), 'B2 · 빈 층');
   assert.equal(await page.locator('#dynamic-scene .solid').count(), 3);
   await page.clock.runFor(100);
   await page.keyboard.press('e');
+  await finishSceneTransition(page);
   await page.setViewportSize({ width: 390, height: 844 });
   await cabin.evaluate(el => { el.scrollLeft = el.scrollWidth - el.clientWidth; });
   await page.locator('[data-floor="-1"]').click();
@@ -116,6 +150,7 @@ try {
   await page.keyboard.press('Tab');
   assert(await page.evaluate(() => document.getElementById('elevator-cabin').contains(document.activeElement)));
   await page.locator('#cabin-exit').click();
+  await finishSceneTransition(page);
   assert.equal(await page.locator('header span').textContent(), 'B1 · 빈 층');
   assert.equal(await page.locator('#dynamic-scene .solid').count(), 3);
   assert.equal(await page.locator('#stage').evaluate(el => el.inert), false);

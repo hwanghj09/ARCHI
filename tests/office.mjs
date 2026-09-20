@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import { mkdir } from 'node:fs/promises';
 import { chromium } from 'playwright';
+import { reachInitialCorridor } from './scene-transition.mjs';
 
 await mkdir('.local', { recursive: true });
 const browser = await chromium.launch();
@@ -35,6 +36,26 @@ try {
     assert.equal((await state()).room, room);
     near((await state()).feet, 570);
   };
+
+  assert.equal((await state()).room, 'office', 'New games start inside the 17F office');
+  near((await state()).x, 640);
+  near((await state()).feet, 570);
+  assert.equal(await page.locator('#world').evaluate(el => el.style.width), '2400px');
+  assert.equal(await page.locator('header span').textContent(), '17F · 사무실');
+  assert.match(await page.locator('#stage').getAttribute('aria-label'), /17층 사무실/);
+  assert(await page.locator('#office-background').isVisible());
+  assert(await page.locator('#background').isHidden());
+  assert(await page.locator('#interaction-hint').isHidden(), 'Start is inside the office, away from the exit');
+  await page.keyboard.press('e');
+  assert.equal((await state()).room, 'office', 'Initial E does not immediately exit');
+  await page.screenshot({ path: '.local/start-office-desktop.png' });
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.clock.runFor(100);
+  near((await state()).x, 640);
+  await page.screenshot({ path: '.local/start-office-mobile.png' });
+  await page.setViewportSize({ width: 1280, height: 720 });
+  await page.clock.runFor(100);
+  await reachInitialCorridor(page);
 
   await page.keyboard.press('e');
   assert.equal((await state()).room, 'corridor', 'A distant door cannot be entered');
@@ -80,13 +101,7 @@ try {
   near((await state()).x, entrance.x);
   await page.setViewportSize({ width: 1280, height: 720 });
   await page.clock.runFor(100);
-  await hold('d', 2000);
-  near((await state()).x, 960);
-  await page.keyboard.press('Space');
-  await hold('d', 400);
-  await page.clock.runFor(500);
-  await page.keyboard.press('Space');
-  await hold('d', 1200);
+  await hold('d', (1288 - (await state()).x) / 200 * 1000);
   await page.clock.runFor(100);
   const secondEntrance = await state();
   assert(await page.locator('#interaction-hint').isHidden(), 'Former second entrance has no interaction hint');

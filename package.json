@@ -2,7 +2,7 @@
   "name": "archi-player",
   "private": true,
   "scripts": {
-    "test": "node tests/movement.mjs && node tests/office.mjs && node tests/elevator.mjs"
+    "test": "node tests/movement.mjs && node tests/office.mjs && node tests/elevator.mjs && node tests/rooftop.mjs && node tests/running.mjs && node tests/lighting.mjs"
   },
   "devDependencies": {
     "playwright": "^1.63.0"

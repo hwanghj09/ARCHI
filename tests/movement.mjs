@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import { mkdir } from 'node:fs/promises';
 import { chromium } from 'playwright';
+import { finishSceneTransition, reachInitialCorridor } from './scene-transition.mjs';
 
 await mkdir('.local', { recursive: true });
 const browser = await chromium.launch();
@@ -12,6 +13,7 @@ try {
   await page.goto(new URL('../index.html', import.meta.url).href);
   await page.clock.pauseAt(new Date('2026-09-19T00:01:00Z'));
   await page.clock.runFor(100);
+  await reachInitialCorridor(page);
   const state = () => page.locator('#player').evaluate(el => {
     const player = new DOMMatrix(getComputedStyle(el).transform);
     const world = new DOMMatrix(getComputedStyle(el.parentElement).transform);
@@ -147,20 +149,14 @@ try {
   near((await state()).x, 52, 'Left world wall must hold');
   assert.equal((await state()).animation, 'idle');
   await hold('d', 5000);
-  near((await state()).x, 960, 'Obstacle side must block movement');
+  assert((await state()).x > 1000, 'Walking crosses the former box position');
+  assert.equal(await page.locator('.solid:not(.floor):not(.boundary)').count(), 0, 'No box obstacles remain');
   assert((await state()).camera > 200, 'Camera must follow beyond the first screen');
   assert.equal((await state()).animation, 'idle');
 
-  await page.keyboard.press('Space');
-  await hold('d', 400);
-  await page.clock.runFor(500);
-  near((await state()).feet, 514, 'Player must land on the crate');
-  await page.screenshot({ path: '.local/sideview-obstacle.png' });
-  await page.keyboard.press('w');
-  await hold('d', 1000);
-  near((await state()).feet, 570, 'Player must return to the floor after crossing the crate');
-  await hold('d', 4000);
-  near((await state()).x, 1910, 'Second obstacle must block movement');
+  near((await state()).feet, 570, 'Former box position is flat ground');
+  await page.screenshot({ path: '.local/corridor-no-boxes.png' });
+  await hold('d', (1910 - (await state()).x) / 200 * 1000);
   assert(await doors.nth(0).evaluate(door => door.classList.contains('near')));
   await page.keyboard.down('e');
   await page.keyboard.down('e');
@@ -187,9 +183,11 @@ try {
   assert.match(await page.locator('#interaction-status').textContent(), /17층에 도착/);
   await page.screenshot({ path: '.local/door-elevator-open.png' });
   await page.keyboard.press('e');
+  await finishSceneTransition(page);
   assert.equal(await page.locator('#elevator-cabin').isHidden(), false, 'E enters the first-person cabin');
   assert.equal(await doors.nth(0).getAttribute('data-open'), 'true', 'Boarding menu must not close the door');
   await page.keyboard.press('Escape');
+  await finishSceneTransition(page);
   assert.equal(await page.locator('#elevator-cabin').isHidden(), true, 'Escape exits only with an open door');
   await page.keyboard.press('ArrowUp');
   await page.clock.runFor(100);
@@ -199,21 +197,21 @@ try {
   assert.equal(await page.locator('#interaction-hint').isVisible(), false);
   await hold('d', 400);
   await page.clock.runFor(500);
-  near((await state()).feet, 482, 'Player must land on the higher cabinet');
+  near((await state()).feet, 570, 'Former cabinet position is flat ground');
   await hold('d', 6500);
   near((await state()).x, 3148, 'Right world wall must hold');
   near((await state()).camera, 1920, 'Camera must stop at the right world boundary');
   await page.screenshot({ path: '.local/sideview-exit.png' });
 
-  for (const [index, x] of [[3, 2996], [2, 2552], [1, 2255]]) {
+  for (const [index, x] of [[2, 2552], [1, 2255]]) {
     await hold('a', ((await state()).x - x) / 200 * 1000);
     await page.keyboard.press('e');
-    assert.equal(await doors.nth(index).getAttribute('data-open'), index === 3 ? 'true' : 'false',
-      'Stairs open immediately while elevators must travel first');
+    assert.equal(await doors.nth(index).getAttribute('data-open'), 'false',
+      'Elevators must travel before opening');
   }
   await page.clock.runFor(19400);
   assert.deepEqual(await indicators.allTextContents(), ['17F', '17F', '17F'], 'Elevators keep travelling independently when the player walks away');
-  for (const index of [3, 2, 1]) {
+  for (const index of [2, 1]) {
     assert.equal(await doors.nth(index).getAttribute('data-open'), 'true');
     assert(await doors.nth(index).locator('img').evaluate(image =>
       Math.abs(new DOMMatrix(getComputedStyle(image).transform).m41 + image.parentElement.clientWidth) < .1),
@@ -223,7 +221,9 @@ try {
   await page.evaluate(() => window.dispatchEvent(new Event('blur')));
   assert.equal((await state()).animation, 'idle', 'Blur must cancel interaction');
   await page.keyboard.press('e');
+  await finishSceneTransition(page);
   await page.keyboard.press('Escape');
+  await finishSceneTransition(page);
   await page.keyboard.down('d');
   await page.clock.runFor(50);
   assert.equal((await state()).animation, 'walk', 'Movement must cancel interaction');
@@ -278,10 +278,12 @@ try {
   const stepsToElevator0 = (beforeTravel.x - 1818) / 200 * 1000;
   await hold(stepsToElevator0 > 0 ? 'a' : 'd', Math.abs(stepsToElevator0));
   await page.keyboard.press('e');
+  await finishSceneTransition(page);
   await page.locator('[data-floor="12"]').click();
   await page.locator('#cabin-close').click();
   await page.clock.runFor(8500);
   await page.locator('#cabin-exit').click();
+  await finishSceneTransition(page);
   assert.equal(await page.locator('#world').getAttribute('data-room'), 'dynamic', 'Boarding must move the player to a dynamically built floor');
   assert.equal(await page.evaluate(() => document.getElementById('world').style.width), '2400px');
   assert.equal(await page.locator('header span').textContent(), '12F · 빈 층');
@@ -291,10 +293,12 @@ try {
   await page.screenshot({ path: '.local/floor-12.png' });
 
   await page.keyboard.press('e');
+  await finishSceneTransition(page);
   await page.locator('[data-floor="17"]').click();
   await page.locator('#cabin-close').click();
   await page.clock.runFor(8500);
   await page.locator('#cabin-exit').click();
+  await finishSceneTransition(page);
   assert.equal(await page.locator('#world').getAttribute('data-room'), 'corridor', 'Boarding must return the player to floor 17');
   assert.equal(await page.locator('header span').textContent(), '17F · 00:00');
   assert.match(await page.locator('#interaction-status').textContent(), /17층 · 복도에 도착/);

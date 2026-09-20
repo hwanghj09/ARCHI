@@ -6,7 +6,8 @@
 - Format: 1774 x 887 RGBA PNG, two horizontal 887 x 887 cells.
 - Left: display off. Right: display on with battery charge indicator.
 - Both cells retain a small green status LED; the display distinguishes output states.
-- Not connected to gameplay. Align the apparatus anchors before frame switching.
+- Placed on the rooftop at world x=720. Displays the left/off frame in a 360x360 crop; source bottom edge y=691 aligns with world floor y=570.
+- Decorative placement only: no collision, power supply logic, or state switching. Align the apparatus anchors before adding frame switching.
 
 ## Generation Prompt
 
