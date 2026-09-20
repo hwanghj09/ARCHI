@@ -26,7 +26,18 @@ try {
     await page.clock.runFor(34);
   };
   assert(await page.locator('#idle-sprite').evaluate(el => el.naturalWidth === 256));
-  assert(await page.locator('#walk-sheet').evaluate(el => el.naturalWidth === 1024 && el.naturalHeight === 256));
+  assert(await page.locator('#walk-sheet').evaluate(el => el.naturalWidth === 1536 && el.naturalHeight === 256));
+  await page.locator('.action-sheet').evaluateAll(images => Promise.all(images.map(image => image.decode())));
+  const actionFrame = async (sheet, frame) => {
+    assert(await page.locator(sheet).isVisible());
+    assert.equal((await state()).frame, frame);
+    assert.equal(await page.locator('#player img:visible').count(), 1);
+    assert(await page.locator(sheet).evaluate((el, frame) =>
+      el.naturalWidth === el.naturalHeight * 2 &&
+      el.clientWidth === el.parentElement.clientWidth * 2 &&
+      Math.abs(new DOMMatrix(getComputedStyle(el).transform).m41 + frame * el.parentElement.clientWidth) < .01,
+    frame), 'Action sheet must show the selected cell');
+  };
   const tiles = page.locator('#background img');
   await tiles.evaluateAll(images => Promise.all(images.map(image => image.decode())));
   assert.equal(await tiles.count(), 39, 'The 3200x720 stage must be covered by 13x3 tiles');
@@ -35,6 +46,16 @@ try {
     image.offsetLeft === (index % 13) * 256 && image.offsetTop === Math.floor(index / 13) * 256)),
   'Background sprites must be 256x256 and meet without gaps');
   near((await state()).feet, 570, 'Player must stand on the floor');
+  const doors = page.locator('.door');
+  await doors.locator('img').evaluateAll(images => Promise.all(images.map(image => image.decode())));
+  assert.equal(await doors.count(), 4);
+  const indicators = page.locator('.elevator-indicator');
+  assert.deepEqual(await indicators.allTextContents(), ['01F', '01F', '01F']);
+  assert(await doors.locator('img').evaluateAll(images => images.every(image =>
+    image.naturalWidth === 512 && image.naturalHeight === 512)), 'Door sheets must contain two 256x512 frames');
+  await page.keyboard.press('e');
+  assert.equal(await page.locator('.door[data-open="true"]').count(), 0, 'Distant doors must ignore E');
+  assert.equal(await page.locator('#interaction-hint').isVisible(), false);
   await page.screenshot({ path: '.local/sideview-desktop.png' });
 
   const initial = await state();
@@ -66,7 +87,13 @@ try {
   });
   await page.keyboard.down('d');
   await page.clock.runFor(1100);
-  assert.deepEqual((await page.evaluate(() => [...window.walkFrames])).sort(), [0, 1, 2, 3]);
+  assert.deepEqual((await page.evaluate(() => [...window.walkFrames])).sort(), [0, 1, 2, 3, 4, 5]);
+  assert(await page.locator('#walk-sheet').evaluate(el => {
+    const frame = Number(el.parentElement.dataset.frame);
+    const cellWidth = el.parentElement.clientWidth;
+    return Math.abs(new DOMMatrix(getComputedStyle(el).transform).m41 + frame * cellWidth) < .01 &&
+      el.clientWidth === cellWidth * 6;
+  }), 'The six-frame sheet must display exactly one aligned cell');
   assert(await page.locator('#walk-sheet').isVisible());
   assert.equal(await page.locator('#idle-sprite').isVisible(), false);
   await page.evaluate(() => window.dispatchEvent(new Event('blur')));
@@ -79,9 +106,15 @@ try {
   await page.clock.runFor(200);
   assert((await state()).feet < 500, 'Jump must lift the player');
   assert.equal((await state()).animation, 'jump');
+  await actionFrame('#jump-sheet', 0);
+  await page.screenshot({ path: '.local/action-jump.png' });
   await page.keyboard.press('Space');
   await page.clock.runFor(200);
   assert((await state()).feet > 420, 'A second midair press must not double-jump');
+  await page.clock.runFor(150);
+  assert.equal((await state()).animation, 'fall');
+  await actionFrame('#jump-sheet', 1);
+  await page.screenshot({ path: '.local/action-fall.png' });
   await page.clock.runFor(900);
   near((await state()).feet, 570, 'Gravity must return the player to the floor');
 
@@ -103,7 +136,39 @@ try {
   near((await state()).feet, 570, 'Player must return to the floor after crossing the crate');
   await hold('d', 4000);
   near((await state()).x, 1910, 'Second obstacle must block movement');
+  assert.equal(await doors.nth(0).getAttribute('class'), 'door near');
+  await page.keyboard.down('e');
+  await page.keyboard.down('e');
+  await page.keyboard.up('e');
+  assert.equal(await doors.nth(0).getAttribute('data-open'), 'false', 'Calling must not open the elevator immediately');
+  assert.match(await page.locator('#interaction-status').textContent(), /1번 엘리베이터.*호출했습니다/);
+  assert.deepEqual(await indicators.allTextContents(), ['↑ 01F', '01F', '01F'], 'Only the called elevator starts moving');
+  await actionFrame('#interact-sheet', 0);
+  await page.clock.runFor(220);
+  await actionFrame('#interact-sheet', 1);
+  await page.clock.runFor(250);
+  assert.equal((await state()).animation, 'idle');
+  await page.clock.runFor(800);
+  assert.equal(await indicators.nth(0).textContent(), '↑ 02F', 'The floor display must advance gradually');
+  await page.keyboard.press('e');
+  assert.equal(await doors.nth(0).getAttribute('data-open'), 'false', 'Repeated calls must not open a moving elevator');
+  await page.screenshot({ path: '.local/elevator-ascending.png' });
+  await page.clock.runFor(17700);
+  assert.equal(await indicators.nth(0).textContent(), '↑ 16F', 'Repeated calls must not restart or accelerate travel');
+  assert.equal(await doors.nth(0).getAttribute('data-open'), 'false', 'The door stays shut before arrival');
+  await page.clock.runFor(400);
+  assert.equal(await indicators.nth(0).textContent(), '17F');
+  assert.equal(await doors.nth(0).getAttribute('data-open'), 'true', 'Arrival must automatically open the door');
+  assert.match(await page.locator('#interaction-status').textContent(), /17층에 도착/);
+  await page.screenshot({ path: '.local/door-elevator-open.png' });
+  await page.keyboard.press('e');
+  assert.equal(await doors.nth(0).getAttribute('data-open'), 'false', 'E closes an open door');
   await page.keyboard.press('ArrowUp');
+  await page.clock.runFor(100);
+  assert.equal((await state()).animation, 'jump', 'Jump must cancel interaction');
+  await page.keyboard.press('e');
+  assert.equal(await doors.nth(0).getAttribute('data-open'), 'false', 'Jumping must prevent interaction');
+  assert.equal(await page.locator('#interaction-hint').isVisible(), false);
   await hold('d', 400);
   await page.clock.runFor(500);
   near((await state()).feet, 482, 'Player must land on the higher cabinet');
@@ -112,49 +177,74 @@ try {
   near((await state()).camera, 1920, 'Camera must stop at the right world boundary');
   await page.screenshot({ path: '.local/sideview-exit.png' });
 
+  for (const [index, x] of [[3, 2996], [2, 2552], [1, 2255]]) {
+    await hold('a', ((await state()).x - x) / 200 * 1000);
+    await page.keyboard.press('e');
+    assert.equal(await doors.nth(index).getAttribute('data-open'), index === 3 ? 'true' : 'false',
+      'Stairs open immediately while elevators must travel first');
+  }
+  await page.clock.runFor(19400);
+  assert.deepEqual(await indicators.allTextContents(), ['17F', '17F', '17F'], 'Elevators keep travelling independently when the player walks away');
+  for (const index of [3, 2, 1]) {
+    assert.equal(await doors.nth(index).getAttribute('data-open'), 'true');
+    assert(await doors.nth(index).locator('img').evaluate(image =>
+      Math.abs(new DOMMatrix(getComputedStyle(image).transform).m41 + image.parentElement.clientWidth) < .1),
+    'Open state must display the second sprite frame');
+    if (index === 2) await page.screenshot({ path: '.local/doors-open.png' });
+  }
+  await page.evaluate(() => window.dispatchEvent(new Event('blur')));
+  assert.equal((await state()).animation, 'idle', 'Blur must cancel interaction');
+  await page.keyboard.press('e');
+  await page.keyboard.down('d');
+  await page.clock.runFor(50);
+  assert.equal((await state()).animation, 'walk', 'Movement must cancel interaction');
+  await page.keyboard.up('d');
+  await hold('d', 5000);
+  near((await state()).x, 3148, 'Interaction must preserve movement and boundaries');
+  assert.equal(await page.locator('#interaction-hint').isVisible(), false, 'Walking away hides the prompt');
+
   const beforeResize = await state();
   await page.setViewportSize({ width: 390, height: 844 });
   await page.clock.runFor(100);
   near((await state()).x, beforeResize.x, 'Resize must preserve world position');
   near((await state()).feet, beforeResize.feet, 'Resize must preserve floor contact');
-  const cdp = await page.context().newCDPSession(page);
-  const left = await page.locator('[data-direction="-1"]').boundingBox();
-  const jump = await page.locator('#jump').boundingBox();
-  const leftTouch = { x: left.x + left.width / 2, y: left.y + left.height / 2, id: 1 };
-  const jumpTouch = { x: jump.x + jump.width / 2, y: jump.y + jump.height / 2, id: 2 };
-  await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [leftTouch] });
-  await page.clock.runFor(100);
-  await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [leftTouch, jumpTouch] });
-  await page.clock.runFor(200);
-  assert((await state()).x < beforeResize.x - 40, 'Touch must move left');
-  assert((await state()).feet < 500, 'Two-finger input must move and jump together');
-  await page.screenshot({ path: '.local/sideview-mobile-jump.png' });
-  await cdp.send('Input.dispatchTouchEvent', { type: 'touchCancel', touchPoints: [] });
-  await page.clock.runFor(34);
-  const cancelled = await state();
-  await page.clock.runFor(1000);
-  near((await state()).x, cancelled.x, 'Cancelled touch must stop movement');
-  near((await state()).feet, 570, 'Jump must land after touch cancellation');
-  assert.equal(await page.locator('button.active').count(), 0);
-  await page.locator('[data-direction="1"]').focus();
-  await page.keyboard.press('Enter');
-  await page.clock.runFor(250);
-  assert((await state()).x > cancelled.x + 20, 'Native keyboard button activation must move through physics');
-  await page.locator('#jump').focus();
+  assert.equal(await page.locator('nav').count(), 1, 'On-screen controls must be present for touch');
+  assert.equal(await page.locator('nav button').count(), 4, 'Left, right, interact and jump buttons must exist');
+
+  const holdButton = async (selector, duration) => {
+    const box = await page.locator(selector).boundingBox();
+    await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+    await page.mouse.down();
+    await page.clock.runFor(duration);
+    await page.mouse.up();
+    await page.clock.runFor(34);
+  };
+  const beforeButtons = await state();
+  await holdButton('button[data-direction="-1"]', 400);
+  const afterLeftButton = await state();
+  assert(afterLeftButton.x < beforeButtons.x - 60, 'Left button must move the player left');
+  await holdButton('button[data-direction="1"]', 400);
+  assert((await state()).x > afterLeftButton.x + 60, 'Right button must move the player right');
+  await page.locator('#jump').click();
+  await page.clock.runFor(150);
+  assert((await state()).feet < 500, 'Jump button must lift the player');
+  await page.clock.runFor(900);
+
+  await hold('a', 300);
+  assert((await state()).x < beforeResize.x - 40, 'Keyboard must still move left');
   await page.keyboard.press('Space');
   await page.clock.runFor(200);
-  assert((await state()).feet < 500, 'Focused jump button must accept Space');
+  assert((await state()).feet < 500, 'Keyboard jump must still work alongside the on-screen buttons');
+  await actionFrame('#jump-sheet', 0);
+  await page.screenshot({ path: '.local/action-mobile-jump.png' });
   await page.clock.runFor(1000);
   await page.screenshot({ path: '.local/sideview-mobile.png' });
   await page.setViewportSize({ width: 844, height: 390 });
   await page.clock.runFor(100);
   near((await state()).feet, 570, 'Landscape must preserve physics coordinates');
-  const controlBounds = await page.locator('nav').boundingBox();
-  const playerBounds = await page.locator('#player').boundingBox();
-  assert(playerBounds.y + playerBounds.height < controlBounds.y, 'Controls must not overlap the player in landscape');
   await page.screenshot({ path: '.local/sideview-landscape.png' });
   assert.deepEqual(errors, []);
-  console.log('PASS: four-frame animation, movement, gravity, jump, no double-jump, walls, obstacle landings, camera, resize, blur, multi-touch and keyboard controls.');
+  console.log('PASS: delayed elevator calls, gradual floor indicators, independent travel, automatic arrival opening, repeated-call guards; doors, player animations, movement, collisions, camera and resize.');
 } finally {
   await browser.close();
 }
