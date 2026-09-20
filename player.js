@@ -24,7 +24,18 @@
   const status = document.getElementById('interaction-status');
   const roomTransition = document.getElementById('room-transition');
   const dynamicScene = document.getElementById('dynamic-scene');
-  const floorSelect = document.getElementById('floor-select');
+  const cabin = document.getElementById('elevator-cabin');
+  const cabinScene = document.getElementById('cabin-scene');
+  const cabinStatus = document.getElementById('cabin-status');
+  const cabinDisplay = document.getElementById('cabin-display');
+  const cabinOpen = document.getElementById('cabin-open');
+  const cabinClose = document.getElementById('cabin-close');
+  const cabinExit = document.getElementById('cabin-exit');
+  let cabinCarIndex = null;
+  let selectedFloor = null;
+  let cabinDoorAmount = 1;
+  let cabinAutoClose = 0;
+  let cabinReturnFocus = null;
   const officeBackground = document.getElementById('office-background');
   // The generated office floor starts at source y=504; align it with the physics floor.
   Object.assign(officeBackground.style, {
@@ -77,6 +88,7 @@
     door.element.append(image);
     world.insertBefore(door.element, sprite);
     if (door.type === 'elevator') {
+      addElevatorPanels(door);
       door.indicator = document.createElement('div');
       door.indicator.className = 'elevator-indicator';
       door.indicator.style.left = `${door.x + door.width / 2}px`;
@@ -85,45 +97,14 @@
       updateFloorIndicator(door);
     }
   }
-  // 다른 층들: 실제 배경 아트가 없어 색상/소품 배치만으로 층마다 다른 구조를 준다.
-  // elevatorBank는 그 층의 3개 엘리베이터 중 첫 번째 문의 x좌표(이후 260px 간격)다.
+  // Additional floors share an empty layout until their content is authored.
   const FLOOR17 = { id: 'f17', floor: 17, short: '17F', label: '17층 · 복도', header: '17F · 00:00', aria: '17층 복도' };
-  const FLOORS = [
-    { id: 'roof', floor: 18, short: 'RF', label: '옥상 · 비상 전력', header: 'RF · 비상 전력', aria: '옥상', width: 2000,
-      background: 'linear-gradient(#2c3d55, #16202f)', elevatorBank: 850,
-      obstacles: [{ kind: 'hvac', x: 450, y: floorY - 50, width: 96, height: 50 }],
-      panel: { name: '태양광 비상 전력 제어 장치', x: 140, y: 260, width: 120 } },
-    { id: 'f12', floor: 12, short: '12F', label: '12층 · ARCHI 개발팀', header: '12F · ARCHI 개발팀', aria: '12층 ARCHI 개발팀', width: 3000,
-      background: '#1a2230', elevatorBank: 1700,
-      obstacles: [
-        { kind: 'desk', x: 600, y: floorY - 60, width: 110, height: 60 },
-        { kind: 'desk', x: 950, y: floorY - 60, width: 110, height: 60 },
-        { kind: 'cabinet', x: 1300, y: floorY - 88, width: 100, height: 88 },
-      ] },
-    { id: 'f7', floor: 7, short: '7F', label: '7층 · AI 테스트/검증실', header: '7F · AI 테스트실', aria: '7층 AI 테스트 검증실', width: 2800,
-      background: '#132420', elevatorBank: 1500,
-      obstacles: [
-        { kind: 'rig', x: 650, y: floorY - 70, width: 110, height: 70 },
-        { kind: 'rig', x: 1000, y: floorY - 70, width: 110, height: 70 },
-      ] },
-    { id: 'f1', floor: 1, short: '1F', label: '1층 · 로비', header: '1F · 로비', aria: '1층 로비', width: 3400,
-      background: '#23262b', elevatorBank: 2100,
-      obstacles: [{ kind: 'crate', x: 1400, y: floorY - 56, width: 112, height: 56 }] },
-    { id: 'b1', floor: -1, short: 'B1', label: 'B1 · 시설관리실', header: 'B1 · 시설관리실', aria: 'B1 시설관리실', width: 2400,
-      background: '#1c1712', elevatorBank: 1050,
-      obstacles: [
-        { kind: 'crate', x: 260, y: floorY - 56, width: 112, height: 56 },
-        { kind: 'cabinet', x: 560, y: floorY - 88, width: 112, height: 88 },
-        { kind: 'crate', x: 820, y: floorY - 56, width: 112, height: 56 },
-      ] },
-    { id: 'b2', floor: -2, short: 'B2', label: 'B2 · 서버실', header: 'B2 · 서버실', aria: 'B2 서버실', width: 2600,
-      background: '#0a121a', elevatorBank: 1300,
-      obstacles: [
-        { kind: 'server-rack', x: 550, y: floorY - 90, width: 90, height: 90 },
-        { kind: 'server-rack', x: 850, y: floorY - 90, width: 90, height: 90 },
-        { kind: 'server-rack', x: 1100, y: floorY - 90, width: 90, height: 90 },
-      ] },
-  ];
+  const FLOORS = [-2, -1, ...Array.from({ length: 16 }, (_, index) => index + 1)].map(floor => {
+    const short = floor < 0 ? `B${-floor}` : `${floor}F`;
+    const label = floor < 0 ? `지하 ${-floor}층` : `${floor}층`;
+    return { id: floor < 0 ? `b${-floor}` : `f${floor}`, floor, short, label,
+      header: `${short} · 빈 층`, aria: label, width: 2400, background: '#252b2a', elevatorBank: 1000 };
+  });
   const ALL_FLOORS = [FLOOR17, ...FLOORS];
   const floorById = new Map(ALL_FLOORS.map(entry => [entry.id, entry]));
 
@@ -230,6 +211,11 @@
   }
 
   function update() {
+    if (selectingFloor) {
+      updateElevators();
+      updateCabin();
+      return;
+    }
     const directions = [...keys].map(key => movementKeys[key]).concat([...pointers.values()]);
     if (pulseTime > 0) directions.push(pulseDirection);
     pulseTime = Math.max(0, pulseTime - step);
@@ -306,7 +292,6 @@
       { kind: 'floor', x: 0, y: floorY, width: config.width, height: 150 },
       { kind: 'boundary', x: 0, y: 0, width: 32, height: worldHeight },
       { kind: 'boundary', x: config.width - 32, y: 0, width: 32, height: worldHeight },
-      ...config.obstacles,
     ];
     for (const { kind, x, y, width, height } of layout) {
       const element = document.createElement('div');
@@ -332,6 +317,7 @@
       image.alt = '';
       image.draggable = false;
       door.element.append(image);
+      addElevatorPanels(door);
       dynamicScene.append(door.element);
       door.indicator = document.createElement('div');
       door.indicator.className = 'elevator-indicator';
@@ -340,35 +326,10 @@
       dynamicScene.append(door.indicator);
       doorList.push(door);
     });
-    const stairs = { name: '비상계단', type: 'stairs', x: bank + 780, y: 232, width: 170 };
-    stairs.element = document.createElement('div');
-    stairs.element.className = 'door';
-    stairs.element.dataset.open = 'false';
-    stairs.element.setAttribute('role', 'img');
-    Object.assign(stairs.element.style, {
-      left: `${stairs.x}px`, top: `${stairs.y}px`, width: `${stairs.width}px`, height: `${floorY - stairs.y}px`,
-    });
-    const stairsImage = new Image();
-    stairsImage.src = 'assets/objects/floor17/stairs.png';
-    stairsImage.alt = '';
-    stairsImage.draggable = false;
-    stairs.element.append(stairsImage);
-    dynamicScene.append(stairs.element);
-    doorList.push(stairs);
-    if (config.panel) {
-      const panel = { name: config.panel.name, type: 'panel', x: config.panel.x, y: config.panel.y, width: config.panel.width };
-      panel.element = document.createElement('div');
-      panel.element.className = 'panel';
-      Object.assign(panel.element.style, {
-        left: `${panel.x}px`, top: `${panel.y}px`, width: `${panel.width}px`, height: `${floorY - panel.y}px`,
-      });
-      dynamicScene.append(panel.element);
-      doorList.push(panel);
-    }
-    return { bodies, doors: doorList, spawnX: bank + 130 };
+    return { bodies, doors: doorList };
   }
 
-  function performFloorChange(destId) {
+  function performFloorChange(destId, carIndex = 0) {
     Composite.remove(engine.world, currentTerrain);
     dynamicScene.innerHTML = '';
     const dest = floorById.get(destId);
@@ -380,7 +341,6 @@
       currentTerrain = solids;
       currentDoors = doors;
       Composite.add(engine.world, solids);
-      Body.setPosition(body, { x: 1948, y: floorY - 81 });
     } else {
       room = 'dynamic';
       dynamicFloorId = destId;
@@ -391,8 +351,9 @@
       currentTerrain = built.bodies;
       currentDoors = built.doors;
       Composite.add(engine.world, currentTerrain);
-      Body.setPosition(body, { x: built.spawnX, y: floorY - 81 });
     }
+    const arrivalDoor = currentDoors.find(door => door.carIndex === carIndex);
+    Body.setPosition(body, { x: arrivalDoor.x + 40, y: floorY - 81 });
     Engine.clear(engine);
     world.style.width = `${worldWidth}px`;
     Body.setVelocity(body, { x: 0, y: 0 });
@@ -409,6 +370,13 @@
     render();
   }
 
+  function addElevatorPanels(door) {
+    door.element.classList.add('elevator');
+    const panels = document.createElement('div');
+    panels.className = 'elevator-panels';
+    door.element.append(panels);
+  }
+
   function setDoorOpen(door, open) {
     door.element.dataset.open = String(open);
     door.element.setAttribute('aria-label', `${door.name} 문 ${open ? '열림' : '닫힘'}`);
@@ -417,7 +385,7 @@
   function updateFloorIndicator(door) {
     const car = elevatorCars[door.carIndex];
     const label = floorShortLabel(car.floor);
-    door.indicator.textContent = `${car.travelling ? '↑ ' : ''}${label}`;
+    door.indicator.textContent = `${car.travelling ? (car.destination > car.floor ? '↑ ' : '↓ ') : ''}${label}`;
     door.indicator.setAttribute('aria-label', `${door.name} ${label}${car.travelling ? ' 이동 중' : ''}`);
   }
 
@@ -425,7 +393,7 @@
     elevatorCars.forEach((car, index) => {
       const door = currentDoors.find(candidate => candidate.type === 'elevator' && candidate.carIndex === index);
       if (!door) return;
-      setDoorOpen(door, !!car.open);
+      setDoorOpen(door, car.open && car.floor === currentSceneFloor);
       updateFloorIndicator(door);
     });
   }
@@ -437,16 +405,14 @@
       if (car.elapsed < elevatorFloorTime) continue;
       car.elapsed -= elevatorFloorTime;
       car.floor += Math.sign(car.destination - car.floor);
+      if (car.floor === 0) car.floor += Math.sign(car.destination);
       if (car.floor === car.destination) {
         car.travelling = false;
         car.open = true;
         if (car.rider) {
-          car.rider = false;
-          const destId = car.pendingDestId;
-          car.pendingDestId = null;
-          performFloorChange(destId);
-          roomTransition.classList.remove('visible');
-          setTimeout(() => { transitioning = false; }, 350);
+          selectedFloor = null;
+          setCabinDoor(true);
+          cabinStatus.textContent = `${floorShortLabel(car.floor)} 도착 · 문이 열립니다.`;
         } else if (car.floor === currentSceneFloor) {
           showStatus(`${car.name}가 ${car.floor}층에 도착했습니다.`);
         }
@@ -485,7 +451,7 @@
     if (door.type === 'panel') return 'E · 조사';
     if (door.type === 'elevator') {
       const car = elevatorCars[door.carIndex];
-      if (car.travelling) return car.rider ? '이동 중…' : '올라오는 중…';
+      if (car.travelling) return car.rider ? '이동 중…' : '호출 중…';
       if (car.floor === currentSceneFloor) return 'E · 탑승';
       return 'E · 호출';
     }
@@ -510,7 +476,7 @@
       facing = body.position.x <= nearbyDoor.x + nearbyDoor.width / 2 ? 1 : -1;
       animate(0);
       if (car.floor === currentSceneFloor) {
-        openFloorSelect(nearbyDoor.carIndex);
+        enterCabin(nearbyDoor.carIndex);
         return;
       }
       car.travelling = true;
@@ -532,56 +498,153 @@
     updateInteraction();
   }
 
-  function openFloorSelect(carIndex) {
+  // Hotspots use the source artwork's 1536x1024 coordinates; CSS scales them with the scene.
+  const cabinFloorButtons = [];
+  const panelFloors = [null, 17, 16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, -1, -2];
+  panelFloors.forEach((floor, index) => {
+    if (floor === null) return;
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'cabin-hit';
+    button.dataset.floor = floor;
+    button.title = floor < 0 ? `지하 ${-floor}층` : `${floor}층`;
+    button.setAttribute('aria-label', button.title);
+    button.setAttribute('aria-pressed', 'false');
+    Object.assign(button.style, {
+      left: `${(1073 + index % 4 * 77) / 1536 * 100}%`, top: `${(261 + Math.floor(index / 4) * 74) / 1024 * 100}%`,
+      width: `${60 / 1536 * 100}%`, height: `${57 / 1024 * 100}%`,
+    });
+    button.addEventListener('click', () => {
+      const car = elevatorCars[cabinCarIndex];
+      if (!car || car.travelling || floor === car.floor) return;
+      selectedFloor = selectedFloor === floor ? null : floor;
+      cabinAutoClose = selectedFloor === null ? 0 : 1600;
+      cabinStatus.textContent = selectedFloor === null ? '층 선택 취소' : `${button.title} 선택`;
+      refreshCabin();
+    });
+    document.getElementById('cabin-floor-buttons').append(button);
+    cabinFloorButtons.push(button);
+  });
+
+  function enterCabin(carIndex) {
+    const art = document.getElementById('cabin-art');
+    if (!art.complete || !art.naturalWidth) {
+      showStatus('엘리베이터 내부 이미지를 불러오지 못했습니다. 다시 시도해 주세요.');
+      return;
+    }
+    cabinCarIndex = carIndex;
+    selectedFloor = null;
+    cabinAutoClose = 0;
+    cabinDoorAmount = 1;
+    cabinScene.style.setProperty('--door-open', '1');
     selectingFloor = true;
     releaseInput();
-    floorSelect.innerHTML = '';
-    const title = document.createElement('p');
-    title.textContent = '이동할 층을 선택하세요';
-    floorSelect.append(title);
-    for (const target of ALL_FLOORS) {
-      if (target.floor === currentSceneFloor) continue;
-      const optionButton = document.createElement('button');
-      optionButton.type = 'button';
-      optionButton.textContent = target.label;
-      optionButton.addEventListener('click', () => boardElevator(carIndex, target.id));
-      floorSelect.append(optionButton);
+    elevatorCars[carIndex].rider = true;
+    elevatorCars[carIndex].open = true;
+    cabinScene.dataset.door = 'open';
+    cabinReturnFocus = document.activeElement;
+    stage.inert = true;
+    cabin.hidden = false;
+    cabinStatus.textContent = `${floorShortLabel(elevatorCars[carIndex].floor)} · 문 열림`;
+    refreshCabin();
+    cabin.focus({ preventScroll: true });
+    cabin.scrollLeft = cabin.scrollWidth - cabin.clientWidth;
+  }
+
+  function refreshCabin() {
+    if (cabinCarIndex === null) return;
+    const car = elevatorCars[cabinCarIndex];
+    const label = car.floor < 0 ? `B${-car.floor}` : String(car.floor);
+    const display = `${car.travelling ? (car.destination > car.floor ? '↑' : '↓') : ''}${label}`;
+    if (cabinDisplay.textContent !== display) cabinDisplay.textContent = display;
+    cabin.dataset.moving = String(car.travelling);
+    cabin.dataset.floor = car.floor;
+    cabinScene.dataset.floor = car.floor;
+    cabinOpen.disabled = car.travelling;
+    cabinClose.disabled = car.travelling;
+    cabinExit.disabled = car.travelling || cabinScene.dataset.door !== 'open';
+    for (const button of cabinFloorButtons) {
+      button.disabled = car.travelling || Number(button.dataset.floor) === car.floor;
+      button.setAttribute('aria-pressed', String(Number(button.dataset.floor) === (car.travelling ? car.destination : selectedFloor)));
     }
-    const cancel = document.createElement('button');
-    cancel.type = 'button';
-    cancel.className = 'cancel';
-    cancel.textContent = '취소';
-    cancel.addEventListener('click', closeFloorSelect);
-    floorSelect.append(cancel);
-    floorSelect.hidden = false;
   }
 
-  function closeFloorSelect() {
-    floorSelect.hidden = true;
-    floorSelect.innerHTML = '';
-    selectingFloor = false;
-  }
-
-  function boardElevator(carIndex, destId) {
-    const car = elevatorCars[carIndex];
-    const dest = floorById.get(destId);
-    closeFloorSelect();
-    transitioning = true;
-    releaseInput();
-    car.rider = true;
-    car.pendingDestId = destId;
-    car.destination = dest.floor;
-    car.travelling = true;
-    car.elapsed = 0;
-    car.open = false;
+  function setCabinDoor(open) {
+    const car = elevatorCars[cabinCarIndex];
+    if (!car || car.travelling) return;
+    cabinAutoClose = 0;
+    const phase = cabinScene.dataset.door;
+    if (phase === (open ? 'open' : 'closed') || phase === (open ? 'opening' : 'closing')) return;
+    car.open = open;
+    cabinScene.dataset.door = open ? 'opening' : 'closing';
+    cabinStatus.textContent = open ? '문이 열립니다.' : '문이 닫힙니다.';
     refreshSceneElevatorDoors();
-    showStatus(`${car.name} 탑승. ${dest.label}(으)로 이동합니다.`);
-    roomTransition.classList.add('visible');
+    refreshCabin();
   }
+
+  function updateCabin() {
+    if (cabinCarIndex === null) return;
+    const car = elevatorCars[cabinCarIndex];
+    if (cabinAutoClose > 0) {
+      cabinAutoClose = Math.max(0, cabinAutoClose - step);
+      if (!cabinAutoClose) setCabinDoor(false);
+    }
+    if (cabinScene.dataset.door === 'opening' || cabinScene.dataset.door === 'closing') {
+      cabinDoorAmount = Math.max(0, Math.min(1, cabinDoorAmount + (car.open ? 1 : -1) * step / 1100));
+      cabinScene.style.setProperty('--door-open', cabinDoorAmount);
+      if (cabinDoorAmount === (car.open ? 1 : 0)) cabinScene.dataset.door = car.open ? 'open' : 'closed';
+    }
+    if (!car.travelling && cabinScene.dataset.door === 'closed' && selectedFloor !== null && !cabinAutoClose) {
+      car.destination = selectedFloor;
+      car.travelling = true;
+      car.elapsed = 0;
+      cabinStatus.textContent = `${floorShortLabel(selectedFloor)} 이동 중`;
+    }
+    refreshCabin();
+  }
+
+  function exitCabin() {
+    if (cabinCarIndex === null || cabinExit.disabled) return;
+    const car = elevatorCars[cabinCarIndex];
+    const destination = ALL_FLOORS.find(entry => entry.floor === car.floor);
+    car.rider = false;
+    selectingFloor = false;
+    cabin.hidden = true;
+    stage.inert = false;
+    releaseInput();
+    performFloorChange(destination.id, cabinCarIndex);
+    cabinCarIndex = null;
+    const focus = cabinReturnFocus?.isConnected && cabinReturnFocus !== document.body ? cabinReturnFocus : stage;
+    focus.focus({ preventScroll: true });
+  }
+  cabinOpen.addEventListener('click', () => setCabinDoor(true));
+  cabinClose.addEventListener('click', () => setCabinDoor(false));
+  cabinExit.addEventListener('click', exitCabin);
+  document.getElementById('cabin-alarm').addEventListener('click', () => {
+    cabinStatus.textContent = '비상벨 작동';
+    const AudioContext = window.AudioContext || window.webkitAudioContext;
+    if (!AudioContext) return;
+    const audio = new AudioContext();
+    const oscillator = audio.createOscillator();
+    const gain = audio.createGain();
+    gain.gain.value = .08;
+    oscillator.frequency.value = 880;
+    oscillator.connect(gain).connect(audio.destination);
+    oscillator.start();
+    oscillator.stop(audio.currentTime + .4);
+    oscillator.onended = () => { audio.close(); };
+  });
+  cabin.addEventListener('keydown', event => {
+    if (event.code !== 'Tab') return;
+    const enabled = [...cabin.querySelectorAll('button:not(:disabled)')];
+    const index = enabled.indexOf(document.activeElement);
+    if (event.shiftKey && index <= 0) { event.preventDefault(); enabled.at(-1).focus(); }
+    else if (!event.shiftKey && (index === -1 || index === enabled.length - 1)) { event.preventDefault(); enabled[0].focus(); }
+  });
 
   window.addEventListener('keydown', event => {
     if (selectingFloor) {
-      if (event.code === 'Escape') closeFloorSelect();
+      if (event.code === 'Escape') exitCabin();
       return;
     }
     if (transitioning) return;

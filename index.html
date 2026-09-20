@@ -4,6 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <title>ARCHI | 정수호</title>
+    <link rel="stylesheet" href="elevator.css" />
     <style>
       * { box-sizing: border-box; }
       body { margin: 0; overflow: hidden; background: #27292b; color: #eee; font: 14px Arial, sans-serif; }
@@ -20,6 +21,7 @@
       #world[data-room="office"] .office-door[data-room="corridor"],
       #world[data-room="corridor"] .office-door[data-room="office"] { display: none; }
       #dynamic-scene { position: absolute; inset: 0; display: none; }
+      #dynamic-scene > .floor { background: #171b1a; border-top: 2px solid #626963; }
       #world[data-room="dynamic"] #dynamic-scene { display: block; }
       #world[data-room="dynamic"] #background,
       #world[data-room="dynamic"] #office-background,
@@ -32,6 +34,13 @@
       .door { position: absolute; overflow: hidden; pointer-events: none; image-rendering: pixelated; }
       .door img { display: block; width: 200%; height: 100%; max-width: none; }
       .door[data-open="true"] img { transform: translateX(-50%); }
+      .door.elevator img { transform: translateX(-50%); }
+      .elevator-panels { position: absolute; inset: 0; clip-path: inset(6.5% 12% 4.5%); }
+      .elevator-panels::before, .elevator-panels::after { content: ''; position: absolute; inset: 0; background: url('assets/objects/floor17/elevator.png') 0 0 / 200% 100% no-repeat; transition: transform 1.4s cubic-bezier(.45, 0, .2, 1); }
+      .elevator-panels::before { clip-path: inset(6.5% 50% 4.5% 12%); }
+      .elevator-panels::after { clip-path: inset(6.5% 12% 4.5% 50%); }
+      .elevator[data-open="true"] .elevator-panels::before { transform: translateX(-38%); }
+      .elevator[data-open="true"] .elevator-panels::after { transform: translateX(38%); }
       .door.near { outline: 2px solid #96b7aa; }
       .elevator-indicator { position: absolute; transform: translateX(-50%); width: 86px; height: 26px; border: 2px solid #293b40; background: #081013; color: #9fd5ba; font: bold 19px/22px monospace; text-align: center; text-shadow: 0 0 5px #578873; pointer-events: none; }
       #interaction-hint { position: absolute; z-index: 1; transform: translateX(-50%); padding: 6px 10px; background: #101b20; border: 1px solid #96b7aa; pointer-events: none; white-space: nowrap; }
@@ -78,18 +87,12 @@
         nav { bottom: max(12px, env(safe-area-inset-bottom)); }
         nav button { width: 48px; height: 44px; }
       }
-      #floor-select { position: absolute; z-index: 4; top: 50%; left: 50%; transform: translate(-50%, -50%); display: flex; flex-direction: column; gap: 6px; padding: 14px; min-width: 220px; background: #101b20; border: 1px solid #4c6b63; }
-      #floor-select[hidden] { display: none; }
-      #floor-select p { margin: 0 0 4px; font-size: 13px; color: #9fd5ba; text-align: center; }
-      #floor-select button { padding: 8px 10px; border: 1px solid #4c6b63; border-radius: 4px; background: #1a2a2c; color: #e5e7e9; font: 15px Arial, sans-serif; cursor: pointer; text-align: left; }
-      #floor-select button:hover { border-color: #96b7aa; }
-      #floor-select button.cancel { margin-top: 4px; text-align: center; color: #b8c6c0; }
     </style>
     <script src="assets/vendor/matter.min.js" defer></script>
     <script src="player.js" defer></script>
   </head>
   <body>
-    <main id="stage" aria-label="ARCHI 17층 사이드뷰 스테이지">
+    <main id="stage" tabindex="-1" aria-label="ARCHI 17층 사이드뷰 스테이지">
       <div id="world" data-room="corridor">
         <div id="background" aria-hidden="true"></div>
         <img id="office-background" src="assets/background/floor17/office-interior.png" alt="" width="2172" height="724" draggable="false" />
@@ -110,8 +113,20 @@
         <button id="jump" type="button" aria-label="점프" title="점프 (Space / W / ↑)">↑</button>
       </nav>
       <div id="interaction-status" role="status" aria-live="polite"></div>
-      <div id="floor-select" role="listbox" aria-label="이동할 층 선택" hidden></div>
       <div id="room-transition" aria-hidden="true"></div>
     </main>
+    <div id="elevator-cabin" role="dialog" aria-modal="true" aria-label="엘리베이터 내부" tabindex="-1" hidden>
+      <div id="cabin-scene" data-door="closed">
+        <img id="cabin-art" src="assets/background/elevator/cabin-b2-to-17.png" width="1536" height="1024" alt="" draggable="false" />
+        <div id="cabin-doorway"><div class="cabin-leaf left"></div><div class="cabin-leaf right"></div></div>
+        <output id="cabin-display" aria-label="현재 층">17</output>
+        <div id="cabin-floor-buttons"></div>
+        <button id="cabin-open" class="cabin-hit" type="button" aria-label="문 열기" title="문 열기"></button>
+        <button id="cabin-close" class="cabin-hit" type="button" aria-label="문 닫기" title="문 닫기"></button>
+        <button id="cabin-alarm" class="cabin-hit" type="button" aria-label="비상벨" title="비상벨"></button>
+        <button id="cabin-exit" type="button" disabled>나가기</button>
+        <p id="cabin-status" role="status" aria-live="polite"></p>
+      </div>
+    </div>
   </body>
 </html>
