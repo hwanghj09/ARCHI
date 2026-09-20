@@ -162,12 +162,15 @@ try {
   assert.match(await page.locator('#interaction-status').textContent(), /17층에 도착/);
   await page.screenshot({ path: '.local/door-elevator-open.png' });
   await page.keyboard.press('e');
-  assert.equal(await doors.nth(0).getAttribute('data-open'), 'false', 'E closes an open door');
+  assert.equal(await page.locator('#floor-select').isHidden(), false, 'E on an open elevator offers floors to board');
+  assert.equal(await doors.nth(0).getAttribute('data-open'), 'true', 'Boarding menu must not close the door');
+  await page.keyboard.press('Escape');
+  assert.equal(await page.locator('#floor-select').isHidden(), true, 'Escape cancels the floor menu');
   await page.keyboard.press('ArrowUp');
   await page.clock.runFor(100);
   assert.equal((await state()).animation, 'jump', 'Jump must cancel interaction');
   await page.keyboard.press('e');
-  assert.equal(await doors.nth(0).getAttribute('data-open'), 'false', 'Jumping must prevent interaction');
+  assert.equal(await doors.nth(0).getAttribute('data-open'), 'true', 'Jumping must prevent interaction');
   assert.equal(await page.locator('#interaction-hint').isVisible(), false);
   await hold('d', 400);
   await page.clock.runFor(500);
@@ -195,6 +198,7 @@ try {
   await page.evaluate(() => window.dispatchEvent(new Event('blur')));
   assert.equal((await state()).animation, 'idle', 'Blur must cancel interaction');
   await page.keyboard.press('e');
+  await page.keyboard.press('Escape');
   await page.keyboard.down('d');
   await page.clock.runFor(50);
   assert.equal((await state()).animation, 'walk', 'Movement must cancel interaction');
@@ -243,8 +247,31 @@ try {
   await page.clock.runFor(100);
   near((await state()).feet, 570, 'Landscape must preserve physics coordinates');
   await page.screenshot({ path: '.local/sideview-landscape.png' });
+
+  // Board an already-open elevator to travel to a different, structurally distinct floor.
+  const beforeTravel = await state();
+  const stepsToElevator0 = (beforeTravel.x - 1818) / 200 * 1000;
+  await hold(stepsToElevator0 > 0 ? 'a' : 'd', Math.abs(stepsToElevator0));
+  await page.keyboard.press('e');
+  await page.locator('#floor-select button', { hasText: '12층 · ARCHI 개발팀' }).click();
+  await page.clock.runFor(6600);
+  assert.equal(await page.locator('#world').getAttribute('data-room'), 'dynamic', 'Boarding must move the player to a dynamically built floor');
+  assert.equal(await page.evaluate(() => document.getElementById('world').style.width), '3000px', 'Floor 12 must use its own width, not floor 17\'s');
+  assert.equal(await page.locator('header span').textContent(), '12F · ARCHI 개발팀');
+  assert.equal(await page.locator('.desk').count(), 2, 'Floor 12 must have its own distinct desk layout');
+  assert.match(await page.locator('#interaction-status').textContent(), /12층 · ARCHI 개발팀에 도착/);
+  assert.equal(await page.locator('#floor-select').isHidden(), true, 'Boarding must close the floor menu');
+  await page.screenshot({ path: '.local/floor-12.png' });
+
+  await page.keyboard.press('e');
+  await page.locator('#floor-select button', { hasText: '17층 · 복도' }).click();
+  await page.clock.runFor(6600);
+  assert.equal(await page.locator('#world').getAttribute('data-room'), 'corridor', 'Boarding must return the player to floor 17');
+  assert.equal(await page.locator('header span').textContent(), '17F · 00:00');
+  assert.match(await page.locator('#interaction-status').textContent(), /17층 · 복도에 도착/);
+
   assert.deepEqual(errors, []);
-  console.log('PASS: delayed elevator calls, gradual floor indicators, independent travel, automatic arrival opening, repeated-call guards; doors, player animations, movement, collisions, camera and resize.');
+  console.log('PASS: delayed elevator calls, gradual floor indicators, independent travel, automatic arrival opening, repeated-call guards, multi-floor boarding across structurally distinct floors; doors, player animations, movement, collisions, camera and resize.');
 } finally {
   await browser.close();
 }
