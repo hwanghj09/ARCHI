@@ -44,7 +44,6 @@
   });
   const officeDoors = [
     { name: '사무실', room: 'corridor', x: 580, y: 236, width: 128 },
-    { name: '사무실', room: 'corridor', x: 1224, y: 236, width: 128 },
     { name: '복도', room: 'office', x: 68, y: 250, width: 144 },
   ];
   for (const door of officeDoors) {

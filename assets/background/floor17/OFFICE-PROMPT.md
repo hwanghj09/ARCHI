@@ -4,7 +4,7 @@
 - Reference: floor17.png, architectural and pixel-art style reference.
 - Output: office-interior.png, generated original 2172x724 PNG.
 - Integrated as a 2400px-wide office, with source floor y=504 aligned to world y=570 using uniform CSS scaling.
-- Both corridor office entrances lead to this room. E at the interior left door returns to the entrance used. Furniture remains background art; the foreground lane has floor and boundary collisions.
+- Only the first corridor office door leads to this room. E at the interior left door returns to that entrance. The second corridor door was replaced with fixed glazing in the background. Furniture remains background art; the foreground lane has floor and boundary collisions.
 
 ## Generation prompt
 

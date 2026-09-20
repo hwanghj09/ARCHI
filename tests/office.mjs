@@ -13,6 +13,9 @@ try {
   await page.clock.pauseAt(new Date(Date.now() + 1000));
   await page.clock.runFor(100);
   await page.locator('#office-background').evaluate(image => image.decode());
+  await page.locator('#background img').evaluateAll(images => Promise.all(images.map(image => image.decode())));
+  assert.equal(await page.locator('.office-door[data-room="corridor"]').count(), 1, 'Only one office entrance');
+  assert.equal(await page.locator('.office-door[data-room="office"]').count(), 1, 'Only one office exit');
   const state = () => page.locator('#player').evaluate(el => {
     const transform = new DOMMatrix(getComputedStyle(el).transform);
     return { x: transform.m41 + 96, feet: transform.m42 + 178, room: el.parentElement.dataset.room };
@@ -86,15 +89,15 @@ try {
   await hold('d', 1200);
   await page.clock.runFor(100);
   const secondEntrance = await state();
-  assert.match(await page.locator('#interaction-hint').textContent(), /사무실 들어가기/);
+  assert(await page.locator('#interaction-hint').isHidden(), 'Former second entrance has no interaction hint');
   await page.keyboard.press('e');
-  await transition('office');
-  await page.keyboard.press('e');
-  await transition('corridor');
+  await page.clock.runFor(900);
+  assert.equal((await state()).room, 'corridor', 'Former second door must not enter the office');
+  await page.screenshot({ path: '.local/office-second-door-removed.png' });
   near((await state()).x, secondEntrance.x);
   assert.equal(await page.locator('.elevator-indicator').first().textContent(), '01F');
   assert.deepEqual(errors, []);
-  console.log('PASS: both office entrances, return positions, held/distant/airborne E guards, floor/wall collisions, jump, camera and mobile rendering.');
+  console.log('PASS: single office entrance and exit, disabled second entrance, return position, input guards, collisions, jump, camera and mobile rendering.');
 } finally {
   await browser.close();
 }
