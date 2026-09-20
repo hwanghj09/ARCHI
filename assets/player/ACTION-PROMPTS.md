@@ -1,0 +1,16 @@
+# Jeong Suho action sprites
+
+- Tool: built-in image_gen.
+- Reference: jeong-suho.png.
+- jeong-suho-jump-fall.png: two columns, jump ascent then fall descent.
+- jeong-suho-interact.png: two columns, investigation then interaction.
+- Generated sheets retain their original 1774x887 resolution and alpha; each cell renders at 192x192 in the game.
+- Vertical velocity selects jump/fall. E at a nearby door plays investigation then interaction for 420ms; movement, jump or blur cancels it.
+
+## Jump / fall prompt
+
+Use case: identity-preserve. Asset type: ARCHI 2D side-scrolling pixel-art character sprite sheet. Reference image is the approved Jeong Suho character: preserve exact adult slim proportions, face, messy black hair, white rolled-sleeve shirt, loose black tie, dark ID lanyard and badge, black trousers and gray-white sneakers; same crisp detailed muted anime pixel-art style. Generate exactly TWO distinct full-body poses facing RIGHT in strict side profile, arranged left to right in two equally sized square cells, 2 columns x 1 row. Left: airborne jump ascent, knees bent, one knee lifted forward, other leg bent back, arms bent naturally for balance, tie slightly trailing down. Right: airborne fall descent, legs extending downward ready to land, knees slightly bent, arms slightly raised forward for balance, tie subtly lifting. Empty hands. Maintain identical character scale and hip anchor in both cells, generous transparent padding, no cropping. Layout 512x256 pixels or an exact integer multiple with 2:1 aspect ratio; conceptually 256x256 each cell matching the reference sprite. REAL transparent alpha background, no checkerboard baked in, no ground, shadows, motion trails, captions, text, borders or extra figures. Output only the two-frame sprite sheet.
+
+## Investigation / interaction prompt
+
+Use case: identity-preserve. Asset type: ARCHI 2D side-scrolling pixel-art character sprite sheet. Reference image is the approved Jeong Suho character: preserve exact adult slim proportions, face, messy black hair, white rolled-sleeve shirt, loose black tie, dark ID lanyard and badge, black trousers and gray-white sneakers; same crisp detailed muted anime pixel-art style. Generate exactly TWO distinct full-body investigation/interaction animation poses facing RIGHT in strict side profile, arranged left to right in two equally sized square cells, 2 columns x 1 row. Left: investigation, both feet planted, torso leaning slightly forward, head lowered to look closely at an unseen waist-high object, near hand partially reaching forward with relaxed fingers. Right: interaction, same feet positions, torso leaning a little further forward, near arm extending forward at waist/chest height to press an unseen wall terminal with index finger, far arm relaxed close to body. Empty hands, do not draw any object or terminal. Natural restrained cautious office worker body language. Maintain identical character scale, hip horizontal anchor, foot baseline and cell padding in both poses, no cropping. Layout 512x256 pixels or an exact integer multiple with 2:1 aspect ratio; conceptually 256x256 cells, feet at y239 like the reference. REAL transparent alpha background, no baked-in checkerboard, ground, shadows, captions, text, borders or extra figures. Output only the two-frame sprite sheet.
