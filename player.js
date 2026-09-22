@@ -86,13 +86,31 @@
     }
   }
   // 다른 층들: 실제 배경 아트가 없어 색상/소품 배치만으로 층마다 다른 구조를 준다.
+  // (옥상 실사 배경은 assets/background/roof/PROMPT.md 참고 — 생성되면 이 placeholder를 교체한다.)
   // elevatorBank는 그 층의 3개 엘리베이터 중 첫 번째 문의 x좌표(이후 260px 간격)다.
   const FLOOR17 = { id: 'f17', floor: 17, short: '17F', label: '17층 · 복도', header: '17F · 00:00', aria: '17층 복도' };
   const FLOORS = [
-    { id: 'roof', floor: 18, short: 'RF', label: '옥상 · 비상 전력', header: 'RF · 비상 전력', aria: '옥상', width: 2000,
-      background: 'linear-gradient(#2c3d55, #16202f)', elevatorBank: 850,
-      obstacles: [{ kind: 'hvac', x: 450, y: floorY - 50, width: 96, height: 50 }],
-      panel: { name: '태양광 비상 전력 제어 장치', x: 140, y: 260, width: 120 } },
+    { id: 'roof', floor: 18, short: 'RF', label: '옥상 · 비상 전력', header: 'RF · 비상 전력', aria: '옥상', width: 2171,
+      // 실사 배경(assets/background/roof/source.png, 2171x724, 2번째로 교체된 버전). 좌우는 1:1
+      // 그대로 쓰고(스케일 없음), 세로만 이동한다: 소스 바닥선 y=613을 게임 바닥선 floorY(570)에
+      // 맞추려면 top = 570 - 613 = -43. 아래 panel/door 좌표는 모두 이 이미지에서 직접 실측한 값이다.
+      backgroundImage: { src: 'assets/background/roof/source.png', width: 2171, height: 724, top: -43 },
+      background: '#0b1220', // 이미지 로딩 전/실패 시 대비용 배경색
+      // 문/장치 좌표는 확대 크롭 + 20px 격자로 다시 정밀 실측했다(예전 값은 벽 시작선을 문 시작선으로
+      // 착각해 실제보다 좁고 왼쪽으로 치우쳐 있었다).
+      elevatorBank: 1035, doorWidth: 100, doorSpacing: 183, doorY: 405,
+      // 층수 표시 박스를 문 중앙 기준 오른쪽으로 12.5px(15px에서 2.5px 왼쪽으로 보정), 위로 48px.
+      indicatorDx: 12.5, indicatorLift: 48,
+      // 흰 테두리(근접 표시) 박스를 문 실측 위치보다 오른쪽으로 10px 더 이동.
+      doorOutlineDx: 10,
+      stairsOffset: 773, stairsWidth: 82, stairsY: 439,
+      // 배경 그림이 이미 문을 그려주므로, 깨진 이미지 아이콘이 뜨는 별도 문 스프라이트는 넣지 않는다.
+      doorImage: null, stairsImage: null,
+      // 실외기/물탱크는 배경 그림에만 존재 — 걸어서 지나갈 수 있는 장애물 판정을 두지 않는다.
+      obstacles: [],
+      // 이 배경은 제어 장치를 이미 크고 상세하게 그려주므로(전용 스프라이트보다 낫다) 별도
+      // 이미지 오버레이 없이, 그림 속 장치 크기에 맞춘 판정 영역만 둔다.
+      panel: { name: '태양광 비상 전력 제어 장치', x: 0, y: 419, width: 330 } },
     { id: 'f12', floor: 12, short: '12F', label: '12층 · ARCHI 개발팀', header: '12F · ARCHI 개발팀', aria: '12층 ARCHI 개발팀', width: 3000,
       background: '#1a2230', elevatorBank: 1700,
       obstacles: [
@@ -302,57 +320,91 @@
   function buildDynamicScene(config) {
     const bodies = [];
     const doorList = [];
+    // 실사 배경 그림(있으면 가장 먼저 넣어 다른 모든 요소 뒤에 깔리게 한다).
+    if (config.backgroundImage) {
+      const art = config.backgroundImage;
+      const image = new Image();
+      image.src = art.src;
+      image.alt = '';
+      image.draggable = false;
+      image.setAttribute('aria-hidden', 'true');
+      Object.assign(image.style, {
+        position: 'absolute', left: '0px', top: `${art.top}px`, width: `${art.width}px`, height: `${art.height}px`,
+        pointerEvents: 'none', userSelect: 'none',
+      });
+      dynamicScene.append(image);
+    }
+    // 실사 배경이 있으면 바닥/좌우 경계/소품도 이미 그림에 그려져 있으므로 판정 박스만 두고 감춘다.
     const layout = [
-      { kind: 'floor', x: 0, y: floorY, width: config.width, height: 150 },
-      { kind: 'boundary', x: 0, y: 0, width: 32, height: worldHeight },
-      { kind: 'boundary', x: config.width - 32, y: 0, width: 32, height: worldHeight },
+      { kind: 'floor', x: 0, y: floorY, width: config.width, height: 150, invisible: !!config.backgroundImage },
+      { kind: 'boundary', x: 0, y: 0, width: 32, height: worldHeight, invisible: !!config.backgroundImage },
+      { kind: 'boundary', x: config.width - 32, y: 0, width: 32, height: worldHeight, invisible: !!config.backgroundImage },
       ...config.obstacles,
     ];
-    for (const { kind, x, y, width, height } of layout) {
+    for (const { kind, x, y, width, height, invisible } of layout) {
       const element = document.createElement('div');
-      element.className = `solid ${kind}`;
+      element.className = invisible ? 'solid' : `solid ${kind}`;
       element.setAttribute('aria-hidden', 'true');
       Object.assign(element.style, { left: `${x}px`, top: `${y}px`, width: `${width}px`, height: `${height}px` });
       dynamicScene.append(element);
       bodies.push(Bodies.rectangle(x + width / 2, y + height / 2, width, height, { isStatic: true }));
     }
     const bank = config.elevatorBank;
+    const doorWidth = config.doorWidth ?? 200;
+    const doorSpacing = config.doorSpacing ?? 260;
+    const doorY = config.doorY ?? 220;
     [0, 1, 2].forEach(carIndex => {
       const car = elevatorCars[carIndex];
-      const door = { name: car.name, type: 'elevator', carIndex, x: bank + carIndex * 260, y: 220, width: 200 };
+      const door = { name: car.name, type: 'elevator', carIndex, x: bank + carIndex * doorSpacing, y: doorY, width: doorWidth };
       door.element = document.createElement('div');
-      door.element.className = 'door';
+      // 실사 배경 위 문은 근접 시 흰 테두리(.door.art.near)로, 그 외 placeholder 층은 기존 색 그대로.
+      door.element.className = config.backgroundImage ? 'door art' : 'door';
       door.element.dataset.open = 'false';
       door.element.setAttribute('role', 'img');
+      // doorOutlineDx: 흰 테두리(.door.art.near) 박스만 시각적으로 미세 이동한다. 상호작용 판정은
+      // door.x(실측값)를 그대로 쓰므로 근접 판정 위치는 안 바뀐다.
       Object.assign(door.element.style, {
-        left: `${door.x}px`, top: `${door.y}px`, width: `${door.width}px`, height: `${floorY - door.y}px`,
+        left: `${door.x + (config.doorOutlineDx ?? 0)}px`, top: `${door.y}px`,
+        width: `${door.width}px`, height: `${floorY - door.y}px`,
       });
-      const image = new Image();
-      image.src = 'assets/objects/floor17/elevator.png';
-      image.alt = '';
-      image.draggable = false;
-      door.element.append(image);
+      // config.doorImage === null이면(옥상처럼 실사 배경이 이미 문을 그려주는 층) 깨진 이미지 아이콘이
+      // 뜨지 않도록 아예 넣지 않는다. 지정 안 하면 기존 층들과 같은 기본 경로를 그대로 쓴다.
+      const doorImagePath = config.doorImage === undefined ? 'assets/objects/floor17/elevator.png' : config.doorImage;
+      if (doorImagePath) {
+        const image = new Image();
+        image.src = doorImagePath;
+        image.alt = '';
+        image.draggable = false;
+        door.element.append(image);
+      }
       dynamicScene.append(door.element);
       door.indicator = document.createElement('div');
       door.indicator.className = 'elevator-indicator';
-      door.indicator.style.left = `${door.x + door.width / 2}px`;
-      door.indicator.style.top = `${door.y - 32}px`;
+      // indicatorDx/indicatorLift: 층별로 층수 표시 박스를 문 중앙/기본 32px 위 기준에서 미세 조정한다.
+      door.indicator.style.left = `${door.x + door.width / 2 + (config.indicatorDx ?? 0)}px`;
+      door.indicator.style.top = `${door.y - (config.indicatorLift ?? 32)}px`;
       dynamicScene.append(door.indicator);
       doorList.push(door);
     });
-    const stairs = { name: '비상계단', type: 'stairs', x: bank + 780, y: 232, width: 170 };
+    const stairs = {
+      name: '비상계단', type: 'stairs',
+      x: bank + (config.stairsOffset ?? 780), y: config.stairsY ?? 232, width: config.stairsWidth ?? 170,
+    };
     stairs.element = document.createElement('div');
-    stairs.element.className = 'door';
+    stairs.element.className = config.backgroundImage ? 'door art' : 'door';
     stairs.element.dataset.open = 'false';
     stairs.element.setAttribute('role', 'img');
     Object.assign(stairs.element.style, {
       left: `${stairs.x}px`, top: `${stairs.y}px`, width: `${stairs.width}px`, height: `${floorY - stairs.y}px`,
     });
-    const stairsImage = new Image();
-    stairsImage.src = 'assets/objects/floor17/stairs.png';
-    stairsImage.alt = '';
-    stairsImage.draggable = false;
-    stairs.element.append(stairsImage);
+    const stairsImagePath = config.stairsImage === undefined ? 'assets/objects/floor17/stairs.png' : config.stairsImage;
+    if (stairsImagePath) {
+      const stairsImage = new Image();
+      stairsImage.src = stairsImagePath;
+      stairsImage.alt = '';
+      stairsImage.draggable = false;
+      stairs.element.append(stairsImage);
+    }
     dynamicScene.append(stairs.element);
     doorList.push(stairs);
     if (config.panel) {
@@ -360,8 +412,17 @@
       panel.element = document.createElement('div');
       panel.element.className = 'panel';
       Object.assign(panel.element.style, {
+        position: 'absolute', overflow: 'hidden', pointerEvents: 'none',
         left: `${panel.x}px`, top: `${panel.y}px`, width: `${panel.width}px`, height: `${floorY - panel.y}px`,
       });
+      if (config.panel.image) {
+        const image = new Image();
+        image.src = config.panel.image;
+        image.alt = '';
+        image.draggable = false;
+        Object.assign(image.style, { display: 'block', width: '100%', height: '100%' });
+        panel.element.append(image);
+      }
       dynamicScene.append(panel.element);
       doorList.push(panel);
     }
