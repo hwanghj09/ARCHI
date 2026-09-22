@@ -4,11 +4,14 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <title>ARCHI | 정수호</title>
+    <link rel="stylesheet" href="elevator.css" />
     <style>
       * { box-sizing: border-box; }
       body { margin: 0; overflow: hidden; background: #27292b; color: #eee; font: 14px Arial, sans-serif; }
       #stage { position: relative; width: 100%; height: 100dvh; overflow: hidden; touch-action: none; }
       #world { position: absolute; transform-origin: top left; background: #151f25; }
+      #darkness { display: none; position: absolute; inset: 0; z-index: 1; pointer-events: none; background: radial-gradient(circle at var(--sight-x, 640px) var(--sight-y, 489px), #0000000d 0 90px, #000000e6 160px, #000 210px); }
+      #world[data-lights="off"]:is([data-room="office"], [data-room="corridor"]) #darkness { display: block; }
       #background { position: absolute; inset: 0; overflow: hidden; pointer-events: none; user-select: none; }
       #background img { position: absolute; width: 256px; height: 256px; image-rendering: pixelated; }
       #office-background { display: none; position: absolute; pointer-events: none; user-select: none; image-rendering: pixelated; }
@@ -20,6 +23,9 @@
       #world[data-room="office"] .office-door[data-room="corridor"],
       #world[data-room="corridor"] .office-door[data-room="office"] { display: none; }
       #dynamic-scene { position: absolute; inset: 0; display: none; }
+      #dynamic-scene > .floor { background: #171b1a; border-top: 2px solid #626963; }
+      .solar-supply { position: absolute; width: 360px; height: 360px; overflow: hidden; pointer-events: none; image-rendering: pixelated; }
+      .solar-supply img { display: block; width: 200%; height: 100%; max-width: none; }
       #world[data-room="dynamic"] #dynamic-scene { display: block; }
       #world[data-room="dynamic"] #background,
       #world[data-room="dynamic"] #office-background,
@@ -32,39 +38,40 @@
       .door { position: absolute; overflow: hidden; pointer-events: none; image-rendering: pixelated; }
       .door img { display: block; width: 200%; height: 100%; max-width: none; }
       .door[data-open="true"] img { transform: translateX(-50%); }
+      .door.elevator img { transform: translateX(-50%); }
+      .elevator-panels { position: absolute; inset: 0; clip-path: inset(6.5% 12% 4.5%); }
+      .elevator-panels::before, .elevator-panels::after { content: ''; position: absolute; inset: 0; background: url('assets/objects/floor17/elevator.png') 0 0 / 200% 100% no-repeat; transition: transform 1.4s cubic-bezier(.45, 0, .2, 1); }
+      .elevator-panels::before { clip-path: inset(6.5% 50% 4.5% 12%); }
+      .elevator-panels::after { clip-path: inset(6.5% 12% 4.5% 50%); }
+      .elevator[data-open="true"] .elevator-panels::before { transform: translateX(-38%); }
+      .elevator[data-open="true"] .elevator-panels::after { transform: translateX(38%); }
       .door.near { outline: 2px solid #96b7aa; }
-      /* 실사 배경(옥상 등) 위의 문은 제어 장치(.panel.near)와 통일해 흰 테두리를 쓴다. */
-      .door.art.near { outline: 2px solid #fff; }
       .elevator-indicator { position: absolute; transform: translateX(-50%); width: 86px; height: 26px; border: 2px solid #293b40; background: #081013; color: #9fd5ba; font: bold 19px/22px monospace; text-align: center; text-shadow: 0 0 5px #578873; pointer-events: none; }
-      #interaction-hint { position: absolute; z-index: 1; transform: translateX(-50%); padding: 6px 10px; background: #101b20; border: 1px solid #96b7aa; pointer-events: none; white-space: nowrap; }
+      #interaction-hint { position: absolute; z-index: 2; transform: translateX(-50%); padding: 6px 10px; background: #101b20; border: 1px solid #96b7aa; pointer-events: none; white-space: nowrap; }
       #interaction-status { position: absolute; bottom: 24px; width: 100%; text-align: center; text-shadow: 0 2px 4px #000; pointer-events: none; }
-      #room-transition { position: absolute; inset: 0; z-index: 5; background: #000; opacity: 0; pointer-events: none; transition: opacity .35s ease; }
-      #room-transition.visible { opacity: 1; }
+      #room-transition { position: fixed; inset: 0; z-index: 20; background: #000; opacity: 0; pointer-events: none; }
+      #room-transition.visible { pointer-events: auto; }
       .solid { position: absolute; }
       .boundary { background: #172126; border-inline: 4px solid #2b383e; }
-      /* 17층/사무실/옥상은 실제 배경 그림이 바닥을 그려주므로 .floor를 투명하게 둔다(버려도 되는
-         invisible 처리, buildDynamicScene() 참고). 반면 배경 그림이 없는 12F/7F/1F/B1/B2 같은
-         placeholder 층은 바닥이 안 보이면 안 되므로 여기서만 채운다. */
-      #dynamic-scene .floor { background: #20242a;
-        box-shadow: inset 0 2px 0 #4a5860, inset 0 10px 16px -10px #4a5860, inset 0 -28px 24px -14px rgba(0, 0, 0, .6); }
-      .crate { background: #77817a; border: 5px solid #a0a790; box-shadow: inset 0 -10px #5b6762; }
-      .crate::after { content: ''; position: absolute; top: 8px; left: 12px; width: 34px; height: 8px; background: #d6bd6a; }
-      .cabinet { background: #737f7b; border: 5px solid #a3ada2; box-shadow: inset 0 -6px #52645e; }
-      .cabinet::after { content: ''; position: absolute; top: 14px; left: 40%; width: 20%; height: 4px; background: #273b38; }
       .desk { background: #5c5346; border: 5px solid #8f8168; box-shadow: inset 0 -8px #40392f; }
-     ㅇㅇ .desk::after { content: ''; position: absolute; top: 10px; left: 14px; width: 40%; height: 18px; background: #2f6b63; box-shadow: 0 0 6px #3fa696; }
+      .desk::after { content: ''; position: absolute; top: 10px; left: 14px; width: 40%; height: 18px; background: #2f6b63; box-shadow: 0 0 6px #3fa696; }
       .rig { background: #37524f; border: 5px solid #5f8b85; box-shadow: inset 0 -8px #233a38; }
       .rig::after { content: ''; position: absolute; top: 10px; left: 10px; right: 10px; height: 6px; background: #79e0c9; box-shadow: 0 0 6px #79e0c9; }
       .server-rack { background: #14181f; border: 5px solid #37414f; box-shadow: inset 0 -10px #05070a; }
       .server-rack::after { content: ''; position: absolute; top: 12px; left: 10px; width: 14px; height: 14px; background: #4fd6ff; border-radius: 50%; box-shadow: 0 0 8px #4fd6ff, 0 24px 0 #4fd6ff, 0 48px 0 #ff5c5c; }
-      /* 옥상 전력 제어 장치: 실사 스프라이트를 얹는 레이어라 기본 모양은 없고, 근접 시 흰 테두리만 표시한다. */
-      .panel.near { outline: 2px solid #fff; }
+      .hvac { background: #6b7278; border: 5px solid #9aa2a8; box-shadow: inset 0 -8px #4a4f53; }
+      .hvac::after { content: ''; position: absolute; inset: 10px; border: 3px solid #454b4f; }
+      .panel { position: absolute; pointer-events: none; background: #23343a; border: 4px solid #4c6b63; }
+      .panel::after { content: ''; position: absolute; top: 10px; left: 10px; right: 10px; height: 16px; background: #7fd9c2; box-shadow: 0 0 8px #7fd9c2; }
+      .panel.near { outline: 2px solid #96b7aa; }
       #player { position: absolute; top: 0; left: 0; width: 192px; height: 192px; overflow: hidden; image-rendering: pixelated; user-select: none; pointer-events: none; }
       #player img { display: none; width: 100%; height: 100%; }
       #player #walk-sheet { width: 600%; height: 100%; }
+      #player #run-sheet { width: 800%; height: 100%; }
       #player .action-sheet { width: 200%; height: 100%; }
       #player[data-state="idle"] #idle-sprite,
       #player[data-state="walk"] #walk-sheet,
+      #player[data-state="run"] #run-sheet,
       #player[data-state="jump"] #jump-sheet,
       #player[data-state="fall"] #jump-sheet,
       #player[data-state="interact"] #interact-sheet { display: block; }
@@ -72,6 +79,10 @@
       header { position: absolute; inset: max(24px, env(safe-area-inset-top)) max(24px, env(safe-area-inset-right)) auto max(24px, env(safe-area-inset-left)); display: flex; justify-content: space-between; gap: 16px; pointer-events: none; }
       header strong { font-size: 18px; font-weight: 600; }
       header span { color: #b8c6c0; font-size: 13px; }
+      #floor17-light-switch { display: flex; align-items: center; gap: 6px; min-height: 32px; font-size: 13px; white-space: nowrap; pointer-events: auto; cursor: pointer; }
+      #floor17-light-switch[hidden] { display: none; }
+      #floor17-lights { width: 18px; height: 18px; margin: 0; accent-color: #b9d0a6; cursor: pointer; }
+      #floor17-lights:focus-visible { outline: 2px solid #e2e9cc; outline-offset: 3px; }
       nav { position: absolute; inset: auto max(24px, env(safe-area-inset-right)) max(24px, env(safe-area-inset-bottom)) max(24px, env(safe-area-inset-left)); display: flex; gap: 12px; }
       nav button { width: 56px; height: 52px; flex-shrink: 0; padding: 0; border: 1px solid #6b6d70; border-radius: 4px; background: #252629; color: #e5e7e9; font: 24px Arial, sans-serif; cursor: pointer; touch-action: none; user-select: none; -webkit-user-select: none; }
       #interact { margin-left: auto; font-size: 18px; }
@@ -82,19 +93,14 @@
         nav { bottom: max(12px, env(safe-area-inset-bottom)); }
         nav button { width: 48px; height: 44px; }
       }
-      #floor-select { position: absolute; z-index: 4; top: 50%; left: 50%; transform: translate(-50%, -50%); display: flex; flex-direction: column; gap: 6px; padding: 14px; min-width: 220px; background: #101b20; border: 1px solid #4c6b63; }
-      #floor-select[hidden] { display: none; }
-      #floor-select p { margin: 0 0 4px; font-size: 13px; color: #9fd5ba; text-align: center; }
-      #floor-select button { padding: 8px 10px; border: 1px solid #4c6b63; border-radius: 4px; background: #1a2a2c; color: #e5e7e9; font: 15px Arial, sans-serif; cursor: pointer; text-align: left; }
-      #floor-select button:hover { border-color: #96b7aa; }
-      #floor-select button.cancel { margin-top: 4px; text-align: center; color: #b8c6c0; }
     </style>
     <script src="assets/vendor/matter.min.js" defer></script>
     <script src="player.js" defer></script>
   </head>
   <body>
-    <main id="stage" aria-label="ARCHI 17층 사이드뷰 스테이지">
-      <div id="world" data-room="corridor">
+    <main id="stage" tabindex="-1" aria-label="ARCHI 17층 사무실 사이드뷰 스테이지">
+      <div id="world" data-room="office" data-lights="on">
+        <div id="darkness" aria-hidden="true"></div>
         <div id="background" aria-hidden="true"></div>
         <img id="office-background" src="assets/background/floor17/office-interior.png" alt="" width="2172" height="724" draggable="false" />
         <div id="dynamic-scene" aria-hidden="true"></div>
@@ -102,11 +108,12 @@
         <div id="player" role="img" aria-label="정수호" data-state="idle" data-frame="0">
           <img id="idle-sprite" src="assets/player/jeong-suho.png" alt="" width="256" height="256" draggable="false" />
           <img id="walk-sheet" src="assets/player/jeong-suho-walk-six.png" alt="" width="1536" height="256" draggable="false" />
+          <img id="run-sheet" src="assets/player/jeong-suho-run-eight.png" alt="" width="2048" height="256" draggable="false" />
           <img id="jump-sheet" class="action-sheet" src="assets/player/jeong-suho-jump-fall.png" alt="" width="1774" height="887" draggable="false" />
           <img id="interact-sheet" class="action-sheet" src="assets/player/jeong-suho-interact.png" alt="" width="1774" height="887" draggable="false" />
         </div>
       </div>
-      <header><strong>ARCHI</strong><span>17F · 00:00</span></header>
+      <header><strong>ARCHI</strong><span>17F · 사무실</span><label id="floor17-light-switch"><input id="floor17-lights" type="checkbox" checked aria-label="17층 조명" /><output id="floor17-light-state">조명 켜짐</output></label></header>
       <nav aria-label="플레이어 조작">
         <button type="button" data-direction="-1" aria-label="왼쪽 이동" title="왼쪽 이동 (A / ←)">←</button>
         <button type="button" data-direction="1" aria-label="오른쪽 이동" title="오른쪽 이동 (D / →)">→</button>
@@ -114,8 +121,20 @@
         <button id="jump" type="button" aria-label="점프" title="점프 (Space / W / ↑)">↑</button>
       </nav>
       <div id="interaction-status" role="status" aria-live="polite"></div>
-      <div id="floor-select" role="listbox" aria-label="이동할 층 선택" hidden></div>
-      <div id="room-transition" aria-hidden="true"></div>
     </main>
+    <div id="room-transition" aria-hidden="true" data-phase="idle"></div>
+    <div id="elevator-cabin" role="dialog" aria-modal="true" aria-label="엘리베이터 내부" tabindex="-1" hidden>
+      <div id="cabin-scene" data-door="closed">
+        <img id="cabin-art" src="assets/background/elevator/cabin-b2-to-17.png" width="1536" height="1024" alt="" draggable="false" />
+        <div id="cabin-doorway"><div class="cabin-leaf left"></div><div class="cabin-leaf right"></div></div>
+        <output id="cabin-display" aria-label="현재 층">17</output>
+        <div id="cabin-floor-buttons"></div>
+        <button id="cabin-open" class="cabin-hit" type="button" aria-label="문 열기" title="문 열기"></button>
+        <button id="cabin-close" class="cabin-hit" type="button" aria-label="문 닫기" title="문 닫기"></button>
+        <button id="cabin-alarm" class="cabin-hit" type="button" aria-label="비상벨" title="비상벨"></button>
+        <button id="cabin-exit" type="button" disabled>나가기</button>
+        <p id="cabin-status" role="status" aria-live="polite"></p>
+      </div>
+    </div>
   </body>
 </html>
