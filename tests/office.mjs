@@ -38,20 +38,33 @@ try {
   };
 
   assert.equal((await state()).room, 'office', 'New games start inside the 17F office');
-  near((await state()).x, 640);
+  near((await state()).x, 940);
   near((await state()).feet, 570);
   assert.equal(await page.locator('#world').evaluate(el => el.style.width), '2400px');
   assert.equal(await page.locator('header span').textContent(), '17F · 사무실');
   assert.match(await page.locator('#stage').getAttribute('aria-label'), /17층 사무실/);
   assert(await page.locator('#office-background').isVisible());
   assert(await page.locator('#background').isHidden());
-  assert(await page.locator('#interaction-hint').isHidden(), 'Start is inside the office, away from the exit');
-  await page.keyboard.press('e');
-  assert.equal((await state()).room, 'office', 'Initial E does not immediately exit');
+  assert.equal(await page.locator('#interaction-hint').textContent(), 'E · 컴퓨터 사용');
   await page.screenshot({ path: '.local/start-office-desktop.png' });
+  for (const viewport of [{ width: 1280, height: 900 }, { width: 1920, height: 1080 }, { width: 390, height: 844 }]) {
+    await page.setViewportSize(viewport);
+    await page.waitForFunction(() => {
+      const bounds = document.getElementById('world').getBoundingClientRect();
+      return Math.abs(bounds.y) < 1 && Math.abs(bounds.height - innerHeight) < 1;
+    }, null, { polling: 50 });
+    await page.clock.runFor(100);
+    const world = await page.locator('#world').boundingBox();
+    near(world.y, 0);
+    near((await page.locator('#office-background').boundingBox()).y, 0);
+    near(world.height, viewport.height);
+    near((await state()).feet, 570);
+    near((await state()).x, 940);
+    await page.screenshot({ path: `.local/office-filled-${viewport.width}x${viewport.height}.png` });
+  }
   await page.setViewportSize({ width: 390, height: 844 });
   await page.clock.runFor(100);
-  near((await state()).x, 640);
+  near((await state()).x, 940);
   await page.screenshot({ path: '.local/start-office-mobile.png' });
   await page.setViewportSize({ width: 1280, height: 720 });
   await page.clock.runFor(100);

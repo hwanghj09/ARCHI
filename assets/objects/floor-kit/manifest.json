@@ -1,0 +1,248 @@
+{
+  "baseTile": 256,
+  "padding": 8,
+  "assets": [
+    {
+      "file": "office-desk.png",
+      "name": "개발팀 책상",
+      "width": 512,
+      "height": 256,
+      "anchor": [
+        256,
+        248
+      ],
+      "suggestedWorldWidth": 340
+    },
+    {
+      "file": "office-copier.png",
+      "name": "복합기",
+      "width": 256,
+      "height": 256,
+      "anchor": [
+        128,
+        248
+      ],
+      "suggestedWorldWidth": 140
+    },
+    {
+      "file": "filing-cabinet.png",
+      "name": "문서 캐비닛",
+      "width": 256,
+      "height": 512,
+      "anchor": [
+        128,
+        504
+      ],
+      "suggestedWorldWidth": 140
+    },
+    {
+      "file": "rolling-whiteboard.png",
+      "name": "이동식 화이트보드",
+      "width": 512,
+      "height": 256,
+      "anchor": [
+        256,
+        248
+      ],
+      "suggestedWorldWidth": 260
+    },
+    {
+      "file": "reception-counter.png",
+      "name": "로비 안내 데스크",
+      "width": 512,
+      "height": 256,
+      "anchor": [
+        256,
+        248
+      ],
+      "suggestedWorldWidth": 400
+    },
+    {
+      "file": "waiting-sofa.png",
+      "name": "대기실 소파",
+      "width": 512,
+      "height": 256,
+      "anchor": [
+        256,
+        248
+      ],
+      "suggestedWorldWidth": 300
+    },
+    {
+      "file": "meeting-table.png",
+      "name": "회의 테이블",
+      "width": 512,
+      "height": 256,
+      "anchor": [
+        256,
+        248
+      ],
+      "suggestedWorldWidth": 400
+    },
+    {
+      "file": "large-planter.png",
+      "name": "로비 화분",
+      "width": 256,
+      "height": 512,
+      "anchor": [
+        128,
+        504
+      ],
+      "suggestedWorldWidth": 130
+    },
+    {
+      "file": "electronics-bench.png",
+      "name": "전자장비 시험대",
+      "width": 512,
+      "height": 256,
+      "anchor": [
+        256,
+        248
+      ],
+      "suggestedWorldWidth": 330
+    },
+    {
+      "file": "robot-charging-dock.png",
+      "name": "로봇 충전 도크",
+      "width": 256,
+      "height": 256,
+      "anchor": [
+        128,
+        248
+      ],
+      "suggestedWorldWidth": 150
+    },
+    {
+      "file": "instrument-cart.png",
+      "name": "계측장비 카트",
+      "width": 256,
+      "height": 256,
+      "anchor": [
+        128,
+        248
+      ],
+      "suggestedWorldWidth": 170
+    },
+    {
+      "file": "glass-display-cabinet.png",
+      "name": "시험장비 보관장",
+      "width": 256,
+      "height": 512,
+      "anchor": [
+        128,
+        504
+      ],
+      "suggestedWorldWidth": 200
+    },
+    {
+      "file": "server-rack.png",
+      "name": "메인 서버 랙",
+      "width": 256,
+      "height": 512,
+      "anchor": [
+        128,
+        504
+      ],
+      "suggestedWorldWidth": 150
+    },
+    {
+      "file": "network-rack.png",
+      "name": "네트워크 패치 랙",
+      "width": 256,
+      "height": 512,
+      "anchor": [
+        128,
+        504
+      ],
+      "suggestedWorldWidth": 160
+    },
+    {
+      "file": "ups-cabinet.png",
+      "name": "비상 UPS 전원장치",
+      "width": 256,
+      "height": 256,
+      "anchor": [
+        128,
+        248
+      ],
+      "suggestedWorldWidth": 170
+    },
+    {
+      "file": "server-cooling-unit.png",
+      "name": "서버실 냉각장치",
+      "width": 256,
+      "height": 512,
+      "anchor": [
+        128,
+        504
+      ],
+      "suggestedWorldWidth": 170
+    },
+    {
+      "file": "maintenance-tool-cabinet.png",
+      "name": "정비 공구함",
+      "width": 512,
+      "height": 256,
+      "anchor": [
+        256,
+        248
+      ],
+      "suggestedWorldWidth": 200
+    },
+    {
+      "file": "electrical-panel.png",
+      "name": "배전반",
+      "width": 256,
+      "height": 512,
+      "anchor": [
+        128,
+        504
+      ],
+      "suggestedWorldWidth": 160
+    },
+    {
+      "file": "staff-lockers.png",
+      "name": "직원용 사물함",
+      "width": 256,
+      "height": 512,
+      "anchor": [
+        128,
+        504
+      ],
+      "suggestedWorldWidth": 230
+    },
+    {
+      "file": "drink-vending-machine.png",
+      "name": "음료 자판기",
+      "width": 256,
+      "height": 512,
+      "anchor": [
+        128,
+        504
+      ],
+      "suggestedWorldWidth": 180
+    },
+    {
+      "file": "kitchenette-counter.png",
+      "name": "탕비실 싱크대",
+      "width": 512,
+      "height": 256,
+      "anchor": [
+        256,
+        248
+      ],
+      "suggestedWorldWidth": 360
+    },
+    {
+      "file": "water-cooler.png",
+      "name": "냉온수기",
+      "width": 256,
+      "height": 512,
+      "anchor": [
+        128,
+        504
+      ],
+      "suggestedWorldWidth": 105
+    }
+  ]
+}

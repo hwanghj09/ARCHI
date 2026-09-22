@@ -1,0 +1,74 @@
+#office-computer { position: absolute; left: 896px; top: 392px; width: 88px; height: 64px; pointer-events: none; }
+#office-computer.near { outline: 2px solid #b8d8bd; outline-offset: 3px; }
+#world:not([data-room="office"]) #office-computer { display: none; }
+#computer { position: fixed; inset: 0; z-index: 10; overflow: hidden; background: #233c36; color: #252b29; font: 14px Arial, sans-serif; }
+#computer[hidden], #computer [hidden] { display: none; }
+#computer-wallpaper { position: absolute; width: 100%; height: 100%; object-fit: cover; image-rendering: pixelated; pointer-events: none; }
+#computer button { display: inline-flex; align-items: center; justify-content: center; gap: 12px; min-width: 44px; min-height: 44px; padding: 8px; border: 1px solid transparent; border-radius: 4px; background: transparent; color: inherit; font: inherit; cursor: pointer; }
+#computer button:hover { background: #dbe9e2; border-color: #9ab4a7; }
+#computer :is(button, textarea, input, select, [tabindex]):focus-visible { outline: 3px solid #bf6329; outline-offset: -3px; }
+#computer button img { width: 24px; height: 24px; flex-shrink: 0; pointer-events: none; }
+.computer-shortcuts { position: absolute; top: 24px; left: 24px; display: grid; gap: 16px; }
+#computer .computer-shortcuts button { width: 96px; height: 96px; flex-direction: column; gap: 8px; color: white; text-shadow: 0 1px 3px #000; }
+#computer .computer-shortcuts button:hover { background: #162f37b3; }
+#computer .computer-shortcuts img { width: 42px; height: 42px; padding: 7px; border-radius: 4px; background: #f4cd67; }
+#computer .computer-shortcuts button:nth-child(2) img { background: #f1e6df; }
+#computer-window { position: absolute; inset: 48px 40px 88px 152px; max-width: 1000px; margin-inline: auto; display: flex; flex-direction: column; overflow: hidden; border: 1px solid #657b71; border-radius: 6px; background: #f5f7f6; box-shadow: 0 12px 44px #102d3459; }
+.computer-titlebar, .computer-toolbar { display: flex; align-items: center; gap: 12px; min-height: 48px; padding: 0 8px 0 16px; border-bottom: 1px solid #c9d0cc; flex-shrink: 0; }
+.computer-titlebar { background: #e7eeea; }
+.computer-titlebar strong { flex: 1; min-width: 0; overflow-wrap: anywhere; font-size: 14px; }
+#computer #computer-window-close:hover { background: #eac8c3; border-color: #bb756b; }
+.computer-content { flex: 1; min-height: 0; overflow: auto; }
+#computer-files { padding: 16px; }
+.computer-path { margin: 0 0 20px; color: #596960; font-size: 13px; }
+#computer-files button { display: flex; justify-content: flex-start; width: 100%; min-height: 60px; border-bottom: 1px solid #dfe5e1; border-radius: 0; text-align: left; }
+.computer-file-filters { display: flex; gap: 16px; }
+.computer-file-filters label { display: grid; gap: 6px; min-width: 0; font-size: 12px; color: #596960; }
+.computer-file-filters label:first-child { flex: 1; }
+.computer-file-filters :is(input, select) { width: 100%; min-width: 0; height: 40px; padding: 8px; border: 1px solid #aebbb3; border-radius: 3px; background: white; color: #252b29; font: 14px Arial, sans-serif; }
+#computer-file-count { margin: 16px 0 4px; font-size: 12px; color: #596960; }
+.computer-file-description { display: grid; gap: 5px; min-width: 0; flex: 1; overflow-wrap: anywhere; }
+.computer-file-description strong { font-weight: 600; }
+.computer-file-description small { color: #596960; font-size: 12px; line-height: 1.5; }
+.computer-file-metadata { font-size: 11px; line-height: 1.8; color: #596960; white-space: pre-line; text-align: right; }
+#computer-files-empty { padding: 24px 0; color: #596960; }
+#computer-notes, #computer-document { display: flex; flex-direction: column; }
+.computer-toolbar { padding: 4px 12px; }
+#computer-save-status { color: #596960; font-size: 12px; }
+#computer-note { display: block; flex: 1; min-height: 0; width: 100%; padding: 24px; border: 0; resize: none; background: #fff; color: #252b29; font: 16px/1.8 Arial, sans-serif; }
+#computer-document { background: #fff; }
+#computer-document-scroll { flex: 1; min-height: 0; overflow: auto; }
+.company-document { max-width: 800px; margin: 0 auto; padding: 32px 40px; line-height: 1.85; overflow-wrap: anywhere; }
+.document-letterhead { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-bottom: 16px; border-bottom: 3px solid #426655; }
+.document-letterhead strong { font-size: 20px; }
+.document-letterhead span, #computer-document-code { color: #66756c; font-size: 11px; }
+#computer-document-code { margin: 24px 0 6px; }
+#computer-document-title { margin: 0 0 12px; font-size: 23px; line-height: 1.4; }
+#computer-document-meta { margin: 0 0 28px; padding-bottom: 16px; border-bottom: 1px solid #d5ded8; font-size: 12px; color: #596960; }
+.company-document h2 { margin: 28px 0 8px; font-size: 15px; }
+.company-document p { margin: 10px 0; }
+.company-document table { width: 100%; border-collapse: collapse; table-layout: fixed; margin: 16px 0; font-size: 12px; }
+.company-document :is(th, td) { padding: 10px; border: 1px solid #d5ded8; text-align: left; vertical-align: top; }
+.company-document th { background: #edf2ef; font-weight: 600; }
+.company-document :is(ul, ol) { padding-left: 24px; }
+.company-document .document-note { padding-left: 12px; border-left: 3px solid #b39449; color: #59604f; font-size: 12px; }
+.company-document footer { margin-top: 36px; padding-top: 12px; border-top: 1px solid #d5ded8; font-size: 10px; color: #66756c; }
+.computer-taskbar { position: absolute; inset: auto 0 0; min-height: 60px; display: flex; align-items: center; gap: 8px; padding: 8px max(12px, env(safe-area-inset-right)) max(8px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left)); background: #ecf1eef2; border-top: 1px solid #7c9688; }
+.computer-taskbar strong { margin-right: 12px; font-size: 16px; }
+.computer-taskbar span { margin-left: auto; font-size: 12px; color: #596960; white-space: nowrap; }
+@media (max-width: 600px) {
+  .computer-shortcuts { top: 16px; left: 12px; grid-template-columns: repeat(2, 96px); }
+  #computer-window { inset: 126px 8px 84px; }
+  #computer-note { padding: 16px; }
+  #computer-file-list button { flex-wrap: wrap; gap: 8px; padding-block: 12px; }
+  .computer-file-metadata { width: 100%; padding-left: 32px; text-align: left; white-space: normal; }
+  .company-document { padding: 20px 16px; }
+  #computer-document-title { font-size: 20px; }
+  .company-document :is(th, td) { padding: 6px; }
+  .computer-taskbar { gap: 2px; }
+  .computer-taskbar strong { margin-right: 4px; }
+}
+@media (max-height: 480px) {
+  #computer-window { inset: 8px 8px 76px 128px; }
+  .computer-shortcuts { top: 8px; left: 8px; gap: 4px; grid-template-columns: 96px; }
+}

@@ -3,6 +3,7 @@
   const stage = document.getElementById('stage');
   const world = document.getElementById('world');
   const sprite = document.getElementById('player');
+  const idleSheet = document.getElementById('idle-sprite');
   const walkSheet = document.getElementById('walk-sheet');
   const runSheet = document.getElementById('run-sheet');
   const jumpSheet = document.getElementById('jump-sheet');
@@ -28,6 +29,12 @@
   const roomTransition = document.getElementById('room-transition');
   const dynamicScene = document.getElementById('dynamic-scene');
   const cabin = document.getElementById('elevator-cabin');
+  const computer = document.getElementById('computer');
+  const officeComputer = { type: 'computer', x: 896, y: 392, width: 88, element: document.getElementById('office-computer') };
+  const computerWindow = document.getElementById('computer-window');
+  const computerNote = document.getElementById('computer-note');
+  const computerSaveStatus = document.getElementById('computer-save-status');
+  let computerReturnFocus = null;
   const cabinScene = document.getElementById('cabin-scene');
   const cabinStatus = document.getElementById('cabin-status');
   const cabinDisplay = document.getElementById('cabin-display');
@@ -43,7 +50,7 @@
   const lightSwitch = document.getElementById('floor17-light-switch');
   const lights = document.getElementById('floor17-lights');
   lights.addEventListener('change', () => {
-    if (transitioning || selectingFloor || currentSceneFloor !== 17) {
+    if (transitioning || selectingFloor || usingComputer || currentSceneFloor !== 17) {
       lights.checked = world.dataset.lights === 'on';
       return;
     }
@@ -52,8 +59,8 @@
   });
   // The generated office floor starts at source y=504; align it with the physics floor.
   Object.assign(officeBackground.style, {
-    width: `${officeWidth}px`, height: `${724 * officeWidth / 2172}px`,
-    left: '0px', top: `${floorY - 504 * officeWidth / 2172}px`,
+    width: `${officeWidth}px`, height: `${724 * floorY / 504}px`,
+    left: '0px', top: '0px',
   });
   const officeDoors = [
     { name: '사무실', room: 'corridor', x: 580, y: 236, width: 128 },
@@ -125,8 +132,8 @@
   rooftopBackground.alt = '';
   rooftopBackground.draggable = false;
   Object.assign(rooftopBackground.style, {
-    position: 'absolute', width: '2400px', height: `${724 * 2400 / 2172}px`,
-    top: `${floorY - 504 * 2400 / 2172}px`, left: '0px', imageRendering: 'pixelated',
+    position: 'absolute', width: '2400px', height: `${724 * floorY / 504}px`,
+    top: '0px', left: '0px', imageRendering: 'pixelated',
   });
 
   function floorShortLabel(floorValue) {
@@ -175,7 +182,8 @@
     world.insertBefore(element, sprite);
     return Bodies.rectangle(x + width / 2, y + height / 2, width, height, { isStatic: true });
   });
-  const body = Bodies.rectangle(640, floorY - 81, 40, 162, {
+  // Start in front of the lit monitor in the office background.
+  const body = Bodies.rectangle(940, floorY - 81, 40, 162, {
     inertia: Infinity, friction: 0, frictionStatic: 0, frictionAir: 0, restitution: 0,
   });
   const officeSolids = [
@@ -188,6 +196,7 @@
   let currentDoors = doors;
   let walkDistance = 0;
   let runDistance = 0;
+  let idleTime = 0;
   let walkReady = false;
   let facing = 1;
   let grounded = false;
@@ -196,6 +205,7 @@
   let transitioning = false;
   let sceneTransition = null;
   let selectingFloor = false;
+  let usingComputer = false;
   let pulseDirection = 0;
   let pulseTime = 0;
   let scale = 1;
@@ -210,17 +220,26 @@
   walkSheet.addEventListener('load', checkWalkSheet);
   checkWalkSheet();
 
-  function animate(distance, sprinting = false) {
+  function animate(distance, sprinting = false, elapsed = 0) {
     const running = grounded && sprinting && distance > .1 && runSheet.naturalWidth === 256 * runFrames && runSheet.naturalHeight === 256;
     const walking = grounded && walkReady && distance > .1 && !running;
     walkDistance = walking ? (walkDistance + distance) % (frameDistance * walkFrames) : 0;
     runDistance = running ? (runDistance + distance) % (runFrameDistance * runFrames) : 0;
     const state = !grounded ? (body.velocity.y < 0 ? 'jump' : 'fall') :
       interactionTime > 0 ? 'interact' : running ? 'run' : walking ? 'walk' : 'idle';
+    idleTime = state === 'idle' && sprite.dataset.state === 'idle' ? (idleTime + elapsed) % 3200 : 0;
     const index = state === 'fall' ? 1 : state === 'interact' ? Number(interactionTime <= 240) :
-      running ? Math.floor(runDistance / runFrameDistance) : walking ? Math.floor(walkDistance / frameDistance) : 0;
+      running ? Math.floor(runDistance / runFrameDistance) : walking ? Math.floor(walkDistance / frameDistance) :
+      state === 'idle' ? (idleTime < 1200 ? 0 : idleTime < 2100 ? 1 : idleTime < 2220 ? 2 : 3) : 0;
     sprite.dataset.state = state;
     sprite.dataset.frame = index;
+    if (state === 'idle') {
+      // The original 2x2 sheet has uneven cells: align each hip and sole at the walking scale.
+      const hip = [325, 925, 325, 925][index];
+      const sole = [619, 619, 1234, 1235][index];
+      idleSheet.style.transform = `translate(${96 - hip * .285}px, ${178 - sole * .285}px)`;
+      idleSheet.style.clipPath = `inset(${index < 2 ? 0 : 50}% ${index % 2 ? 0 : 50}% ${index < 2 ? 50 : 0}% ${index % 2 ? 50 : 0}%)`;
+    }
     if (state === 'walk') walkSheet.style.transform = `translateX(${-index * 100 / walkFrames}%)`;
     if (state === 'run') runSheet.style.transform = `translateX(${-index * 100 / runFrames}%)`;
     if (state === 'jump' || state === 'fall') jumpSheet.style.transform = `translateX(${-index * 50}%)`;
@@ -250,6 +269,10 @@
       updateCabin();
       return;
     }
+    if (usingComputer) {
+      updateElevators();
+      return;
+    }
     const directions = [...keys].map(key => movementKeys[key]).concat([...pointers.values()]);
     if (pulseTime > 0) directions.push(pulseDirection);
     pulseTime = Math.max(0, pulseTime - step);
@@ -266,7 +289,7 @@
       const normalY = pair.collision.normal.y * (pair.bodyA === body ? 1 : -1);
       return normalY < -.5;
     });
-    animate(Math.abs(body.position.x - oldX), sprinting);
+    animate(Math.abs(body.position.x - oldX), sprinting, step);
     updateElevators();
     updateInteraction();
     cameraX += (cameraTarget() - cameraX) * .13;
@@ -295,6 +318,7 @@
     releaseInput();
     stage.inert = true;
     cabin.inert = true;
+    computer.inert = true;
     roomTransition.dataset.phase = 'out';
     roomTransition.style.opacity = '0';
     roomTransition.classList.add('visible');
@@ -307,6 +331,7 @@
       transition.onChange();
       stage.inert = true;
       cabin.inert = true;
+      computer.inert = true;
       transition.elapsed = 0;
       roomTransition.dataset.phase = 'in';
       return;
@@ -324,10 +349,13 @@
     sceneTransition = null;
     roomTransition.dataset.phase = 'idle';
     roomTransition.classList.remove('visible');
-    stage.inert = selectingFloor;
+    stage.inert = selectingFloor || usingComputer;
     cabin.inert = false;
-    const previousFocus = cabin.contains(transition.focus) ? cabinReturnFocus : transition.focus;
-    const focus = selectingFloor ? cabin : previousFocus?.isConnected && previousFocus !== document.body ? previousFocus : stage;
+    computer.inert = false;
+    const previousFocus = computer.contains(transition.focus) ? computerReturnFocus :
+      cabin.contains(transition.focus) ? cabinReturnFocus : transition.focus;
+    const focus = usingComputer ? computer.querySelector('button') : selectingFloor ? cabin :
+      previousFocus?.isConnected && previousFocus !== document.body ? previousFocus : stage;
     focus.focus({ preventScroll: true });
   }
 
@@ -526,10 +554,10 @@
       return;
     }
     const activeDoors = room === 'corridor' ? [...doors, ...officeDoors.filter(door => door.room === room)] :
-      officeDoors.filter(door => door.room === room);
+      [...officeDoors.filter(door => door.room === room), officeComputer];
     nearbyDoor = activeDoors.find(door => grounded && Math.abs(body.bounds.max.y - floorY) < 2 &&
       Math.abs(body.position.x - door.x - door.width / 2) < door.width / 2 + 28) || null;
-    for (const door of [...doors, ...officeDoors]) door.element.classList.toggle('near', door === nearbyDoor);
+    for (const door of [...doors, ...officeDoors, officeComputer]) door.element.classList.toggle('near', door === nearbyDoor);
     hint.hidden = !nearbyDoor;
     if (nearbyDoor) {
       hint.style.left = `${nearbyDoor.x + nearbyDoor.width / 2}px`;
@@ -539,6 +567,7 @@
   }
 
   function doorHintText(door) {
+    if (door.type === 'computer') return 'E · 컴퓨터 사용';
     if (door.type === 'stairs') return currentSceneFloor === 18 ? 'E · 17층으로 내려가기' : 'E · 옥상으로 올라가기';
     if (door.type === 'panel') return 'E · 조사';
     if (door.type === 'elevator') {
@@ -551,9 +580,19 @@
   }
 
   function interact() {
-    if (transitioning || selectingFloor) return;
+    if (transitioning || selectingFloor || usingComputer) return;
     updateInteraction();
     if (!nearbyDoor) return;
+    if (nearbyDoor.type === 'computer') {
+      computerReturnFocus = document.activeElement;
+      transitionScene(() => {
+        usingComputer = true;
+        computer.hidden = false;
+        computerWindow.hidden = true;
+        hint.hidden = true;
+      });
+      return;
+    }
     if (nearbyDoor.type === 'stairs') {
       const destId = currentSceneFloor === 18 ? 'f17' : 'rooftop';
       if (destId === 'rooftop' && (!rooftopBackground.complete || !rooftopBackground.naturalWidth)) {
@@ -599,6 +638,108 @@
     showStatus(`${nearbyDoor.name} 문을 ${open ? '열었습니다' : '닫았습니다'}.`);
     updateInteraction();
   }
+
+  function exitComputer() {
+    if (transitioning || !usingComputer) return;
+    transitionScene(() => {
+      usingComputer = false;
+      computer.hidden = true;
+      updateInteraction();
+    });
+  }
+
+  function openComputerApp(app, documentId) {
+    if (transitioning || !usingComputer) return;
+    const record = app === 'document' ? officeDocuments.find(item => item.id === documentId) : null;
+    if (app === 'document' && !record) return;
+    computerWindow.hidden = false;
+    for (const view of ['files', 'notes', 'document']) {
+      document.getElementById(`computer-${view}`).hidden = view !== app;
+    }
+    let title = app === 'files' ? '파일' : '업무 메모';
+    if (app === 'document') {
+      title = record.title;
+      document.getElementById('computer-document-title').textContent = title;
+      document.getElementById('computer-document-code').textContent = `${record.code} / REV ${record.revision}`;
+      document.getElementById('computer-document-meta').textContent = `${record.category} · ${record.owner} · ${record.updated} · ${record.status}`;
+      // Only authored local document markup is rendered here; user notes stay in the textarea.
+      document.getElementById('computer-document-body').innerHTML = record.body;
+      document.getElementById('computer-document-scroll').scrollTop = 0;
+    }
+    document.getElementById('computer-window-title').textContent = title;
+    (app === 'notes' ? computerNote : document.getElementById('computer-window-close')).focus();
+  }
+
+  function closeComputerApp() {
+    computerWindow.hidden = true;
+    computer.querySelector('button').focus();
+  }
+
+  const fileSearch = document.getElementById('computer-search');
+  const fileCategory = document.getElementById('computer-category');
+  const fileRows = officeDocuments.map(record => {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.dataset.computerDocument = record.id;
+    const icon = new Image();
+    icon.src = 'assets/vendor/lucide/file-text.svg';
+    icon.alt = '';
+    const description = document.createElement('span');
+    description.className = 'computer-file-description';
+    const title = document.createElement('strong');
+    title.textContent = record.title;
+    const summary = document.createElement('small');
+    summary.textContent = record.summary;
+    description.append(title, summary);
+    const metadata = document.createElement('span');
+    metadata.className = 'computer-file-metadata';
+    metadata.textContent = `${record.category} · ${record.owner}\n${record.updated} · ${record.status}`;
+    button.append(icon, description, metadata);
+    button.addEventListener('click', () => openComputerApp('document', record.id));
+    document.getElementById('computer-file-list').append(button);
+    return { record, button };
+  });
+  function filterComputerFiles() {
+    const query = fileSearch.value.trim().toLocaleLowerCase();
+    let count = 0;
+    for (const { record, button } of fileRows) {
+      button.hidden = Boolean(fileCategory.value && record.category !== fileCategory.value) ||
+        !`${record.title} ${record.owner} ${record.code} ${record.summary}`.toLocaleLowerCase().includes(query);
+      if (!button.hidden) count++;
+    }
+    document.getElementById('computer-file-count').textContent = `${count}개 문서`;
+    document.getElementById('computer-files-empty').hidden = count !== 0;
+  }
+  fileSearch.addEventListener('input', filterComputerFiles);
+  fileCategory.addEventListener('change', filterComputerFiles);
+  filterComputerFiles();
+
+  computer.querySelectorAll('[data-computer-app]').forEach(button => {
+    button.addEventListener('click', () => openComputerApp(button.dataset.computerApp));
+  });
+  document.getElementById('computer-window-close').addEventListener('click', closeComputerApp);
+  document.getElementById('computer-exit').addEventListener('click', exitComputer);
+  try {
+    computerNote.value = localStorage.getItem('archi.office17.note') || '';
+  } catch {
+    computerSaveStatus.textContent = '저장소를 읽을 수 없음';
+  }
+  computerNote.addEventListener('input', () => { computerSaveStatus.textContent = '저장되지 않음'; });
+  document.getElementById('computer-save').addEventListener('click', () => {
+    try {
+      localStorage.setItem('archi.office17.note', computerNote.value);
+      computerSaveStatus.textContent = '저장됨';
+    } catch {
+      computerSaveStatus.textContent = '저장 실패 · 입력 내용은 유지됩니다';
+    }
+  });
+  computer.addEventListener('keydown', event => {
+    if (event.code !== 'Tab') return;
+    const enabled = [...computer.querySelectorAll('button, input, select, textarea, [tabindex="0"]')].filter(el => !el.closest('[hidden]'));
+    const index = enabled.indexOf(document.activeElement);
+    if (event.shiftKey && index <= 0) { event.preventDefault(); enabled.at(-1).focus(); }
+    else if (!event.shiftKey && (index === -1 || index === enabled.length - 1)) { event.preventDefault(); enabled[0].focus(); }
+  });
 
   // Hotspots use the source artwork's 1536x1024 coordinates; CSS scales them with the scene.
   const cabinFloorButtons = [];
@@ -753,6 +894,14 @@
 
   window.addEventListener('keydown', event => {
     if (transitioning) { event.preventDefault(); return; }
+    if (usingComputer) {
+      if (event.code === 'Escape' && !event.repeat) {
+        event.preventDefault();
+        if (computerWindow.hidden) exitComputer();
+        else closeComputerApp();
+      }
+      return;
+    }
     if (selectingFloor) {
       if (event.code === 'Escape') exitCabin();
       return;
@@ -796,7 +945,7 @@
   buttons.forEach(button => {
     const direction = Number(button.dataset.direction) || 0;
     button.addEventListener('pointerdown', event => {
-      if (event.button !== 0 || transitioning || selectingFloor) return;
+      if (event.button !== 0 || transitioning || selectingFloor || usingComputer) return;
       event.preventDefault();
       button.setPointerCapture(event.pointerId);
       if (direction) pointers.set(event.pointerId, direction);
@@ -810,7 +959,7 @@
     ['pointerup', 'pointercancel', 'lostpointercapture'].forEach(name => button.addEventListener(name, release));
     button.addEventListener('contextmenu', event => event.preventDefault());
     button.addEventListener('click', event => {
-      if (event.detail !== 0 || transitioning || selectingFloor) return;
+      if (event.detail !== 0 || transitioning || selectingFloor || usingComputer) return;
       if (direction) {
         pulseDirection = direction;
         pulseTime = 150;
@@ -819,7 +968,7 @@
   });
 
   new ResizeObserver(() => {
-    scale = Math.min(1, stage.clientHeight / worldHeight);
+    scale = stage.clientHeight / worldHeight;
     viewWidth = stage.clientWidth / scale;
     cameraX = cameraTarget();
     render();

@@ -27,7 +27,7 @@ try {
     await page.keyboard.up(key);
     await page.clock.runFor(34);
   };
-  assert(await page.locator('#idle-sprite').evaluate(el => el.naturalWidth === 256));
+  assert(await page.locator('#idle-sprite').evaluate(el => el.naturalWidth === 1254 && el.naturalHeight === 1254));
   assert(await page.locator('#walk-sheet').evaluate(el => el.naturalWidth === 1536 && el.naturalHeight === 256));
   await page.locator('.action-sheet').evaluateAll(images => Promise.all(images.map(image => image.decode())));
   const actionFrame = async (sheet, frame) => {
@@ -92,6 +92,28 @@ try {
   assert.equal(right.facing, 1);
   assert.equal(right.animation, 'idle');
   assert.equal(right.frame, 0);
+  const idleFrames = new Set();
+  for (let elapsed = 0; elapsed < 3300; elapsed += 100) {
+    const idle = await state();
+    idleFrames.add(idle.frame);
+    assert.equal(idle.animation, 'idle');
+    near(idle.x, right.x, 'Idle animation must not move the character');
+    assert.equal(await page.locator('#player img:visible').count(), 1);
+    assert(await page.locator('#idle-sprite').evaluate(el => {
+      const frame = Number(el.parentElement.dataset.frame);
+      const transform = new DOMMatrix(getComputedStyle(el).transform);
+      const scale = el.getBoundingClientRect().width / el.naturalWidth /
+        new DOMMatrix(getComputedStyle(document.getElementById('world')).transform).m11;
+      return getComputedStyle(el).clipPath === ['inset(0% 50% 50% 0%)', 'inset(0% 0% 50% 50%)',
+        'inset(50% 50% 0% 0%)', 'inset(50% 0% 0% 50%)'][frame] &&
+        Math.abs([325, 925, 325, 925][frame] * scale + transform.m41 - 96) < .1 &&
+        Math.abs([619, 619, 1234, 1235][frame] * scale + transform.m42 - 178) < .1;
+    }), 'Every idle pose must keep its hip centered and soles on the ground');
+    await page.clock.runFor(100);
+  }
+  assert.deepEqual([...idleFrames].sort(), [0, 1, 2, 3], 'Idle must play the complete breathing and blink loop');
+  assert.equal((await state()).frame, 0, 'Idle loop returns to neutral');
+  await page.screenshot({ path: '.local/idle-desktop.png' });
   await hold('ArrowLeft', 400);
   assert((await state()).x < right.x - 60, 'ArrowLeft must move left');
   assert.equal((await state()).facing, -1);

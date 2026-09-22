@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <title>ARCHI | 정수호</title>
     <link rel="stylesheet" href="elevator.css" />
+    <link rel="stylesheet" href="computer.css" />
     <style>
       * { box-sizing: border-box; }
       body { margin: 0; overflow: hidden; background: #27292b; color: #eee; font: 14px Arial, sans-serif; }
@@ -66,6 +67,7 @@
       .panel.near { outline: 2px solid #96b7aa; }
       #player { position: absolute; top: 0; left: 0; width: 192px; height: 192px; overflow: hidden; image-rendering: pixelated; user-select: none; pointer-events: none; }
       #player img { display: none; width: 100%; height: 100%; }
+      #player #idle-sprite { width: 357.39px; height: 357.39px; transform: translate(3.375px, 1.585px); clip-path: inset(0 50% 50% 0); }
       #player #walk-sheet { width: 600%; height: 100%; }
       #player #run-sheet { width: 800%; height: 100%; }
       #player .action-sheet { width: 200%; height: 100%; }
@@ -95,6 +97,7 @@
       }
     </style>
     <script src="assets/vendor/matter.min.js" defer></script>
+    <script src="computer-documents.js" defer></script>
     <script src="player.js" defer></script>
   </head>
   <body>
@@ -103,10 +106,11 @@
         <div id="darkness" aria-hidden="true"></div>
         <div id="background" aria-hidden="true"></div>
         <img id="office-background" src="assets/background/floor17/office-interior.png" alt="" width="2172" height="724" draggable="false" />
+        <div id="office-computer" role="img" aria-label="켜진 컴퓨터"></div>
         <div id="dynamic-scene" aria-hidden="true"></div>
         <div id="interaction-hint" hidden></div>
         <div id="player" role="img" aria-label="정수호" data-state="idle" data-frame="0">
-          <img id="idle-sprite" src="assets/player/jeong-suho.png" alt="" width="256" height="256" draggable="false" />
+          <img id="idle-sprite" src="assets/player/jeong-suho-idle-four.png" alt="" width="1254" height="1254" draggable="false" />
           <img id="walk-sheet" src="assets/player/jeong-suho-walk-six.png" alt="" width="1536" height="256" draggable="false" />
           <img id="run-sheet" src="assets/player/jeong-suho-run-eight.png" alt="" width="2048" height="256" draggable="false" />
           <img id="jump-sheet" class="action-sheet" src="assets/player/jeong-suho-jump-fall.png" alt="" width="1774" height="887" draggable="false" />
@@ -123,6 +127,57 @@
       <div id="interaction-status" role="status" aria-live="polite"></div>
     </main>
     <div id="room-transition" aria-hidden="true" data-phase="idle"></div>
+    <div id="computer" role="dialog" aria-modal="true" aria-label="17층 사무실 컴퓨터" tabindex="-1" hidden>
+      <img id="computer-wallpaper" src="assets/ui/computer/wallpaper.png" alt="" draggable="false" />
+      <div class="computer-shortcuts">
+        <button type="button" data-computer-app="files"><img src="assets/vendor/lucide/folder.svg" alt="" /><span>파일</span></button>
+        <button type="button" data-computer-app="notes"><img src="assets/vendor/lucide/notebook-pen.svg" alt="" /><span>업무 메모</span></button>
+      </div>
+      <section id="computer-window" aria-labelledby="computer-window-title" hidden>
+        <div class="computer-titlebar">
+          <strong id="computer-window-title">파일</strong>
+          <button id="computer-window-close" type="button" aria-label="창 닫기" title="창 닫기"><img src="assets/vendor/lucide/x.svg" alt="" /></button>
+        </div>
+        <div id="computer-files" class="computer-content" hidden>
+          <p class="computer-path">내 컴퓨터 / 사내 공유 / ARCHI</p>
+          <div class="computer-file-filters">
+            <label>검색<input id="computer-search" type="search" aria-label="문서 검색" /></label>
+            <label>분류<select id="computer-category" aria-label="문서 분류"><option value="">전체 자료</option><option>회사·조직</option><option>프로젝트</option><option>시설·보안</option></select></label>
+          </div>
+          <p id="computer-file-count" role="status" aria-live="polite"></p>
+          <div id="computer-file-list"></div>
+          <p id="computer-files-empty" hidden>일치하는 문서가 없습니다.</p>
+          <button type="button" data-computer-app="notes"><img src="assets/vendor/lucide/notebook-pen.svg" alt="" /><span>업무 메모</span></button>
+        </div>
+        <div id="computer-notes" class="computer-content" hidden>
+          <div class="computer-toolbar">
+            <button id="computer-save" type="button" aria-label="메모 저장" title="메모 저장"><img src="assets/vendor/lucide/save.svg" alt="" /></button>
+            <output id="computer-save-status" role="status" aria-live="polite">저장됨</output>
+          </div>
+          <textarea id="computer-note" aria-label="업무 메모 내용" spellcheck="false"></textarea>
+        </div>
+        <div id="computer-document" class="computer-content" hidden>
+          <div class="computer-toolbar"><button type="button" data-computer-app="files" aria-label="파일 목록으로" title="파일 목록으로"><img src="assets/vendor/lucide/arrow-left.svg" alt="" /></button></div>
+          <div id="computer-document-scroll" tabindex="0" aria-label="문서 본문">
+            <article class="company-document">
+              <div class="document-letterhead"><strong>ARCHI</strong><span>INTERNAL · 사내 자료</span></div>
+              <p id="computer-document-code"></p>
+              <h1 id="computer-document-title"></h1>
+              <p id="computer-document-meta"></p>
+              <div id="computer-document-body"></div>
+              <footer>ARCHI PROJECT OFFICE · 내부 열람용</footer>
+            </article>
+          </div>
+        </div>
+      </section>
+      <div class="computer-taskbar">
+        <strong>ARCHI</strong>
+        <button type="button" data-computer-app="files" aria-label="파일" title="파일"><img src="assets/vendor/lucide/folder.svg" alt="" /></button>
+        <button type="button" data-computer-app="notes" aria-label="업무 메모" title="업무 메모"><img src="assets/vendor/lucide/notebook-pen.svg" alt="" /></button>
+        <span>17F · PC-01</span>
+        <button id="computer-exit" type="button" aria-label="컴퓨터 사용 종료" title="컴퓨터 사용 종료"><img src="assets/vendor/lucide/log-out.svg" alt="" /></button>
+      </div>
+    </div>
     <div id="elevator-cabin" role="dialog" aria-modal="true" aria-label="엘리베이터 내부" tabindex="-1" hidden>
       <div id="cabin-scene" data-door="closed">
         <img id="cabin-art" src="assets/background/elevator/cabin-b2-to-17.png" width="1536" height="1024" alt="" draggable="false" />
