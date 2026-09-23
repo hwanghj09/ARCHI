@@ -27,6 +27,18 @@
       #dynamic-scene > .floor { background: #171b1a; border-top: 2px solid #626963; }
       .solar-supply { position: absolute; width: 360px; height: 360px; overflow: hidden; pointer-events: none; image-rendering: pixelated; }
       .solar-supply img { display: block; width: 200%; height: 100%; max-width: none; }
+      .floor-room { position: absolute; top: 118px; height: 452px; border: 6px solid #2a363b; border-bottom: 0; background: linear-gradient(#172025, #11181b); pointer-events: none; }
+      .floor-room::before { content: ''; position: absolute; top: 34px; left: 28px; right: 28px; height: 190px; border: 5px solid #2f3d43; background: radial-gradient(circle, #c9b77a55 0 1.5px, transparent 2px) 0 60px / 26px 22px, linear-gradient(transparent 38%, #0b1116 38%), linear-gradient(#0c1a2b, #16273a); }
+      .floor-room-sign { position: absolute; top: -40px; left: 50%; transform: translateX(-50%); padding: 3px 12px; border: 2px solid #3d4e52; background: #0d1417; color: #a9bfb6; font: bold 15px Arial, sans-serif; white-space: nowrap; }
+      .floor-number-sign { position: absolute; top: 150px; width: 80px; padding: 6px 0; border: 3px solid #3d4e52; background: #0d1417; color: #cfd9d3; font: bold 30px Arial, sans-serif; text-align: center; pointer-events: none; }
+      .room-interior { position: absolute; inset: 0 0 150px; background: linear-gradient(#0d1316 0 44px, #26333a 44px 50px, #182226 50px); pointer-events: none; }
+      .room-interior::before { content: ''; position: absolute; top: 90px; left: 260px; right: 60px; height: 250px; border: 6px solid #2f3d43; background: radial-gradient(circle, #c9b77a55 0 1.5px, transparent 2px) 0 80px / 26px 22px, linear-gradient(transparent 38%, #0b1116 38%), repeating-linear-gradient(90deg, transparent 0 236px, #2f3d43 236px 242px), linear-gradient(#0c1a2b, #16273a); }
+      .room-interior::after { content: ''; position: absolute; top: 44px; left: 0; right: 0; height: 10px; background: repeating-linear-gradient(90deg, transparent 0 180px, #3c4a50 180px 300px); }
+      .room-door { position: absolute; pointer-events: none; border: 6px solid #3a4a50; border-bottom: 0; background: linear-gradient(90deg, transparent 78%, #6d7f86 78% 82%, transparent 82%), linear-gradient(#22343c, #16242a); box-shadow: inset 0 0 0 4px #121b1f; }
+      .room-door.near { outline: 2px solid #96b7aa; }
+      .floor-prop { position: absolute; pointer-events: none; image-rendering: pixelated; }
+      .floor-prop img { display: block; width: 100%; height: 100%; }
+      .floor-prop.near { outline: 2px solid #96b7aa; }
       #world[data-room="dynamic"] #dynamic-scene { display: block; }
       #world[data-room="dynamic"] #background,
       #world[data-room="dynamic"] #office-background,
