@@ -74,8 +74,8 @@ try {
   assert((await state()).feet < 500);
   await page.clock.runFor(1000);
   assert.equal((await state()).animation, 'run', 'Landing resumes running');
-  await page.clock.runFor(2000);
-  assert(Math.abs((await state()).x - 3148) < 1, 'Map boundary still blocks sprinting');
+  await page.clock.runFor(8000);
+  assert(Math.abs((await state()).x - 4948) < 1, 'Extended map boundary still blocks sprinting');
   assert.equal((await state()).animation, 'idle', 'Blocked sprint does not animate in place');
   await page.evaluate(() => window.dispatchEvent(new Event('blur')));
   await page.keyboard.up('d');

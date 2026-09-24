@@ -1,4 +1,4 @@
-#office-computer { position: absolute; left: 896px; top: 392px; width: 88px; height: 64px; pointer-events: none; }
+#office-computer { position: absolute; left: 612px; top: 392px; width: 88px; height: 64px; pointer-events: none; }
 #office-computer.near { outline: 2px solid #b8d8bd; outline-offset: 3px; }
 #world:not([data-room="office"]) #office-computer { display: none; }
 #computer { position: fixed; inset: 0; z-index: 10; overflow: hidden; background: #233c36; color: #252b29; font: 14px Arial, sans-serif; }

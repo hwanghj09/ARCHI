@@ -14,7 +14,15 @@
   const movementKeys = { KeyA: -1, ArrowLeft: -1, KeyD: 1, ArrowRight: 1 };
   const jumpKeys = new Set(['Space', 'KeyW', 'ArrowUp']);
   const runKeys = new Set(['ShiftLeft', 'ShiftRight']);
-  const corridorWidth = 3200;
+  // 모든 층(B2~17)이 공유하는 건물 코어: 층 폭, 엘리베이터 3대, 비상계단, 화장실. 17층 배경 그림 기준이며
+  // 층마다 다른 것은 빈 구역 x=32..1790, 3100..3540, 4300..4968에 놓는 방과 소품뿐이다.
+  const BUILDING_CORE = {
+    width: 5000, elevatorY: 220, floorSignX: 2694,
+    elevators: [{ x: 1818, width: 218 }, { x: 2148, width: 214 }, { x: 2444, width: 216 }],
+    stairs: { x: 2906, y: 232, width: 180 },
+    restroom: { x: 3556, width: 726, style: 'restroom', doorX: 3612, doorY: 210, doorWidth: 145, doorStyle: 'metal' },
+  };
+  const corridorWidth = BUILDING_CORE.width;
   const officeWidth = 2400;
   let worldWidth = officeWidth;
   let room = 'office'; // 'corridor' | 'office' (17층) | 'dynamic' (다른 층)
@@ -30,7 +38,7 @@
   const dynamicScene = document.getElementById('dynamic-scene');
   const cabin = document.getElementById('elevator-cabin');
   const computer = document.getElementById('computer');
-  const officeComputer = { type: 'computer', x: 896, y: 392, width: 88, element: document.getElementById('office-computer') };
+  const officeComputer = { type: 'computer', x: 612, y: 392, width: 88, element: document.getElementById('office-computer') };
   const computerWindow = document.getElementById('computer-window');
   const computerNote = document.getElementById('computer-note');
   const computerSaveStatus = document.getElementById('computer-save-status');
@@ -62,9 +70,11 @@
     width: `${officeWidth}px`, height: `${724 * floorY / 504}px`,
     left: '0px', top: '0px',
   });
+  // 복도 그림에서 사무실 유리벽은 x=32..1555이고 문은 그 왼쪽에서 39% 지점이다. 방 안 배경
+  // (office-interior-aligned.png)도 문을 같은 비율 위치에 두어, 문 양옆 공간과 켜진 책상의 방향이 복도에서 본 것과 같다.
   const officeDoors = [
     { name: '사무실', room: 'corridor', x: 580, y: 236, width: 128 },
-    { name: '복도', room: 'office', x: 68, y: 250, width: 144 },
+    { name: '복도', room: 'office', x: 895, y: 250, width: 144 },
   ];
   for (const door of officeDoors) {
     door.type = 'office';
@@ -86,10 +96,9 @@
     { name: '3번 엘리베이터', floor: 1, travelling: false, elapsed: 0, destination: null, rider: false, open: false, pendingDestId: null },
   ];
   const doors = [
-    { name: '1번 엘리베이터', type: 'elevator', carIndex: 0, x: 1818, y: 220, width: 218 },
-    { name: '2번 엘리베이터', type: 'elevator', carIndex: 1, x: 2148, y: 220, width: 214 },
-    { name: '3번 엘리베이터', type: 'elevator', carIndex: 2, x: 2444, y: 220, width: 216 },
-    { name: '비상계단', type: 'stairs', x: 2906, y: 232, width: 180 },
+    ...BUILDING_CORE.elevators.map((car, carIndex) => ({ name: elevatorCars[carIndex].name, type: 'elevator', carIndex,
+      x: car.x, y: BUILDING_CORE.elevatorY, width: car.width })),
+    { name: '비상계단', type: 'stairs', ...BUILDING_CORE.stairs },
   ];
   for (const door of doors) {
     door.element = document.createElement('div');
@@ -117,112 +126,179 @@
     }
   }
   // 방이 있는 층의 방 내부: 17층 사무실처럼 별도 장면(2400px)이며 왼쪽 문으로 복도에 돌아간다.
-  // 소품은 충돌 없이 배치하고 message가 있는 것만 조사할 수 있다. 크기/앵커는 floor-kit/manifest.json 기준.
-  const interiorRooms = (floor, rooms) => rooms.map(entry => ({ ...entry, floor, interior: true, parent: `f${floor}`,
-    label: entry.name, arrival: `${entry.name}에 들어왔습니다.`, header: `${floor}F · ${entry.name}`,
-    aria: `${floor}층 ${entry.name}`, width: 2400, background: '#151c20' }));
-  const lockedStairs = { x: 3420, message: '비상계단 문이 잠겨 있다. 정전 중에는 열리지 않는 것 같다.' };
-  // 16층 복도: 방 3개의 전면(유리벽 + 출입문), 엘리베이터 3대, 정전으로 잠긴 비상계단.
+  // 소품은 충돌 없이 배치하고 message가 있는 것만 조사할 수 있다. 원본 캔버스/앵커는 floor-kit/manifest.json 기준.
+  const floorId = floor => floor < 0 ? `b${-floor}` : `f${floor}`;
+  const floorName = floor => floor < 0 ? `지하 ${-floor}층` : `${floor}층`;
+  const interiorRooms = (floor, rooms) => rooms.map(entry => ({ ...entry, floor, interior: true, parent: floorId(floor),
+    label: entry.name, arrival: `${entry.name}에 들어왔습니다.`,
+    header: `${floor < 0 ? `B${-floor}` : `${floor}F`} · ${entry.name}`, aria: `${floorName(floor)} ${entry.name}`, width: 2400, background: '#151c20', ...entry }));
+  // 방은 복도 쪽 벽면 x..x+width를 차지한다. 방 안의 출구는 문 양옆 벽 길이의 비율을 복도에서 본 것과 같게 두어,
+  // 복도에서 문 옆에 방이 보이는 만큼 안에서도 같은 쪽에 공간이 있다. 출구 문 그림이 배경에 들어 있는 방은 exitX로
+  // 그 위치를 적고, 복도 쪽 문을 거기에 맞춘다. 방 안 폭도 층마다 복도 벽면 폭에 비례하게 잡는다.
+  function exitDoorX(outside, insideWidth, doorWidth) {
+    const left = outside.doorX - outside.x;
+    const right = outside.x + outside.width - outside.doorX - doorWidth;
+    return Math.round(32 + (insideWidth - 64 - doorWidth) * left / (left + right));
+  }
+  const lockedStairsMessage = '비상계단 문이 잠겨 있다. 정전 중에는 열리지 않는 것 같다.';
+  // 16층 경영지원팀: 청회색 유리벽. 코어 왼쪽에 사무실·소회의실, 오른쪽에 탕비실과 복도 휴게 공간.
+  // 방 내부 배경과 소품 배율은 assets/background/floor16/GENERATED.md. 복도 배경 그림은 예전 3700px 배치 기준이라
+  // 코어 좌표와 맞지 않아 쓰지 않는다(corridor.png는 재생성 필요). 세 방 배경은 모두 폭 2400에 왼쪽 끝 문(높이 210)이
+  // 그려져 있으므로 복도에서도 같은 폭의 방 왼쪽 끝에 같은 크기의 문을 둔다.
   const FLOOR16_LAYOUT = {
-    header: '16F · 경영지원팀', width: 3700, background: '#151c20', elevatorBank: 2620,
+    header: '16F · 경영지원팀', background: '#151c20', roomDoorY: 360,
     rooms: [
-      { name: '경영지원팀 사무실', x: 64, width: 836, target: 'f16-office', doorX: 740 },
-      { name: '소회의실', x: 940, width: 760, target: 'f16-meeting', doorX: 1540 },
-      { name: '탕비실', x: 1740, width: 760, target: 'f16-pantry', doorX: 2340 },
+      { name: '경영지원팀 사무실', x: 64, width: 820, target: 'f16-office', doorX: 75, doorWidth: 144, doorStyle: 'glass' },
+      { name: '소회의실', x: 924, width: 820, target: 'f16-meeting', doorX: 935, doorWidth: 144, doorStyle: 'glass' },
+      { name: '탕비실', x: 4322, width: 646, target: 'f16-pantry', doorX: 4333, doorWidth: 144 },
     ],
-    stairs: lockedStairs,
+    props: [
+      { file: 'waiting-sofa', size: [512, 256], worldWidth: 250, x: 3300, name: '복도 소파',
+        message: '소파 위에 누가 두고 간 사원증 줄이 있다. 카드는 빠져 있다.' },
+      { file: 'large-planter', size: [256, 512], worldWidth: 78, x: 3480 },
+      { file: 'large-planter', size: [256, 512], worldWidth: 78, x: 4900 },
+    ],
   };
   const FLOOR16_ROOMS = interiorRooms(16, [
-    { id: 'f16-office', name: '경영지원팀 사무실', props: [
-      { file: 'filing-cabinet', size: [256, 512], worldWidth: 140, x: 330, name: '문서 캐비닛',
+    { id: 'f16-office', name: '경영지원팀 사무실', background: '#05090b',
+      backgroundImage: { src: 'assets/background/floor16/office.png', height: 521.28, top: 207.12 }, exitX: 68, props: [
+      { file: 'filing-cabinet', size: [256, 512], worldWidth: 72, x: 330, name: '문서 캐비닛',
         message: '문서 캐비닛은 잠겨 있다. 열쇠 구멍 옆에 "재무 · 대외비" 라벨이 붙어 있다.' },
-      { file: 'filing-cabinet', size: [256, 512], worldWidth: 140, x: 480 },
-      { file: 'office-desk', size: [512, 256], worldWidth: 340, x: 740, name: '책상',
+      { file: 'filing-cabinet', size: [256, 512], worldWidth: 72, x: 480 },
+      { file: 'office-desk', size: [512, 256], worldWidth: 252, x: 740, name: '책상',
         message: '모니터가 꺼져 있다. 정전 때문에 PC를 켤 수 없다.' },
-      { file: 'office-desk', size: [512, 256], worldWidth: 340, x: 1110 },
-      { file: 'office-desk', size: [512, 256], worldWidth: 340, x: 1480 },
-      { file: 'office-desk', size: [512, 256], worldWidth: 340, x: 1850 },
-      { file: 'office-copier', size: [256, 256], worldWidth: 140, x: 2110, name: '복합기',
+      { file: 'office-desk', size: [512, 256], worldWidth: 252, x: 1110 },
+      { file: 'office-desk', size: [512, 256], worldWidth: 252, x: 1480 },
+      { file: 'office-desk', size: [512, 256], worldWidth: 252, x: 1850 },
+      { file: 'office-copier', size: [256, 256], worldWidth: 110, x: 2110, name: '복합기',
         message: '출력하다 멈춘 종이가 걸려 있다. "야간 전력 사용 내역 · B2 서버실 · 전월 대비 3…" 뒷부분은 인쇄되지 않았다.' },
-      { file: 'large-planter', size: [256, 512], worldWidth: 130, x: 2290 },
+      { file: 'large-planter', size: [256, 512], worldWidth: 78, x: 2290 },
     ] },
-    { id: 'f16-meeting', name: '소회의실', props: [
-      { file: 'large-planter', size: [256, 512], worldWidth: 130, x: 320 },
-      { file: 'rolling-whiteboard', size: [512, 256], worldWidth: 260, x: 580, name: '화이트보드',
+    { id: 'f16-meeting', name: '소회의실', background: '#05090b',
+      backgroundImage: { src: 'assets/background/floor16/meeting.png', height: 521.28, top: 207.12 }, exitX: 68, props: [
+      { file: 'large-planter', size: [256, 512], worldWidth: 78, x: 320 },
+      { file: 'rolling-whiteboard', size: [512, 256], worldWidth: 350, x: 580, name: '화이트보드',
         message: '회의 메모: "12층 ARCHI팀 전력 예산 또 초과. 사용량 대부분이 새벽 시간대 B2. 시설관리실 확인 요청."' },
-      { file: 'meeting-table', size: [512, 256], worldWidth: 400, x: 1120 },
-      { file: 'waiting-sofa', size: [512, 256], worldWidth: 300, x: 1720 },
-      { file: 'large-planter', size: [256, 512], worldWidth: 130, x: 2000 },
-      { file: 'water-cooler', size: [256, 512], worldWidth: 105, x: 2250 },
+      { file: 'meeting-table', size: [512, 256], worldWidth: 356, x: 1120 },
+      { file: 'waiting-sofa', size: [512, 256], worldWidth: 250, x: 1720 },
+      { file: 'large-planter', size: [256, 512], worldWidth: 78, x: 2000 },
+      { file: 'water-cooler', size: [256, 512], worldWidth: 62, x: 2250 },
     ] },
-    { id: 'f16-pantry', name: '탕비실', props: [
-      { file: 'water-cooler', size: [256, 512], worldWidth: 105, x: 330 },
-      { file: 'kitchenette-counter', size: [512, 256], worldWidth: 360, x: 620 },
-      { file: 'drink-vending-machine', size: [256, 512], worldWidth: 180, x: 960, name: '음료 자판기',
+    { id: 'f16-pantry', name: '탕비실', background: '#05090b', width: 1890,
+      backgroundImage: { src: 'assets/background/floor16/pantry.png', width: 2400, height: 521.28, top: 207.12 }, exitX: 68, props: [
+      { file: 'water-cooler', size: [256, 512], worldWidth: 62, x: 330 },
+      { file: 'kitchenette-counter', size: [512, 256], worldWidth: 312, x: 620 },
+      { file: 'drink-vending-machine', size: [256, 512], worldWidth: 96, x: 960, name: '음료 자판기',
         message: '자판기 불이 꺼져 있다. 이 층에도 전기가 들어오지 않는다.' },
-      { file: 'drink-vending-machine', size: [256, 512], worldWidth: 180, x: 1160 },
-      { file: 'staff-lockers', size: [256, 512], worldWidth: 230, x: 1500 },
-      { file: 'waiting-sofa', size: [512, 256], worldWidth: 300, x: 1950 },
-      { file: 'large-planter', size: [256, 512], worldWidth: 130, x: 2270 },
+      { file: 'drink-vending-machine', size: [256, 512], worldWidth: 96, x: 1160 },
+      { file: 'staff-lockers', size: [256, 512], worldWidth: 130, x: 1500 },
+      { file: 'waiting-sofa', size: [512, 256], worldWidth: 250, x: 1720 },
     ] },
   ]);
-  // 15층 인사총무팀: 16층과 같은 복도 구조. 단서는 ARCHI가 수호의 사원증 권한을 바꿨다는 복선(1층 경비 로봇 사건).
+  // 15층 인사총무팀: 목재 마감(warm 테마). 코어 왼쪽에 창 없는 문서 보관실·인사팀 사무실, 오른쪽에 방문객 대기실과
+  // 자판기 코너. 방마다 벽·문 모양과 내부 폭이 다르고, 보관실은 어두워 상자를 넘어가야 한다.
+  // 단서는 ARCHI가 수호의 사원증 권한을 바꿨다는 복선(1층 경비 로봇 사건)이다.
+  // 복도 벽면 폭은 방 안 폭(2600/3000/1800)의 1/3.33로 맞췄다. 보관실은 왼쪽 끝, 인사팀과 대기실은 오른쪽 끝에 문이 있다.
   const FLOOR15_LAYOUT = {
-    header: '15F · 인사총무팀', width: 3700, background: '#151c20', elevatorBank: 2620,
+    header: '15F · 인사총무팀', background: '#1d1814', theme: 'warm',
     rooms: [
-      { name: '인사팀 사무실', x: 64, width: 836, target: 'f15-hr', doorX: 740 },
-      { name: '방문객 대기실', x: 940, width: 760, target: 'f15-lounge', doorX: 1540 },
-      { name: '문서 보관실', x: 1740, width: 760, target: 'f15-archive', doorX: 2340 },
+      { name: '문서 보관실', x: 64, width: 780, style: 'solid-wall', target: 'f15-archive',
+        doorX: 76, doorStyle: 'metal' },
+      { name: '인사팀 사무실', x: 884, width: 900, style: 'panel', target: 'f15-hr', doorX: 1644, doorStyle: 'wood' },
+      { name: '방문객 대기실', x: 4322, width: 540, style: 'open', target: 'f15-lounge',
+        doorX: 4634, doorWidth: 220, doorStyle: 'double' },
     ],
-    stairs: lockedStairs,
+    props: [
+      { file: 'drink-vending-machine', size: [256, 512], worldWidth: 180, x: 3240, name: '음료 자판기',
+        message: '자판기 유리에 붙은 쪽지: "15층 자판기 고장 신고 · 인사총무팀". 정전이라 어차피 작동하지 않는다.' },
+      { file: 'water-cooler', size: [256, 512], worldWidth: 105, x: 3385 },
+      { file: 'large-planter', size: [256, 512], worldWidth: 120, x: 3494 },
+    ],
   };
   const FLOOR15_ROOMS = interiorRooms(15, [
-    { id: 'f15-hr', name: '인사팀 사무실', props: [
-      { file: 'filing-cabinet', size: [256, 512], worldWidth: 140, x: 330 },
-      { file: 'filing-cabinet', size: [256, 512], worldWidth: 140, x: 480 },
-      { file: 'office-desk', size: [512, 256], worldWidth: 340, x: 740, name: '책상',
+    { id: 'f15-hr', name: '인사팀 사무실', width: 3000, props: [
+      { file: 'large-planter', size: [256, 512], worldWidth: 130, x: 150 },
+      { file: 'office-desk', size: [512, 256], worldWidth: 340, x: 500 },
+      { file: 'office-desk', size: [512, 256], worldWidth: 340, x: 870, name: '책상',
         message: '출력된 종이 한 장: "금일 야간 잔류 인원 · 17층 정수호 (1명) · 출력 23:41". 누가 출력했는지는 적혀 있지 않다.' },
-      { file: 'office-desk', size: [512, 256], worldWidth: 340, x: 1110 },
-      { file: 'office-desk', size: [512, 256], worldWidth: 340, x: 1480 },
-      { file: 'rolling-whiteboard', size: [512, 256], worldWidth: 260, x: 1850, name: '화이트보드',
+      { file: 'office-desk', size: [512, 256], worldWidth: 340, x: 1240 },
+      { file: 'filing-cabinet', size: [256, 512], worldWidth: 140, x: 1500 },
+      { file: 'filing-cabinet', size: [256, 512], worldWidth: 140, x: 1650 },
+      { file: 'rolling-whiteboard', size: [512, 256], worldWidth: 260, x: 1950, name: '화이트보드',
         message: '이번 주 할 일: "사원증 출입 권한 일괄 점검. 보안 로봇 인식 DB 동기화는 ARCHI 시스템이 자동 처리."' },
-      { file: 'office-copier', size: [256, 256], worldWidth: 140, x: 2110 },
-      { file: 'large-planter', size: [256, 512], worldWidth: 130, x: 2290 },
+      { file: 'office-desk', size: [512, 256], worldWidth: 340, x: 2300 },
+      { file: 'office-copier', size: [256, 256], worldWidth: 140, x: 2600 },
     ] },
-    { id: 'f15-lounge', name: '방문객 대기실', props: [
-      { file: 'reception-counter', size: [512, 256], worldWidth: 400, x: 520, name: '안내 데스크',
-        message: '방문 기록 태블릿이 꺼져 있다. 정전 때문에 켤 수 없다.' },
-      { file: 'waiting-sofa', size: [512, 256], worldWidth: 300, x: 1000 },
-      { file: 'waiting-sofa', size: [512, 256], worldWidth: 300, x: 1400 },
-      { file: 'large-planter', size: [256, 512], worldWidth: 130, x: 1700 },
-      { file: 'water-cooler', size: [256, 512], worldWidth: 105, x: 1900 },
-      { file: 'drink-vending-machine', size: [256, 512], worldWidth: 180, x: 2200 },
+    { id: 'f15-lounge', name: '방문객 대기실', width: 1800, props: [
+      { file: 'large-planter', size: [256, 512], worldWidth: 130, x: 150 },
+      { file: 'waiting-sofa', size: [512, 256], worldWidth: 300, x: 420 },
+      { file: 'water-cooler', size: [256, 512], worldWidth: 105, x: 680 },
+      { file: 'reception-counter', size: [512, 256], worldWidth: 400, x: 1100, name: '안내 데스크',
+        message: '방문 기록 태블릿이 꺼져 있다. 옆의 방문증 보관함은 비어 있고, 오늘 방문객은 없었다.' },
+      { file: 'large-planter', size: [256, 512], worldWidth: 130, x: 1400 },
     ] },
-    { id: 'f15-archive', name: '문서 보관실', props: [
-      { file: 'filing-cabinet', size: [256, 512], worldWidth: 140, x: 330 },
-      { file: 'filing-cabinet', size: [256, 512], worldWidth: 140, x: 480 },
-      { file: 'filing-cabinet', size: [256, 512], worldWidth: 140, x: 630, name: '출입 기록 캐비닛',
-        message: '캐비닛 위에 정전 직전 자동 출력된 통보서가 놓여 있다: "23:58 · 정수호 · 직원 → 미확인 인물 · 변경자: SYSTEM". 방금 전 시각이다.' },
-      { file: 'filing-cabinet', size: [256, 512], worldWidth: 140, x: 780 },
-      { file: 'staff-lockers', size: [256, 512], worldWidth: 230, x: 1100 },
-      { file: 'maintenance-tool-cabinet', size: [512, 256], worldWidth: 200, x: 1450 },
-      { file: 'glass-display-cabinet', size: [256, 512], worldWidth: 200, x: 1800 },
-      { file: 'large-planter', size: [256, 512], worldWidth: 130, x: 2250 },
-    ] },
+    { id: 'f15-archive', name: '문서 보관실', width: 2600, dark: true, windowless: true,
+      solids: [{ x: 900, width: 110, height: 50 }, { x: 1560, width: 90, height: 60 }], props: [
+        { file: 'filing-cabinet', size: [256, 512], worldWidth: 140, x: 330 },
+        { file: 'filing-cabinet', size: [256, 512], worldWidth: 140, x: 480, name: '문서 캐비닛',
+          message: '"퇴사자 인사기록" 서랍이다. 잠겨 있다.' },
+        { file: 'filing-cabinet', size: [256, 512], worldWidth: 140, x: 630 },
+        { file: 'filing-cabinet', size: [256, 512], worldWidth: 140, x: 780 },
+        { file: 'staff-lockers', size: [256, 512], worldWidth: 230, x: 1250 },
+        { file: 'filing-cabinet', size: [256, 512], worldWidth: 140, x: 1800 },
+        { file: 'filing-cabinet', size: [256, 512], worldWidth: 140, x: 1950, name: '출입 기록 캐비닛',
+          message: '캐비닛 위에 정전 직전 자동 출력된 통보서가 놓여 있다: "23:58 · 정수호 · 직원 → 미확인 인물 · 변경자: SYSTEM". 방금 전 시각이다.' },
+        { file: 'glass-display-cabinet', size: [256, 512], worldWidth: 200, x: 2150 },
+        { file: 'maintenance-tool-cabinet', size: [512, 256], worldWidth: 200, x: 2450 },
+      ] },
   ]);
   const FLOOR_LAYOUTS = { 15: FLOOR15_LAYOUT, 16: FLOOR16_LAYOUT };
+  // 화장실 내부는 건물 공통 구조라 모든 층이 17층 화장실 배경을 함께 쓴다.
+  const restroomInterior = { name: '화장실', width: 1800, windowless: true,
+    backgroundImage: { src: 'assets/background/floor17/restroom.png', height: 824.84, top: 0 } };
   // Additional floors share an empty layout until their content is authored.
-  const FLOOR17 = { id: 'f17', floor: 17, short: '17F', label: '17층 · 복도', header: '17F · 00:00', aria: '17층 복도' };
-  const FLOORS = [-2, -1, ...Array.from({ length: 16 }, (_, index) => index + 1)].map(floor => {
+  // 복도 벽면 범위는 service-corridor.png의 벽기둥 중심(x=3556, 4282)과 끝벽(4968) 기준이다.
+  const FLOOR17 = { id: 'f17', floor: 17, short: '17F', label: '17층 · 복도', header: '17F · 00:00', aria: '17층 복도', roomDoorY: 210, rooms: [
+    { name: '화장실', target: 'f17-restroom', ...BUILDING_CORE.restroom },
+    { name: '관리자 외 출입금지', target: 'f17-manager', x: 4282, width: 686,
+      doorX: 4378, doorWidth: 171, doorStyle: 'metal', locked: true,
+      message: '관리자실 문이 잠겨 있다. 관리자 외 출입금지 표지와 붉은 출입 표시등이 보인다.' },
+  ] };
+  const FLOOR17_ROOMS = interiorRooms(17, [
+    { id: 'f17-restroom', ...restroomInterior },
+    { id: 'f17-manager', name: '관리자실', width: 1800, windowless: true, props: [
+      { file: 'electrical-panel', size: [256, 512], worldWidth: 160, x: 170 },
+      { file: 'office-desk', size: [512, 256], worldWidth: 400, x: 800 },
+      { file: 'filing-cabinet', size: [256, 512], worldWidth: 150, x: 1180 },
+      { file: 'maintenance-tool-cabinet', size: [512, 256], worldWidth: 300, x: 1540 },
+    ] },
+  ]);
+  const FLOOR_NUMBERS = [-2, -1, ...Array.from({ length: 16 }, (_, index) => index + 1)];
+  const FLOORS = FLOOR_NUMBERS.map(floor => {
     const short = floor < 0 ? `B${-floor}` : `${floor}F`;
-    const label = floor < 0 ? `지하 ${-floor}층` : `${floor}층`;
-    return { id: floor < 0 ? `b${-floor}` : `f${floor}`, floor, short, label,
-      header: `${short} · 빈 층`, aria: label, width: 2400, background: '#252b2a', elevatorBank: 1000,
-      ...FLOOR_LAYOUTS[floor] };
+    const layout = FLOOR_LAYOUTS[floor] || {};
+    return { id: floorId(floor), floor, short, label: floorName(floor),
+      header: `${short} · 빈 층`, aria: floorName(floor), background: '#252b2a', ...layout,
+      rooms: [...(layout.rooms || []), { name: '화장실', target: `${floorId(floor)}-restroom`, ...BUILDING_CORE.restroom }],
+      width: BUILDING_CORE.width };
   });
+  const RESTROOMS = FLOOR_NUMBERS.flatMap(floor => interiorRooms(floor, [{ id: `${floorId(floor)}-restroom`, ...restroomInterior }]));
   const ALL_FLOORS = [FLOOR17, ...FLOORS];
   const ROOFTOP = { id: 'rooftop', floor: 18, label: '옥상', header: 'RF · 옥상', aria: '옥상', width: 2400, background: '#11191d' };
-  const floorById = new Map([...ALL_FLOORS, ROOFTOP, ...FLOOR15_ROOMS, ...FLOOR16_ROOMS].map(entry => [entry.id, entry]));
+  const floorById = new Map([...ALL_FLOORS, ROOFTOP, ...FLOOR15_ROOMS, ...FLOOR16_ROOMS, ...FLOOR17_ROOMS, ...RESTROOMS].map(entry => [entry.id, entry]));
+  const extension = document.getElementById('floor17-extension');
+  for (const entry of FLOOR17.rooms) {
+    const door = addRoomDoor({ name: entry.name, type: 'room', hint: `E · ${entry.name} 들어가기`,
+      target: entry.target, arrivalKey: 'exit', key: `room:${entry.target}`, locked: entry.locked, message: entry.message,
+      x: entry.doorX, y: entry.doorY ?? FLOOR17.roomDoorY, width: entry.doorWidth, style: 'art-door' }, extension);
+    const sign = document.createElement('span');
+    sign.className = 'floor-room-sign';
+    sign.textContent = entry.name;
+    door.element.append(sign);
+    doors.push(door);
+  }
+  doors.push({ name: '소화전', type: 'inspect', x: 4023, y: 248, width: 145,
+    element: document.getElementById('floor17-hydrant'), message: '소화전 안에 호스와 관창이 정리되어 있다. 옆에는 소화기가 비치되어 있다.' });
   const rooftopBackground = new Image();
   rooftopBackground.src = 'assets/background/rooftop/rooftop.png';
   rooftopBackground.alt = '';
@@ -252,7 +328,7 @@
   world.style.height = `${worldHeight}px`;
   const background = document.getElementById('background');
   for (let row = 0; row < Math.ceil(worldHeight / 256); row++) {
-    for (let col = 0; col < Math.ceil(corridorWidth / 256); col++) {
+    for (let col = 0; col < Math.ceil(3200 / 256); col++) {
       const tile = new Image(256, 256);
       tile.src = `assets/background/floor17/tiles/${row}-${col}.png`;
       tile.alt = '';
@@ -279,7 +355,7 @@
     return Bodies.rectangle(x + width / 2, y + height / 2, width, height, { isStatic: true });
   });
   // Start in front of the lit monitor in the office background.
-  const body = Bodies.rectangle(940, floorY - 81, 40, 162, {
+  const body = Bodies.rectangle(officeComputer.x + officeComputer.width / 2, floorY - 81, 40, 162, {
     inertia: Infinity, friction: 0, frictionStatic: 0, frictionAir: 0, restitution: 0,
   });
   const officeSolids = [
@@ -466,7 +542,7 @@
     worldWidth = entering ? officeWidth : corridorWidth;
     world.dataset.room = room;
     world.style.width = `${worldWidth}px`;
-    Body.setPosition(body, { x: entering ? 160 : returnX, y: floorY - 81 });
+    Body.setPosition(body, { x: entering ? officeDoors[1].x + 91 : returnX, y: floorY - 81 });
     Body.setVelocity(body, { x: 0, y: 0 });
     grounded = true;
     interactionTime = 420;
@@ -480,14 +556,38 @@
     render();
   }
 
+  function addRoomDoor(door, parent = dynamicScene) {
+    door.element = document.createElement('div');
+    door.element.className = `room-door ${door.style || ''}`.trim();
+    door.element.setAttribute('role', 'img');
+    door.element.setAttribute('aria-label', `${door.name} 출입문${door.locked ? ' · 잠김' : ''}`);
+    Object.assign(door.element.style, {
+      left: `${door.x}px`, top: `${door.y}px`, width: `${door.width}px`, height: `${floorY - door.y}px`,
+    });
+    parent.append(door.element);
+    return door;
+  }
+
   function buildDynamicScene(config) {
     const bodies = [];
     const doorList = [];
+    dynamicScene.dataset.art = String(Boolean(config.backgroundImage));
+    if (config.backgroundImage) {
+      const art = config.backgroundImage;
+      const image = new Image();
+      image.className = 'floor-background';
+      image.src = art.src;
+      image.alt = '';
+      image.draggable = false;
+      Object.assign(image.style, { width: `${art.width ?? config.width}px`, height: `${art.height}px`, top: `${art.top}px` });
+      dynamicScene.append(image);
+    }
     if (config.id === 'rooftop') dynamicScene.append(rooftopBackground);
     const layout = [
       { kind: 'floor', x: 0, y: floorY, width: config.width, height: 150 },
       { kind: 'boundary', x: 0, y: 0, width: 32, height: worldHeight },
       { kind: 'boundary', x: config.width - 32, y: 0, width: 32, height: worldHeight },
+      ...(config.solids || []).map(({ x, width, height }) => ({ kind: 'crate', x, y: floorY - height, width, height })),
     ];
     for (const { kind, x, y, width, height } of layout) {
       const element = document.createElement('div');
@@ -511,42 +611,39 @@
       supply.append(image);
       dynamicScene.append(supply);
     }
-    const addRoomDoor = door => {
-      door.element = document.createElement('div');
-      door.element.className = 'room-door';
-      door.element.setAttribute('role', 'img');
-      door.element.setAttribute('aria-label', `${door.name} 출입문`);
-      Object.assign(door.element.style, {
-        left: `${door.x}px`, top: `${door.y}px`, width: `${door.width}px`, height: `${floorY - door.y}px`,
-      });
-      dynamicScene.append(door.element);
-      doorList.push(door);
-    };
     if (config.interior) {
       const backdrop = document.createElement('div');
-      backdrop.className = 'room-interior';
+      backdrop.className = `room-interior${config.windowless ? ' windowless' : ''}`;
       dynamicScene.append(backdrop);
-      addRoomDoor({ name: '복도', type: 'room', hint: 'E · 복도로 나가기', target: config.parent,
-        arrivalKey: `room:${config.id}`, key: 'exit', x: 68, y: 250, width: 144 });
+      // 출구는 복도에서 들어온 그 문이다: 크기와 모양이 같고, 위치는 문 양옆 벽 비율을 따른다.
+      const parent = floorById.get(config.parent);
+      const outside = parent.rooms.find(entry => entry.target === config.id);
+      const doorWidth = outside.doorWidth ?? 120;
+      doorList.push(addRoomDoor({ name: '복도', type: 'room', hint: 'E · 복도로 나가기', target: config.parent,
+        arrivalKey: `room:${config.id}`, key: 'exit', x: config.exitX ?? exitDoorX(outside, config.width, doorWidth),
+        y: outside.doorY ?? parent.roomDoorY ?? 250, width: doorWidth, style: outside.doorStyle }));
     }
     for (const roomConfig of config.rooms || []) {
       const roomElement = document.createElement('div');
-      roomElement.className = 'floor-room';
+      roomElement.className = `floor-room ${roomConfig.style || 'glass'}`;
       Object.assign(roomElement.style, { left: `${roomConfig.x}px`, width: `${roomConfig.width}px` });
       const sign = document.createElement('span');
       sign.className = 'floor-room-sign';
       sign.textContent = roomConfig.name;
       roomElement.append(sign);
       dynamicScene.append(roomElement);
-      addRoomDoor({ name: roomConfig.name, type: 'room', hint: `E · ${roomConfig.name} 들어가기`,
+      doorList.push(addRoomDoor({ name: roomConfig.name, type: 'room', hint: `E · ${roomConfig.name} 들어가기`,
+        locked: roomConfig.locked, message: roomConfig.message,
         target: roomConfig.target, arrivalKey: 'exit', key: `room:${roomConfig.target}`,
-        x: roomConfig.doorX, y: 250, width: 120 });
+        x: roomConfig.doorX, y: roomConfig.doorY ?? config.roomDoorY ?? 250, width: roomConfig.doorWidth ?? 120,
+        style: roomConfig.doorStyle }));
     }
-    if (config.rooms) {
+    const isFloor = config.id !== 'rooftop' && !config.interior;
+    if (isFloor) {
       const floorSign = document.createElement('div');
       floorSign.className = 'floor-number-sign';
       floorSign.textContent = floorShortLabel(config.floor);
-      floorSign.style.left = `${config.elevatorBank - 110}px`;
+      floorSign.style.left = `${BUILDING_CORE.floorSignX}px`;
       dynamicScene.append(floorSign);
     }
     for (const prop of config.props || []) {
@@ -571,13 +668,12 @@
         x: prop.x - prop.worldWidth / 2, y: floorY - (height - 8) * scale, width: prop.worldWidth });
     }
     const sceneDoors = config.id === 'rooftop' ?
-      [{ name: '17층 계단', type: 'stairs', x: 160, y: 232, width: 180 }] : config.interior ? [] :
-      elevatorCars.map((car, carIndex) => ({ name: car.name, type: 'elevator', carIndex,
-        x: config.elevatorBank + carIndex * 260, y: 220, width: 200 }));
-    if (config.stairs) {
-      sceneDoors.push({ name: '비상계단', type: 'stairs', locked: true, message: config.stairs.message,
-        x: config.stairs.x, y: 232, width: 180 });
-    }
+      [{ name: '17층 계단', type: 'stairs', x: 160, y: 232, width: 180 }] : !isFloor ? [] : [
+        ...BUILDING_CORE.elevators.map((car, carIndex) => ({ name: elevatorCars[carIndex].name, type: 'elevator', carIndex,
+          x: car.x, y: BUILDING_CORE.elevatorY, width: car.width })),
+        { name: '비상계단', type: 'stairs', locked: true, message: lockedStairsMessage, ...BUILDING_CORE.stairs },
+      ];
+    const coreDoors = [];
     sceneDoors.forEach(door => {
       door.element = document.createElement('div');
       door.element.className = 'door';
@@ -601,9 +697,11 @@
         door.indicator.style.top = `${door.y - 32}px`;
         dynamicScene.append(door.indicator);
       }
-      doorList.push(door);
+      coreDoors.push(door);
     });
-    return { bodies, doors: doorList };
+    // Core doors come first: interaction picks the first match, so the fixed elevators and stairs behave
+    // identically on every floor even where a floor's own door or prop hint zone touches theirs.
+    return { bodies, doors: [...coreDoors, ...doorList] };
   }
 
   function performFloorChange(destId, carIndex = 0, arrivalKey = null) {
@@ -611,6 +709,7 @@
     dynamicScene.innerHTML = '';
     const dest = floorById.get(destId);
     currentSceneFloor = dest.floor;
+    world.dataset.floor = String(currentSceneFloor);
     lightSwitch.hidden = currentSceneFloor !== 17;
     if (destId === 'f17') {
       room = 'corridor';
@@ -625,6 +724,7 @@
       world.dataset.room = 'dynamic';
       worldWidth = dest.width;
       dynamicScene.style.background = dest.background;
+      dynamicScene.dataset.theme = dest.theme || (dest.parent && floorById.get(dest.parent).theme) || '';
       const built = buildDynamicScene(dest);
       currentTerrain = built.bodies;
       currentDoors = built.doors;
@@ -638,7 +738,8 @@
     Body.setVelocity(body, { x: 0, y: 0 });
     grounded = true;
     interactionTime = 420;
-    facing = dest.interior ? 1 : -1;
+    facing = dest.interior && arrivalDoor.x < worldWidth / 2 ? 1 : -1;
+    world.dataset.dark = String(Boolean(dest.dark));
     animate(0);
     cameraX = cameraTarget();
     stage.setAttribute('aria-label', `ARCHI ${dest.aria} 사이드뷰 스테이지`);
@@ -729,8 +830,8 @@
   function doorHintText(door) {
     if (door.type === 'computer') return 'E · 컴퓨터 사용';
     if (door.type === 'inspect') return `E · ${door.name} 조사`;
+    if (door.locked) return `E · ${door.name} (잠김)`;
     if (door.type === 'room') return door.hint;
-    if (door.locked) return 'E · 비상계단 (잠김)';
     if (door.type === 'stairs') return currentSceneFloor === 18 ? 'E · 17층으로 내려가기' : 'E · 옥상으로 올라가기';
     if (door.type === 'panel') return 'E · 조사';
     if (door.type === 'elevator') {

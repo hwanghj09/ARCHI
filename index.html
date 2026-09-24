@@ -12,7 +12,7 @@
       #stage { position: relative; width: 100%; height: 100dvh; overflow: hidden; touch-action: none; }
       #world { position: absolute; transform-origin: top left; background: #151f25; }
       #darkness { display: none; position: absolute; inset: 0; z-index: 1; pointer-events: none; background: radial-gradient(circle at var(--sight-x, 640px) var(--sight-y, 489px), #0000000d 0 90px, #000000e6 160px, #000 210px); }
-      #world[data-lights="off"]:is([data-room="office"], [data-room="corridor"]) #darkness { display: block; }
+      #world[data-lights="off"][data-floor="17"] #darkness { display: block; }
       #background { position: absolute; inset: 0; overflow: hidden; pointer-events: none; user-select: none; }
       #background img { position: absolute; width: 256px; height: 256px; image-rendering: pixelated; }
       #office-background { display: none; position: absolute; pointer-events: none; user-select: none; image-rendering: pixelated; }
@@ -36,9 +36,46 @@
       .room-interior::after { content: ''; position: absolute; top: 44px; left: 0; right: 0; height: 10px; background: repeating-linear-gradient(90deg, transparent 0 180px, #3c4a50 180px 300px); }
       .room-door { position: absolute; pointer-events: none; border: 6px solid #3a4a50; border-bottom: 0; background: linear-gradient(90deg, transparent 78%, #6d7f86 78% 82%, transparent 82%), linear-gradient(#22343c, #16242a); box-shadow: inset 0 0 0 4px #121b1f; }
       .room-door.near { outline: 2px solid #96b7aa; }
+      #floor17-extension { position: absolute; inset: 0; display: none; pointer-events: none; }
+      #world[data-room="corridor"] #floor17-extension { display: block; }
+      #floor17-extension > img { position: absolute; left: 3200px; top: 0; width: 1800px; height: 785.39px; image-rendering: pixelated; }
+      #floor17-extension .art-door { border: 0; background: none; box-shadow: none; }
+      #floor17-hydrant { position: absolute; left: 4023px; top: 248px; width: 145px; height: 220px; }
+      #floor17-hydrant.near { outline: 2px solid #96b7aa; }
+      #dynamic-scene[data-art="true"] .room-door.metal { border: 6px solid #555f66; border-bottom: 0; background: linear-gradient(90deg, #303a40 78%, #8e989e 78% 82%, #303a40 82%); }
+      #world[data-dark="true"][data-room="dynamic"] #darkness { display: block; }
+      .crate { background: linear-gradient(90deg, transparent 44%, #b89a6a 44% 56%, transparent 56%), #6b5238; border: 4px solid #8a6b4a; box-shadow: inset 0 0 0 3px #4d3a28; }
+      #dynamic-scene[data-theme="warm"] > .floor { background: #211a15; border-top-color: #6d5a48; }
+      #dynamic-scene[data-theme="warm"] .floor-room { border-color: #4a3b30; background: linear-gradient(#2a211b, #1f1813); }
+      #dynamic-scene[data-theme="warm"] .floor-room-sign { border-color: #6b5341; background: #19120e; color: #d6c3a6; }
+      #dynamic-scene[data-theme="warm"] .floor-number-sign { border-color: #6b5341; background: #19120e; color: #e2d2b8; }
+      #dynamic-scene .floor-room.solid-wall { background: repeating-linear-gradient(90deg, #2c241e 0 118px, #231c17 118px 122px); }
+      #dynamic-scene .floor-room.solid-wall::before { display: none; }
+      #dynamic-scene .floor-room.restroom { background: linear-gradient(transparent 55%, #2c3a3f 55% 56%, transparent 56%), repeating-linear-gradient(90deg, #1d2a2e 0 46px, #172226 46px 48px), repeating-linear-gradient(#1d2a2e 0 46px, #172226 46px 48px); background-blend-mode: normal, multiply, normal; }
+      #dynamic-scene .floor-room.restroom::before { display: none; }
+      #dynamic-scene .floor-room.panel { background: linear-gradient(transparent 62%, #3a2b20 62% 63%, transparent 63%), repeating-linear-gradient(90deg, #35281f 0 150px, #2b2019 150px 154px); }
+      #dynamic-scene .floor-room.panel::before { top: 40px; left: 60px; right: 60px; height: 110px; border-color: #5a4636; }
+      #dynamic-scene .floor-room.open { background: linear-gradient(#2f251d, #231b15); }
+      #dynamic-scene .floor-room.open::before { top: 30px; left: 40px; right: 40px; height: 230px; border-color: #5a4636; }
+      .room-door.wood { border-color: #6b5341; background: linear-gradient(90deg, transparent 80%, #b59a6a 80% 84%, transparent 84%), repeating-linear-gradient(#4a3526 0 40px, #3f2d20 40px 44px); box-shadow: inset 0 0 0 4px #2a1d14; }
+      .room-door.metal { border-color: #555f66; background: linear-gradient(transparent 10%, #1b2124 10% 20%, transparent 20%), linear-gradient(90deg, transparent 80%, #8e989e 80% 84%, transparent 84%), linear-gradient(#3a4146, #2a3034); box-shadow: inset 0 0 0 4px #20262a; }
+      .room-door.glass { border-color: #45565c; background: linear-gradient(90deg, transparent 74%, #a3b6bc 74% 77%, transparent 77%), linear-gradient(105deg, #2a4350 0 28%, #182b35 28%); box-shadow: inset 0 0 0 4px #121b1f; }
+      .room-door.double { border-color: #6b5341; background: linear-gradient(90deg, transparent 47%, #6b5341 47% 53%, transparent 53%), linear-gradient(#2a3a3e, #1c2629); box-shadow: inset 0 0 0 4px #2a1d14; }
+      #dynamic-scene[data-theme="warm"] .room-interior { background: linear-gradient(#150f0c 0 44px, #3a2d24 44px 50px, #2a211b 50px 420px, #33271f 420px 424px, #241b15 424px); }
+      #dynamic-scene[data-theme="warm"] .room-interior::before { border-color: #5a4636; }
+      .room-interior.windowless { background: linear-gradient(#0c0a09 0 44px, #26221e 44px 50px, transparent 50px), repeating-linear-gradient(90deg, #1c1916 0 200px, #151210 200px 206px) !important; }
+      .room-interior.windowless::before { display: none; }
       .floor-prop { position: absolute; pointer-events: none; image-rendering: pixelated; }
       .floor-prop img { display: block; width: 100%; height: 100%; }
       .floor-prop.near { outline: 2px solid #96b7aa; }
+      .floor-background { position: absolute; left: 0; pointer-events: none; user-select: none; image-rendering: pixelated; }
+      #dynamic-scene[data-art="true"] > .solid:not(.crate),
+      #dynamic-scene[data-art="true"] .room-interior { visibility: hidden; }
+      #dynamic-scene[data-art="true"] .floor-room { top: 300px; height: 270px; border: 0; background: none; }
+      #dynamic-scene[data-art="true"] .floor-room::before { content: none; }
+      #dynamic-scene[data-art="true"] .room-door { border: 0; background: none; box-shadow: none; }
+      #dynamic-scene[data-art="true"] .floor-number-sign { top: 282px; }
+      #dynamic-scene[data-art="true"] .floor-prop img { filter: brightness(.68) saturate(.8); }
       #world[data-room="dynamic"] #dynamic-scene { display: block; }
       #world[data-room="dynamic"] #background,
       #world[data-room="dynamic"] #office-background,
@@ -114,10 +151,14 @@
   </head>
   <body>
     <main id="stage" tabindex="-1" aria-label="ARCHI 17층 사무실 사이드뷰 스테이지">
-      <div id="world" data-room="office" data-lights="on">
+      <div id="world" data-room="office" data-floor="17" data-lights="on">
         <div id="darkness" aria-hidden="true"></div>
         <div id="background" aria-hidden="true"></div>
-        <img id="office-background" src="assets/background/floor17/office-interior.png" alt="" width="2172" height="724" draggable="false" />
+        <div id="floor17-extension">
+          <img src="assets/background/floor17/service-corridor.png" alt="" draggable="false" />
+          <div id="floor17-hydrant" role="img" aria-label="소화전과 소화기"></div>
+        </div>
+        <img id="office-background" src="assets/background/floor17/office-interior-aligned.png" alt="" width="2196" height="724" draggable="false" />
         <div id="office-computer" role="img" aria-label="켜진 컴퓨터"></div>
         <div id="dynamic-scene" aria-hidden="true"></div>
         <div id="interaction-hint" hidden></div>

@@ -42,7 +42,7 @@ try {
   };
   const tiles = page.locator('#background img');
   await tiles.evaluateAll(images => Promise.all(images.map(image => image.decode())));
-  assert.equal(await tiles.count(), 39, 'The 3200x720 stage must be covered by 13x3 tiles');
+  assert.equal(await tiles.count(), 39, 'The original corridor retains its 13x3 tiles; the extension has separate art');
   assert(await tiles.evaluateAll(images => images.every((image, index) =>
     image.naturalWidth === 256 && image.naturalHeight === 256 &&
     image.offsetLeft === (index % 13) * 256 && image.offsetTop === Math.floor(index / 13) * 256)),
@@ -220,9 +220,9 @@ try {
   await hold('d', 400);
   await page.clock.runFor(500);
   near((await state()).feet, 570, 'Former cabinet position is flat ground');
-  await hold('d', 6500);
-  near((await state()).x, 3148, 'Right world wall must hold');
-  near((await state()).camera, 1920, 'Camera must stop at the right world boundary');
+  await hold('d', 16000);
+  near((await state()).x, 4948, 'Extended right world wall must hold');
+  near((await state()).camera, 3720, 'Camera must stop at the extended right world boundary');
   await page.screenshot({ path: '.local/sideview-exit.png' });
 
   for (const [index, x] of [[2, 2552], [1, 2255]]) {
@@ -250,8 +250,8 @@ try {
   await page.clock.runFor(50);
   assert.equal((await state()).animation, 'walk', 'Movement must cancel interaction');
   await page.keyboard.up('d');
-  await hold('d', 5000);
-  near((await state()).x, 3148, 'Interaction must preserve movement and boundaries');
+  await hold('d', 15000);
+  near((await state()).x, 4948, 'Interaction must preserve movement and boundaries');
   assert.equal(await page.locator('#interaction-hint').isVisible(), false, 'Walking away hides the prompt');
 
   const beforeResize = await state();
@@ -307,7 +307,7 @@ try {
   await page.locator('#cabin-exit').click();
   await finishSceneTransition(page);
   assert.equal(await page.locator('#world').getAttribute('data-room'), 'dynamic', 'Boarding must move the player to a dynamically built floor');
-  assert.equal(await page.evaluate(() => document.getElementById('world').style.width), '2400px');
+  assert.equal(await page.evaluate(() => document.getElementById('world').style.width), '5000px', 'Every floor shares the 17F width');
   assert.equal(await page.locator('header span').textContent(), '12F · 빈 층');
   assert.equal(await page.locator('#dynamic-scene .solid:not(.floor):not(.boundary)').count(), 0, 'Additional floors must have no obstacles');
   assert.match(await page.locator('#interaction-status').textContent(), /12층에 도착/);

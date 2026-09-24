@@ -10,9 +10,11 @@ export async function reachInitialCorridor(page) {
   assert.equal(await page.locator('#world').getAttribute('data-room'), 'office');
   await page.locator('#office-background').evaluate(img => img.decode());
   const position = () => page.locator('#player').evaluate(el => new DOMMatrix(getComputedStyle(el).transform).m41 + 96);
-  await page.keyboard.down('a');
-  await page.clock.runFor((await position() - 140) / 200 * 1000);
-  await page.keyboard.up('a');
+  const exit = await page.locator('.office-door[data-room="office"]').evaluate(el => parseFloat(el.style.left) + parseFloat(el.style.width) / 2);
+  const key = exit > await position() ? 'd' : 'a';
+  await page.keyboard.down(key);
+  await page.clock.runFor(Math.abs(exit - await position()) / 200 * 1000);
+  await page.keyboard.up(key);
   await page.clock.runFor(34);
   await page.keyboard.press('e');
   await finishSceneTransition(page);
