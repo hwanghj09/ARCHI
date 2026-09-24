@@ -1,7 +1,7 @@
 # Floor prop kit
 
 - Generator: built-in image_gen; style reference: ../../background/floor17/office-interior.png.
-- 22 completed isolated props. Asset-only delivery; no game placement or interactions.
+- 28 completed isolated props. The six food-court sprites are placed on 16F; see [FOOD-PROMPTS.md](FOOD-PROMPTS.md) for their prompts, dimensions, and placement.
 - Production PNG files in this directory use a 256px tile grid: 256x256, 512x256 or 256x512.
 - Unmodified high-resolution generated originals are in source/. They are NOT the production sprites.
 - Export: trim to alpha > 8 bounds, preserve aspect ratio, nearest-neighbor scale, horizontal center, 8px bottom padding. Alpha is preserved.
@@ -221,4 +221,3 @@ One empty upright two-wheel hand trolley facing viewer, muted yellow steel tubul
 - Planned canvas: 256x512; anchor: 128, 504; suggested world width: 105.
 
 One industrial portable LED worklight on a telescoping black tripod, rectangular muted yellow lamp housing with pale off-white unlit LED panel, steel side brackets and a neatly coiled black power cable secured low on the stand. No glow, beam, halo or cast shadow.
-

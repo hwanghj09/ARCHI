@@ -308,8 +308,8 @@ try {
   await finishSceneTransition(page);
   assert.equal(await page.locator('#world').getAttribute('data-room'), 'dynamic', 'Boarding must move the player to a dynamically built floor');
   assert.equal(await page.evaluate(() => document.getElementById('world').style.width), '5000px', 'Every floor shares the 17F width');
-  assert.equal(await page.locator('header span').textContent(), '12F · 빈 층');
-  assert.equal(await page.locator('#dynamic-scene .solid:not(.floor):not(.boundary)').count(), 0, 'Additional floors must have no obstacles');
+  assert.equal(await page.locator('header span').textContent(), '12F · 기술본부 ARCHI 개발팀');
+  assert.equal(await page.locator('#dynamic-scene .solid:not(.floor):not(.boundary)').count(), 0, 'The 12F corridor has no obstacles');
   assert.match(await page.locator('#interaction-status').textContent(), /12층에 도착/);
   assert.equal(await page.locator('#elevator-cabin').isHidden(), true, 'Exiting must close the cabin view');
   await page.screenshot({ path: '.local/floor-12.png' });

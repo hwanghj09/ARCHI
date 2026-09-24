@@ -243,6 +243,66 @@
         504
       ],
       "suggestedWorldWidth": 105
+    },
+    {
+      "file": "food-serving-counter.png",
+      "name": "식당 배식대",
+      "width": 512,
+      "height": 256,
+      "anchor": [
+        256,
+        248
+      ]
+    },
+    {
+      "file": "food-dining-table.png",
+      "name": "식당 벤치 테이블",
+      "width": 512,
+      "height": 256,
+      "anchor": [
+        256,
+        248
+      ]
+    },
+    {
+      "file": "food-refrigerator.png",
+      "name": "편의점 냉장 진열장",
+      "width": 256,
+      "height": 512,
+      "anchor": [
+        128,
+        504
+      ]
+    },
+    {
+      "file": "food-checkout.png",
+      "name": "편의점 계산대",
+      "width": 512,
+      "height": 256,
+      "anchor": [
+        256,
+        248
+      ]
+    },
+    {
+      "file": "food-coffee-bar.png",
+      "name": "카페 커피 바",
+      "width": 512,
+      "height": 256,
+      "anchor": [
+        256,
+        248
+      ]
+    },
+    {
+      "file": "food-menu-board.png",
+      "name": "메뉴 입간판",
+      "width": 256,
+      "height": 512,
+      "anchor": [
+        128,
+        504
+      ]
     }
   ]
 }

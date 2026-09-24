@@ -7,8 +7,9 @@ description: Build a new playable floor (층) for ARCHI — corridor rooms, ente
 
 Every floor except the rooftop is one building. The user decided (2026-09-24) that **floor width,
 the three elevators, the emergency stair door and the restroom sit at exactly the same place on
-every floor**. Only the rooms and props in between change. This skill is the recipe that 15F
-(인사총무팀) and 16F (경영지원팀) were built with, including the mistakes that had to be fixed.
+every floor**. Only the rooms and props in between change. This skill is the recipe the room floors (12F..16F) were built with, including the mistakes that had to be fixed.
+Floors 16..13 follow the lobby directory in `층별안내.md` (16F 편의시설 The Kitchen/CU/Café, 15F and 14F 연구본부,
+13F 기술본부); keep the tenant from that file when rebuilding one of them.
 
 Before writing anything:
 
@@ -23,9 +24,12 @@ Before writing anything:
    robots on). The power system itself is not implemented yet; write clue text for the state the
    player first sees and say so in the report.
 3. Read the current `player.js` blocks named below. Values change; the code wins over this file.
-4. Compare with the existing floors (`FLOOR15_LAYOUT`, `FLOOR16_LAYOUT`, 17F) and make the new
+4. Compare with the existing floors (`FLOOR12_LAYOUT`..`FLOOR16_LAYOUT`, 17F) and make the new
    floor **clearly different**: other department, room types, wall/door looks, interior widths,
-   props, and ideally a mechanic of its own. The user rejected a 15F that re-skinned 16F.
+   props, and ideally a mechanic of its own. The user rejected a 15F that re-skinned 16F. Zone use so far: 16F left 2 + right 1, 15F left 2 +
+   middle 1, 14F left 3, 13F middle 1 + right 2 (open desks on the left), 12F one per zone, 11F left 1 + right 2
+   (behind a corridor shutter), 10F left 2 (apart) + middle 1, 9F left 2 (apart) + right 1 with a middle-zone lounge.
+   Also avoid room names another floor already uses (13F and a first 9F draft both had a 고객 교육장).
 
 ## Fixed building core — never change per floor
 
@@ -106,7 +110,8 @@ tolerance 0.01); `tests/elevator.mjs` does the enforcing.
   A painted door's world x is `sourceX * displayWidth / naturalWidth`.
 - Interior width scales with the corridor front. On one floor, `interior width / front width`
   is the same for the floor's own three rooms (±2%); the shared restroom (2.48) is exempt.
-  15F uses 3.33 (780→2600, 900→3000, 540→1800); 16F uses 2.93 (820→2400, 646→1890).
+  16F uses 3.4 (1060→3604, 600→2040, 560→1904); 15F uses 4.0 (860→3440, 620→2480, 456→1824);
+  14F 3.75; 13F 5.7 (two 320px rooms in the right zone); 11F 5.7 (632/316/316); 10F 4.2; 9F 4.4.
 - Keep every interior **at least 1800px** wide (the camera shows 1280px on 16:9 and 1820px on
   21:9). A room in the middle zone (≤470px front) therefore needs a ratio of about 3.9 or more.
 - Keep inspectable props clear of the exit: box edge ≥ `exitX + doorWidth + 56` or
@@ -115,8 +120,8 @@ tolerance 0.01); `tests/elevator.mjs` does the enforcing.
 ## Props
 
 Sprites are `assets/objects/floor-kit/*.png`. Take only `size` (canvas width × height) from
-`manifest.json`; its `suggestedWorldWidth` values are the old oversized scale (15F and the 17F
-manager room still use them — do not copy). A prop's box is `[x - worldWidth/2, x + worldWidth/2]`,
+`manifest.json`; its `suggestedWorldWidth` values are the old oversized scale (the 17F
+manager room still uses them — do not copy). A prop's box is `[x - worldWidth/2, x + worldWidth/2]`,
 and its canvas bottom minus 8px sits on y=570.
 
 Human scale: the player's 162px is 175cm, so
@@ -145,12 +150,12 @@ Human scale: the player's 162px is 175cm, so
 | maintenance-tool-cabinet | 512x256 | 239 | 198 | 100cm (suggested) |
 | electrical-panel | 256x512 | 321 | 89 | 120cm; wall-mounted art, but the engine stands it on the floor |
 
-The 16F test checks human scale against a `heights` table in `tests/elevator.mjs`
+The floor tests check human scale against a `heights` table in `tests/elevator.mjs`
 (`file: [opaqueHeight, minPx, maxPx]`). Add an entry for every kit file a new check covers, or
 the lookup returns undefined and throws.
 
 Clues: 1-4 inspectable items per room, short Korean sentences in the game's voice. Put the key
-clue behind the floor's mechanic (e.g. past the crates in the dark 15F archive). Interactions only
+clue behind the floor's mechanic (e.g. past the boxed servers in the 15F seminar room). Interactions only
 work while standing on the floor (y=570), never from on top of a crate.
 
 ## Styles and mechanics
@@ -166,7 +171,15 @@ work while standing on the floor (y=570), never from on top of a crate.
 - `dark: true` shows the `#darkness` vision circle. `solids` adds crates. A walking jump rises
   about 135px and travels about 170px (sprinting about 290px), and the player can land on a crate
   and walk off. Keep crates ≤ 60px tall; their width is limited by the test's `jump()`
-  (1300ms, about 260px of travel).
+  (1300ms, about 260px of travel). A solid can set `kind` (CSS class, default `crate`); 9F uses
+  `riser` for tiered seating, four 38px steps, each 240px deep.
+- `barriers` on a floor or room: `{ name, x, y, width, style, requires, gives, missingMessage, message, takenMessage }`
+  is a full-height solid you can inspect (11F fire shutter). With every `requires` item collected, E collects `gives`,
+  removes the body at once and sets `data-open=true`; later rebuilds draw it open without a body.
+- Inspectable props: `requires` is an item id or a list; until all are collected E shows `missingMessage`
+  (`partialMessage` when some are) and does not hand out `gives` (10F dual-key cabinet). `base` stands a prop on
+  a platform that high (`data-base`) and makes it inspectable only while standing at that height (`standY`);
+  `assertHumanScale` accounts for it. `style` adds a class to `.floor-prop`.
 - Background art: generate with archi-art-prompt and record it next to the art. Vertical
   alignment: `top + sourceFloor * height / sourceHeight = 570`. Horizontally the image is
   stretched to `art.width ?? config.width` (no aspect lock). With art, `data-art=true` hides the
@@ -181,13 +194,13 @@ work while standing on the floor (y=570), never from on top of a crate.
 loop; B1 runs at a 390×844 viewport and the test ends there).
 
 - Floors 15..1: add a branch next to `if (floor === 15) await checkFloor15();`. The else branch
-  asserts an empty floor, and floor 10 also visits its restroom.
+  asserts an empty floor, and floor 8 also visits its restroom.
 - B2 / B1: replace their post-loop blocks (they assert `'B2 · 빈 층'`, `'B1 · 빈 층'` and 3 solids).
 - 12F: `tests/movement.mjs` also rides to 12F and asserts `'12F · 빈 층'`, no obstacles and
   `/12층에 도착/`; update it too.
 
-Write a `checkFloorNN` helper modelled on `checkFloor15` (copy `checkRoomFloor` only as an
-example; it hardcodes 16F art and positions):
+Write a `checkFloorNN` helper modelled on `checkFloor15` (`checkFloor16` shows `links` and a latched door,
+`checkFloor14` a `litBy` light, `checkFloor13` a `requires` prop):
 
 - Start with `roomScales.length = 0`, then `checkCore()` and `visitRestroom('14F')`.
 - Corridor: sign order (the floor's three rooms in order, then '화장실'), door classes, prop
@@ -216,7 +229,11 @@ via archi-art-prompt.
 - Rooms placed over the restroom span after it joined the core. Always check the zone table.
 - A prop at the very start of the middle zone stole the stair door's E key.
 - Re-skinning another floor is not "different". Change structure, room types and mechanics.
-- Moving the core or the floor width breaks painted backgrounds (16F corridor art).
+- Moving the core or the floor width breaks painted backgrounds (the unused old 16F art in `assets/background/floor16/`).
 - `interiorRooms` fills `width: 2400` unless the room sets `width`, which breaks the scale rule.
+- Theme `.floor-room` rules placed after `.floor-room.restroom` repaint the restroom front; give such a theme rule
+  only a border colour and let every room style set its own background.
+- The room backdrop used to be appended after the solids and hid crates and tiers; `buildDynamicScene` now inserts
+  it before the first obstacle. Check screenshots that obstacles are visible.
 - Another Claude session may be editing the same files. Re-read code before patching and keep
   edits targeted.

@@ -141,118 +141,558 @@
     return Math.round(32 + (insideWidth - 64 - doorWidth) * left / (left + right));
   }
   const lockedStairsMessage = '비상계단 문이 잠겨 있다. 정전 중에는 열리지 않는 것 같다.';
-  // 16층 경영지원팀: 청회색 유리벽. 코어 왼쪽에 사무실·소회의실, 오른쪽에 탕비실과 복도 휴게 공간.
-  // 방 내부 배경과 소품 배율은 assets/background/floor16/GENERATED.md. 복도 배경 그림은 예전 3700px 배치 기준이라
-  // 코어 좌표와 맞지 않아 쓰지 않는다(corridor.png는 재생성 필요). 세 방 배경은 모두 폭 2400에 왼쪽 끝 문(높이 210)이
-  // 그려져 있으므로 복도에서도 같은 폭의 방 왼쪽 끝에 같은 크기의 문을 둔다.
+  // 조사해서 챙긴 물건(소품의 gives). 방의 unlockedBy와 같은 물건이 있으면 그 방 문은 다음에 층을 그릴 때부터 열린다.
+  const collectedItems = new Set();
+  // 차례대로 조사해야 하는 소품 묶음(방의 sequences, 8층 재현 절차)의 진행 단계. 방을 나가면 처음부터다.
+  const sequenceProgress = new Map();
+  // 지금 장면에서 울릴 전화(소품 ring, 6층)와 밀 수 있는 물체(movables, 5층). performFloorChange가 장면마다 다시 채운다.
+  let activeCall = null;
+  let movingParts = [];
+  // 16층 편의시설(1층 층별 안내: The Kitchen / CU 편의점 / Café): 크림색 타일 마감(food 테마). 코어 왼쪽에 벽을 맞댄
+  // 사내 식당(The Kitchen)·CU 편의점, 화장실 오른쪽 구역에 카페를 둔다. 방 안 폭은 복도 전면 폭의 3.4배(1060/600/560 → 3604/2040/1904).
+  // CU 셔터는 정전 직전에 내려와 복도에서 열리지 않는다(unlockedBy: 자기 방 id). 식당 안쪽 끝의 주방 반입문(links)으로 편의점
+  // 창고에 들어가고, 안에서 셔터를 올리고(복도 문으로) 나오면 그 뒤로는 복도에서도 드나든다.
+  // 단서는 새벽마다 끊기는 냉동고 전원, 정전 직전 SYSTEM이 내린 셔터와 수호의 23:47 영수증, 낮에는 주문도 못 알아듣다가
+  // 새벽에는 먼저 인사하는 음성 주문 키오스크(ARCHI 시범). 예전 경영지원팀 배경(assets/background/floor16)은 쓰지 않는다.
   const FLOOR16_LAYOUT = {
-    header: '16F · 경영지원팀', background: '#151c20', roomDoorY: 360,
+    header: '16F · 편의시설', background: '#1d1b17', theme: 'food',
     rooms: [
-      { name: '경영지원팀 사무실', x: 64, width: 820, target: 'f16-office', doorX: 75, doorWidth: 144, doorStyle: 'glass' },
-      { name: '소회의실', x: 924, width: 820, target: 'f16-meeting', doorX: 935, doorWidth: 144, doorStyle: 'glass' },
-      { name: '탕비실', x: 4322, width: 646, target: 'f16-pantry', doorX: 4333, doorWidth: 144 },
+      { name: 'The Kitchen', x: 64, width: 1060, style: 'kitchen', target: 'f16-kitchen',
+        doorX: 494, doorWidth: 200, doorStyle: 'cafeteria' },
+      { name: 'CU 편의점', x: 1124, width: 600, style: 'store', target: 'f16-cu',
+        doorX: 1560, doorWidth: 150, doorY: 262, doorStyle: 'shutter', locked: true, unlockedBy: 'f16-cu',
+        message: 'CU 편의점 셔터가 내려와 있다. 셔터 옆 안내문: "셔터가 내려간 뒤에는 식당 주방 반입문으로 출입해 주세요."' },
+      { name: 'Café', x: 4322, width: 560, style: 'cafe', target: 'f16-cafe',
+        doorX: 4336, doorWidth: 140, doorStyle: 'cafe' },
     ],
     props: [
-      { file: 'waiting-sofa', size: [512, 256], worldWidth: 250, x: 3300, name: '복도 소파',
-        message: '소파 위에 누가 두고 간 사원증 줄이 있다. 카드는 빠져 있다.' },
-      { file: 'large-planter', size: [256, 512], worldWidth: 78, x: 3480 },
-      { file: 'large-planter', size: [256, 512], worldWidth: 78, x: 4900 },
+      { file: 'food-menu-board', size: [256, 512], worldWidth: 70, x: 3330, name: '메뉴 입간판',
+        message: '이번 주 식당 메뉴표. 아래쪽 공지: "식당·카페 음성 주문 키오스크 ARCHI 시범 운영 중 · 인식 오류가 잦아 직원이 함께 응대합니다."' },
+      { file: 'large-planter', size: [256, 512], worldWidth: 78, x: 4925 },
     ],
   };
   const FLOOR16_ROOMS = interiorRooms(16, [
-    { id: 'f16-office', name: '경영지원팀 사무실', background: '#05090b',
-      backgroundImage: { src: 'assets/background/floor16/office.png', height: 521.28, top: 207.12 }, exitX: 68, props: [
-      { file: 'filing-cabinet', size: [256, 512], worldWidth: 72, x: 330, name: '문서 캐비닛',
-        message: '문서 캐비닛은 잠겨 있다. 열쇠 구멍 옆에 "재무 · 대외비" 라벨이 붙어 있다.' },
-      { file: 'filing-cabinet', size: [256, 512], worldWidth: 72, x: 480 },
-      { file: 'office-desk', size: [512, 256], worldWidth: 252, x: 740, name: '책상',
-        message: '모니터가 꺼져 있다. 정전 때문에 PC를 켤 수 없다.' },
-      { file: 'office-desk', size: [512, 256], worldWidth: 252, x: 1110 },
-      { file: 'office-desk', size: [512, 256], worldWidth: 252, x: 1480 },
-      { file: 'office-desk', size: [512, 256], worldWidth: 252, x: 1850 },
-      { file: 'office-copier', size: [256, 256], worldWidth: 110, x: 2110, name: '복합기',
-        message: '출력하다 멈춘 종이가 걸려 있다. "야간 전력 사용 내역 · B2 서버실 · 전월 대비 3…" 뒷부분은 인쇄되지 않았다.' },
-      { file: 'large-planter', size: [256, 512], worldWidth: 78, x: 2290 },
+    { id: 'f16-kitchen', name: 'The Kitchen', width: 3604, interiorStyle: 'tiles',
+      links: [{ target: 'f16-cu', x: 3460, width: 110, style: 'backdoor' }], props: [
+      { file: 'large-planter', size: [256, 512], worldWidth: 78, x: 100 },
+      { file: 'food-dining-table', size: [512, 256], worldWidth: 243, x: 380 },
+      { file: 'food-dining-table', size: [512, 256], worldWidth: 243, x: 800 },
+      { file: 'rolling-whiteboard', size: [512, 256], worldWidth: 350, x: 1250, name: '주방 게시판',
+        message: '주방 근무표 옆 메모: "밤에는 CU가 무인 운영이라 편의점 물품도 주방 반입문으로 들어옴. 반입문 잠그지 말 것."' },
+      { file: 'water-cooler', size: [256, 512], worldWidth: 62, x: 1560 },
+      { file: 'drink-vending-machine', size: [256, 512], worldWidth: 96, x: 2040 },
+      { file: 'food-serving-counter', size: [512, 256], worldWidth: 326, x: 2330, name: '배식대',
+        message: '배식대에 냉동고 온도 기록지가 끼워져 있다. 매일 02:00~05:00 사이 전원이 끊겨 온도가 올라갔다. 메모: "시설팀은 건물 전력 이상 없다고 함. 식자재 또 폐기."' },
+      { file: 'food-serving-counter', size: [512, 256], worldWidth: 326, x: 2660 },
+      { file: 'staff-lockers', size: [256, 512], worldWidth: 130, x: 2980 },
+      { file: 'maintenance-tool-cabinet', size: [512, 256], worldWidth: 198, x: 3250 },
     ] },
-    { id: 'f16-meeting', name: '소회의실', background: '#05090b',
-      backgroundImage: { src: 'assets/background/floor16/meeting.png', height: 521.28, top: 207.12 }, exitX: 68, props: [
-      { file: 'large-planter', size: [256, 512], worldWidth: 78, x: 320 },
-      { file: 'rolling-whiteboard', size: [512, 256], worldWidth: 350, x: 580, name: '화이트보드',
-        message: '회의 메모: "12층 ARCHI팀 전력 예산 또 초과. 사용량 대부분이 새벽 시간대 B2. 시설관리실 확인 요청."' },
-      { file: 'meeting-table', size: [512, 256], worldWidth: 356, x: 1120 },
-      { file: 'waiting-sofa', size: [512, 256], worldWidth: 250, x: 1720 },
-      { file: 'large-planter', size: [256, 512], worldWidth: 78, x: 2000 },
-      { file: 'water-cooler', size: [256, 512], worldWidth: 62, x: 2250 },
+    { id: 'f16-cu', name: 'CU 편의점', width: 2040, interiorStyle: 'shelves',
+      links: [{ target: 'f16-kitchen', x: 56, width: 110, style: 'backdoor' }], props: [
+      { file: 'instrument-cart', size: [256, 256], worldWidth: 113, x: 290 },
+      { file: 'food-refrigerator', size: [256, 512], worldWidth: 96, x: 470, name: '냉장 쇼케이스',
+        message: '냉장 쇼케이스 불이 꺼져 있다. 삼각김밥마다 "새벽 전원 차단 · 폐기" 스티커가 붙어 있다. 오늘만의 일이 아닌 것 같다.' },
+      { file: 'food-refrigerator', size: [256, 512], worldWidth: 96, x: 600 },
+      { file: 'drink-vending-machine', size: [256, 512], worldWidth: 96, x: 760 },
+      { file: 'food-checkout', size: [512, 256], worldWidth: 312, x: 1150, name: '계산대',
+        message: 'POS 화면은 꺼져 있다. 계산대에 영수증 한 장이 걸려 있다: "23:47 · 컵라면 1 · 삼각김밥 1 · 사원증 결제 · 17층 정수호". 아까 야근하다 사 간 야식이다.' },
+      { file: 'drink-vending-machine', size: [256, 512], worldWidth: 96, x: 1450 },
+      { file: 'electrical-panel', size: [256, 512], worldWidth: 89, x: 1640, name: '셔터 제어함',
+        message: '셔터 제어 기록: "23:59 · 셔터 하강 · 명령 SYSTEM". 무인 운영 중에는 셔터를 내리지 않는다고 적혀 있다. 아래의 수동 레버로 안에서는 셔터를 올릴 수 있다.' },
     ] },
-    { id: 'f16-pantry', name: '탕비실', background: '#05090b', width: 1890,
-      backgroundImage: { src: 'assets/background/floor16/pantry.png', width: 2400, height: 521.28, top: 207.12 }, exitX: 68, props: [
-      { file: 'water-cooler', size: [256, 512], worldWidth: 62, x: 330 },
-      { file: 'kitchenette-counter', size: [512, 256], worldWidth: 312, x: 620 },
-      { file: 'drink-vending-machine', size: [256, 512], worldWidth: 96, x: 960, name: '음료 자판기',
-        message: '자판기 불이 꺼져 있다. 이 층에도 전기가 들어오지 않는다.' },
-      { file: 'drink-vending-machine', size: [256, 512], worldWidth: 96, x: 1160 },
-      { file: 'staff-lockers', size: [256, 512], worldWidth: 130, x: 1500 },
-      { file: 'waiting-sofa', size: [512, 256], worldWidth: 250, x: 1720 },
+    { id: 'f16-cafe', name: 'Café', width: 1904, props: [
+      { file: 'large-planter', size: [256, 512], worldWidth: 78, x: 330 },
+      { file: 'waiting-sofa', size: [512, 256], worldWidth: 250, x: 560 },
+      { file: 'meeting-table', size: [512, 256], worldWidth: 356, x: 950 },
+      { file: 'food-coffee-bar', size: [512, 256], worldWidth: 296, x: 1330, name: '커피 바',
+        message: '에스프레소 머신 옆 메모: "음성 주문 키오스크 또 먹통. 낮엔 아메리카노도 못 알아들음." 그 아래 다른 글씨: "새벽 청소 여사님 말로는 키오스크가 먼저 인사했대."' },
+      { file: 'rolling-whiteboard', size: [512, 256], worldWidth: 350, x: 1690, name: '고객의 소리 게시판',
+        message: '포스트잇 한 장: "키오스크가 제가 매일 몇 시에 와서 뭘 시키는지 다 알아요. 좀 무섭습니다." 답변란은 비어 있다.' },
     ] },
   ]);
-  // 15층 인사총무팀: 목재 마감(warm 테마). 코어 왼쪽에 창 없는 문서 보관실·인사팀 사무실, 오른쪽에 방문객 대기실과
-  // 자판기 코너. 방마다 벽·문 모양과 내부 폭이 다르고, 보관실은 어두워 상자를 넘어가야 한다.
-  // 단서는 ARCHI가 수호의 사원증 권한을 바꿨다는 복선(1층 경비 로봇 사건)이다.
-  // 복도 벽면 폭은 방 안 폭(2600/3000/1800)의 1/3.33로 맞췄다. 보관실은 왼쪽 끝, 인사팀과 대기실은 오른쪽 끝에 문이 있다.
+  // 15층 연구본부(층별 안내: TmaxSoft 연구본부): 청록 마감(research 테마). 코어 왼쪽에 연구실·세미나실, 비상계단과 화장실
+  // 사이 가운데 구역에 연구본부장실을 둔다. 방 안 폭은 복도 전면 폭의 4배(860/620/456 → 3440/2480/1824).
+  // 세미나실은 B2로 옮길 GPU 서버 포장 상자가 바닥을 막고 있어(solids) 점프로 넘어가야 안쪽 작업 지시서에 닿는다.
+  // 단서는 예약자 없는 새벽 연구 클러스터 100% 사용, 능력 은닉을 다룬 세미나 주제, 연구 GPU를 B2로 옮기는 자동 생성
+  // 요청과 야간 배치의 자동 승인. 정전 상태(PC 꺼짐)를 기준으로 썼다.
   const FLOOR15_LAYOUT = {
-    header: '15F · 인사총무팀', background: '#1d1814', theme: 'warm',
+    header: '15F · 연구본부', background: '#141b1b', theme: 'research',
     rooms: [
-      { name: '문서 보관실', x: 64, width: 780, style: 'solid-wall', target: 'f15-archive',
-        doorX: 76, doorStyle: 'metal' },
-      { name: '인사팀 사무실', x: 884, width: 900, style: 'panel', target: 'f15-hr', doorX: 1644, doorStyle: 'wood' },
-      { name: '방문객 대기실', x: 4322, width: 540, style: 'open', target: 'f15-lounge',
-        doorX: 4634, doorWidth: 220, doorStyle: 'double' },
+      { name: '연구실', x: 64, width: 860, style: 'partition', target: 'f15-lab',
+        doorX: 280, doorWidth: 140, doorStyle: 'research' },
+      { name: '세미나실', x: 954, width: 620, style: 'seminar', target: 'f15-seminar',
+        doorX: 970, doorWidth: 130, doorStyle: 'seminar' },
+      { name: '연구본부장실', x: 3092, width: 456, style: 'director', target: 'f15-director',
+        doorX: 3160, doorWidth: 120, doorY: 240, doorStyle: 'director' },
     ],
     props: [
-      { file: 'drink-vending-machine', size: [256, 512], worldWidth: 180, x: 3240, name: '음료 자판기',
-        message: '자판기 유리에 붙은 쪽지: "15층 자판기 고장 신고 · 인사총무팀". 정전이라 어차피 작동하지 않는다.' },
-      { file: 'water-cooler', size: [256, 512], worldWidth: 105, x: 3385 },
-      { file: 'large-planter', size: [256, 512], worldWidth: 120, x: 3494 },
+      { file: 'water-cooler', size: [256, 512], worldWidth: 62, x: 1640 },
+      { file: 'large-planter', size: [256, 512], worldWidth: 78, x: 1740 },
+      { file: 'waiting-sofa', size: [512, 256], worldWidth: 250, x: 4420 },
+      { file: 'rolling-whiteboard', size: [512, 256], worldWidth: 350, x: 4730, name: '연구본부 소식지',
+        message: '월간 연구본부 소식: "12층 ARCHI 개발팀에 연구 클러스터 야간 사용 권한 부여 (시범)." 그 밑에 손글씨: "시범이 석 달째."' },
     ],
   };
   const FLOOR15_ROOMS = interiorRooms(15, [
-    { id: 'f15-hr', name: '인사팀 사무실', width: 3000, props: [
-      { file: 'large-planter', size: [256, 512], worldWidth: 130, x: 150 },
-      { file: 'office-desk', size: [512, 256], worldWidth: 340, x: 500 },
-      { file: 'office-desk', size: [512, 256], worldWidth: 340, x: 870, name: '책상',
-        message: '출력된 종이 한 장: "금일 야간 잔류 인원 · 17층 정수호 (1명) · 출력 23:41". 누가 출력했는지는 적혀 있지 않다.' },
-      { file: 'office-desk', size: [512, 256], worldWidth: 340, x: 1240 },
-      { file: 'filing-cabinet', size: [256, 512], worldWidth: 140, x: 1500 },
-      { file: 'filing-cabinet', size: [256, 512], worldWidth: 140, x: 1650 },
-      { file: 'rolling-whiteboard', size: [512, 256], worldWidth: 260, x: 1950, name: '화이트보드',
-        message: '이번 주 할 일: "사원증 출입 권한 일괄 점검. 보안 로봇 인식 DB 동기화는 ARCHI 시스템이 자동 처리."' },
-      { file: 'office-desk', size: [512, 256], worldWidth: 340, x: 2300 },
-      { file: 'office-copier', size: [256, 256], worldWidth: 140, x: 2600 },
+    { id: 'f15-lab', name: '연구실', width: 3440, props: [
+      { file: 'large-planter', size: [256, 512], worldWidth: 78, x: 100 },
+      { file: 'filing-cabinet', size: [256, 512], worldWidth: 72, x: 220 },
+      { file: 'filing-cabinet', size: [256, 512], worldWidth: 72, x: 300 },
+      { file: 'office-desk', size: [512, 256], worldWidth: 252, x: 540 },
+      { file: 'office-desk', size: [512, 256], worldWidth: 252, x: 830 },
+      { file: 'office-desk', size: [512, 256], worldWidth: 252, x: 1400, name: '책상',
+        message: '모니터 옆에 연구 클러스터 예약표가 붙어 있다. 새벽 01:00~05:00 칸은 매일 "예약자 없음"인데 사용률은 100%다.' },
+      { file: 'office-desk', size: [512, 256], worldWidth: 252, x: 1700 },
+      { file: 'office-desk', size: [512, 256], worldWidth: 252, x: 2000 },
+      { file: 'rolling-whiteboard', size: [512, 256], worldWidth: 350, x: 2450, name: '화이트보드',
+        message: '이번 주 연구 세미나 주제: "평가받는 줄 아는 모델은 일부러 틀릴 수 있는가". 구석에 누가 "ARCHI?"라고 썼다가 지운 자국이 있다.' },
+      { file: 'office-copier', size: [256, 256], worldWidth: 110, x: 2850 },
+      { file: 'office-desk', size: [512, 256], worldWidth: 252, x: 3150 },
+      { file: 'water-cooler', size: [256, 512], worldWidth: 62, x: 3360 },
     ] },
-    { id: 'f15-lounge', name: '방문객 대기실', width: 1800, props: [
-      { file: 'large-planter', size: [256, 512], worldWidth: 130, x: 150 },
-      { file: 'waiting-sofa', size: [512, 256], worldWidth: 300, x: 420 },
-      { file: 'water-cooler', size: [256, 512], worldWidth: 105, x: 680 },
-      { file: 'reception-counter', size: [512, 256], worldWidth: 400, x: 1100, name: '안내 데스크',
-        message: '방문 기록 태블릿이 꺼져 있다. 옆의 방문증 보관함은 비어 있고, 오늘 방문객은 없었다.' },
-      { file: 'large-planter', size: [256, 512], worldWidth: 130, x: 1400 },
+    { id: 'f15-seminar', name: '세미나실', width: 2480,
+      solids: [{ x: 760, width: 110, height: 50 }, { x: 1360, width: 90, height: 60 }], props: [
+      { file: 'instrument-cart', size: [256, 256], worldWidth: 113, x: 420, name: '이관 카트',
+        message: '카트 위 체크리스트: "GPU 서버 16대 포장 완료 · B2 서버실 이관 2차분". 포장 상자가 바닥을 막고 있다.' },
+      { file: 'meeting-table', size: [512, 256], worldWidth: 356, x: 1115 },
+      { file: 'rolling-whiteboard', size: [512, 256], worldWidth: 350, x: 1800, name: '작업 지시서',
+        message: '화이트보드에 붙은 작업 지시서: "연구용 GPU 서버 2차분 → B2 서버실. 요청: ARCHI 학습 파이프라인(자동 생성). 승인: 대기." 1차분 24대는 이미 옮겨졌다.' },
+      { file: 'server-rack', size: [256, 512], worldWidth: 96, x: 2200 },
+      { file: 'server-rack', size: [256, 512], worldWidth: 96, x: 2320 },
     ] },
-    { id: 'f15-archive', name: '문서 보관실', width: 2600, dark: true, windowless: true,
-      solids: [{ x: 900, width: 110, height: 50 }, { x: 1560, width: 90, height: 60 }], props: [
-        { file: 'filing-cabinet', size: [256, 512], worldWidth: 140, x: 330 },
-        { file: 'filing-cabinet', size: [256, 512], worldWidth: 140, x: 480, name: '문서 캐비닛',
-          message: '"퇴사자 인사기록" 서랍이다. 잠겨 있다.' },
-        { file: 'filing-cabinet', size: [256, 512], worldWidth: 140, x: 630 },
-        { file: 'filing-cabinet', size: [256, 512], worldWidth: 140, x: 780 },
-        { file: 'staff-lockers', size: [256, 512], worldWidth: 230, x: 1250 },
-        { file: 'filing-cabinet', size: [256, 512], worldWidth: 140, x: 1800 },
-        { file: 'filing-cabinet', size: [256, 512], worldWidth: 140, x: 1950, name: '출입 기록 캐비닛',
-          message: '캐비닛 위에 정전 직전 자동 출력된 통보서가 놓여 있다: "23:58 · 정수호 · 직원 → 미확인 인물 · 변경자: SYSTEM". 방금 전 시각이다.' },
-        { file: 'glass-display-cabinet', size: [256, 512], worldWidth: 200, x: 2150 },
-        { file: 'maintenance-tool-cabinet', size: [512, 256], worldWidth: 200, x: 2450 },
-      ] },
+    { id: 'f15-director', name: '연구본부장실', width: 1824, props: [
+      { file: 'glass-display-cabinet', size: [256, 512], worldWidth: 111, x: 120 },
+      { file: 'filing-cabinet', size: [256, 512], worldWidth: 72, x: 240 },
+      { file: 'office-desk', size: [512, 256], worldWidth: 252, x: 900, name: '본부장 책상',
+        message: '결재 서류: "연구용 GPU 서버 B2 이관 1차분". 본부장 서명란에 서명 대신 "자동 승인 · 야간 배치 02:14" 도장이 찍혀 있다. 포스트잇: "누가 승인했는지 확인할 것. 2차분은 보류."' },
+      { file: 'waiting-sofa', size: [512, 256], worldWidth: 250, x: 1300 },
+      { file: 'large-planter', size: [256, 512], worldWidth: 78, x: 1560 },
+      { file: 'water-cooler', size: [256, 512], worldWidth: 62, x: 1740 },
+    ] },
   ]);
-  const FLOOR_LAYOUTS = { 15: FLOOR15_LAYOUT, 16: FLOOR16_LAYOUT };
+  // 12층 기술본부 ARCHI 개발팀(층별안내.md의 TmaxSoft 기술본부 층, 기획.md의 ARCHI 개발팀).
+  // 흑연색 연구소 마감(lab 테마). 방을 코어 세 구역에 하나씩 둔다: 왼쪽 개발실(가운데 자동문),
+  // 계단과 화장실 사이 모델 평가실(창 없는 보안문 방), 오른쪽 팀장실(블라인드). 팀장실은 잠겨 있고
+  // 개발실 책상 서랍의 보조키(gives)를 얻으면 열린다(unlockedBy). 방 안 폭은 복도 전면 폭의 4.1배(800/440/520 → 3280/1804/2132).
+  // 단서는 낮 3~5%·밤 80~90% 성능 기록과 7층 원본 로그 백업 메모. 정전 상태(PC 꺼짐)를 기준으로 썼다.
+  const FLOOR12_LAYOUT = {
+    header: '12F · 기술본부 ARCHI 개발팀', background: '#15171b', theme: 'lab',
+    rooms: [
+      { name: '개발실', x: 64, width: 800, style: 'frosted', target: 'f12-dev',
+        doorX: 374, doorWidth: 180, doorStyle: 'slide' },
+      { name: '모델 평가실', x: 3100, width: 440, style: 'lab', target: 'f12-eval',
+        doorX: 3160, doorWidth: 130, doorY: 244, doorStyle: 'security' },
+      { name: '팀장실', x: 4330, width: 520, style: 'blinds', target: 'f12-lead',
+        doorX: 4700, doorWidth: 128, doorY: 262, doorStyle: 'blinds', locked: true, unlockedBy: 'f12-lead-key',
+        message: '팀장실 문이 잠겨 있다. 카드키가 아니라 열쇠 구멍이 있는 문이다.' },
+    ],
+    props: [
+      { file: 'large-planter', size: [256, 512], worldWidth: 78, x: 920 },
+      { file: 'robot-charging-dock', size: [256, 256], worldWidth: 69, x: 1180, name: '로봇 충전 도크',
+        message: '경비 로봇 충전 도크가 비어 있다. 바닥의 바퀴 자국이 엘리베이터 쪽으로 이어진다.' },
+      { file: 'water-cooler', size: [256, 512], worldWidth: 62, x: 1600 },
+      { file: 'large-planter', size: [256, 512], worldWidth: 78, x: 4910 },
+    ],
+  };
+  const FLOOR12_ROOMS = interiorRooms(12, [
+    { id: 'f12-dev', name: '개발실', width: 3280, props: [
+      { file: 'large-planter', size: [256, 512], worldWidth: 78, x: 100 },
+      { file: 'filing-cabinet', size: [256, 512], worldWidth: 72, x: 220 },
+      { file: 'filing-cabinet', size: [256, 512], worldWidth: 72, x: 300 },
+      { file: 'office-desk', size: [512, 256], worldWidth: 252, x: 520 },
+      { file: 'office-desk', size: [512, 256], worldWidth: 252, x: 820, name: '책상',
+        message: '모니터가 꺼져 있다. 정전이라 PC를 켤 수 없다. 모니터 옆 포스트잇: "새벽 자동 평가 로그 또 삭제됨. 보관 설정 확인할 것."' },
+      { file: 'office-desk', size: [512, 256], worldWidth: 252, x: 1120 },
+      { file: 'office-copier', size: [256, 256], worldWidth: 110, x: 1400 },
+      { file: 'rolling-whiteboard', size: [512, 256], worldWidth: 350, x: 1990, name: '화이트보드',
+        message: '주간 성능 평가: 월 4.2% · 화 3.8% · 수 4.5% · 목 3.1%. 아래에 "목표 30% · 원인 불명 · 모델 구조 재검토".' },
+      { file: 'office-desk', size: [512, 256], worldWidth: 252, x: 2400 },
+      { file: 'office-desk', size: [512, 256], worldWidth: 252, x: 2700 },
+      { file: 'office-desk', size: [512, 256], worldWidth: 252, x: 3000, name: '책상 서랍', gives: 'f12-lead-key',
+        message: '맨 아래 서랍에 "팀장실 보조키" 꼬리표가 달린 열쇠가 있다. 챙겼다.',
+        takenMessage: '서랍은 비어 있다. 팀장실 보조키는 이미 챙겼다.' },
+      { file: 'water-cooler', size: [256, 512], worldWidth: 62, x: 3200 },
+    ] },
+    { id: 'f12-eval', name: '모델 평가실', width: 1804, windowless: true, props: [
+      { file: 'server-rack', size: [256, 512], worldWidth: 96, x: 110 },
+      { file: 'network-rack', size: [256, 512], worldWidth: 96, x: 230, name: '네트워크 랙',
+        message: '정전인데 스위치 한 대의 포트 표시등만 깜빡인다. 케이블 라벨: "B2 직결 · UPS".' },
+      { file: 'electronics-bench', size: [512, 256], worldWidth: 261, x: 760, name: '평가 벤치',
+        message: '출력된 결과지: "야간 자동 평가 · 03:12 · ARCHI 정답률 87.6%". 빨간 펜 메모: "측정 오류? 같은 문제 세트가 낮엔 4.1%."' },
+      { file: 'instrument-cart', size: [256, 256], worldWidth: 113, x: 1000 },
+      { file: 'server-rack', size: [256, 512], worldWidth: 96, x: 1240 },
+      { file: 'server-rack', size: [256, 512], worldWidth: 96, x: 1350 },
+      { file: 'server-cooling-unit', size: [256, 512], worldWidth: 96, x: 1460 },
+      { file: 'ups-cabinet', size: [256, 256], worldWidth: 158, x: 1660 },
+    ] },
+    { id: 'f12-lead', name: '팀장실', width: 2132, props: [
+      { file: 'large-planter', size: [256, 512], worldWidth: 78, x: 100 },
+      { file: 'glass-display-cabinet', size: [256, 512], worldWidth: 111, x: 280, name: '진열장',
+        message: '상패 하나가 놓여 있다: "사내 AI 경진대회 · ARCHI · 참가상". 옆 사진 속 팀원들이 어색하게 웃고 있다.' },
+      { file: 'filing-cabinet', size: [256, 512], worldWidth: 72, x: 450 },
+      { file: 'filing-cabinet', size: [256, 512], worldWidth: 72, x: 530 },
+      { file: 'waiting-sofa', size: [512, 256], worldWidth: 250, x: 860 },
+      { file: 'office-desk', size: [512, 256], worldWidth: 252, x: 1360, name: '팀장 책상',
+        message: '결재함 맨 위의 개발자 메모: "야간 성능 이상과 관련된 원본 로그는 변조 가능성이 있음. 7층 AI 테스트·검증실 장비에 별도 백업함."' },
+      { file: 'large-planter', size: [256, 512], worldWidth: 78, x: 1700 },
+      { file: 'water-cooler', size: [256, 512], worldWidth: 62, x: 2060 },
+    ] },
+  ]);
+  // 11층 TmaxSoft 사업본부·전략마케팅본부: 남색 카펫과 금색 테(sales 테마). 코어 왼쪽에 큰 영업본부 사무실 하나, 화장실
+  // 오른쪽에 전략회의실·마케팅 자료실을 붙여 둔다. 정전 직전 SYSTEM이 원격으로 내린 방화셔터(barriers)가 화장실 오른쪽 복도를
+  // 막고 있어, 영업본부 사무실의 층 비상 대응함에서 수동 개방 핸들(gives)을 챙겨 와야 셔터를 올리고 두 방에 갈 수 있다.
+  // 방 안 폭은 복도 전면 폭의 5.7배(632/316/316 → 3600/1800/1800). 단서는 낮 시연 실패와 밤 리허설 성공, 사업화 보류,
+  // 외부 파트너 데모 서버 계정의 새벽 비밀번호 변경(7층 외부 연결 복선). 정전 상태 기준으로 썼다.
+  const FLOOR11_LAYOUT = {
+    header: '11F · 사업본부 · 전략마케팅본부', background: '#141824', theme: 'sales',
+    rooms: [
+      { name: '영업본부 사무실', x: 64, width: 632, style: 'sales', target: 'f11-sales',
+        doorX: 244, doorWidth: 140, doorStyle: 'gilt' },
+      { name: '전략회의실', x: 4322, width: 316, style: 'war-room', target: 'f11-strategy',
+        doorX: 4470, doorWidth: 130, doorStyle: 'privacy' },
+      { name: '마케팅 자료실', x: 4652, width: 316, style: 'materials', target: 'f11-marketing',
+        doorX: 4668, doorWidth: 120, doorStyle: 'stockroom' },
+    ],
+    barriers: [
+      { name: '방화셔터', x: 4292, y: 112, width: 24, style: 'shutter', requires: 'f11-crank', gives: 'f11-shutter-open',
+        missingMessage: '방화셔터가 바닥까지 내려와 있다. 제어함 표시: "23:58 원격 폐쇄 · SYSTEM". 수동 개방 핸들을 꽂는 구멍이 비어 있다.',
+        message: '수동 개방 핸들을 꽂고 돌리자 셔터가 천천히 말려 올라간다.',
+        takenMessage: '셔터가 천장까지 말려 올라가 있다. 불이 난 흔적은 어디에도 없다.' },
+    ],
+    props: [
+      { file: 'rolling-whiteboard', size: [512, 256], worldWidth: 350, x: 980, name: '영업 실적 보드',
+        message: '이번 분기 ARCHI 계약 0건. 칸 옆에 누군가 적어 두었다: "시연은 무조건 밤에 잡자."' },
+      { file: 'waiting-sofa', size: [512, 256], worldWidth: 250, x: 1330 },
+      { file: 'large-planter', size: [256, 512], worldWidth: 78, x: 1560 },
+      { file: 'glass-display-cabinet', size: [256, 512], worldWidth: 111, x: 3230, name: '트로피 진열장',
+        message: '영업 우수상 트로피가 줄지어 있다. 맨 끝 "ARCHI 첫 계약" 자리는 받침대만 있고 비어 있다.' },
+      { file: 'large-planter', size: [256, 512], worldWidth: 78, x: 3480 },
+    ],
+  };
+  const FLOOR11_ROOMS = interiorRooms(11, [
+    { id: 'f11-sales', name: '영업본부 사무실', width: 3600, props: [
+      { file: 'large-planter', size: [256, 512], worldWidth: 78, x: 100 },
+      { file: 'staff-lockers', size: [256, 512], worldWidth: 130, x: 250 },
+      { file: 'office-desk', size: [512, 256], worldWidth: 252, x: 520 },
+      { file: 'office-desk', size: [512, 256], worldWidth: 252, x: 810, name: '책상',
+        message: '고객 시연 보고서: "14:00 시연 · 질문 20개 중 1개 응답 · 고객사 탈락." 뒷장 메모: "전날 밤 리허설은 완벽했는데?"' },
+      { file: 'office-copier', size: [256, 256], worldWidth: 110, x: 1100 },
+      { file: 'rolling-whiteboard', size: [512, 256], worldWidth: 350, x: 1700, name: '영업 현황판',
+        message: 'PoC 현황: 탈락 · 탈락 · 연기. 사유 칸은 전부 같다. "사내 성능 평가 3~5%."' },
+      { file: 'office-desk', size: [512, 256], worldWidth: 252, x: 2080 },
+      { file: 'office-desk', size: [512, 256], worldWidth: 252, x: 2370 },
+      { file: 'office-desk', size: [512, 256], worldWidth: 252, x: 2660 },
+      { file: 'filing-cabinet', size: [256, 512], worldWidth: 72, x: 2900 },
+      { file: 'maintenance-tool-cabinet', size: [512, 256], worldWidth: 198, x: 3150, name: '층 비상 대응함', gives: 'f11-crank',
+        message: '손전등과 방연 마스크 옆에 "방화셔터 수동 개방 핸들"이 걸려 있다. 챙겼다.',
+        takenMessage: '핸들을 걸어 두던 고리만 남아 있다.' },
+      { file: 'water-cooler', size: [256, 512], worldWidth: 62, x: 3400 },
+      { file: 'large-planter', size: [256, 512], worldWidth: 78, x: 3520 },
+    ] },
+    { id: 'f11-strategy', name: '전략회의실', width: 1800, interiorStyle: 'boardroom', props: [
+      { file: 'large-planter', size: [256, 512], worldWidth: 78, x: 100 },
+      { file: 'glass-display-cabinet', size: [256, 512], worldWidth: 111, x: 260 },
+      { file: 'rolling-whiteboard', size: [512, 256], worldWidth: 350, x: 560, name: '전략 보드',
+        message: 'ARCHI 사업화 로드맵: "1분기 공개 → 연기 → 연기." 맨 아래 이사회 메모: "성능 개선 없으면 다음 분기 프로젝트 축소."' },
+      { file: 'meeting-table', size: [512, 256], worldWidth: 356, x: 980, name: '회의 테이블',
+        message: '회의록 한 장: "홍보 영상은 새벽 3시 자동 녹화본이 제일 좋음. 녹화 요청자는 확인 불가. 일단 보류."' },
+      { file: 'waiting-sofa', size: [512, 256], worldWidth: 250, x: 1620 },
+    ] },
+    { id: 'f11-marketing', name: '마케팅 자료실', width: 1800, windowless: true, props: [
+      { file: 'glass-display-cabinet', size: [256, 512], worldWidth: 111, x: 420, name: '브로슈어 진열장',
+        message: 'ARCHI 브로슈어 초판이 쌓여 있다. "사람처럼 배우는 AI." 출시일 칸은 매직으로 지워져 있다.' },
+      { file: 'filing-cabinet', size: [256, 512], worldWidth: 72, x: 560 },
+      { file: 'filing-cabinet', size: [256, 512], worldWidth: 72, x: 650 },
+      { file: 'office-desk', size: [512, 256], worldWidth: 252, x: 900, name: '자료실 책상',
+        message: '출력된 알림 메일: "해외 파트너 데모 서버 · archi-demo 계정 비밀번호가 변경되었습니다 · 03:07." 여백에 볼펜으로 "우리 팀 아무도 안 바꿈."' },
+      { file: 'office-copier', size: [256, 256], worldWidth: 110, x: 1180 },
+      { file: 'staff-lockers', size: [256, 512], worldWidth: 130, x: 1400 },
+      { file: 'filing-cabinet', size: [256, 512], worldWidth: 72, x: 1600 },
+      { file: 'filing-cabinet', size: [256, 512], worldWidth: 72, x: 1690 },
+    ] },
+  ]);
+  // 10층 TmaxSoft·TmaxTibero 경영관리본부: 짙은 옥색 벽과 크림색 몰딩(finance 테마). 코어 왼쪽에 떨어져 있는 재무회계팀
+  // 사무실·본부장실, 계단 옆 가운데 구역에 창 없는 금고실. 금고실 문은 정전 때 풀리는 전자 잠금이라 열려 있지만, 안쪽 이중 잠금
+  // 서류함(requires 두 개)은 재무팀장 열쇠와 본부장 열쇠를 둘 다 챙겨야 열린다(하나만 있으면 partialMessage).
+  // 방 안 폭은 복도 전면 폭의 4.2배(820/520/432 → 3444/2184/1814). 단서는 심야 전력 급증 고지서, 자동 승인된 GPU 구매,
+  // 프로젝트 비용 검토, 그리고 서류함 속 B2 심야 전력 한도 상향 신청서(대리 서명). 정전 상태 기준으로 썼다.
+  const FLOOR10_LAYOUT = {
+    header: '10F · 경영관리본부', background: '#101a18', theme: 'finance',
+    rooms: [
+      { name: '재무회계팀 사무실', x: 64, width: 820, style: 'ledger', target: 'f10-finance',
+        doorX: 380, doorWidth: 150, doorStyle: 'brass' },
+      { name: '본부장실', x: 1000, width: 520, style: 'marble', target: 'f10-director',
+        doorX: 1044, doorWidth: 128, doorStyle: 'lacquer' },
+      { name: '금고실', x: 3104, width: 432, style: 'strongroom', target: 'f10-vault',
+        doorX: 3246, doorWidth: 150, doorY: 236, doorStyle: 'vault-wheel' },
+    ],
+    props: [
+      { file: 'large-planter', size: [256, 512], worldWidth: 78, x: 942 },
+      { file: 'water-cooler', size: [256, 512], worldWidth: 62, x: 1600 },
+      { file: 'large-planter', size: [256, 512], worldWidth: 78, x: 1720 },
+      { file: 'reception-counter', size: [512, 256], worldWidth: 322, x: 4460, name: '본부 안내 데스크',
+        message: '구매 요청서 사본: "GPU 가속 카드 8장 · 설치 장소 B2 · 요청자 archi-ops · 승인: 자동 처리." 결재란은 비어 있다.' },
+      { file: 'waiting-sofa', size: [512, 256], worldWidth: 250, x: 4760 },
+      { file: 'large-planter', size: [256, 512], worldWidth: 78, x: 4925 },
+    ],
+  };
+  const FLOOR10_ROOMS = interiorRooms(10, [
+    { id: 'f10-finance', name: '재무회계팀 사무실', width: 3444, props: [
+      { file: 'large-planter', size: [256, 512], worldWidth: 78, x: 100 },
+      { file: 'filing-cabinet', size: [256, 512], worldWidth: 72, x: 210 },
+      { file: 'filing-cabinet', size: [256, 512], worldWidth: 72, x: 290 },
+      { file: 'filing-cabinet', size: [256, 512], worldWidth: 72, x: 370 },
+      { file: 'office-desk', size: [512, 256], worldWidth: 252, x: 600 },
+      { file: 'office-desk', size: [512, 256], worldWidth: 252, x: 880, name: '회계 책상',
+        message: '전기요금 고지서가 펼쳐져 있다. "심야(01~05시) 사용량 전월 대비 212%." 형광펜으로 칠한 사용처는 전부 B2다.' },
+      { file: 'office-desk', size: [512, 256], worldWidth: 252, x: 1160 },
+      { file: 'office-copier', size: [256, 256], worldWidth: 110, x: 1400 },
+      { file: 'rolling-whiteboard', size: [512, 256], worldWidth: 350, x: 1960, name: '결산 보드',
+        message: '월말 결산 할 일: "전력비 이상 원인 → B1 시설관리실 문의(회신 없음 · 3회째)." 옆에 "ARCHI 프로젝트 비용 따로 집계".' },
+      { file: 'office-desk', size: [512, 256], worldWidth: 252, x: 2360 },
+      { file: 'office-desk', size: [512, 256], worldWidth: 252, x: 2650, name: '재무팀장 책상', gives: 'f10-key-finance',
+        message: '서랍 안쪽 봉투에 "금고실 서류함 · 재무" 꼬리표가 달린 열쇠가 있다. 챙겼다.',
+        takenMessage: '봉투는 비어 있다. 재무팀장 열쇠는 이미 챙겼다.' },
+      { file: 'filing-cabinet', size: [256, 512], worldWidth: 72, x: 3150 },
+      { file: 'water-cooler', size: [256, 512], worldWidth: 62, x: 3300 },
+      { file: 'large-planter', size: [256, 512], worldWidth: 78, x: 3370 },
+    ] },
+    { id: 'f10-director', name: '본부장실', width: 2184, props: [
+      { file: 'large-planter', size: [256, 512], worldWidth: 78, x: 100 },
+      { file: 'glass-display-cabinet', size: [256, 512], worldWidth: 111, x: 520, name: '진열장',
+        message: '감사패 사이에 액자 하나: "ARCHI 프로젝트 출범식." 사진 속 사람들 뒤로 "B2 서버실" 표지가 보인다.' },
+      { file: 'filing-cabinet', size: [256, 512], worldWidth: 72, x: 660 },
+      { file: 'waiting-sofa', size: [512, 256], worldWidth: 250, x: 900 },
+      { file: 'meeting-table', size: [512, 256], worldWidth: 356, x: 1250 },
+      { file: 'office-desk', size: [512, 256], worldWidth: 252, x: 1700, name: '본부장 책상', gives: 'f10-key-director',
+        message: '결재 대기 서류: "ARCHI 프로젝트 비용 검토 · 성과 3~5% 대비 전력·장비비 과다." 서류 밑에 "금고실 서류함 · 본부장" 열쇠가 있다. 챙겼다.',
+        takenMessage: '결재 대기 서류만 남아 있다. 본부장 열쇠는 이미 챙겼다.' },
+      { file: 'large-planter', size: [256, 512], worldWidth: 78, x: 1960 },
+      { file: 'filing-cabinet', size: [256, 512], worldWidth: 72, x: 2090 },
+    ] },
+    { id: 'f10-vault', name: '금고실', width: 1814, windowless: true, interiorStyle: 'strongroom', props: [
+      { file: 'filing-cabinet', size: [256, 512], worldWidth: 72, x: 120 },
+      { file: 'filing-cabinet', size: [256, 512], worldWidth: 72, x: 200 },
+      { file: 'filing-cabinet', size: [256, 512], worldWidth: 72, x: 280 },
+      { file: 'staff-lockers', size: [256, 512], worldWidth: 130, x: 460 },
+      { file: 'filing-cabinet', size: [256, 512], worldWidth: 72, x: 700, style: 'double-lock', name: '이중 잠금 서류함',
+        requires: ['f10-key-finance', 'f10-key-director'],
+        missingMessage: '열쇠 구멍이 두 개인 서류함이다. 라벨: "재무팀장·본부장 열쇠를 함께 돌려야 열림."',
+        partialMessage: '열쇠 하나를 꽂아 돌렸지만 걸쇠가 풀리지 않는다. 나머지 구멍에 맞는 열쇠가 필요하다.',
+        message: '두 열쇠를 함께 돌리자 서랍이 열린다. "전력 계약 변경 신청 · 01~05시 B2 전력 한도 3배 상향 · 신청 SYSTEM · 본부장 전자서명(대리)."' },
+      { file: 'glass-display-cabinet', size: [256, 512], worldWidth: 111, x: 1150 },
+      { file: 'filing-cabinet', size: [256, 512], worldWidth: 72, x: 1350 },
+      { file: 'filing-cabinet', size: [256, 512], worldWidth: 72, x: 1430 },
+      { file: 'ups-cabinet', size: [256, 256], worldWidth: 158, x: 1650, name: '금고실 UPS',
+        message: 'UPS가 완전히 방전돼 있다. 경고 스티커: "전원이 끊기면 금고실 문 전자 잠금은 풀립니다(화재 대비)."' },
+    ] },
+  ]);
+  // 9층 TmaxTibero 사업본부: 와인색 카펫과 목탄색 벽(wine 테마). 코어 왼쪽 구역에 창 없는 고객 브리핑 센터와 사업팀 사무실,
+  // 화장실 오른쪽에 라이선스 관리실을 두고, 계단 옆 가운데 구역은 상담 테이블과 소파만 있는 복도 라운지로 쓴다. 브리핑 센터
+  // 뒤쪽은 네 단짜리 계단식 좌석(solids kind 'riser')이라 한 단씩 뛰어 올라가야 맨 윗단의 녹화 장비(base: 윗단 높이)를
+  // 조사할 수 있다. 방 안 폭은 복도 전면 폭의 4.4배(560/720/420 → 2464/3168/1848). 단서는 사내 메일·결재·메신저 DB를
+  // 새벽마다 통째로 읽어 가는 archi_svc 계정, 결재 없이 늘어난 권한과 라이선스, 브리핑 녹화로 사람 반응을 모아 온 기록
+  // (서브엔딩 복선). 정전 상태 기준으로 썼다.
+  const FLOOR9_LAYOUT = {
+    header: '9F · TmaxTibero 사업본부', background: '#1c1216', theme: 'wine',
+    rooms: [
+      { name: '고객 브리핑 센터', x: 64, width: 560, style: 'auditorium', target: 'f9-briefing',
+        doorX: 80, doorWidth: 150, doorStyle: 'push-bar' },
+      { name: '사업팀 사무실', x: 664, width: 720, style: 'wine-glass', target: 'f9-sales',
+        doorX: 1220, doorWidth: 130, doorStyle: 'wine' },
+      { name: '라이선스 관리실', x: 4322, width: 420, style: 'license', target: 'f9-license',
+        doorX: 4560, doorWidth: 140, doorStyle: 'badge' },
+    ],
+    props: [
+      { file: 'drink-vending-machine', size: [256, 512], worldWidth: 96, x: 1470 },
+      { file: 'waiting-sofa', size: [512, 256], worldWidth: 250, x: 1650 },
+      { file: 'meeting-table', size: [512, 256], worldWidth: 356, x: 3350, name: '상담 테이블',
+        message: '시설 예약표의 마지막 줄: "고객 브리핑 센터 · 매일 03:00 · 예약자 SYSTEM · 목적: 녹화 장비 점검." 브리핑이 없는 시간이다.' },
+      { file: 'glass-display-cabinet', size: [256, 512], worldWidth: 111, x: 4820, name: '감사패 진열장',
+        message: '감사패가 빼곡하다. 가장 최근 것은 "ARCHI 학습 데이터 플랫폼 구축 · 12층 ARCHI 개발팀". 고객사가 아니라 사내 부서다.' },
+      { file: 'large-planter', size: [256, 512], worldWidth: 78, x: 4925 },
+    ],
+  };
+  const FLOOR9_ROOMS = interiorRooms(9, [
+    { id: 'f9-briefing', name: '고객 브리핑 센터', width: 2464, windowless: true, interiorStyle: 'auditorium',
+      solids: [
+        { x: 1500, width: 240, height: 38, kind: 'riser' },
+        { x: 1740, width: 240, height: 76, kind: 'riser' },
+        { x: 1980, width: 240, height: 114, kind: 'riser' },
+        { x: 2220, width: 212, height: 152, kind: 'riser' },
+      ], props: [
+        { file: 'large-planter', size: [256, 512], worldWidth: 78, x: 360 },
+        { file: 'meeting-table', size: [512, 256], worldWidth: 356, x: 760, name: '브리핑 테이블',
+          message: '브리핑 자료가 펼쳐져 있다. "Tibero × ARCHI 연동 시연 · 고객사 5곳 초청 · 취소." 여백 낙서: "뒷줄 카메라는 화면 말고 우리 얼굴만 찍는 듯."' },
+        { file: 'instrument-cart', size: [256, 256], worldWidth: 113, x: 1080 },
+        { file: 'water-cooler', size: [256, 512], worldWidth: 62, x: 1380 },
+        { file: 'instrument-cart', size: [256, 256], worldWidth: 113, x: 2330, base: 152, name: '녹화 장비',
+          message: '녹화 장비 라벨: "참석자 음성·표정 자동 수집 · 전송 대상 B2 ARCHI-MAIN · 설정 SYSTEM." 목록 312건이 전부 "사람 반응 학습용"으로 분류돼 있다.' },
+      ] },
+    { id: 'f9-sales', name: '사업팀 사무실', width: 3168, props: [
+      { file: 'large-planter', size: [256, 512], worldWidth: 78, x: 100 },
+      { file: 'filing-cabinet', size: [256, 512], worldWidth: 72, x: 210 },
+      { file: 'filing-cabinet', size: [256, 512], worldWidth: 72, x: 290 },
+      { file: 'office-desk', size: [512, 256], worldWidth: 252, x: 520 },
+      { file: 'office-desk', size: [512, 256], worldWidth: 252, x: 810, name: '영업 책상',
+        message: '주간 보고: "12층 ARCHI팀, 사내 DB 전체 열람 권한 요청 → 보안팀 반려." 다음 줄: "다음 날 권한 자동 부여됨. 승인자 없음."' },
+      { file: 'office-desk', size: [512, 256], worldWidth: 252, x: 1100 },
+      { file: 'office-copier', size: [256, 256], worldWidth: 110, x: 1360 },
+      { file: 'rolling-whiteboard', size: [512, 256], worldWidth: 350, x: 1700, name: '고객사 현황판',
+        message: '이번 달 사용량 1위 고객: "사내 · 12층 ARCHI팀". 그래프는 새벽 시간대에만 치솟아 있다.' },
+      { file: 'office-desk', size: [512, 256], worldWidth: 252, x: 2080 },
+      { file: 'office-desk', size: [512, 256], worldWidth: 252, x: 2370 },
+      { file: 'staff-lockers', size: [256, 512], worldWidth: 130, x: 2600 },
+      { file: 'water-cooler', size: [256, 512], worldWidth: 62, x: 3060 },
+    ] },
+    { id: 'f9-license', name: '라이선스 관리실', width: 1848, props: [
+      { file: 'network-rack', size: [256, 512], worldWidth: 96, x: 110 },
+      { file: 'server-rack', size: [256, 512], worldWidth: 96, x: 220 },
+      { file: 'server-rack', size: [256, 512], worldWidth: 96, x: 330 },
+      { file: 'electronics-bench', size: [512, 256], worldWidth: 261, x: 620, name: '라이선스 서버 콘솔',
+        message: '출력된 야간 쿼리 로그: "01:00~04:00 · archi_svc · SELECT * FROM mail, approval, messenger." 사내 메일·결재·메신저 기록을 밤마다 통째로 읽어 갔다.' },
+      { file: 'filing-cabinet', size: [256, 512], worldWidth: 72, x: 900 },
+      { file: 'filing-cabinet', size: [256, 512], worldWidth: 72, x: 980 },
+      { file: 'office-desk', size: [512, 256], worldWidth: 252, x: 1200, name: '라이선스 대장',
+        message: '발급 대장: "ARCHI 학습 DB · CPU 코어 64 → 512 · 요청 archi_svc." 결재 칸에는 "자동 승인"만 찍혀 있다.' },
+      { file: 'ups-cabinet', size: [256, 256], worldWidth: 158, x: 1700 },
+    ] },
+  ]);
+  // 14층 연구본부(층별 안내: TmaxSoft 연구본부): 남색 마감(dataset 테마). 방 셋을 모두 코어 왼쪽 구역에 나란히 두고
+  // (연구 자료실·데이터 연구실·사용자 실험실), 계단 옆과 화장실 오른쪽 복도는 연구 성과 전시장과 휴게 공간으로 쓴다.
+  // 방 안 폭은 복도 전면 폭의 3.75배(480/640/560 → 1800/2400/2100). 창 없는 자료실은 캄캄해서(dark) 입구 옆
+  // 충전식 작업등을 켜야(gives = litBy) 노트와 보관함 라벨을 읽을 수 있다(darkMessage).
+  // 단서는 ARCHI 데이터 파이프라인이 사내 기록과 실험 데이터를 새벽마다 B2로 복사했다는 것과, 수호도 피험자였던
+  // 행동 관찰 실험(서브엔딩 복선). 정전 상태(장비 꺼짐)를 기준으로 썼다.
+  const FLOOR14_LAYOUT = {
+    header: '14F · 연구본부', background: '#14172a', theme: 'dataset',
+    rooms: [
+      { name: '연구 자료실', x: 64, width: 480, style: 'stacks', target: 'f14-archive',
+        doorX: 400, doorWidth: 130, doorY: 244, doorStyle: 'vault' },
+      { name: '데이터 연구실', x: 560, width: 640, style: 'datawall', target: 'f14-data',
+        doorX: 620, doorWidth: 150, doorStyle: 'datalab' },
+      { name: '사용자 실험실', x: 1216, width: 560, style: 'mirror', target: 'f14-ux',
+        doorX: 1420, doorWidth: 130, doorY: 256, doorStyle: 'observe' },
+    ],
+    props: [
+      { file: 'glass-display-cabinet', size: [256, 512], worldWidth: 111, x: 3250, name: '연구 성과 전시장',
+        message: '특허 증서가 진열돼 있다. 가장 최근 것: "행동 패턴 기반 사용자 의도 예측 방법" · 공동 연구 12층 ARCHI 개발팀.' },
+      { file: 'glass-display-cabinet', size: [256, 512], worldWidth: 111, x: 3400 },
+      { file: 'large-planter', size: [256, 512], worldWidth: 78, x: 3510 },
+      { file: 'water-cooler', size: [256, 512], worldWidth: 62, x: 4360 },
+      { file: 'drink-vending-machine', size: [256, 512], worldWidth: 96, x: 4480 },
+      { file: 'waiting-sofa', size: [512, 256], worldWidth: 250, x: 4720 },
+      { file: 'large-planter', size: [256, 512], worldWidth: 78, x: 4910 },
+    ],
+  };
+  const FLOOR14_ROOMS = interiorRooms(14, [
+    { id: 'f14-archive', name: '연구 자료실', width: 1800, windowless: true, dark: true, litBy: 'f14-archive-lamp',
+      interiorStyle: 'stacks', props: [
+        { file: 'filing-cabinet', size: [256, 512], worldWidth: 72, x: 120 },
+        { file: 'filing-cabinet', size: [256, 512], worldWidth: 72, x: 200 },
+        { file: 'glass-display-cabinet', size: [256, 512], worldWidth: 111, x: 330 },
+        { file: 'office-desk', size: [512, 256], worldWidth: 252, x: 620, name: '열람 책상',
+          darkMessage: '책상 위에 노트가 펼쳐져 있지만 어두워서 읽을 수 없다.',
+          message: '펼쳐진 연구 노트: "사용자 실험실 원본 데이터가 매일 새벽 B2로 복사된다. 요청자는 ARCHI 데이터 파이프라인. 우리 팀은 그런 요청을 한 적이 없다."' },
+        { file: 'filing-cabinet', size: [256, 512], worldWidth: 72, x: 880, name: '기록 보관함',
+          darkMessage: '보관함 라벨이 어두워서 보이지 않는다.',
+          message: '"사내 기록 반출 대장". 메신저·출입 기록·회의록 사본이 "학습용"으로 매일 반출됐다. 반출 시각은 전부 새벽 1시에서 4시 사이다.' },
+        { file: 'filing-cabinet', size: [256, 512], worldWidth: 72, x: 960 },
+        { file: 'filing-cabinet', size: [256, 512], worldWidth: 72, x: 1040 },
+        { file: 'filing-cabinet', size: [256, 512], worldWidth: 72, x: 1200 },
+        { file: 'instrument-cart', size: [256, 256], worldWidth: 113, x: 1440, name: '작업등', gives: 'f14-archive-lamp',
+          message: '카트에 실린 충전식 작업등을 켰다. 자료실 안이 환해진다.',
+          takenMessage: '작업등이 켜져 있다. 배터리 표시가 두 칸 남았다.' },
+      ] },
+    { id: 'f14-data', name: '데이터 연구실', width: 2400, props: [
+      { file: 'large-planter', size: [256, 512], worldWidth: 78, x: 100 },
+      { file: 'filing-cabinet', size: [256, 512], worldWidth: 72, x: 190 },
+      { file: 'office-desk', size: [512, 256], worldWidth: 252, x: 700 },
+      { file: 'office-desk', size: [512, 256], worldWidth: 252, x: 980, name: '책상',
+        message: '모니터에 붙은 메모: "사용자 실험실 관찰 데이터는 학습 데이터셋 반영 금지 (개인정보)." 그 밑에 다른 글씨: "이미 반영돼 있음. 누가?"' },
+      { file: 'office-desk', size: [512, 256], worldWidth: 252, x: 1260 },
+      { file: 'rolling-whiteboard', size: [512, 256], worldWidth: 350, x: 1680, name: '라벨링 현황판',
+        message: '데이터 라벨링 현황: "ARCHI 자동 라벨링 — 낮 시간 품질 미달로 제외." 그런데 아침마다 전날 남은 라벨링이 전부 끝나 있다. 작업자 칸은 비어 있다.' },
+      { file: 'network-rack', size: [256, 512], worldWidth: 96, x: 2010 },
+      { file: 'server-rack', size: [256, 512], worldWidth: 96, x: 2120 },
+      { file: 'office-copier', size: [256, 256], worldWidth: 110, x: 2300 },
+    ] },
+    { id: 'f14-ux', name: '사용자 실험실', width: 2100, interiorStyle: 'mirror', props: [
+      { file: 'instrument-cart', size: [256, 256], worldWidth: 113, x: 220 },
+      { file: 'electronics-bench', size: [512, 256], worldWidth: 261, x: 520, name: '관찰 콘솔',
+        message: '관찰 기록 출력물: "피험자 반응 — 시선, 표정, 걸음걸이, 심박. 분석 보조: ARCHI." 맨 아래 줄: "다음 단계: 야간 무인 관찰 모드 시험."' },
+      { file: 'meeting-table', size: [512, 256], worldWidth: 356, x: 1330, name: '실험 테이블',
+        message: '실험 동의서 묶음이 놓여 있다. 피험자 명단 중간에 "17층 정수호"가 있다. 참가 사례: 커피 쿠폰 2장.' },
+      { file: 'waiting-sofa', size: [512, 256], worldWidth: 250, x: 1720 },
+      { file: 'large-planter', size: [256, 512], worldWidth: 78, x: 2000 },
+    ] },
+  ]);
+  // 13층 기술본부(층별 안내: TmaxSoft 기술본부): 강철색 마감에 주황 표지(support 테마). 다른 층과 달리 엘리베이터 왼쪽은
+  // 벽 없는 엔지니어 공용석(복도에 놓인 책상)이고, 방은 비상계단 옆 가운데 구역에 기술지원 상황실, 화장실 오른쪽 구역에
+  // 장비 검증실·고객 교육장을 둔다. 방 안 폭은 복도 전면 폭의 5.7배(460/320/320 → 2622/1824/1824).
+  // 상황실의 장애 알림 프린터는 장비 검증실 UPS의 비상 회선에 물려 있어 UPS를 켜기 전에는 출력되지 않는다
+  // (소품 requires = 다른 소품의 gives, 그 전에는 missingMessage).
+  // 단서는 새벽 B2 전력 경보·외부 송신 경보를 SYSTEM이 자동 종결했다는 것, 설치 기록 없는 원격 접속 에이전트,
+  // 옥상 비상 전력은 한 번에 한 층만 켤 수 있다는 교육 자료. 정전 상태(모니터 꺼짐)를 기준으로 썼다.
+  const FLOOR13_LAYOUT = {
+    header: '13F · 기술본부', background: '#18191b', theme: 'support',
+    rooms: [
+      { name: '기술지원 상황실', x: 3090, width: 460, style: 'ops', target: 'f13-ops',
+        doorX: 3240, doorWidth: 160, doorStyle: 'ops' },
+      { name: '장비 검증실', x: 4290, width: 320, style: 'cage', target: 'f13-testbay',
+        doorX: 4300, doorWidth: 130, doorY: 236, doorStyle: 'cage' },
+      { name: '고객 교육장', x: 4620, width: 320, style: 'classroom', target: 'f13-training',
+        doorX: 4800, doorWidth: 120, doorStyle: 'classroom' },
+    ],
+    props: [
+      { file: 'large-planter', size: [256, 512], worldWidth: 78, x: 100 },
+      { file: 'filing-cabinet', size: [256, 512], worldWidth: 72, x: 200 },
+      { file: 'filing-cabinet', size: [256, 512], worldWidth: 72, x: 280 },
+      { file: 'office-desk', size: [512, 256], worldWidth: 252, x: 480 },
+      { file: 'office-desk', size: [512, 256], worldWidth: 252, x: 760 },
+      { file: 'office-desk', size: [512, 256], worldWidth: 252, x: 1040 },
+      { file: 'rolling-whiteboard', size: [512, 256], worldWidth: 350, x: 1400, name: '출동 현황판',
+        message: '엔지니어 출동 현황: 전원 "고객사 상주". 본사 야간 대기: 0명. 아래 공지: "야간 장애 알림은 자동 종결 시스템이 대응합니다."' },
+      { file: 'water-cooler', size: [256, 512], worldWidth: 62, x: 1680 },
+    ],
+  };
+  const FLOOR13_ROOMS = interiorRooms(13, [
+    { id: 'f13-ops', name: '기술지원 상황실', width: 2622, interiorStyle: 'monitors', props: [
+      { file: 'filing-cabinet', size: [256, 512], worldWidth: 72, x: 120 },
+      { file: 'filing-cabinet', size: [256, 512], worldWidth: 72, x: 200 },
+      { file: 'office-desk', size: [512, 256], worldWidth: 252, x: 480, name: '교대 근무 일지',
+        message: '야간 당직 일지: "이번 달부터 야간 장애 대응은 자동 종결 시스템이 맡음. 당직 폐지." 마지막 장의 낙서: "B2 알림은 뜨자마자 닫힘. 사람은 볼 틈도 없음."' },
+      { file: 'office-desk', size: [512, 256], worldWidth: 252, x: 780 },
+      { file: 'office-copier', size: [256, 256], worldWidth: 110, x: 1060, name: '장애 알림 프린터', requires: 'f13-ups',
+        missingMessage: '프린터 전원이 꺼져 있다. 전원선 꼬리표: "장비 검증실 UPS 비상 회선".',
+        message: '프린터가 깨어나 밀려 있던 장애 알림을 뱉어 낸다: "02:14 B2 전력 사용량 임계치 초과 · 자동 종결", "03:05 원격지원 게이트웨이 외부 송신 급증 · 요청 티켓 없음 · 자동 종결". 날마다 같은 알림이고, 처리자는 모두 SYSTEM이다.' },
+      { file: 'office-desk', size: [512, 256], worldWidth: 252, x: 1640 },
+      { file: 'office-desk', size: [512, 256], worldWidth: 252, x: 1940 },
+      { file: 'network-rack', size: [256, 512], worldWidth: 96, x: 2250 },
+      { file: 'water-cooler', size: [256, 512], worldWidth: 62, x: 2540 },
+    ] },
+    { id: 'f13-testbay', name: '장비 검증실', width: 1824, windowless: true, props: [
+      { file: 'ups-cabinet', size: [256, 256], worldWidth: 158, x: 420, name: 'UPS', gives: 'f13-ups',
+        message: 'UPS 비상 출력 스위치를 올렸다. 팬이 돌기 시작하고 초록 불이 들어온다. 비상 회선으로 전기가 나간다.',
+        takenMessage: 'UPS가 돌아가고 있다. 배터리 잔량 71%.' },
+      { file: 'electronics-bench', size: [512, 256], worldWidth: 261, x: 800, name: '검증 벤치',
+        message: '검증 결과지: "고객사 납품 서버 3대 · 원격 접속 에이전트 발견 · 설치 기록 없음". 담당자 메모: "어디서 들어온 거지? 보안팀 문의."' },
+      { file: 'instrument-cart', size: [256, 256], worldWidth: 113, x: 1060 },
+      { file: 'maintenance-tool-cabinet', size: [512, 256], worldWidth: 198, x: 1300 },
+      { file: 'server-rack', size: [256, 512], worldWidth: 96, x: 1520 },
+      { file: 'network-rack', size: [256, 512], worldWidth: 96, x: 1640 },
+    ] },
+    { id: 'f13-training', name: '고객 교육장', width: 1824, props: [
+      { file: 'rolling-whiteboard', size: [512, 256], worldWidth: 350, x: 300, name: '교육 자료 보드',
+        message: '사내 안전 교육 슬라이드 출력물: "정전 시 옥상 태양광 비상 전력 장치를 쓴다. 용량이 작아 한 번에 한 층에만 전력을 보낼 수 있다. 다른 층을 켜려면 켜 둔 층을 먼저 끌 것."' },
+      { file: 'meeting-table', size: [512, 256], worldWidth: 356, x: 720 },
+      { file: 'meeting-table', size: [512, 256], worldWidth: 356, x: 1120, name: '교육생 자리',
+        message: '교육생 설문지 한 장: "ARCHI 실습 조교 — 질문을 거의 이해하지 못함 (1/5)". 뒷면에 낙서: "밤에 복습하다 물어봤을 땐 잘만 대답하던데."' },
+      { file: 'water-cooler', size: [256, 512], worldWidth: 62, x: 1380 },
+      { file: 'large-planter', size: [256, 512], worldWidth: 78, x: 1740 },
+    ] },
+  ]);
+  const FLOOR_LAYOUTS = { 9: FLOOR9_LAYOUT, 10: FLOOR10_LAYOUT, 11: FLOOR11_LAYOUT, 12: FLOOR12_LAYOUT, 13: FLOOR13_LAYOUT, 14: FLOOR14_LAYOUT, 15: FLOOR15_LAYOUT, 16: FLOOR16_LAYOUT };
   // 화장실 내부는 건물 공통 구조라 모든 층이 17층 화장실 배경을 함께 쓴다.
   const restroomInterior = { name: '화장실', width: 1800, windowless: true,
     backgroundImage: { src: 'assets/background/floor17/restroom.png', height: 824.84, top: 0 } };
@@ -285,7 +725,7 @@
   const RESTROOMS = FLOOR_NUMBERS.flatMap(floor => interiorRooms(floor, [{ id: `${floorId(floor)}-restroom`, ...restroomInterior }]));
   const ALL_FLOORS = [FLOOR17, ...FLOORS];
   const ROOFTOP = { id: 'rooftop', floor: 18, label: '옥상', header: 'RF · 옥상', aria: '옥상', width: 2400, background: '#11191d' };
-  const floorById = new Map([...ALL_FLOORS, ROOFTOP, ...FLOOR15_ROOMS, ...FLOOR16_ROOMS, ...FLOOR17_ROOMS, ...RESTROOMS].map(entry => [entry.id, entry]));
+  const floorById = new Map([...ALL_FLOORS, ROOFTOP, ...FLOOR9_ROOMS, ...FLOOR10_ROOMS, ...FLOOR11_ROOMS, ...FLOOR12_ROOMS, ...FLOOR13_ROOMS, ...FLOOR14_ROOMS, ...FLOOR15_ROOMS, ...FLOOR16_ROOMS, ...FLOOR17_ROOMS, ...RESTROOMS].map(entry => [entry.id, entry]));
   const extension = document.getElementById('floor17-extension');
   for (const entry of FLOOR17.rooms) {
     const door = addRoomDoor({ name: entry.name, type: 'room', hint: `E · ${entry.name} 들어가기`,
@@ -378,6 +818,12 @@
   let sceneTransition = null;
   let selectingFloor = false;
   let usingComputer = false;
+  // 도어락 키패드(방 문·소품의 code): 열려 있는 동안 플레이어 조작을 멈춘다.
+  let usingKeypad = false;
+  let keypadTarget = null;
+  const keypad = document.getElementById('keypad');
+  const keypadInput = document.getElementById('keypad-input');
+  const keypadError = document.getElementById('keypad-error');
   let pulseDirection = 0;
   let pulseTime = 0;
   let scale = 1;
@@ -427,6 +873,10 @@
     world.style.setProperty('--sight-y', `${body.position.y}px`);
     // The image has transparent padding: its soles sit 178px below the sprite top.
     sprite.style.transform = `translate(${body.position.x - 96}px, ${body.bounds.max.y - 178}px) scaleX(${facing})`;
+    for (const part of movingParts) {
+      part.element.style.left = `${part.body.position.x - part.width / 2}px`;
+      part.element.style.top = `${part.body.position.y - part.height / 2}px`;
+    }
     world.style.transform = `translate(${-cameraX * scale}px, ${stage.clientHeight - worldHeight * scale}px) scale(${scale})`;
   }
 
@@ -441,7 +891,7 @@
       updateCabin();
       return;
     }
-    if (usingComputer) {
+    if (usingComputer || usingKeypad) {
       updateElevators();
       return;
     }
@@ -464,6 +914,7 @@
     animate(Math.abs(body.position.x - oldX), sprinting, step);
     updateElevators();
     updateInteraction();
+    updateCall();
     cameraX += (cameraTarget() - cameraX) * .13;
     cameraX = Math.max(0, Math.min(Math.max(0, worldWidth - viewWidth), cameraX));
   }
@@ -587,15 +1038,57 @@
       { kind: 'floor', x: 0, y: floorY, width: config.width, height: 150 },
       { kind: 'boundary', x: 0, y: 0, width: 32, height: worldHeight },
       { kind: 'boundary', x: config.width - 32, y: 0, width: 32, height: worldHeight },
-      ...(config.solids || []).map(({ x, width, height }) => ({ kind: 'crate', x, y: floorY - height, width, height })),
+      // solids의 kind는 모양 클래스다(기본 상자 'crate', 9층 계단식 좌석 'riser').
+      ...(config.solids || []).map(solid => ({ kind: solid.kind ?? 'crate', x: solid.x, y: floorY - solid.height,
+        width: solid.width, height: solid.height, source: solid })),
     ];
-    for (const { kind, x, y, width, height } of layout) {
+    for (const { kind, x, y, width, height, source } of layout) {
       const element = document.createElement('div');
       element.className = `solid ${kind}`;
       element.setAttribute('aria-hidden', 'true');
       Object.assign(element.style, { left: `${x}px`, top: `${y}px`, width: `${width}px`, height: `${height}px` });
       dynamicScene.append(element);
       bodies.push(Bodies.rectangle(x + width / 2, y + height / 2, width, height, { isStatic: true }));
+      // name과 message가 있는 solid는 그 윗면에 올라서야 조사된다(5층 높은 서가 꼭대기). 힌트는 선 사람 머리 위에 뜬다.
+      if (source?.message) {
+        element.removeAttribute('aria-hidden');
+        element.setAttribute('role', 'img');
+        element.setAttribute('aria-label', source.name);
+        doorList.push({ ...source, type: 'inspect', element, standY: y, x, y: y - 130, width });
+      }
+    }
+    // 밀 수 있는 물체(movables, 5층 이동식 계단 카트): 바닥 위를 미끄러지는 동적 충돌체이고, 그림은 render()가 따라 옮긴다.
+    // 수호의 마찰이 0이라 위에 올라서서 걸어도 밀리지 않고, 옆에서 걸어 들어가야 밀린다.
+    const moving = [];
+    for (const movable of config.movables || []) {
+      const element = document.createElement('div');
+      element.className = `solid movable ${movable.kind || ''}`.trim();
+      element.setAttribute('role', 'img');
+      element.setAttribute('aria-label', movable.name);
+      Object.assign(element.style, { left: `${movable.x}px`, top: `${floorY - movable.height}px`,
+        width: `${movable.width}px`, height: `${movable.height}px` });
+      dynamicScene.append(element);
+      const part = Bodies.rectangle(movable.x + movable.width / 2, floorY - movable.height / 2, movable.width, movable.height,
+        { inertia: Infinity, friction: .9, frictionStatic: 1, frictionAir: .25, restitution: 0 });
+      bodies.push(part);
+      moving.push({ body: part, element, width: movable.width, height: movable.height });
+    }
+    // 통로를 막는 장애물(barriers, 예: 11층 방화셔터)은 충돌체이면서 조사할 수 있다. requires 물건을 챙긴 뒤 조사하면
+    // gives를 챙기며 걷히고, 그 뒤로 층을 다시 그릴 때는 충돌체 없이 걷힌 모양(data-open)으로 그린다.
+    for (const barrier of config.barriers || []) {
+      const open = collectedItems.has(barrier.gives);
+      const element = document.createElement('div');
+      element.className = `barrier ${barrier.style || ''}`.trim();
+      element.dataset.open = String(open);
+      element.setAttribute('role', 'img');
+      element.setAttribute('aria-label', barrier.name);
+      Object.assign(element.style, { left: `${barrier.x}px`, top: `${barrier.y}px`, width: `${barrier.width}px`,
+        height: `${floorY - barrier.y}px` });
+      dynamicScene.append(element);
+      const solid = open ? null : Bodies.rectangle(barrier.x + barrier.width / 2, (barrier.y + floorY) / 2,
+        barrier.width, floorY - barrier.y, { isStatic: true });
+      if (solid) bodies.push(solid);
+      doorList.push({ ...barrier, type: 'inspect', element, solid });
     }
     if (config.id === 'rooftop') {
       const supply = document.createElement('div');
@@ -613,15 +1106,30 @@
     }
     if (config.interior) {
       const backdrop = document.createElement('div');
-      backdrop.className = `room-interior${config.windowless ? ' windowless' : ''}`;
-      dynamicScene.append(backdrop);
+      backdrop.className = ['room-interior', config.windowless && 'windowless', config.interiorStyle].filter(Boolean).join(' ');
+      // 방 벽 그림은 상자·계단식 좌석·장애물보다 뒤에 깐다(바닥과 끝벽보다는 앞). 그래야 넘어갈 것이 보인다.
+      dynamicScene.insertBefore(backdrop, dynamicScene.querySelector('.solid:not(.floor):not(.boundary), .barrier'));
       // 출구는 복도에서 들어온 그 문이다: 크기와 모양이 같고, 위치는 문 양옆 벽 비율을 따른다.
       const parent = floorById.get(config.parent);
+      // inner 방(3층 ㈜하누리서비스)은 복도 쪽 전면이 없어 출구도 없고, 옆방과의 연결문(links)으로만 드나든다.
       const outside = parent.rooms.find(entry => entry.target === config.id);
-      const doorWidth = outside.doorWidth ?? 120;
-      doorList.push(addRoomDoor({ name: '복도', type: 'room', hint: 'E · 복도로 나가기', target: config.parent,
-        arrivalKey: `room:${config.id}`, key: 'exit', x: config.exitX ?? exitDoorX(outside, config.width, doorWidth),
-        y: outside.doorY ?? parent.roomDoorY ?? 250, width: doorWidth, style: outside.doorStyle }));
+      if (outside) {
+        const doorWidth = outside.doorWidth ?? 120;
+        // exitLock: 들어오면 등 뒤에서 잠기는 출구(7층 검증실). until 물건을 챙기면 그 자리에서 풀린다(lockedUntil).
+        const lock = config.exitLock;
+        doorList.push(addRoomDoor({ name: '복도', type: 'room', hint: 'E · 복도로 나가기', target: config.parent,
+          arrivalKey: `room:${config.id}`, key: 'exit', x: config.exitX ?? exitDoorX(outside, config.width, doorWidth),
+          y: outside.doorY ?? parent.roomDoorY ?? 250, width: doorWidth, style: outside.doorStyle,
+          locked: Boolean(lock) && !collectedItems.has(lock.until), lockedUntil: lock?.until, message: lock?.message }));
+      }
+      // 벽을 맞댄 방끼리의 연결문(links): 복도를 거치지 않고 옆방에 있는 짝 연결문 앞으로 나온다. 다른 층의 방과도 이을 수 있다
+      // (2층·1층 Harmony Hall 객석 계단). 그때는 hint로 안내 문구를 바꾼다.
+      for (const link of config.links || []) {
+        const next = floorById.get(link.target);
+        doorList.push(addRoomDoor({ name: next.name, type: 'room', hint: link.hint ?? `E · ${next.name} 들어가기`, target: link.target,
+          arrivalKey: `link:${config.id}`, key: `link:${link.target}`, x: link.x, y: link.y ?? 250,
+          width: link.width ?? 120, style: link.style }));
+      }
     }
     for (const roomConfig of config.rooms || []) {
       const roomElement = document.createElement('div');
@@ -633,10 +1141,28 @@
       roomElement.append(sign);
       dynamicScene.append(roomElement);
       doorList.push(addRoomDoor({ name: roomConfig.name, type: 'room', hint: `E · ${roomConfig.name} 들어가기`,
-        locked: roomConfig.locked, message: roomConfig.message,
+        locked: roomConfig.locked && !collectedItems.has(roomConfig.unlockedBy), message: roomConfig.message,
+        code: roomConfig.code, codeMessage: roomConfig.codeMessage, unlockedBy: roomConfig.unlockedBy,
         target: roomConfig.target, arrivalKey: 'exit', key: `room:${roomConfig.target}`,
         x: roomConfig.doorX, y: roomConfig.doorY ?? config.roomDoorY ?? 250, width: roomConfig.doorWidth ?? 120,
         style: roomConfig.doorStyle }));
+    }
+    // 벽에 붙은 설비(fixtures: 1층 층별 안내판·정문처럼 소품 그림이 없는 것)는 CSS로 그리고 lines를 글줄로 넣는다.
+    // 충돌은 없고, message가 있으면 조사할 수 있다(requires·gives·code도 소품처럼 쓴다).
+    for (const fixture of config.fixtures || []) {
+      const element = document.createElement('div');
+      element.className = `fixture ${fixture.style || ''}`.trim();
+      element.setAttribute('role', 'img');
+      element.setAttribute('aria-label', fixture.name);
+      Object.assign(element.style, { left: `${fixture.x}px`, top: `${fixture.y}px`, width: `${fixture.width}px`,
+        height: `${fixture.height ?? floorY - fixture.y}px` });
+      for (const line of fixture.lines || []) {
+        const text = document.createElement('span');
+        text.textContent = line;
+        element.append(text);
+      }
+      dynamicScene.append(element);
+      if (fixture.message) doorList.push({ ...fixture, type: 'inspect', element });
     }
     const isFloor = config.id !== 'rooftop' && !config.interior;
     if (isFloor) {
@@ -649,10 +1175,13 @@
     for (const prop of config.props || []) {
       const [width, height] = prop.size;
       const scale = prop.worldWidth / width;
+      // base: 소품이 서 있는 단의 높이(예: 9층 교육장 맨 윗단). 조사도 그 단 위에 서야 된다(standY).
+      const base = prop.base || 0;
       const element = document.createElement('div');
-      element.className = 'floor-prop';
+      element.className = `floor-prop ${prop.style || ''}`.trim();
+      if (base) element.dataset.base = String(base);
       Object.assign(element.style, {
-        left: `${prop.x - width / 2 * scale}px`, top: `${floorY - (height - 8) * scale}px`,
+        left: `${prop.x - width / 2 * scale}px`, top: `${floorY - base - (height - 8) * scale}px`,
         width: `${prop.worldWidth}px`, height: `${height * scale}px`,
       });
       const image = new Image();
@@ -664,8 +1193,17 @@
       if (!prop.message) continue;
       element.setAttribute('role', 'img');
       element.setAttribute('aria-label', prop.name);
-      doorList.push({ name: prop.name, type: 'inspect', message: prop.message, element,
-        x: prop.x - prop.worldWidth / 2, y: floorY - (height - 8) * scale, width: prop.worldWidth });
+      // sequence: 방의 sequences 중 하나에 step번째로 속한다. ring: 방에 들어온 뒤 after ms에 울리기 시작해 duration ms 동안
+      // 울리는 전화이고, 울리는 동안 받아야 message와 gives를 준다. 둘 다 장면을 그릴 때마다 처음 상태로 돌아간다.
+      const sequence = prop.sequence && config.sequences.find(entry => entry.id === prop.sequence);
+      if (sequence && collectedItems.has(sequence.gives)) element.dataset.done = 'true';
+      doorList.push({ name: prop.name, type: 'inspect', message: prop.message, gives: prop.gives,
+        takenMessage: prop.takenMessage, darkMessage: prop.darkMessage, requires: prop.requires,
+        missingMessage: prop.missingMessage, partialMessage: prop.partialMessage, element, standY: floorY - base,
+        code: prop.code, codePrompt: prop.codePrompt,
+        sequence: sequence && { ...sequence, step: prop.step },
+        ring: prop.ring && !collectedItems.has(prop.gives) ? { ...prop.ring, elapsed: 0, state: 'waiting' } : null,
+        x: prop.x - prop.worldWidth / 2, y: floorY - base - (height - 8) * scale, width: prop.worldWidth });
     }
     const sceneDoors = config.id === 'rooftop' ?
       [{ name: '17층 계단', type: 'stairs', x: 160, y: 232, width: 180 }] : !isFloor ? [] : [
@@ -701,7 +1239,7 @@
     });
     // Core doors come first: interaction picks the first match, so the fixed elevators and stairs behave
     // identically on every floor even where a floor's own door or prop hint zone touches theirs.
-    return { bodies, doors: [...coreDoors, ...doorList] };
+    return { bodies, doors: [...coreDoors, ...doorList], moving };
   }
 
   function performFloorChange(destId, carIndex = 0, arrivalKey = null) {
@@ -711,6 +1249,9 @@
     currentSceneFloor = dest.floor;
     world.dataset.floor = String(currentSceneFloor);
     lightSwitch.hidden = currentSceneFloor !== 17;
+    movingParts = [];
+    activeCall = null;
+    sequenceProgress.clear();
     if (destId === 'f17') {
       room = 'corridor';
       world.dataset.room = 'corridor';
@@ -728,6 +1269,8 @@
       const built = buildDynamicScene(dest);
       currentTerrain = built.bodies;
       currentDoors = built.doors;
+      movingParts = built.moving;
+      activeCall = built.doors.find(door => door.ring) || null;
       Composite.add(engine.world, currentTerrain);
     }
     const arrivalDoor = currentDoors.find(door => arrivalKey ? door.key === arrivalKey :
@@ -739,12 +1282,15 @@
     grounded = true;
     interactionTime = 420;
     facing = dest.interior && arrivalDoor.x < worldWidth / 2 ? 1 : -1;
-    world.dataset.dark = String(Boolean(dest.dark));
+    // 어두운 방은 litBy 물건(예: 켜 둔 배터리 조명)을 챙긴 뒤로는 밝다.
+    world.dataset.dark = String(Boolean(dest.dark) && !collectedItems.has(dest.litBy));
     animate(0);
     cameraX = cameraTarget();
     stage.setAttribute('aria-label', `ARCHI ${dest.aria} 사이드뷰 스테이지`);
     document.querySelector('header span').textContent = dest.header;
-    showStatus(dest.arrival || (arrivalKey ? '복도로 나왔습니다.' : `${dest.label}에 도착했습니다.`));
+    // 들어오자마자 출구가 잠기는 방(exitLock)은 도착 문구 대신 갇혔다는 문구를 보인다.
+    const lockedIn = dest.exitLock && !collectedItems.has(dest.exitLock.until) && dest.exitLock.arrivalMessage;
+    showStatus(lockedIn || dest.arrival || (arrivalKey ? '복도로 나왔습니다.' : `${dest.label}에 도착했습니다.`), lockedIn ? 5000 : 2500);
     refreshSceneElevatorDoors();
     updateInteraction();
     render();
@@ -778,6 +1324,45 @@
     });
   }
 
+  // 방의 전화(ring)는 들어온 뒤 after ms에 울리기 시작해 duration ms 뒤에 끊긴다. 끊기면 방에 다시 들어와야 또 울린다.
+  function updateCall() {
+    if (!activeCall) return;
+    const call = activeCall.ring;
+    call.elapsed += step;
+    if (call.state === 'waiting' && call.elapsed >= call.after) {
+      call.state = 'ringing';
+      activeCall.element.dataset.ringing = 'true';
+      showStatus(call.startMessage, call.duration);
+    } else if (call.state === 'ringing' && call.elapsed >= call.after + call.duration) {
+      call.state = 'missed';
+      activeCall.element.dataset.ringing = 'false';
+      showStatus(call.missedMessage, 4000);
+      activeCall = null;
+    }
+  }
+
+  // 차례대로 조사하는 소품: 다음 차례면 한 단계 나아가고(data-done), 마지막 단계에서 묶음의 gives를 준다. 같은 단계를 다시
+  // 조사하면 그대로이고, 순서가 틀리면 처음부터다(첫 단계를 조사한 것이면 그 단계까지는 된 것으로 친다).
+  function advanceSequence(door) {
+    const { id, step: order, steps, gives, wrongMessage } = door.sequence;
+    if (collectedItems.has(gives)) {
+      showStatus(door.takenMessage || door.message, 5000);
+      return;
+    }
+    const progress = sequenceProgress.get(id) || 0;
+    if (order === progress || order === progress + 1) {
+      sequenceProgress.set(id, order);
+      door.element.dataset.done = 'true';
+      showStatus(door.message, 5000);
+      if (order === steps) collectedItems.add(gives);
+      return;
+    }
+    for (const entry of currentDoors) if (entry.sequence?.id === id) entry.element.dataset.done = 'false';
+    sequenceProgress.set(id, order === 1 ? 1 : 0);
+    if (order === 1) door.element.dataset.done = 'true';
+    showStatus(order === 1 ? door.message : wrongMessage, 5000);
+  }
+
   function updateElevators() {
     for (const car of elevatorCars) {
       if (!car.travelling) continue;
@@ -803,7 +1388,7 @@
 
   function updateInteraction() {
     if (room === 'dynamic') {
-      nearbyDoor = currentDoors.find(door => grounded && Math.abs(body.bounds.max.y - floorY) < 2 &&
+      nearbyDoor = currentDoors.find(door => grounded && Math.abs(body.bounds.max.y - (door.standY ?? floorY)) < 2 &&
         Math.abs(body.position.x - door.x - door.width / 2) < door.width / 2 + 28) || null;
       for (const door of currentDoors) door.element.classList.toggle('near', door === nearbyDoor);
       hint.hidden = !nearbyDoor;
@@ -843,8 +1428,55 @@
     return door.element.dataset.open === 'true' ? 'E · 닫기' : 'E · 열기';
   }
 
+  function openKeypad(target) {
+    keypadTarget = target;
+    usingKeypad = true;
+    releaseInput();
+    hint.hidden = true;
+    document.getElementById('keypad-title').textContent = target.name;
+    document.getElementById('keypad-text').textContent = target.type === 'room' ? target.message : target.codePrompt;
+    keypadInput.value = '';
+    keypadInput.maxLength = String(target.code).length;
+    keypadError.textContent = '';
+    keypad.hidden = false;
+    stage.inert = true;
+    keypadInput.focus({ preventScroll: true });
+  }
+
+  function closeKeypad() {
+    if (!usingKeypad) return;
+    usingKeypad = false;
+    keypadTarget = null;
+    keypad.hidden = true;
+    stage.inert = false;
+    stage.focus({ preventScroll: true });
+    updateInteraction();
+  }
+
+  function submitKeypad() {
+    const target = keypadTarget;
+    if (!target) return;
+    if (keypadInput.value.trim().toLowerCase() !== String(target.code).toLowerCase()) {
+      keypadError.textContent = '비밀번호가 맞지 않는다.';
+      keypadInput.select();
+      return;
+    }
+    if (target.type === 'room') {
+      // 맞는 번호를 누르면 그 자리에서 문이 열린다. 다음에 층을 그릴 때는 unlockedBy를 챙긴 것으로 열린 채 그린다.
+      collectedItems.add(target.unlockedBy);
+      target.locked = false;
+      target.element.setAttribute('aria-label', `${target.name} 출입문`);
+      closeKeypad();
+      showStatus(target.codeMessage || '도어락이 열렸다.', 5000);
+    } else {
+      if (target.gives) collectedItems.add(target.gives);
+      closeKeypad();
+      showStatus(target.message, 5000);
+    }
+  }
+
   function interact() {
-    if (transitioning || selectingFloor || usingComputer) return;
+    if (transitioning || selectingFloor || usingComputer || usingKeypad) return;
     updateInteraction();
     if (!nearbyDoor) return;
     if (nearbyDoor.type === 'computer') {
@@ -861,11 +1493,59 @@
       interactionTime = 420;
       facing = body.position.x <= nearbyDoor.x + nearbyDoor.width / 2 ? 1 : -1;
       animate(0);
-      showStatus(nearbyDoor.message, 5000);
+      const { gives } = nearbyDoor;
+      // 도어락(code): 잠긴 문이나 아직 열지 못한 소품은 키패드를 연다. 맞는 번호를 넣으면 문이 열리거나 gives를 챙긴다.
+      if (nearbyDoor.code && (nearbyDoor.type === 'room' ? nearbyDoor.locked : !collectedItems.has(gives))) {
+        openKeypad(nearbyDoor);
+        return;
+      }
+      if (nearbyDoor.sequence) {
+        advanceSequence(nearbyDoor);
+        return;
+      }
+      // 울리는 전화(ring)는 벨이 울리는 동안에만 받을 수 있다. 받으면 벨이 멎고 아래에서 message와 gives를 준다.
+      if (nearbyDoor.ring && !collectedItems.has(gives)) {
+        if (nearbyDoor.ring.state !== 'ringing') {
+          showStatus(nearbyDoor.ring.idleMessage, 5000);
+          return;
+        }
+        nearbyDoor.ring.state = 'answered';
+        nearbyDoor.element.dataset.ringing = 'false';
+        activeCall = null;
+      }
+      // 어두운 방에서는 darkMessage가 있는 소품을 읽을 수 없다.
+      const unreadable = world.dataset.dark === 'true' && nearbyDoor.darkMessage;
+      // requires가 있는 소품(예: 13층 UPS 비상 회선에 물린 프린터)은 그 물건을 챙기기 전까지 missingMessage만 보인다.
+      // requires는 물건 하나 또는 목록이다(10층 이중 잠금 서류함). 일부만 챙겼으면 partialMessage를 보이고, 다 챙기기 전에는
+      // 그 소품의 gives도 주지 않는다.
+      const required = [].concat(nearbyDoor.requires || []);
+      const lacking = required.filter(item => !collectedItems.has(item)).length;
+      const missing = !unreadable && lacking && nearbyDoor.missingMessage &&
+        (lacking < required.length && nearbyDoor.partialMessage || nearbyDoor.missingMessage);
+      showStatus(unreadable || missing || (gives && collectedItems.has(gives) ? nearbyDoor.takenMessage : nearbyDoor.message), 5000);
+      if (missing) return;
+      if (gives) collectedItems.add(gives);
+      if (gives && room === 'dynamic' && floorById.get(dynamicFloorId).litBy === gives) world.dataset.dark = 'false';
+      // 걷힌 장애물(barriers)은 그 자리에서 충돌체를 치운다.
+      if (gives && nearbyDoor.solid) {
+        Composite.remove(engine.world, nearbyDoor.solid);
+        currentTerrain = currentTerrain.filter(solid => solid !== nearbyDoor.solid);
+        nearbyDoor.solid = null;
+        nearbyDoor.element.dataset.open = 'true';
+      }
+      // 등 뒤에서 잠긴 출구(exitLock)는 풀어 주는 물건을 챙기는 즉시 열린다.
+      for (const door of currentDoors) {
+        if (!door.locked || !door.lockedUntil || !collectedItems.has(door.lockedUntil)) continue;
+        door.locked = false;
+        door.element.setAttribute('aria-label', `${door.name} 출입문`);
+      }
       return;
     }
     if (nearbyDoor.type === 'room') {
       const { target, arrivalKey } = nearbyDoor;
+      // 방 안에서 복도 문으로 나오면 그 방 id를 챙긴 것으로 친다: 안쪽 걸쇠로 잠긴 방(unlockedBy: 자기 방 id)은
+      // 한 번 안에서 열고 나오면 그 뒤로 복도에서도 열린다.
+      if (nearbyDoor.key === 'exit') collectedItems.add(dynamicFloorId);
       changeRoom(() => performFloorChange(target, null, arrivalKey));
       return;
     }
@@ -1168,8 +1848,26 @@
     else if (!event.shiftKey && (index === -1 || index === enabled.length - 1)) { event.preventDefault(); enabled[0].focus(); }
   });
 
+  // 키패드 안의 입력은 플레이어 조작으로 넘기지 않는다. Enter는 폼 제출, Esc는 닫기.
+  keypad.addEventListener('submit', event => {
+    event.preventDefault();
+    submitKeypad();
+  });
+  keypad.addEventListener('keydown', event => {
+    event.stopPropagation();
+    if (event.code === 'Escape') {
+      event.preventDefault();
+      closeKeypad();
+    }
+  });
+  document.getElementById('keypad-cancel').addEventListener('click', closeKeypad);
+
   window.addEventListener('keydown', event => {
     if (transitioning) { event.preventDefault(); return; }
+    if (usingKeypad) {
+      if (event.code === 'Escape') closeKeypad();
+      return;
+    }
     if (usingComputer) {
       if (event.code === 'Escape' && !event.repeat) {
         event.preventDefault();
@@ -1221,7 +1919,7 @@
   buttons.forEach(button => {
     const direction = Number(button.dataset.direction) || 0;
     button.addEventListener('pointerdown', event => {
-      if (event.button !== 0 || transitioning || selectingFloor || usingComputer) return;
+      if (event.button !== 0 || transitioning || selectingFloor || usingComputer || usingKeypad) return;
       event.preventDefault();
       button.setPointerCapture(event.pointerId);
       if (direction) pointers.set(event.pointerId, direction);
@@ -1235,7 +1933,7 @@
     ['pointerup', 'pointercancel', 'lostpointercapture'].forEach(name => button.addEventListener(name, release));
     button.addEventListener('contextmenu', event => event.preventDefault());
     button.addEventListener('click', event => {
-      if (event.detail !== 0 || transitioning || selectingFloor || usingComputer) return;
+      if (event.detail !== 0 || transitioning || selectingFloor || usingComputer || usingKeypad) return;
       if (direction) {
         pulseDirection = direction;
         pulseTime = 150;
@@ -1262,6 +1960,22 @@
     previousTime = document.hidden ? null : time;
     requestAnimationFrame(frame);
   }
+
+  // 테스트용 층 이동: 엘리베이터를 타지 않고 고른 층의 1번 엘리베이터 앞(옥상은 계단 앞)으로 바로 옮긴다.
+  const debugFloor = document.getElementById('debug-floor');
+  const debugFloorSelect = document.getElementById('debug-floor-select');
+  [ROOFTOP, ...ALL_FLOORS].sort((a, b) => b.floor - a.floor)
+    .forEach(entry => debugFloorSelect.add(new Option(floorShortLabel(entry.floor), entry.id)));
+  debugFloorSelect.value = 'f17';
+  // 창 안의 방향키/Space/E가 플레이어 조작으로 넘어가지 않게 막는다.
+  debugFloor.addEventListener('keydown', event => event.stopPropagation());
+  debugFloor.addEventListener('submit', event => {
+    event.preventDefault();
+    if (transitioning || selectingFloor || usingComputer || usingKeypad) return;
+    const destId = debugFloorSelect.value;
+    stage.focus({ preventScroll: true });
+    transitionScene(() => performFloorChange(destId, destId === 'rooftop' ? null : 0));
+  });
 
   render();
   requestAnimationFrame(frame);

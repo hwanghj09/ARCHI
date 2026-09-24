@@ -49,6 +49,27 @@
       #dynamic-scene[data-theme="warm"] .floor-room { border-color: #4a3b30; background: linear-gradient(#2a211b, #1f1813); }
       #dynamic-scene[data-theme="warm"] .floor-room-sign { border-color: #6b5341; background: #19120e; color: #d6c3a6; }
       #dynamic-scene[data-theme="warm"] .floor-number-sign { border-color: #6b5341; background: #19120e; color: #e2d2b8; }
+      #dynamic-scene[data-theme="lab"] > .floor { background: #131519; border-top-color: #56606b; }
+      #dynamic-scene[data-theme="lab"] .floor-room { border-color: #30353d; background: linear-gradient(#1b1e24, #121418); }
+      #dynamic-scene[data-theme="lab"] .floor-room-sign { border-color: #4c5664; background: #0d0f13; color: #b9c4d2; }
+      #dynamic-scene[data-theme="lab"] .floor-number-sign { border-color: #4c5664; background: #0d0f13; color: #d3dbe6; }
+      /* 16층 편의시설(food)·15층 연구본부(research)·14층 연구본부(dataset)·13층 기술본부(support) 테마. 화장실과 방·문 스타일 규칙보다 먼저 둔다. */
+      #dynamic-scene[data-theme="food"] > .floor { background: radial-gradient(circle, #37322a 0 1.5px, transparent 2px) 0 0 / 14px 11px, #1d1b17; border-top-color: #6a604c; }
+      #dynamic-scene[data-theme="food"] .floor-room { border-color: #474033; background: linear-gradient(#27241e, #1c1a16); }
+      #dynamic-scene[data-theme="food"] .floor-room-sign { border-color: #7a6a48; background: #16130e; color: #efd9a8; }
+      #dynamic-scene[data-theme="food"] .floor-number-sign { border-color: #7a6a48; background: #16130e; color: #f3e3bd; }
+      #dynamic-scene[data-theme="research"] > .floor { background: #141b1b; border-top-color: #4d6664; }
+      #dynamic-scene[data-theme="research"] .floor-room { border-color: #2c3d3c; background: linear-gradient(#1a2524, #121a1a); }
+      #dynamic-scene[data-theme="research"] .floor-room-sign { border-color: #4a6a66; background: #0c1414; color: #a8dcd2; }
+      #dynamic-scene[data-theme="research"] .floor-number-sign { border-color: #4a6a66; background: #0c1414; color: #c4ebe3; }
+      #dynamic-scene[data-theme="dataset"] > .floor { background: #14172a; border-top-color: #4b5680; }
+      #dynamic-scene[data-theme="dataset"] .floor-room { border-color: #2c3352; background: linear-gradient(#1b1f33, #131626); }
+      #dynamic-scene[data-theme="dataset"] .floor-room-sign { border-color: #4b5680; background: #0d0f1c; color: #b9c3ee; }
+      #dynamic-scene[data-theme="dataset"] .floor-number-sign { border-color: #4b5680; background: #0d0f1c; color: #d2d9f6; }
+      #dynamic-scene[data-theme="support"] > .floor { background: repeating-linear-gradient(90deg, #18191b 0 160px, #141517 160px 162px); border-top-color: #7a5a2e; }
+      #dynamic-scene[data-theme="support"] .floor-room { border-color: #383b40; background: linear-gradient(#212327, #18191c); }
+      #dynamic-scene[data-theme="support"] .floor-room-sign { border-color: #8a6430; background: #121315; color: #f2b25c; }
+      #dynamic-scene[data-theme="support"] .floor-number-sign { border-color: #8a6430; background: #121315; color: #f6c47a; }
       #dynamic-scene .floor-room.solid-wall { background: repeating-linear-gradient(90deg, #2c241e 0 118px, #231c17 118px 122px); }
       #dynamic-scene .floor-room.solid-wall::before { display: none; }
       #dynamic-scene .floor-room.restroom { background: linear-gradient(transparent 55%, #2c3a3f 55% 56%, transparent 56%), repeating-linear-gradient(90deg, #1d2a2e 0 46px, #172226 46px 48px), repeating-linear-gradient(#1d2a2e 0 46px, #172226 46px 48px); background-blend-mode: normal, multiply, normal; }
@@ -65,9 +86,97 @@
       #dynamic-scene[data-theme="warm"] .room-interior::before { border-color: #5a4636; }
       .room-interior.windowless { background: linear-gradient(#0c0a09 0 44px, #26221e 44px 50px, transparent 50px), repeating-linear-gradient(90deg, #1c1916 0 200px, #151210 200px 206px) !important; }
       .room-interior.windowless::before { display: none; }
+      /* 12층 ARCHI 개발팀: 반투명 띠 유리벽(개발실)·타공 금속벽(모델 평가실)·닫힌 블라인드(팀장실), 자동문·보안문·블라인드 문 */
+      #dynamic-scene .floor-room.frosted { background: linear-gradient(transparent 46%, #3b444e 46% 58%, transparent 58%), repeating-linear-gradient(90deg, #1b1f25 0 154px, #2d333b 154px 160px); }
+      #dynamic-scene .floor-room.frosted::before { top: 24px; left: 20px; right: 20px; height: 150px; border-color: #3a414a; }
+      #dynamic-scene .floor-room.lab { background: radial-gradient(circle, #0b0d10 0 1.6px, transparent 2px) 0 0 / 12px 12px, linear-gradient(#2a2f36, #22262c); }
+      #dynamic-scene .floor-room.lab::before { top: 64px; left: auto; right: 36px; width: 150px; height: 90px; border-color: #454d57; background: linear-gradient(#0a0e12, #111a20); }
+      #dynamic-scene .floor-room.lab::after { content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: 18px; background: repeating-linear-gradient(135deg, #3b3522 0 14px, #1b1c1f 14px 28px); }
+      #dynamic-scene .floor-room.blinds { background: linear-gradient(#1d2127, #15181c); }
+      #dynamic-scene .floor-room.blinds::before { top: 30px; left: 30px; right: 30px; height: 250px; border-color: #3d444d; background: repeating-linear-gradient(#545c66 0 7px, #373d44 7px 9px, #1f2328 9px 12px); }
+      .room-door.slide { border-color: #4a535d; background: linear-gradient(90deg, transparent 49%, #4a535d 49% 51%, transparent 51%), linear-gradient(90deg, transparent 43%, #7f8a96 43% 45%, transparent 45% 55%, #7f8a96 55% 57%, transparent 57%), linear-gradient(110deg, #22303a 0 30%, #19222b 30% 62%, #1f2a34 62%); box-shadow: inset 0 0 0 4px #14171b; }
+      .room-door.slide::before { content: ''; position: absolute; top: -26px; left: 50%; width: 64px; height: 12px; margin-left: -34px; border: 2px solid #4a535d; background: linear-gradient(90deg, transparent 80%, #3a1c1c 80% 90%, transparent 90%), #22262c; }
+      .room-door.security { border-color: #5a626c; background: linear-gradient(90deg, transparent 80%, #9aa3ad 80% 84%, transparent 84%), repeating-linear-gradient(#3b4148 0 58px, #33383e 58px 62px); box-shadow: inset 0 0 0 4px #1e2226; }
+      .room-door.security::after { content: ''; position: absolute; top: 120px; right: -34px; width: 16px; height: 28px; border: 2px solid #5a626c; background: radial-gradient(circle at 50% 28%, #5a1f1f 0 3px, transparent 4px), #15181c; }
+      .room-door.blinds { border-color: #4f4a44; background: radial-gradient(circle at 84% 58%, #0a0a0a 0 3px, transparent 4px), linear-gradient(90deg, transparent 80%, #b9b2a4 80% 85%, transparent 85%), repeating-linear-gradient(#59616b 0 6px, #373d44 6px 8px, #1f2328 8px 11px); box-shadow: inset 0 0 0 4px #1a1c1f; }
+      #dynamic-scene[data-theme="lab"] .room-interior { background: linear-gradient(#0e1013 0 44px, #2b3038 44px 50px, #1a1d22 50px 420px, #262a31 420px 424px, #16181c 424px); }
+      #dynamic-scene[data-theme="lab"] .room-interior::before { border-color: #353c45; }
+      #dynamic-scene[data-theme="lab"] .room-interior::after { background: repeating-linear-gradient(90deg, transparent 0 220px, #3a414b 220px 360px); }
+      #dynamic-scene[data-theme="lab"] .room-interior.windowless { background: linear-gradient(#0b0c0f 0 44px, #2a2f36 44px 50px, transparent 50px), radial-gradient(circle, #0b0d10 0 1.6px, transparent 2px) 0 0 / 12px 12px, linear-gradient(#23272d, #1c1f24) !important; }
+      /* 16층 편의시설: 식당 유리벽과 메뉴 라이트박스·진열창과 꺼진 간판(CU)·목재 루버(카페), 식당 양문·편의점 셔터·카페 문·주방 반입문. 방 안은 타일 벽(식당)·진열대 벽(CU) */
+      #dynamic-scene[data-theme="food"] .room-interior { background: linear-gradient(#12100d 0 44px, #3a352b 44px 50px, #26231d 50px 420px, #312d25 420px 424px, #1f1c17 424px); }
+      #dynamic-scene[data-theme="food"] .room-interior::before { border-color: #4d4536; }
+      #dynamic-scene .floor-room.kitchen { background: linear-gradient(transparent 58%, #3b352a 58% 59.5%, transparent 59.5%), repeating-linear-gradient(90deg, #2a2721 0 38px, #24211c 38px 40px); }
+      #dynamic-scene .floor-room.kitchen::before { top: 30px; left: 24px; right: 24px; height: 180px; border-color: #4d4536; background: repeating-linear-gradient(90deg, transparent 0 70px, #3a342a 70px 170px) 0 120px / 100% 16px no-repeat, linear-gradient(#15130f, #1d1a15); }
+      #dynamic-scene .floor-room.kitchen::after { content: ''; position: absolute; top: 236px; left: 40px; width: 220px; height: 64px; border: 3px solid #5a4f3c; background: repeating-linear-gradient(#2c2820 0 10px, #3a3428 10px 12px); }
+      #dynamic-scene .floor-room.store { background: linear-gradient(#211f26, #18161c); }
+      #dynamic-scene .floor-room.store::before { top: 70px; left: 20px; right: 20px; height: 230px; border-color: #48434f; background: repeating-linear-gradient(transparent 0 52px, #3b3645 52px 58px), repeating-linear-gradient(90deg, #1c1a22 0 30px, #24212b 30px 34px); }
+      #dynamic-scene .floor-room.store::after { content: ''; position: absolute; top: 14px; left: 20px; right: 20px; height: 36px; background: linear-gradient(90deg, #3e3052 0 72%, #4d6532 72%); opacity: .6; }
+      #dynamic-scene .floor-room.cafe { background: repeating-linear-gradient(90deg, #36291e 0 18px, #2d2219 18px 22px); }
+      #dynamic-scene .floor-room.cafe::before { top: 40px; left: auto; right: 30px; width: 300px; height: 210px; border-color: #5a4430; background: radial-gradient(circle at 30% 30%, #3a2c1e 0 16px, transparent 17px), radial-gradient(circle at 70% 30%, #3a2c1e 0 16px, transparent 17px), linear-gradient(#14100c, #1d1712); }
+      .room-door.cafeteria { border-color: #5d5444; background: linear-gradient(90deg, transparent 49%, #5d5444 49% 51%, transparent 51%), linear-gradient(transparent 46%, #a89a7c 46% 48%, transparent 48%), linear-gradient(110deg, #283238 0 30%, #1c2428 30%); box-shadow: inset 0 0 0 4px #15130f; }
+      .room-door.shutter { border-color: #5a5a5e; background: repeating-linear-gradient(#56585c 0 9px, #3e4044 9px 12px); box-shadow: inset 0 -12px 0 #2a2b2e, inset 0 0 0 3px #2a2b2e; }
+      .room-door.shutter::before { content: ''; position: absolute; top: -24px; left: -8px; right: -8px; height: 18px; border: 2px solid #5a5a5e; background: #34353a; }
+      .room-door.cafe { border-color: #6b4f36; background: radial-gradient(circle at 16% 55%, #c9a877 0 4px, transparent 5px), linear-gradient(105deg, #2c3438 0 30%, #20272a 30%); box-shadow: inset 0 0 0 8px #4a3524; }
+      .room-door.backdoor { border-color: #5d584c; background: linear-gradient(transparent 82%, #6c6556 82%), linear-gradient(90deg, transparent 80%, #a39c8a 80% 84%, transparent 84%), linear-gradient(#3b3830, #2c2a24); box-shadow: inset 0 0 0 4px #1b1914; }
+      .room-door.backdoor::before { content: '반입문'; position: absolute; top: -28px; left: 50%; transform: translateX(-50%); padding: 1px 8px; border: 2px solid #6a604c; background: #16130e; color: #e2cf9a; font: bold 12px Arial, sans-serif; white-space: nowrap; }
+      #dynamic-scene .room-interior.tiles { background: linear-gradient(#12100d 0 44px, #3a352b 44px 50px, transparent 50px), repeating-linear-gradient(90deg, transparent 0 44px, #1c1a1599 44px 46px), repeating-linear-gradient(transparent 0 44px, #1c1a1599 44px 46px), #2a2822; }
+      #dynamic-scene .room-interior.shelves { background: linear-gradient(#100f14 0 44px, #34303e 44px 50px, transparent 50px), repeating-linear-gradient(transparent 0 70px, #3a3546 70px 76px) 0 110px / 100% 310px no-repeat, repeating-linear-gradient(90deg, #1d1b24 0 160px, #17151d 160px 164px); }
+      #dynamic-scene .room-interior.shelves::before { display: none; }
+      /* 15층 연구본부: 민트 띠 유리 칸막이(연구실)·창 하나와 일정판 벽(세미나실)·목재 패널과 명판(본부장실), 카드 리더 유리문·세로창 나무문·호두나무 문 */
+      #dynamic-scene[data-theme="research"] .room-interior { background: linear-gradient(#0c1212 0 44px, #2a3a39 44px 50px, #182221 50px 420px, #223030 420px 424px, #151d1d 424px); }
+      #dynamic-scene[data-theme="research"] .room-interior::before { border-color: #2f4443; }
+      #dynamic-scene .floor-room.partition { background: repeating-linear-gradient(90deg, #1a2524 0 96px, #2e4241 96px 102px); }
+      #dynamic-scene .floor-room.partition::before { top: 24px; left: 16px; right: 16px; height: 300px; border-color: #2e4241; background: linear-gradient(transparent 44%, #3c5553 44% 50%, transparent 50%), repeating-linear-gradient(90deg, transparent 0 96px, #2e4241 96px 102px), linear-gradient(#0e1818, #132020); }
+      #dynamic-scene .floor-room.seminar { background: linear-gradient(#1f2b2a, #172120); }
+      #dynamic-scene .floor-room.seminar::before { top: 50px; left: auto; right: 40px; width: 260px; height: 120px; border-color: #36504d; }
+      #dynamic-scene .floor-room.seminar::after { content: ''; position: absolute; top: 210px; right: 80px; width: 110px; height: 70px; border: 3px solid #36504d; background: repeating-linear-gradient(#2d3f3d 0 8px, #1a2524 8px 14px); }
+      #dynamic-scene .floor-room.director { background: repeating-linear-gradient(90deg, #2e2a22 0 110px, #26231c 110px 113px); }
+      #dynamic-scene .floor-room.director::before { display: none; }
+      #dynamic-scene .floor-room.director::after { content: ''; position: absolute; top: 150px; right: 60px; width: 120px; height: 30px; border: 2px solid #3a3020; background: linear-gradient(#8a7444, #5e4e2c); }
+      .room-door.research { border-color: #3e5856; background: linear-gradient(90deg, transparent 76%, #9cc4bd 76% 79%, transparent 79%), linear-gradient(transparent 40%, #3c5553 40% 46%, transparent 46%), linear-gradient(105deg, #1e3634 0 28%, #142625 28%); box-shadow: inset 0 0 0 4px #0e1716; }
+      .room-door.research::after { content: ''; position: absolute; top: 110px; right: -32px; width: 14px; height: 24px; border: 2px solid #3e5856; background: radial-gradient(circle at 50% 30%, #1f4a3a 0 3px, transparent 4px), #0e1716; }
+      .room-door.seminar { border-color: #4a5a4c; background: linear-gradient(90deg, transparent 18%, #152326 18% 32%, transparent 32%) 0 30px / 100% 150px no-repeat, linear-gradient(90deg, transparent 80%, #b7ab85 80% 84%, transparent 84%), repeating-linear-gradient(#3d4a3e 0 36px, #35412f 36px 38px); box-shadow: inset 0 0 0 4px #1b221b; }
+      .room-door.director { border-color: #5b4a30; background: linear-gradient(90deg, transparent 76%, #c2a060 76% 84%, transparent 84%) 0 150px / 100% 12px no-repeat, repeating-linear-gradient(90deg, #3a2a1c 0 20px, #33251a 20px 22px); box-shadow: inset 0 0 0 6px #241a10; }
+      /* 14층 연구본부: 창 없는 블록벽(자료실)·막대그래프 포스터 유리벽(데이터 연구실)·반사 유리와 꺼진 "실험 중" 표시(사용자 실험실), 키패드 철문·파란 띠 유리문·관찰창 문. 방 안은 서가 벽(자료실)·관찰 유리(실험실) */
+      #dynamic-scene[data-theme="dataset"] .room-interior { background: linear-gradient(#0c0e18 0 44px, #2c3352 44px 50px, #191c2e 50px 420px, #242a44 420px 424px, #151827 424px); }
+      #dynamic-scene[data-theme="dataset"] .room-interior::before { border-color: #323a5a; }
+      #dynamic-scene .floor-room.stacks { background: repeating-linear-gradient(90deg, transparent 0 88px, #1418288c 88px 92px), repeating-linear-gradient(#20243a 0 38px, #1a1d30 38px 42px); }
+      #dynamic-scene .floor-room.stacks::before { display: none; }
+      #dynamic-scene .floor-room.datawall::before { top: 26px; left: 20px; right: 20px; height: 160px; border-color: #3a4468; }
+      #dynamic-scene .floor-room.datawall::after { content: ''; position: absolute; top: 214px; right: 50px; width: 180px; height: 100px; border: 3px solid #3a4468; background: linear-gradient(to top, #35598a 30%, transparent 30%) 12px 0 / 24px 100% no-repeat, linear-gradient(to top, #35598a 55%, transparent 55%) 48px 0 / 24px 100% no-repeat, linear-gradient(to top, #35598a 80%, transparent 80%) 84px 0 / 24px 100% no-repeat, linear-gradient(to top, #5d4680 45%, transparent 45%) 120px 0 / 24px 100% no-repeat, #0f1222; }
+      #dynamic-scene .floor-room.mirror { background: linear-gradient(#1a1d2e, #121422); }
+      #dynamic-scene .floor-room.mirror::before { top: 40px; left: 24px; right: 24px; height: 180px; border-color: #353c5e; background: linear-gradient(115deg, transparent 0 30%, #ffffff10 30% 34%, transparent 34% 60%, #ffffff0a 60% 62%, transparent 62%), linear-gradient(#08090f, #0e1018); }
+      #dynamic-scene .floor-room.mirror::after { content: '실험 중'; position: absolute; top: 250px; left: 40px; padding: 2px 10px; border: 2px solid #4a3040; background: #1a0c12; color: #5c2d3a; font: bold 13px Arial, sans-serif; white-space: nowrap; }
+      .room-door.vault { border-color: #4f5878; background: linear-gradient(90deg, transparent 12%, #5d678a 12% 14%, transparent 14% 86%, #5d678a 86% 88%, transparent 88%), linear-gradient(90deg, transparent 72%, #9aa3c4 72% 84%, transparent 84%) 0 140px / 100% 14px no-repeat, linear-gradient(#2e3450, #22273e); box-shadow: inset 0 0 0 6px #171a2a; }
+      .room-door.vault::after { content: ''; position: absolute; top: 110px; left: -32px; width: 16px; height: 26px; border: 2px solid #4f5878; background: repeating-linear-gradient(#2b3150 0 4px, #0e1020 4px 6px); }
+      .room-door.datalab { border-color: #3e4870; background: linear-gradient(90deg, transparent 74%, #aab4dc 74% 77%, transparent 77%), linear-gradient(transparent 36%, #2f4c86 36% 40%, transparent 40%), linear-gradient(105deg, #1e2a48 0 28%, #151d34 28%); box-shadow: inset 0 0 0 4px #0e1222; }
+      .room-door.observe { border-color: #4a4f68; background: linear-gradient(#0b0d16, #0b0d16) 50% 60px / 46% 64px no-repeat, linear-gradient(90deg, transparent 80%, #969cb8 80% 84%, transparent 84%), linear-gradient(#34384e, #282b3d); box-shadow: inset 0 0 0 4px #181a26; }
+      #dynamic-scene .room-interior.stacks { background: linear-gradient(#0a0b12 0 44px, #262b44 44px 50px, transparent 50px), repeating-linear-gradient(transparent 0 64px, #2a2f48 64px 70px) 0 90px / 100% 330px no-repeat, repeating-linear-gradient(90deg, #171a2a 0 240px, #121421 240px 246px) !important; }
+      #dynamic-scene .room-interior.mirror::before { top: 80px; left: 180px; right: auto; width: 700px; height: 240px; border: 8px solid #2c3352; background: linear-gradient(115deg, transparent 0 30%, #ffffff0d 30% 33%, transparent 33%), linear-gradient(#07080d, #0c0e16); }
+      /* 13층 기술본부(support 테마): 꺼진 모니터 벽이 비치는 유리(상황실)·철망 우리와 고전압 표지(장비 검증실)·높은 띠창과 꺼진 "교육 중" 표시(교육장), 주황 띠 유리 양문·철망 문·작은 창 문. 상황실 안은 꺼진 모니터 벽 */
+      #dynamic-scene[data-theme="support"] .room-interior { background: linear-gradient(#0e0f11 0 44px, #36393e 44px 50px, #1d1f22 50px 420px, #2a2c30 420px 424px, #18191c 424px); }
+      #dynamic-scene[data-theme="support"] .room-interior::before { border-color: #3a3d42; }
+      #dynamic-scene[data-theme="support"] .room-interior.windowless { background: linear-gradient(#0c0d0f 0 44px, #33363b 44px 50px, transparent 50px), repeating-linear-gradient(90deg, #1c1e21 0 180px, #16171a 180px 184px) !important; }
+      #dynamic-scene .floor-room.ops::before { top: 30px; left: 20px; right: 20px; height: 220px; border-color: #44484e; background: repeating-linear-gradient(90deg, transparent 0 70px, #2a2d31 70px 74px) 0 24px / 100% 110px no-repeat, repeating-linear-gradient(transparent 0 34px, #2a2d31 34px 38px) 0 24px / 100% 110px no-repeat, linear-gradient(#07090b, #07090b) 0 24px / 100% 110px no-repeat, linear-gradient(#101215, #16181b); }
+      #dynamic-scene .floor-room.cage { background: repeating-linear-gradient(45deg, transparent 0 10px, #4a4d5255 10px 11px), repeating-linear-gradient(-45deg, transparent 0 10px, #4a4d5255 10px 11px), linear-gradient(#141518, #0f1012); }
+      #dynamic-scene .floor-room.cage::before { display: none; }
+      #dynamic-scene .floor-room.cage::after { content: '고전압 주의'; position: absolute; top: 40px; right: 24px; padding: 3px 8px; background: #8a6424; color: #16140f; font: bold 12px Arial, sans-serif; white-space: nowrap; }
+      #dynamic-scene .floor-room.classroom { background: linear-gradient(#24262a, #1b1c1f); }
+      #dynamic-scene .floor-room.classroom::before { top: 30px; left: 20px; right: 20px; height: 70px; border-color: #3e4146; background: repeating-linear-gradient(90deg, #0c1a2b 0 60px, #3e4146 60px 66px); }
+      #dynamic-scene .floor-room.classroom::after { content: '교육 중'; position: absolute; top: 150px; left: 40px; padding: 2px 10px; border: 2px solid #4a3a26; background: #1a130c; color: #5e4526; font: bold 13px Arial, sans-serif; white-space: nowrap; }
+      .room-door.ops { border-color: #4a4e55; background: linear-gradient(90deg, transparent 49%, #4a4e55 49% 51%, transparent 51%), linear-gradient(transparent 44%, #8a6430 44% 47%, transparent 47%), linear-gradient(110deg, #22303a 0 30%, #19222b 30%); box-shadow: inset 0 0 0 4px #131416; }
+      .room-door.cage { border-color: #5c6066; background: linear-gradient(90deg, transparent 80%, #a0a4aa 80% 84%, transparent 84%), repeating-linear-gradient(45deg, transparent 0 8px, #5c606699 8px 9px), repeating-linear-gradient(-45deg, transparent 0 8px, #5c606699 8px 9px), #101113; box-shadow: inset 0 0 0 4px #1d1f22; }
+      .room-door.classroom { border-color: #4e5258; background: linear-gradient(#0c1a2b, #0c1a2b) 30% 50px / 40% 60px no-repeat, linear-gradient(90deg, transparent 80%, #a8acb2 80% 84%, transparent 84%), linear-gradient(#3a3d43, #2c2e33); box-shadow: inset 0 0 0 4px #1a1b1e; }
+      #dynamic-scene .room-interior.monitors { background: linear-gradient(#0c0d0f 0 44px, #33363b 44px 50px, #1a1c1f 50px 420px, #282a2e 420px 424px, #151618 424px); }
+      #dynamic-scene .room-interior.monitors::before { top: 70px; left: 240px; right: 560px; height: 230px; border: 6px solid #2c2f34; background: repeating-linear-gradient(90deg, transparent 0 146px, #2c2f34 146px 152px), repeating-linear-gradient(transparent 0 70px, #2c2f34 70px 76px), linear-gradient(#0a0d0f, #111618); }
       .floor-prop { position: absolute; pointer-events: none; image-rendering: pixelated; }
       .floor-prop img { display: block; width: 100%; height: 100%; }
       .floor-prop.near { outline: 2px solid #96b7aa; }
+      /* 벽에 붙은 설비(fixtures): 층별 안내판·정문처럼 CSS로 그리는 조사 대상. 글줄(lines)은 span 한 줄씩 */
+      .fixture { position: absolute; box-sizing: border-box; pointer-events: none; }
+      .fixture span { display: block; white-space: nowrap; }
+      .fixture.near { outline: 2px solid #96b7aa; }
       .floor-background { position: absolute; left: 0; pointer-events: none; user-select: none; image-rendering: pixelated; }
       #dynamic-scene[data-art="true"] > .solid:not(.crate),
       #dynamic-scene[data-art="true"] .room-interior { visibility: hidden; }
@@ -77,6 +186,71 @@
       #dynamic-scene[data-art="true"] .floor-number-sign { top: 282px; }
       #dynamic-scene[data-art="true"] .floor-prop img { filter: brightness(.68) saturate(.8); }
       #world[data-room="dynamic"] #dynamic-scene { display: block; }
+      /* 11F 사업본부·전략마케팅본부: 남색 카펫과 금색 테(sales 테마), 복도를 막는 방화셔터. 테마 규칙이 방 모양 규칙보다 먼저 온다. */
+      #dynamic-scene[data-theme="sales"] > .floor { background: repeating-linear-gradient(90deg, #151b2c 0 60px, #121727 60px 120px); border-top-color: #8a7446; }
+      #dynamic-scene[data-theme="sales"] .floor-room { border-color: #2c3450; }
+      #dynamic-scene[data-theme="sales"] .floor-room-sign { border-color: #9a8350; background: #0e1220; color: #e3cf97; }
+      #dynamic-scene[data-theme="sales"] .floor-number-sign { border-color: #9a8350; background: #0e1220; color: #f0dea8; }
+      #dynamic-scene[data-theme="sales"] .room-interior { background: linear-gradient(#0c0f1a 0 44px, #2c3450 44px 50px, #182036 50px 420px, #8a7446 420px 423px, #141a2c 423px); }
+      #dynamic-scene[data-theme="sales"] .room-interior::before { border-color: #3a4466; background: linear-gradient(90deg, transparent 0 calc(100% - 6px), #8a7446 0) 0 0 / 180px 100%, radial-gradient(circle, #c9b77a55 0 1.5px, transparent 2px) 0 80px / 26px 22px, linear-gradient(transparent 38%, #0a0d17 38%), linear-gradient(#0d1426, #1a2440); }
+      #dynamic-scene[data-theme="sales"] .room-interior::after { background: repeating-linear-gradient(90deg, transparent 0 240px, #3a4466 240px 380px); }
+      #dynamic-scene[data-theme="sales"] .room-interior.windowless { background: linear-gradient(#0b0e18 0 44px, #2c3450 44px 50px, transparent 50px), repeating-linear-gradient(90deg, #19203a 0 150px, #141a2e 150px 154px) !important; }
+      #dynamic-scene .floor-room.sales { background: linear-gradient(transparent 70%, #8a7446 70% 71%, transparent 71%), linear-gradient(#1a2238, #121828); }
+      #dynamic-scene .floor-room.sales::before { top: 30px; left: 22px; right: 22px; height: 250px; border-color: #8a7446; background: linear-gradient(90deg, transparent 0 calc(100% - 5px), #8a7446 0) 0 0 / 150px 100%, radial-gradient(circle, #c9b77a55 0 1.5px, transparent 2px) 0 70px / 26px 22px, linear-gradient(transparent 40%, #0a0e19 40%), linear-gradient(#0d1528, #1a2542); }
+      #dynamic-scene .floor-room.war-room { background: linear-gradient(#1a2032, #101422); }
+      #dynamic-scene .floor-room.war-room::before { top: 28px; left: 18px; right: 18px; height: 300px; border-color: #3a4466; background: repeating-linear-gradient(#2a3350 0 10px, #161c2e 10px 26px); }
+      #dynamic-scene .floor-room.materials { background: repeating-linear-gradient(90deg, #1a2034 0 76px, #151a2b 76px 79px); }
+      #dynamic-scene .floor-room.materials::before { top: 60px; left: 40px; right: 40px; height: 120px; border: 4px solid #8a7446; background: linear-gradient(90deg, #5a2c36 0 30%, transparent 30% 36%, #28475e 36% 64%, transparent 64% 70%, #8f7632 70%); }
+      #dynamic-scene .room-interior.boardroom::before { top: 80px; left: 520px; right: auto; width: 640px; height: 280px; border: 8px solid #2c3450; background: linear-gradient(115deg, #151b2c 0 18%, transparent 18%), linear-gradient(#0a0d14, #121828); }
+      .room-door.gilt { border-color: #9a8350; background: linear-gradient(90deg, transparent 49%, #9a8350 49% 51%, transparent 51%), linear-gradient(transparent 52%, #c8ae6a 52% 55%, transparent 55%), linear-gradient(105deg, #22304a 0 30%, #172238 30%); box-shadow: inset 0 0 0 4px #0e1220; }
+      .room-door.privacy { border-color: #4a5577; background: repeating-linear-gradient(#3a4566 0 8px, #1f2740 8px 22px) 0 40% / 100% 30% no-repeat, linear-gradient(90deg, transparent 80%, #c8ae6a 80% 84%, transparent 84%), linear-gradient(105deg, #243049 0 30%, #19223a 30%); box-shadow: inset 0 0 0 4px #0e1220; }
+      .room-door.stockroom { border-color: #4f5670; background: linear-gradient(#10141f, #10141f) 50% 18% / 40% 50px no-repeat, linear-gradient(transparent 86%, #6b7188 86%), linear-gradient(90deg, transparent 80%, #9aa0b4 80% 84%, transparent 84%), linear-gradient(#343a50, #262b3d); box-shadow: inset 0 0 0 4px #161a26; }
+      .barrier { position: absolute; pointer-events: none; }
+      .barrier.near { outline: 2px solid #96b7aa; }
+      .barrier.shutter { border: 3px solid #5b5f66; border-top: 0; background: radial-gradient(circle at 50% 80%, #0d0f12 0 3px, #c9a13b 3px 5px, transparent 5px), repeating-linear-gradient(#8a8f96 0 9px, #5e636b 9px 12px, #3c4046 12px 14px); box-shadow: inset 0 -12px #c9a13b; }
+      .barrier.shutter::before { content: ''; position: absolute; top: -30px; left: -12px; right: -12px; height: 30px; border: 3px solid #4a4f58; background: linear-gradient(#3a3f47, #2a2e35); }
+      .barrier.shutter[data-open="true"] { border: 0; background: repeating-linear-gradient(#8a8f96 0 9px, #5e636b 9px 12px, #3c4046 12px 14px) 0 0 / 100% 24px no-repeat; box-shadow: none; }
+      /* 10F 경영관리본부: 짙은 옥색 벽과 크림색 몰딩(finance 테마), 창 없는 금고실과 이중 잠금 서류함 */
+      #dynamic-scene[data-theme="finance"] > .floor { background: repeating-linear-gradient(90deg, #17201d 0 158px, #26302c 158px 160px); border-top-color: #b3a784; }
+      #dynamic-scene[data-theme="finance"] .floor-room { border-color: #33463f; }
+      #dynamic-scene[data-theme="finance"] .floor-room-sign { border-color: #a48d5a; background: #0c1310; color: #e4dcc0; }
+      #dynamic-scene[data-theme="finance"] .floor-number-sign { border-color: #a48d5a; background: #0c1310; color: #efe7cc; }
+      #dynamic-scene[data-theme="finance"] .room-interior { background: linear-gradient(#0b110f 0 44px, #33463f 44px 50px, #182420 50px 400px, #b3a784 400px 403px, #22302b 403px 418px, #b3a784 418px 420px, #141d1a 420px); }
+      #dynamic-scene[data-theme="finance"] .room-interior::before { border-color: #4a5f56; }
+      #dynamic-scene[data-theme="finance"] .room-interior::after { background: repeating-linear-gradient(90deg, transparent 0 200px, #4a5f56 200px 320px); }
+      #dynamic-scene .floor-room.ledger { background: linear-gradient(transparent 46%, #8f8a74 46% 52%, transparent 52%), repeating-linear-gradient(90deg, #1b2824 0 200px, #a48d5a 200px 204px); }
+      #dynamic-scene .floor-room.ledger::before { top: 26px; left: 24px; right: 24px; height: 130px; border-color: #a48d5a; }
+      #dynamic-scene .floor-room.marble { border-color: #5e5a4d; background: linear-gradient(115deg, transparent 0 30%, #8e897866 30% 30.6%, transparent 30.6% 62%, #8e897855 62% 62.5%, transparent 62.5%), linear-gradient(#4a473f, #3a3832); }
+      #dynamic-scene .floor-room.marble::before { top: 40px; left: 50%; right: auto; width: 160px; height: 36px; margin-left: -80px; border: 3px solid #8a7446; background: linear-gradient(#c8ae6a, #9a8350); }
+      #dynamic-scene .floor-room.strongroom { border-color: #56605c; background: radial-gradient(circle, #6d7672 0 2px, transparent 3px) 10px 10px / 60px 60px, repeating-linear-gradient(90deg, #2d3533 0 120px, #1c2221 120px 124px), linear-gradient(#303836, #232a28); }
+      #dynamic-scene .floor-room.strongroom::before { display: none; }
+      #dynamic-scene .room-interior.strongroom { background: linear-gradient(#0b0f0e 0 44px, #3a4442 44px 50px, transparent 50px), radial-gradient(circle, #56605c 0 2px, transparent 3px) 10px 60px / 60px 60px, repeating-linear-gradient(90deg, #262d2b 0 180px, #1b2120 180px 186px) !important; }
+      .room-door.brass { border-color: #a48d5a; background: linear-gradient(transparent 88%, #a48d5a 88%), linear-gradient(90deg, transparent 76%, #d4bd7c 76% 80%, transparent 80%), linear-gradient(105deg, #243a33 0 30%, #182a25 30%); box-shadow: inset 0 0 0 4px #0c1310; }
+      .room-door.lacquer { border-color: #6f6a5b; background: radial-gradient(circle at 82% 56%, #d4bd7c 0 5px, #6b5a30 5px 7px, transparent 7px), linear-gradient(#16291f, #16291f) 50% 12% / 66% 28% no-repeat, linear-gradient(#16291f, #16291f) 50% 88% / 66% 44% no-repeat, linear-gradient(#24422f, #1b3325); box-shadow: inset 0 0 0 4px #0b1410; }
+      .room-door.vault-wheel { border: 8px solid #6d7672; border-bottom: 0; background: radial-gradient(circle at 50% 44%, transparent 0 22px, #a9b2ae 22px 26px, transparent 26px), linear-gradient(#a9b2ae, #a9b2ae) 50% 44% / 60px 6px no-repeat, linear-gradient(#a9b2ae, #a9b2ae) 50% 44% / 6px 60px no-repeat, repeating-linear-gradient(#4a524f 0 40px, #414946 40px 44px); box-shadow: inset 0 0 0 5px #252b29; }
+      .floor-prop.double-lock::after { content: ''; position: absolute; left: 50%; top: 20%; width: 34px; height: 12px; margin-left: -17px; background: radial-gradient(circle, #d4bd7c 0 3px, #3a2f16 3px 5px, transparent 5px) 0 0 / 17px 12px; }
+      /* 9F TmaxTibero 사업본부: 와인색 카펫과 목탄색 벽(wine 테마), 계단식 좌석이 있는 고객 교육장 */
+      #dynamic-scene[data-theme="wine"] > .floor { background: repeating-linear-gradient(90deg, #22141a 0 40px, #1d1116 40px 80px); border-top-color: #7a4a58; }
+      #dynamic-scene[data-theme="wine"] .floor-room { border-color: #3d2530; }
+      #dynamic-scene[data-theme="wine"] .floor-room-sign { border-color: #8c5566; background: #150b0f; color: #e8c9d2; }
+      #dynamic-scene[data-theme="wine"] .floor-number-sign { border-color: #8c5566; background: #150b0f; color: #f2d9e0; }
+      #dynamic-scene[data-theme="wine"] .room-interior { background: linear-gradient(#100a0c 0 44px, #3d2530 44px 50px, #1f1519 50px 420px, #4a2d38 420px 424px, #1a1014 424px); }
+      #dynamic-scene[data-theme="wine"] .room-interior::before { border-color: #4a303a; }
+      #dynamic-scene[data-theme="wine"] .room-interior::after { background: repeating-linear-gradient(90deg, transparent 0 260px, #4a303a 260px 400px); }
+      #dynamic-scene .floor-room.auditorium { background: repeating-linear-gradient(90deg, #2a1a21 0 22px, #22151b 22px 26px); }
+      #dynamic-scene .floor-room.auditorium::before { top: 36px; left: auto; right: 40px; width: 90px; height: 36px; border: 3px solid #5a3a46; background: #1a0e12; }
+      #dynamic-scene .floor-room.wine-glass { background: linear-gradient(transparent 64%, #4a2d38 64% 65%, transparent 65%), linear-gradient(#26181e, #1a1015); }
+      #dynamic-scene .floor-room.wine-glass::before { top: 28px; left: 20px; right: 20px; height: 220px; border-color: #5a3a46; }
+      #dynamic-scene .floor-room.license { background: linear-gradient(#211a1e, #171215); }
+      #dynamic-scene .floor-room.license::before { top: 30px; left: 20px; right: 20px; height: 230px; border-color: #4a4a52; background: radial-gradient(circle, #3f8f6a 0 1.5px, transparent 2px) 14px 20px / 40px 30px, repeating-linear-gradient(90deg, #121014 0 34px, #2a2830 34px 40px); }
+      #dynamic-scene .room-interior.auditorium { background: linear-gradient(#0f090b 0 44px, #3d2530 44px 50px, transparent 50px), repeating-linear-gradient(90deg, #24171c 0 30px, #1d1216 30px 34px) !important; }
+      #dynamic-scene .room-interior.auditorium::before { display: block; top: 90px; left: 560px; right: auto; width: 520px; height: 260px; border: 8px solid #2a1a21; background: linear-gradient(#1e2126, #15171b); }
+      .solid.riser { background: linear-gradient(#8c5566 0 3px, #3a2029 3px 10px, #2a171e 10px); }
+      .solid.riser::before { content: ''; position: absolute; right: 18px; bottom: 100%; width: 150px; height: 30px; border-radius: 5px 5px 0 0; background: repeating-linear-gradient(90deg, #4a2a36 0 40px, transparent 40px 50px); }
+      .room-door.push-bar { border-color: #8c5566; background: radial-gradient(circle at 25% 30%, #1a2230 0 12px, #8c5566 12px 14px, transparent 14px), radial-gradient(circle at 75% 30%, #1a2230 0 12px, #8c5566 12px 14px, transparent 14px), linear-gradient(transparent 55%, #b8a0a8 55% 58%, transparent 58%), linear-gradient(90deg, transparent 49%, #150b0f 49% 51%, transparent 51%), linear-gradient(#4a2a36, #3a2029); box-shadow: inset 0 0 0 4px #1a0d12; }
+      .room-door.wine { border-color: #6a4250; background: linear-gradient(90deg, transparent 78%, #c9a9b3 78% 82%, transparent 82%), linear-gradient(105deg, #2c2433 0 30%, #201a27 30%); box-shadow: inset 0 0 0 4px #150b0f; }
+      .room-door.badge { border-color: #5a5a64; background: linear-gradient(90deg, transparent 80%, #a8a8b4 80% 84%, transparent 84%), linear-gradient(#2e2d35, #232228); box-shadow: inset 0 0 0 4px #141318; }
+      .room-door.badge::after { content: ''; position: absolute; top: 130px; left: -30px; width: 16px; height: 26px; border: 2px solid #5a5a64; background: radial-gradient(circle at 50% 30%, #2d4a3a 0 3px, transparent 4px), #151418; }
       #world[data-room="dynamic"] #background,
       #world[data-room="dynamic"] #office-background,
       #world[data-room="dynamic"] > .solid,
@@ -140,6 +314,18 @@
       nav button:hover { border-color: #b9c6cf; }
       nav button.active, nav button:active { background: #bdd1dc; color: #22282e; }
       nav button:focus-visible { outline: 2px solid #c9dde5; outline-offset: 4px; }
+      /* 테스트용 층 이동 창 */
+      #debug-floor { position: fixed; top: 64px; left: max(24px, env(safe-area-inset-left)); z-index: 5; display: flex; align-items: center; gap: 6px; padding: 6px 8px; background: #101b20e6; border: 1px dashed #c9a13b; font-size: 12px; }
+      #debug-floor select, #debug-floor button { font: 12px Arial, sans-serif; }
+      /* 도어락 키패드: 방 문·소품의 code. 열려 있는 동안 스테이지 조작이 멈춘다 */
+      #keypad { position: fixed; left: 50%; top: 50%; z-index: 6; box-sizing: border-box; width: min(340px, calc(100vw - 32px)); padding: 18px; border: 2px solid #3d4e52; background: #0d1417f2; color: #cfd9d3; font: 14px Arial, sans-serif; transform: translate(-50%, -50%); box-shadow: 0 12px 40px #000a; }
+      #keypad[hidden] { display: none; }
+      #keypad h2 { margin: 0 0 8px; color: #e2d2b8; font-size: 16px; }
+      #keypad p { margin: 0 0 12px; line-height: 1.5; }
+      #keypad input { box-sizing: border-box; width: 100%; padding: 10px; border: 2px solid #56606b; background: #05090b; color: #9fe0b0; font: bold 24px monospace; letter-spacing: .4em; text-align: center; }
+      #keypad-error { min-height: 1.3em; margin: 8px 0; color: #e08a7a; }
+      #keypad .keypad-buttons { display: flex; justify-content: flex-end; gap: 8px; }
+      #keypad button { padding: 8px 14px; font: 14px Arial, sans-serif; }
       @media (max-height: 480px) {
         nav { bottom: max(12px, env(safe-area-inset-bottom)); }
         nav button { width: 48px; height: 44px; }
@@ -179,6 +365,23 @@
       </nav>
       <div id="interaction-status" role="status" aria-live="polite"></div>
     </main>
+    <!-- 테스트용 층 이동 창 -->
+    <!-- 도어락 키패드 -->
+    <form id="keypad" role="dialog" aria-modal="true" aria-labelledby="keypad-title" hidden>
+      <h2 id="keypad-title"></h2>
+      <p id="keypad-text"></p>
+      <input id="keypad-input" type="text" inputmode="numeric" autocomplete="off" aria-label="비밀번호" />
+      <div id="keypad-error" role="alert"></div>
+      <div class="keypad-buttons">
+        <button type="button" id="keypad-cancel">닫기</button>
+        <button type="submit" id="keypad-submit">확인</button>
+      </div>
+    </form>
+    <form id="debug-floor" aria-label="테스트용 층 이동">
+      <label for="debug-floor-select">TEST 층 이동</label>
+      <select id="debug-floor-select"></select>
+      <button type="submit">이동</button>
+    </form>
     <div id="room-transition" aria-hidden="true" data-phase="idle"></div>
     <div id="computer" role="dialog" aria-modal="true" aria-label="17층 사무실 컴퓨터" tabindex="-1" hidden>
       <img id="computer-wallpaper" src="assets/ui/computer/wallpaper.png" alt="" draggable="false" />
