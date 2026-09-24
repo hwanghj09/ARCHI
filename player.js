@@ -153,9 +153,15 @@
   // CU 셔터는 정전 직전에 내려와 복도에서 열리지 않는다(unlockedBy: 자기 방 id). 식당 안쪽 끝의 주방 반입문(links)으로 편의점
   // 창고에 들어가고, 안에서 셔터를 올리고(복도 문으로) 나오면 그 뒤로는 복도에서도 드나든다.
   // 단서는 새벽마다 끊기는 냉동고 전원, 정전 직전 SYSTEM이 내린 셔터와 수호의 23:47 영수증, 낮에는 주문도 못 알아듣다가
-  // 새벽에는 먼저 인사하는 음성 주문 키오스크(ARCHI 시범). 예전 경영지원팀 배경(assets/background/floor16)은 쓰지 않는다.
+  // 새벽에는 먼저 인사하는 음성 주문 키오스크(ARCHI 시범). 배경은 편의시설 전용 그림이며 문·소품은 별도로 그린다.
   const FLOOR16_LAYOUT = {
     header: '16F · 편의시설', background: '#1d1b17', theme: 'food',
+    backgroundWallsOnly: true,
+    backgroundImage: [
+      { src: 'assets/background/floor16/amenity-corridor-left.png', left: 0, width: 1800, height: 793 * 570 / 562, top: 0 },
+      { src: 'assets/background/floor16/amenity-corridor-core.png', left: 1800, width: 1756, height: 793 * 570 / 601, top: 0 },
+      { src: 'assets/background/floor16/amenity-corridor-right.png', left: 3556, width: 1444, height: 793 * 570 / 563, top: 0 },
+    ],
     rooms: [
       { name: 'The Kitchen', x: 64, width: 1060, style: 'kitchen', target: 'f16-kitchen',
         doorX: 494, doorWidth: 200, doorStyle: 'cafeteria' },
@@ -173,6 +179,11 @@
   };
   const FLOOR16_ROOMS = interiorRooms(16, [
     { id: 'f16-kitchen', name: 'The Kitchen', width: 3604, interiorStyle: 'tiles',
+      backgroundWallsOnly: true,
+      backgroundImage: [
+        { src: 'assets/background/floor16/amenity-kitchen-dining.png', left: 0, width: 1802, height: 793 * 570 / 571, top: 0 },
+        { src: 'assets/background/floor16/amenity-kitchen-service.png', left: 1802, width: 1802, height: 793 * 570 / 591, top: 0 },
+      ],
       links: [{ target: 'f16-cu', x: 3460, width: 110, style: 'backdoor' }], props: [
       { file: 'large-planter', size: [256, 512], worldWidth: 78, x: 100 },
       { file: 'food-dining-table', size: [512, 256], worldWidth: 243, x: 380 },
@@ -188,6 +199,8 @@
       { file: 'maintenance-tool-cabinet', size: [512, 256], worldWidth: 198, x: 3250 },
     ] },
     { id: 'f16-cu', name: 'CU 편의점', width: 2040, interiorStyle: 'shelves',
+      backgroundWallsOnly: true,
+      backgroundImage: { src: 'assets/background/floor16/amenity-cu-interior.png', height: 793 * 570 / 602, top: 0 },
       links: [{ target: 'f16-kitchen', x: 56, width: 110, style: 'backdoor' }], props: [
       { file: 'instrument-cart', size: [256, 256], worldWidth: 113, x: 290 },
       { file: 'food-refrigerator', size: [256, 512], worldWidth: 96, x: 470, name: '냉장 쇼케이스',
@@ -200,7 +213,10 @@
       { file: 'electrical-panel', size: [256, 512], worldWidth: 89, x: 1640, name: '셔터 제어함',
         message: '셔터 제어 기록: "23:59 · 셔터 하강 · 명령 SYSTEM". 무인 운영 중에는 셔터를 내리지 않는다고 적혀 있다. 아래의 수동 레버로 안에서는 셔터를 올릴 수 있다.' },
     ] },
-    { id: 'f16-cafe', name: 'Café', width: 1904, props: [
+    { id: 'f16-cafe', name: 'Café', width: 1904,
+      backgroundWallsOnly: true,
+      backgroundImage: { src: 'assets/background/floor16/amenity-cafe-interior.png', height: 793 * 570 / 596, top: 0 },
+      props: [
       { file: 'large-planter', size: [256, 512], worldWidth: 78, x: 330 },
       { file: 'waiting-sofa', size: [512, 256], worldWidth: 250, x: 560 },
       { file: 'meeting-table', size: [512, 256], worldWidth: 356, x: 950 },
@@ -1022,15 +1038,15 @@
   function buildDynamicScene(config) {
     const bodies = [];
     const doorList = [];
-    dynamicScene.dataset.art = String(Boolean(config.backgroundImage));
-    if (config.backgroundImage) {
-      const art = config.backgroundImage;
+    // 벽만 그린 배경은 실제 문을 유지한다. 기존 문 포함 배경(화장실)은 기존 art 모드를 쓴다.
+    dynamicScene.dataset.art = config.backgroundWallsOnly ? 'walls' : String(Boolean(config.backgroundImage));
+    for (const art of [config.backgroundImage].flat().filter(Boolean)) {
       const image = new Image();
       image.className = 'floor-background';
       image.src = art.src;
       image.alt = '';
       image.draggable = false;
-      Object.assign(image.style, { width: `${art.width ?? config.width}px`, height: `${art.height}px`, top: `${art.top}px` });
+      Object.assign(image.style, { left: `${art.left ?? 0}px`, width: `${art.width ?? config.width}px`, height: `${art.height}px`, top: `${art.top}px` });
       dynamicScene.append(image);
     }
     if (config.id === 'rooftop') dynamicScene.append(rooftopBackground);

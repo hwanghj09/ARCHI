@@ -224,7 +224,8 @@ try {
     assert.equal(await header(), corridorHeader);
     await checkCore();
     assert.equal(await page.locator('#dynamic-scene').getAttribute('data-theme'), 'food');
-    assert.equal(await page.locator('#dynamic-scene .floor-background').count(), 0, 'The old 16F office art is not used');
+    assert.equal(await page.locator('#dynamic-scene .floor-background').count(), 3, 'The amenity corridor uses three background panels');
+    assert.equal(await page.locator('#dynamic-scene').getAttribute('data-art'), 'walls', 'Doors remain separate from the background');
     assert.deepEqual(await page.locator('#dynamic-scene .floor-room-sign').allTextContents(),
       ['The Kitchen', 'CU 편의점', 'Café', '화장실'], 'Rooms follow the lobby directory');
     assert.deepEqual(await page.locator('#dynamic-scene .floor-room').evaluateAll(els => els.map(el => el.className)),
