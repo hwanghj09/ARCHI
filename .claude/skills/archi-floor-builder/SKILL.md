@@ -174,6 +174,10 @@ work while standing on the floor (y=570), never from on top of a crate.
   the floor sign, and dims props (brightness .68, saturate .8), so the art must paint every front
   and door. A corridor image must be drawn for the core coordinates above;
   `floor16/corridor.png` is the old 3700px layout and is unused.
+- 1:1 art (12F): `backgroundImage: { src, height: 720, top: 0, flat: true }` drawn at world scale (floor at y=570)
+  sets `data-art="flat"`: CSS walls, fronts, signs and interior are hidden, doors keep only the `.near` outline, and
+  props are not dimmed. 12F's images are rendered from CSS by `scripts/render-floor12-art.mjs`, which is the only
+  place its design lives; change its coordinates together with `FLOOR12_LAYOUT` and rerun it.
 
 ## Tests
 

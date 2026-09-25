@@ -252,7 +252,106 @@
         { file: 'maintenance-tool-cabinet', size: [512, 256], worldWidth: 200, x: 2450 },
       ] },
   ]);
-  const FLOOR_LAYOUTS = { 15: FLOOR15_LAYOUT, 16: FLOOR16_LAYOUT };
+  // 12층 ARCHI 개발팀: 차가운 청회색 연구소 마감. 벽·문·표지판은 assets/background/floor12/의 1:1 배경 그림이다
+  // (image_gen 픽셀아트, assets/background/floor12/PROMPT.md·GENERATED.md 참고. 좌표를 바꾸면 그림도 다시 만든다). 코어 왼쪽에 넓은 개발실(문이 전면 가운데), 계단과 화장실
+  // 사이 가운데 구역에 성능 평가실, 오른쪽에 개발자 휴게실. 성능 평가실은 자동문이라 전원이 없으면 열리지 않지만 유리 너머
+  // 야간 평가 출력물이 보인다(낮 3~5% / 밤 80~90% 모순). 팀장 책상 메모가 7층 검증실 백업을 가리킨다.
+  // 방 안 폭 / 복도 전면 폭 = 4.0 (900→3600, 452→1808, 640→2560). 전력 공급(조명·PC 켜짐)은 아직 없어 꺼진 상태 기준 문구다.
+  const floor12Art = name => ({ src: `assets/background/floor12/${name}.png`, height: 720, top: 0, flat: true });
+  const FLOOR12_LAYOUT = {
+    header: '12F · ARCHI 개발팀', background: '#10151c', roomDoorY: 280, backgroundImage: floor12Art('corridor'),
+    // 12층 복도 그림에서만 3번째 엘리베이터 문이 그려진 위치가 BUILDING_CORE 좌표보다 오른쪽으로 치우쳐 있어,
+    // 이 층의 엘리베이터 에셋(문·표시창)만 오른쪽으로 20px 옮긴다. 다른 층의 BUILDING_CORE 좌표는 그대로다.
+    elevatorOffsetX: [0, 0, 20],
+    // 비상구 에셋도 이 층 그림에서만 문 폭을 양쪽으로 10px씩 넓힌다(중심은 그대로, 총 폭 +20px).
+    stairsExpandX: 10,
+    // 층 번호 표지판(BUILDING_CORE.floorSignX=2694)은 17층 그림 기준 좌표라 12층 그림에서는 아무 것도 없는
+    // 빈 벽에 혼자 떠 있어 보였다. 엘리베이터 3번과 비상계단 사이 니치(로봇 충전독) 벽감 한가운데로 옮겨서
+    // 그 옆에 자연스럽게 붙어 있는 것처럼 보이게 한다.
+    floorSignX: 2785,
+    rooms: [
+      { name: 'ARCHI 개발실', x: 640, width: 900, style: 'studio', target: 'f12-dev',
+        doorX: 1030, doorWidth: 140, doorStyle: 'badge', signOffsetY: -60 },
+      { name: '성능 평가실', x: 3100, width: 452, style: 'lab', target: 'f12-lab',
+        doorX: 3290, doorWidth: 160, doorY: 260, doorStyle: 'auto', locked: true, signOffsetY: -50, signOffsetX: 20,
+        message: '자동문이 닫혀 있다. 전원이 끊겨 열리지 않는다. 유리 너머 프린터에 종이가 걸려 있다: "야간 자동 평가 03:12 · 정답률 87.4%".' },
+      { name: '개발자 휴게실', x: 4300, width: 640, style: 'lounge', target: 'f12-lounge',
+        doorX: 4700, doorWidth: 110, doorStyle: 'pocket' },
+    ],
+    props: [
+      { file: 'glass-display-cabinet', size: [256, 512], worldWidth: 111, x: 300, name: '전시 진열장',
+        message: '진열장 안의 상패: "사내 AI 경진대회 참가상 · ARCHI · 정답률 4.8%". 옆 칸은 비어 있다.' },
+      { file: 'large-planter', size: [256, 512], worldWidth: 78, x: 520 },
+      { file: 'robot-charging-dock', size: [256, 256], worldWidth: 69, x: 1650, name: '로봇 충전독',
+        message: '경비 로봇 충전독이 비어 있다. 케이블이 뽑힌 채 엘리베이터 쪽을 향해 있다.' },
+      { file: 'water-cooler', size: [256, 512], worldWidth: 62, x: 3860 },
+      { file: 'large-planter', size: [256, 512], worldWidth: 78, x: 4160 },
+    ],
+  };
+  const FLOOR12_ROOMS = interiorRooms(12, [
+    { id: 'f12-dev', name: 'ARCHI 개발실', width: 3600, backgroundImage: floor12Art('dev'), props: [
+      { file: 'large-planter', size: [256, 512], worldWidth: 78, x: 110 },
+      { file: 'filing-cabinet', size: [256, 512], worldWidth: 72, x: 230 },
+      { file: 'rolling-whiteboard', size: [512, 256], worldWidth: 350, x: 520, name: '성능 평가 보드',
+        message: '주간 ARCHI 정답률: 1주 4.6% · 2주 3.9% · 3주 3.1%. 빨간 글씨: "이대로면 다음 분기 GPU 배정 제외."' },
+      { file: 'office-desk', size: [512, 256], worldWidth: 252, x: 900 },
+      { file: 'office-desk', size: [512, 256], worldWidth: 252, x: 1180, name: '책상',
+        message: '모니터가 꺼져 있다. 전원이 들어와야 ARCHI 테스트 로그를 볼 수 있을 것 같다.' },
+      { file: 'office-desk', size: [512, 256], worldWidth: 252, x: 1460 },
+      { file: 'office-copier', size: [256, 256], worldWidth: 110, x: 2090, name: '프린터',
+        message: '출력함에 일일 성능 리포트가 쌓여 있다. 전부 09:00~18:00 측정분이다. 야간 칸에는 "자동 평가 비활성"이라고만 적혀 있다.' },
+      { file: 'office-desk', size: [512, 256], worldWidth: 252, x: 2400 },
+      { file: 'office-desk', size: [512, 256], worldWidth: 252, x: 2680 },
+      { file: 'office-desk', size: [512, 256], worldWidth: 252, x: 3180, name: '팀장 책상',
+        message: '모니터에 붙은 메모: "야간 성능 이상 관련 원본 로그는 변조 가능성 있음. 7층 AI 테스트·검증실 장비에 별도 백업함."' },
+      { file: 'filing-cabinet', size: [256, 512], worldWidth: 72, x: 3420 },
+      { file: 'large-planter', size: [256, 512], worldWidth: 78, x: 3520 },
+    ] },
+    // 지금은 잠겨 있다. 전력 시스템이 생기면 locked를 풀어 들어갈 수 있게 한다.
+    { id: 'f12-lab', name: '성능 평가실', width: 1808, windowless: true, backgroundImage: floor12Art('lab'), props: [
+      { file: 'electronics-bench', size: [512, 256], worldWidth: 261, x: 400 },
+      { file: 'server-rack', size: [256, 512], worldWidth: 96, x: 1340 },
+      { file: 'network-rack', size: [256, 512], worldWidth: 96, x: 1460 },
+      { file: 'instrument-cart', size: [256, 256], worldWidth: 113, x: 1640 },
+    ] },
+    { id: 'f12-lounge', name: '개발자 휴게실', width: 2560, backgroundImage: floor12Art('lounge'), props: [
+      { file: 'drink-vending-machine', size: [256, 512], worldWidth: 96, x: 150 },
+      { file: 'kitchenette-counter', size: [512, 256], worldWidth: 312, x: 450 },
+      { file: 'water-cooler', size: [256, 512], worldWidth: 62, x: 700 },
+      { file: 'waiting-sofa', size: [512, 256], worldWidth: 250, x: 1000, name: '소파',
+        message: '소파 위 노트북 가방에 메모가 꽂혀 있다: "새벽 배포 확인하러 왔더니 ARCHI 서버 사용률 91%. 아무 작업도 안 돌렸는데."' },
+      { file: 'staff-lockers', size: [256, 512], worldWidth: 130, x: 1450, name: '사물함',
+        message: '열린 사물함 안쪽 공지: "01:00~05:00 정기 점검 · 이 시간 12층 전력은 자동 차단됩니다. — 시설관리실"' },
+      { file: 'large-planter', size: [256, 512], worldWidth: 78, x: 2200 },
+      { file: 'staff-lockers', size: [256, 512], worldWidth: 130, x: 2400 },
+    ] },
+  ]);
+  // 7층 AI 테스트·검증실: 방이 하나뿐이라(기획.md 스토리상 이 방만 필요) 복도도 개발실·엘리베이터3·비상계단·
+  // 화장실만 있고 두 번째 방은 없다. 문은 x=848(폭146, y=260, 자동문)이며 image_gen 그림에서 나온 값 그대로다
+  // (17층처럼 그림에 맞춰 좌표를 정한 경우라 12층과 달리 억지로 끼워 맞추지 않았다).
+  const floor7Art = name => ({ src: `assets/background/floor7/${name}.png`, height: 720, top: 0, flat: true });
+  const FLOOR7_LAYOUT = {
+    header: '7F · AI 테스트·검증실', background: '#0d1418', roomDoorY: 260, backgroundImage: floor7Art('corridor'),
+    rooms: [
+      { name: 'AI 테스트·검증실', x: 64, width: 1690, style: 'lab', target: 'f7-lab',
+        doorX: 848, doorWidth: 146, doorY: 260, doorStyle: 'auto' },
+    ],
+  };
+  const FLOOR7_ROOMS = interiorRooms(7, [
+    { id: 'f7-lab', name: 'AI 테스트·검증실', width: 2600, windowless: true, backgroundImage: floor7Art('lab'), props: [
+      { file: 'server-rack', size: [256, 512], worldWidth: 96, x: 260 },
+      { file: 'server-rack', size: [256, 512], worldWidth: 96, x: 380 },
+      { file: 'network-rack', size: [256, 512], worldWidth: 96, x: 500 },
+      { file: 'electronics-bench', size: [512, 256], worldWidth: 261, x: 820, name: '백업 로그 단말',
+        message: '백업 로그 단말이다: "01:00~05:00 사이 ARCHI 자체 학습 세션 반복 기록. 같은 시간대 B2 서버실 전력 사용량 급증과 일치."' },
+      { file: 'instrument-cart', size: [256, 256], worldWidth: 113, x: 1150 },
+      { file: 'electronics-bench', size: [512, 256], worldWidth: 261, x: 1500, name: '외부 연결 테스트 장비',
+        message: '외부 호스트 연결 테스트 기록: "연결 준비 완료 · 테스트 성공." 대상 주소는 지워져 있지만, 모든 로그의 중심은 B2 ARCHI 메인 서버다.' },
+      { file: 'server-cooling-unit', size: [256, 512], worldWidth: 96, x: 1820 },
+      { file: 'ups-cabinet', size: [256, 512], worldWidth: 96, x: 1940 },
+    ] },
+  ]);
+  const FLOOR_LAYOUTS = { 7: FLOOR7_LAYOUT, 12: FLOOR12_LAYOUT, 15: FLOOR15_LAYOUT, 16: FLOOR16_LAYOUT };
   // 화장실 내부는 건물 공통 구조라 모든 층이 17층 화장실 배경을 함께 쓴다.
   const restroomInterior = { name: '화장실', width: 1800, windowless: true,
     backgroundImage: { src: 'assets/background/floor17/restroom.png', height: 824.84, top: 0 } };
@@ -285,7 +384,7 @@
   const RESTROOMS = FLOOR_NUMBERS.flatMap(floor => interiorRooms(floor, [{ id: `${floorId(floor)}-restroom`, ...restroomInterior }]));
   const ALL_FLOORS = [FLOOR17, ...FLOORS];
   const ROOFTOP = { id: 'rooftop', floor: 18, label: '옥상', header: 'RF · 옥상', aria: '옥상', width: 2400, background: '#11191d' };
-  const floorById = new Map([...ALL_FLOORS, ROOFTOP, ...FLOOR15_ROOMS, ...FLOOR16_ROOMS, ...FLOOR17_ROOMS, ...RESTROOMS].map(entry => [entry.id, entry]));
+  const floorById = new Map([...ALL_FLOORS, ROOFTOP, ...FLOOR7_ROOMS, ...FLOOR12_ROOMS, ...FLOOR15_ROOMS, ...FLOOR16_ROOMS, ...FLOOR17_ROOMS, ...RESTROOMS].map(entry => [entry.id, entry]));
   const extension = document.getElementById('floor17-extension');
   for (const entry of FLOOR17.rooms) {
     const door = addRoomDoor({ name: entry.name, type: 'room', hint: `E · ${entry.name} 들어가기`,
@@ -571,7 +670,8 @@
   function buildDynamicScene(config) {
     const bodies = [];
     const doorList = [];
-    dynamicScene.dataset.art = String(Boolean(config.backgroundImage));
+    // 'flat': 월드와 1:1로 그린 배경(12층)이 벽·문·표지판까지 담고 있어 DOM은 위치와 상호작용만 맡는다.
+    dynamicScene.dataset.art = config.backgroundImage?.flat ? 'flat' : String(Boolean(config.backgroundImage));
     if (config.backgroundImage) {
       const art = config.backgroundImage;
       const image = new Image();
@@ -630,6 +730,11 @@
       const sign = document.createElement('span');
       sign.className = 'floor-room-sign';
       sign.textContent = roomConfig.name;
+      // 표지판은 방이 차지하는 복도 벽면 전체(roomConfig.x/width, exitDoorX 계산에 쓰이는 값이라 못 바꿈)가
+      // 아니라 실제 문 한가운데 위로 오도록, 부모 기준 left를 직접 계산해 CSS의 50% 중앙 정렬을 덮어쓴다.
+      const doorWidth = roomConfig.doorWidth ?? 120;
+      sign.style.left = `${roomConfig.doorX + doorWidth / 2 - roomConfig.x + (roomConfig.signOffsetX ?? 0)}px`;
+      if (roomConfig.signOffsetY) sign.style.top = `${-40 + roomConfig.signOffsetY}px`;
       roomElement.append(sign);
       dynamicScene.append(roomElement);
       doorList.push(addRoomDoor({ name: roomConfig.name, type: 'room', hint: `E · ${roomConfig.name} 들어가기`,
@@ -643,7 +748,7 @@
       const floorSign = document.createElement('div');
       floorSign.className = 'floor-number-sign';
       floorSign.textContent = floorShortLabel(config.floor);
-      floorSign.style.left = `${BUILDING_CORE.floorSignX}px`;
+      floorSign.style.left = `${config.floorSignX ?? BUILDING_CORE.floorSignX}px`;
       dynamicScene.append(floorSign);
     }
     for (const prop of config.props || []) {
@@ -670,8 +775,10 @@
     const sceneDoors = config.id === 'rooftop' ?
       [{ name: '17층 계단', type: 'stairs', x: 160, y: 232, width: 180 }] : !isFloor ? [] : [
         ...BUILDING_CORE.elevators.map((car, carIndex) => ({ name: elevatorCars[carIndex].name, type: 'elevator', carIndex,
-          x: car.x, y: BUILDING_CORE.elevatorY, width: car.width })),
-        { name: '비상계단', type: 'stairs', locked: true, message: lockedStairsMessage, ...BUILDING_CORE.stairs },
+          x: car.x + (config.elevatorOffsetX?.[carIndex] ?? 0), y: BUILDING_CORE.elevatorY, width: car.width })),
+        { name: '비상계단', type: 'stairs', locked: true, message: lockedStairsMessage, ...BUILDING_CORE.stairs,
+          x: BUILDING_CORE.stairs.x - (config.stairsExpandX ?? 0),
+          width: BUILDING_CORE.stairs.width + (config.stairsExpandX ?? 0) * 2 },
       ];
     const coreDoors = [];
     sceneDoors.forEach(door => {

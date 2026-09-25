@@ -76,6 +76,14 @@
       #dynamic-scene[data-art="true"] .room-door { border: 0; background: none; box-shadow: none; }
       #dynamic-scene[data-art="true"] .floor-number-sign { top: 282px; }
       #dynamic-scene[data-art="true"] .floor-prop img { filter: brightness(.68) saturate(.8); }
+      /* data-art="flat": 1:1 배경 그림(12층)에 벽·문이 그려져 있지만 글자는 없다(PROMPT.md). DOM은 자리·접근
+         외곽선과 표지판 글자만 남긴다. */
+      #dynamic-scene[data-art="flat"] > .solid:not(.crate),
+      #dynamic-scene[data-art="flat"] .room-interior { visibility: hidden; }
+      #dynamic-scene[data-art="flat"] .floor-room { top: 300px; height: 270px; border: 0; background: none; }
+      #dynamic-scene[data-art="flat"] .floor-room::before { content: none; }
+      #dynamic-scene[data-art="flat"] .room-door { border-color: transparent; background: none; box-shadow: none; }
+      #dynamic-scene[data-art="flat"] .floor-number-sign { top: 282px; }
       #world[data-room="dynamic"] #dynamic-scene { display: block; }
       #world[data-room="dynamic"] #background,
       #world[data-room="dynamic"] #office-background,

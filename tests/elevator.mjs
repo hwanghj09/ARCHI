@@ -148,6 +148,25 @@ try {
     await page.clock.runFor(100);
     near(await playerX(), front.door.x + 40, 'Return to the restroom door');
   };
+  // Measured opaque pixel heights, excluding the transparent canvas padding: [opaque, minPx, maxPx].
+  const propHeights = { 'filing-cabinet.png': [496, 135, 145], 'office-desk.png': [239, 112, 122],
+    'office-copier.png': [240, 98, 108], 'large-planter.png': [465, 136, 146],
+    'rolling-whiteboard.png': [240, 158, 170], 'meeting-table.png': [100, 66, 74],
+    'waiting-sofa.png': [162, 75, 84], 'water-cooler.png': [496, 115, 125],
+    'kitchenette-counter.png': [202, 118, 128], 'drink-vending-machine.png': [468, 170, 180],
+    'staff-lockers.png': [334, 164, 174] };
+  const checkHumanScale = async () => {
+    const dimensions = await page.locator('#dynamic-scene .floor-prop img').evaluateAll(images => images.map(img => ({
+      file: img.src.split('/').pop(), width: parseFloat(img.parentElement.style.width),
+      top: parseFloat(img.parentElement.style.top), sourceWidth: img.naturalWidth, sourceHeight: img.naturalHeight,
+    })));
+    for (const prop of dimensions) {
+      const [opaqueHeight, min, max] = propHeights[prop.file];
+      const scale = prop.width / prop.sourceWidth;
+      assert(opaqueHeight * scale >= min && opaqueHeight * scale <= max, `${prop.file} remains at human scale`);
+      near(prop.top + (prop.sourceHeight - 8) * scale, 570, `${prop.file} rests on the floor`);
+    }
+  };
   // Corridor with three enterable rooms around the shared core; ends where it started.
   const checkRoomFloor = async (floor, corridorHeader, rooms) => {
     assert.equal(await header(), corridorHeader);
@@ -202,23 +221,7 @@ try {
       assert.equal(await page.locator('#dynamic-scene .solid').count(), 3, 'Props do not collide');
       await page.locator('#dynamic-scene .floor-prop img').evaluateAll(images => Promise.all(images.map(img => img.decode())));
       assert.equal(await page.locator('#dynamic-scene .floor-prop').count(), props);
-      const dimensions = await page.locator('#dynamic-scene .floor-prop img').evaluateAll(images => images.map(img => ({
-        file: img.src.split('/').pop(), width: parseFloat(img.parentElement.style.width),
-        top: parseFloat(img.parentElement.style.top), sourceWidth: img.naturalWidth, sourceHeight: img.naturalHeight,
-      })));
-      // Measured opaque pixel heights, excluding the transparent canvas padding.
-      const heights = { 'filing-cabinet.png': [496, 135, 145], 'office-desk.png': [239, 112, 122],
-        'office-copier.png': [240, 98, 108], 'large-planter.png': [465, 136, 146],
-        'rolling-whiteboard.png': [240, 158, 170], 'meeting-table.png': [100, 66, 74],
-        'waiting-sofa.png': [162, 75, 84], 'water-cooler.png': [496, 115, 125],
-        'kitchenette-counter.png': [202, 118, 128], 'drink-vending-machine.png': [468, 170, 180],
-        'staff-lockers.png': [334, 164, 174] };
-      for (const prop of dimensions) {
-        const [opaqueHeight, min, max] = heights[prop.file];
-        const scale = prop.width / prop.sourceWidth;
-        assert(opaqueHeight * scale >= min && opaqueHeight * scale <= max, `${prop.file} remains at human scale`);
-        near(prop.top + (prop.sourceHeight - 8) * scale, 570, `${prop.file} rests on the floor`);
-      }
+      await checkHumanScale();
       await page.clock.runFor(100);
       assert(Math.abs(await playerX() - 108) < 1, 'Enter at the room door');
       await walkTo(inspectX);
@@ -344,6 +347,93 @@ try {
     await walkTo(startX);
     await page.clock.runFor(100);
   };
+  // 12F: cold lab finish, the first room in the middle zone, a wide open office entered through the middle of its
+  // front, and a performance lab whose powerless automatic door stays shut but shows the night result through the glass.
+  // 12F walls, doors and signs are 1:1 background images; the DOM keeps positions and interaction only.
+  const checkFlatArt = async (file, width) => {
+    const image = page.locator('#dynamic-scene .floor-background');
+    await image.evaluate(img => img.decode());
+    assert.match(await image.getAttribute('src'), new RegExp(`/floor12/${file}\\.png$`));
+    assert.deepEqual(await image.evaluate(img => [img.naturalWidth, img.naturalHeight, parseFloat(img.style.width),
+      parseFloat(img.style.height), parseFloat(img.style.top)]), [width, 720, width, 720, 0], `${file}.png is drawn 1:1`);
+    assert.equal(await page.locator('#dynamic-scene').getAttribute('data-art'), 'flat');
+    assert.equal(await page.locator('#dynamic-scene').getAttribute('data-theme'), '', '12F has no CSS theme');
+    assert.equal(await page.locator('#dynamic-scene > .floor').evaluate(el => getComputedStyle(el).visibility), 'hidden');
+    assert(await page.locator('#dynamic-scene .room-door').evaluateAll(els => els.every(el => {
+      const style = getComputedStyle(el);
+      return style.backgroundImage === 'none' && style.borderTopColor === 'rgba(0, 0, 0, 0)';
+    })), 'Doors are painted in the image, not by CSS');
+    assert(await page.locator('#dynamic-scene .floor-prop img').evaluateAll(els => els.every(el => getComputedStyle(el).filter === 'none')),
+      'Props keep their colours on 1:1 art');
+  };
+  const checkFloor12 = async () => {
+    roomScales.length = 0;
+    const corridorHeader = '12F · ARCHI 개발팀';
+    assert.equal(await header(), corridorHeader);
+    await checkCore();
+    await checkFlatArt('corridor', 5000);
+    assert(await page.locator('#dynamic-scene .floor-room').evaluateAll(els => els.every(el => {
+      const style = getComputedStyle(el);
+      return style.visibility === 'visible' && style.backgroundImage === 'none' && style.borderTopWidth === '0px';
+    })), 'Room fronts are painted in the art; only the sign is drawn by DOM (art has no text)');
+    assert.deepEqual(await page.locator('#dynamic-scene .floor-room-sign').allTextContents(),
+      ['ARCHI 개발실', '성능 평가실', '개발자 휴게실', '화장실']);
+    assert.deepEqual(await page.locator('#dynamic-scene .room-door').evaluateAll(els => els.map(el => el.className)),
+      ['room-door badge', 'room-door auto', 'room-door pocket', 'room-door metal']);
+    assert.equal(await page.locator('#dynamic-scene .floor-prop').count(), 3, 'Corridor furniture');
+    assert.equal(await page.locator('#dynamic-scene .solid').count(), 3, 'No obstacles on 12F');
+    await page.clock.runFor(100);
+    const startX = await playerX();
+    near(startX, 1858, 'Arrive at elevator 1');
+    await walkTo(1795);
+    assert.equal(await hint(), 'E · 탑승', 'Charging dock leaves the elevator zone alone');
+    await inspect(1650, 'E · 로봇 충전독 조사', /충전독이 비어/);
+    await inspect(300, 'E · 전시 진열장 조사', /정답률 4\.8%/);
+    await visitRestroom('12F');
+    await walkTo(3084);
+    assert.equal(await hint(), 'E · 비상계단 (잠김)', 'Middle-zone room keeps clear of the stair door');
+    await walkTo(2996);
+    await page.keyboard.press('e');
+    await page.clock.runFor(800);
+    assert.match(await page.locator('#interaction-status').textContent(), /비상계단 문이 잠겨/);
+
+    const lab = await roomFront(page, '성능 평가실');
+    assert.deepEqual([lab.room.x, lab.room.width, lab.door], [3100, 452, { x: 3290, y: 260, width: 160 }]);
+    await walkTo(lab.door.x + lab.door.width / 2);
+    assert.equal(await hint(), 'E · 성능 평가실 (잠김)');
+    await page.keyboard.press('e');
+    await page.clock.runFor(800);
+    assert.equal(await header(), corridorHeader, 'Powerless automatic door does not open');
+    assert.match(await page.locator('#interaction-status').textContent(), /87\.4%/);
+    await page.screenshot({ path: '.local/floor-12-lab.png' });
+
+    const dev = await enterRoom('ARCHI 개발실', '12F');
+    assert.equal(await worldWidth(page), 3600);
+    await checkFlatArt('dev', 3600);
+    assert.equal(dev.exit.x, 1775, 'Exit matches the door painted in dev.png');
+    assert(dev.exit.x > 1700 && dev.exit.x < 1800, 'Door in the middle of the front opens into the middle of the room');
+    assert.equal(await page.locator('#dynamic-scene .floor-prop').count(), 12);
+    await checkHumanScale();
+    await inspect(520, 'E · 성능 평가 보드 조사', /3\.1%/);
+    await inspect(3180, 'E · 팀장 책상 조사', /7층 AI 테스트·검증실/);
+    await page.screenshot({ path: '.local/floor-12-dev.png' });
+    await leaveRoom(dev, corridorHeader);
+
+    const lounge = await enterRoom('개발자 휴게실', '12F');
+    assert.equal(await worldWidth(page), 2560);
+    await checkFlatArt('lounge', 2560);
+    assert.equal(lounge.exit.x, 1833, 'Exit matches the door painted in lounge.png');
+    assert.equal(await page.locator('#dynamic-scene .floor-prop').count(), 7);
+    await checkHumanScale();
+    await inspect(1000, 'E · 소파 조사', /사용률 91%/);
+    await inspect(1450, 'E · 사물함 조사', /시설관리실/);
+    await page.screenshot({ path: '.local/floor-12-lounge.png' });
+    await leaveRoom(lounge, corridorHeader);
+    roomScales.push(1808 / lab.room.width);
+    assert(Math.max(...roomScales) / Math.min(...roomScales) < 1.02, `Room fronts scale with their interiors: ${roomScales}`);
+    await walkTo(startX);
+    await page.clock.runFor(100);
+  };
   await checkRoomFloor(16, '16F · 경영지원팀', [
     { name: '탕비실', width: 1890, props: 6, inspectX: 960, hintText: 'E · 음료 자판기 조사', message: /자판기 불이 꺼져/ },
     { name: '소회의실', width: 2400, props: 6, inspectX: 580, hintText: 'E · 화이트보드 조사', message: /ARCHI팀 전력 예산/ },
@@ -363,6 +453,8 @@ try {
     await finishSceneTransition(page);
     if (floor === 15) {
       await checkFloor15();
+    } else if (floor === 12) {
+      await checkFloor12();
     } else {
       assert.equal(await page.locator('header span').textContent(), `${floor}F · 빈 층`);
       assert.equal(await page.locator('#dynamic-scene .solid').count(), 3, 'Only floor and boundary walls');
