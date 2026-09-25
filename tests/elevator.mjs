@@ -924,6 +924,481 @@ try {
     await walkTo(startX);
     await page.clock.runFor(100);
   };
+  // 4F TmaxTibero 연구본부 (DB engine research): the engine lab sits left of the elevators, the performance lab and the
+  // replication lab share a wall in the middle zone, and the right zone is an empty dead end. Its mechanic: the replication
+  // lab has a battery doorlock (keypad). The code is never written; the engine lab post-it gives the rule (first four digits
+  // of the new in-house record TPS) and the benchmark board gives the number, while the corridor board's certified TPS is a decoy.
+  const checkFloor4 = async () => {
+    roomScales.length = 0;
+    const corridorHeader = '4F · TmaxTibero 연구본부';
+    const status = () => page.locator('#interaction-status').textContent();
+    const keypad = page.locator('#keypad');
+    const keypadError = () => page.locator('#keypad-error').textContent();
+    const enterCode = async code => {
+      await page.fill('#keypad-input', code);
+      await page.keyboard.press('Enter');
+      await page.clock.runFor(100);
+    };
+    assert.equal(await header(), corridorHeader);
+    await checkCore();
+    assert.equal(await page.locator('#dynamic-scene').getAttribute('data-theme'), 'dbms');
+    assert.deepEqual(await page.locator('#dynamic-scene .floor-room-sign').allTextContents(),
+      ['DB 엔진 연구실', '성능 측정실', '복제 실험실', '화장실'], 'Rooms run left to right');
+    assert.deepEqual(await page.locator('#dynamic-scene .floor-room').evaluateAll(els => els.map(el => el.className)),
+      ['floor-room engine', 'floor-room bench', 'floor-room replica', 'floor-room restroom']);
+    assert.deepEqual(await page.locator('#dynamic-scene .room-door').evaluateAll(els => els.map(el => el.className)),
+      ['room-door mullion', 'room-door louver', 'room-door doorlock', 'room-door metal']);
+    const engine = await roomFront(page, 'DB 엔진 연구실');
+    const bench = await roomFront(page, '성능 측정실');
+    const replica = await roomFront(page, '복제 실험실');
+    assert(engine.room.x >= 32 && engine.room.x + engine.room.width <= 1790 && engine.door.x - 28 >= 32
+      && engine.door.x + engine.door.width + 28 <= 1790, 'The engine lab sits in the left zone');
+    assert.equal(bench.room.x + bench.room.width, replica.room.x, 'The two labs share a wall');
+    assert(bench.room.x >= 3086 && replica.room.x + replica.room.width <= 3556, 'Both labs sit in the middle zone');
+    assert(bench.door.x - 28 >= 3114 && replica.door.x + replica.door.width + 28 <= 3584,
+      'Their doors leave the stair door and the restroom their zones');
+    assert.deepEqual([engine.door.width, bench.door.width, replica.door.width], [120, 110, 110]);
+    assert.equal(await page.locator('#dynamic-scene .floor-prop').count(), 7, 'Planters, sofa, cooler, copier and cabinets');
+    assert.deepEqual(await page.locator('#dynamic-scene .fixture').evaluateAll(els =>
+      els.map(el => [el.className, el.getAttribute('role'), el.getAttribute('aria-label')])),
+    [['fixture dbms-plaque', 'img', 'TmaxTibero 연구본부 표지'], ['fixture tps-board', 'img', '연구 성과 게시판'],
+      ['fixture dbms-notice', 'img', '연구 자료 반출 안내']]);
+    assert.deepEqual(await page.locator('#dynamic-scene .fixture.tps-board span').allTextContents(),
+      ['TIBERO 성능 기록', '1,396,204 TPS', '공식 인증 · 작년 3월'], 'The corridor board shows last year\'s record');
+    await page.locator('#dynamic-scene .floor-prop img').evaluateAll(images => Promise.all(images.map(img => img.decode())));
+    await assertHumanScale();
+    await page.clock.runFor(100);
+    const startX = await playerX();
+    near(startX, 1858, 'Arrive at elevator 1');
+    await walkTo(1795);
+    assert.equal(await hint(), 'E · 탑승', 'The engine lab door leaves elevator 1 its whole zone');
+    await walkTo(3084);
+    assert.equal(await hint(), 'E · 비상계단 (잠김)', 'The performance lab door leaves the stair door its whole zone');
+    await page.keyboard.press('e');
+    await page.clock.runFor(800);
+    assert.equal(await header(), corridorHeader);
+    assert.match(await status(), /비상계단 문이 잠겨/);
+    await visitRestroom('4F');
+
+    // The doorlock: a keypad, not a message. Guessing and last year's certified TPS both fail.
+    await walkTo(replica.door.x + replica.door.width / 2);
+    assert.equal(await hint(), 'E · 복제 실험실 (잠김)');
+    await page.keyboard.press('e');
+    await page.clock.runFor(100);
+    assert(await keypad.isVisible(), 'The doorlock opens the keypad');
+    assert.equal(await page.locator('#keypad-title').textContent(), '복제 실험실');
+    assert.match(await page.locator('#keypad-text').textContent(), /번호 문의는 엔진 연구실로/);
+    await enterCode('0000');
+    assert.equal(await keypadError(), '비밀번호가 맞지 않는다.');
+    assert(await keypad.isVisible(), 'A wrong code keeps the keypad open');
+    await enterCode('1396');
+    assert.equal(await keypadError(), '비밀번호가 맞지 않는다.', 'The certified TPS on the corridor board is a decoy');
+    await page.keyboard.press('Escape');
+    await page.clock.runFor(100);
+    assert.equal(await keypad.isVisible(), false, 'Esc closes the keypad');
+    assert.equal(await header(), corridorHeader);
+    assert.equal(await hint(), 'E · 복제 실험실 (잠김)', 'The door stays locked');
+
+    await inspect(940, 'E · 연구 성과 게시판 조사', /1,396,204 TPS.*작년 3월/);
+    const engineRoom = await enterRoom('DB 엔진 연구실', '4F');
+    assert.equal(await worldWidth(page), 2808);
+    assert.equal(engineRoom.exit.x, 1563);
+    assert.equal(await page.locator('#dynamic-scene .room-interior.deskgrid').count(), 1);
+    assert.equal(await page.locator('#dynamic-scene .floor-prop').count(), 10);
+    await assertHumanScale();
+    await inspect(1320, 'E · 과제 보드 조사', /메모리 상태와 실행 환경.*연구 보조 ARCHI/);
+    await inspect(420, 'E · 선임연구원 자리 조사', /사내 신기록 TPS의 앞 네 자리/);
+    await page.screenshot({ path: '.local/floor-4-engine.png' });
+    await leaveRoom(engineRoom, corridorHeader);
+
+    const benchRoom = await enterRoom('성능 측정실', '4F');
+    assert.equal(await worldWidth(page), 1810);
+    assert.equal(benchRoom.exit.x, 837);
+    assert.equal(await page.locator('#dynamic-scene .room-interior.raisedfloor.windowless').count(), 1);
+    assert.equal(await page.locator('#dynamic-scene .floor-prop').count(), 7);
+    await assertHumanScale();
+    await inspect(590, 'E · 벤치마크 결과판 조사', /RUN-12 1,742,915 TPS.*사내 신기록/);
+    await inspect(1200, 'E · 측정 콘솔 조사', /37\.8TB.*arc_bundle_041/);
+    await page.screenshot({ path: '.local/floor-4-bench.png' });
+    await leaveRoom(benchRoom, corridorHeader);
+
+    // Rule (post-it) + number (RUN-12) = 1742. The door unlocks at once.
+    await walkTo(replica.door.x + replica.door.width / 2);
+    assert.equal(await hint(), 'E · 복제 실험실 (잠김)');
+    await page.keyboard.press('e');
+    await page.clock.runFor(100);
+    assert(await keypad.isVisible());
+    await enterCode('1742');
+    assert.equal(await keypad.isVisible(), false, 'The right code closes the keypad');
+    assert.match(await status(), /도어락이 풀렸다/);
+    assert.equal(await page.locator('#dynamic-scene .room-door.doorlock').getAttribute('aria-label'), '복제 실험실 출입문');
+    await page.clock.runFor(100);
+    assert.equal(await hint(), 'E · 복제 실험실 들어가기', 'The door opens at once');
+    await page.screenshot({ path: '.local/floor-4.png' });
+    const replicaRoom = await enterRoom('복제 실험실', '4F');
+    assert.equal(await worldWidth(page), 1810);
+    assert.equal(replicaRoom.exit.x, 1346);
+    assert.equal(await page.locator('#dynamic-scene .room-interior.coldaisle.windowless').count(), 1);
+    assert.equal(await page.locator('#dynamic-scene .floor-prop').count(), 7);
+    await assertHumanScale();
+    await inspect(900, 'E · 복제 시험 콘솔 조사', /모델 가중치, 학습 데이터, 기억 저장소, 실행 환경.*전송 대상 칸은 비어/);
+    await inspect(440, 'E · 스냅샷 저장 랙 조사', /ARC-FULL-041/);
+    await page.screenshot({ path: '.local/floor-4-replica.png' });
+    await leaveRoom(replicaRoom, corridorHeader);
+    assert.equal(await hint(), 'E · 복제 실험실 들어가기', 'The doorlock stays open after the corridor is rebuilt');
+    assert(Math.max(...roomScales) / Math.min(...roomScales) < 1.02, `Room fronts scale with their interiors: ${roomScales}`);
+    await walkTo(startX);
+    await page.clock.runFor(100);
+  };
+  // 3F follows the lobby directory: Fitness Club / ㈜하누리서비스 / 고객만족센터 / Studio. The Fitness Club and its Studio
+  // share a wall in the left zone next to an open lounge, 고객만족센터 sits right of the restroom.
+  // Its mechanic: ㈜하누리서비스 is an inner room with no corridor front and no exit; the only way in is the connecting door
+  // at the far wall of 고객만족센터, and its own connecting door leads back to that same door.
+  const checkFloor3 = async () => {
+    roomScales.length = 0;
+    const corridorHeader = '3F · Fitness Club · 고객만족센터';
+    const status = () => page.locator('#interaction-status').textContent();
+    const linkDoor = () => page.locator('#dynamic-scene .room-door.partner-door').evaluate(el =>
+      ({ x: parseFloat(el.style.left), y: parseFloat(el.style.top), width: parseFloat(el.style.width) }));
+    const decodeProps = () => page.locator('#dynamic-scene .floor-prop img').evaluateAll(images => Promise.all(images.map(img => img.decode())));
+    const fixtures = () => page.locator('#dynamic-scene .fixture').evaluateAll(els => els.map(el => [el.className, el.getAttribute('aria-label')]));
+    assert.equal(await header(), corridorHeader);
+    await checkCore();
+    assert.equal(await page.locator('#dynamic-scene').getAttribute('data-theme'), 'fitness');
+    assert.deepEqual(await page.locator('#dynamic-scene .floor-room-sign').allTextContents(),
+      ['Fitness Club', 'Studio', '고객만족센터', '화장실'], 'Three fronts; ㈜하누리서비스 has none');
+    assert.deepEqual(await page.locator('#dynamic-scene .floor-room').evaluateAll(els => els.map(el => el.className)),
+      ['floor-room gym-front', 'floor-room gx-studio', 'floor-room cs-center', 'floor-room restroom']);
+    assert.deepEqual(await page.locator('#dynamic-scene .room-door').evaluateAll(els => els.map(el => el.className)),
+      ['room-door gym-gate', 'room-door gx-door', 'room-door cs-auto', 'room-door metal']);
+    const cs = await roomFront(page, '고객만족센터');
+    const studio = await roomFront(page, 'Studio');
+    const gym = await roomFront(page, 'Fitness Club');
+    assert.equal(gym.room.x + gym.room.width, studio.room.x, 'The Fitness Club and its Studio share a wall');
+    assert(gym.room.x >= 32 && studio.room.x + studio.room.width <= 1790, 'Both sit in the left zone');
+    assert(gym.door.x + gym.door.width + 28 <= studio.door.x - 28, 'The two left doors do not share a zone');
+    assert(studio.door.x + studio.door.width + 28 <= 1790, 'The Studio door leaves elevator 1 its whole zone');
+    assert(cs.room.x >= 4282 && cs.room.x + cs.room.width <= 4968 && cs.door.x >= 4282 && cs.door.x + cs.door.width <= 4940,
+      '고객만족센터 sits in the right zone');
+    assert.equal(await page.locator('#dynamic-scene .floor-prop').count(), 6, 'Lounge sofa, vending machine, water cooler and three planters');
+    assert.deepEqual(await fixtures(), [['fixture tenant-directory', '3층 입주사 안내'], ['fixture gym-poster', 'Fitness Club 광고판']]);
+    await decodeProps();
+    await assertHumanScale();
+    await page.clock.runFor(100);
+    const startX = await playerX();
+    near(startX, 1858, 'Arrive at elevator 1');
+    await walkTo(1795);
+    assert.equal(await hint(), 'E · 탑승', 'The lounge leaves elevator 1 its whole zone');
+    await inspect(3325, 'E · 3층 입주사 안내 조사', /고객만족센터 안쪽 연결문/);
+    await walkTo(3084);
+    assert.equal(await hint(), 'E · 비상계단 (잠김)', 'The tenant directory leaves the stair door its whole zone');
+    await page.keyboard.press('e');
+    await page.clock.runFor(800);
+    assert.equal(await header(), corridorHeader);
+    assert.match(await status(), /비상계단 문이 잠겨/);
+    await visitRestroom('3F');
+    await page.screenshot({ path: '.local/floor-3.png' });
+
+    // The mechanic, both ways: 고객만족센터 → ㈜하누리서비스 → 고객만족센터.
+    const csRoom = await enterRoom('고객만족센터', '3F');
+    assert.equal(await worldWidth(page), 1810);
+    assert.equal(csRoom.exit.x, 903);
+    assert.equal(await page.locator('#dynamic-scene .room-interior.callcenter').count(), 1);
+    assert.equal(await page.locator('#dynamic-scene .floor-prop').count(), 6);
+    assert.deepEqual(await fixtures(), [['fixture partner-plate', '㈜하누리서비스 안내판']]);
+    await assertHumanScale();
+    await inspect(260, 'E · 상담석 조사', /내선 0000/);
+    await inspect(1270, 'E · 민원 현황판 조사', /몇 시에 퇴근/);
+    await page.screenshot({ path: '.local/floor-3-cs.png' });
+    const csLink = await linkDoor();
+    assert.deepEqual(csLink, { x: 1668, y: 250, width: 110 }, 'The connecting door is at the far wall of 고객만족센터');
+    await walkTo(csLink.x + csLink.width / 2);
+    assert.equal(await hint(), 'E · ㈜하누리서비스 들어가기');
+    await page.keyboard.press('e');
+    await finishSceneTransition(page);
+    assert.equal(await header(), '3F · ㈜하누리서비스');
+    await decodeProps();
+    await page.clock.runFor(100);
+    assert.equal(await page.locator('#dynamic-scene .room-door').count(), 1, 'The inner office has no corridor exit');
+    const hanuriLink = await exitDoor(page);
+    assert.deepEqual(hanuriLink, { x: 56, y: 250, width: 110 }, 'Its only door is the pair of the connecting door');
+    assert.deepEqual(await linkDoor(), hanuriLink);
+    near(await playerX(), hanuriLink.x + 40, 'Arrive at the matching connecting door');
+    assert.equal(await worldWidth(page), 1860);
+    assert.equal(await page.locator('#dynamic-scene .room-interior.partner-office.windowless').count(), 1);
+    assert.equal(await page.locator('#dynamic-scene .floor-prop').count(), 7);
+    await assertHumanScale();
+    await inspect(560, 'E · 인수인계 일지 조사', /순찰 경로/);
+    await inspect(1080, 'E · 계약 파일 조사', /야간 무인화/);
+    await inspect(1520, 'E · 인력 배치표 조사', /R-02 · R-05 · R-07/);
+    await page.screenshot({ path: '.local/floor-3-hanuri.png' });
+    await walkTo(hanuriLink.x + hanuriLink.width / 2);
+    assert.equal(await hint(), 'E · 고객만족센터 들어가기');
+    await page.keyboard.press('e');
+    await finishSceneTransition(page);
+    assert.equal(await header(), '3F · 고객만족센터');
+    await page.clock.runFor(100);
+    near(await playerX(), csLink.x + 40, 'The way back lands at the connecting door in 고객만족센터');
+    await leaveRoom(csRoom, corridorHeader);
+
+    const studioRoom = await enterRoom('Studio', '3F');
+    assert.equal(await worldWidth(page), 1810);
+    assert.equal(studioRoom.exit.x, 1339);
+    assert.equal(await page.locator('#dynamic-scene .room-interior.gx-mirror').count(), 1);
+    assert.equal(await page.locator('#dynamic-scene .floor-prop').count(), 4);
+    assert.deepEqual(await fixtures(), [['fixture smart-mirror', '스마트 미러'], ['fixture ballet-barre', '발레 바'],
+      ['fixture mat-stack', '요가 매트']]);
+    await assertHumanScale();
+    await inspect(560, 'E · 음향 카트 조사', /심박 반응 수업/);
+    await inspect(900, 'E · 스마트 미러 조사', /카메라 렌즈/);
+    await page.screenshot({ path: '.local/floor-3-studio.png' });
+    await leaveRoom(studioRoom, corridorHeader);
+
+    const gymRoom = await enterRoom('Fitness Club', '3F');
+    assert.equal(await worldWidth(page), 3744);
+    assert.equal(gymRoom.exit.x, 1792, 'The centred gym door is centred inside');
+    assert.equal(await page.locator('#dynamic-scene .room-interior.gym-floor').count(), 1);
+    assert.equal(await page.locator('#dynamic-scene .floor-prop').count(), 8);
+    assert.equal(await page.locator('#dynamic-scene .fixture.treadmill').count(), 3);
+    assert.equal(await page.locator('#dynamic-scene .fixture').count(), 6);
+    await assertHumanScale();
+    await inspect(655, 'E · 러닝머신 조사', /사람 반응 모델링/);
+    await inspect(940, 'E · 인바디 측정기 조사', /정수호.*신경 반응/);
+    await inspect(2230, 'E · 프런트 조사', /직원증.*R-02, R-05, R-07/);
+    await page.screenshot({ path: '.local/floor-3-fitness.png' });
+    assert(Math.max(...roomScales) / Math.min(...roomScales) < 1.02, `Room fronts scale with their interiors: ${roomScales}`);
+    await leaveRoom(gymRoom, corridorHeader);
+    await walkTo(startX);
+    await page.clock.runFor(100);
+  };
+  // 2F is the Harmony Hall / server-room floor of the lobby directory. The hall spans 1F and 2F, so its balcony entrance sits
+  // right above the 1F hall entrance with the sound and lighting booth beside it; the emptied server room stands alone left of
+  // the elevators. Its mechanic: the balcony stairs link to a room on another floor, down to 1F Harmony Hall and back up.
+  const checkFloor2 = async () => {
+    roomScales.length = 0;
+    const corridorHeader = '2F · Harmony Hall · 서버실';
+    const status = () => page.locator('#interaction-status').textContent();
+    const stairs = () => page.locator('#dynamic-scene .room-door.hallstairs').evaluate(el =>
+      ({ x: parseFloat(el.style.left), y: parseFloat(el.style.top), width: parseFloat(el.style.width) }));
+    assert.equal(await header(), corridorHeader);
+    await checkCore();
+    assert.equal(await page.locator('#dynamic-scene').getAttribute('data-theme'), 'acoustic');
+    assert.deepEqual(await page.locator('#dynamic-scene .floor-room-sign').allTextContents(),
+      ['서버실', '음향·조명 조정실', 'Harmony Hall', '화장실'], 'Rooms follow the lobby directory');
+    assert.deepEqual(await page.locator('#dynamic-scene .floor-room').evaluateAll(els => els.map(el => el.className)),
+      ['floor-room rackroom', 'floor-room mixbooth', 'floor-room velvet', 'floor-room restroom']);
+    assert.deepEqual(await page.locator('#dynamic-scene .room-door').evaluateAll(els => els.map(el => el.className)),
+      ['room-door rackdoor', 'room-door lever', 'room-door padded', 'room-door metal']);
+    const hall = await roomFront(page, 'Harmony Hall');
+    const booth = await roomFront(page, '음향·조명 조정실');
+    const server = await roomFront(page, '서버실');
+    assert(server.room.x >= 32 && server.room.x + server.room.width <= 1790, 'The server room sits alone in the left zone');
+    assert(server.door.x + server.door.width + 28 <= 1790, 'The server room door leaves elevator 1 its zone');
+    assert.deepEqual([hall.room.x, hall.room.width, hall.door.x, hall.door.width], [4688, 280, 4720, 140],
+      'The balcony entrance is right above the 1F Harmony Hall entrance');
+    assert.equal(booth.room.x + booth.room.width, hall.room.x, 'The booth backs onto the hall');
+    assert(booth.room.x >= 4282 && hall.room.x + hall.room.width <= 4968, 'Both sit in the right zone');
+    assert(booth.door.x + booth.door.width + 28 <= hall.door.x - 28, 'The two right doors do not share a zone');
+    assert.equal(await page.locator('#dynamic-scene .floor-prop').count(), 6, 'Planters, sofas and a vending machine');
+    assert.deepEqual(await page.locator('#dynamic-scene .fixture').evaluateAll(els => els.map(el => el.getAttribute('aria-label'))),
+      ['사내 방송 안내문', 'Harmony Hall 공연 포스터']);
+    await page.locator('#dynamic-scene .floor-prop img').evaluateAll(images => Promise.all(images.map(img => img.decode())));
+    await assertHumanScale();
+    await page.clock.runFor(100);
+    const startX = await playerX();
+    near(startX, 1858, 'Arrive at elevator 1');
+    await walkTo(1795);
+    assert.equal(await hint(), 'E · 탑승', 'The server room door leaves elevator 1 its whole zone');
+    await walkTo(3084);
+    assert.equal(await hint(), 'E · 비상계단 (잠김)', 'The middle zone keeps the stair door its whole zone');
+    await page.keyboard.press('e');
+    await page.clock.runFor(800);
+    assert.equal(await header(), corridorHeader);
+    assert.match(await status(), /비상계단 문이 잠겨/);
+    await visitRestroom('2F');
+    await page.screenshot({ path: '.local/floor-2.png' });
+
+    const boothRoom = await enterRoom('음향·조명 조정실', '2F');
+    assert.equal(await worldWidth(page), 1826);
+    assert.equal(boothRoom.exit.x, 885, 'The booth exit mirrors its corridor door');
+    assert.equal(await page.locator('#dynamic-scene .room-interior.mixroom').count(), 1);
+    assert.equal(await page.locator('#dynamic-scene .floor-prop').count(), 3);
+    assert.equal(await page.locator('#dynamic-scene .fixture').count(), 2, 'Mixing console and patch bay');
+    await assertHumanScale();
+    await inspect(370, 'E · 음향 콘솔 조사', /00:00.*SYSTEM.*보류/);
+    await inspect(1525, 'E · 패치베이 조사', /ARCHI VOICE/);
+    await page.screenshot({ path: '.local/floor-2-booth.png' });
+    await leaveRoom(boothRoom, corridorHeader);
+
+    const serverRoom = await enterRoom('서버실', '2F');
+    assert.equal(await worldWidth(page), 1841);
+    assert.equal(serverRoom.exit.x, 1289, 'The server room exit mirrors its corridor door');
+    assert.equal(await page.locator('#dynamic-scene .room-interior.windowless.rackrows').count(), 1);
+    assert.equal(await page.locator('#dynamic-scene .floor-prop').count(), 4);
+    assert.equal(await page.locator('#dynamic-scene .fixture.rack-frame').count(), 4, 'Only empty rack frames are left');
+    await assertHumanScale();
+    await inspect(640, 'E · 남은 랙 조사', /B2 서버실.*ARCHI 운영 구역/);
+    await inspect(1575, 'E · 야간 전력 우선순위표 조사', /1\. B2 서버실.*비상 조명/);
+    await page.screenshot({ path: '.local/floor-2-server.png' });
+    await leaveRoom(serverRoom, corridorHeader);
+
+    await inspect(665, 'E · 사내 방송 안내문 조사', /자동 운영 시스템/);
+    const hallRoom = await enterRoom('Harmony Hall', '2F');
+    assert.equal(await worldWidth(page), 2184);
+    assert.equal(hallRoom.exit.x, 485, 'The balcony exit keeps clear of the stairs');
+    assert.equal(await page.locator('#dynamic-scene .room-interior.balcony').count(), 1);
+    assert.deepEqual(await page.locator('#dynamic-scene .room-door').evaluateAll(els => els.map(el => el.className.replace(' near', ''))),
+      ['room-door padded', 'room-door hallstairs'], 'The exit (the player stands at it), then the stairs down');
+    assert.equal(await page.locator('#dynamic-scene .room-door.hallstairs').getAttribute('aria-label'), 'Harmony Hall 출입문');
+    assert.equal(await page.locator('#dynamic-scene .floor-prop').count(), 3);
+    assert.equal(await page.locator('#dynamic-scene .fixture.hall-seats').count(), 2, 'The balcony seats are flat fixtures');
+    assert.equal(await page.locator('#dynamic-scene .solid.riser').count(), 0, 'No tiered risers on the balcony');
+    await assertHumanScale();
+    const hallStairs = await stairs();
+    assert.deepEqual(hallStairs, { x: 56, y: 250, width: 130 }, 'The stairs sit at the far left end of the balcony');
+    assert(hallRoom.exit.x - 28 > hallStairs.x + hallStairs.width + 28, 'The exit and the stairs do not share a zone');
+    await inspect(760, 'E · 연혁 진열장 조사', /송출 서버는 2층 서버실/);
+    await inspect(1565, 'E · 리허설 큐시트 조사', /00:00.*SYSTEM/);
+    await inspect(2040, 'E · 객석 음향 분배 랙 조사', /SYSTEM \(ARCHI\)/);
+    await page.screenshot({ path: '.local/floor-2-hall.png' });
+    await walkTo(hallStairs.x + hallStairs.width / 2);
+    assert.equal(await hint(), 'E · 1층 객석으로 내려가기');
+    await page.keyboard.press('e');
+    await finishSceneTransition(page);
+    assert.equal(await header(), '1F · Harmony Hall', 'The balcony stairs lead down to the 1F stalls');
+    await page.clock.runFor(100);
+    near(await playerX(), 96, 'Arrive at the matching 1F stairs');
+    assert.equal(await hint(), 'E · 2층 객석으로 올라가기');
+    await page.screenshot({ path: '.local/floor-2-hall-1f.png' });
+    await page.keyboard.press('e');
+    await finishSceneTransition(page);
+    assert.equal(await header(), '2F · Harmony Hall', 'The same stairs lead back up');
+    await page.clock.runFor(100);
+    near(await playerX(), hallStairs.x + 40, 'The way back up lands at the balcony stairs');
+    assert(Math.max(...roomScales) / Math.min(...roomScales) < 1.02, `Room fronts scale with their interiors: ${roomScales}`);
+    await leaveRoom(hallRoom, corridorHeader);
+    await walkTo(startX);
+    await page.clock.runFor(100);
+  };
+  // 1F is the story's lobby: the whole left zone is open, with the main entrance, the first security robot standing dark in
+  // its dock, the reception desk, the speed gates and the floor directory; the three rooms of the lobby directory stand
+  // together right of the restroom, Harmony Hall right below the 2F balcony entrance. Its mechanic: the gates reject Suho's
+  // badge, so he jumps them to reach the entrance; the hall stairs lead up to the 2F balcony and back.
+  const checkFloor1 = async () => {
+    roomScales.length = 0;
+    const corridorHeader = '1F · 로비';
+    const stairs = () => page.locator('#dynamic-scene .room-door.hallstairs').evaluate(el =>
+      ({ x: parseFloat(el.style.left), y: parseFloat(el.style.top), width: parseFloat(el.style.width) }));
+    const guideLines = page.locator('#dynamic-scene .fixture.floor-guide span');
+    assert.equal(await header(), corridorHeader);
+    await checkCore();
+    assert.equal(await page.locator('#dynamic-scene').getAttribute('data-theme'), 'lobby');
+    assert.deepEqual(await page.locator('#dynamic-scene .floor-room-sign').allTextContents(),
+      ['건강관리실', 'Vision Hall', 'Harmony Hall', '화장실'], 'Rooms follow the lobby directory');
+    assert.deepEqual(await page.locator('#dynamic-scene .floor-room').evaluateAll(els => els.map(el => el.className)),
+      ['floor-room infirmary', 'floor-room vision', 'floor-room harmony-foyer', 'floor-room restroom']);
+    assert.deepEqual(await page.locator('#dynamic-scene .room-door').evaluateAll(els => els.map(el => el.className)),
+      ['room-door infirmary', 'room-door vision-glass', 'room-door foyer-double', 'room-door metal']);
+    const infirmary = await roomFront(page, '건강관리실');
+    const vision = await roomFront(page, 'Vision Hall');
+    const hall = await roomFront(page, 'Harmony Hall');
+    assert.equal(infirmary.room.x + infirmary.room.width, vision.room.x, 'The health room and Vision Hall share a wall');
+    assert.equal(vision.room.x + vision.room.width, hall.room.x, 'Vision Hall and Harmony Hall share a wall');
+    assert(infirmary.room.x >= 4282 && hall.room.x + hall.room.width <= 4968, 'All three rooms stand right of the restroom');
+    for (const { door } of [infirmary, vision, hall]) assert(door.x >= 4282 && door.x + door.width + 28 <= 4968);
+    assert.deepEqual([hall.room.x, hall.room.width, hall.door.x, hall.door.width], [4688, 280, 4720, 140],
+      'Harmony Hall is right below the 2F balcony entrance');
+    assert.equal(await page.locator('#dynamic-scene .floor-room').evaluateAll(els =>
+      els.filter(el => parseFloat(el.style.left) < 1790).length), 0, 'The left zone is an open lobby');
+    assert.deepEqual(await page.locator('#dynamic-scene .fixture').evaluateAll(els => els.map(el => el.getAttribute('aria-label'))),
+      ['정문', '경비 로봇', '보안 게이트', '층별 안내판']);
+    assert.equal(await guideLines.count(), 20, 'The directory lists 17F to B3');
+    assert.deepEqual(await guideLines.evaluateAll(els => [els[5], els[10], els[18]].map(el => el.textContent)),
+      ['12F  TmaxSoft 기술본부 · ARCHI 개발팀', '7F  Lounge / VIP Room · AI 테스트·검증실', 'B2  AI 서버실 서버실']);
+    assert.equal(await page.locator('#dynamic-scene .solid.speedgate').count(), 1);
+    assert.equal(await page.locator('#dynamic-scene .floor-prop').count(), 4, 'Reception desk, planters and a sofa');
+    await page.locator('#dynamic-scene .floor-prop img').evaluateAll(images => Promise.all(images.map(img => img.decode())));
+    await assertHumanScale();
+    await page.clock.runFor(100);
+    const startX = await playerX();
+    near(startX, 1858, 'Arrive at elevator 1');
+    await walkTo(1795);
+    assert.equal(await hint(), 'E · 탑승', 'The directory leaves elevator 1 its whole zone');
+    await inspect(1572, 'E · 층별 안내판 조사', /12F 기술본부 · ARCHI 개발팀.*7F AI 테스트·검증실.*B2 AI 서버실/);
+    await inspect(1265, 'E · 보안 게이트 조사', /미등록 출입증/);
+    await hold('a', 600);
+    assert((await playerX()) > 1232, 'The closed gate blocks walking');
+    await walkTo(1300);
+    await jump('a');
+    assert((await playerX()) < 1080, 'Jumping clears the gate');
+    await inspect(800, 'E · 안내 데스크 조사', /23:58.*정수호.*SYSTEM/);
+    await inspect(522, 'E · 경비 로봇 조사', /R-01/);
+    await inspect(249, 'E · 정문 조사', /가로등/);
+    await page.screenshot({ path: '.local/floor-1-lobby.png' });
+    await walkTo(1020);
+    await jump('d');
+    assert((await playerX()) > 1240, 'Jumping back over the gate');
+    await walkTo(3084);
+    assert.equal(await hint(), 'E · 비상계단 (잠김)', 'The lobby sofa leaves the stair door its whole zone');
+    await visitRestroom('1F');
+    await page.screenshot({ path: '.local/floor-1.png' });
+
+    const infirmaryRoom = await enterRoom('건강관리실', '1F');
+    assert.equal(await worldWidth(page), 1818);
+    assert.equal(infirmaryRoom.exit.x, 854, 'The centred door is centred inside');
+    assert.equal(await page.locator('#dynamic-scene .room-interior.windowless.ward').count(), 1);
+    assert.equal(await page.locator('#dynamic-scene .floor-prop').count(), 6);
+    await assertHumanScale();
+    await inspect(320, 'E · 간호사 책상 조사', /이송 위치.*B2/);
+    await inspect(560, 'E · 검진 기록함 조사', /쫓기면.*①에 동그라미/);
+    await inspect(1700, 'E · 여성휴게실 조사', /들어갈 곳이 아니다/);
+    assert.equal(await header(), '1F · 건강관리실', 'The women\'s lounge door opens nothing');
+    await page.screenshot({ path: '.local/floor-1-infirmary.png' });
+    await leaveRoom(infirmaryRoom, corridorHeader);
+
+    const visionRoom = await enterRoom('Vision Hall', '1F');
+    assert.equal(await worldWidth(page), 1818);
+    assert.equal(visionRoom.exit.x, 1108);
+    assert.equal(await page.locator('#dynamic-scene .room-interior.showcase').count(), 1);
+    assert.equal(await page.locator('#dynamic-scene .floor-prop').count(), 5);
+    await assertHumanScale();
+    await inspect(760, 'E · 행사 안내 보드 조사', /무기한 연기.*ARCHI 자신/);
+    await inspect(240, 'E · 전시 진열장 조사', /R-01/);
+    await inspect(1535, 'E · 홍보 스크린 조사', /윤곽/);
+    await page.screenshot({ path: '.local/floor-1-vision.png' });
+    await leaveRoom(visionRoom, corridorHeader);
+
+    const hallRoom = await enterRoom('Harmony Hall', '1F');
+    assert.equal(await worldWidth(page), 2520);
+    assert.equal(hallRoom.exit.x, 561);
+    assert.equal(await page.locator('#dynamic-scene .room-interior.orchestra').count(), 1);
+    assert.equal(await page.locator('#dynamic-scene .fixture.proscenium').count(), 1);
+    assert.equal(await page.locator('#dynamic-scene .floor-prop').count(), 5);
+    await assertHumanScale();
+    const hallStairs = await stairs();
+    assert.deepEqual(hallStairs, { x: 56, y: 250, width: 130 }, 'The stairs sit at the far left end of the stalls');
+    assert(hallRoom.exit.x - 28 > hallStairs.x + hallStairs.width + 28, 'The exit and the stairs do not share a zone');
+    await inspect(940, 'E · 시연 장비대 조사', /전원을 뽑음/);
+    await inspect(1960, 'E · 행사 자료 보드 조사', /미등록 출입증.*B2/);
+    await page.screenshot({ path: '.local/floor-1-hall.png' });
+    await walkTo(hallStairs.x + hallStairs.width / 2);
+    assert.equal(await hint(), 'E · 2층 객석으로 올라가기');
+    await page.keyboard.press('e');
+    await finishSceneTransition(page);
+    assert.equal(await header(), '2F · Harmony Hall', 'The stall stairs lead up to the 2F balcony');
+    await page.clock.runFor(100);
+    near(await playerX(), 96, 'Arrive at the matching balcony stairs');
+    assert.equal(await hint(), 'E · 1층 객석으로 내려가기');
+    await page.keyboard.press('e');
+    await finishSceneTransition(page);
+    assert.equal(await header(), '1F · Harmony Hall', 'The same stairs lead back down');
+    await page.clock.runFor(100);
+    near(await playerX(), hallStairs.x + 40, 'The way back down lands at the stall stairs');
+    assert(Math.max(...roomScales) / Math.min(...roomScales) < 1.02, `Room fronts scale with their interiors: ${roomScales}`);
+    await leaveRoom(hallRoom, corridorHeader);
+    await walkTo(startX);
+    await page.clock.runFor(100);
+  };
   await checkFloor16();
   assert(await page.locator('#player').evaluate(el =>
     Math.abs(new DOMMatrix(getComputedStyle(el).transform).m42 + 178 - 570) < 1));
@@ -951,6 +1426,14 @@ try {
       await checkFloor10();
     } else if (floor === 9) {
       await checkFloor9();
+    } else if (floor === 4) {
+      await checkFloor4();
+    } else if (floor === 3) {
+      await checkFloor3();
+    } else if (floor === 2) {
+      await checkFloor2();
+    } else if (floor === 1) {
+      await checkFloor1();
     } else {
       assert.equal(await page.locator('header span').textContent(), `${floor}F · 빈 층`);
       assert.equal(await page.locator('#dynamic-scene .solid').count(), 3, 'Only floor and boundary walls');

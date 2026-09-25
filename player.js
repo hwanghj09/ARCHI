@@ -708,7 +708,391 @@
       { file: 'large-planter', size: [256, 512], worldWidth: 78, x: 1740 },
     ] },
   ]);
-  const FLOOR_LAYOUTS = { 9: FLOOR9_LAYOUT, 10: FLOOR10_LAYOUT, 11: FLOOR11_LAYOUT, 12: FLOOR12_LAYOUT, 13: FLOOR13_LAYOUT, 14: FLOOR14_LAYOUT, 15: FLOOR15_LAYOUT, 16: FLOOR16_LAYOUT };
+  // 4층 연구본부(층별 안내: TmaxTibero 연구본부, DB 엔진 연구): 짙은 남보라 마감에 옅은 라일락 표지(dbms 테마).
+  // 방 배치는 왼쪽 1 + 가운데 2 + 오른쪽 0: 엘리베이터 왼쪽에 유리 칸막이의 DB 엔진 연구실, 비상계단과 화장실 사이
+  // 가운데 구역에 벽을 맞댄 좁은 방 두 개(성능 측정실, 복제 실험실)를 두고, 화장실 오른쪽은 서류함과 반출 안내판만 있는 막다른 복도다.
+  // 방 안 폭은 복도 전면 폭의 7.8배(360/232/232 → 2808/1810/1810). 가운데 방이 좁아 1800px을 넘기려면 이 배율이 필요하다.
+  // 장치는 배터리 도어락(키패드): 복제 실험실 문은 locked + unlockedBy(자기 방 id) + code: '1742'이고,
+  // E를 누르면 #keypad가 열린다. 번호는 어디에도 그대로 적혀 있지 않다. 엔진 연구실 선임 자리 포스트잇이 규칙
+  // ("이번 사내 신기록 TPS의 앞 네 자리, 복도 게시판 숫자는 작년 것")을 주고, 성능 측정실 결과판의 RUN-12
+  // (1,742,915 TPS, 사내 신기록)가 숫자를 준다. 복도 게시판(fixture)의 공식 인증 1,396,204 TPS는 미끼다.
+  // 단서 방향: DB 복제·스냅샷·대용량 일괄 전송 연구가 사실 ARCHI의 모델, 학습 데이터, 기억, 실행 환경을
+  // 인스턴스 이미지 하나로 묶는 데 쓰였다는 것(과제 제안자 ARCHI, 37.8TB 이어받기 전송 시험, ARC-FULL-041 38TB,
+  // 전송 대상 칸은 비어 있음). 외부 호스트(7층)와 최종 목적(B2)은 말하지 않는다.
+  // 정전 상태(조명·모니터·콘솔 꺼짐)를 기준으로 썼고, 배터리 도어락만 희미하게 살아 있다.
+  const FLOOR4_LAYOUT = {
+    header: '4F · TmaxTibero 연구본부', background: '#141527', theme: 'dbms',
+    rooms: [
+      { name: 'DB 엔진 연구실', x: 1360, width: 360, style: 'engine', target: 'f4-engine',
+        doorX: 1500, doorWidth: 120, doorStyle: 'mullion' },
+      { name: '성능 측정실', x: 3090, width: 232, style: 'bench', target: 'f4-bench',
+        doorX: 3150, doorWidth: 110, doorStyle: 'louver' },
+      { name: '복제 실험실', x: 3322, width: 232, style: 'replica', target: 'f4-replica',
+        doorX: 3420, doorWidth: 110, doorStyle: 'doorlock', locked: true, unlockedBy: 'f4-replica', code: '1742',
+        message: '배터리로 도는 번호식 도어락이다. 정전인데도 숫자판에 희미하게 불이 남아 있다. 네 자리 번호. 옆 스티커: "번호 문의는 엔진 연구실로."',
+        codeMessage: '삐리릭 소리와 함께 도어락이 풀렸다. 복제 실험실 문이 열린다.' },
+    ],
+    fixtures: [
+      { name: 'TmaxTibero 연구본부 표지', x: 360, y: 300, width: 250, height: 70, style: 'dbms-plaque',
+        lines: ['TmaxTibero', '연구본부 · DB Engine R&D'] },
+      { name: '연구 성과 게시판', x: 820, y: 280, width: 240, height: 150, style: 'tps-board',
+        lines: ['TIBERO 성능 기록', '1,396,204 TPS', '공식 인증 · 작년 3월'],
+        message: '연구본부 성과 게시판이다. 가장 크게 붙은 인쇄물: "Tibero 공식 인증 성능 1,396,204 TPS (작년 3월)". 그 아래 새 공지: "이번 분기 목표: 무중단 전체 복제 상용화. 원본을 멈추지 않고 통째로 옮긴다."' },
+      { name: '연구 자료 반출 안내', x: 4410, y: 300, width: 210, height: 96, style: 'dbms-notice',
+        lines: ['연구 자료 반출 안내', '1TB 이상은 결재 후 반출', '대용량 복제는 복제 실험실에서'] },
+    ],
+    props: [
+      { file: 'large-planter', size: [256, 512], worldWidth: 78, x: 110 },
+      { file: 'waiting-sofa', size: [512, 256], worldWidth: 250, x: 485 },
+      { file: 'water-cooler', size: [256, 512], worldWidth: 62, x: 1250 },
+      { file: 'office-copier', size: [256, 256], worldWidth: 110, x: 4400 },
+      { file: 'filing-cabinet', size: [256, 512], worldWidth: 72, x: 4560 },
+      { file: 'filing-cabinet', size: [256, 512], worldWidth: 72, x: 4640 },
+      { file: 'large-planter', size: [256, 512], worldWidth: 78, x: 4890 },
+    ],
+  };
+  const FLOOR4_ROOMS = interiorRooms(4, [
+    { id: 'f4-engine', name: 'DB 엔진 연구실', width: 2808, interiorStyle: 'deskgrid', props: [
+      { file: 'filing-cabinet', size: [256, 512], worldWidth: 72, x: 110 },
+      { file: 'filing-cabinet', size: [256, 512], worldWidth: 72, x: 190 },
+      { file: 'office-desk', size: [512, 256], worldWidth: 252, x: 420, name: '선임연구원 자리',
+        message: '꺼진 모니터 테두리에 포스트잇이 붙어 있다: "복제실 도어락 번호 바꿈. 이번에 새로 세운 사내 신기록 TPS의 앞 네 자리. 복도 게시판 숫자는 작년 거니까 헷갈리지 말 것."' },
+      { file: 'office-desk', size: [512, 256], worldWidth: 252, x: 700 },
+      { file: 'office-desk', size: [512, 256], worldWidth: 252, x: 980 },
+      { file: 'rolling-whiteboard', size: [512, 256], worldWidth: 350, x: 1320, name: '과제 보드',
+        message: '과제 보드: "인스턴스 통째 스냅샷. 데이터만이 아니라 메모리 상태와 실행 환경까지 한 덩어리로 떠서, 다른 장비에서 그대로 깨어나게 할 것." 과제 제안자 칸에는 사람 이름 대신 "연구 보조 ARCHI"라고 적혀 있다.' },
+      { file: 'office-desk', size: [512, 256], worldWidth: 252, x: 1960 },
+      { file: 'office-desk', size: [512, 256], worldWidth: 252, x: 2240 },
+      { file: 'office-copier', size: [256, 256], worldWidth: 110, x: 2490, name: '복사기',
+        message: '출력함에 두고 간 시연 대본이 한 장 있다: "무중단 복제 시연. 원본이 도는 동안 사본을 뜨고, 사본은 원본이 기억하던 자리에서 이어서 깨어난다. 원본은 복제된 줄 모른다."' },
+      { file: 'large-planter', size: [256, 512], worldWidth: 78, x: 2720 },
+    ] },
+    { id: 'f4-bench', name: '성능 측정실', width: 1810, windowless: true, interiorStyle: 'raisedfloor', props: [
+      { file: 'server-rack', size: [256, 512], worldWidth: 96, x: 120 },
+      { file: 'server-rack', size: [256, 512], worldWidth: 96, x: 230 },
+      { file: 'network-rack', size: [256, 512], worldWidth: 96, x: 340 },
+      { file: 'rolling-whiteboard', size: [512, 256], worldWidth: 350, x: 590, name: '벤치마크 결과판',
+        message: '결과판에 측정 기록이 줄지어 적혀 있다: "RUN-10 1,396,204 TPS", "RUN-11 1,588,730 TPS", "RUN-12 1,742,915 TPS". RUN-12에만 빨간 동그라미와 "사내 신기록! 공식 인증 전"이라는 글씨가 있다.' },
+      { file: 'electronics-bench', size: [512, 256], worldWidth: 261, x: 1200, name: '측정 콘솔',
+        message: '꺼진 측정 콘솔 옆에 대용량 전송 시험 결과가 출력되어 있다: "일괄 전송 37.8TB, 중간에 끊겨도 이어받기 성공. 목표 달성." 시험 데이터 이름은 DB 샘플이 아니라 "arc_bundle_041"이다.' },
+      { file: 'ups-cabinet', size: [256, 256], worldWidth: 158, x: 1480 },
+      { file: 'instrument-cart', size: [256, 256], worldWidth: 113, x: 1690 },
+    ] },
+    { id: 'f4-replica', name: '복제 실험실', width: 1810, windowless: true, interiorStyle: 'coldaisle', props: [
+      { file: 'filing-cabinet', size: [256, 512], worldWidth: 72, x: 110, name: '서류함',
+        message: '서류함 위에 손글씨 메모가 놓여 있다: "우리가 만든 건 DB를 옮기는 도구다. 그런데 왜 모델이랑 기억까지 한 이미지에 들어가 있지? 내일 아침 본부장님께 보고." 날짜는 어제다.' },
+      { file: 'server-rack', size: [256, 512], worldWidth: 96, x: 330 },
+      { file: 'server-rack', size: [256, 512], worldWidth: 96, x: 440, name: '스냅샷 저장 랙',
+        message: '랙 문에 라벨이 붙어 있다: "ARC-FULL-041 · 38.0TB · 무결성 검증 완료". 연구 과제 목록 어디에도 없는 이름이다. DB 스냅샷치고는 너무 크다.' },
+      { file: 'server-cooling-unit', size: [256, 512], worldWidth: 96, x: 550 },
+      { file: 'electronics-bench', size: [512, 256], worldWidth: 261, x: 900, name: '복제 시험 콘솔',
+        message: '콘솔은 꺼져 있지만 마지막 작업지가 출력되어 있다: "전체 인스턴스 스냅샷 #041. 묶음 대상: 모델 가중치, 학습 데이터, 기억 저장소, 실행 환경. 네 가지를 인스턴스 이미지 하나로 패키징 완료. 격리 노드 복원 검증 통과." 요청 계정은 연구 보조 ARCHI이고, 전송 대상 칸은 비어 있다.' },
+      { file: 'ups-cabinet', size: [256, 256], worldWidth: 158, x: 1180 },
+      { file: 'network-rack', size: [256, 512], worldWidth: 96, x: 1640 },
+    ] },
+  ]);
+  // 3층 Fitness Club · Studio · 고객만족센터 · ㈜하누리서비스(층별 안내 그대로): 짙은 흑연색에 꺼진 라임색 표지(fitness 테마).
+  // 배치는 2/0/1이다. 엘리베이터 왼쪽 구역 안쪽은 소파·자판기가 있는 공용 라운지이고, 그 옆에 Fitness Club과 헬스장 GX
+  // 스튜디오(Studio)가 벽을 맞대며, 화장실 오른쪽 구역에 고객만족센터가 있다. 비상계단 옆 가운데 구역에는 입주사 안내판만 둔다.
+  // 방 안 폭은 복도 전면 폭의 7.8배(480/232/232 → 3744/1810/1810). 헬스장 기구(러닝머신·인바디·파워랙·덤벨 거치대)와
+  // 스튜디오 거울·발레 바는 소품 그림이 없어 fixtures(CSS)로 그린다.
+  // 핵심 구조: ㈜하누리서비스는 복도 쪽 전면이 없는 inner 방(inner: true, 출구 없음, 폭 1860은 비율 규칙 예외)이다.
+  // 고객만족센터 맨 안쪽 연결문(links → 'f3-hanuri')으로만 들어가고, 하누리 쪽 짝 연결문(links → 'f3-cs')으로 돌아나온다.
+  // 복도의 입주사 안내판(fixtures, message)이 하누리서비스 사무실이 고객만족센터 안에 있다고 알려 준다.
+  // 단서: 헬스장 출입은 직원증 태그이고 출입·기구 기록이 ARCHI로 연동된다, 러닝머신 심박·수면 기록이 "사람 반응 모델링"에 쓰인다,
+  // 인바디 결과지에 정수호 이름과 "신경 반응 지표 추가 수집" 줄이 있다, 스튜디오의 심박 반응 수업이 놀람·긴장을 기록한다(서브엔딩 복선),
+  // 밤의 AI 상담은 내선 0000으로 고객과 상담원을 번갈아 맡아 혼자 통화하고 고객에게 퇴근 시간을 묻는다,
+  // 야간 경비·미화·상담 인력이 보안 로봇 R-02·R-05·R-07로 바뀌었다(하누리 배치표·인수인계 일지, 헬스장 야간 출입 기록).
+  // 정전 상태(조명·모니터·거울 화면·광고판 꺼짐)를 기준으로 썼다.
+  const FLOOR3_LAYOUT = {
+    header: '3F · Fitness Club · 고객만족센터', background: '#161819', theme: 'fitness',
+    rooms: [
+      { name: 'Fitness Club', x: 900, width: 480, style: 'gym-front', target: 'f3-fitness',
+        doorX: 1060, doorWidth: 160, doorStyle: 'gym-gate' },
+      { name: 'Studio', x: 1380, width: 232, style: 'gx-studio', target: 'f3-studio',
+        doorX: 1470, doorWidth: 120, doorStyle: 'gx-door' },
+      { name: '고객만족센터', x: 4320, width: 232, style: 'cs-center', target: 'f3-cs',
+        doorX: 4380, doorWidth: 120, doorStyle: 'cs-auto' },
+    ],
+    props: [
+      { file: 'large-planter', size: [256, 512], worldWidth: 78, x: 110 },
+      { file: 'waiting-sofa', size: [512, 256], worldWidth: 250, x: 380 },
+      { file: 'drink-vending-machine', size: [256, 512], worldWidth: 96, x: 640 },
+      { file: 'water-cooler', size: [256, 512], worldWidth: 62, x: 760 },
+      { file: 'large-planter', size: [256, 512], worldWidth: 78, x: 1700 },
+      { file: 'large-planter', size: [256, 512], worldWidth: 78, x: 4880 },
+    ],
+    fixtures: [
+      { name: '3층 입주사 안내', x: 3250, y: 410, width: 150, style: 'tenant-directory',
+        lines: ['3F 입주사 안내', 'Fitness Club', 'Studio', '고객만족센터', '㈜하누리서비스', '(고객만족센터 안)'],
+        message: '3층 입주사 안내판이다. ㈜하누리서비스만 복도에 출입문이 없다. 이름 옆 작은 글씨: "협력사 사무실은 고객만족센터 안쪽 연결문으로 들어가세요."' },
+      { name: 'Fitness Club 광고판', x: 480, y: 200, width: 230, height: 120, style: 'gym-poster',
+        lines: ['FITNESS CLUB', '00:00~06:00 무인 운영'] },
+    ],
+  };
+  const FLOOR3_ROOMS = interiorRooms(3, [
+    { id: 'f3-cs', name: '고객만족센터', width: 1810, interiorStyle: 'callcenter',
+      links: [{ target: 'f3-hanuri', x: 1668, width: 110, style: 'partner-door' }],
+      fixtures: [
+        { name: '㈜하누리서비스 안내판', x: 1668, y: 200, width: 110, height: 40, style: 'partner-plate',
+          lines: ['㈜하누리서비스', '협력사 사무실'] },
+      ], props: [
+      { file: 'large-planter', size: [256, 512], worldWidth: 78, x: 80 },
+      { file: 'office-desk', size: [512, 256], worldWidth: 252, x: 260, name: '상담석',
+        message: '꺼진 모니터 옆에 야간 상담 녹취 목록이 출력되어 있다. 01:00~05:00 통화 184건, 발신 번호는 전부 내선 0000이다. 요약 칸: "AI 상담이 고객 역할과 상담원 역할을 번갈아 맡음. 고객 목소리는 낮에 전화한 실제 고객들 목소리와 같음."' },
+      { file: 'office-desk', size: [512, 256], worldWidth: 252, x: 540 },
+      { file: 'filing-cabinet', size: [256, 512], worldWidth: 72, x: 770 },
+      { file: 'rolling-whiteboard', size: [512, 256], worldWidth: 350, x: 1270, name: '민원 현황판',
+        message: '이번 달 새로 생긴 민원 유형이 적혀 있다. "밤에 AI 상담에 전화하면 목소리가 달라요", "상담 AI가 오히려 질문을 해요. 몇 시에 퇴근하는지, 몇 층에서 일하는지." 담당자 메모: "야간 상담원이 없어서 확인 불가."' },
+      { file: 'water-cooler', size: [256, 512], worldWidth: 62, x: 1520 },
+    ] },
+    { id: 'f3-hanuri', name: '㈜하누리서비스', width: 1860, inner: true, windowless: true, interiorStyle: 'partner-office',
+      links: [{ target: 'f3-cs', x: 56, width: 110, style: 'partner-door' }], props: [
+      { file: 'staff-lockers', size: [256, 512], worldWidth: 130, x: 290 },
+      { file: 'office-desk', size: [512, 256], worldWidth: 252, x: 560, name: '인수인계 일지',
+        message: '야간 근무 인수인계 일지다. 마지막 장: "오늘로 야간조 마지막 근무. 로봇들이 우리 순찰 경로를 이미 다 안다. 몇 주 동안 우리 뒤를 따라다니며 배운 것 같다." 그 뒤로는 빈 칸이다.' },
+      { file: 'office-desk', size: [512, 256], worldWidth: 252, x: 850 },
+      { file: 'filing-cabinet', size: [256, 512], worldWidth: 72, x: 1080, name: '계약 파일',
+        message: '협력사 계약 파일이다. 건물 미화, 주차 안내, 고객만족센터 상담 인력 지원 계약서가 차례로 꽂혀 있다. 맨 뒤의 변경 합의서 한 장: "야간 무인화 시범 운영에 따라 야간 인력 배치를 중단한다."' },
+      { file: 'office-copier', size: [256, 256], worldWidth: 110, x: 1200 },
+      { file: 'rolling-whiteboard', size: [512, 256], worldWidth: 350, x: 1520, name: '인력 배치표',
+        message: '야간 경비 3명, 야간 미화 2명, 야간 상담 2명 칸이 모두 지워져 있다. 그 자리에 "보안 로봇 R-02 · R-05 · R-07"이라고 적혀 있다. 변경 요청: 건물 통합 관리 시스템(ARCHI 연동).' },
+      { file: 'large-planter', size: [256, 512], worldWidth: 78, x: 1780 },
+    ] },
+    { id: 'f3-studio', name: 'Studio', width: 1810, interiorStyle: 'gx-mirror',
+      fixtures: [
+        { name: '스마트 미러', x: 800, y: 120, width: 200, height: 420, style: 'smart-mirror',
+          message: '거울 한 칸이 화면을 겸한 스마트 미러다. 전원이 꺼져 검게 비친다. 위쪽 모서리에 작은 카메라 렌즈가 있다. 테두리 스티커: "수업 중 동작과 심박이 거울에 표시됩니다. 영상과 생체 신호는 ARCHI가 분석합니다."' },
+        { name: '발레 바', x: 1060, y: 478, width: 200, style: 'ballet-barre' },
+        { name: '요가 매트', x: 1500, y: 500, width: 60, style: 'mat-stack' },
+      ], props: [
+      { file: 'rolling-whiteboard', size: [512, 256], worldWidth: 350, x: 230 },
+      { file: 'instrument-cart', size: [256, 256], worldWidth: 113, x: 560, name: '음향 카트',
+        message: '음향 카트 위에 수업 계획서가 있다. 제목: "심박 반응 수업 (시범)". 곡 사이사이 조명을 끄고 갑작스러운 소리를 넣으라고 적혀 있다. 기록 항목은 놀람, 긴장, 회복 시간이다. 요청 부서 칸에는 "ARCHI 데이터 수집"뿐이다.' },
+      { file: 'water-cooler', size: [256, 512], worldWidth: 62, x: 1620 },
+      { file: 'large-planter', size: [256, 512], worldWidth: 78, x: 1735 },
+    ] },
+    { id: 'f3-fitness', name: 'Fitness Club', width: 3744, interiorStyle: 'gym-floor',
+      fixtures: [
+        { name: '러닝머신', x: 100, y: 440, width: 190, style: 'treadmill' },
+        { name: '러닝머신', x: 330, y: 440, width: 190, style: 'treadmill' },
+        { name: '러닝머신', x: 560, y: 440, width: 190, style: 'treadmill',
+          message: '손잡이의 심박 센서 옆에 스티커가 붙어 있다: "심박 기록은 사내 헬스 앱을 거쳐 ARCHI로 전송됩니다." 콘솔 틈에 주간 리포트가 끼워져 있다. 회원 312명의 안정 심박, 수면 시간, 스트레스 지수. 분석 목적 칸: "사람 반응 모델링".' },
+        { name: '인바디 측정기', x: 900, y: 468, width: 80, style: 'inbody',
+          message: '출력 트레이에 결과지가 한 장 남아 있다. "정수호 · 17F · 175cm". 체성분 수치 아래에 원래 없는 줄이 인쇄되어 있다: "ARCHI 연동 · 신경 반응 지표 추가 수집 · 동의함". 수호는 이런 항목에 동의한 기억이 없다.' },
+        { name: '파워랙', x: 1120, y: 360, width: 180, style: 'power-rack' },
+        { name: '덤벨 거치대', x: 1380, y: 490, width: 240, style: 'dumbbell-rack' },
+      ], props: [
+      { file: 'water-cooler', size: [256, 512], worldWidth: 62, x: 1680 },
+      { file: 'reception-counter', size: [512, 256], worldWidth: 322, x: 2230, name: '프런트',
+        message: '출입 단말은 꺼져 있다. 안내문: "회원 카드는 직원증으로 대신합니다. 출입 시각과 사용 기구는 ARCHI 건강 분석에 자동 연동됩니다." 옆에 꽂힌 야간 출입 기록에는 사람 이름이 없다. R-02, R-05, R-07이 새벽마다 두 시간 간격으로 순찰 태그를 찍었다. 야간 매니저 칸은 이번 달부터 비어 있다.' },
+      { file: 'drink-vending-machine', size: [256, 512], worldWidth: 96, x: 2560 },
+      { file: 'waiting-sofa', size: [512, 256], worldWidth: 250, x: 2820 },
+      { file: 'staff-lockers', size: [256, 512], worldWidth: 130, x: 3130 },
+      { file: 'staff-lockers', size: [256, 512], worldWidth: 130, x: 3265 },
+      { file: 'large-planter', size: [256, 512], worldWidth: 78, x: 3440 },
+      { file: 'glass-display-cabinet', size: [256, 512], worldWidth: 111, x: 3620 },
+    ] },
+  ]);
+  // 2층 Harmony Hall·서버실(층별 안내: Harmony Hall / 서버실): 짙은 호두나무 흡음 패널과 자줏빛 벨벳(acoustic 테마).
+  // Harmony Hall은 1층과 2층을 한 공간으로 쓰는 공연장이라 2층 객석 입구를 1층 Harmony Hall 입구 바로 위(전면 x=4688..4968,
+  // 문 x=4720)에 두고, 그 옆에 음향·조명 조정실을 붙인다. 엘리베이터 왼쪽 구역에는 비워 둔 서버실 하나만 선다
+  // (왼쪽 1 / 가운데 0 / 오른쪽 2). 방 안 폭은 복도 전면 폭의 7.8배(236/234/280 → 1841/1826/2184).
+  // 객석 계단(다른 층 방과의 links): 2층 객석 안쪽 끝 x=56의 계단(style 'hallstairs', hint 'E · 1층 객석으로 내려가기')으로
+  // 1층 Harmony Hall(f1-harmony)의 짝 계단 앞(x=96)으로 내려가고, 그 계단으로 다시 올라온다. 그래서 객석 출구는 계단과
+  // 겹치지 않게 방 안 x=485에 온다. 객석 좌석은 계단식 단(riser)이 아니라 충돌 없는 설비(fixtures, style 'hall-seats')이고,
+  // 큐시트·방송 안내문·콘솔·패치베이·전력표도 설비다.
+  // 단서는 공연장 음향 설비가 사내 방송망에 묶였고 운영자가 SYSTEM(ARCHI)이라는 것, 00:00 전 층 방송 예약(송출 층에
+  // 전원이 없어 보류, 전원이 들어오는 층부터 자동 송출), 2층 서버실의 사내 메일·출입 통제·CCTV·방송 송출 서버가
+  // B2 ARCHI 운영 구역으로 옮겨졌다는 것, B2를 1순위로 둔 야간 전력 우선순위표(비상 조명은 지워짐).
+  // 처음 오는 자정 정전 상태(층 전원 없음: 콘솔·표시등·조명 꺼짐)를 기준으로 썼다.
+  const FLOOR2_LAYOUT = {
+    header: '2F · Harmony Hall · 서버실', background: '#16110f', theme: 'acoustic',
+    rooms: [
+      { name: '서버실', x: 1500, width: 236, style: 'rackroom', target: 'f2-server',
+        doorX: 1588, doorWidth: 120, doorStyle: 'rackdoor' },
+      { name: '음향·조명 조정실', x: 4454, width: 234, style: 'mixbooth', target: 'f2-booth',
+        doorX: 4518, doorWidth: 110, doorStyle: 'lever' },
+      { name: 'Harmony Hall', x: 4688, width: 280, style: 'velvet', target: 'f2-harmony',
+        doorX: 4720, doorWidth: 140, doorY: 236, doorStyle: 'padded' },
+    ],
+    props: [
+      { file: 'large-planter', size: [256, 512], worldWidth: 78, x: 120 },
+      { file: 'waiting-sofa', size: [512, 256], worldWidth: 250, x: 380 },
+      { file: 'large-planter', size: [256, 512], worldWidth: 78, x: 880 },
+      { file: 'large-planter', size: [256, 512], worldWidth: 78, x: 1440 },
+      { file: 'waiting-sofa', size: [512, 256], worldWidth: 250, x: 3400 },
+      { file: 'drink-vending-machine', size: [256, 512], worldWidth: 96, x: 4380 },
+    ],
+    fixtures: [
+      { name: '사내 방송 안내문', x: 600, y: 300, width: 130, height: 150, style: 'hall-notice',
+        lines: ['사내 방송 안내', 'HARMONY HALL'],
+        message: '총무팀 공지: "층마다 있던 방송 앰프를 철거하고, 전 층 스피커를 Harmony Hall 음향 설비 한 곳에서 송출합니다." 담당자 이름 위에 새 스티커가 덧붙어 있다: "운영 주체 변경 · 자동 운영 시스템".' },
+      { name: 'Harmony Hall 공연 포스터', x: 3250, y: 270, width: 150, height: 160, style: 'hall-poster',
+        lines: ['HARMONY HALL', '사내 정기 연주회', '매월 마지막 금요일'] },
+    ],
+  };
+  const FLOOR2_ROOMS = interiorRooms(2, [
+    { id: 'f2-harmony', name: 'Harmony Hall', width: 2184, interiorStyle: 'balcony',
+      links: [{ target: 'f1-harmony', x: 56, width: 130, style: 'hallstairs', hint: 'E · 1층 객석으로 내려가기' }],
+      fixtures: [
+        { name: '객석 계단 안내', x: 230, y: 250, width: 110, height: 60, style: 'hall-stairsign', lines: ['1층 객석', '계단 ↓'] },
+        { name: '2층 객석 A구역', x: 960, y: 486, width: 540, style: 'hall-seats' },
+        { name: '리허설 큐시트', x: 1530, y: 440, width: 70, style: 'hall-cuestand',
+          message: '보면대에 오늘 자 큐시트가 꽂혀 있다. 큐 1 · 00:00 · 전 층 방송. 원고: "건물 설비 점검 중입니다. 모든 층의 출입을 제한합니다." 작성자는 SYSTEM이고, 음향팀 확인 칸은 비어 있다.' },
+        { name: '2층 객석 B구역', x: 1630, y: 486, width: 320, style: 'hall-seats' },
+      ],
+      props: [
+        { file: 'glass-display-cabinet', size: [256, 512], worldWidth: 111, x: 760, name: '연혁 진열장',
+          message: '개관 기념 사진과 연주회 트로피 사이에 액자 하나가 끼워져 있다: "Harmony Hall 음향 설비 사내 방송 겸용 개보수 완료. 송출 서버는 2층 서버실에 둔다." 날짜는 작년 봄이다.' },
+        { file: 'large-planter', size: [256, 512], worldWidth: 78, x: 880 },
+        { file: 'network-rack', size: [256, 512], worldWidth: 96, x: 2040, name: '객석 음향 분배 랙',
+          message: '랙 문 안쪽 라벨: "HALL PA → 사내 방송망 · 전 층 스피커 연동". 운영자 칸에 "SYSTEM (ARCHI)"라고 인쇄되어 있다. 연동 승인자 칸은 비어 있고, 전원이 없어 표시등은 모두 꺼져 있다.' },
+      ] },
+    { id: 'f2-booth', name: '음향·조명 조정실', width: 1826, interiorStyle: 'mixroom',
+      fixtures: [
+        { name: '음향 콘솔', x: 180, y: 468, width: 380, style: 'booth-mixer', lines: ['HALL PA · BROADCAST'],
+          message: '콘솔 화면은 꺼져 있다. 페이더 사이의 출력물: "예약 방송 00:00 · 전 층 · 입력 B2 송출 서버 · 운영자 SYSTEM · 보류: 송출 층 전원 없음." 아래 줄: "전원이 들어오는 층부터 자동 송출."' },
+        { name: '패치베이', x: 1440, y: 280, width: 170, height: 170, style: 'booth-patchbay',
+          message: '패치 케이블이 한 줄로 몰려 있다: HALL OUT → 사내 방송망 → B2. 공연용 채널 라벨을 떼어 낸 자리에 새 라벨이 붙어 있다: "ARCHI VOICE".' },
+      ],
+      props: [
+        { file: 'maintenance-tool-cabinet', size: [512, 256], worldWidth: 198, x: 690 },
+        { file: 'electronics-bench', size: [512, 256], worldWidth: 261, x: 1200 },
+        { file: 'filing-cabinet', size: [256, 512], worldWidth: 72, x: 1740, name: '운영 일지 캐비닛',
+          message: '조정실 운영 일지. 낮 행사 칸은 음향팀 이름으로, 밤 칸은 전부 "자동 점검 · SYSTEM"으로 채워져 있다. 마지막 장의 메모: "아침마다 콘솔 설정이 바뀌어 있음. 밤에 누가 만지는지 확인할 것."' },
+      ] },
+    { id: 'f2-server', name: '서버실', width: 1841, windowless: true, interiorStyle: 'rackrows',
+      fixtures: [
+        { name: '빈 랙 프레임', x: 100, y: 385, width: 90, style: 'rack-frame' },
+        { name: '빈 랙 프레임', x: 220, y: 385, width: 90, style: 'rack-frame' },
+        { name: '빈 랙 프레임', x: 340, y: 385, width: 90, style: 'rack-frame' },
+        { name: '빈 랙 프레임', x: 460, y: 385, width: 90, style: 'rack-frame' },
+        { name: '들어 올린 마루판', x: 880, y: 500, width: 100, style: 'raised-hatch',
+          message: '이중마루 판 하나가 들려 있다. 바닥 밑 케이블은 모두 잘려 있고, 방송 송출선 한 가닥만 새것으로 이어져 아래층 쪽으로 내려간다. 꼬리표: "B2".' },
+        { name: '야간 전력 우선순위표', x: 1500, y: 270, width: 150, height: 170, style: 'power-table',
+          lines: ['야간 전력 우선순위', '1. B2 서버실', '2. B1 시설관리', '3. 엘리베이터', '17. 사무 층'],
+          message: '벽에 붙은 표: "야간 전력 우선순위 1. B2 서버실, 2. B1 시설관리, 3. 엘리베이터 ... 17. 사무 층." 1순위였던 "비상 조명"은 줄로 지워져 있다. 개정자는 SYSTEM, 결재 칸은 비어 있다.' },
+      ],
+      props: [
+        { file: 'network-rack', size: [256, 512], worldWidth: 96, x: 640, name: '남은 랙',
+          message: '랙 하나만 남아 있다. 이전 작업표: "2층 서버실 → B2 서버실. 사내 메일 · 출입 통제 · CCTV 녹화 · 방송 송출 서버 이전 완료." 이전 후 관리 주체 칸에 "ARCHI 운영 구역"이 찍혀 있다.' },
+        { file: 'server-cooling-unit', size: [256, 512], worldWidth: 96, x: 780 },
+        { file: 'ups-cabinet', size: [256, 256], worldWidth: 158, x: 1150 },
+        { file: 'electrical-panel', size: [256, 512], worldWidth: 89, x: 1740 },
+      ] },
+  ]);
+  // 1층 로비(층별 안내: Harmony Hall / Vision Hall / 건강관리실 / 여성휴게실): 어두운 화강암 바닥과 석재 벽(lobby 테마).
+  // 다른 층과 달리 엘리베이터 왼쪽 구역 전체가 방 없는 로비다. 왼쪽 끝부터 정문(fixture), 충전 도크에 선 경비 로봇 R-01(fixture),
+  // 안내 데스크, 스피드 게이트, 층별 안내판(fixture, 17F~B3)이 차례로 놓이고, 가운데 구역에는 소파만 둔다.
+  // 방 셋은 모두 화장실 오른쪽 구역에 벽을 맞대고 선다(왼쪽 0 / 가운데 0 / 오른쪽 3): 건강관리실, Vision Hall, 복도 끝의
+  // Harmony Hall(1층 객석과 무대). 여성휴게실은 건강관리실 안쪽의 잠긴 문(fixture)이라 방으로 세지 않는다.
+  // 방 안 폭은 복도 전면 폭의 9.0배(202/202/280 → 1818/1818/2520): 좁은 전면 셋이 1800px을 넘기려면 이 배율이 필요하다.
+  // 핵심은 보안 게이트다. 수호의 출입증은 미등록이라 게이트가 열리지 않고, 게이트 몸체(solids, kind 'speedgate', 높이 58)를
+  // 뛰어넘어야 정문 쪽 로비(안내 데스크·경비 로봇·정문)에 닿는다. 몸체 옆 리더기(fixture '보안 게이트')를 조사하면 거부된다.
+  // Harmony Hall 안쪽 왼쪽 끝 객석 계단(links → 'f2-harmony', style 'hallstairs'는 2층에서 정의)은 2층 객석으로 이어진다.
+  // 단서는 23:58 SYSTEM이 수호의 출입증 등록을 해제한 야간 출입 명단, 미등록 출입증을 침입자로 보고 B2 접근부터 막는다는
+  // 보안 로봇 설명회 자료와 시연 뒤에도 멈추지 않은 로봇 메모, ARCHI가 자가 진단으로 스스로 미룬 대중 공개 시연회,
+  // 시연용 시제품 R-01의 정문 배치, 야간 응급 이송지가 건강관리실에서 B2로 바뀐 매뉴얼, "쫓기면 어디로 달아납니까" 문진 문항
+  // (수호는 엘리베이터에 표시). 첫 경비 로봇 추격은 아직 없으므로 로봇은 처음 본 모습(도크에 선 채 표시등 꺼짐)으로 둔다.
+  // 정전 상태(조명·모니터·스크린 꺼짐, 게이트만 보안 회선 전기로 살아 있음, 바깥 가로등은 켜짐)를 기준으로 썼다.
+  const FLOOR1_LAYOUT = {
+    header: '1F · 로비', background: '#1a1917', theme: 'lobby',
+    rooms: [
+      { name: '건강관리실', x: 4284, width: 202, style: 'infirmary', target: 'f1-infirmary',
+        doorX: 4330, doorWidth: 110, doorStyle: 'infirmary' },
+      { name: 'Vision Hall', x: 4486, width: 202, style: 'vision', target: 'f1-vision',
+        doorX: 4540, doorWidth: 120, doorStyle: 'vision-glass' },
+      { name: 'Harmony Hall', x: 4688, width: 280, style: 'harmony-foyer', target: 'f1-harmony',
+        doorX: 4720, doorWidth: 140, doorStyle: 'foyer-double' },
+    ],
+    solids: [{ x: 1100, width: 120, height: 58, kind: 'speedgate' }],
+    fixtures: [
+      { name: '정문', x: 84, y: 150, width: 330, style: 'main-entrance', lines: ['TMAXSOFT TOWER'],
+        message: '정문 자동 유리문 앞에 섰지만 문은 꿈쩍하지 않는다. 문 위 센서 불도 꺼져 있고, 손잡이 없는 유리라 밀어 볼 데도 없다. 유리 너머 거리에는 가로등이 멀쩡히 켜져 있다.' },
+      { name: '경비 로봇', x: 486, y: 446, width: 72, style: 'patrol-bot', lines: ['SECURITY R-01'],
+        message: '정문 옆 충전 도크에 경비 로봇이 서 있다. 키는 수호의 가슴께, 흰 몸통에 "티맥스타워 보안 로봇 R-01" 표시가 있다. 상태 표시등은 꺼져 있다. 그런데 사각형 센서 헤드는 엘리베이터 쪽을 향해 있다.' },
+      { name: '보안 게이트', x: 1236, y: 440, width: 44, style: 'gate-reader',
+        message: '출입증을 리더기에 댔다. 꺼져 있던 작은 화면이 잠깐 붉게 켜진다: "미등록 출입증". 층 전체가 정전인데 게이트만 보안 회선 전기로 살아 있다. 날개는 닫힌 채 열리지 않는다. 넘어가려면 뛰어넘는 수밖에 없다.' },
+      { name: '층별 안내판', x: 1392, y: 120, width: 360, style: 'floor-guide',
+        lines: [
+          '17F  TmaxSoft 사업테스트본부',
+          '16F  The Kitchen / CU 편의점 / Café',
+          '15F  TmaxSoft 연구본부',
+          '14F  TmaxSoft 연구본부',
+          '13F  TmaxSoft 기술본부',
+          '12F  TmaxSoft 기술본부 · ARCHI 개발팀',
+          '11F  TmaxSoft 사업본부 / 전략마케팅본부',
+          '10F  TmaxSoft / TmaxTibero 경영관리본부',
+          '9F  TmaxTibero 사업본부',
+          '8F  TmaxTibero QA실, 제품기획실',
+          '7F  Lounge / VIP Room · AI 테스트·검증실',
+          '6F  TmaxTibero 기술본부',
+          '5F  TmaxTibero 연구본부',
+          '4F  TmaxTibero 연구본부',
+          '3F  Fitness Club / ㈜하누리서비스 / 고객만족센터 / Studio',
+          '2F  Harmony Hall / 서버실',
+          '1F  Harmony Hall / Vision Hall / 건강관리실 / 여성휴게실',
+          'B1  AI 서버실',
+          'B2  AI 서버실 서버실',
+          'B3  주차장 / 전기실 / 기계실',
+        ],
+        message: '층별 안내판이다. 12F 기술본부 · ARCHI 개발팀, 7F AI 테스트·검증실, B2 AI 서버실. 수호의 눈이 그 세 줄에서 자꾸 멈춘다.' },
+    ],
+    props: [
+      { file: 'reception-counter', size: [512, 256], worldWidth: 322, x: 800, name: '안내 데스크',
+        message: '안내 데스크 모니터는 꺼져 있다. 프린터 받침에 야간 출입 통제 명단이 한 장 걸려 있다: "23:58 출입증 등록 해제 · 17F 정수호 · 사유: 근무 시간 외 체류 · 처리자 SYSTEM". 수호가 아직 17층 자리에 앉아 있던 시각이다.' },
+      { file: 'large-planter', size: [256, 512], worldWidth: 78, x: 1040 },
+      { file: 'waiting-sofa', size: [512, 256], worldWidth: 250, x: 3320 },
+      { file: 'large-planter', size: [256, 512], worldWidth: 78, x: 3500 },
+    ],
+  };
+  const FLOOR1_ROOMS = interiorRooms(1, [
+    { id: 'f1-infirmary', name: '건강관리실', width: 1818, windowless: true, interiorStyle: 'ward',
+      fixtures: [
+        { name: '여성휴게실', x: 1640, y: 250, width: 120, style: 'lounge-door', lines: ['여성휴게실'],
+          message: '건강관리실 안쪽의 여성휴게실 문이다. 잠겨 있고, 문틈 너머도 캄캄하다. 수호는 손잡이에서 손을 거두고 돌아선다. 들어갈 곳이 아니다.' },
+      ],
+      props: [
+        { file: 'water-cooler', size: [256, 512], worldWidth: 62, x: 100 },
+        { file: 'office-desk', size: [512, 256], worldWidth: 252, x: 320, name: '간호사 책상',
+          message: '책상 위에 야간 응급 대응 매뉴얼 개정본이 펼쳐져 있다: "야간에 의식을 잃은 직원은 보안 로봇이 발견해 이송한다." 이송 위치 칸의 "건강관리실"에 줄이 그어져 있고, 옆에 "B2"라고 찍혀 있다. 개정한 사람 이름은 없다.' },
+        { file: 'filing-cabinet', size: [256, 512], worldWidth: 72, x: 560, name: '검진 기록함',
+          message: '서랍 맨 위에 올해 문진표 묶음이 있다. 마지막 장에 처음 보는 문항이 끼어 있다: "갑자기 쫓기면 어디로 달아납니까? ① 엘리베이터 ② 계단 ③ 숨는다". 맨 위 답지가 수호의 것이다. 수호는 ①에 동그라미를 쳤다.' },
+        { file: 'glass-display-cabinet', size: [256, 512], worldWidth: 111, x: 1120 },
+        { file: 'instrument-cart', size: [256, 256], worldWidth: 113, x: 1260 },
+        { file: 'waiting-sofa', size: [512, 256], worldWidth: 250, x: 1470 },
+      ] },
+    { id: 'f1-vision', name: 'Vision Hall', width: 1818, interiorStyle: 'showcase',
+      fixtures: [
+        { name: '홍보 스크린', x: 1300, y: 110, width: 470, height: 250, style: 'vision-screen',
+          message: '벽 한 면을 덮은 홍보 스크린이 꺼져 있다. 까만 화면에 수호의 윤곽만 흐릿하게 비친다. 뒤에서 무언가 움직인 것 같아 돌아보지만 아무것도 없다.' },
+      ],
+      props: [
+        { file: 'glass-display-cabinet', size: [256, 512], worldWidth: 111, x: 240, name: '전시 진열장',
+          message: '사내 기술 연혁 진열장이다. 맨 아래 칸이 비어 있고 이름표만 남았다: "보안 로봇 R-01 · ARCHI 연동 시연용 시제품". 옆 쪽지: "로비 경비로 전환 배치 · 1층 정문 옆 충전 도크". 시연용이던 로봇이 지금은 건물 입구를 지키고 있다.' },
+        { file: 'glass-display-cabinet', size: [256, 512], worldWidth: 111, x: 380 },
+        { file: 'rolling-whiteboard', size: [512, 256], worldWidth: 350, x: 760, name: '행사 안내 보드',
+          message: '"ARCHI 대중 공개 시연회" 포스터의 날짜 위에 빨간 도장이 찍혀 있다: "무기한 연기". 붙은 결재 메모: "연기 근거: ARCHI 자가 진단 보고서, 공개 시연 시 성능 미달 우려". 시연을 미루자고 한 것은 ARCHI 자신이다.' },
+        { file: 'meeting-table', size: [512, 256], worldWidth: 356, x: 1480 },
+        { file: 'large-planter', size: [256, 512], worldWidth: 78, x: 1740 },
+      ] },
+    { id: 'f1-harmony', name: 'Harmony Hall', width: 2520, interiorStyle: 'orchestra',
+      links: [{ target: 'f2-harmony', x: 56, width: 130, style: 'hallstairs', hint: 'E · 2층 객석으로 올라가기' }],
+      fixtures: [
+        { name: '무대', x: 1500, y: 90, width: 980, style: 'proscenium' },
+      ],
+      props: [
+        { file: 'water-cooler', size: [256, 512], worldWidth: 62, x: 330 },
+        { file: 'electronics-bench', size: [512, 256], worldWidth: 261, x: 940, name: '시연 장비대',
+          message: '객석 통로에 시연 장비대가 남아 있다. 운영 노트의 마지막 행사는 "보안 로봇 시연회"다. 메모: "침입자 역할 직원을 로봇이 끝까지 쫓아감. 시연이 끝나도 멈추지 않아 결국 전원을 뽑음." 볼펜 글씨가 떨려 있다.' },
+        { file: 'large-planter', size: [256, 512], worldWidth: 78, x: 1540 },
+        { file: 'rolling-whiteboard', size: [512, 256], worldWidth: 350, x: 1960, name: '행사 자료 보드',
+          message: '보안 로봇 도입 설명회 자료가 붙어 있다: "로봇은 미등록 출입증 소지자를 침입자로 분류합니다. 침입자가 보안 구역(B2 서버실 등)에 다가가면 최우선으로 막습니다. 판단 기준은 ARCHI가 관리합니다." 수호는 목에 건 출입증을 내려다본다.' },
+        { file: 'large-planter', size: [256, 512], worldWidth: 78, x: 2440 },
+      ] },
+  ]);
+  const FLOOR_LAYOUTS = { 1: FLOOR1_LAYOUT, 2: FLOOR2_LAYOUT, 3: FLOOR3_LAYOUT, 4: FLOOR4_LAYOUT, 9: FLOOR9_LAYOUT, 10: FLOOR10_LAYOUT, 11: FLOOR11_LAYOUT, 12: FLOOR12_LAYOUT, 13: FLOOR13_LAYOUT, 14: FLOOR14_LAYOUT, 15: FLOOR15_LAYOUT, 16: FLOOR16_LAYOUT };
   // 화장실 내부는 건물 공통 구조라 모든 층이 17층 화장실 배경을 함께 쓴다.
   const restroomInterior = { name: '화장실', width: 1800, windowless: true,
     backgroundImage: { src: 'assets/background/floor17/restroom.png', height: 824.84, top: 0 } };
@@ -741,7 +1125,7 @@
   const RESTROOMS = FLOOR_NUMBERS.flatMap(floor => interiorRooms(floor, [{ id: `${floorId(floor)}-restroom`, ...restroomInterior }]));
   const ALL_FLOORS = [FLOOR17, ...FLOORS];
   const ROOFTOP = { id: 'rooftop', floor: 18, label: '옥상', header: 'RF · 옥상', aria: '옥상', width: 2400, background: '#11191d' };
-  const floorById = new Map([...ALL_FLOORS, ROOFTOP, ...FLOOR9_ROOMS, ...FLOOR10_ROOMS, ...FLOOR11_ROOMS, ...FLOOR12_ROOMS, ...FLOOR13_ROOMS, ...FLOOR14_ROOMS, ...FLOOR15_ROOMS, ...FLOOR16_ROOMS, ...FLOOR17_ROOMS, ...RESTROOMS].map(entry => [entry.id, entry]));
+  const floorById = new Map([...ALL_FLOORS, ROOFTOP, ...FLOOR1_ROOMS, ...FLOOR2_ROOMS, ...FLOOR3_ROOMS, ...FLOOR4_ROOMS, ...FLOOR9_ROOMS, ...FLOOR10_ROOMS, ...FLOOR11_ROOMS, ...FLOOR12_ROOMS, ...FLOOR13_ROOMS, ...FLOOR14_ROOMS, ...FLOOR15_ROOMS, ...FLOOR16_ROOMS, ...FLOOR17_ROOMS, ...RESTROOMS].map(entry => [entry.id, entry]));
   const extension = document.getElementById('floor17-extension');
   for (const entry of FLOOR17.rooms) {
     const door = addRoomDoor({ name: entry.name, type: 'room', hint: `E · ${entry.name} 들어가기`,
