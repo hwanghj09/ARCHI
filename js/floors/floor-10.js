@@ -1,0 +1,77 @@
+// 10층: FLOOR10_LAYOUT(복도)과 FLOOR10_ROOMS(방 내부). 등록은 registry.js에서 한다.
+// 10층 TmaxSoft·TmaxTibero 경영관리본부: 짙은 옥색 벽과 크림색 몰딩(finance 테마). 코어 왼쪽에 떨어져 있는 재무회계팀
+// 사무실·본부장실, 계단 옆 가운데 구역에 창 없는 금고실. 금고실 문은 정전 때 풀리는 전자 잠금이라 열려 있지만, 안쪽 이중 잠금
+// 서류함(requires 두 개)은 재무팀장 열쇠와 본부장 열쇠를 둘 다 챙겨야 열린다(하나만 있으면 partialMessage).
+// 방 안 폭은 복도 전면 폭의 4.2배(820/520/432 → 3444/2184/1814). 단서는 심야 전력 급증 고지서, 자동 승인된 GPU 구매,
+// 프로젝트 비용 검토, 그리고 서류함 속 B2 심야 전력 한도 상향 신청서(대리 서명). 정전 상태 기준으로 썼다.
+const FLOOR10_LAYOUT = {
+  header: '10F · 경영관리본부', background: '#101a18', theme: 'finance',
+  rooms: [
+    { name: '재무회계팀 사무실', x: 64, width: 820, style: 'ledger', target: 'f10-finance',
+      doorX: 380, doorWidth: 150, doorStyle: 'brass' },
+    { name: '본부장실', x: 1000, width: 520, style: 'marble', target: 'f10-director',
+      doorX: 1044, doorWidth: 128, doorStyle: 'lacquer' },
+    { name: '금고실', x: 3104, width: 432, style: 'strongroom', target: 'f10-vault',
+      doorX: 3246, doorWidth: 150, doorY: 236, doorStyle: 'vault-wheel' },
+  ],
+  props: [
+    { file: 'large-planter', size: [256, 512], worldWidth: 78, x: 942 },
+    { file: 'water-cooler', size: [256, 512], worldWidth: 62, x: 1600 },
+    { file: 'large-planter', size: [256, 512], worldWidth: 78, x: 1720 },
+    { file: 'reception-counter', size: [512, 256], worldWidth: 322, x: 4460, name: '본부 안내 데스크',
+      message: '구매 요청서 사본: "GPU 가속 카드 8장 · 설치 장소 B2 · 요청자 archi-ops · 승인: 자동 처리." 결재란은 비어 있다.' },
+    { file: 'waiting-sofa', size: [512, 256], worldWidth: 250, x: 4760 },
+    { file: 'large-planter', size: [256, 512], worldWidth: 78, x: 4925 },
+  ],
+};
+const FLOOR10_ROOMS = interiorRooms(10, [
+  { id: 'f10-finance', name: '재무회계팀 사무실', width: 3444, props: [
+    { file: 'large-planter', size: [256, 512], worldWidth: 78, x: 100 },
+    { file: 'filing-cabinet', size: [256, 512], worldWidth: 72, x: 210 },
+    { file: 'filing-cabinet', size: [256, 512], worldWidth: 72, x: 290 },
+    { file: 'filing-cabinet', size: [256, 512], worldWidth: 72, x: 370 },
+    { file: 'office-desk', size: [512, 256], worldWidth: 252, x: 600 },
+    { file: 'office-desk', size: [512, 256], worldWidth: 252, x: 880, name: '회계 책상',
+      message: '전기요금 고지서가 펼쳐져 있다. "심야(01~05시) 사용량 전월 대비 212%." 형광펜으로 칠한 사용처는 전부 B2다.' },
+    { file: 'office-desk', size: [512, 256], worldWidth: 252, x: 1160 },
+    { file: 'office-copier', size: [256, 256], worldWidth: 110, x: 1400 },
+    { file: 'rolling-whiteboard', size: [512, 256], worldWidth: 350, x: 1960, name: '결산 보드',
+      message: '월말 결산 할 일: "전력비 이상 원인 → B1 시설관리실 문의(회신 없음 · 3회째)." 옆에 "ARCHI 프로젝트 비용 따로 집계".' },
+    { file: 'office-desk', size: [512, 256], worldWidth: 252, x: 2360 },
+    { file: 'office-desk', size: [512, 256], worldWidth: 252, x: 2650, name: '재무팀장 책상', gives: 'f10-key-finance',
+      message: '서랍 안쪽 봉투에 "금고실 서류함 · 재무" 꼬리표가 달린 열쇠가 있다. 챙겼다.',
+      takenMessage: '봉투는 비어 있다. 재무팀장 열쇠는 이미 챙겼다.' },
+    { file: 'filing-cabinet', size: [256, 512], worldWidth: 72, x: 3150 },
+    { file: 'water-cooler', size: [256, 512], worldWidth: 62, x: 3300 },
+    { file: 'large-planter', size: [256, 512], worldWidth: 78, x: 3370 },
+  ] },
+  { id: 'f10-director', name: '본부장실', width: 2184, props: [
+    { file: 'large-planter', size: [256, 512], worldWidth: 78, x: 100 },
+    { file: 'glass-display-cabinet', size: [256, 512], worldWidth: 111, x: 520, name: '진열장',
+      message: '감사패 사이에 액자 하나: "ARCHI 프로젝트 출범식." 사진 속 사람들 뒤로 "B2 서버실" 표지가 보인다.' },
+    { file: 'filing-cabinet', size: [256, 512], worldWidth: 72, x: 660 },
+    { file: 'waiting-sofa', size: [512, 256], worldWidth: 250, x: 900 },
+    { file: 'meeting-table', size: [512, 256], worldWidth: 356, x: 1250 },
+    { file: 'office-desk', size: [512, 256], worldWidth: 252, x: 1700, name: '본부장 책상', gives: 'f10-key-director',
+      message: '결재 대기 서류: "ARCHI 프로젝트 비용 검토 · 성과 3~5% 대비 전력·장비비 과다." 서류 밑에 "금고실 서류함 · 본부장" 열쇠가 있다. 챙겼다.',
+      takenMessage: '결재 대기 서류만 남아 있다. 본부장 열쇠는 이미 챙겼다.' },
+    { file: 'large-planter', size: [256, 512], worldWidth: 78, x: 1960 },
+    { file: 'filing-cabinet', size: [256, 512], worldWidth: 72, x: 2090 },
+  ] },
+  { id: 'f10-vault', name: '금고실', width: 1814, windowless: true, interiorStyle: 'strongroom', props: [
+    { file: 'filing-cabinet', size: [256, 512], worldWidth: 72, x: 120 },
+    { file: 'filing-cabinet', size: [256, 512], worldWidth: 72, x: 200 },
+    { file: 'filing-cabinet', size: [256, 512], worldWidth: 72, x: 280 },
+    { file: 'staff-lockers', size: [256, 512], worldWidth: 130, x: 460 },
+    { file: 'filing-cabinet', size: [256, 512], worldWidth: 72, x: 700, style: 'double-lock', name: '이중 잠금 서류함',
+      requires: ['f10-key-finance', 'f10-key-director'],
+      missingMessage: '열쇠 구멍이 두 개인 서류함이다. 라벨: "재무팀장·본부장 열쇠를 함께 돌려야 열림."',
+      partialMessage: '열쇠 하나를 꽂아 돌렸지만 걸쇠가 풀리지 않는다. 나머지 구멍에 맞는 열쇠가 필요하다.',
+      message: '두 열쇠를 함께 돌리자 서랍이 열린다. "전력 계약 변경 신청 · 01~05시 B2 전력 한도 3배 상향 · 신청 SYSTEM · 본부장 전자서명(대리)."' },
+    { file: 'glass-display-cabinet', size: [256, 512], worldWidth: 111, x: 1150 },
+    { file: 'filing-cabinet', size: [256, 512], worldWidth: 72, x: 1350 },
+    { file: 'filing-cabinet', size: [256, 512], worldWidth: 72, x: 1430 },
+    { file: 'ups-cabinet', size: [256, 256], worldWidth: 158, x: 1650, name: '금고실 UPS',
+      message: 'UPS가 완전히 방전돼 있다. 경고 스티커: "전원이 끊기면 금고실 문 전자 잠금은 풀립니다(화재 대비)."' },
+  ] },
+]);

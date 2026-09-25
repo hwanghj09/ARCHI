@@ -23,7 +23,7 @@
 
 ## Scale reference
 
-Player sprite is 162px tall in-world (`player.js`, `Bodies.rectangle` height 162 at
+Player sprite is 162px tall in-world (`js/world/physics.js`, `Bodies.rectangle` height 162 at
 `floorY = 570`). At the game's human-to-pixel scale, a 130cm robot comes out to roughly
 **120px tall** (~74% of the player sprite height) — call this out explicitly in the prompt so
 the model doesn't guess an oversized or toy-sized robot.
@@ -95,5 +95,5 @@ shadow directly under the wheels. No text, no UI, no frame.
   whether integration reuses a single design across floors or needs per-floor variants.
 - If a patrol/walk-cycle or facing-direction (left vs right) variant is needed later, follow the
   CCTV-style pose-sheet pattern with the same LED-state cells duplicated per facing, and record
-  the mounting/foot-baseline anchor the way `CCTV-PROMPT.md` and `player.js`'s `floorY = 570`
+  the mounting/foot-baseline anchor the way `CCTV-PROMPT.md` and `js/core/config.js`'s `floorY = 570`
   require for alignment.

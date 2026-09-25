@@ -1,0 +1,55 @@
+// 게임 루프: 고정 시간 간격(step)으로 update를 돌리고 매 프레임 render한다.
+let previousTime = null;
+let accumulator = 0;
+
+function update() {
+  if (transitioning) {
+    updateSceneTransition();
+    updateElevators();
+    return;
+  }
+  if (selectingFloor) {
+    updateElevators();
+    updateCabin();
+    return;
+  }
+  if (usingComputer || usingKeypad) {
+    updateElevators();
+    return;
+  }
+  const directions = [...keys].map(key => movementKeys[key]).concat([...pointers.values()]);
+  if (pulseTime > 0) directions.push(pulseDirection);
+  pulseTime = Math.max(0, pulseTime - step);
+  const direction = Number(directions.includes(1)) - Number(directions.includes(-1));
+  const sprinting = [...runKeys].some(key => keys.has(key));
+  interactionTime = direction || jumpQueued ? 0 : Math.max(0, interactionTime - step);
+  if (direction) facing = direction;
+  Body.setVelocity(body, { x: direction * (sprinting ? runSpeed : speed) / 60, y: jumpQueued && grounded ? -10.8 : body.velocity.y });
+  jumpQueued = false;
+  const oldX = body.position.x;
+  Engine.update(engine, step);
+  grounded = engine.pairs.list.some(pair => {
+    if (!pair.isActive || (pair.bodyA !== body && pair.bodyB !== body)) return false;
+    const normalY = pair.collision.normal.y * (pair.bodyA === body ? 1 : -1);
+    return normalY < -.5;
+  });
+  animate(Math.abs(body.position.x - oldX), sprinting, step);
+  updateElevators();
+  updateInteraction();
+  updateCall();
+  cameraX += (cameraTarget() - cameraX) * .13;
+  cameraX = Math.max(0, Math.min(Math.max(0, worldWidth - viewWidth), cameraX));
+}
+
+function frame(time) {
+  if (!document.hidden) {
+    accumulator += previousTime === null ? 0 : Math.min(time - previousTime, 100);
+    while (accumulator >= step) {
+      update();
+      accumulator -= step;
+    }
+    render();
+  }
+  previousTime = document.hidden ? null : time;
+  requestAnimationFrame(frame);
+}

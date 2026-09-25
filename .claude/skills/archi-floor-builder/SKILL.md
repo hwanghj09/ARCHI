@@ -23,7 +23,7 @@ Before writing anything:
    B2 already have power**, and 12F and 7F get powered by the player later (lights, PCs, CCTV,
    robots on). The power system itself is not implemented yet; write clue text for the state the
    player first sees and say so in the report.
-3. Read the current `player.js` blocks named below. Values change; the code wins over this file.
+3. Read the current code named below (`js/core/config.js`, `js/floors/`, `js/scene/scene-builder.js`). Values change; the code wins over this file.
 4. Compare with the existing floors (`FLOOR12_LAYOUT`..`FLOOR16_LAYOUT`, 17F) and make the new
    floor **clearly different**: other department, room types, wall/door looks, interior widths,
    props, and ideally a mechanic of its own. The user rejected a 15F that re-skinned 16F. Zone use so far: 16F left 2 + right 1, 15F left 2 +
@@ -33,7 +33,7 @@ Before writing anything:
 
 ## Fixed building core — never change per floor
 
-`BUILDING_CORE` in `player.js` is the single source, and 17F's static corridor reads it too:
+`BUILDING_CORE` in `js/core/config.js` is the single source, and 17F's static corridor reads it too:
 
 | Element | Value | Hint zone (±28) |
 | --- | --- | --- |
@@ -60,8 +60,10 @@ overlapping any core hint zone.
 
 ## Floor config shape
 
-Declare the new constants **after the `FLOOR15_ROOMS` block and before `const FLOOR_LAYOUTS`**
-(they are `const`; declaring them later throws a ReferenceError at load).
+Put the new constants in their own file **`js/floors/floor-NN.js`** (two digits; e.g. `floor-b1.js` for B1)
+and add its `<script>` tag in `index.html` **between the other floor files and `js/floors/registry.js`**.
+All game scripts are classic scripts sharing one global scope, so load order is dependency order;
+a floor file loaded after `registry.js` throws a ReferenceError at load.
 
 ```js
 const FLOOR14_LAYOUT = {
@@ -89,11 +91,11 @@ const FLOOR14_ROOMS = interiorRooms(14, [
 ]);
 ```
 
-Register it in **two** places: `FLOOR_LAYOUTS = { ..., 14: FLOOR14_LAYOUT }` and
+Register it in **two** places in `js/floors/registry.js`: `FLOOR_LAYOUTS = { ..., 14: FLOOR14_LAYOUT }` and
 `...FLOOR14_ROOMS` inside the `floorById` list. The floor already exists in `FLOOR_NUMBERS`.
 Basements: `floorId(-1) === 'b1'`, so targets are `b1-<id>`, and the key must be written
 `[-1]: B1_LAYOUT` (a bare `-1:` is a syntax error). 17F is different: it is static DOM, so
-change it through `FLOOR17.rooms`, `FLOOR17_ROOMS`, `#floor17-extension` and
+change it through `FLOOR17.rooms`, `FLOOR17_ROOMS` (`js/floors/floor-17.js`), `#floor17-extension` and
 `tests/floor17-extension.mjs`.
 
 ## Room inside/outside rule

@@ -500,8 +500,50 @@
       }
     </style>
     <script src="assets/vendor/matter.min.js" defer></script>
-    <script src="computer-documents.js" defer></script>
-    <script src="player.js" defer></script>
+    <!-- 게임 스크립트는 모두 일반 스크립트라 최상위 선언(전역)을 서로 함께 쓴다. 불러오는 순서가 곧 의존 순서다:
+         설정·상태 → 층 데이터 → 엘리베이터·17층 고정 장면·물리 → 기능별 로직 → 입력 → main.js(첫 화면과 루프 시작). -->
+    <script src="js/core/config.js" defer></script>
+    <script src="js/core/dom.js" defer></script>
+    <script src="js/core/state.js" defer></script>
+    <script src="js/ui/status.js" defer></script>
+    <script src="js/floors/helpers.js" defer></script>
+    <script src="js/floors/floor-01.js" defer></script>
+    <script src="js/floors/floor-02.js" defer></script>
+    <script src="js/floors/floor-03.js" defer></script>
+    <script src="js/floors/floor-04.js" defer></script>
+    <script src="js/floors/floor-09.js" defer></script>
+    <script src="js/floors/floor-10.js" defer></script>
+    <script src="js/floors/floor-11.js" defer></script>
+    <script src="js/floors/floor-12.js" defer></script>
+    <script src="js/floors/floor-13.js" defer></script>
+    <script src="js/floors/floor-14.js" defer></script>
+    <script src="js/floors/floor-15.js" defer></script>
+    <script src="js/floors/floor-16.js" defer></script>
+    <script src="js/floors/floor-17.js" defer></script>
+    <script src="js/floors/registry.js" defer></script>
+    <script src="js/scene/doors.js" defer></script>
+    <script src="js/elevator/elevators.js" defer></script>
+    <script src="js/world/office17.js" defer></script>
+    <script src="js/world/corridor17.js" defer></script>
+    <script src="js/world/rooftop.js" defer></script>
+    <script src="js/world/physics.js" defer></script>
+    <script src="js/player/player.js" defer></script>
+    <script src="js/scene/camera.js" defer></script>
+    <script src="js/scene/transition.js" defer></script>
+    <script src="js/scene/scene-builder.js" defer></script>
+    <script src="js/scene/floor-change.js" defer></script>
+    <script src="js/interaction/puzzles.js" defer></script>
+    <script src="js/interaction/keypad.js" defer></script>
+    <script src="js/interaction/interaction.js" defer></script>
+    <script src="js/computer/documents.js" defer></script>
+    <script src="js/computer/computer.js" defer></script>
+    <script src="js/elevator/cabin.js" defer></script>
+    <script src="js/core/loop.js" defer></script>
+    <script src="js/input/input.js" defer></script>
+    <script src="js/input/keyboard.js" defer></script>
+    <script src="js/input/touch.js" defer></script>
+    <script src="js/debug/floor-select.js" defer></script>
+    <script src="js/main.js" defer></script>
   </head>
   <body>
     <main id="stage" tabindex="-1" aria-label="ARCHI 17층 사무실 사이드뷰 스테이지">

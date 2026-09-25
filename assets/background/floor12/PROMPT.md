@@ -3,7 +3,7 @@
 - 상태: 2026-09-24 프롬프트만 작성. 아직 생성하지 않았다. 생성 후 실제 크기, 바닥선, 문 좌표는 `GENERATED.md`에 따로 적는다(16층 방식).
 - 도구: 내장 `image_gen` 또는 동급 도구. use case는 `stylized-concept`.
 - 층 설정(기획.md): 12층은 ARCHI 개발팀이다. 낮에는 성능 3~5%, 밤에는 80~90%였다는 기록과 7층 원본 로그 백업 메모를 찾는 층이다. 게임에서 처음 보는 상태는 정전이다(전력 공급 기능 미구현). 조명, 모니터, CCTV는 모두 꺼져 있고 빛은 창밖 도시 불빛, 초록 비상구 표시등, 작은 대기 LED뿐이다. 추리 80%, 공포 20%. 사람, 로봇, 괴물은 그리지 않는다.
-- 게임 쪽 배치 기준: `player.js`의 `BUILDING_CORE`, `FLOOR12_LAYOUT`, `FLOOR12_ROOMS`. 지금은 CSS 임시 그림(`index.html`의 lab 테마, frosted/lab/blinds 벽, slide/security/blinds 문)이며 아래 좌표가 그 판정 좌표와 같다.
+- 게임 쪽 배치 기준: `js/core/config.js`의 `BUILDING_CORE`, `js/floors/floor-12.js`의 `FLOOR12_LAYOUT`, `FLOOR12_ROOMS`. 지금은 CSS 임시 그림(`index.html`의 lab 테마, frosted/lab/blinds 벽, slide/security/blinds 문)이며 아래 좌표가 그 판정 좌표와 같다.
 
 ## 공통 규칙
 

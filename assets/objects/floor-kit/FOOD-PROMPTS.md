@@ -15,7 +15,7 @@
 
 원본은 `source/food-*.png`, 게임용 파일은 이 폴더에 있습니다. `manifest.json`과 기존 `scripts/prepare-floor-kit.ps1`을 사용해 alpha > 8 경계를 추출하고 종횡비를 보존한 nearest-neighbor 축소를 합니다. 투명 알파를 보존하며 아래 여백은 8px입니다. 원본 픽셀 편집 없이 게임 규격으로 내보냈습니다.
 
-`player.js`의 `FLOOR16_LAYOUT`·`FLOOR16_ROOMS`에서 기존 이미지 로더로 사용합니다. 앵커는 `(canvasWidth / 2, canvasHeight - 8)`입니다. `scale = worldWidth / canvasWidth`, `top = 570 - (canvasHeight - 8) * scale`로 바닥에 맞춥니다. 플레이어 162px = 175cm 기준으로 테이블 약 75cm, 배식대 약 135cm, 냉장 진열장 약 200cm, 계산대 약 134cm, 커피 바 약 145cm, 입간판 약 122cm입니다.
+`js/floors/floor-16.js`의 `FLOOR16_LAYOUT`·`FLOOR16_ROOMS`에서 기존 이미지 로더로 사용합니다. 앵커는 `(canvasWidth / 2, canvasHeight - 8)`입니다. `scale = worldWidth / canvasWidth`, `top = 570 - (canvasHeight - 8) * scale`로 바닥에 맞춥니다. 플레이어 162px = 175cm 기준으로 테이블 약 75cm, 배식대 약 135cm, 냉장 진열장 약 200cm, 계산대 약 134cm, 커피 바 약 145cm, 입간판 약 122cm입니다.
 
 새 소품만 재출력:
 

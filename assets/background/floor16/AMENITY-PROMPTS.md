@@ -16,7 +16,7 @@
 | [amenity-cu-interior.png](amenity-cu-interior.png) | CU 편의점 내부 | 0 | 2040 | 602 | 750.847 |
 | [amenity-cafe-interior.png](amenity-cafe-interior.png) | 카페 내부 | 0 | 1904 | 596 | 758.406 |
 
-`player.js`의 `FLOOR16_LAYOUT`·`FLOOR16_ROOMS`에 연결합니다. 가로는 각 구간 폭에 맞추고, 세로는 측정한 벽·바닥 경계가 충돌 바닥 y=570에 오도록 `height = 793 × 570 / sourceFloor`, `top = 0`을 사용합니다. 따라서 `top + sourceFloor × height / 793 = 570`입니다. 원본 그림은 수정하지 않았습니다.
+`js/floors/floor-16.js`의 `FLOOR16_LAYOUT`·`FLOOR16_ROOMS`에 연결합니다. 가로는 각 구간 폭에 맞추고, 세로는 측정한 벽·바닥 경계가 충돌 바닥 y=570에 오도록 `height = 793 × 570 / sourceFloor`, `top = 0`을 사용합니다. 따라서 `top + sourceFloor × height / 793 = 570`입니다. 원본 그림은 수정하지 않았습니다.
 
 `backgroundImage`는 기존 단일 객체 또는 이미지 배열을 받습니다. `backgroundWallsOnly: true`는 `data-art="walls"`로 표시하며 CSS 임시 벽·바닥만 감춥니다. 문·셔터·반입문·엘리베이터·계단과 모든 소품은 기존 좌표에 그대로 그립니다. 방 이름표와 층 표지판도 DOM 글자로 유지합니다. 기존 화장실은 `data-art="true"`, 배경 없는 층은 `false` 동작을 유지합니다.
 

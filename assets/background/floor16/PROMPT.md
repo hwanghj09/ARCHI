@@ -17,21 +17,21 @@
 
 ## 공통 정렬 계산
 
-- 게임 충돌 바닥선은 `player.js`의 `floorY = 570`이다. 화면에 보이는 월드 높이는 720px이다.
+- 게임 충돌 바닥선은 `js/core/config.js`의 `floorY = 570`이다. 화면에 보이는 월드 높이는 720px이다.
 - 요청 캔버스의 높이를 768로 잡으면 바닥선은 y=570(74.2%)이 된다. 이렇게 나오면 1 이미지 픽셀이 1 월드 픽셀이고 `left: 0; top: 0`에 그대로 놓으면 된다.
 - 다른 크기로 나오면 원본 바닥선 y를 `srcFloor`, 원본 폭을 `srcW`, 게임 폭을 `W`라고 둔다. 이때 배율은 `s = W / srcW`, 표시 높이는 `srcH * s`, `top = 570 - srcFloor * s`다. 예를 들어 사무실 원본이 2172x724이고 `srcFloor = 504`라면 `s = 1.105`, 높이 800, `top = 13`이다. 기존 `office-interior.png`는 `top 0`, 높이 `724 * 570 / 504`로 맞췄다.
 - 보간은 최근접(nearest)을 쓰고 CSS에는 `image-rendering: pixelated`를 준다.
 
 ## 게임 연결 계획 (이미지가 생긴 뒤)
 
-1. `player.js`의 `FLOOR16_LAYOUT`과 `FLOOR16_ROOMS` 항목마다 `backgroundImage` 경로를 추가한다. `buildDynamicScene`에서 옥상의 `rooftopBackground`처럼 `<img>`를 `dynamicScene` 맨 앞에 넣는다.
+1. `js/floors/floor-16.js`의 `FLOOR16_LAYOUT`과 `FLOOR16_ROOMS` 항목마다 `backgroundImage` 경로를 추가한다. `buildDynamicScene`에서 옥상의 `rooftopBackground`처럼 `<img>`를 `dynamicScene` 맨 앞에 넣는다.
 2. 배경이 있는 장면에서는 `.floor-room`과 `.room-interior`의 CSS 그림을 숨긴다. `.floor-room-sign`(방 이름표)과 `.floor-number-sign`(16F 표지판)은 DOM 텍스트이므로 유지한다.
 3. `.room-door`는 17층 `.office-door`처럼 배경은 투명하게, 가까이 갔을 때 외곽선만 보이게 바꾼다. 문 그림은 배경에 들어 있다. 판정 좌표는 바꾸지 않는다.
 4. 엘리베이터(`elevator.png`)와 비상계단(`stairs.png`) 개폐 스프라이트는 기존처럼 배경 위에 겹쳐 그린다. 배경에서 그 자리는 겹칠 스프라이트보다 조금 넓은 벽면이나 문틀 정도만 둔다.
 
 ## 1. 복도 `corridor.png`
 
-게임 좌표(월드 px, 문과 판정 위치는 `player.js` 기준):
+게임 좌표(월드 px, 문과 판정 위치는 `js/floors/floor-16.js` 기준):
 
 | x 범위 | 내용 | 비고 |
 | --- | --- | --- |

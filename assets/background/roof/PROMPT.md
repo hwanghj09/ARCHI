@@ -10,7 +10,7 @@
 
 ## 통합 방식
 
-옥상은 17층처럼 고정 배경이 아니라 `player.js`의 `buildDynamicScene()`이 매번 DOM으로 조립하는
+옥상은 17층처럼 고정 배경이 아니라 `js/scene/scene-builder.js`의 `buildDynamicScene()`이 매번 DOM으로 조립하는
 "dynamic" 층이다. `FLOORS`(`id: 'roof'`) 항목에 다음을 추가해서 연동했다:
 
 ```js
@@ -27,7 +27,7 @@ backgroundImage: { src: 'assets/background/roof/source.png', width: 1983, height
 - `top = floorY - sourceFloorY = 570 - 610 = -40px`
 
 가로가 1:1이라는 것은 소스 이미지에서 실측한 x좌표를 **그대로 게임 좌표로 쓸 수 있다는 뜻**이다.
-아래 표는 그렇게 실측해서 `player.js`의 `FLOORS.roof`에 넣은 값이다 (전부 `pixel_scan` +
+아래 표는 그렇게 실측해서 `js/floors/registry.js`의 `ROOFTOP`과 `js/scene/scene-builder.js`의 옥상 분기에 넣은 값이다 (전부 `pixel_scan` +
 격자 오버레이로 실측, 눈대중 아님):
 
 | 오브젝트 | 소스 x (좌측 기준) | 게임 x (= 소스 x) | 소스 y(top) | 게임 y(top) = 소스 y − 40 |
