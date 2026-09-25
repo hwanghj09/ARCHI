@@ -37,6 +37,8 @@ function update() {
   updateElevators();
   updateInteraction();
   updateCall();
+  updateTimedBarriers();
+  updateCameras();
   cameraX += (cameraTarget() - cameraX) * .13;
   cameraX = Math.max(0, Math.min(Math.max(0, worldWidth - viewWidth), cameraX));
 }

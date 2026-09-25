@@ -302,6 +302,12 @@ try {
   await page.keyboard.press('e');
   await finishSceneTransition(page);
   await page.locator('[data-floor="12"]').click();
+  assert.equal(await page.locator('[data-floor="12"]').getAttribute('aria-pressed'), 'false', '12F needs an employee ID card');
+  assert.match(await page.locator('#cabin-status').textContent(), /사원증 인증 층이다/);
+  // tests/elevator.mjs picks the card up on 16F; here it is handed over directly to keep the ride short.
+  await page.evaluate(() => collectedItems.add('f16-badge'));
+  await page.locator('[data-floor="12"]').click();
+  assert.equal(await page.locator('[data-floor="12"]').getAttribute('aria-pressed'), 'true');
   await page.locator('#cabin-close').click();
   await page.clock.runFor(8500);
   await page.locator('#cabin-exit').click();

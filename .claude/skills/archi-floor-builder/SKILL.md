@@ -8,8 +8,10 @@ description: Build a new playable floor (층) for ARCHI — corridor rooms, ente
 Every floor except the rooftop is one building. The user decided (2026-09-24) that **floor width,
 the three elevators, the emergency stair door and the restroom sit at exactly the same place on
 every floor**. Only the rooms and props in between change. This skill is the recipe the room floors (12F..16F) were built with, including the mistakes that had to be fixed.
-Floors 16..13 follow the lobby directory in `층별안내.md` (16F 편의시설 The Kitchen/CU/Café, 15F and 14F 연구본부,
-13F 기술본부); keep the tenant from that file when rebuilding one of them.
+Floors follow the lobby directory in `층별안내.md` (16F 편의시설 The Kitchen/CU/Café, 15F and 14F 연구본부,
+13F 기술본부, 8F QA실·제품기획실, 4F TmaxTibero 연구본부, 3F Fitness Club/㈜하누리서비스/고객만족센터/Studio,
+2F Harmony Hall/서버실, 1F Harmony Hall/Vision Hall/건강관리실/여성휴게실); keep the tenant from that file when
+rebuilding one of them. `js/elevator/cabin.js` relies on the 1F info-desk clue (Suho's badge deregistered at 23:58).
 
 Before writing anything:
 
@@ -28,7 +30,18 @@ Before writing anything:
    floor **clearly different**: other department, room types, wall/door looks, interior widths,
    props, and ideally a mechanic of its own. The user rejected a 15F that re-skinned 16F. Zone use so far: 16F left 2 + right 1, 15F left 2 +
    middle 1, 14F left 3, 13F middle 1 + right 2 (open desks on the left), 12F one per zone, 11F left 1 + right 2
-   (behind a corridor shutter), 10F left 2 (apart) + middle 1, 9F left 2 (apart) + right 1 with a middle-zone lounge.
+   (behind a corridor shutter), 10F left 2 (apart) + middle 1, 9F left 2 (apart) + right 1 with a middle-zone lounge,
+   8F middle 2 + right 1 with an open test area and no room on the left, 7F left 1 (VIP Room past an open lounge) +
+   right 2, 6F one per zone, 5F left 2 (apart) + middle 1, 4F right 3 (open lounge on the left), 3F left 1 + middle 2,
+   2F left 2 + right 1 (balcony right above the 1F hall), 1F left 3 (entrance, gates and robot at the east end),
+   B1 right 3 (open robot charging bay on the left), B2 one per zone (the main server room is the left one).
+   Mechanics taken so far: 16F links + latched shutter, 15F crates, 14F dark room + `litBy`, 13F `requires`,
+   12F key + `unlockedBy`, 11F `barriers`, 10F two-key `requires`, 9F risers + `base`, 8F `sequences`, 7F `exitLock`,
+   6F `ring`, 5F `movables` + inspectable solid, 4F one-output UPS `cycle`, 3F timed door (`opens` + sprint),
+   2F cross-room projection (fixture `requires` → `data-ready`), 1F fixture keypad `code` with a decoy,
+   B1 elevator restriction (cabin.js `restrictedFloors`, lifted by a prop's `gives`), B2 sweeping CCTV `cameras`.
+   B1 and B2 are the only floors with power, so they are drawn lit (monitors, card readers and ceiling lights on).
+   The first 1F..4F (speed gate, cross-floor Harmony Hall links, inner room, door keypad) were rebuilt on 2026-09-25.
    Also avoid room names another floor already uses (13F and a first 9F draft both had a 고객 교육장).
 
 ## Fixed building core — never change per floor
@@ -113,7 +126,8 @@ tolerance 0.01); `tests/elevator.mjs` does the enforcing.
 - Interior width scales with the corridor front. On one floor, `interior width / front width`
   is the same for the floor's own three rooms (±2%); the shared restroom (2.48) is exempt.
   16F uses 3.4 (1060→3604, 600→2040, 560→1904); 15F uses 4.0 (860→3440, 620→2480, 456→1824);
-  14F 3.75; 13F 5.7 (two 320px rooms in the right zone); 11F 5.7 (632/316/316); 10F 4.2; 9F 4.4.
+  14F 3.75; 13F 5.7 (two 320px rooms in the right zone); 11F 5.7 (632/316/316); 10F 4.2; 9F 4.4; 8F 9.1 (266/200/420);
+  4F 8.6 (230/210/236); 3F 8.0 (420/236/226); 2F 6.4 (520/300/460); 1F 6.2 (520/380/300).
 - Keep every interior **at least 1800px** wide (the camera shows 1280px on 16:9 and 1820px on
   21:9). A room in the middle zone (≤470px front) therefore needs a ratio of about 3.9 or more.
 - Keep inspectable props clear of the exit: box edge ≥ `exitX + doorWidth + 56` or
@@ -182,6 +196,28 @@ work while standing on the floor (y=570), never from on top of a crate.
   (`partialMessage` when some are) and does not hand out `gives` (10F dual-key cabinet). `base` stands a prop on
   a platform that high (`data-base`) and makes it inspectable only while standing at that height (`standY`);
   `assertHumanScale` accounts for it. `style` adds a class to `.floor-prop`.
+- `sequences` on a room: `[{ id, steps, gives, wrongMessage }]`, and props with `sequence: id, step: n` (props only,
+  not fixtures). Inspecting the next step (or the current one again) advances and sets `data-done` (green light);
+  a wrong or skipped step resets and shows `wrongMessage`; the last step collects `gives`, after which every step
+  shows `takenMessage || message`. Progress clears on every scene change (8F reproduction procedure).
+- Timed door: a prop or fixture with `opens: { barrier: <barrier name>, duration }` removes that barrier's body for
+  `duration` ms (`data-open`); pressing again restarts the count, and it only closes once the player is clear of it.
+  Barrier `closedMessage` shows on closing. Walking is 200px/s and sprinting (Shift) 340px/s, so 3F puts the button
+  ~1300px from the door with 5000ms: walking fails, sprinting passes. Test sprint with `keyboard.down('ShiftLeft')`.
+- Selector: a prop with `cycle: { id, states, messages, initial }` advances one state per E and holds exactly one item
+  `${id}=${state}` (`data-state` = index). Other props `requires` it and doors use it as `unlockedBy`, so a device
+  works only while selected; the corridor door re-locks on the next rebuild once the state moves (4F UPS).
+- A fixture with `requires` gets `data-requires` and `data-ready` (all collected). `refreshReady()` runs on build,
+  after any `gives` and after a cycle step, so CSS can show a state change in the same room (2F booth window).
+- A fixture can take `code` + `codePrompt` + `gives` like a prop (1F robot panel); after the right code, E shows
+  `takenMessage` without the keypad.
+- `cameras` on a floor or room (B2, `js/interaction/cctv.js`): `{ name, x, y, spans: [[from, to], ...], period, guards,
+  lockMs, disabledBy, detectedMessage, lockedMessage }`. The camera watches one span per `period` ms in turn
+  (cone `data-active`); the player's centre inside the watched span locks the `guards` room's corridor door (hint
+  `(잠김)`, E shows `lockedMessage`) until `lockMs` after leaving it (`.cctv` `data-alert`). Gaps between spans are
+  blind spots. With `disabledBy` collected the camera is drawn off with no cones. The count restarts on every rebuild.
+- Elevator restriction: `restrictedFloors` / `restrictionItem` in `js/elevator/cabin.js` refuse a floor button
+  (`data-restricted`) until the item is collected, like the 15F..12F `badgeFloors` (B2, lifted on B1).
 - Background art: generate with archi-art-prompt and record it next to the art. Vertical
   alignment: `top + sourceFloor * height / sourceHeight = 570`. Horizontally the image is
   stretched to `art.width ?? config.width` (no aspect lock). With art, `data-art=true` hides the
@@ -192,12 +228,15 @@ work while standing on the floor (y=570), never from on top of a crate.
 
 ## Tests
 
-`tests/elevator.mjs` rides 17 → 16 (checked before the loop) → 15…1 (loop) → B2 → B1 (after the
-loop; B1 runs at a 390×844 viewport and the test ends there).
+`tests/elevator.mjs` rides 17 → 16 (checked before the loop) → 15…1 (loop) → B1 → B2 (after the
+loop: B2 is refused from 1F, `checkFloorB1` lifts the restriction, the B1 → B2 ride runs at a 390×844 viewport, then
+`checkFloorB2` runs back at 1280×720 and the test ends there).
 
 - Floors 15..1: add a branch next to `if (floor === 15) await checkFloor15();`. The else branch
-  asserts an empty floor, and floor 8 also visits its restroom.
-- B2 / B1: replace their post-loop blocks (they assert `'B2 · 빈 층'`, `'B1 · 빈 층'` and 3 solids).
+  asserts an empty floor, and the first empty floor it meets also visits its restroom (`emptyRestroomVisited`).
+  No floor is empty any more, so that branch only guards future changes.
+- B1 / B2: change `checkFloorB1` / `checkFloorB2`. Camera timing in a test: wait for a span to start afresh
+  (`nextSpan` in `checkFloorB2`), not just to be active, or the period may run out mid-walk.
 - 12F: `tests/movement.mjs` also rides to 12F and asserts `'12F · 빈 층'`, no obstacles and
   `/12층에 도착/`; update it too.
 
@@ -237,5 +276,8 @@ via archi-art-prompt.
   only a border colour and let every room style set its own background.
 - The room backdrop used to be appended after the solids and hid crates and tiers; `buildDynamicScene` now inserts
   it before the first obstacle. Check screenshots that obstacles are visible.
+- Leaving a room by its exit collects the room's own id (the latch behind `unlockedBy: <room id>`). A `gives` equal to
+  a room id is therefore collected just by walking out; 8F's sequence first used `f8-repro` and was solved that way.
+  Give items their own ids (`f8-repro-record`).
 - Another Claude session may be editing the same files. Re-read code before patching and keep
   edits targeted.

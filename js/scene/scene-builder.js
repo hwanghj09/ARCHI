@@ -101,7 +101,7 @@ function buildDynamicScene(config) {
     dynamicScene.insertBefore(backdrop, dynamicScene.querySelector('.solid:not(.floor):not(.boundary), .barrier'));
     // 출구는 복도에서 들어온 그 문이다: 크기와 모양이 같고, 위치는 문 양옆 벽 비율을 따른다.
     const parent = floorById.get(config.parent);
-    // inner 방(3층 ㈜하누리서비스)은 복도 쪽 전면이 없어 출구도 없고, 옆방과의 연결문(links)으로만 드나든다.
+    // inner 방(inner: true)은 복도 쪽 전면이 없어 출구도 없고, 옆방과의 연결문(links)으로만 드나든다.
     const outside = parent.rooms.find(entry => entry.target === config.id);
     if (outside) {
       const doorWidth = outside.doorWidth ?? 120;
@@ -110,10 +110,11 @@ function buildDynamicScene(config) {
       doorList.push(addRoomDoor({ name: '복도', type: 'room', hint: 'E · 복도로 나가기', target: config.parent,
         arrivalKey: `room:${config.id}`, key: 'exit', x: config.exitX ?? exitDoorX(outside, config.width, doorWidth),
         y: outside.doorY ?? parent.roomDoorY ?? 250, width: doorWidth, style: outside.doorStyle,
+        unlocked: collectedItems.has(outside.unlockedBy),
         locked: Boolean(lock) && !collectedItems.has(lock.until), lockedUntil: lock?.until, message: lock?.message }));
     }
-    // 벽을 맞댄 방끼리의 연결문(links): 복도를 거치지 않고 옆방에 있는 짝 연결문 앞으로 나온다. 다른 층의 방과도 이을 수 있다
-    // (2층·1층 Harmony Hall 객석 계단). 그때는 hint로 안내 문구를 바꾼다.
+    // 벽을 맞댄 방끼리의 연결문(links, 16층 주방 반입문): 복도를 거치지 않고 옆방에 있는 짝 연결문 앞으로 나온다. 다른 층의 방과도
+    // 이을 수 있고, 그때는 hint로 안내 문구를 바꾼다.
     for (const link of config.links || []) {
       const next = floorById.get(link.target);
       doorList.push(addRoomDoor({ name: next.name, type: 'room', hint: link.hint ?? `E · ${next.name} 들어가기`, target: link.target,
@@ -132,16 +133,19 @@ function buildDynamicScene(config) {
     dynamicScene.append(roomElement);
     doorList.push(addRoomDoor({ name: roomConfig.name, type: 'room', hint: `E · ${roomConfig.name} 들어가기`,
       locked: roomConfig.locked && !collectedItems.has(roomConfig.unlockedBy), message: roomConfig.message,
+      unlocked: collectedItems.has(roomConfig.unlockedBy),
       code: roomConfig.code, codeMessage: roomConfig.codeMessage, unlockedBy: roomConfig.unlockedBy,
       target: roomConfig.target, arrivalKey: 'exit', key: `room:${roomConfig.target}`,
       x: roomConfig.doorX, y: roomConfig.doorY ?? config.roomDoorY ?? 250, width: roomConfig.doorWidth ?? 120,
       style: roomConfig.doorStyle }));
   }
   // 벽에 붙은 설비(fixtures: 1층 층별 안내판·정문처럼 소품 그림이 없는 것)는 CSS로 그리고 lines를 글줄로 넣는다.
-  // 충돌은 없고, message가 있으면 조사할 수 있다(requires·gives·code도 소품처럼 쓴다).
+  // 충돌은 없고, message가 있으면 조사할 수 있다(requires·gives·code·opens도 소품처럼 쓴다). requires가 있는 설비는 그 물건을
+  // 다 챙겼는지를 data-ready로 그린다(2층 객석 스크린: 영사실 영사기를 돌려야 화면이 비친다).
   for (const fixture of config.fixtures || []) {
     const element = document.createElement('div');
     element.className = `fixture ${fixture.style || ''}`.trim();
+    if (fixture.requires) element.dataset.requires = [].concat(fixture.requires).join('|');
     element.setAttribute('role', 'img');
     element.setAttribute('aria-label', fixture.name);
     Object.assign(element.style, { left: `${fixture.x}px`, top: `${fixture.y}px`, width: `${fixture.width}px`,
@@ -154,6 +158,7 @@ function buildDynamicScene(config) {
     dynamicScene.append(element);
     if (fixture.message) doorList.push({ ...fixture, type: 'inspect', element });
   }
+  refreshReady();
   const isFloor = config.id !== 'rooftop' && !config.interior;
   if (isFloor) {
     const floorSign = document.createElement('div');
@@ -187,14 +192,18 @@ function buildDynamicScene(config) {
     // 울리는 전화이고, 울리는 동안 받아야 message와 gives를 준다. 둘 다 장면을 그릴 때마다 처음 상태로 돌아간다.
     const sequence = prop.sequence && config.sequences.find(entry => entry.id === prop.sequence);
     if (sequence && collectedItems.has(sequence.gives)) element.dataset.done = 'true';
+    // cycle: 조사할 때마다 출력 칸이 바뀌는 선택기(4층 UPS). 지금 칸 번호를 data-state로 그린다.
+    if (prop.cycle) element.dataset.state = String(cycleState(prop.cycle));
     doorList.push({ name: prop.name, type: 'inspect', message: prop.message, gives: prop.gives,
       takenMessage: prop.takenMessage, darkMessage: prop.darkMessage, requires: prop.requires,
       missingMessage: prop.missingMessage, partialMessage: prop.partialMessage, element, standY: floorY - base,
-      code: prop.code, codePrompt: prop.codePrompt,
+      code: prop.code, codePrompt: prop.codePrompt, cycle: prop.cycle, opens: prop.opens,
       sequence: sequence && { ...sequence, step: prop.step },
       ring: prop.ring && !collectedItems.has(prop.gives) ? { ...prop.ring, elapsed: 0, state: 'waiting' } : null,
       x: prop.x - prop.worldWidth / 2, y: floorY - base - (height - 8) * scale, width: prop.worldWidth });
   }
+  // 감시 카메라(cameras, B2 복도): 카메라와 시야를 그리고 지키는 방 문을 찾아 둔다. 돌아가기와 발각은 cctv.js가 맡는다.
+  const cameras = buildCameras(config, doorList);
   const sceneDoors = config.id === 'rooftop' ?
     [{ name: '17층 계단', type: 'stairs', x: 160, y: 232, width: 180 }] : !isFloor ? [] : [
       ...BUILDING_CORE.elevators.map((car, carIndex) => ({ name: elevatorCars[carIndex].name, type: 'elevator', carIndex,
@@ -229,5 +238,5 @@ function buildDynamicScene(config) {
   });
   // Core doors come first: interaction picks the first match, so the fixed elevators and stairs behave
   // identically on every floor even where a floor's own door or prop hint zone touches theirs.
-  return { bodies, doors: [...coreDoors, ...doorList], moving };
+  return { bodies, doors: [...coreDoors, ...doorList], moving, cameras };
 }

@@ -1,7 +1,7 @@
 # Floor prop kit
 
 - Generator: built-in image_gen; style reference: ../../background/floor17/office-interior.png.
-- 28 completed isolated props. The six food-court sprites are placed on 16F; see [FOOD-PROMPTS.md](FOOD-PROMPTS.md) for their prompts, dimensions, and placement.
+- 33 completed isolated props. The six food-court sprites are placed on 16F; see [FOOD-PROMPTS.md](FOOD-PROMPTS.md). Five research sprites are placed on 15F; see [15F prompts](../floor15/PROMPTS.md) for their prompts, dimensions, and placement.
 - Production PNG files in this directory use a 256px tile grid: 256x256, 512x256 or 256x512.
 - Unmodified high-resolution generated originals are in source/. They are NOT the production sprites.
 - Export: trim to alpha > 8 bounds, preserve aspect ratio, nearest-neighbor scale, horizontal center, 8px bottom padding. Alpha is preserved.

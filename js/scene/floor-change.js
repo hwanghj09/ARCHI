@@ -32,8 +32,10 @@ function performFloorChange(destId, carIndex = 0, arrivalKey = null) {
   world.dataset.floor = String(currentSceneFloor);
   lightSwitch.hidden = currentSceneFloor !== 17;
   movingParts = [];
+  activeCameras = [];
   activeCall = null;
   sequenceProgress.clear();
+  timedBarriers.length = 0;
   if (destId === 'f17') {
     room = 'corridor';
     world.dataset.room = 'corridor';
@@ -52,6 +54,7 @@ function performFloorChange(destId, carIndex = 0, arrivalKey = null) {
     currentTerrain = built.bodies;
     currentDoors = built.doors;
     movingParts = built.moving;
+    activeCameras = built.cameras;
     activeCall = built.doors.find(door => door.ring) || null;
     Composite.add(engine.world, currentTerrain);
   }

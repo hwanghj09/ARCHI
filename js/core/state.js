@@ -12,6 +12,8 @@ const sequenceProgress = new Map();
 // 지금 장면에서 울릴 전화(소품 ring, 6층)와 밀 수 있는 물체(movables, 5층). performFloorChange가 장면마다 다시 채운다.
 let activeCall = null;
 let movingParts = [];
+// 버튼(opens)으로 잠깐 열린 장애물(3층 배터리 자동문). 장면을 바꾸면 비운다.
+const timedBarriers = [];
 
 // 조작을 막는 모드: 장면 전환 중, 엘리베이터 안, 컴퓨터 사용 중, 키패드 입력 중.
 let transitioning = false;

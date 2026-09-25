@@ -71,6 +71,15 @@ function interact() {
       advanceSequence(nearbyDoor);
       return;
     }
+    // 잠깐 여는 버튼(opens, 3층 자동문)과 출력 선택기(cycle, 4층 UPS)는 puzzles.js가 처리한다.
+    if (nearbyDoor.opens) {
+      openTimedBarrier(nearbyDoor);
+      return;
+    }
+    if (nearbyDoor.cycle) {
+      advanceCycle(nearbyDoor);
+      return;
+    }
     // 울리는 전화(ring)는 벨이 울리는 동안에만 받을 수 있다. 받으면 벨이 멎고 아래에서 message와 gives를 준다.
     if (nearbyDoor.ring && !collectedItems.has(gives)) {
       if (nearbyDoor.ring.state !== 'ringing') {
@@ -93,6 +102,7 @@ function interact() {
     showStatus(unreadable || missing || (gives && collectedItems.has(gives) ? nearbyDoor.takenMessage : nearbyDoor.message), 5000);
     if (missing) return;
     if (gives) collectedItems.add(gives);
+    if (gives) refreshReady();
     if (gives && room === 'dynamic' && floorById.get(dynamicFloorId).litBy === gives) world.dataset.dark = 'false';
     // 걷힌 장애물(barriers)은 그 자리에서 충돌체를 치운다.
     if (gives && nearbyDoor.solid) {

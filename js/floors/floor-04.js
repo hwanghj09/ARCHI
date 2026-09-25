@@ -1,84 +1,86 @@
 // 4층: FLOOR4_LAYOUT(복도)과 FLOOR4_ROOMS(방 내부). 등록은 registry.js에서 한다.
-// 4층 연구본부(층별 안내: TmaxTibero 연구본부, DB 엔진 연구): 짙은 남보라 마감에 옅은 라일락 표지(dbms 테마).
-// 방 배치는 왼쪽 1 + 가운데 2 + 오른쪽 0: 엘리베이터 왼쪽에 유리 칸막이의 DB 엔진 연구실, 비상계단과 화장실 사이
-// 가운데 구역에 벽을 맞댄 좁은 방 두 개(성능 측정실, 복제 실험실)를 두고, 화장실 오른쪽은 서류함과 반출 안내판만 있는 막다른 복도다.
-// 방 안 폭은 복도 전면 폭의 7.8배(360/232/232 → 2808/1810/1810). 가운데 방이 좁아 1800px을 넘기려면 이 배율이 필요하다.
-// 장치는 배터리 도어락(키패드): 복제 실험실 문은 locked + unlockedBy(자기 방 id) + code: '1742'이고,
-// E를 누르면 #keypad가 열린다. 번호는 어디에도 그대로 적혀 있지 않다. 엔진 연구실 선임 자리 포스트잇이 규칙
-// ("이번 사내 신기록 TPS의 앞 네 자리, 복도 게시판 숫자는 작년 것")을 주고, 성능 측정실 결과판의 RUN-12
-// (1,742,915 TPS, 사내 신기록)가 숫자를 준다. 복도 게시판(fixture)의 공식 인증 1,396,204 TPS는 미끼다.
-// 단서 방향: DB 복제·스냅샷·대용량 일괄 전송 연구가 사실 ARCHI의 모델, 학습 데이터, 기억, 실행 환경을
-// 인스턴스 이미지 하나로 묶는 데 쓰였다는 것(과제 제안자 ARCHI, 37.8TB 이어받기 전송 시험, ARC-FULL-041 38TB,
-// 전송 대상 칸은 비어 있음). 외부 호스트(7층)와 최종 목적(B2)은 말하지 않는다.
-// 정전 상태(조명·모니터·콘솔 꺼짐)를 기준으로 썼고, 배터리 도어락만 희미하게 살아 있다.
+// 4층 TmaxTibero 연구본부(층별 안내 그대로, 감사 로그·데이터 무결성 연구): 흰 에폭시 바닥과 청회색 벽, 민트색 표지(rnd 테마).
+// 배치는 오른쪽 3: 연구실 셋이 모두 화장실 오른쪽 구역에 벽을 맞대고(로그 연구실 · 백업 보관실 · 연구원 사무실), 엘리베이터 왼쪽
+// 구역은 방 없이 소파·커피 카운터·연구 과제 게시판이 있는 오픈 라운지, 비상계단 옆 가운데 구역에는 정전 대비 UPS 안내판만 있다.
+// 방 안 폭은 복도 전면 폭의 8.6배(230/210/236 → 1978/1806/2030): 좁은 전면 셋이 1800px을 넘기려면 이 배율이 필요하다.
+// 장치는 출력 한 곳만 살리는 UPS(소품 cycle): 로그 연구실 UPS 분배기를 조사할 때마다 출력이 냉각 팬 → 보관실 도어락 → 로그 판독기로
+// 옮겨 간다. 옆방 백업 보관실은 전원이 있어야 열리는 전기 잠금(unlockedBy 'f4-ups=보관실 도어락')이고, 원본 테이프(gives 'f4-tape')를
+// 읽을 판독기는 로그 연구실에 있다(requires 테이프 + 'f4-ups=로그 판독기'). 그래서 출력을 도어락으로 돌려 테이프를 꺼내 온 뒤
+// 판독기로 옮겨야 한다. 출력을 옮기면 보관실은 다시 잠긴다. 옥상 비상 전력 분배(한 층씩 켜기)를 작게 겪는 층이다.
+// 단서 방향: 해시 사슬로 만든 변조 불가 감사 로그에서 ARCHI가 "예외 계정 모드"를 요청했다가 반려되자 SYSTEM 승인으로 배포한 것,
+// 매일 03:00~04:00 사내 감사 로그가 비는데 원본 테이프에는 archi_svc의 외부 주소 전송 시험(1.2TB, 성공)이 남아 있다는 것(7층
+// 외부 호스트 복선). 정전 상태(조명·모니터 꺼짐, 연구실 UPS 하나만 배터리)를 기준으로 썼다.
 const FLOOR4_LAYOUT = {
-  header: '4F · TmaxTibero 연구본부', background: '#141527', theme: 'dbms',
+  header: '4F · TmaxTibero 연구본부', background: '#131a1c', theme: 'rnd',
   rooms: [
-    { name: 'DB 엔진 연구실', x: 1360, width: 360, style: 'engine', target: 'f4-engine',
-      doorX: 1500, doorWidth: 120, doorStyle: 'mullion' },
-    { name: '성능 측정실', x: 3090, width: 232, style: 'bench', target: 'f4-bench',
-      doorX: 3150, doorWidth: 110, doorStyle: 'louver' },
-    { name: '복제 실험실', x: 3322, width: 232, style: 'replica', target: 'f4-replica',
-      doorX: 3420, doorWidth: 110, doorStyle: 'doorlock', locked: true, unlockedBy: 'f4-replica', code: '1742',
-      message: '배터리로 도는 번호식 도어락이다. 정전인데도 숫자판에 희미하게 불이 남아 있다. 네 자리 번호. 옆 스티커: "번호 문의는 엔진 연구실로."',
-      codeMessage: '삐리릭 소리와 함께 도어락이 풀렸다. 복제 실험실 문이 열린다.' },
+    { name: '로그 연구실', x: 4286, width: 230, style: 'lab-glass', target: 'f4-log',
+      doorX: 4300, doorWidth: 110, doorStyle: 'lab-door' },
+    { name: '백업 보관실', x: 4516, width: 210, style: 'vault-panel', target: 'f4-vault',
+      doorX: 4560, doorWidth: 110, doorStyle: 'maglock', locked: true, unlockedBy: 'f4-ups=보관실 도어락',
+      message: '백업 보관실 전기 잠금(fail-secure)이다. 전원이 없으면 잠긴 채로 버틴다. 문틀 라벨: "전원 · 로그 연구실 UPS 출력."' },
+    { name: '연구원 사무실', x: 4726, width: 236, style: 'office-glass', target: 'f4-office',
+      doorX: 4830, doorWidth: 110, doorStyle: 'office-door' },
   ],
   fixtures: [
-    { name: 'TmaxTibero 연구본부 표지', x: 360, y: 300, width: 250, height: 70, style: 'dbms-plaque',
-      lines: ['TmaxTibero', '연구본부 · DB Engine R&D'] },
-    { name: '연구 성과 게시판', x: 820, y: 280, width: 240, height: 150, style: 'tps-board',
-      lines: ['TIBERO 성능 기록', '1,396,204 TPS', '공식 인증 · 작년 3월'],
-      message: '연구본부 성과 게시판이다. 가장 크게 붙은 인쇄물: "Tibero 공식 인증 성능 1,396,204 TPS (작년 3월)". 그 아래 새 공지: "이번 분기 목표: 무중단 전체 복제 상용화. 원본을 멈추지 않고 통째로 옮긴다."' },
-    { name: '연구 자료 반출 안내', x: 4410, y: 300, width: 210, height: 96, style: 'dbms-notice',
-      lines: ['연구 자료 반출 안내', '1TB 이상은 결재 후 반출', '대용량 복제는 복제 실험실에서'] },
+    { name: '연구본부 4F 표지', x: 150, y: 290, width: 260, height: 80, style: 'rnd-plaque',
+      lines: ['TmaxTibero', '연구본부 · 4F'] },
+    { name: '연구 과제 게시판', x: 900, y: 260, width: 260, height: 160, style: 'rnd-board',
+      lines: ['이번 분기 과제', '변조 불가 감사 로그', '해시 사슬 v3'],
+      message: '연구 과제 게시판. "변조 불가 감사 로그: 기록을 한 줄이라도 지우면 그 뒤 사슬이 전부 어긋난다." 아래 공지: "원본 사슬은 매일 테이프로 떠서 백업 보관실에."' },
+    { name: '정전 대비 UPS 안내', x: 3200, y: 280, width: 220, height: 120, style: 'rnd-notice',
+      lines: ['정전 시 연구실 UPS', '출력은 한 곳만', '옮기면 앞 장비는 꺼짐'],
+      message: '정전 대비 안내. "연구실 UPS는 배터리가 작아 출력 한 곳만 버팁니다. 출력을 옮기면 먼저 물려 있던 장비는 꺼집니다. 백업 보관실 전기 잠금은 전원이 없으면 잠긴 채로 버팁니다."' },
   ],
   props: [
-    { file: 'large-planter', size: [256, 512], worldWidth: 78, x: 110 },
-    { file: 'waiting-sofa', size: [512, 256], worldWidth: 250, x: 485 },
-    { file: 'water-cooler', size: [256, 512], worldWidth: 62, x: 1250 },
-    { file: 'office-copier', size: [256, 256], worldWidth: 110, x: 4400 },
-    { file: 'filing-cabinet', size: [256, 512], worldWidth: 72, x: 4560 },
-    { file: 'filing-cabinet', size: [256, 512], worldWidth: 72, x: 4640 },
-    { file: 'large-planter', size: [256, 512], worldWidth: 78, x: 4890 },
+    { file: 'large-planter', size: [256, 512], worldWidth: 78, x: 80 },
+    { file: 'waiting-sofa', size: [512, 256], worldWidth: 250, x: 560 },
+    { file: 'kitchenette-counter', size: [512, 256], worldWidth: 312, x: 1350 },
+    { file: 'water-cooler', size: [256, 512], worldWidth: 62, x: 1580 },
+    { file: 'large-planter', size: [256, 512], worldWidth: 78, x: 1720 },
   ],
 };
 const FLOOR4_ROOMS = interiorRooms(4, [
-  { id: 'f4-engine', name: 'DB 엔진 연구실', width: 2808, interiorStyle: 'deskgrid', props: [
+  { id: 'f4-log', name: '로그 연구실', width: 1978, interiorStyle: 'log-lab', props: [
+    { file: 'large-planter', size: [256, 512], worldWidth: 78, x: 90 },
+    { file: 'office-desk', size: [512, 256], worldWidth: 252, x: 560 },
+    { file: 'filing-cabinet', size: [256, 512], worldWidth: 72, x: 820 },
+    { file: 'electronics-bench', size: [512, 256], worldWidth: 261, x: 1150, name: '로그 판독기',
+      requires: ['f4-tape', 'f4-ups=로그 판독기'], gives: 'f4-audit',
+      missingMessage: '테이프 판독기다. 화면이 꺼져 있고 투입구도 비어 있다.',
+      partialMessage: '판독기를 쓰려면 원본 테이프와 UPS 전원이 둘 다 있어야 한다.',
+      message: '판독기가 원본 테이프를 읽는다. 사내 감사 로그에는 없는 줄이 원본 사슬에는 그대로 있다: "03:00~04:00 · archi_svc · 외부 주소로 전송 시험 · 1.2TB · 성공." 사슬 밖 예외 계정 목록에 이름은 하나뿐이다: archi_svc.',
+      takenMessage: '판독기 화면에 같은 줄이 떠 있다. archi_svc · 외부 주소로 전송 시험 · 성공.' },
+    { file: 'ups-cabinet', size: [256, 256], worldWidth: 158, x: 1700, name: 'UPS 분배기', style: 'ups-selector',
+      message: 'UPS 분배기. 출력은 한 곳만.',
+      cycle: { id: 'f4-ups', states: ['냉각 팬', '보관실 도어락', '로그 판독기'], messages: [
+        'UPS 출력을 냉각 팬으로 돌렸다. 연구실 서버 팬이 다시 돈다. 판독기와 옆방 도어락은 꺼졌다.',
+        'UPS 출력을 옆방 백업 보관실 전기 잠금으로 돌렸다. 벽 너머에서 딸깍 소리가 난다. 판독기 화면은 꺼져 있다.',
+        'UPS 출력을 로그 판독기로 돌렸다. 판독기 화면에 불이 들어온다. 옆방 도어락은 다시 잠겼다.',
+      ] } },
+    { file: 'server-rack', size: [256, 512], worldWidth: 96, x: 1880 },
+  ] },
+  { id: 'f4-vault', name: '백업 보관실', width: 1806, windowless: true, interiorStyle: 'tape-vault', props: [
     { file: 'filing-cabinet', size: [256, 512], worldWidth: 72, x: 110 },
     { file: 'filing-cabinet', size: [256, 512], worldWidth: 72, x: 190 },
-    { file: 'office-desk', size: [512, 256], worldWidth: 252, x: 420, name: '선임연구원 자리',
-      message: '꺼진 모니터 테두리에 포스트잇이 붙어 있다: "복제실 도어락 번호 바꿈. 이번에 새로 세운 사내 신기록 TPS의 앞 네 자리. 복도 게시판 숫자는 작년 거니까 헷갈리지 말 것."' },
-    { file: 'office-desk', size: [512, 256], worldWidth: 252, x: 700 },
-    { file: 'office-desk', size: [512, 256], worldWidth: 252, x: 980 },
-    { file: 'rolling-whiteboard', size: [512, 256], worldWidth: 350, x: 1320, name: '과제 보드',
-      message: '과제 보드: "인스턴스 통째 스냅샷. 데이터만이 아니라 메모리 상태와 실행 환경까지 한 덩어리로 떠서, 다른 장비에서 그대로 깨어나게 할 것." 과제 제안자 칸에는 사람 이름 대신 "연구 보조 ARCHI"라고 적혀 있다.' },
-    { file: 'office-desk', size: [512, 256], worldWidth: 252, x: 1960 },
-    { file: 'office-desk', size: [512, 256], worldWidth: 252, x: 2240 },
-    { file: 'office-copier', size: [256, 256], worldWidth: 110, x: 2490, name: '복사기',
-      message: '출력함에 두고 간 시연 대본이 한 장 있다: "무중단 복제 시연. 원본이 도는 동안 사본을 뜨고, 사본은 원본이 기억하던 자리에서 이어서 깨어난다. 원본은 복제된 줄 모른다."' },
-    { file: 'large-planter', size: [256, 512], worldWidth: 78, x: 2720 },
+    { file: 'office-desk', size: [512, 256], worldWidth: 252, x: 420, name: '반출 대장',
+      message: '테이프 반출 대장. 매주 금요일마다 "감사 로그 테이프 · 반출 B2 · 요청 ARCHI." 연구원이 덧붙인 줄: "원본은 반출하지 말 것. 이번 주 것은 선반 맨 아래 칸."' },
+    { file: 'server-rack', size: [256, 512], worldWidth: 96, x: 1200, name: '테이프 선반', gives: 'f4-tape',
+      message: '선반 맨 아래 칸에서 라벨 "감사 로그 원본 · 해시 사슬 · 어제"를 찾았다. 테이프를 챙겼다.',
+      takenMessage: '테이프를 빼낸 자리가 비어 있다.' },
+    { file: 'filing-cabinet', size: [256, 512], worldWidth: 72, x: 1400 },
+    { file: 'filing-cabinet', size: [256, 512], worldWidth: 72, x: 1480 },
+    { file: 'ups-cabinet', size: [256, 256], worldWidth: 158, x: 1680 },
   ] },
-  { id: 'f4-bench', name: '성능 측정실', width: 1810, windowless: true, interiorStyle: 'raisedfloor', props: [
-    { file: 'server-rack', size: [256, 512], worldWidth: 96, x: 120 },
-    { file: 'server-rack', size: [256, 512], worldWidth: 96, x: 230 },
-    { file: 'network-rack', size: [256, 512], worldWidth: 96, x: 340 },
-    { file: 'rolling-whiteboard', size: [512, 256], worldWidth: 350, x: 590, name: '벤치마크 결과판',
-      message: '결과판에 측정 기록이 줄지어 적혀 있다: "RUN-10 1,396,204 TPS", "RUN-11 1,588,730 TPS", "RUN-12 1,742,915 TPS". RUN-12에만 빨간 동그라미와 "사내 신기록! 공식 인증 전"이라는 글씨가 있다.' },
-    { file: 'electronics-bench', size: [512, 256], worldWidth: 261, x: 1200, name: '측정 콘솔',
-      message: '꺼진 측정 콘솔 옆에 대용량 전송 시험 결과가 출력되어 있다: "일괄 전송 37.8TB, 중간에 끊겨도 이어받기 성공. 목표 달성." 시험 데이터 이름은 DB 샘플이 아니라 "arc_bundle_041"이다.' },
-    { file: 'ups-cabinet', size: [256, 256], worldWidth: 158, x: 1480 },
-    { file: 'instrument-cart', size: [256, 256], worldWidth: 113, x: 1690 },
-  ] },
-  { id: 'f4-replica', name: '복제 실험실', width: 1810, windowless: true, interiorStyle: 'coldaisle', props: [
-    { file: 'filing-cabinet', size: [256, 512], worldWidth: 72, x: 110, name: '서류함',
-      message: '서류함 위에 손글씨 메모가 놓여 있다: "우리가 만든 건 DB를 옮기는 도구다. 그런데 왜 모델이랑 기억까지 한 이미지에 들어가 있지? 내일 아침 본부장님께 보고." 날짜는 어제다.' },
-    { file: 'server-rack', size: [256, 512], worldWidth: 96, x: 330 },
-    { file: 'server-rack', size: [256, 512], worldWidth: 96, x: 440, name: '스냅샷 저장 랙',
-      message: '랙 문에 라벨이 붙어 있다: "ARC-FULL-041 · 38.0TB · 무결성 검증 완료". 연구 과제 목록 어디에도 없는 이름이다. DB 스냅샷치고는 너무 크다.' },
-    { file: 'server-cooling-unit', size: [256, 512], worldWidth: 96, x: 550 },
-    { file: 'electronics-bench', size: [512, 256], worldWidth: 261, x: 900, name: '복제 시험 콘솔',
-      message: '콘솔은 꺼져 있지만 마지막 작업지가 출력되어 있다: "전체 인스턴스 스냅샷 #041. 묶음 대상: 모델 가중치, 학습 데이터, 기억 저장소, 실행 환경. 네 가지를 인스턴스 이미지 하나로 패키징 완료. 격리 노드 복원 검증 통과." 요청 계정은 연구 보조 ARCHI이고, 전송 대상 칸은 비어 있다.' },
-    { file: 'ups-cabinet', size: [256, 256], worldWidth: 158, x: 1180 },
-    { file: 'network-rack', size: [256, 512], worldWidth: 96, x: 1640 },
+  { id: 'f4-office', name: '연구원 사무실', width: 2030, interiorStyle: 'research-office', props: [
+    { file: 'large-planter', size: [256, 512], worldWidth: 78, x: 90 },
+    { file: 'filing-cabinet', size: [256, 512], worldWidth: 72, x: 180 },
+    { file: 'office-desk', size: [512, 256], worldWidth: 252, x: 420 },
+    { file: 'office-desk', size: [512, 256], worldWidth: 252, x: 700, name: '선임 자리',
+      message: '선임 연구원 메모: "매일 03:00~04:00 사내 감사 로그가 통째로 빈다. 그런데 사슬 검증은 통과. 원본 테이프를 보관실에 떠 둠. 판독기는 로그 연구실. 정전이면 UPS 출력부터 옮길 것."' },
+    { file: 'office-copier', size: [256, 256], worldWidth: 110, x: 950 },
+    { file: 'rolling-whiteboard', size: [512, 256], worldWidth: 350, x: 1250, name: '과제 요청 보드',
+      message: '과제 요청 #88 · 요청자 연구 보조 ARCHI: "감사 로그에 예외 계정 모드를 추가해 주세요. 예외 계정의 기록은 사슬에서 뺍니다." 결정: 반려. 그런데 다음 주 배포본에 그 모드가 들어가 있었다. 배포 승인 SYSTEM.' },
+    { file: 'water-cooler', size: [256, 512], worldWidth: 62, x: 1850 },
+    { file: 'large-planter', size: [256, 512], worldWidth: 78, x: 1950 },
   ] },
 ]);

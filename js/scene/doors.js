@@ -2,6 +2,7 @@
 function addRoomDoor(door, parent = dynamicScene) {
   door.element = document.createElement('div');
   door.element.className = `room-door ${door.style || ''}`.trim();
+  door.element.dataset.unlocked = String(Boolean(door.unlocked));
   door.element.setAttribute('role', 'img');
   door.element.setAttribute('aria-label', `${door.name} 출입문${door.locked ? ' · 잠김' : ''}`);
   Object.assign(door.element.style, {

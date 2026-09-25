@@ -5,6 +5,7 @@
 // 창고에 들어가고, 안에서 셔터를 올리고(복도 문으로) 나오면 그 뒤로는 복도에서도 드나든다.
 // 단서는 새벽마다 끊기는 냉동고 전원, 정전 직전 SYSTEM이 내린 셔터와 수호의 23:47 영수증, 낮에는 주문도 못 알아듣다가
 // 새벽에는 먼저 인사하는 음성 주문 키오스크(ARCHI 시범). 배경은 편의시설 전용 그림이며 문·소품은 별도로 그린다.
+// 카페 테이블에는 조현아 팀장이 두고 간 사원증(gives 'f16-badge')이 있고, 이것이 있어야 엘리베이터로 15~12층에 간다(cabin.js).
 const FLOOR16_LAYOUT = {
   header: '16F · 편의시설', background: '#1d1b17', theme: 'food',
   backgroundWallsOnly: true,
@@ -70,7 +71,9 @@ const FLOOR16_ROOMS = interiorRooms(16, [
     props: [
     { file: 'large-planter', size: [256, 512], worldWidth: 78, x: 330 },
     { file: 'waiting-sofa', size: [512, 256], worldWidth: 250, x: 560 },
-    { file: 'meeting-table', size: [512, 256], worldWidth: 356, x: 950 },
+    { file: 'meeting-table', size: [512, 256], worldWidth: 356, x: 950, name: '카페 테이블', gives: 'f16-badge',
+      message: '식은 라테 옆에 사원증 한 장이 엎어져 있다: "조현아 · 기술본부 ARCHI 프로젝트 팀장". 저녁에 두고 퇴근한 모양이다. 등록 해제된 수호의 출입증과 달리 아직 살아 있을지 모른다. 챙겼다.',
+      takenMessage: '테이블에는 식은 라테만 남아 있다. 조현아 팀장의 사원증은 이미 챙겼다.' },
     { file: 'food-coffee-bar', size: [512, 256], worldWidth: 296, x: 1330, name: '커피 바',
       message: '에스프레소 머신 옆 메모: "음성 주문 키오스크 또 먹통. 낮엔 아메리카노도 못 알아들음." 그 아래 다른 글씨: "새벽 청소 여사님 말로는 키오스크가 먼저 인사했대."' },
     { file: 'rolling-whiteboard', size: [512, 256], worldWidth: 350, x: 1690, name: '고객의 소리 게시판',

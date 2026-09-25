@@ -38,6 +38,30 @@ try {
     'amenity-kitchen-dining.png': 571, 'amenity-kitchen-service.png': 591,
     'amenity-cu-interior.png': 602, 'amenity-cafe-interior.png': 596,
   };
+  const doorFiles = { cafeteria: 'cafeteria-door.png', shutter: 'cu-shutter-states.png',
+    metal: 'restroom-door.png', cafe: 'cafe-door.png', backdoor: 'service-door.png' };
+  const checkDoors = async () => {
+    for (const door of await page.locator('#dynamic-scene .room-door').all()) {
+      const state = await door.evaluate(async el => {
+        const style = getComputedStyle(el);
+        const source = style.backgroundImage.match(/url\("?([^"\)]+)"?\)/)?.[1];
+        if (source) {
+          const image = new Image();
+          image.src = source;
+          await image.decode();
+        }
+        return { classes: [...el.classList], source, visible: style.visibility, size: style.backgroundSize,
+          position: style.backgroundPositionX, unlocked: el.dataset.unlocked,
+          bottom: parseFloat(el.style.top) + parseFloat(el.style.height) };
+      });
+      const kind = state.classes.find(name => doorFiles[name]);
+      assert(state.source?.endsWith(doorFiles[kind]), `${kind} uses its own loaded door artwork`);
+      assert.equal(state.visible, 'visible');
+      assert.equal(state.bottom, 570, 'Door threshold stays at the collision floor');
+      assert.equal(state.size, kind === 'shutter' ? '200% 100%' : '100% 100%');
+      if (kind === 'shutter') assert.equal(state.position, state.unlocked === 'true' ? '100%' : '0px');
+    }
+  };
   const checkArt = async count => {
     assert.equal(await page.locator('#dynamic-scene').getAttribute('data-art'), 'walls');
     await page.locator('#dynamic-scene img').evaluateAll(images => Promise.all(images.map(img => img.decode())));
@@ -55,14 +79,14 @@ try {
     }
     assert.equal(edge, await worldWidth(page));
     assert.equal(await page.locator('#dynamic-scene > .floor').evaluate(el => getComputedStyle(el).visibility), 'hidden');
-    for (const door of await page.locator('#dynamic-scene .room-door').all()) {
-      assert(await door.evaluate(el => getComputedStyle(el).visibility === 'visible' && parseFloat(getComputedStyle(el).borderLeftWidth) > 0),
-        'Functional doors stay visible over the wall artwork');
-    }
+    await checkDoors();
   };
   const capture = name => page.screenshot({ path: `.local/floor16-art-${name}.png` });
   await jumpFloor('f16');
   await checkArt(3);
+  assert.equal(await page.locator('.room-door.shutter').getAttribute('data-unlocked'), 'false');
+  await walk(620);
+  await capture('kitchen-door');
   await walk(2400);
   await capture('elevators');
   await walk(1100);
@@ -78,6 +102,8 @@ try {
   await use(2330);
   assert.match(await page.locator('#interaction-status').textContent(), /02:00~05:00/);
   await capture('kitchen');
+  await walk(3410);
+  await capture('service-door');
   await use(3515);
   assert.equal(await page.locator('header span').textContent(), '16F · CU 편의점');
   await checkArt(1);
@@ -90,6 +116,13 @@ try {
   const exit = await exitDoor(page);
   await use(exit.x + exit.width / 2);
   assert.equal(await page.locator('.room-door.shutter').getAttribute('aria-label'), 'CU 편의점 출입문');
+  await checkDoors();
+  assert.equal(await page.locator('.room-door.shutter').getAttribute('data-unlocked'), 'true');
+  await capture('cu-unlocked');
+  await use(1635);
+  await checkDoors();
+  assert.equal(await page.locator('.room-door.shutter').getAttribute('data-unlocked'), 'true', 'Raised shutter persists inside');
+  await use(exit.x + exit.width / 2);
   await walk(4440);
   await capture('cafe-front');
   await use(4406);
@@ -103,9 +136,13 @@ try {
   await capture('mobile');
   await page.setViewportSize({ width: 1280, height: 720 });
   await jumpFloor('f16');
+  await walk(3684);
+  await checkDoors();
+  await capture('restroom-door');
   await use(3684);
   assert.equal(await page.locator('#dynamic-scene').getAttribute('data-art'), 'true', 'Legacy single-image restroom still renders');
   await page.locator('.floor-background').evaluate(img => img.decode());
+  await checkDoors();
   assert.equal(await page.locator('.floor-background').count(), 1);
   await jumpFloor('f15');
   assert.equal(await page.locator('#dynamic-scene').getAttribute('data-art'), 'false', 'CSS floors retain their original renderer');
@@ -115,4 +152,3 @@ try {
 } finally {
   await browser.close();
 }
-

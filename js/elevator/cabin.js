@@ -15,12 +15,22 @@ let cabinReturnFocus = null;
 // Hotspots use the source artwork's 1536x1024 coordinates; CSS scales them with the scene.
 const cabinFloorButtons = [];
 const panelFloors = [null, 17, 16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, -1, -2];
+// 15~12층(연구본부·기술본부)은 카드 리더에 사원증을 태그해야 버튼이 눌린다. 수호의 출입증은 23:58에 등록이
+// 해제돼(1층 단서) 거부되므로, 16층 카페에 두고 간 조현아 팀장의 사원증(badgeItem)을 챙겨야 갈 수 있다.
+const badgeFloors = [15, 14, 13, 12];
+const badgeItem = 'f16-badge';
+// B2는 ARCHI가 23:59에 운행을 막아 두었다(SYSTEM 운행 제한). B1 방재 관제실 승강기 제어반의 열쇠 스위치로 수동 해제해야
+// (restrictionItem) 버튼이 눌린다.
+const restrictedFloors = [-2];
+const restrictionItem = 'b1-elevator';
 panelFloors.forEach((floor, index) => {
   if (floor === null) return;
   const button = document.createElement('button');
   button.type = 'button';
   button.className = 'cabin-hit';
   button.dataset.floor = floor;
+  if (badgeFloors.includes(floor)) button.dataset.badge = 'true';
+  if (restrictedFloors.includes(floor)) button.dataset.restricted = 'true';
   button.title = floor < 0 ? `지하 ${-floor}층` : `${floor}층`;
   button.setAttribute('aria-label', button.title);
   button.setAttribute('aria-pressed', 'false');
@@ -31,9 +41,18 @@ panelFloors.forEach((floor, index) => {
   button.addEventListener('click', () => {
     const car = elevatorCars[cabinCarIndex];
     if (transitioning || !car || car.travelling || floor === car.floor) return;
+    const badge = button.dataset.badge && selectedFloor !== floor;
+    if (badge && !collectedItems.has(badgeItem)) {
+      cabinStatus.textContent = `${button.title}은 사원증 인증 층이다. 수호의 출입증은 "미등록"으로 거부된다.`;
+      return;
+    }
+    if (button.dataset.restricted && selectedFloor !== floor && !collectedItems.has(restrictionItem)) {
+      cabinStatus.textContent = `${button.title}은 운행 제한 중이다. 버튼 옆 표시: "SYSTEM 제한 · 해제는 B1 방재 관제실".`;
+      return;
+    }
     selectedFloor = selectedFloor === floor ? null : floor;
     cabinAutoClose = selectedFloor === null ? 0 : 1600;
-    cabinStatus.textContent = selectedFloor === null ? '층 선택 취소' : `${button.title} 선택`;
+    cabinStatus.textContent = selectedFloor === null ? '층 선택 취소' : `${badge ? '조현아 팀장 사원증 인증 · ' : ''}${button.title} 선택`;
     refreshCabin();
   });
   document.getElementById('cabin-floor-buttons').append(button);
