@@ -186,6 +186,12 @@
       .room-door.observe { border-color: #4a4f68; background: linear-gradient(#0b0d16, #0b0d16) 50% 60px / 46% 64px no-repeat, linear-gradient(90deg, transparent 80%, #969cb8 80% 84%, transparent 84%), linear-gradient(#34384e, #282b3d); box-shadow: inset 0 0 0 4px #181a26; }
       #dynamic-scene .room-interior.stacks { background: linear-gradient(#0a0b12 0 44px, #262b44 44px 50px, transparent 50px), repeating-linear-gradient(transparent 0 64px, #2a2f48 64px 70px) 0 90px / 100% 330px no-repeat, repeating-linear-gradient(90deg, #171a2a 0 240px, #121421 240px 246px) !important; }
       #dynamic-scene .room-interior.mirror::before { top: 80px; left: 180px; right: auto; width: 700px; height: 240px; border: 8px solid #2c3352; background: linear-gradient(115deg, transparent 0 30%, #ffffff0d 30% 33%, transparent 33%), linear-gradient(#07080d, #0c0e16); }
+      /* 14층 전용 문: 복도와 방 안에 같은 스프라이트를 사용한다. */
+      #dynamic-scene[data-theme="dataset"] .room-door:is(.vault, .datalab, .observe) { border: 0; box-shadow: none; background-color: #14172a; background-size: 100% 100%; background-repeat: no-repeat; background-position: 0 0; image-rendering: pixelated; }
+      #dynamic-scene[data-theme="dataset"] .room-door.vault { background-image: url('assets/objects/floor14/archive-door.png'); }
+      #dynamic-scene[data-theme="dataset"] .room-door.vault::after { content: none; }
+      #dynamic-scene[data-theme="dataset"] .room-door.datalab { background-image: url('assets/objects/floor14/data-door.png'); }
+      #dynamic-scene[data-theme="dataset"] .room-door.observe { background-image: url('assets/objects/floor14/observation-door.png'); }
       /* 13층 기술본부(support 테마): 꺼진 모니터 벽이 비치는 유리(상황실)·철망 우리와 고전압 표지(장비 검증실)·높은 띠창과 꺼진 "교육 중" 표시(교육장), 주황 띠 유리 양문·철망 문·작은 창 문. 상황실 안은 꺼진 모니터 벽 */
       #dynamic-scene[data-theme="support"] .room-interior { background: linear-gradient(#0e0f11 0 44px, #36393e 44px 50px, #1d1f22 50px 420px, #2a2c30 420px 424px, #18191c 424px); }
       #dynamic-scene[data-theme="support"] .room-interior::before { border-color: #3a3d42; }
@@ -200,6 +206,11 @@
       .room-door.ops { border-color: #4a4e55; background: linear-gradient(90deg, transparent 49%, #4a4e55 49% 51%, transparent 51%), linear-gradient(transparent 44%, #8a6430 44% 47%, transparent 47%), linear-gradient(110deg, #22303a 0 30%, #19222b 30%); box-shadow: inset 0 0 0 4px #131416; }
       .room-door.cage { border-color: #5c6066; background: linear-gradient(90deg, transparent 80%, #a0a4aa 80% 84%, transparent 84%), repeating-linear-gradient(45deg, transparent 0 8px, #5c606699 8px 9px), repeating-linear-gradient(-45deg, transparent 0 8px, #5c606699 8px 9px), #101113; box-shadow: inset 0 0 0 4px #1d1f22; }
       .room-door.classroom { border-color: #4e5258; background: linear-gradient(#0c1a2b, #0c1a2b) 30% 50px / 40% 60px no-repeat, linear-gradient(90deg, transparent 80%, #a8acb2 80% 84%, transparent 84%), linear-gradient(#3a3d43, #2c2e33); box-shadow: inset 0 0 0 4px #1a1b1e; }
+      /* 13층 전용 문: 복도와 방 안에 같은 스프라이트를 사용한다. */
+      #dynamic-scene[data-theme="support"] .room-door:is(.ops, .cage, .classroom) { border: 0; box-shadow: none; background-color: #18191b; background-size: 100% 100%; background-repeat: no-repeat; background-position: 0 0; image-rendering: pixelated; }
+      #dynamic-scene[data-theme="support"] .room-door.ops { background-image: url('assets/objects/floor13/ops-door.png'); }
+      #dynamic-scene[data-theme="support"] .room-door.cage { background-image: url('assets/objects/floor13/testbay-door.png'); }
+      #dynamic-scene[data-theme="support"] .room-door.classroom { background-image: url('assets/objects/floor13/training-door.png'); }
       #dynamic-scene .room-interior.monitors { background: linear-gradient(#0c0d0f 0 44px, #33363b 44px 50px, #1a1c1f 50px 420px, #282a2e 420px 424px, #151618 424px); }
       #dynamic-scene .room-interior.monitors::before { top: 70px; left: 240px; right: 560px; height: 230px; border: 6px solid #2c2f34; background: repeating-linear-gradient(90deg, transparent 0 146px, #2c2f34 146px 152px), repeating-linear-gradient(transparent 0 70px, #2c2f34 70px 76px), linear-gradient(#0a0d0f, #111618); }
       /* 4층 TmaxTibero 연구본부(rnd): 흰 에폭시 바닥과 청회색 벽, 민트색 표지. 로그 연구실 유리벽·백업 보관실 강판과 전기 잠금 문·연구원 사무실 간유리.
