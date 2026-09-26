@@ -3,8 +3,8 @@
 ## 기존 구현을 먼저 확인
 
 - 실행 진입점: `index.html`. 직접 브라우저에서 열 수 있으며 빌드/개발 서버는 필요 없다.
-- 상태·물리·방/층 전환·상호작용: `player.js`. 기존 Matter.js 엔진과 고정 시간 간격을 재사용한다.
-- 엘리베이터 내부 UI: `elevator.css` 및 `index.html`, 상태 처리는 `player.js`.
+- 상태·물리·방/층 전환·상호작용: `js/` 아래 기능별 스크립트(`core`, `world`, `scene`, `interaction`, `player`). 기존 Matter.js 엔진과 고정 시간 간격을 재사용한다.
+- 엘리베이터 내부 UI: `elevator.css` 및 `index.html`, 상태 처리는 `js/elevator/`(`elevators.js`, `cabin.js`).
 - 확인할 심볼: `officeDoors`, `doors`, `FLOORS`, `ALL_FLOORS`, `elevatorCars`,
   `floorY`, `render`. 이름과 위치는 검색으로 확인하고 관련 입력·렌더링 호출부까지 읽는다.
 

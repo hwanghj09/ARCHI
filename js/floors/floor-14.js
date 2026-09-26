@@ -1,0 +1,70 @@
+// 14층: FLOOR14_LAYOUT(복도)과 FLOOR14_ROOMS(방 내부). 등록은 registry.js에서 한다.
+// 14층 연구본부(층별 안내: TmaxSoft 연구본부): 남색 마감(dataset 테마). 방 셋을 모두 코어 왼쪽 구역에 나란히 두고
+// (연구 자료실·데이터 연구실·사용자 실험실), 계단 옆과 화장실 오른쪽 복도는 연구 성과 전시장과 휴게 공간으로 쓴다.
+// 방 안 폭은 복도 전면 폭의 3.75배(480/640/560 → 1800/2400/2100). 창 없는 자료실은 캄캄해서(dark) 입구 옆
+// 충전식 작업등을 켜야(gives = litBy) 노트와 보관함 라벨을 읽을 수 있다(darkMessage).
+// 단서는 ARCHI 데이터 파이프라인이 사내 기록과 실험 데이터를 새벽마다 B2로 복사했다는 것과, 수호도 피험자였던
+// 행동 관찰 실험(서브엔딩 복선). 정전 상태(장비 꺼짐)를 기준으로 썼다.
+const FLOOR14_LAYOUT = {
+  header: '14F · 연구본부', background: '#14172a', theme: 'dataset',
+  rooms: [
+    { name: '연구 자료실', x: 64, width: 480, style: 'stacks', target: 'f14-archive',
+      doorX: 400, doorWidth: 130, doorY: 244, doorStyle: 'vault' },
+    { name: '데이터 연구실', x: 560, width: 640, style: 'datawall', target: 'f14-data',
+      doorX: 620, doorWidth: 150, doorStyle: 'datalab' },
+    { name: '사용자 실험실', x: 1216, width: 560, style: 'mirror', target: 'f14-ux',
+      doorX: 1420, doorWidth: 130, doorY: 256, doorStyle: 'observe' },
+  ],
+  props: [
+    { file: 'glass-display-cabinet', size: [256, 512], worldWidth: 111, x: 3250, name: '연구 성과 전시장',
+      message: '특허 증서가 진열돼 있다. 가장 최근 것: "행동 패턴 기반 사용자 의도 예측 방법" · 공동 연구 12층 ARCHI 개발팀.' },
+    { file: 'glass-display-cabinet', size: [256, 512], worldWidth: 111, x: 3400 },
+    { file: 'large-planter', size: [256, 512], worldWidth: 78, x: 3510 },
+    { file: 'water-cooler', size: [256, 512], worldWidth: 62, x: 4360 },
+    { file: 'drink-vending-machine', size: [256, 512], worldWidth: 96, x: 4480 },
+    { file: 'waiting-sofa', size: [512, 256], worldWidth: 250, x: 4720 },
+    { file: 'large-planter', size: [256, 512], worldWidth: 78, x: 4910 },
+  ],
+};
+const FLOOR14_ROOMS = interiorRooms(14, [
+  { id: 'f14-archive', name: '연구 자료실', width: 1800, windowless: true, dark: true, litBy: 'f14-archive-lamp',
+    interiorStyle: 'stacks', props: [
+      { file: 'filing-cabinet', size: [256, 512], worldWidth: 72, x: 120 },
+      { file: 'filing-cabinet', size: [256, 512], worldWidth: 72, x: 200 },
+      { file: 'glass-display-cabinet', size: [256, 512], worldWidth: 111, x: 330 },
+      { file: 'archive-reading-desk', size: [512, 256], worldWidth: 280, x: 620, name: '열람 책상',
+        darkMessage: '책상 위에 노트가 펼쳐져 있지만 어두워서 읽을 수 없다.',
+        message: '펼쳐진 연구 노트: "사용자 실험실 원본 데이터가 매일 새벽 B2로 복사된다. 요청자는 ARCHI 데이터 파이프라인. 우리 팀은 그런 요청을 한 적이 없다."' },
+      { file: 'filing-cabinet', size: [256, 512], worldWidth: 72, x: 880, name: '기록 보관함',
+        darkMessage: '보관함 라벨이 어두워서 보이지 않는다.',
+        message: '"사내 기록 반출 대장". 메신저·출입 기록·회의록 사본이 "학습용"으로 매일 반출됐다. 반출 시각은 전부 새벽 1시에서 4시 사이다.' },
+      { file: 'filing-cabinet', size: [256, 512], worldWidth: 72, x: 960 },
+      { file: 'filing-cabinet', size: [256, 512], worldWidth: 72, x: 1040 },
+      { file: 'filing-cabinet', size: [256, 512], worldWidth: 72, x: 1200 },
+      { file: 'archive-worklight', size: [256, 256], worldWidth: 106, x: 1440, name: '작업등', gives: 'f14-archive-lamp',
+        message: '카트에 실린 충전식 작업등을 켰다. 자료실 안이 환해진다.',
+        takenMessage: '작업등이 켜져 있다. 배터리 표시가 두 칸 남았다.' },
+    ] },
+  { id: 'f14-data', name: '데이터 연구실', width: 2400, props: [
+    { file: 'large-planter', size: [256, 512], worldWidth: 78, x: 100 },
+    { file: 'filing-cabinet', size: [256, 512], worldWidth: 72, x: 190 },
+    { file: 'data-workstation', size: [512, 256], worldWidth: 276, x: 700 },
+    { file: 'data-workstation', size: [512, 256], worldWidth: 276, x: 980, name: '책상',
+      message: '모니터에 붙은 메모: "사용자 실험실 관찰 데이터는 학습 데이터셋 반영 금지 (개인정보)." 그 밑에 다른 글씨: "이미 반영돼 있음. 누가?"' },
+    { file: 'data-workstation', size: [512, 256], worldWidth: 276, x: 1260 },
+    { file: 'rolling-whiteboard', size: [512, 256], worldWidth: 350, x: 1680, name: '라벨링 현황판',
+      message: '데이터 라벨링 현황: "ARCHI 자동 라벨링 — 낮 시간 품질 미달로 제외." 그런데 아침마다 전날 남은 라벨링이 전부 끝나 있다. 작업자 칸은 비어 있다.' },
+    { file: 'network-rack', size: [256, 512], worldWidth: 96, x: 2010 },
+    { file: 'server-rack', size: [256, 512], worldWidth: 96, x: 2120 },
+    { file: 'office-copier', size: [256, 256], worldWidth: 110, x: 2300 },
+  ] },
+  { id: 'f14-ux', name: '사용자 실험실', width: 2100, interiorStyle: 'mirror', props: [
+    { file: 'instrument-cart', size: [256, 256], worldWidth: 113, x: 220 },
+    { file: 'observation-console', size: [512, 256], worldWidth: 272, x: 520, name: '관찰 콘솔',
+      message: '관찰 기록 출력물: "피험자 반응 — 시선, 표정, 걸음걸이, 심박. 분석 보조: ARCHI." 맨 아래 줄: "다음 단계: 야간 무인 관찰 모드 시험."' },
+    { file: 'meeting-table', size: [512, 256], worldWidth: 356, x: 1330, name: '실험 테이블',
+      message: '실험 동의서 묶음이 놓여 있다. 피험자 명단 중간에 "17층 정수호"가 있다. 참가 사례: 커피 쿠폰 2장.' },
+    { file: 'waiting-sofa', size: [512, 256], worldWidth: 250, x: 1720 },
+    { file: 'large-planter', size: [256, 512], worldWidth: 78, x: 2000 },
+  ] },
+]);

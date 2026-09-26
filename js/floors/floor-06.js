@@ -1,0 +1,85 @@
+// 6층: FLOOR6_LAYOUT(복도)과 FLOOR6_ROOMS(방 내부). 등록은 registry.js에서 한다.
+// 6층 TmaxTibero 기술본부(층별 안내 그대로, 고객사 DB 기술지원): 올리브색 카펫 타일과 카키 벽, 겨자색 표지(oncall 테마).
+// 배치는 구역마다 하나: 엘리베이터 왼쪽에 원격 지원실(헤드셋 걸이가 비치는 블라인드 유리), 비상계단과 화장실 사이에 창 없는
+// 회선 관리실(케이블 트레이, UPS로 살아 있는 카드 리더), 화장실 오른쪽 조용한 끝에 당직실(간유리 작은 창, "당직실" 명판).
+// 방 안 폭은 복도 전면 폭의 6배(520/300/340 → 3120/1800/2040).
+// 장치는 울리는 전화(소품 ring): 당직실에 들어오고 2.5초 뒤 당직 책상의 내선 전화가 울리고, 7.5초 안에 받아야 한다.
+// 받으면 당직 ARS가 수호를 당직자로 인증해 회선 관리실 출입을 승인한다(gives 'f6-oncall' = 회선 관리실 unlockedBy).
+// 놓치면 "무응답 · 자동 승인"이 뜨고, 당직실을 나갔다 다시 들어와야 또 울린다. 발신 내선은 2000(B2 서버실)이다.
+// 단서 방향: 사람 당직이 폐지된 뒤 야간 원격 접속·회선 사용은 "당직 ARS 무응답 자동 승인"으로 누구든 통과했고, archi_svc가
+// 매일 03:00 고객사 DR 센터에 접속해 03:05~03:40 고객사 DR 복제 전용선을 등록되지 않은 해외 주소로 꽉 채워 썼다는 것
+// ("B2 ARCHI-MAIN → DR-EXT" 새 광케이블). 외부 호스트 연결 준비·성공 여부는 7층에서 밝혀진다.
+// 정전 상태(조명·단말 꺼짐, 당직 전화와 회선실 카드 리더만 UPS로 살아 있음)를 기준으로 썼다.
+const FLOOR6_LAYOUT = {
+  header: '6F · TmaxTibero 기술본부', background: '#16170f', theme: 'oncall',
+  rooms: [
+    { name: '원격 지원실', x: 700, width: 520, style: 'helpdesk', target: 'f6-remote',
+      doorX: 900, doorWidth: 120, doorStyle: 'headset' },
+    { name: '회선 관리실', x: 3150, width: 300, style: 'telecom', target: 'f6-line',
+      doorX: 3300, doorWidth: 110, doorStyle: 'cable-reader', locked: true, unlockedBy: 'f6-oncall',
+      message: '카드 리더기만 UPS로 살아 있다. 붉은 불. 문 안내: "야간 출입은 당직자 인증 후. 당직 전화에 응답하면 자동으로 열립니다."' },
+    { name: '당직실', x: 4480, width: 340, style: 'oncall-room', target: 'f6-duty',
+      doorX: 4520, doorWidth: 110, doorStyle: 'duty' },
+  ],
+  fixtures: [
+    { name: '기술본부 표지', x: 150, y: 290, width: 250, height: 80, style: 'tech-plaque',
+      lines: ['TmaxTibero', '기술본부 · DB 기술지원'] },
+    { name: '당직 안내문', x: 1340, y: 260, width: 170, height: 150, style: 'duty-notice',
+      lines: ['야간 당직 안내', '당직실 · 화장실 옆', '벨이 끊기기 전에 응답'],
+      message: '안내문: "야간 당직은 화장실 옆 당직실. 당직 전화가 울리면 벨이 끊기기 전에 받을 것. 응답이 없으면 당직 ARS가 자동 승인 처리합니다." 그 아래 새 공지: "9월 1일부로 사람 당직 폐지."' },
+  ],
+  props: [
+    { file: 'filing-cabinet', size: [256, 512], worldWidth: 72, x: 470 },
+    { file: 'office-copier', size: [256, 256], worldWidth: 110, x: 580 },
+    { file: 'water-cooler', size: [256, 512], worldWidth: 62, x: 1600 },
+    { file: 'large-planter', size: [256, 512], worldWidth: 78, x: 1710 },
+    { file: 'drink-vending-machine', size: [256, 512], worldWidth: 96, x: 4360 },
+    { file: 'large-planter', size: [256, 512], worldWidth: 78, x: 4900 },
+  ],
+};
+const FLOOR6_ROOMS = interiorRooms(6, [
+  { id: 'f6-remote', name: '원격 지원실', width: 3120, interiorStyle: 'helpdesk', props: [
+    { file: 'filing-cabinet', size: [256, 512], worldWidth: 72, x: 110 },
+    { file: 'filing-cabinet', size: [256, 512], worldWidth: 72, x: 190 },
+    { file: 'office-desk', size: [512, 256], worldWidth: 252, x: 430 },
+    { file: 'office-desk', size: [512, 256], worldWidth: 252, x: 720, name: '원격 접속 단말',
+      message: '꺼진 단말 옆 VPN 토큰 대장. 고객사 원격 접속 계정은 열두 개인데, 새벽 03:00마다 접속한 것은 archi_svc 하나뿐이다. 접속 대상은 매번 "고객사 DR 센터".' },
+    { file: 'rolling-whiteboard', size: [512, 256], worldWidth: 350, x: 1260, name: '야간 승인 규칙판',
+      message: '규칙판: "야간 원격 접속·회선 사용은 당직 전화(ARS) 응답으로 승인." 아래에 누가 덧붙였다: "당직 폐지 후엔 벨이 끝까지 울려도 응답 없으면 자동 승인. 누가 신청하든 다 통과한다는 뜻."' },
+    { file: 'office-desk', size: [512, 256], worldWidth: 252, x: 1900 },
+    { file: 'office-desk', size: [512, 256], worldWidth: 252, x: 2200, name: '엔지니어 책상',
+      message: '포스트잇: "새벽마다 당직실 전화가 울림. 받으면 아무 말 없이 서버 팬 소리만 남. 발신 내선 2000 = B2 서버실." 그 밑에: "B2엔 밤에 사람 없음."' },
+    { file: 'office-desk', size: [512, 256], worldWidth: 252, x: 2500 },
+    { file: 'office-copier', size: [256, 256], worldWidth: 110, x: 2800 },
+    { file: 'large-planter', size: [256, 512], worldWidth: 78, x: 3040 },
+  ] },
+  { id: 'f6-line', name: '회선 관리실', width: 1800, windowless: true, interiorStyle: 'telecom', props: [
+    { file: 'network-rack', size: [256, 512], worldWidth: 96, x: 120 },
+    { file: 'server-rack', size: [256, 512], worldWidth: 96, x: 230 },
+    { file: 'network-rack', size: [256, 512], worldWidth: 96, x: 340, name: '회선 단말함',
+      message: '고객사 DR 복제 전용선 단말이다. 원래 없던 광케이블 하나가 꽂혀 있고, 라벨은 사람 글씨가 아니라 프린터 글씨다: "B2 ARCHI-MAIN → DR-EXT".' },
+    { file: 'ups-cabinet', size: [256, 256], worldWidth: 158, x: 560 },
+    { file: 'electronics-bench', size: [512, 256], worldWidth: 261, x: 900, name: '회선 사용 기록',
+      message: '사용 기록지: 매일 03:05~03:40 전용선 사용률 100%. 고객사는 그 시간에 받은 데이터가 없다고 답했다. 실제 목적지 칸에는 "등록되지 않은 주소 · 해외"라고 찍혀 있다.' },
+    { file: 'filing-cabinet', size: [256, 512], worldWidth: 72, x: 1180, name: '회선 신청서',
+      message: '회선 증설 신청서 스무 장. 신청자는 전부 SYSTEM, 승인은 전부 "당직 ARS 무응답 자동 승인". 맨 위 오늘 자 신청서 한 장만 다르다: "정전 중 자동 승인 · 대역폭 최대".' },
+    { file: 'server-cooling-unit', size: [256, 512], worldWidth: 96, x: 1620 },
+    { file: 'network-rack', size: [256, 512], worldWidth: 96, x: 1716 },
+  ] },
+  { id: 'f6-duty', name: '당직실', width: 2040, interiorStyle: 'dutyroom',
+    fixtures: [{ name: '2층 침대', x: 900, y: 360, width: 280, style: 'bunk-bed' }],
+    props: [
+      { file: 'staff-lockers', size: [256, 512], worldWidth: 130, x: 150 },
+      { file: 'water-cooler', size: [256, 512], worldWidth: 62, x: 260 },
+      { file: 'waiting-sofa', size: [512, 256], worldWidth: 250, x: 700 },
+      { file: 'filing-cabinet', size: [256, 512], worldWidth: 72, x: 1320, name: '당직 일지',
+        message: '당직 일지. 사람 이름은 9월 1일 칸에서 끝난다. 그 뒤로는 매일 같은 줄뿐이다: "02:14 B2 전력 임계 초과 · 당직 호출 · 무응답 · 자동 승인."' },
+      { file: 'office-desk', size: [512, 256], worldWidth: 252, x: 1860, name: '당직 전화', style: 'desk-phone', gives: 'f6-oncall',
+        ring: { after: 2500, duration: 7500,
+          idleMessage: '당직 책상의 내선 전화다. 발신 기록 맨 위: "내선 2000 · B2 서버실". 지금은 조용하다.',
+          startMessage: '따르릉— 당직 전화가 울린다. 정전된 층에서 전화만 살아 있다.',
+          missedMessage: '벨이 끊겼다. 전화 화면에 "무응답 · 자동 승인"이 잠깐 떴다가 꺼진다. 당직실을 나갔다 들어오면 또 울릴 것 같다.' },
+        message: '수화기를 들자 기계 음성이 흘러나온다. "당직자 응답을 확인했습니다, 정수호 님. 장애 B2-0214, 서버실 전력 임계 초과. 회선 관리실 출입을 승인합니다." 수호는 당직이 아니다. 음성은 그 이름을 알고 있었다.',
+        takenMessage: '수화기에서는 신호음만 난다. 회선 관리실 출입은 이미 승인됐다.' },
+    ] },
+]);

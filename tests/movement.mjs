@@ -27,7 +27,7 @@ try {
     await page.keyboard.up(key);
     await page.clock.runFor(34);
   };
-  assert(await page.locator('#idle-sprite').evaluate(el => el.naturalWidth === 256));
+  assert(await page.locator('#idle-sprite').evaluate(el => el.naturalWidth === 1254 && el.naturalHeight === 1254));
   assert(await page.locator('#walk-sheet').evaluate(el => el.naturalWidth === 1536 && el.naturalHeight === 256));
   await page.locator('.action-sheet').evaluateAll(images => Promise.all(images.map(image => image.decode())));
   const actionFrame = async (sheet, frame) => {
@@ -42,7 +42,7 @@ try {
   };
   const tiles = page.locator('#background img');
   await tiles.evaluateAll(images => Promise.all(images.map(image => image.decode())));
-  assert.equal(await tiles.count(), 39, 'The 3200x720 stage must be covered by 13x3 tiles');
+  assert.equal(await tiles.count(), 39, 'The original corridor retains its 13x3 tiles; the extension has separate art');
   assert(await tiles.evaluateAll(images => images.every((image, index) =>
     image.naturalWidth === 256 && image.naturalHeight === 256 &&
     image.offsetLeft === (index % 13) * 256 && image.offsetTop === Math.floor(index / 13) * 256)),
@@ -92,6 +92,28 @@ try {
   assert.equal(right.facing, 1);
   assert.equal(right.animation, 'idle');
   assert.equal(right.frame, 0);
+  const idleFrames = new Set();
+  for (let elapsed = 0; elapsed < 3300; elapsed += 100) {
+    const idle = await state();
+    idleFrames.add(idle.frame);
+    assert.equal(idle.animation, 'idle');
+    near(idle.x, right.x, 'Idle animation must not move the character');
+    assert.equal(await page.locator('#player img:visible').count(), 1);
+    assert(await page.locator('#idle-sprite').evaluate(el => {
+      const frame = Number(el.parentElement.dataset.frame);
+      const transform = new DOMMatrix(getComputedStyle(el).transform);
+      const scale = el.getBoundingClientRect().width / el.naturalWidth /
+        new DOMMatrix(getComputedStyle(document.getElementById('world')).transform).m11;
+      return getComputedStyle(el).clipPath === ['inset(0% 50% 50% 0%)', 'inset(0% 0% 50% 50%)',
+        'inset(50% 50% 0% 0%)', 'inset(50% 0% 0% 50%)'][frame] &&
+        Math.abs([325, 925, 325, 925][frame] * scale + transform.m41 - 96) < .1 &&
+        Math.abs([619, 619, 1234, 1235][frame] * scale + transform.m42 - 178) < .1;
+    }), 'Every idle pose must keep its hip centered and soles on the ground');
+    await page.clock.runFor(100);
+  }
+  assert.deepEqual([...idleFrames].sort(), [0, 1, 2, 3], 'Idle must play the complete breathing and blink loop');
+  assert.equal((await state()).frame, 0, 'Idle loop returns to neutral');
+  await page.screenshot({ path: '.local/idle-desktop.png' });
   await hold('ArrowLeft', 400);
   assert((await state()).x < right.x - 60, 'ArrowLeft must move left');
   assert.equal((await state()).facing, -1);
@@ -198,9 +220,9 @@ try {
   await hold('d', 400);
   await page.clock.runFor(500);
   near((await state()).feet, 570, 'Former cabinet position is flat ground');
-  await hold('d', 6500);
-  near((await state()).x, 3148, 'Right world wall must hold');
-  near((await state()).camera, 1920, 'Camera must stop at the right world boundary');
+  await hold('d', 16000);
+  near((await state()).x, 4948, 'Extended right world wall must hold');
+  near((await state()).camera, 3720, 'Camera must stop at the extended right world boundary');
   await page.screenshot({ path: '.local/sideview-exit.png' });
 
   for (const [index, x] of [[2, 2552], [1, 2255]]) {
@@ -228,8 +250,8 @@ try {
   await page.clock.runFor(50);
   assert.equal((await state()).animation, 'walk', 'Movement must cancel interaction');
   await page.keyboard.up('d');
-  await hold('d', 5000);
-  near((await state()).x, 3148, 'Interaction must preserve movement and boundaries');
+  await hold('d', 15000);
+  near((await state()).x, 4948, 'Interaction must preserve movement and boundaries');
   assert.equal(await page.locator('#interaction-hint').isVisible(), false, 'Walking away hides the prompt');
 
   const beforeResize = await state();
@@ -280,14 +302,20 @@ try {
   await page.keyboard.press('e');
   await finishSceneTransition(page);
   await page.locator('[data-floor="12"]').click();
+  assert.equal(await page.locator('[data-floor="12"]').getAttribute('aria-pressed'), 'false', '12F needs an employee ID card');
+  assert.match(await page.locator('#cabin-status').textContent(), /사원증 인증 층이다/);
+  // tests/elevator.mjs picks the card up on 16F; here it is handed over directly to keep the ride short.
+  await page.evaluate(() => collectedItems.add('f16-badge'));
+  await page.locator('[data-floor="12"]').click();
+  assert.equal(await page.locator('[data-floor="12"]').getAttribute('aria-pressed'), 'true');
   await page.locator('#cabin-close').click();
   await page.clock.runFor(8500);
   await page.locator('#cabin-exit').click();
   await finishSceneTransition(page);
   assert.equal(await page.locator('#world').getAttribute('data-room'), 'dynamic', 'Boarding must move the player to a dynamically built floor');
-  assert.equal(await page.evaluate(() => document.getElementById('world').style.width), '2400px');
-  assert.equal(await page.locator('header span').textContent(), '12F · 빈 층');
-  assert.equal(await page.locator('#dynamic-scene .solid:not(.floor):not(.boundary)').count(), 0, 'Additional floors must have no obstacles');
+  assert.equal(await page.evaluate(() => document.getElementById('world').style.width), '5000px', 'Every floor shares the 17F width');
+  assert.equal(await page.locator('header span').textContent(), '12F · 기술본부 ARCHI 개발팀');
+  assert.equal(await page.locator('#dynamic-scene .solid:not(.floor):not(.boundary)').count(), 0, 'The 12F corridor has no obstacles');
   assert.match(await page.locator('#interaction-status').textContent(), /12층에 도착/);
   assert.equal(await page.locator('#elevator-cabin').isHidden(), true, 'Exiting must close the cabin view');
   await page.screenshot({ path: '.local/floor-12.png' });

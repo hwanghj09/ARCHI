@@ -4,7 +4,6 @@
   const world = document.getElementById('world');
   const sprite = document.getElementById('player');
   const walkSheet = document.getElementById('walk-sheet');
-  const runSheet = document.getElementById('run-sheet');
   const jumpSheet = document.getElementById('jump-sheet');
   const interactSheet = document.getElementById('interact-sheet');
   const buttons = [...document.querySelectorAll('nav button')];
@@ -12,11 +11,9 @@
   const pointers = new Map();
   const movementKeys = { KeyA: -1, ArrowLeft: -1, KeyD: 1, ArrowRight: 1 };
   const jumpKeys = new Set(['Space', 'KeyW', 'ArrowUp']);
-  const runKeys = new Set(['ShiftLeft', 'ShiftRight']);
-  const corridorWidth = 3200;
+  let worldWidth = 3200;
   const officeWidth = 2400;
-  let worldWidth = officeWidth;
-  let room = 'office'; // 'corridor' | 'office' (17층) | 'dynamic' (다른 층)
+  let room = 'corridor'; // 'corridor' | 'office' (17층) | 'dynamic' (다른 층)
   let dynamicFloorId = null;
   let returnX = 644;
   const worldHeight = 720;
@@ -27,29 +24,8 @@
   const status = document.getElementById('interaction-status');
   const roomTransition = document.getElementById('room-transition');
   const dynamicScene = document.getElementById('dynamic-scene');
-  const cabin = document.getElementById('elevator-cabin');
-  const cabinScene = document.getElementById('cabin-scene');
-  const cabinStatus = document.getElementById('cabin-status');
-  const cabinDisplay = document.getElementById('cabin-display');
-  const cabinOpen = document.getElementById('cabin-open');
-  const cabinClose = document.getElementById('cabin-close');
-  const cabinExit = document.getElementById('cabin-exit');
-  let cabinCarIndex = null;
-  let selectedFloor = null;
-  let cabinDoorAmount = 1;
-  let cabinAutoClose = 0;
-  let cabinReturnFocus = null;
+  const floorSelect = document.getElementById('floor-select');
   const officeBackground = document.getElementById('office-background');
-  const lightSwitch = document.getElementById('floor17-light-switch');
-  const lights = document.getElementById('floor17-lights');
-  lights.addEventListener('change', () => {
-    if (transitioning || selectingFloor || currentSceneFloor !== 17) {
-      lights.checked = world.dataset.lights === 'on';
-      return;
-    }
-    world.dataset.lights = lights.checked ? 'on' : 'off';
-    document.getElementById('floor17-light-state').value = lights.checked ? '조명 켜짐' : '조명 꺼짐';
-  });
   // The generated office floor starts at source y=504; align it with the physics floor.
   Object.assign(officeBackground.style, {
     width: `${officeWidth}px`, height: `${724 * officeWidth / 2172}px`,
@@ -57,6 +33,7 @@
   });
   const officeDoors = [
     { name: '사무실', room: 'corridor', x: 580, y: 236, width: 128 },
+    { name: '사무실', room: 'corridor', x: 1224, y: 236, width: 128 },
     { name: '복도', room: 'office', x: 68, y: 250, width: 144 },
   ];
   for (const door of officeDoors) {
@@ -100,7 +77,6 @@
     door.element.append(image);
     world.insertBefore(door.element, sprite);
     if (door.type === 'elevator') {
-      addElevatorPanels(door);
       door.indicator = document.createElement('div');
       door.indicator.className = 'elevator-indicator';
       door.indicator.style.left = `${door.x + door.width / 2}px`;
@@ -109,25 +85,65 @@
       updateFloorIndicator(door);
     }
   }
-  // Additional floors share an empty layout until their content is authored.
+  // 다른 층들: 실제 배경 아트가 없어 색상/소품 배치만으로 층마다 다른 구조를 준다.
+  // (옥상 실사 배경은 assets/background/roof/PROMPT.md 참고 — 생성되면 이 placeholder를 교체한다.)
+  // elevatorBank는 그 층의 3개 엘리베이터 중 첫 번째 문의 x좌표(이후 260px 간격)다.
   const FLOOR17 = { id: 'f17', floor: 17, short: '17F', label: '17층 · 복도', header: '17F · 00:00', aria: '17층 복도' };
-  const FLOORS = [-2, -1, ...Array.from({ length: 16 }, (_, index) => index + 1)].map(floor => {
-    const short = floor < 0 ? `B${-floor}` : `${floor}F`;
-    const label = floor < 0 ? `지하 ${-floor}층` : `${floor}층`;
-    return { id: floor < 0 ? `b${-floor}` : `f${floor}`, floor, short, label,
-      header: `${short} · 빈 층`, aria: label, width: 2400, background: '#252b2a', elevatorBank: 1000 };
-  });
+  const FLOORS = [
+    { id: 'roof', floor: 18, short: 'RF', label: '옥상 · 비상 전력', header: 'RF · 비상 전력', aria: '옥상', width: 2171,
+      // 실사 배경(assets/background/roof/source.png, 2171x724, 2번째로 교체된 버전). 좌우는 1:1
+      // 그대로 쓰고(스케일 없음), 세로만 이동한다: 소스 바닥선 y=613을 게임 바닥선 floorY(570)에
+      // 맞추려면 top = 570 - 613 = -43. 아래 panel/door 좌표는 모두 이 이미지에서 직접 실측한 값이다.
+      backgroundImage: { src: 'assets/background/roof/source.png', width: 2171, height: 724, top: -43 },
+      background: '#0b1220', // 이미지 로딩 전/실패 시 대비용 배경색
+      // 문/장치 좌표는 확대 크롭 + 20px 격자로 다시 정밀 실측했다(예전 값은 벽 시작선을 문 시작선으로
+      // 착각해 실제보다 좁고 왼쪽으로 치우쳐 있었다).
+      elevatorBank: 1035, doorWidth: 100, doorSpacing: 183, doorY: 405,
+      // 층수 표시 박스를 문 중앙 기준 오른쪽으로 12.5px(15px에서 2.5px 왼쪽으로 보정), 위로 48px.
+      indicatorDx: 12.5, indicatorLift: 48,
+      // 흰 테두리(근접 표시) 박스를 문 실측 위치보다 오른쪽으로 10px 더 이동.
+      doorOutlineDx: 10,
+      stairsOffset: 773, stairsWidth: 82, stairsY: 439,
+      // 배경 그림이 이미 문을 그려주므로, 깨진 이미지 아이콘이 뜨는 별도 문 스프라이트는 넣지 않는다.
+      doorImage: null, stairsImage: null,
+      // 실외기/물탱크는 배경 그림에만 존재 — 걸어서 지나갈 수 있는 장애물 판정을 두지 않는다.
+      obstacles: [],
+      // 이 배경은 제어 장치를 이미 크고 상세하게 그려주므로(전용 스프라이트보다 낫다) 별도
+      // 이미지 오버레이 없이, 그림 속 장치 크기에 맞춘 판정 영역만 둔다.
+      panel: { name: '태양광 비상 전력 제어 장치', x: 0, y: 419, width: 330 } },
+    { id: 'f12', floor: 12, short: '12F', label: '12층 · ARCHI 개발팀', header: '12F · ARCHI 개발팀', aria: '12층 ARCHI 개발팀', width: 3000,
+      background: '#1a2230', elevatorBank: 1700,
+      obstacles: [
+        { kind: 'desk', x: 600, y: floorY - 60, width: 110, height: 60 },
+        { kind: 'desk', x: 950, y: floorY - 60, width: 110, height: 60 },
+        { kind: 'cabinet', x: 1300, y: floorY - 88, width: 100, height: 88 },
+      ] },
+    { id: 'f7', floor: 7, short: '7F', label: '7층 · AI 테스트/검증실', header: '7F · AI 테스트실', aria: '7층 AI 테스트 검증실', width: 2800,
+      background: '#132420', elevatorBank: 1500,
+      obstacles: [
+        { kind: 'rig', x: 650, y: floorY - 70, width: 110, height: 70 },
+        { kind: 'rig', x: 1000, y: floorY - 70, width: 110, height: 70 },
+      ] },
+    { id: 'f1', floor: 1, short: '1F', label: '1층 · 로비', header: '1F · 로비', aria: '1층 로비', width: 3400,
+      background: '#23262b', elevatorBank: 2100,
+      obstacles: [{ kind: 'crate', x: 1400, y: floorY - 56, width: 112, height: 56 }] },
+    { id: 'b1', floor: -1, short: 'B1', label: 'B1 · 시설관리실', header: 'B1 · 시설관리실', aria: 'B1 시설관리실', width: 2400,
+      background: '#1c1712', elevatorBank: 1050,
+      obstacles: [
+        { kind: 'crate', x: 260, y: floorY - 56, width: 112, height: 56 },
+        { kind: 'cabinet', x: 560, y: floorY - 88, width: 112, height: 88 },
+        { kind: 'crate', x: 820, y: floorY - 56, width: 112, height: 56 },
+      ] },
+    { id: 'b2', floor: -2, short: 'B2', label: 'B2 · 서버실', header: 'B2 · 서버실', aria: 'B2 서버실', width: 2600,
+      background: '#0a121a', elevatorBank: 1300,
+      obstacles: [
+        { kind: 'server-rack', x: 550, y: floorY - 90, width: 90, height: 90 },
+        { kind: 'server-rack', x: 850, y: floorY - 90, width: 90, height: 90 },
+        { kind: 'server-rack', x: 1100, y: floorY - 90, width: 90, height: 90 },
+      ] },
+  ];
   const ALL_FLOORS = [FLOOR17, ...FLOORS];
-  const ROOFTOP = { id: 'rooftop', floor: 18, label: '옥상', header: 'RF · 옥상', aria: '옥상', width: 2400, background: '#11191d' };
-  const floorById = new Map([...ALL_FLOORS, ROOFTOP].map(entry => [entry.id, entry]));
-  const rooftopBackground = new Image();
-  rooftopBackground.src = 'assets/background/rooftop/rooftop.png';
-  rooftopBackground.alt = '';
-  rooftopBackground.draggable = false;
-  Object.assign(rooftopBackground.style, {
-    position: 'absolute', width: '2400px', height: `${724 * 2400 / 2172}px`,
-    top: `${floorY - 504 * 2400 / 2172}px`, left: '0px', imageRendering: 'pixelated',
-  });
+  const floorById = new Map(ALL_FLOORS.map(entry => [entry.id, entry]));
 
   function floorShortLabel(floorValue) {
     if (floorValue === -1) return 'B1';
@@ -139,9 +155,6 @@
   let nearbyDoor = null;
   let statusTimer;
   const speed = 200;
-  const runSpeed = 340;
-  const runFrames = 8;
-  const runFrameDistance = 192 / runFrames;
   const walkFrames = 6;
   const frameDistance = 184 / walkFrames;
   const step = 1000 / 60;
@@ -149,7 +162,7 @@
   world.style.height = `${worldHeight}px`;
   const background = document.getElementById('background');
   for (let row = 0; row < Math.ceil(worldHeight / 256); row++) {
-    for (let col = 0; col < Math.ceil(corridorWidth / 256); col++) {
+    for (let col = 0; col < Math.ceil(worldWidth / 256); col++) {
       const tile = new Image(256, 256);
       tile.src = `assets/background/floor17/tiles/${row}-${col}.png`;
       tile.alt = '';
@@ -161,9 +174,11 @@
   }
   const engine = Engine.create({ gravity: { x: 0, y: 1.5 } });
   const terrain = [
-    { kind: 'floor', x: 0, y: floorY, width: corridorWidth, height: 150 },
+    { kind: 'floor', x: 0, y: floorY, width: worldWidth, height: 150 },
     { kind: 'boundary', x: 0, y: 0, width: 32, height: worldHeight },
-    { kind: 'boundary', x: corridorWidth - 32, y: 0, width: 32, height: worldHeight },
+    { kind: 'boundary', x: worldWidth - 32, y: 0, width: 32, height: worldHeight },
+    { kind: 'crate', x: 980, y: floorY - 56, width: 112, height: 56 },
+    { kind: 'cabinet', x: 1930, y: floorY - 88, width: 112, height: 88 },
   ];
   const solids = terrain.map(({ kind, x, y, width, height }) => {
     const element = document.createElement('div');
@@ -175,26 +190,24 @@
     world.insertBefore(element, sprite);
     return Bodies.rectangle(x + width / 2, y + height / 2, width, height, { isStatic: true });
   });
-  const body = Bodies.rectangle(640, floorY - 81, 40, 162, {
+  const body = Bodies.rectangle(220, floorY - 81, 40, 162, {
     inertia: Infinity, friction: 0, frictionStatic: 0, frictionAir: 0, restitution: 0,
   });
+  Composite.add(engine.world, [...solids, body]);
   const officeSolids = [
     Bodies.rectangle(officeWidth / 2, floorY + 75, officeWidth, 150, { isStatic: true }),
     Bodies.rectangle(16, worldHeight / 2, 32, worldHeight, { isStatic: true }),
     Bodies.rectangle(officeWidth - 16, worldHeight / 2, 32, worldHeight, { isStatic: true }),
   ];
-  Composite.add(engine.world, [...officeSolids, body]);
-  let currentTerrain = officeSolids;
+  let currentTerrain = solids;
   let currentDoors = doors;
   let walkDistance = 0;
-  let runDistance = 0;
   let walkReady = false;
   let facing = 1;
   let grounded = false;
   let jumpQueued = false;
   let interactionTime = 0;
   let transitioning = false;
-  let sceneTransition = null;
   let selectingFloor = false;
   let pulseDirection = 0;
   let pulseTime = 0;
@@ -210,19 +223,16 @@
   walkSheet.addEventListener('load', checkWalkSheet);
   checkWalkSheet();
 
-  function animate(distance, sprinting = false) {
-    const running = grounded && sprinting && distance > .1 && runSheet.naturalWidth === 256 * runFrames && runSheet.naturalHeight === 256;
-    const walking = grounded && walkReady && distance > .1 && !running;
+  function animate(distance) {
+    const walking = grounded && walkReady && distance > .1;
     walkDistance = walking ? (walkDistance + distance) % (frameDistance * walkFrames) : 0;
-    runDistance = running ? (runDistance + distance) % (runFrameDistance * runFrames) : 0;
     const state = !grounded ? (body.velocity.y < 0 ? 'jump' : 'fall') :
-      interactionTime > 0 ? 'interact' : running ? 'run' : walking ? 'walk' : 'idle';
+      interactionTime > 0 ? 'interact' : walking ? 'walk' : 'idle';
     const index = state === 'fall' ? 1 : state === 'interact' ? Number(interactionTime <= 240) :
-      running ? Math.floor(runDistance / runFrameDistance) : walking ? Math.floor(walkDistance / frameDistance) : 0;
+      walking ? Math.floor(walkDistance / frameDistance) : 0;
     sprite.dataset.state = state;
     sprite.dataset.frame = index;
     if (state === 'walk') walkSheet.style.transform = `translateX(${-index * 100 / walkFrames}%)`;
-    if (state === 'run') runSheet.style.transform = `translateX(${-index * 100 / runFrames}%)`;
     if (state === 'jump' || state === 'fall') jumpSheet.style.transform = `translateX(${-index * 50}%)`;
     if (state === 'interact') interactSheet.style.transform = `translateX(${-index * 50}%)`;
   }
@@ -232,32 +242,19 @@
   }
 
   function render() {
-    world.style.setProperty('--sight-x', `${body.position.x}px`);
-    world.style.setProperty('--sight-y', `${body.position.y}px`);
     // The image has transparent padding: its soles sit 178px below the sprite top.
     sprite.style.transform = `translate(${body.position.x - 96}px, ${body.bounds.max.y - 178}px) scaleX(${facing})`;
     world.style.transform = `translate(${-cameraX * scale}px, ${stage.clientHeight - worldHeight * scale}px) scale(${scale})`;
   }
 
   function update() {
-    if (transitioning) {
-      updateSceneTransition();
-      updateElevators();
-      return;
-    }
-    if (selectingFloor) {
-      updateElevators();
-      updateCabin();
-      return;
-    }
     const directions = [...keys].map(key => movementKeys[key]).concat([...pointers.values()]);
     if (pulseTime > 0) directions.push(pulseDirection);
     pulseTime = Math.max(0, pulseTime - step);
     const direction = Number(directions.includes(1)) - Number(directions.includes(-1));
-    const sprinting = [...runKeys].some(key => keys.has(key));
     interactionTime = direction || jumpQueued ? 0 : Math.max(0, interactionTime - step);
     if (direction) facing = direction;
-    Body.setVelocity(body, { x: direction * (sprinting ? runSpeed : speed) / 60, y: jumpQueued && grounded ? -10.8 : body.velocity.y });
+    Body.setVelocity(body, { x: direction * speed / 60, y: jumpQueued && grounded ? -10.8 : body.velocity.y });
     jumpQueued = false;
     const oldX = body.position.x;
     Engine.update(engine, step);
@@ -266,7 +263,7 @@
       const normalY = pair.collision.normal.y * (pair.bodyA === body ? 1 : -1);
       return normalY < -.5;
     });
-    animate(Math.abs(body.position.x - oldX), sprinting);
+    animate(Math.abs(body.position.x - oldX));
     updateElevators();
     updateInteraction();
     cameraX += (cameraTarget() - cameraX) * .13;
@@ -279,56 +276,20 @@
     statusTimer = setTimeout(() => { status.textContent = ''; }, 2500);
   }
 
-  function changeRoom(onChange = performRoomChange) {
+  function changeRoom() {
     if (transitioning) return;
-    if (onChange === performRoomChange && room === 'corridor' && (!officeBackground.complete || !officeBackground.naturalWidth)) {
+    if (room === 'corridor' && (!officeBackground.complete || !officeBackground.naturalWidth)) {
       showStatus('사무실 배경을 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.');
       return;
     }
-    transitionScene(onChange);
-  }
-
-  function transitionScene(onChange) {
-    if (transitioning) return;
-    sceneTransition = { onChange, elapsed: 0, focus: document.activeElement };
     transitioning = true;
     releaseInput();
-    stage.inert = true;
-    cabin.inert = true;
-    roomTransition.dataset.phase = 'out';
-    roomTransition.style.opacity = '0';
+    roomTransition.addEventListener('transitionend', () => {
+      performRoomChange();
+      roomTransition.addEventListener('transitionend', () => { transitioning = false; }, { once: true });
+      roomTransition.classList.remove('visible');
+    }, { once: true });
     roomTransition.classList.add('visible');
-  }
-
-  function updateSceneTransition() {
-    const transition = sceneTransition;
-    // Keep a fully black frame between scenes; use the same clock as gameplay.
-    if (roomTransition.dataset.phase === 'black') {
-      transition.onChange();
-      stage.inert = true;
-      cabin.inert = true;
-      transition.elapsed = 0;
-      roomTransition.dataset.phase = 'in';
-      return;
-    }
-    transition.elapsed += step;
-    const amount = Math.min(1, transition.elapsed / 350);
-    const fadingOut = roomTransition.dataset.phase === 'out';
-    roomTransition.style.opacity = String(fadingOut ? amount : 1 - amount);
-    if (amount < 1) return;
-    if (fadingOut) {
-      roomTransition.dataset.phase = 'black';
-      return;
-    }
-    transitioning = false;
-    sceneTransition = null;
-    roomTransition.dataset.phase = 'idle';
-    roomTransition.classList.remove('visible');
-    stage.inert = selectingFloor;
-    cabin.inert = false;
-    const previousFocus = cabin.contains(transition.focus) ? cabinReturnFocus : transition.focus;
-    const focus = selectingFloor ? cabin : previousFocus?.isConnected && previousFocus !== document.body ? previousFocus : stage;
-    focus.focus({ preventScroll: true });
   }
 
   function performRoomChange() {
@@ -339,7 +300,7 @@
     Engine.clear(engine);
     room = entering ? 'office' : 'corridor';
     currentTerrain = entering ? officeSolids : solids;
-    worldWidth = entering ? officeWidth : corridorWidth;
+    worldWidth = entering ? officeWidth : 3200;
     world.dataset.room = room;
     world.style.width = `${worldWidth}px`;
     Body.setPosition(body, { x: entering ? 160 : returnX, y: floorY - 81 });
@@ -359,79 +320,128 @@
   function buildDynamicScene(config) {
     const bodies = [];
     const doorList = [];
-    if (config.id === 'rooftop') dynamicScene.append(rooftopBackground);
+    // 실사 배경 그림(있으면 가장 먼저 넣어 다른 모든 요소 뒤에 깔리게 한다).
+    if (config.backgroundImage) {
+      const art = config.backgroundImage;
+      const image = new Image();
+      image.src = art.src;
+      image.alt = '';
+      image.draggable = false;
+      image.setAttribute('aria-hidden', 'true');
+      Object.assign(image.style, {
+        position: 'absolute', left: '0px', top: `${art.top}px`, width: `${art.width}px`, height: `${art.height}px`,
+        pointerEvents: 'none', userSelect: 'none',
+      });
+      dynamicScene.append(image);
+    }
+    // 실사 배경이 있으면 바닥/좌우 경계/소품도 이미 그림에 그려져 있으므로 판정 박스만 두고 감춘다.
     const layout = [
-      { kind: 'floor', x: 0, y: floorY, width: config.width, height: 150 },
-      { kind: 'boundary', x: 0, y: 0, width: 32, height: worldHeight },
-      { kind: 'boundary', x: config.width - 32, y: 0, width: 32, height: worldHeight },
+      { kind: 'floor', x: 0, y: floorY, width: config.width, height: 150, invisible: !!config.backgroundImage },
+      { kind: 'boundary', x: 0, y: 0, width: 32, height: worldHeight, invisible: !!config.backgroundImage },
+      { kind: 'boundary', x: config.width - 32, y: 0, width: 32, height: worldHeight, invisible: !!config.backgroundImage },
+      ...config.obstacles,
     ];
-    for (const { kind, x, y, width, height } of layout) {
+    for (const { kind, x, y, width, height, invisible } of layout) {
       const element = document.createElement('div');
-      element.className = `solid ${kind}`;
+      element.className = invisible ? 'solid' : `solid ${kind}`;
       element.setAttribute('aria-hidden', 'true');
       Object.assign(element.style, { left: `${x}px`, top: `${y}px`, width: `${width}px`, height: `${height}px` });
       dynamicScene.append(element);
       bodies.push(Bodies.rectangle(x + width / 2, y + height / 2, width, height, { isStatic: true }));
     }
-    if (config.id === 'rooftop') {
-      const supply = document.createElement('div');
-      supply.className = 'solar-supply';
-      supply.setAttribute('role', 'img');
-      supply.setAttribute('aria-label', '태양광 임시 전력장치 · 화면 꺼짐');
-      // The first 887px cell has transparent padding; its bottom edge is y=691.
-      Object.assign(supply.style, { left: '720px', top: `${floorY - 691 * 360 / 887}px` });
-      const image = new Image();
-      image.src = 'assets/objects/power/solar-supply-off-on.png';
-      image.alt = '';
-      image.draggable = false;
-      supply.append(image);
-      dynamicScene.append(supply);
-    }
-    const sceneDoors = config.id === 'rooftop' ?
-      [{ name: '17층 계단', type: 'stairs', x: 160, y: 232, width: 180 }] :
-      elevatorCars.map((car, carIndex) => ({ name: car.name, type: 'elevator', carIndex,
-        x: config.elevatorBank + carIndex * 260, y: 220, width: 200 }));
-    sceneDoors.forEach(door => {
+    const bank = config.elevatorBank;
+    const doorWidth = config.doorWidth ?? 200;
+    const doorSpacing = config.doorSpacing ?? 260;
+    const doorY = config.doorY ?? 220;
+    [0, 1, 2].forEach(carIndex => {
+      const car = elevatorCars[carIndex];
+      const door = { name: car.name, type: 'elevator', carIndex, x: bank + carIndex * doorSpacing, y: doorY, width: doorWidth };
       door.element = document.createElement('div');
-      door.element.className = 'door';
+      // 실사 배경 위 문은 근접 시 흰 테두리(.door.art.near)로, 그 외 placeholder 층은 기존 색 그대로.
+      door.element.className = config.backgroundImage ? 'door art' : 'door';
       door.element.dataset.open = 'false';
       door.element.setAttribute('role', 'img');
+      // doorOutlineDx: 흰 테두리(.door.art.near) 박스만 시각적으로 미세 이동한다. 상호작용 판정은
+      // door.x(실측값)를 그대로 쓰므로 근접 판정 위치는 안 바뀐다.
       Object.assign(door.element.style, {
-        left: `${door.x}px`, top: `${door.y}px`, width: `${door.width}px`, height: `${floorY - door.y}px`,
+        left: `${door.x + (config.doorOutlineDx ?? 0)}px`, top: `${door.y}px`,
+        width: `${door.width}px`, height: `${floorY - door.y}px`,
       });
-      const image = new Image();
-      image.src = `assets/objects/floor17/${door.type}.png`;
-      image.alt = '';
-      image.draggable = false;
-      door.element.append(image);
-      dynamicScene.append(door.element);
-      setDoorOpen(door, false);
-      if (door.type === 'elevator') {
-        addElevatorPanels(door);
-        door.indicator = document.createElement('div');
-        door.indicator.className = 'elevator-indicator';
-        door.indicator.style.left = `${door.x + door.width / 2}px`;
-        door.indicator.style.top = `${door.y - 32}px`;
-        dynamicScene.append(door.indicator);
+      // config.doorImage === null이면(옥상처럼 실사 배경이 이미 문을 그려주는 층) 깨진 이미지 아이콘이
+      // 뜨지 않도록 아예 넣지 않는다. 지정 안 하면 기존 층들과 같은 기본 경로를 그대로 쓴다.
+      const doorImagePath = config.doorImage === undefined ? 'assets/objects/floor17/elevator.png' : config.doorImage;
+      if (doorImagePath) {
+        const image = new Image();
+        image.src = doorImagePath;
+        image.alt = '';
+        image.draggable = false;
+        door.element.append(image);
       }
+      dynamicScene.append(door.element);
+      door.indicator = document.createElement('div');
+      door.indicator.className = 'elevator-indicator';
+      // indicatorDx/indicatorLift: 층별로 층수 표시 박스를 문 중앙/기본 32px 위 기준에서 미세 조정한다.
+      door.indicator.style.left = `${door.x + door.width / 2 + (config.indicatorDx ?? 0)}px`;
+      door.indicator.style.top = `${door.y - (config.indicatorLift ?? 32)}px`;
+      dynamicScene.append(door.indicator);
       doorList.push(door);
     });
-    return { bodies, doors: doorList };
+    const stairs = {
+      name: '비상계단', type: 'stairs',
+      x: bank + (config.stairsOffset ?? 780), y: config.stairsY ?? 232, width: config.stairsWidth ?? 170,
+    };
+    stairs.element = document.createElement('div');
+    stairs.element.className = config.backgroundImage ? 'door art' : 'door';
+    stairs.element.dataset.open = 'false';
+    stairs.element.setAttribute('role', 'img');
+    Object.assign(stairs.element.style, {
+      left: `${stairs.x}px`, top: `${stairs.y}px`, width: `${stairs.width}px`, height: `${floorY - stairs.y}px`,
+    });
+    const stairsImagePath = config.stairsImage === undefined ? 'assets/objects/floor17/stairs.png' : config.stairsImage;
+    if (stairsImagePath) {
+      const stairsImage = new Image();
+      stairsImage.src = stairsImagePath;
+      stairsImage.alt = '';
+      stairsImage.draggable = false;
+      stairs.element.append(stairsImage);
+    }
+    dynamicScene.append(stairs.element);
+    doorList.push(stairs);
+    if (config.panel) {
+      const panel = { name: config.panel.name, type: 'panel', x: config.panel.x, y: config.panel.y, width: config.panel.width };
+      panel.element = document.createElement('div');
+      panel.element.className = 'panel';
+      Object.assign(panel.element.style, {
+        position: 'absolute', overflow: 'hidden', pointerEvents: 'none',
+        left: `${panel.x}px`, top: `${panel.y}px`, width: `${panel.width}px`, height: `${floorY - panel.y}px`,
+      });
+      if (config.panel.image) {
+        const image = new Image();
+        image.src = config.panel.image;
+        image.alt = '';
+        image.draggable = false;
+        Object.assign(image.style, { display: 'block', width: '100%', height: '100%' });
+        panel.element.append(image);
+      }
+      dynamicScene.append(panel.element);
+      doorList.push(panel);
+    }
+    return { bodies, doors: doorList, spawnX: bank + 130 };
   }
 
-  function performFloorChange(destId, carIndex = 0) {
+  function performFloorChange(destId) {
     Composite.remove(engine.world, currentTerrain);
     dynamicScene.innerHTML = '';
     const dest = floorById.get(destId);
     currentSceneFloor = dest.floor;
-    lightSwitch.hidden = currentSceneFloor !== 17;
     if (destId === 'f17') {
       room = 'corridor';
       world.dataset.room = 'corridor';
-      worldWidth = corridorWidth;
+      worldWidth = 3200;
       currentTerrain = solids;
       currentDoors = doors;
       Composite.add(engine.world, solids);
+      Body.setPosition(body, { x: 1948, y: floorY - 81 });
     } else {
       room = 'dynamic';
       dynamicFloorId = destId;
@@ -442,9 +452,8 @@
       currentTerrain = built.bodies;
       currentDoors = built.doors;
       Composite.add(engine.world, currentTerrain);
+      Body.setPosition(body, { x: built.spawnX, y: floorY - 81 });
     }
-    const arrivalDoor = currentDoors.find(door => carIndex === null ? door.type === 'stairs' : door.carIndex === carIndex);
-    Body.setPosition(body, { x: arrivalDoor.x + 40, y: floorY - 81 });
     Engine.clear(engine);
     world.style.width = `${worldWidth}px`;
     Body.setVelocity(body, { x: 0, y: 0 });
@@ -461,13 +470,6 @@
     render();
   }
 
-  function addElevatorPanels(door) {
-    door.element.classList.add('elevator');
-    const panels = document.createElement('div');
-    panels.className = 'elevator-panels';
-    door.element.append(panels);
-  }
-
   function setDoorOpen(door, open) {
     door.element.dataset.open = String(open);
     door.element.setAttribute('aria-label', `${door.name} 문 ${open ? '열림' : '닫힘'}`);
@@ -476,7 +478,7 @@
   function updateFloorIndicator(door) {
     const car = elevatorCars[door.carIndex];
     const label = floorShortLabel(car.floor);
-    door.indicator.textContent = `${car.travelling ? (car.destination > car.floor ? '↑ ' : '↓ ') : ''}${label}`;
+    door.indicator.textContent = `${car.travelling ? '↑ ' : ''}${label}`;
     door.indicator.setAttribute('aria-label', `${door.name} ${label}${car.travelling ? ' 이동 중' : ''}`);
   }
 
@@ -484,7 +486,7 @@
     elevatorCars.forEach((car, index) => {
       const door = currentDoors.find(candidate => candidate.type === 'elevator' && candidate.carIndex === index);
       if (!door) return;
-      setDoorOpen(door, car.open && car.floor === currentSceneFloor);
+      setDoorOpen(door, !!car.open);
       updateFloorIndicator(door);
     });
   }
@@ -496,14 +498,16 @@
       if (car.elapsed < elevatorFloorTime) continue;
       car.elapsed -= elevatorFloorTime;
       car.floor += Math.sign(car.destination - car.floor);
-      if (car.floor === 0) car.floor += Math.sign(car.destination);
       if (car.floor === car.destination) {
         car.travelling = false;
         car.open = true;
         if (car.rider) {
-          selectedFloor = null;
-          setCabinDoor(true);
-          cabinStatus.textContent = `${floorShortLabel(car.floor)} 도착 · 문이 열립니다.`;
+          car.rider = false;
+          const destId = car.pendingDestId;
+          car.pendingDestId = null;
+          performFloorChange(destId);
+          roomTransition.classList.remove('visible');
+          setTimeout(() => { transitioning = false; }, 350);
         } else if (car.floor === currentSceneFloor) {
           showStatus(`${car.name}가 ${car.floor}층에 도착했습니다.`);
         }
@@ -539,11 +543,10 @@
   }
 
   function doorHintText(door) {
-    if (door.type === 'stairs') return currentSceneFloor === 18 ? 'E · 17층으로 내려가기' : 'E · 옥상으로 올라가기';
     if (door.type === 'panel') return 'E · 조사';
     if (door.type === 'elevator') {
       const car = elevatorCars[door.carIndex];
-      if (car.travelling) return car.rider ? '이동 중…' : '호출 중…';
+      if (car.travelling) return car.rider ? '이동 중…' : '올라오는 중…';
       if (car.floor === currentSceneFloor) return 'E · 탑승';
       return 'E · 호출';
     }
@@ -551,18 +554,8 @@
   }
 
   function interact() {
-    if (transitioning || selectingFloor) return;
     updateInteraction();
     if (!nearbyDoor) return;
-    if (nearbyDoor.type === 'stairs') {
-      const destId = currentSceneFloor === 18 ? 'f17' : 'rooftop';
-      if (destId === 'rooftop' && (!rooftopBackground.complete || !rooftopBackground.naturalWidth)) {
-        showStatus('옥상 배경을 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.');
-        return;
-      }
-      changeRoom(() => performFloorChange(destId, null));
-      return;
-    }
     if (nearbyDoor.type === 'office') {
       changeRoom();
       return;
@@ -578,7 +571,7 @@
       facing = body.position.x <= nearbyDoor.x + nearbyDoor.width / 2 ? 1 : -1;
       animate(0);
       if (car.floor === currentSceneFloor) {
-        enterCabin(nearbyDoor.carIndex);
+        openFloorSelect(nearbyDoor.carIndex);
         return;
       }
       car.travelling = true;
@@ -600,170 +593,66 @@
     updateInteraction();
   }
 
-  // Hotspots use the source artwork's 1536x1024 coordinates; CSS scales them with the scene.
-  const cabinFloorButtons = [];
-  const panelFloors = [null, 17, 16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, -1, -2];
-  panelFloors.forEach((floor, index) => {
-    if (floor === null) return;
-    const button = document.createElement('button');
-    button.type = 'button';
-    button.className = 'cabin-hit';
-    button.dataset.floor = floor;
-    button.title = floor < 0 ? `지하 ${-floor}층` : `${floor}층`;
-    button.setAttribute('aria-label', button.title);
-    button.setAttribute('aria-pressed', 'false');
-    Object.assign(button.style, {
-      left: `${(1073 + index % 4 * 77) / 1536 * 100}%`, top: `${(261 + Math.floor(index / 4) * 74) / 1024 * 100}%`,
-      width: `${60 / 1536 * 100}%`, height: `${57 / 1024 * 100}%`,
-    });
-    button.addEventListener('click', () => {
-      const car = elevatorCars[cabinCarIndex];
-      if (transitioning || !car || car.travelling || floor === car.floor) return;
-      selectedFloor = selectedFloor === floor ? null : floor;
-      cabinAutoClose = selectedFloor === null ? 0 : 1600;
-      cabinStatus.textContent = selectedFloor === null ? '층 선택 취소' : `${button.title} 선택`;
-      refreshCabin();
-    });
-    document.getElementById('cabin-floor-buttons').append(button);
-    cabinFloorButtons.push(button);
-  });
-
-  function enterCabin(carIndex) {
-    if (transitioning) return;
-    const art = document.getElementById('cabin-art');
-    if (!art.complete || !art.naturalWidth) {
-      showStatus('엘리베이터 내부 이미지를 불러오지 못했습니다. 다시 시도해 주세요.');
-      return;
-    }
-    cabinReturnFocus = document.activeElement;
-    transitionScene(() => showCabin(carIndex));
-  }
-
-  function showCabin(carIndex) {
-    cabinCarIndex = carIndex;
-    selectedFloor = null;
-    cabinAutoClose = 0;
-    cabinDoorAmount = 1;
-    cabinScene.style.setProperty('--door-open', '1');
+  function openFloorSelect(carIndex) {
     selectingFloor = true;
     releaseInput();
-    elevatorCars[carIndex].rider = true;
-    elevatorCars[carIndex].open = true;
-    cabinScene.dataset.door = 'open';
-    stage.inert = true;
-    cabin.hidden = false;
-    cabinStatus.textContent = `${floorShortLabel(elevatorCars[carIndex].floor)} · 문 열림`;
-    refreshCabin();
-    cabin.scrollLeft = cabin.scrollWidth - cabin.clientWidth;
-  }
-
-  function refreshCabin() {
-    if (cabinCarIndex === null) return;
-    const car = elevatorCars[cabinCarIndex];
-    const label = car.floor < 0 ? `B${-car.floor}` : String(car.floor);
-    const display = `${car.travelling ? (car.destination > car.floor ? '↑' : '↓') : ''}${label}`;
-    if (cabinDisplay.textContent !== display) cabinDisplay.textContent = display;
-    cabin.dataset.moving = String(car.travelling);
-    cabin.dataset.floor = car.floor;
-    cabinScene.dataset.floor = car.floor;
-    cabinOpen.disabled = car.travelling;
-    cabinClose.disabled = car.travelling;
-    cabinExit.disabled = car.travelling || cabinScene.dataset.door !== 'open';
-    for (const button of cabinFloorButtons) {
-      button.disabled = car.travelling || Number(button.dataset.floor) === car.floor;
-      button.setAttribute('aria-pressed', String(Number(button.dataset.floor) === (car.travelling ? car.destination : selectedFloor)));
+    floorSelect.innerHTML = '';
+    const title = document.createElement('p');
+    title.textContent = '이동할 층을 선택하세요';
+    floorSelect.append(title);
+    for (const target of ALL_FLOORS) {
+      if (target.floor === currentSceneFloor) continue;
+      const optionButton = document.createElement('button');
+      optionButton.type = 'button';
+      optionButton.textContent = target.label;
+      optionButton.addEventListener('click', () => boardElevator(carIndex, target.id));
+      floorSelect.append(optionButton);
     }
+    const cancel = document.createElement('button');
+    cancel.type = 'button';
+    cancel.className = 'cancel';
+    cancel.textContent = '취소';
+    cancel.addEventListener('click', closeFloorSelect);
+    floorSelect.append(cancel);
+    floorSelect.hidden = false;
   }
 
-  function setCabinDoor(open) {
-    const car = elevatorCars[cabinCarIndex];
-    if (transitioning || !car || car.travelling) return;
-    cabinAutoClose = 0;
-    const phase = cabinScene.dataset.door;
-    if (phase === (open ? 'open' : 'closed') || phase === (open ? 'opening' : 'closing')) return;
-    car.open = open;
-    cabinScene.dataset.door = open ? 'opening' : 'closing';
-    cabinStatus.textContent = open ? '문이 열립니다.' : '문이 닫힙니다.';
-    refreshSceneElevatorDoors();
-    refreshCabin();
-  }
-
-  function updateCabin() {
-    if (cabinCarIndex === null) return;
-    const car = elevatorCars[cabinCarIndex];
-    if (cabinAutoClose > 0) {
-      cabinAutoClose = Math.max(0, cabinAutoClose - step);
-      if (!cabinAutoClose) setCabinDoor(false);
-    }
-    if (cabinScene.dataset.door === 'opening' || cabinScene.dataset.door === 'closing') {
-      cabinDoorAmount = Math.max(0, Math.min(1, cabinDoorAmount + (car.open ? 1 : -1) * step / 1100));
-      cabinScene.style.setProperty('--door-open', cabinDoorAmount);
-      if (cabinDoorAmount === (car.open ? 1 : 0)) cabinScene.dataset.door = car.open ? 'open' : 'closed';
-    }
-    if (!car.travelling && cabinScene.dataset.door === 'closed' && selectedFloor !== null && !cabinAutoClose) {
-      car.destination = selectedFloor;
-      car.travelling = true;
-      car.elapsed = 0;
-      cabinStatus.textContent = `${floorShortLabel(selectedFloor)} 이동 중`;
-    }
-    refreshCabin();
-  }
-
-  function exitCabin() {
-    if (transitioning || cabinCarIndex === null || cabinExit.disabled) return;
-    transitionScene(leaveCabin);
-  }
-
-  function leaveCabin() {
-    const car = elevatorCars[cabinCarIndex];
-    const destination = ALL_FLOORS.find(entry => entry.floor === car.floor);
-    car.rider = false;
+  function closeFloorSelect() {
+    floorSelect.hidden = true;
+    floorSelect.innerHTML = '';
     selectingFloor = false;
-    cabin.hidden = true;
-    stage.inert = false;
-    releaseInput();
-    performFloorChange(destination.id, cabinCarIndex);
-    cabinCarIndex = null;
   }
-  cabinOpen.addEventListener('click', () => setCabinDoor(true));
-  cabinClose.addEventListener('click', () => setCabinDoor(false));
-  cabinExit.addEventListener('click', exitCabin);
-  document.getElementById('cabin-alarm').addEventListener('click', () => {
-    if (transitioning) return;
-    cabinStatus.textContent = '비상벨 작동';
-    const AudioContext = window.AudioContext || window.webkitAudioContext;
-    if (!AudioContext) return;
-    const audio = new AudioContext();
-    const oscillator = audio.createOscillator();
-    const gain = audio.createGain();
-    gain.gain.value = .08;
-    oscillator.frequency.value = 880;
-    oscillator.connect(gain).connect(audio.destination);
-    oscillator.start();
-    oscillator.stop(audio.currentTime + .4);
-    oscillator.onended = () => { audio.close(); };
-  });
-  cabin.addEventListener('keydown', event => {
-    if (event.code !== 'Tab') return;
-    const enabled = [...cabin.querySelectorAll('button:not(:disabled)')];
-    const index = enabled.indexOf(document.activeElement);
-    if (event.shiftKey && index <= 0) { event.preventDefault(); enabled.at(-1).focus(); }
-    else if (!event.shiftKey && (index === -1 || index === enabled.length - 1)) { event.preventDefault(); enabled[0].focus(); }
-  });
+
+  function boardElevator(carIndex, destId) {
+    const car = elevatorCars[carIndex];
+    const dest = floorById.get(destId);
+    closeFloorSelect();
+    transitioning = true;
+    releaseInput();
+    car.rider = true;
+    car.pendingDestId = destId;
+    car.destination = dest.floor;
+    car.travelling = true;
+    car.elapsed = 0;
+    car.open = false;
+    refreshSceneElevatorDoors();
+    showStatus(`${car.name} 탑승. ${dest.label}(으)로 이동합니다.`);
+    roomTransition.classList.add('visible');
+  }
 
   window.addEventListener('keydown', event => {
-    if (transitioning) { event.preventDefault(); return; }
     if (selectingFloor) {
-      if (event.code === 'Escape') exitCabin();
+      if (event.code === 'Escape') closeFloorSelect();
       return;
     }
-    if (event.target instanceof Element && event.target.closest('button, input') && event.code === 'Space') return;
+    if (transitioning) return;
+    if (event.target instanceof Element && event.target.closest('button') && event.code === 'Space') return;
     if (event.code === 'KeyE') {
       event.preventDefault();
       if (!event.repeat) interact();
       return;
     }
-    if (!Object.hasOwn(movementKeys, event.code) && !jumpKeys.has(event.code) && !runKeys.has(event.code)) return;
+    if (!Object.hasOwn(movementKeys, event.code) && !jumpKeys.has(event.code)) return;
     event.preventDefault();
     if (jumpKeys.has(event.code)) {
       if (!event.repeat) jumpQueued = true;

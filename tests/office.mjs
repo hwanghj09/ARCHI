@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import { mkdir } from 'node:fs/promises';
 import { chromium } from 'playwright';
 import { reachInitialCorridor } from './scene-transition.mjs';
+import { assertMirroredDoor, box } from './room-geometry.mjs';
 
 await mkdir('.local', { recursive: true });
 const browser = await chromium.launch();
@@ -38,20 +39,33 @@ try {
   };
 
   assert.equal((await state()).room, 'office', 'New games start inside the 17F office');
-  near((await state()).x, 640);
+  near((await state()).x, 656);
   near((await state()).feet, 570);
   assert.equal(await page.locator('#world').evaluate(el => el.style.width), '2400px');
   assert.equal(await page.locator('header span').textContent(), '17F · 사무실');
   assert.match(await page.locator('#stage').getAttribute('aria-label'), /17층 사무실/);
   assert(await page.locator('#office-background').isVisible());
   assert(await page.locator('#background').isHidden());
-  assert(await page.locator('#interaction-hint').isHidden(), 'Start is inside the office, away from the exit');
-  await page.keyboard.press('e');
-  assert.equal((await state()).room, 'office', 'Initial E does not immediately exit');
+  assert.equal(await page.locator('#interaction-hint').textContent(), 'E · 컴퓨터 사용');
   await page.screenshot({ path: '.local/start-office-desktop.png' });
+  for (const viewport of [{ width: 1280, height: 900 }, { width: 1920, height: 1080 }, { width: 390, height: 844 }]) {
+    await page.setViewportSize(viewport);
+    await page.waitForFunction(() => {
+      const bounds = document.getElementById('world').getBoundingClientRect();
+      return Math.abs(bounds.y) < 1 && Math.abs(bounds.height - innerHeight) < 1;
+    }, null, { polling: 50 });
+    await page.clock.runFor(100);
+    const world = await page.locator('#world').boundingBox();
+    near(world.y, 0);
+    near((await page.locator('#office-background').boundingBox()).y, 0);
+    near(world.height, viewport.height);
+    near((await state()).feet, 570);
+    near((await state()).x, 656);
+    await page.screenshot({ path: `.local/office-filled-${viewport.width}x${viewport.height}.png` });
+  }
   await page.setViewportSize({ width: 390, height: 844 });
   await page.clock.runFor(100);
-  near((await state()).x, 640);
+  near((await state()).x, 656);
   await page.screenshot({ path: '.local/start-office-mobile.png' });
   await page.setViewportSize({ width: 1280, height: 720 });
   await page.clock.runFor(100);
@@ -75,7 +89,13 @@ try {
   assert.equal((await state()).room, 'office', 'Held E must not immediately exit');
   assert.equal(await page.locator('.door:visible, .elevator-indicator:visible, .solid:visible').count(), 0);
   assert.equal(await page.locator('#office-background').isVisible(), true);
-  near((await state()).x, 160);
+  near((await state()).x, 986);
+  // The corridor art shows the glass front at x=32..1555 with the door at 580: the lit desk and part of
+  // the office lie left of the door, so the interior exit must sit at the same share of the wall.
+  const officeExit = await page.locator('.office-door[data-room="office"]').evaluate(box);
+  assertMirroredDoor({ x: 32, width: 1523 }, { x: 580, width: 128 }, 2400, officeExit, '17F office');
+  const computerX = await page.locator('#office-computer').evaluate(el => el.getBoundingClientRect().x);
+  assert(computerX < (await page.locator('.office-door[data-room="office"]').boundingBox()).x, 'Lit desk is left of the door as seen through the glass');
   await page.screenshot({ path: '.local/office-desktop.png' });
 
   await hold('d', 6000);
@@ -95,7 +115,7 @@ try {
   await page.screenshot({ path: '.local/office-mobile.png' });
   await hold('a', 12000);
   near((await state()).x, 52);
-  await hold('d', 540);
+  await hold('d', (officeExit.x + officeExit.width / 2 - 52) / 200 * 1000);
   await page.locator('#interact').click();
   await transition('corridor');
   near((await state()).x, entrance.x);

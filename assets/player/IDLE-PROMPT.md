@@ -5,7 +5,9 @@
 - Output: jeong-suho-idle-four.png, original transparent PNG.
 - Layout: 2 columns x 2 rows, four frames read left to right then top to bottom.
 - Sequence: neutral, inhale, blink, exhale. Feet remain planted for a standing idle pose.
-- Asset-only delivery; not connected to the game. Normalize frame scale and foot anchors against the existing player when integrating.
+- Connected to the game's idle state; the original 1254x1254 PNG is reused without resampling.
+- Render at 0.285 scale, with source hip anchors [325, 925, 325, 925] and sole anchors [619, 619, 1234, 1235] aligned to player-local (96, 178). CSS clips the selected pose to the player viewport.
+- Loop: neutral 1200ms, inhale 900ms, blink 120ms, exhale 980ms. Movement, jumping, and interaction interrupt the loop; stopping starts again at neutral.
 
 ## Generation prompt
 

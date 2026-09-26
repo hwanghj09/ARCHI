@@ -11,7 +11,7 @@ sheets) was all produced the same way: someone wrote a careful prompt for an ext
 documenting exactly what was asked for and how the output was wired into the game. This skill
 is that same process, minus the "run it" step — Claude Code has no image-gen tool, so the job
 here is to produce a prompt good enough to paste into whatever the user is using, plus the
-integration math so the result drops into `player.js`/`index.html` without guesswork.
+integration math so the result drops into the `js/` scripts/`index.html` without guesswork.
 
 Before writing anything, skim 1-2 existing `PROMPT.md` files for the asset type closest to
 what's being requested (see the map at the end of this file) — they're worked examples, and
@@ -22,7 +22,7 @@ matching their level of detail matters more than matching this skill's prose.
 Every rule below traces back to something the game engine actually does. Skipping one doesn't
 just look inconsistent — it breaks integration:
 
-- **The world has one straight collision floor.** `floorY = 570` in `player.js` is the only
+- **The world has one straight collision floor.** `floorY = 570` in `js/core/config.js` is the only
   ground the physics engine knows about. Every door, desk, and character foot line in every
   piece of art has to land on the same baseline in its own canvas coordinates, scaled the same
   way the existing assets were (see "Aligning to y=570" below). A background drawn with a floor
@@ -30,7 +30,7 @@ just look inconsistent — it breaks integration:
 - **Strict orthographic side view, always.** The camera in `render()` only ever translates and
   scales — it never rotates or handles depth. Isometric or perspective art will look wrong the
   instant the camera pans.
-- **Sprite sheets are cropped by CSS transforms, not by cutting the image.** `player.js`
+- **Sprite sheets are cropped by CSS transforms, not by cutting the image.** `js/player/player.js`
   computes `translateX(-index * cellWidth%)` to flip between frames. That only works if every
   cell is an identical square, tightly packed with no gutters, in a single row. Get the cell
   count or aspect ratio wrong and every frame after the first is misaligned.
@@ -123,7 +123,7 @@ is at y=[baseline] pixels of this [height]-high canvas, from extreme left to ext
 doorway/prop bottoms sit exactly on this same line. The area below is a flat cutaway floor
 foundation only — no perspective floor, no elevation changes.
 Composition across width: [break the scene into x-coordinate ranges, each describing what
-occupies it — copy the exact object x-positions from the FLOORS config in player.js so the art
+occupies it — copy the exact object x-positions from the floor data in js/floors/ so the art
 lines up with real interactive elements. See "Composition across width" below.]
 No people, no monsters, no robots, no foreground furniture blocking the walk lane, no UI, no
 border, no watermark, no captions, no large readable lettering. Output only the finished
@@ -156,8 +156,8 @@ which states/frames are needed and where the game will overlay live DOM text on 
 
 For wide panoramas, describe the prompt in x-coordinate ranges rather than vague spatial words
 ("on the left", "further along") — and make those ranges match the real positions of doors,
-elevators, and obstacles defined for that floor in `player.js` (the `FLOORS` config, or the
-`officeDoors`/`doors` arrays for 17층). This is what makes a generated background actually usable
+elevators, and obstacles defined for that floor in `js/floors/floor-NN.js` (the floor's `_LAYOUT`/`_ROOMS`), or the
+`officeDoors`/`doors` arrays for 17층 (`js/world/office17.js`, `js/world/corridor17.js`). This is what makes a generated background actually usable
 as a hallway you can walk and interact in, instead of art that has to be worked around.
 
 Example from the existing 17층 prompt (`assets/background/floor17/PROMPT.md`):
@@ -173,7 +173,7 @@ scaling/alignment math, the same way `floor17/PROMPT.md` and `OFFICE-PROMPT.md` 
 
 ## Aligning to y=570 (or any other in-game baseline)
 
-The floor/door baseline in-game is a fixed pixel row (`floorY` in `player.js`, currently 570).
+The floor/door baseline in-game is a fixed pixel row (`floorY` in `js/core/config.js`, currently 570).
 Generated art rarely comes out with its floor already on that exact row, so the existing assets
 record a small alignment step in their PROMPT.md, e.g.:
 
@@ -194,7 +194,7 @@ matching the existing files:
    depicts.
 2. **File list**: every output file with its exact pixel dimensions and format.
 3. **Integration**: how it's positioned/scaled/aligned in the game — the actual math, referencing
-   the relevant `player.js` constants or `index.html` selectors, so a future reader (human or
+   the relevant `js/` constants or `index.html` selectors, so a future reader (human or
    Claude) can regenerate or resize the asset without re-deriving alignment from scratch.
 4. **생성 프롬프트 / Generation prompt**: the literal prompt text used, in a fenced code block, so
    it can be regenerated or tweaked later.
@@ -211,7 +211,7 @@ Read the closest match before writing a new prompt:
 - Two-state interactive object sheet (elevator/stairs doors): `assets/objects/floor17/PROMPT.md`
 
 For the floors added in the multi-floor travel feature (옥상, 12층, 7층, 1층, B1, B2 — see the
-`FLOORS` config in `player.js`), there is no background art yet; those floors currently render as
+`FLOORS` list in `js/floors/registry.js`), there is no background art yet; those floors currently render as
 a flat CSS color with simple box props as a placeholder. That's the most likely next use of this
-skill — check `player.js`'s `FLOORS` array for each floor's width, obstacle layout, and elevator
+skill — check the floor files in `js/floors/` for each floor's width, obstacle layout, and elevator
 positions so a new background lines up with what's already interactive.
