@@ -7,6 +7,10 @@
 /* 12층은 이 날 만든 corridor.png가 있어서 문틈으로 그 복도(개발실 유리 전면 쪽)가 보이게 한다.
    다른 층은 아직 배경 그림이 없어서 위 회색 그라데이션 그대로 쓴다. */
 #cabin-scene[data-floor="12"] #cabin-doorway { background: #20272a url('assets/background/floor12/corridor.png') 15% center / auto 100% no-repeat; }
+/* 7층도 corridor.png가 있어서 문틈으로 AI 테스트·검증실 앞(자동문 쪽)이 보이게 한다. */
+#cabin-scene[data-floor="7"] #cabin-doorway { background: #0d1418 url('assets/background/floor7/corridor.png') 15% center / auto 100% no-repeat; }
+/* 1층도 corridor.png가 있어서 문틈으로 로비 안내 데스크 쪽이 보이게 한다. */
+#cabin-scene[data-floor="1"] #cabin-doorway { background: #10151c url('assets/background/floor1/corridor.png') 15% center / auto 100% no-repeat; }
 .cabin-leaf { position: absolute; inset: 0; background: url('assets/background/elevator/cabin-b2-to-17.png') 42.24% 47.31% / 269.47% 134.03% no-repeat; }
 .cabin-leaf.left { clip-path: inset(0 50% 0 0); transform: translateX(calc(var(--door-open, 0) * -50%)); }
 .cabin-leaf.right { clip-path: inset(0 0 0 50%); transform: translateX(calc(var(--door-open, 0) * 50%)); }

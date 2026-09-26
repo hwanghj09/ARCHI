@@ -269,6 +269,10 @@
     // 빈 벽에 혼자 떠 있어 보였다. 엘리베이터 3번과 비상계단 사이 니치(로봇 충전독) 벽감 한가운데로 옮겨서
     // 그 옆에 자연스럽게 붙어 있는 것처럼 보이게 한다.
     floorSignX: 2785,
+    // 화장실 문(BUILDING_CORE 기본 x=3612 y=210 폭145)이 이 층 그림에서는 문틀이 x=3617..3750(폭133),
+    // 위쪽은 y=290(기본 210보다 훨씬 아래 — 등박스 아래부터 문틀 시작)에 그려져 있어(격자로 실측),
+    // 판정 박스를 그 자리에 정확히 맞춘다.
+    restroomOverride: { doorX: 3617, doorWidth: 133, doorY: 290 },
     rooms: [
       { name: 'ARCHI 개발실', x: 640, width: 900, style: 'studio', target: 'f12-dev',
         doorX: 1030, doorWidth: 140, doorStyle: 'badge', signOffsetY: -60 },
@@ -326,15 +330,19 @@
       { file: 'staff-lockers', size: [256, 512], worldWidth: 130, x: 2400 },
     ] },
   ]);
-  // 7층 AI 테스트·검증실: 방이 하나뿐이라(기획.md 스토리상 이 방만 필요) 복도도 개발실·엘리베이터3·비상계단·
-  // 화장실만 있고 두 번째 방은 없다. 문은 x=848(폭146, y=260, 자동문)이며 image_gen 그림에서 나온 값 그대로다
-  // (17층처럼 그림에 맞춰 좌표를 정한 경우라 12층과 달리 억지로 끼워 맞추지 않았다).
+  // 7층 AI 테스트·검증실: 방이 하나뿐이라(기획.md 스토리상 이 방만 필요) 복도도 개발실·엘리베이터3·비상구·
+  // 화장실만 있고 두 번째 방은 없다. 문(x=822, 폭146, y=260, 자동문)과 화장실 문(restroomOverride)은
+  // 사용자가 새로 올린 복도 그림에서 실측한 값이다.
   const floor7Art = name => ({ src: `assets/background/floor7/${name}.png`, height: 720, top: 0, flat: true });
   const FLOOR7_LAYOUT = {
     header: '7F · AI 테스트·검증실', background: '#0d1418', roomDoorY: 260, backgroundImage: floor7Art('corridor'),
+    // 새 복도 그림에 맞춰 엘리베이터 문·비상구 문 DOM의 위치/크기를 조정한다(그림은 그대로 두고 좌표만 이동).
+    elevatorOffsetX: [50, -20, -45], elevatorHeightDelta: -10, elevatorLiftY: 5, elevatorWidthDelta: -10,
+    stairsScale: 0.85, stairsWidthScale: 0.765, stairsWidthDelta: -5, stairsOffsetX: -25, stairsHeightDelta: 0, stairsLiftY: 5,
+    restroomOverride: { doorX: 3653, doorWidth: 142, doorY: 310 },
     rooms: [
       { name: 'AI 테스트·검증실', x: 64, width: 1690, style: 'lab', target: 'f7-lab',
-        doorX: 848, doorWidth: 146, doorY: 260, doorStyle: 'auto' },
+        doorX: 822, doorWidth: 236, doorY: 290, doorStyle: 'auto' },
     ],
   };
   const FLOOR7_ROOMS = interiorRooms(7, [
@@ -345,13 +353,36 @@
       { file: 'electronics-bench', size: [512, 256], worldWidth: 261, x: 820, name: '백업 로그 단말',
         message: '백업 로그 단말이다: "01:00~05:00 사이 ARCHI 자체 학습 세션 반복 기록. 같은 시간대 B2 서버실 전력 사용량 급증과 일치."' },
       { file: 'instrument-cart', size: [256, 256], worldWidth: 113, x: 1150 },
-      { file: 'electronics-bench', size: [512, 256], worldWidth: 261, x: 1500, name: '외부 연결 테스트 장비',
+      { file: 'electronics-bench', size: [512, 256], worldWidth: 261, x: 1620, name: '외부 연결 테스트 장비',
         message: '외부 호스트 연결 테스트 기록: "연결 준비 완료 · 테스트 성공." 대상 주소는 지워져 있지만, 모든 로그의 중심은 B2 ARCHI 메인 서버다.' },
       { file: 'server-cooling-unit', size: [256, 512], worldWidth: 96, x: 1820 },
       { file: 'ups-cabinet', size: [256, 512], worldWidth: 96, x: 1940 },
     ] },
   ]);
-  const FLOOR_LAYOUTS = { 7: FLOOR7_LAYOUT, 12: FLOOR12_LAYOUT, 15: FLOOR15_LAYOUT, 16: FLOOR16_LAYOUT };
+  // 1층 로비: 들어갈 수 있는 방은 없고(화장실 제외), 건물 공통 빈 구역 3곳(x=32..1790, 3100..3540, 4300..4968)에
+  // 로비 소품만 놓는다. 안내 데스크 옆에 멈춰 선 경비 로봇은 그림에만 그려 넣는다(상호작용 소품 아님) —
+  // 15층 인사팀 화이트보드 메모("사원증 출입 권한 일괄 점검")와 이어지는 단서는 안내 데스크 조사 메시지로 낸다.
+  const floor1Art = name => ({ src: `assets/background/floor1/${name}.png`, height: 720, top: 0, flat: true });
+  const FLOOR1_LAYOUT = {
+    header: '1F · 로비', background: '#10151c', backgroundImage: floor1Art('corridor'),
+    // 2026-09-26 3차 로비 그림(원본이 바닥선 native y=474라 570/474로 재확대한 뒤, 계단↔화장실 사이·표지판
+    // 뒤쪽 두 군데의 빈 벽만 잘라내 5000px에 맞췄다 — 문·엘리베이터는 건드리지 않음, GENERATED.md 참고).
+    // 문 좌표는 이 그림에서 다시 실측한 값이라 이전 시도들과 완전히 다르다.
+    elevatorOffsetX: [455.5, 477.5, 533], elevatorWidthDelta: [-3, 1, 4],
+    stairsOffsetX: 559, stairsWidthDelta: -10, stairsHeightDelta: -25, stairsLiftY: 5,
+    restroomOverride: { doorX: 3855, doorWidth: 135, doorY: 290 },
+    props: [
+      { file: 'large-planter', size: [256, 512], worldWidth: 78, x: 100 },
+      { file: 'reception-counter', size: [512, 256], worldWidth: 400, x: 925, name: '안내 데스크',
+        message: '안내 데스크 모니터가 꺼져 있다. 데스크 위 출입 기록에 마지막 줄만 남아 있다: "23:58 · 정수호 · 직원 → 미확인 인물 · 변경자: SYSTEM".' },
+      { file: 'large-planter', size: [256, 512], worldWidth: 78, x: 1150 },
+      { file: 'waiting-sofa', size: [512, 256], worldWidth: 250, x: 1600 },
+      { file: 'large-planter', size: [256, 512], worldWidth: 78, x: 2000 },
+      { file: 'water-cooler', size: [256, 512], worldWidth: 62, x: 3660 },
+      { file: 'large-planter', size: [256, 512], worldWidth: 78, x: 4870 },
+    ],
+  };
+  const FLOOR_LAYOUTS = { 1: FLOOR1_LAYOUT, 7: FLOOR7_LAYOUT, 12: FLOOR12_LAYOUT, 15: FLOOR15_LAYOUT, 16: FLOOR16_LAYOUT };
   // 화장실 내부는 건물 공통 구조라 모든 층이 17층 화장실 배경을 함께 쓴다.
   const restroomInterior = { name: '화장실', width: 1800, windowless: true,
     backgroundImage: { src: 'assets/background/floor17/restroom.png', height: 824.84, top: 0 } };
@@ -378,10 +409,18 @@
     const layout = FLOOR_LAYOUTS[floor] || {};
     return { id: floorId(floor), floor, short, label: floorName(floor),
       header: `${short} · 빈 층`, aria: floorName(floor), background: '#252b2a', ...layout,
-      rooms: [...(layout.rooms || []), { name: '화장실', target: `${floorId(floor)}-restroom`, ...BUILDING_CORE.restroom }],
+      rooms: [...(layout.rooms || []), { name: '화장실', target: `${floorId(floor)}-restroom`, ...BUILDING_CORE.restroom, ...(layout.restroomOverride || {}) }],
       width: BUILDING_CORE.width };
   });
-  const RESTROOMS = FLOOR_NUMBERS.flatMap(floor => interiorRooms(floor, [{ id: `${floorId(floor)}-restroom`, ...restroomInterior }]));
+  // 화장실 배경 그림(restroom.png)은 왼쪽 끝 빈 타일벽(월드 x=0..413)만 비어 있고 나머지는 세면대·칸막이가
+  // 그려져 있다. 층마다 복도 쪽 화장실 문 비율이 달라 계산된 출구 위치가 이 빈 벽을 벗어나 세면대·거울
+  // 위에 겹쳐 보일 수 있어(1층에서 확인), 그런 층만 exitX로 빈 벽 쪽에 고정한다.
+  const restroomExitOverrides = { 1: 130 };
+  // 화장실 안쪽 출구 박스(회색 사각형)만 좁히고 싶을 때 쓴다 — 복도 쪽 화장실 문 판정(doorWidth)은 그대로 두고
+  // 이 안쪽 박스 너비만 exitWidth로 따로 줄인다.
+  const restroomExitWidthOverrides = { 1: 105, 12: 115 };
+  const RESTROOMS = FLOOR_NUMBERS.flatMap(floor => interiorRooms(floor, [{ id: `${floorId(floor)}-restroom`, ...restroomInterior,
+    exitX: restroomExitOverrides[floor], exitWidth: restroomExitWidthOverrides[floor] }]));
   const ALL_FLOORS = [FLOOR17, ...FLOORS];
   const ROOFTOP = { id: 'rooftop', floor: 18, label: '옥상', header: 'RF · 옥상', aria: '옥상', width: 2400, background: '#11191d' };
   const floorById = new Map([...ALL_FLOORS, ROOFTOP, ...FLOOR7_ROOMS, ...FLOOR12_ROOMS, ...FLOOR15_ROOMS, ...FLOOR16_ROOMS, ...FLOOR17_ROOMS, ...RESTROOMS].map(entry => [entry.id, entry]));
@@ -721,7 +760,7 @@
       const doorWidth = outside.doorWidth ?? 120;
       doorList.push(addRoomDoor({ name: '복도', type: 'room', hint: 'E · 복도로 나가기', target: config.parent,
         arrivalKey: `room:${config.id}`, key: 'exit', x: config.exitX ?? exitDoorX(outside, config.width, doorWidth),
-        y: outside.doorY ?? parent.roomDoorY ?? 250, width: doorWidth, style: outside.doorStyle }));
+        y: outside.doorY ?? parent.roomDoorY ?? 250, width: config.exitWidth ?? doorWidth, style: outside.doorStyle }));
     }
     for (const roomConfig of config.rooms || []) {
       const roomElement = document.createElement('div');
@@ -774,11 +813,28 @@
     }
     const sceneDoors = config.id === 'rooftop' ?
       [{ name: '17층 계단', type: 'stairs', x: 160, y: 232, width: 180 }] : !isFloor ? [] : [
-        ...BUILDING_CORE.elevators.map((car, carIndex) => ({ name: elevatorCars[carIndex].name, type: 'elevator', carIndex,
-          x: car.x + (config.elevatorOffsetX?.[carIndex] ?? 0), y: BUILDING_CORE.elevatorY, width: car.width })),
-        { name: '비상계단', type: 'stairs', locked: true, message: lockedStairsMessage, ...BUILDING_CORE.stairs,
-          x: BUILDING_CORE.stairs.x - (config.stairsExpandX ?? 0),
-          width: BUILDING_CORE.stairs.width + (config.stairsExpandX ?? 0) * 2 },
+        ...BUILDING_CORE.elevators.map((car, carIndex) => {
+          const height = (floorY - BUILDING_CORE.elevatorY) + (config.elevatorHeightDelta ?? 0);
+          const bottom = floorY - (config.elevatorLiftY ?? 0);
+          const widthDeltaCfg = config.elevatorWidthDelta;
+          const widthDelta = Array.isArray(widthDeltaCfg) ? (widthDeltaCfg[carIndex] ?? 0) : (widthDeltaCfg ?? 0);
+          return { name: elevatorCars[carIndex].name, type: 'elevator', carIndex,
+            x: car.x + (config.elevatorOffsetX?.[carIndex] ?? 0) - widthDelta / 2, y: bottom - height, height,
+            width: car.width + widthDelta };
+        }),
+        (() => {
+          const expandX = config.stairsExpandX ?? 0;
+          const scale = config.stairsScale ?? 1;
+          const widthScale = config.stairsWidthScale ?? scale;
+          const baseWidth = BUILDING_CORE.stairs.width + expandX * 2;
+          const baseHeight = floorY - BUILDING_CORE.stairs.y;
+          const centerX = BUILDING_CORE.stairs.x - expandX + baseWidth / 2 + (config.stairsOffsetX ?? 0);
+          const width = baseWidth * widthScale + (config.stairsWidthDelta ?? 0);
+          const height = baseHeight * scale + (config.stairsHeightDelta ?? 0);
+          const bottom = floorY - (config.stairsLiftY ?? 0);
+          return { name: '비상계단', type: 'stairs', locked: true, message: lockedStairsMessage,
+            x: centerX - width / 2, y: bottom - height, height, width };
+        })(),
       ];
     const coreDoors = [];
     sceneDoors.forEach(door => {
@@ -787,7 +843,7 @@
       door.element.dataset.open = 'false';
       door.element.setAttribute('role', 'img');
       Object.assign(door.element.style, {
-        left: `${door.x}px`, top: `${door.y}px`, width: `${door.width}px`, height: `${floorY - door.y}px`,
+        left: `${door.x}px`, top: `${door.y}px`, width: `${door.width}px`, height: `${door.height ?? (floorY - door.y)}px`,
       });
       const image = new Image();
       image.src = `assets/objects/floor17/${door.type}.png`;
