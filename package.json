@@ -2,6 +2,8 @@
   "name": "archi-player",
   "private": true,
   "scripts": {
+    "test:floor15": "node tests/floor15-art.mjs",
+    "test:floor16": "node tests/floor16-art.mjs",
     "test": "node tests/movement.mjs && node tests/office.mjs && node tests/elevator.mjs && node tests/rooftop.mjs && node tests/running.mjs && node tests/lighting.mjs && node tests/computer.mjs && node tests/floor17-extension.mjs"
   },
   "devDependencies": {

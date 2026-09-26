@@ -302,14 +302,20 @@ try {
   await page.keyboard.press('e');
   await finishSceneTransition(page);
   await page.locator('[data-floor="12"]').click();
+  assert.equal(await page.locator('[data-floor="12"]').getAttribute('aria-pressed'), 'false', '12F needs an employee ID card');
+  assert.match(await page.locator('#cabin-status').textContent(), /사원증 인증 층이다/);
+  // tests/elevator.mjs picks the card up on 16F; here it is handed over directly to keep the ride short.
+  await page.evaluate(() => collectedItems.add('f16-badge'));
+  await page.locator('[data-floor="12"]').click();
+  assert.equal(await page.locator('[data-floor="12"]').getAttribute('aria-pressed'), 'true');
   await page.locator('#cabin-close').click();
   await page.clock.runFor(8500);
   await page.locator('#cabin-exit').click();
   await finishSceneTransition(page);
   assert.equal(await page.locator('#world').getAttribute('data-room'), 'dynamic', 'Boarding must move the player to a dynamically built floor');
   assert.equal(await page.evaluate(() => document.getElementById('world').style.width), '5000px', 'Every floor shares the 17F width');
-  assert.equal(await page.locator('header span').textContent(), '12F · ARCHI 개발팀');
-  assert.equal(await page.locator('#dynamic-scene .solid:not(.floor):not(.boundary)').count(), 0, '12F has no obstacles');
+  assert.equal(await page.locator('header span').textContent(), '12F · 기술본부 ARCHI 개발팀');
+  assert.equal(await page.locator('#dynamic-scene .solid:not(.floor):not(.boundary)').count(), 0, 'The 12F corridor has no obstacles');
   assert.match(await page.locator('#interaction-status').textContent(), /12층에 도착/);
   assert.equal(await page.locator('#elevator-cabin').isHidden(), true, 'Exiting must close the cabin view');
   await page.screenshot({ path: '.local/floor-12.png' });

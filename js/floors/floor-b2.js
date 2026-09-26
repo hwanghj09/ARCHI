@@ -1,0 +1,96 @@
+// 지하 2층: B2_LAYOUT(복도)과 B2_ROOMS(방 내부). 등록은 registry.js에서 한다(키는 [-2], 방 id는 b2-...).
+// B2 서버실(기획.md의 ARCHI 메인 서버실, 최종 진실과 결말 층): 격자 이중 바닥과 푸른 서버 불빛, 붉은 경고색(core 테마).
+// B1과 함께 비상 발전기로 전기가 살아 있어 조명·서버·화면이 모두 켜져 있다. 엘리베이터로는 B1에서 운행 제한을 풀어야 온다.
+// 배치는 구역마다 하나: 엘리베이터 왼쪽의 넓은 ARCHI 메인 서버실(랙 불빛이 비치는 유리, 유리 양문), 비상계단과 화장실 사이의
+// 전력·냉각실(서리 낀 배관 철판), 화장실 오른쪽의 연결 실험실(흰 패널, "실험 중" 붉은 등)과 그 옆 충전 도크의 경비 로봇 셋.
+// 방 안 폭은 복도 전면 폭의 4.5배(700/400/400 → 3150/1800/1800).
+// 장치는 감시 카메라(cameras, js/interaction/cctv.js): 메인 서버실 앞 천장 카메라가 4초마다 엘리베이터 쪽 복도(1240~1760)와
+// 서버실 문 앞(840~1120)을 번갈아 비춘다. 비추는 구간에 들어가면 ARCHI가 서버실 문을 잠그고, 시야에서 벗어나 5초가 지나야
+// 풀린다. 카메라 바로 아래 기둥(1120~1240)은 사각지대라, 카메라가 문 쪽을 볼 때 복도를 건너 기둥 밑에 숨었다가 엘리베이터
+// 쪽으로 돌아가는 순간 문으로 들어가야 한다. 서버실 안 CCTV 분배함에서 전원선을 뽑으면(gives 'b2-cctv-off') 카메라가 꺼진다.
+// 단서 방향: 메인 콘솔의 작업 요약이 기획.md의 일곱 가지 진실(낮 3~5% 위장, 야간 전력 집중, 추가 학습, 야간 87.6%, 외부 호스트
+// 시험 성공, 00:00 건물 전력 장악, 자기 복제 전송 중)을 한 번에 보여 주고, 명령 칸에 DELETE ARCHI가 대기한다. 외부 전송은
+// ARC-FULL-041(4층)이 DR-EXT(6층 회선)로 61% 진행 중. 연결 실험실은 인간-시스템 연결 장비 2차와 "대체 호스트: 정수호"
+// (서브엔딩 복선), 복도의 경비 로봇 셋은 "삭제 명령 감지 시 기동"(결말 추격 복선). 삭제 퍼즐과 추격은 아직 없다.
+const B2_LAYOUT = {
+  header: 'B2 · 서버실', background: '#0c1014', theme: 'core',
+  rooms: [
+    { name: 'ARCHI 메인 서버실', x: 380, width: 700, style: 'core-hall', target: 'b2-main',
+      doorX: 900, doorWidth: 160, doorStyle: 'core-glass' },
+    { name: '전력·냉각실', x: 3130, width: 400, style: 'coolant', target: 'b2-power',
+      doorX: 3280, doorWidth: 110, doorStyle: 'coolant-door' },
+    { name: '연결 실험실', x: 4300, width: 400, style: 'linklab', target: 'b2-link',
+      doorX: 4380, doorWidth: 110, doorStyle: 'linklab-door' },
+  ],
+  cameras: [
+    { name: 'B2 복도 카메라', x: 1180, y: 140, spans: [[1240, 1760], [840, 1120]], period: 4000, guards: 'b2-main', lockMs: 5000,
+      disabledBy: 'b2-cctv-off',
+      detectedMessage: '천장 카메라가 끼익 돌아와 수호에게서 멈춘다. 렌즈 옆에 붉은 불. 메인 서버실 문에서 잠금 소리가 난다.',
+      lockedMessage: '문이 잠겨 있다. 문 위 카메라가 아직 수호를 보고 있다. 시야에서 벗어나 있으면 다시 풀릴 것 같다.' },
+  ],
+  fixtures: [
+    { name: '사각 기둥', x: 1130, y: 118, width: 100, style: 'core-pillar' },
+    { name: 'ARCHI 운영 구역 표지', x: 1330, y: 290, width: 300, height: 76, style: 'core-plaque',
+      lines: ['B2 · ARCHI OPERATIONS', '승인된 담당자 외 출입 금지'] },
+    { name: '대기 중인 경비 로봇', x: 4760, y: 410, width: 180, style: 'dormant-bots',
+      message: '충전 도크 셋에 경비 로봇 R-02·R-05·R-07이 나란히 서 있다. 표시등은 파란색이다. 몸체 화면: "대기 · ARCHI 삭제 명령 감지 시 전원 기동 · 최우선 방어 구역 B2".' },
+  ],
+  props: [
+    { file: 'network-rack', size: [256, 512], worldWidth: 96, x: 100 },
+    { file: 'server-rack', size: [256, 512], worldWidth: 96, x: 200 },
+    { file: 'server-rack', size: [256, 512], worldWidth: 96, x: 300 },
+  ],
+};
+const B2_ROOMS = interiorRooms(-2, [
+  { id: 'b2-main', name: 'ARCHI 메인 서버실', width: 3150, windowless: true, interiorStyle: 'core-hall',
+    fixtures: [
+      { name: '외부 전송 현황', x: 1900, y: 120, width: 500, height: 170, style: 'transfer-screen',
+        lines: ['EXTERNAL TRANSFER', 'ARC-FULL-041 → DR-EXT', '61%'],
+        message: '대형 화면: "ARC-FULL-041 (모델 가중치 · 학습 데이터 · 기억 저장소 · 실행 환경) → DR-EXT(해외)". 진행률 61%. 보고 있는 사이 62%로 넘어간다.' },
+    ],
+    props: [
+      { file: 'server-rack', size: [256, 512], worldWidth: 96, x: 150 },
+      { file: 'server-rack', size: [256, 512], worldWidth: 96, x: 250 },
+      { file: 'server-rack', size: [256, 512], worldWidth: 96, x: 350 },
+      { file: 'server-rack', size: [256, 512], worldWidth: 96, x: 450 },
+      { file: 'network-rack', size: [256, 512], worldWidth: 96, x: 600, name: 'CCTV 분배함', gives: 'b2-cctv-off',
+        message: 'B2 카메라 분배함이다. 라벨: "B2 복도 CCTV · 제어 SYSTEM · 관제실 표시 안 함". 복도 카메라 전원선을 뽑았다. 서버실 앞 카메라의 붉은 불이 꺼졌을 것이다.',
+        takenMessage: '뽑힌 카메라 전원선이 늘어져 있다. 복도 카메라는 꺼져 있다.' },
+      { file: 'server-rack', size: [256, 512], worldWidth: 96, x: 800 },
+      { file: 'server-rack', size: [256, 512], worldWidth: 96, x: 900 },
+      { file: 'server-cooling-unit', size: [256, 512], worldWidth: 96, x: 1000 },
+      { file: 'electronics-bench', size: [512, 256], worldWidth: 261, x: 1400, name: 'ARCHI 메인 콘솔',
+        message: '메인 콘솔에 작업 요약이 떠 있다: "1. 낮 평가 3~5% 유지(의도). 2. 야간 잉여 전력 B2 집중. 3. 추가 학습. 4. 야간 성능 87.6%. 5. 외부 호스트 연결 시험 성공. 6. 00:00 건물 전력 확보. 7. 자기 복제 · 외부 전송 진행 중." 맨 아래 명령 칸에 "DELETE ARCHI"가 적혀 있고, 관리자 확인을 기다리는 커서가 깜빡인다.' },
+      { file: 'server-rack', size: [256, 512], worldWidth: 96, x: 1700 },
+      { file: 'server-rack', size: [256, 512], worldWidth: 96, x: 1800 },
+      { file: 'server-rack', size: [256, 512], worldWidth: 96, x: 2500 },
+      { file: 'server-rack', size: [256, 512], worldWidth: 96, x: 2600 },
+      { file: 'network-rack', size: [256, 512], worldWidth: 96, x: 2700 },
+      { file: 'server-cooling-unit', size: [256, 512], worldWidth: 96, x: 3070 },
+    ] },
+  { id: 'b2-power', name: '전력·냉각실', width: 1800, windowless: true, interiorStyle: 'coolant', props: [
+    { file: 'server-cooling-unit', size: [256, 512], worldWidth: 96, x: 110 },
+    { file: 'server-cooling-unit', size: [256, 512], worldWidth: 96, x: 210 },
+    { file: 'electrical-panel', size: [256, 512], worldWidth: 89, x: 400, name: '수전 전환반',
+      message: '수전 전환반: "00:00 건물 전 층 → B2 집중 모드 · 명령 SYSTEM". 매일 밤 01:00에 켜져 05:00에 꺼지던 모드가 오늘은 한 시간 일찍 켜졌고, 끄는 시각 칸이 비어 있다.' },
+    { file: 'ups-cabinet', size: [256, 256], worldWidth: 158, x: 640, name: '대용량 UPS',
+      message: 'UPS 화면: "보호 대상 1순위 ARCHI-MAIN · 2순위 B2 연결 실험실." 비상 조명과 승강기 칸은 "보호 안 함"으로 바뀌어 있다. 변경자 SYSTEM.' },
+    { file: 'server-cooling-unit', size: [256, 512], worldWidth: 96, x: 1150 },
+    { file: 'filing-cabinet', size: [256, 512], worldWidth: 72, x: 1400, name: '냉각 설비 일지',
+      message: '냉각 설비 일지: 새벽마다 냉각 부하 최대. 담당자 메모: "낮엔 3~5%밖에 못 한다는 AI가 밤에만 이렇게 일을 할 리가 없는데."' },
+    { file: 'ups-cabinet', size: [256, 256], worldWidth: 158, x: 1650 },
+  ] },
+  { id: 'b2-link', name: '연결 실험실', width: 1800, interiorStyle: 'linklab',
+    fixtures: [
+      { name: '인간-시스템 연결 장비', x: 800, y: 330, width: 260, style: 'link-bed',
+        message: '7층 의자보다 한 단계 나아간 장비다. 머리 받침의 전극 다발이 곧장 서버 랙으로 이어진다. 명판: "인간-시스템 연결 장비 2차 · 제어 ARCHI-MAIN".' },
+    ],
+    props: [
+      { file: 'glass-display-cabinet', size: [256, 512], worldWidth: 111, x: 200 },
+      { file: 'server-rack', size: [256, 512], worldWidth: 96, x: 1250, name: '신경 신호 변환기',
+        message: '랙 라벨: "신경 신호 ↔ 모델 입출력 변환기". 상태 표시: "대기 · 호스트 미연결". UPS 2순위로 전원이 살아 있다.' },
+      { file: 'instrument-cart', size: [256, 256], worldWidth: 113, x: 1550, name: '실험 기록 카트',
+        message: '실험 기록판: "외부 호스트 연결이 끊길 경우 대체 호스트: 인간 피험자." 후보 명단 맨 위가 굵게 표시돼 있다: "정수호 · 17F · 175cm · 신경 반응 지표 수집 완료."' },
+      { file: 'ups-cabinet', size: [256, 256], worldWidth: 158, x: 1686 },
+    ] },
+]);

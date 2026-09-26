@@ -243,6 +243,125 @@
         504
       ],
       "suggestedWorldWidth": 105
-    }
+    },
+    {
+      "file": "food-serving-counter.png",
+      "name": "식당 배식대",
+      "width": 512,
+      "height": 256,
+      "anchor": [
+        256,
+        248
+      ]
+    },
+    {
+      "file": "food-dining-table.png",
+      "name": "식당 벤치 테이블",
+      "width": 512,
+      "height": 256,
+      "anchor": [
+        256,
+        248
+      ]
+    },
+    {
+      "file": "food-refrigerator.png",
+      "name": "편의점 냉장 진열장",
+      "width": 256,
+      "height": 512,
+      "anchor": [
+        128,
+        504
+      ]
+    },
+    {
+      "file": "food-checkout.png",
+      "name": "편의점 계산대",
+      "width": 512,
+      "height": 256,
+      "anchor": [
+        256,
+        248
+      ]
+    },
+    {
+      "file": "food-coffee-bar.png",
+      "name": "카페 커피 바",
+      "width": 512,
+      "height": 256,
+      "anchor": [
+        256,
+        248
+      ]
+    },
+    {
+      "file": "food-menu-board.png",
+      "name": "메뉴 입간판",
+      "width": 256,
+      "height": 512,
+      "anchor": [
+        128,
+        504
+      ]
+    },
+    {
+      "file": "research-workstation.png",
+      "name": "연구 워크스테이션",
+      "width": 512,
+      "height": 256,
+      "anchor": [
+        256,
+        248
+      ]
+    },
+    {
+      "file": "research-board.png",
+      "name": "연구 보드",
+      "width": 512,
+      "height": 256,
+      "anchor": [
+        256,
+        248
+      ]
+    },
+    {
+      "file": "gpu-transfer-cart.png",
+      "name": "GPU 이관 카트",
+      "width": 256,
+      "height": 256,
+      "anchor": [
+        128,
+        248
+      ]
+    },
+    {
+      "file": "gpu-shipping-crate.png",
+      "name": "GPU 운송 상자",
+      "width": 512,
+      "height": 256,
+      "anchor": [
+        256,
+        248
+      ]
+    },
+    {
+      "file": "research-director-desk.png",
+      "name": "연구본부장 책상",
+      "width": 512,
+      "height": 256,
+      "anchor": [
+        256,
+        248
+      ]
+    },
+    { "file": "archive-reading-desk.png", "name": "자료실 열람 책상", "width": 512, "height": 256, "anchor": [256, 248] },
+    { "file": "data-workstation.png", "name": "데이터 연구 작업대", "width": 512, "height": 256, "anchor": [256, 248] },
+    { "file": "observation-console.png", "name": "행동 관찰 콘솔", "width": 512, "height": 256, "anchor": [256, 248] },
+    { "file": "archive-worklight.png", "name": "충전식 작업등 카트", "width": 256, "height": 256, "anchor": [128, 248] },
+    { "file": "support-workstation.png", "name": "기술지원 엔지니어 작업대", "width": 512, "height": 256, "anchor": [256, 248] },
+    { "file": "incident-printer.png", "name": "장애 알림 프린터", "width": 256, "height": 256, "anchor": [128, 248] },
+    { "file": "testbay-ups.png", "name": "장비 검증실 UPS", "width": 256, "height": 256, "anchor": [128, 248] },
+    { "file": "server-validation-bench.png", "name": "서버 검증 벤치", "width": 512, "height": 256, "anchor": [256, 248] },
+    { "file": "training-workstation.png", "name": "고객 교육용 책상", "width": 512, "height": 256, "anchor": [256, 248] }
   ]
 }

@@ -26,7 +26,7 @@ description: Generate, edit, validate, and optionally integrate ARCHI pixel-art 
    명령에 `rtk`를 붙인다. 출력은 필요한 경로와 작은 범위로 제한한다.
 2. 가장 비슷한 승인 PNG를 실제 이미지 뷰어로 보고, 그 옆 프롬프트 문서를 읽는다.
    [에셋 기준표](references/assets.md)에서 해당 종류만 찾는다.
-3. 연결 요청이면 `player.js`, `index.html` 및 관련 테스트에서 해당 상태와 호출 경로를 확인한다.
+3. 연결 요청이면 `js/` 아래 기능별 스크립트, `index.html` 및 관련 테스트에서 해당 상태와 호출 경로를 확인한다.
    아래 규격은 기록 시점의 값이며 실제 코드와 PNG를 우선한다.
 4. 기존 `.claude/skills/archi-art-prompt/SKILL.md`는 과거 프롬프트 작성 참고용이다.
    도구 가용성, 프레임 모양, 출입문 개수 등은 현재 상태를 확인하고 사용한다.

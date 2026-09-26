@@ -24,6 +24,7 @@ export const roomFront = (page, name) => page.locator('#dynamic-scene').evaluate
   return { room: box(room), door: box(door) };
 }, name);
 
-export const exitDoor = page => page.locator('#dynamic-scene .room-door').evaluate(box);
+// The exit is drawn first; connecting doors to a neighbouring room (13F) come after it.
+export const exitDoor = page => page.locator('#dynamic-scene .room-door').first().evaluate(box);
 
 export const worldWidth = async page => parseFloat(await page.locator('#world').evaluate(element => element.style.width));

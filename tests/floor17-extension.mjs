@@ -97,10 +97,10 @@ try {
   assert.equal(await page.locator('#floor17-extension .room-door').count(), 2, 'Stair round trip does not duplicate extension doors');
 
   // Exercise the authored room using the future unlocked config, without adding a gameplay bypass.
-  const source = await readFile(new URL('../player.js', import.meta.url), 'utf8');
+  const source = await readFile(new URL('../js/floors/floor-17.js', import.meta.url), 'utf8');
   const locked = "doorX: 4378, doorWidth: 171, doorStyle: 'metal', locked: true";
   assert(source.includes(locked));
-  await page.route('**/player.js', route => route.fulfill({ contentType: 'text/javascript', body: source.replace(locked, locked.replace('true', 'false')) }));
+  await page.route('**/js/floors/floor-17.js', route => route.fulfill({ contentType: 'text/javascript', body: source.replace(locked, locked.replace('true', 'false')) }));
   await page.goto(new URL('../index.html', import.meta.url).href);
   await page.clock.runFor(100);
   await reachInitialCorridor(page);

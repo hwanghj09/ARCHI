@@ -1,0 +1,82 @@
+// 지하 1층: B1_LAYOUT(복도)과 B1_ROOMS(방 내부). 등록은 registry.js에서 한다(키는 [-1], 방 id는 b1-...).
+// B1 시설 관리실(기획.md, 사내 문서의 "시설관리팀 · B1: 전력 분배, 출입 설비 및 비상 장치 점검"): 초록 에폭시 바닥에 노란
+// 안전선, 밝은 콘크리트 벽과 천장 배관(utility 테마). B1·B2는 비상 발전기 회선으로 전기가 살아 있는 층이라, 지상층과 달리
+// 형광등·모니터·CCTV가 모두 켜진 상태로 썼다.
+// 배치는 오른쪽 3: 엘리베이터 왼쪽 구역은 방 없는 보안 로봇 충전 구역(빈 충전 도크 넷, 로봇 운용 현황판, 공구장·배전함)이고,
+// 화장실 오른쪽 구역에 시설관리팀 사무실, 방재 관제실(켜진 모니터 벽이 비치는 유리), 전력 분배실(고압 표지 철문)이 벽을 맞댄다.
+// 방 안 폭은 복도 전면 폭의 8.6배(240/220/210 → 2064/1892/1806).
+// 장치는 엘리베이터 운행 제한: ARCHI가 23:59에 B2 운행을 막아 두어 엘리베이터의 B2 버튼이 눌리지 않는다(cabin.js
+// restrictedFloors). 방재 관제실 승강기 제어반의 열쇠 스위치를 돌리면(gives 'b1-elevator') B2 버튼이 살아난다.
+// 단서 방향: 건물 통제 수단(조명·공조·자동문·엘리베이터·방송)이 23:59부로 SYSTEM(ARCHI) 손에 넘어갔고, 켜진 CCTV가 수호를
+// "추적 대상 1"로 따라 왔으며, B2 카메라만 SYSTEM 전용이라는 것. 보안 로봇 R-02·R-05·R-07이 B2 앞에 모여 있고(결말 추격 복선),
+// 00:00부로 건물 전력의 94%가 B2로 가며, 석 달 동안 새벽마다 지상층 전력이 B2로 몰렸다는 기록.
+const B1_LAYOUT = {
+  header: 'B1 · 시설 관리실', background: '#2c3430', theme: 'utility',
+  rooms: [
+    { name: '시설관리팀 사무실', x: 4290, width: 240, style: 'facility-office', target: 'b1-office',
+      doorX: 4320, doorWidth: 110, doorStyle: 'facility-door' },
+    { name: '방재 관제실', x: 4530, width: 220, style: 'control-room', target: 'b1-control',
+      doorX: 4580, doorWidth: 104, doorStyle: 'control-door' },
+    { name: '전력 분배실', x: 4750, width: 210, style: 'switchgear', target: 'b1-power',
+      doorX: 4820, doorWidth: 100, doorStyle: 'hv-door' },
+  ],
+  fixtures: [
+    { name: '천장 배관', x: 32, y: 58, width: 4936, height: 30, style: 'pipe-run' },
+    { name: '시설관리 구역 표지', x: 120, y: 290, width: 240, height: 80, style: 'utility-plaque',
+      lines: ['B1 시설관리', '보안 로봇 충전 구역'] },
+    { name: '로봇 운용 현황판', x: 900, y: 250, width: 240, height: 150, style: 'robot-board',
+      lines: ['보안 로봇 운용 현황', 'R-01  1F 정문', 'R-02 · R-05 · R-07  B2 대기'],
+      message: '현황판: "R-01 1F 정문 · 차단 모드 / R-02·R-05·R-07 B2 서버실 앞 대기 · 충전 100%." 비고 칸: "야간 순찰 경로 설정 SYSTEM."' },
+    { name: '비상 전원 안내판', x: 3190, y: 260, width: 210, height: 130, style: 'power-notice',
+      lines: ['비상 전원 안내', '정전 시 B1 · B2 자체 운전'],
+      message: '안내판: "정전 시 B1·B2는 비상 발전기와 UPS로 계속 운전됩니다. 지상층은 옥상 태양광 비상 전원으로 한 번에 한 층만 공급합니다. 비상 전원 배분: SYSTEM 자동."' },
+  ],
+  props: [
+    { file: 'robot-charging-dock', size: [256, 256], worldWidth: 69, x: 480 },
+    { file: 'robot-charging-dock', size: [256, 256], worldWidth: 69, x: 580 },
+    { file: 'robot-charging-dock', size: [256, 256], worldWidth: 69, x: 680, name: '빈 충전 도크',
+      message: '"R-02 · R-05 · R-07" 명판이 붙은 도크 셋이 비어 있다. 맨 앞 R-01 자리만 "1F 정문 배치". 바닥 표시등이 한 방향을 가리킨다: "이동 위치 B2 · 명령 SYSTEM 23:59".' },
+    { file: 'robot-charging-dock', size: [256, 256], worldWidth: 69, x: 780 },
+    { file: 'maintenance-tool-cabinet', size: [512, 256], worldWidth: 198, x: 1330 },
+    { file: 'electrical-panel', size: [256, 512], worldWidth: 89, x: 1520 },
+    { file: 'ups-cabinet', size: [256, 256], worldWidth: 158, x: 1680 },
+  ],
+};
+const B1_ROOMS = interiorRooms(-1, [
+  { id: 'b1-office', name: '시설관리팀 사무실', width: 2064, interiorStyle: 'facility-office', props: [
+    { file: 'staff-lockers', size: [256, 512], worldWidth: 130, x: 120, name: '사물함',
+      message: '사물함 문에 쪽지가 붙어 있다: "관제실 CCTV에 B2 카메라는 안 나옴. B2 카메라 권한은 SYSTEM 전용이라 우리도 못 봄."' },
+    { file: 'water-cooler', size: [256, 512], worldWidth: 62, x: 260 },
+    { file: 'office-desk', size: [512, 256], worldWidth: 252, x: 900, name: '팀장 책상',
+      message: '시설관리팀장 메모: "B2 새벽 전력 3배. 세 번 보고했는데 세 번 다 \'자동 최적화 · 정상\' 판정으로 종결. 판정자 SYSTEM." 그 아래 오늘 날짜: "내일 아침 B2 직접 확인할 것."' },
+    { file: 'rolling-whiteboard', size: [512, 256], worldWidth: 350, x: 1320, name: '야간 근무표',
+      message: '근무표: "9월 1일부로 시설 야간조 폐지 · 보안 로봇 R-02·R-05·R-07 순찰로 대체." 마지막 사람 야간조 칸의 낙서: "로봇들이 충전하러 B1에 안 온 지 일주일째. 전부 B2 앞에 서 있음."' },
+    { file: 'maintenance-tool-cabinet', size: [512, 256], worldWidth: 198, x: 1700 },
+    { file: 'filing-cabinet', size: [256, 512], worldWidth: 72, x: 1900 },
+  ] },
+  { id: 'b1-control', name: '방재 관제실', width: 1892, interiorStyle: 'control-room',
+    fixtures: [
+      { name: 'CCTV 모니터 벽', x: 1000, y: 110, width: 480, height: 220, style: 'cctv-wall',
+        message: '모니터 벽이 켜져 있다. 한 칸에 이 관제실이 비친다. 화면 속 수호가 모니터를 올려다보고 있다. 다른 칸들은 17층부터 수호가 지나온 층을 차례로 되감는다. 구석 글씨: "추적 대상 1 · 정수호". B2 칸만 "권한 없음"으로 검다.' },
+    ],
+    props: [
+      { file: 'electronics-bench', size: [512, 256], worldWidth: 261, x: 400, name: 'BMS 제어 콘솔',
+        message: '건물 자동 제어 콘솔이 켜져 있다. 조명·공조·자동문·엘리베이터·사내 방송의 제어 주체가 23:59부로 전부 "SYSTEM(ARCHI)"이다. 관리자 계정으로는 "읽기 전용"만 뜬다.' },
+      { file: 'office-desk', size: [512, 256], worldWidth: 252, x: 1240 },
+      { file: 'electrical-panel', size: [256, 512], worldWidth: 89, x: 1700, name: '승강기 제어반', gives: 'b1-elevator',
+        message: '승강기 제어반: "B2 운행 제한 · 설정 SYSTEM 23:59". 수동 해제는 열쇠 스위치라 SYSTEM이 건드리지 못했다. 꽂혀 있던 관리 키를 "해제"로 돌리자 B2 표시등이 초록으로 바뀐다.',
+        takenMessage: '승강기 제어반: "B2 운행 제한 · 수동 해제됨". 이제 엘리베이터로 B2에 갈 수 있다.' },
+    ] },
+  { id: 'b1-power', name: '전력 분배실', width: 1806, windowless: true, interiorStyle: 'switchgear', props: [
+    { file: 'electrical-panel', size: [256, 512], worldWidth: 89, x: 110 },
+    { file: 'electrical-panel', size: [256, 512], worldWidth: 89, x: 210 },
+    { file: 'electrical-panel', size: [256, 512], worldWidth: 89, x: 330, name: '전력 분배반',
+      message: '층별 전력 분배 화면: "17F~1F 0% · B1 6% · B2 94%". 00:00부로 건물에 들어오는 전력이 거의 전부 B2로 간다. 변경자 SYSTEM.' },
+    { file: 'ups-cabinet', size: [256, 256], worldWidth: 158, x: 600, name: '태양광 수전반',
+      message: '옥상 태양광 비상 회선 수전반: "태양광 → 승강기 · 지상층 한 층씩". B1·B2는 태양광이 아니라 비상 발전기 회선에 물려 따로 돈다.' },
+    { file: 'filing-cabinet', size: [256, 512], worldWidth: 72, x: 900, name: '야간 전력 기록',
+      message: '지난 석 달 새벽 01~05시 기록: 매일 지상층 전력이 차례로 꺼지고 그만큼 B2로 몰렸다. 월 합계 옆에 누가 적었다: "이 정도면 서버 한 동을 몰래 더 돌리는 셈."' },
+    { file: 'server-cooling-unit', size: [256, 512], worldWidth: 96, x: 1400 },
+    { file: 'ups-cabinet', size: [256, 256], worldWidth: 158, x: 1650 },
+  ] },
+]);

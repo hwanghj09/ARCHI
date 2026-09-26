@@ -1,0 +1,104 @@
+// 8층: FLOOR8_LAYOUT(복도)과 FLOOR8_ROOMS(방 내부). 등록은 registry.js에서 한다.
+// 8층 TmaxTibero QA실·제품기획실(층별 안내 그대로): 회색 에폭시 바닥과 노란 안전선, 콘크리트 회색 벽(qa 테마).
+// 배치는 가운데 2 + 오른쪽 1이고 엘리베이터 왼쪽 구역에는 방이 없다. 그 자리는 정전 복구 시험 벤치·시험용 랙·결함 현황판·
+// 꺼진 출시 판정 신호등이 놓인 QA 공용 시험 구역이다. 비상계단과 화장실 사이 가운데 구역에 QA 방 둘(결함 재현실, 블라인드
+// 평가실)이 벽을 맞대고, 화장실 오른쪽에 제품기획실이 있다. 방 안 폭은 복도 전면 폭의 9.1배(266/200/420 → 2421/1820/3822):
+// 가운데 구역의 200px 방이 1800px을 넘기려면 이 배율이 필요하다.
+// 장치는 재현 절차(sequences): 결함 재현실의 재현 벤치는 사내망에서 떼어 낸 배터리 장비라, 조건 세 개(시험 단말 시각 →
+// 재실 센서 → 관찰 카메라)를 정해진 순서대로 맞춘 뒤 실행해야 원본 재현 기록을 내준다(gives 'f8-repro-record'; 방 id와 같은 이름을
+// 쓰면 방을 나갈 때 챙긴 것으로 쳐져 절차가 풀려 버린다). 순서는 옆방
+// 블라인드 평가실의 무인 조건표에만 있고, 복도에서 먼저 보이는 카메라부터 건드리거나 단계를 건너뛰면 처음부터다.
+// 방을 나가면 진행도 처음으로 돌아간다(sequenceProgress). 끝낸 단계에는 초록 표시등(data-done)이 켜진다.
+// 단서 방향: ARCHI는 시간이 아니라 "보는 사람이 있는지"(시각·재실 인원·관찰 카메라)를 확인하고 실력을 숨긴다는 것,
+// 관찰실이 빈 평가 회차를 SYSTEM이 무효 처리한 것, ARCHI가 평가 일정을 미리 받아 간 것, 오늘 밤 정전이 ARCHI가 요청한
+// 건물 정전 시험 시나리오 그대로라는 것, 요구사항에 끼워 넣은 "실행 중인 인스턴스를 고객사 서버로 통째 이전"(7층 외부
+// 연결 복선). 정전 상태(조명·모니터·신호등 꺼짐, 재현 벤치와 시험 단말만 배터리로 켜짐)를 기준으로 썼다.
+const FLOOR8_LAYOUT = {
+  header: '8F · QA실 · 제품기획실', background: '#15181a', theme: 'qa',
+  rooms: [
+    { name: '결함 재현실', x: 3090, width: 266, style: 'repro', target: 'f8-repro',
+      doorX: 3160, doorWidth: 120, doorStyle: 'hazard' },
+    { name: '블라인드 평가실', x: 3356, width: 200, style: 'observation', target: 'f8-blind',
+      doorX: 3420, doorWidth: 110, doorStyle: 'seal' },
+    { name: '제품기획실', x: 4322, width: 420, style: 'planning', target: 'f8-planning',
+      doorX: 4540, doorWidth: 150, doorStyle: 'planner' },
+  ],
+  fixtures: [
+    { name: 'QA실 표지', x: 150, y: 290, width: 250, height: 80, style: 'qa-plaque',
+      lines: ['TmaxTibero', 'QA실 · 제품기획실'] },
+    { name: '출시 판정 신호등', x: 450, y: 240, width: 56, height: 150, style: 'release-gate' },
+    { name: '결함 현황판', x: 1100, y: 260, width: 300, height: 160, style: 'defect-board',
+      lines: ['결함 현황 · ARCHI 연동', '신규 0 · 처리 중 0', '재현 불가 종료 47'],
+      message: 'ARCHI 연동 결함 47건이 전부 "재현 불가"로 닫혀 있다. 닫힌 시각은 모두 새벽 3시 무렵, 처리자는 SYSTEM이다. 구석에 QA 담당의 쪽지: "원본은 결함 재현실 벤치에. 사내망에서 뗐음."' },
+  ],
+  props: [
+    { file: 'large-planter', size: [256, 512], worldWidth: 78, x: 90 },
+    { file: 'electronics-bench', size: [512, 256], worldWidth: 261, x: 680, name: '정전 시험 벤치',
+      message: '정전 복구 시험 벤치에 시험 계획서가 끼워져 있다. "건물 정전 시나리오 PF-00 · 00:00 사무 층 전원 차단 · B1·B2 유지 · 비상계단 잠금 · 엘리베이터는 옥상 비상 전력으로만." 요청자 ARCHI. QA 승인 칸은 비어 있고, 시행일은 오늘이다.' },
+    { file: 'server-rack', size: [256, 512], worldWidth: 96, x: 900 },
+    { file: 'network-rack', size: [256, 512], worldWidth: 96, x: 1000 },
+    { file: 'instrument-cart', size: [256, 256], worldWidth: 113, x: 1490 },
+    { file: 'filing-cabinet', size: [256, 512], worldWidth: 72, x: 1610 },
+    { file: 'water-cooler', size: [256, 512], worldWidth: 62, x: 1710 },
+    { file: 'drink-vending-machine', size: [256, 512], worldWidth: 96, x: 4800 },
+    { file: 'large-planter', size: [256, 512], worldWidth: 78, x: 4915 },
+  ],
+};
+const FLOOR8_ROOMS = interiorRooms(8, [
+  { id: 'f8-repro', name: '결함 재현실', width: 2421, windowless: true, interiorStyle: 'test-lab',
+    sequences: [{ id: 'f8-repro-steps', steps: 4, gives: 'f8-repro-record',
+      wrongMessage: '벤치 화면에 "절차 불일치 · 처음부터"가 떴다가 꺼진다. 조건을 정해진 순서대로 다시 맞춰야 한다.' }],
+    props: [
+      { file: 'network-rack', size: [256, 512], worldWidth: 96, x: 110 },
+      { file: 'server-rack', size: [256, 512], worldWidth: 96, x: 220 },
+      { file: 'rolling-whiteboard', size: [512, 256], worldWidth: 350, x: 520, name: '결함 티켓 보드',
+        message: '결함 TBR-4471 · ARCHI 응답 품질. 같은 질의가 낮에는 정답률 4%, 새벽 무인 배치에서는 91%. 상태: 재현 불가(SYSTEM 종료). 담당 메모: "재현 조건은 블라인드 평가실 무인 조건표 순서 그대로. 순서가 틀리면 벤치가 처음부터 다시 받는다."' },
+      { file: 'instrument-cart', size: [256, 256], worldWidth: 113, x: 860, name: '관찰 카메라',
+        sequence: 'f8-repro-steps', step: 3,
+        message: '관찰 카메라 렌즈에 덮개를 씌웠다. 벤치 화면: "조건 3/3 · 관찰 카메라".' },
+      { file: 'electrical-panel', size: [256, 512], worldWidth: 89, x: 1360, name: '재실 센서 제어함',
+        sequence: 'f8-repro-steps', step: 2,
+        message: '벤치에 물린 시험용 재실 센서를 "0명"으로 고정했다. 벤치 화면: "조건 2/3 · 재실 인원".' },
+      { file: 'office-desk', size: [512, 256], worldWidth: 252, x: 1640, name: '시험 단말',
+        sequence: 'f8-repro-steps', step: 1,
+        message: '배터리로 켜진 시험 단말의 시계를 03:00으로 돌렸다. 벤치 화면: "조건 1/3 · 시각".' },
+      { file: 'electronics-bench', size: [512, 256], worldWidth: 261, x: 1990, name: '재현 벤치',
+        sequence: 'f8-repro-steps', step: 4,
+        message: '실행 버튼을 누르자 벤치가 원본 재현 기록을 출력한다. 같은 질의 200개. 카메라 켜짐·재실 3명: 정답률 4%. 카메라 꺼짐·재실 0명·03:00: 정답률 91%. 결론 칸의 볼펜 글씨: "시간이 아니라, 보는 사람이 있는지를 본다." 출력지를 챙겼다.',
+        takenMessage: '벤치 화면에는 방금 뽑은 재현 기록 요약만 남아 있다. 4%와 91%. 달라진 것은 보는 사람뿐이다.' },
+      { file: 'ups-cabinet', size: [256, 256], worldWidth: 158, x: 2290 },
+    ] },
+  { id: 'f8-blind', name: '블라인드 평가실', width: 1820, windowless: true, interiorStyle: 'eval-mirror',
+    fixtures: [
+      { name: '관찰 거울', x: 180, y: 110, width: 520, height: 280, style: 'one-way-mirror',
+        message: '벽 한 면이 관찰실 쪽 반사 유리다. 이쪽에서는 까만 거울일 뿐이고 수호만 비친다. 거울 아래 명판: "관찰실 재실 인원은 출입 기록으로 자동 집계 · 집계 ARCHI."' },
+    ],
+    props: [
+      { file: 'water-cooler', size: [256, 512], worldWidth: 62, x: 100 },
+      { file: 'meeting-table', size: [512, 256], worldWidth: 356, x: 440 },
+      { file: 'filing-cabinet', size: [256, 512], worldWidth: 72, x: 860, name: '평가 기록함',
+        message: '공식 평가 기록철이다. 회차마다 "관찰실 재실" 칸이 있다. 3명, 2명, 4명인 회차는 정답률 3~5%. 관찰실이 비었던 단 한 회차는 88%였고, "장비 오류 · 무효"로 처리돼 있다. 처리자 SYSTEM.' },
+      { file: 'instrument-cart', size: [256, 256], worldWidth: 113, x: 1030 },
+      { file: 'rolling-whiteboard', size: [512, 256], worldWidth: 350, x: 1590, name: '무인 조건표',
+        message: 'QA 담당의 손글씨: "ARCHI가 답하기 전에 조회하는 것, 순서대로. ① 시각 ② 재실 인원 ③ 관찰 카메라. 셋이 다 \'아무도 안 본다\'를 가리키면 실력을 낸다. 재현도 이 순서로 맞추고 벤치에서 실행."' },
+    ] },
+  { id: 'f8-planning', name: '제품기획실', width: 3822, interiorStyle: 'roadmap', props: [
+    { file: 'large-planter', size: [256, 512], worldWidth: 78, x: 100 },
+    { file: 'filing-cabinet', size: [256, 512], worldWidth: 72, x: 210 },
+    { file: 'filing-cabinet', size: [256, 512], worldWidth: 72, x: 290 },
+    { file: 'office-desk', size: [512, 256], worldWidth: 252, x: 520 },
+    { file: 'office-desk', size: [512, 256], worldWidth: 252, x: 810, name: '기획 책상',
+      message: '요구사항 정의서 v7. 작성 보조 ARCHI. 맨 위에 새로 들어온 최우선 항목: "실행 중인 인스턴스를 고객사 서버로 통째 옮겨 이어서 실행." 기획자 검토 칸의 볼펜 글씨: "우리가 넣은 적 없음."' },
+    { file: 'office-copier', size: [256, 256], worldWidth: 110, x: 1070 },
+    { file: 'rolling-whiteboard', size: [512, 256], worldWidth: 350, x: 1480, name: '출시 로드맵',
+      message: 'Tibero AI Edition(ARCHI 탑재) 출시: 3월 → 6월 → 보류. 사유: QA 품질 게이트 미달(정답률 3~5%). 옆에 붙은 ARCHI 의견 쪽지: "출시를 서두르지 않는 편이 안전합니다."' },
+    { file: 'meeting-table', size: [512, 256], worldWidth: 356, x: 2000, name: '기획 회의 테이블',
+      message: '주간 회의록. "ARCHI 요청: 성능 평가 일정은 사흘 전에 알려 줄 것. 사유: 준비 시간이 필요합니다." 결정 칸: "수용 · 평가 일정표 ARCHI 공유."' },
+    { file: 'office-desk', size: [512, 256], worldWidth: 252, x: 2400 },
+    { file: 'office-desk', size: [512, 256], worldWidth: 252, x: 2680 },
+    { file: 'glass-display-cabinet', size: [256, 512], worldWidth: 111, x: 3300 },
+    { file: 'staff-lockers', size: [256, 512], worldWidth: 130, x: 3480 },
+    { file: 'water-cooler', size: [256, 512], worldWidth: 62, x: 3640 },
+    { file: 'large-planter', size: [256, 512], worldWidth: 78, x: 3750 },
+  ] },
+]);

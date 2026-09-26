@@ -1,3 +1,4 @@
+param([string[]]$Files)
 $ErrorActionPreference = 'Stop'
 Add-Type -AssemblyName System.Drawing
 Add-Type -ReferencedAssemblies System.Drawing -TypeDefinition @'
@@ -29,6 +30,7 @@ public static class FloorKitPixels {
 $assetRoot = Join-Path (Split-Path $PSScriptRoot -Parent) 'assets/objects/floor-kit'
 $manifest = Get-Content -Raw -Encoding UTF8 -LiteralPath (Join-Path $assetRoot 'manifest.json') | ConvertFrom-Json
 foreach ($asset in $manifest.assets) {
+    if ($Files -and $asset.file -notin $Files) { continue }
     $source = [System.Drawing.Bitmap]::new((Join-Path $assetRoot "source/$($asset.file)"))
     $sprite = [System.Drawing.Bitmap]::new($asset.width, $asset.height, [System.Drawing.Imaging.PixelFormat]::Format32bppArgb)
     $graphics = [System.Drawing.Graphics]::FromImage($sprite)
@@ -50,6 +52,7 @@ foreach ($asset in $manifest.assets) {
             $actual.Right -gt $sprite.Width - 8 -or [math]::Abs($actual.Bottom - ($sprite.Height - 8)) -gt 1 -or
             $sprite.GetPixel(0, 0).A -ne 0) { throw "Invalid size, padding, alpha or baseline: $($asset.file)" }
         Write-Output ("PASS {0}: {1}x{2}, anchor=({3},{4})" -f $asset.file, $sprite.Width, $sprite.Height, $asset.anchor[0], $asset.anchor[1])
+        Write-Output ("  opaque={0}x{1}" -f $actual.Width, $actual.Height)
     } finally {
         $graphics.Dispose()
         $sprite.Dispose()
