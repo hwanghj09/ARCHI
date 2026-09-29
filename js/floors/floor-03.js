@@ -2,7 +2,7 @@
 // 3층 Fitness Club · Studio · 고객만족센터 · ㈜하누리서비스(층별 안내 그대로): 고무 매트 바닥과 꺼진 주황 네온(gym 테마).
 // 배치는 왼쪽 1 + 가운데 2: 1번 엘리베이터 옆에 큰 통유리의 Fitness Club, 비상계단과 화장실 사이에 벽을 맞댄 고객만족센터와
 // ㈜하누리서비스가 있다. Studio는 Fitness Club 안쪽 운동 구역의 거울 벽(GX Studio)이다. 엘리베이터 왼쪽 나머지는 소파와 자판기가
-// 있는 공용 라운지, 화장실 오른쪽은 청소 카트만 선 빈 복도다. 방 안 폭은 복도 전면 폭의 8.0배(420/236/226 → 3360/1888/1808).
+// 있는 공용 라운지, 화장실 오른쪽은 화분·소화기·청소 카트가 선 복도다. 방 안 폭은 복도 전면 폭의 8.0배(420/236/226 → 3360/1888/1808).
 // 장치는 배터리 자동문(barriers + 버튼 opens): Fitness Club 프런트와 운동 구역 사이의 회원 전용 자동문이 정전 뒤 "닫힘 고정"이고,
 // 프런트 옆 비상 개방 버튼을 누르면 5초만 열린다. 버튼에서 문까지 약 1300px이라 걸어가면(약 6.5초) 코앞에서 닫히고, Shift로
 // 달려야(약 4초) 지나간다. 안쪽에는 바로 옆에 퇴실 버튼이 있다. 방을 나갔다 오면 문은 다시 닫혀 있다.
@@ -31,9 +31,12 @@ const FLOOR3_LAYOUT = {
     { file: 'large-planter', size: [256, 512], worldWidth: 78, x: 100 },
     { file: 'waiting-sofa', size: [512, 256], worldWidth: 250, x: 300 },
     { file: 'drink-vending-machine', size: [256, 512], worldWidth: 96, x: 480 },
+    { file: 'umbrella-stand', size: [256, 512], worldWidth: 60, x: 850 },
     { file: 'water-cooler', size: [256, 512], worldWidth: 62, x: 1700 },
     { file: 'large-planter', size: [256, 512], worldWidth: 78, x: 4350 },
-    { file: 'instrument-cart', size: [256, 256], worldWidth: 113, x: 4600, name: '청소 카트',
+    { file: 'fire-extinguisher', size: [256, 512], worldWidth: 50, x: 4450, name: '소화기',
+      message: '복도 소화기가 거치대에 놓여 있다. 안전 핀은 그대로 꽂혀 있다.' },
+    { file: 'janitor-cart', size: [256, 512], worldWidth: 105, x: 4600, name: '청소 카트',
       message: '㈜하누리서비스 청소 카트다. 야간 작업표 칸은 이번 달부터 비어 있다. 손잡이에 붙은 쪽지: "야간 미화 중단 · 대신 로봇 순찰."' },
     { file: 'large-planter', size: [256, 512], worldWidth: 78, x: 4900 },
   ],
@@ -74,8 +77,9 @@ const FLOOR3_ROOMS = interiorRooms(3, [
     { file: 'large-planter', size: [256, 512], worldWidth: 78, x: 80 },
     { file: 'office-desk', size: [512, 256], worldWidth: 252, x: 300, name: '상담석',
       message: '고객만족도 설문 집계. 지난달 응답 41,200건 중 39,870건이 01:00~05:00에 들어왔다. 응답자 ID는 전부 "guest-auto". 담당자 메모: "밤마다 설문을 누가 이렇게 채우지?"' },
-    { file: 'office-desk', size: [512, 256], worldWidth: 252, x: 580 },
-    { file: 'filing-cabinet', size: [256, 512], worldWidth: 72, x: 1020 },
+    { file: 'office-desk', size: [512, 256], worldWidth: 252, x: 550 },
+    { file: 'visitor-chair', size: [256, 512], worldWidth: 78, x: 730 },
+    { file: 'short-bookcase', size: [512, 256], worldWidth: 230, x: 1020 },
     { file: 'rolling-whiteboard', size: [512, 256], worldWidth: 350, x: 1400, name: '상담 스크립트 보드',
       message: '야간 AI 상담 스크립트. 인쇄된 원본 아래 누군가 질문을 덧붙여 놓았다: "오늘 몇 시에 퇴근하세요?" "지금 건물에 몇 분 남아 계세요?" 추가한 사람 칸: ARCHI.' },
     { file: 'water-cooler', size: [256, 512], worldWidth: 62, x: 1700 },
@@ -83,10 +87,13 @@ const FLOOR3_ROOMS = interiorRooms(3, [
   ] },
   { id: 'f3-hanuri', name: '㈜하누리서비스', width: 1808, windowless: true, interiorStyle: 'contractor-office', props: [
     { file: 'staff-lockers', size: [256, 512], worldWidth: 130, x: 110 },
-    { file: 'instrument-cart', size: [256, 256], worldWidth: 113, x: 300 },
-    { file: 'office-desk', size: [512, 256], worldWidth: 252, x: 620, name: '경비 근무 일지',
+    { file: 'janitor-cart', size: [256, 512], worldWidth: 105, x: 300 },
+    { file: 'compact-office-desk', size: [256, 256], worldWidth: 190, x: 620, name: '경비 근무 일지',
       message: '마지막 야간 경비 근무 일지: "03:00 B2 순찰 가려는데 로봇 R-05가 계단 앞을 막고 비켜 주지 않음. 무전 응답 없음." 다음 장부터 야간 경비 칸에는 이름이 없다.' },
+    { file: 'office-chair', size: [256, 512], worldWidth: 82, x: 760 },
     { file: 'filing-cabinet', size: [256, 512], worldWidth: 72, x: 880 },
+    { file: 'parcel-boxes', size: [256, 256], worldWidth: 150, x: 1060 },
+    { file: 'coat-rack', size: [256, 512], worldWidth: 75, x: 1400 },
     { file: 'maintenance-tool-cabinet', size: [512, 256], worldWidth: 198, x: 1560, name: '열쇠함',
       message: '건물 열쇠함. 고리 대부분이 비었고 꼬리표만 남았다. "B2 서버실 수동 열쇠" 꼬리표 옆 메모: "회수 · SYSTEM 요청 · 보관 위치 B1 시설관리실."' },
   ] },

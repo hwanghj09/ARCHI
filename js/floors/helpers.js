@@ -9,7 +9,14 @@ const interiorRooms = (floor, rooms) => rooms.map(entry => ({ ...entry, floor, i
 
 // 화장실 내부는 건물 공통 구조라 모든 층이 17층 화장실 배경을 함께 쓴다.
 const restroomInterior = { name: '화장실', width: 1800, windowless: true,
-  backgroundImage: { src: 'assets/background/floor17/restroom.png', height: 824.84, top: 0 } };
+  backgroundImage: { src: 'assets/background/floor17/restroom.png', height: 824.84, top: 0 },
+  props: [
+    { file: 'restroom-supply-cabinet', size: [256, 512], worldWidth: 80, x: 90, name: '위생용품 수납장',
+      message: '종이타월과 여분의 휴지가 가지런히 놓여 있다.' },
+    { file: 'restroom-bin', size: [256, 256], worldWidth: 55, x: 380 },
+    { file: 'wet-floor-sign', size: [256, 256], worldWidth: 72, x: 1130, name: '미끄럼 주의 표지',
+      message: '세면대와 칸막이 사이에 미끄럼 주의 표지가 세워져 있다. 바닥은 이미 말라 있다.' },
+  ] };
 
 function floorShortLabel(floorValue) {
   if (floorValue === -1) return 'B1';

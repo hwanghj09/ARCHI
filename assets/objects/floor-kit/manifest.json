@@ -362,6 +362,18 @@
     { "file": "incident-printer.png", "name": "장애 알림 프린터", "width": 256, "height": 256, "anchor": [128, 248] },
     { "file": "testbay-ups.png", "name": "장비 검증실 UPS", "width": 256, "height": 256, "anchor": [128, 248] },
     { "file": "server-validation-bench.png", "name": "서버 검증 벤치", "width": 512, "height": 256, "anchor": [256, 248] },
-    { "file": "training-workstation.png", "name": "고객 교육용 책상", "width": 512, "height": 256, "anchor": [256, 248] }
+    { "file": "training-workstation.png", "name": "고객 교육용 책상", "width": 512, "height": 256, "anchor": [256, 248] },
+    { "file": "compact-office-desk.png", "name": "소형 사무 책상", "width": 256, "height": 256, "anchor": [128, 248], "suggestedWorldWidth": 190 },
+    { "file": "office-chair.png", "name": "사무용 의자", "width": 256, "height": 512, "anchor": [128, 504], "suggestedWorldWidth": 82 },
+    { "file": "janitor-cart.png", "name": "청소 카트", "width": 256, "height": 512, "anchor": [128, 504], "suggestedWorldWidth": 105 },
+    { "file": "wet-floor-sign.png", "name": "미끄럼 주의 표지", "width": 256, "height": 256, "anchor": [128, 248], "suggestedWorldWidth": 72 },
+    { "file": "visitor-chair.png", "name": "방문객 의자", "width": 256, "height": 512, "anchor": [128, 504], "suggestedWorldWidth": 78 },
+    { "file": "short-bookcase.png", "name": "낮은 서가", "width": 512, "height": 256, "anchor": [256, 248], "suggestedWorldWidth": 230 },
+    { "file": "coat-rack.png", "name": "옷걸이", "width": 256, "height": 512, "anchor": [128, 504], "suggestedWorldWidth": 75 },
+    { "file": "parcel-boxes.png", "name": "택배 상자 묶음", "width": 256, "height": 256, "anchor": [128, 248], "suggestedWorldWidth": 150 },
+    { "file": "fire-extinguisher.png", "name": "소화기", "width": 256, "height": 512, "anchor": [128, 504], "suggestedWorldWidth": 50 },
+    { "file": "umbrella-stand.png", "name": "우산꽂이", "width": 256, "height": 512, "anchor": [128, 504], "suggestedWorldWidth": 60 },
+    { "file": "restroom-bin.png", "name": "화장실 휴지통", "width": 256, "height": 256, "anchor": [128, 248], "suggestedWorldWidth": 55 },
+    { "file": "restroom-supply-cabinet.png", "name": "위생용품 수납장", "width": 256, "height": 512, "anchor": [128, 504], "suggestedWorldWidth": 80 }
   ]
 }

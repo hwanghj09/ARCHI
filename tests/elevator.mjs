@@ -150,6 +150,10 @@ try {
     await finishSceneTransition(page);
     assert.equal(await header(), `${short} · 화장실`);
     assert.equal(await worldWidth(page), 1800);
+    const restroomProps = page.locator('#dynamic-scene .floor-prop img');
+    assert.deepEqual(await restroomProps.evaluateAll(images => images.map(image => image.src.split('/').pop())),
+      ['restroom-supply-cabinet.png', 'restroom-bin.png', 'wet-floor-sign.png']);
+    await restroomProps.evaluateAll(images => Promise.all(images.map(image => image.decode())));
     const exit = await exitDoor(page);
     assert.deepEqual([exit.y, exit.width], [210, 145], 'Restroom exit is the same door');
     assertMirroredDoor(front.room, front.door, 1800, exit, `${short} restroom`);
@@ -174,11 +178,22 @@ try {
     'server-cooling-unit.png': [496, 180, 191], 'ups-cabinet.png': [180, 106, 116],
     'robot-charging-dock.png': [239, 60, 70], 'glass-display-cabinet.png': [406, 170, 182],
     'maintenance-tool-cabinet.png': [239, 88, 98], 'electrical-panel.png': [321, 106, 117], 'reception-counter.png': [162, 97, 107],
+    'compact-office-desk.png': [221, 160, 168], 'office-chair.png': [387, 120, 128],
+    'janitor-cart.png': [370, 148, 156], 'wet-floor-sign.png': [240, 65, 71],
+    'visitor-chair.png': [376, 110, 119], 'short-bookcase.png': [240, 103, 113],
+    'coat-rack.png': [496, 140, 150], 'parcel-boxes.png': [161, 90, 99],
+    'fire-extinguisher.png': [496, 93, 101], 'umbrella-stand.png': [496, 112, 121],
+    'restroom-bin.png': [239, 47, 56], 'restroom-supply-cabinet.png': [496, 150, 160],
     'food-serving-counter.png': [196, 120, 130], 'food-dining-table.png': [146, 65, 75],
     'food-refrigerator.png': [495, 180, 191], 'food-checkout.png': [204, 119, 129],
     'food-coffee-bar.png': [233, 129, 140], 'food-menu-board.png': [411, 107, 118],
     'research-workstation.png': [231, 115, 125], 'research-board.png': [229, 157, 167],
-    'gpu-transfer-cart.png': [240, 88, 98], 'research-director-desk.png': [206, 115, 125] };
+    'gpu-transfer-cart.png': [240, 88, 98], 'research-director-desk.png': [206, 115, 125],
+    'archive-reading-desk.png': [192, 100, 110], 'archive-worklight.png': [240, 95, 105],
+    'data-workstation.png': [223, 115, 125], 'observation-console.png': [226, 115, 125],
+    'support-workstation.png': [228, 115, 125], 'incident-printer.png': [240, 105, 115],
+    'testbay-ups.png': [240, 95, 105], 'server-validation-bench.png': [232, 113, 123],
+    'training-workstation.png': [185, 103, 113] };
   const assertHumanScale = async () => {
     const dimensions = await page.locator('#dynamic-scene .floor-prop img').evaluateAll(images => images.map(img => ({
       file: img.src.split('/').pop(), width: parseFloat(img.parentElement.style.width),
@@ -1190,7 +1205,7 @@ try {
     assert(cs.room.x >= 3086 && hanuri.room.x + hanuri.room.width <= 3556, 'Both offices sit in the middle zone');
     assert(cs.door.x - 28 >= 3114 && hanuri.door.x + hanuri.door.width + 28 <= 3584,
       'Their doors leave the stair door and the restroom their zones');
-    assert.equal(await page.locator('#dynamic-scene .floor-prop').count(), 7, 'Lounge furniture, cooler, planters and a cleaning cart');
+    assert.equal(await page.locator('#dynamic-scene .floor-prop').count(), 9, 'Lounge furniture, safety gear and cleaning cart');
     assert.deepEqual(await page.locator('#dynamic-scene .fixture').evaluateAll(els => els.map(el => [el.className, el.getAttribute('aria-label')])),
       [['fixture tenant-board', '3층 입주사 안내'], ['fixture gym-ad', 'Fitness Club 광고판']]);
     await page.locator('#dynamic-scene .floor-prop img').evaluateAll(images => Promise.all(images.map(img => img.decode())));
@@ -1250,7 +1265,7 @@ try {
     const csRoom = await enterRoom('고객만족센터', '3F');
     assert.equal(await worldWidth(page), 1888);
     assert.equal(csRoom.exit.x, 794);
-    assert.equal(await page.locator('#dynamic-scene .floor-prop').count(), 7);
+    assert.equal(await page.locator('#dynamic-scene .floor-prop').count(), 8);
     await assertHumanScale();
     await inspect(300, 'E · 상담석 조사', /guest-auto/);
     await inspect(1400, 'E · 상담 스크립트 보드 조사', /몇 분 남아 계세요.*ARCHI/);
@@ -1261,7 +1276,7 @@ try {
     assert.equal(await worldWidth(page), 1808);
     assert.equal(hanuriRoom.exit.x, 1242);
     assert.equal(await page.locator('#dynamic-scene .room-interior.contractor-office.windowless').count(), 1);
-    assert.equal(await page.locator('#dynamic-scene .floor-prop').count(), 5);
+    assert.equal(await page.locator('#dynamic-scene .floor-prop').count(), 8);
     await assertHumanScale();
     await inspect(620, 'E · 경비 근무 일지 조사', /R-05가 계단 앞을 막고/);
     await inspect(1560, 'E · 열쇠함 조사', /B1 시설관리실/);
