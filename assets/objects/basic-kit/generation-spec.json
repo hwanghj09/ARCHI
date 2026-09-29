@@ -1,0 +1,316 @@
+{
+  "generator": "built-in image_gen",
+  "created": "2026-09-29",
+  "assets": [
+    {
+      "id": "restroom-toilet-standard",
+      "category": "restroom",
+      "label": "일반 양변기",
+      "size": [
+        256,
+        256
+      ],
+      "world": 65,
+      "prompt": "One clean ivory ceramic floor-standing toilet viewed directly from front, rectangular rear cistern with chrome flush button, lid raised and seat down, bowl pedestal, restrained cool ceramic shading.",
+      "generationPrompt": "Use case: stylized-concept. Asset type: a reusable production PNG sprite for ARCHI, a Korean 2D side-scrolling office mystery game. Match attached references ONLY for art style: finely detailed anime-inspired PIXEL ART with crisp stepped contours and hard pixel clusters, realistic proportions, muted cool gray, restrained midnight office atmosphere, readable neutral highlights. Straight-on FRONT ELEVATION for a side-view game, minimal top surfaces visible, no isometric or 3/4 rotation. Complete silhouette, no clipping, ample padding. True transparent alpha in every empty region. No background, room, floor plane, cast shadow, halo, checkerboard, caption, frame border, watermark, logo or people. No readable text or code. One object only unless a two-state sheet is explicitly requested. One clean ivory ceramic floor-standing toilet viewed directly from front, rectangular rear cistern with chrome flush button, lid raised and seat down, bowl pedestal, restrained cool ceramic shading.",
+      "sourcePath": "source/restroom-toilet-standard.png"
+    },
+    {
+      "id": "restroom-toilet-accessible",
+      "category": "restroom",
+      "label": "장애인 화장실 양변기",
+      "size": [
+        256,
+        256
+      ],
+      "world": 100,
+      "prompt": "One accessible modern wall-hung white toilet with closed lid, rectangular exposed rear service panel and two symmetrical fold-down stainless grab rails attached to that panel. One coherent isolated fixture, straight front elevation.",
+      "generationPrompt": "Use case: stylized-concept. Asset type: a reusable production PNG sprite for ARCHI, a Korean 2D side-scrolling office mystery game. Match attached references ONLY for art style: finely detailed anime-inspired PIXEL ART with crisp stepped contours and hard pixel clusters, realistic proportions, muted cool gray, restrained midnight office atmosphere, readable neutral highlights. Straight-on FRONT ELEVATION for a side-view game, minimal top surfaces visible, no isometric or 3/4 rotation. Complete silhouette, no clipping, ample padding. True transparent alpha in every empty region. No background, room, floor plane, cast shadow, halo, checkerboard, caption, frame border, watermark, logo or people. No readable text or code. One object only unless a two-state sheet is explicitly requested. One accessible modern wall-hung white toilet with closed lid, rectangular exposed rear service panel and two symmetrical fold-down stainless grab rails attached to that panel. One coherent isolated fixture, straight front elevation.",
+      "sourcePath": "source/restroom-toilet-accessible.png"
+    },
+    {
+      "id": "restroom-vanity-double",
+      "category": "restroom",
+      "label": "2인 세면대",
+      "size": [
+        512,
+        256
+      ],
+      "world": 240,
+      "prompt": "One wide restroom double-basin vanity, two white inset sinks and chrome faucets in dark stone countertop, closed slate-blue two-door cabinet below, two simple rectangular mirrors mounted on a narrow shared backing panel above. Entire unified prop visible, straight front elevation.",
+      "generationPrompt": "Use case: stylized-concept. Asset type: a reusable production PNG sprite for ARCHI, a Korean 2D side-scrolling office mystery game. Match attached references ONLY for art style: finely detailed anime-inspired PIXEL ART with crisp stepped contours and hard pixel clusters, realistic proportions, muted cool gray, restrained midnight office atmosphere, readable neutral highlights. Straight-on FRONT ELEVATION for a side-view game, minimal top surfaces visible, no isometric or 3/4 rotation. Complete silhouette, no clipping, ample padding. True transparent alpha in every empty region. No background, room, floor plane, cast shadow, halo, checkerboard, caption, frame border, watermark, logo or people. No readable text or code. One object only unless a two-state sheet is explicitly requested. One wide restroom double-basin vanity, two white inset sinks and chrome faucets in dark stone countertop, closed slate-blue two-door cabinet below, two simple rectangular mirrors mounted on a narrow shared backing panel above. Entire unified prop visible, straight front elevation.",
+      "sourcePath": "source/restroom-vanity-double.png"
+    },
+    {
+      "id": "door-restroom-men",
+      "category": "doors",
+      "label": "남자 화장실 문",
+      "size": [
+        256,
+        512
+      ],
+      "world": 140,
+      "prompt": "ONE closed tall restroom door with entire rectangular aluminum frame and threshold, desaturated navy-blue solid panel, small ivory plaque with only a simple male pictogram, silver lever handle at right and bottom ventilation grille. No surrounding wall. Transparent outside frame; opaque inside doorway.",
+      "generationPrompt": "Use case: stylized-concept. Asset type: a reusable production PNG sprite for ARCHI, a Korean 2D side-scrolling office mystery game. Match attached references ONLY for art style: finely detailed anime-inspired PIXEL ART with crisp stepped contours and hard pixel clusters, realistic proportions, muted cool gray, restrained midnight office atmosphere, readable neutral highlights. Straight-on FRONT ELEVATION for a side-view game, minimal top surfaces visible, no isometric or 3/4 rotation. Complete silhouette, no clipping, ample padding. True transparent alpha in every empty region. No background, room, floor plane, cast shadow, halo, checkerboard, caption, frame border, watermark, logo or people. No readable text or code. One object only unless a two-state sheet is explicitly requested. ONE closed tall restroom door with entire rectangular aluminum frame and threshold, desaturated navy-blue solid panel, small ivory plaque with only a simple male pictogram, silver lever handle at right and bottom ventilation grille. No surrounding wall. Transparent outside frame; opaque inside doorway.",
+      "sourcePath": "source/door-restroom-men.png"
+    },
+    {
+      "id": "door-restroom-women",
+      "category": "doors",
+      "label": "여자 화장실 문",
+      "size": [
+        256,
+        512
+      ],
+      "world": 140,
+      "prompt": "ONE closed tall restroom door with entire rectangular aluminum frame and threshold, muted dusty plum solid panel, small ivory plaque with only a simple female pictogram, silver lever handle at right and bottom ventilation grille. No surrounding wall. Transparent outside frame; opaque inside doorway.",
+      "generationPrompt": "Use case: stylized-concept. Asset type: a reusable production PNG sprite for ARCHI, a Korean 2D side-scrolling office mystery game. Match attached references ONLY for art style: finely detailed anime-inspired PIXEL ART with crisp stepped contours and hard pixel clusters, realistic proportions, muted cool gray, restrained midnight office atmosphere, readable neutral highlights. Straight-on FRONT ELEVATION for a side-view game, minimal top surfaces visible, no isometric or 3/4 rotation. Complete silhouette, no clipping, ample padding. True transparent alpha in every empty region. No background, room, floor plane, cast shadow, halo, checkerboard, caption, frame border, watermark, logo or people. No readable text or code. One object only unless a two-state sheet is explicitly requested.  CRITICAL: absolutely no glow, ambient aura, vignette, cast shadows or partially transparent gray fog around the object. Exterior pixels must be fully transparent right up to crisp object edge.ONE closed tall restroom door with entire rectangular aluminum frame and threshold, muted dusty plum solid panel, small ivory plaque with only a simple female pictogram, silver lever handle at right and bottom ventilation grille. No surrounding wall. Transparent outside frame; opaque inside doorway.",
+      "sourcePath": "source/door-restroom-women.png"
+    },
+    {
+      "id": "door-restroom-accessible",
+      "category": "doors",
+      "label": "장애인 화장실 미닫이문",
+      "size": [
+        256,
+        512
+      ],
+      "world": 170,
+      "prompt": "ONE closed wide accessible restroom sliding door, sage-gray solid panel, brushed metal frame with a narrow overhead sliding rail, long vertical pull handle, small ivory plaque with a simple wheelchair pictogram only. Entire self-contained frame. Transparent outside; opaque interior.",
+      "generationPrompt": "Use case: stylized-concept. Asset type: a reusable production PNG sprite for ARCHI, a Korean 2D side-scrolling office mystery game. Match attached references ONLY for art style: finely detailed anime-inspired PIXEL ART with crisp stepped contours and hard pixel clusters, realistic proportions, muted cool gray, restrained midnight office atmosphere, readable neutral highlights. Straight-on FRONT ELEVATION for a side-view game, minimal top surfaces visible, no isometric or 3/4 rotation. Complete silhouette, no clipping, ample padding. True transparent alpha in every empty region. No background, room, floor plane, cast shadow, halo, checkerboard, caption, frame border, watermark, logo or people. No readable text or code. One object only unless a two-state sheet is explicitly requested.  CRITICAL: absolutely no glow, ambient aura, vignette, cast shadows or partially transparent gray fog around the object. Exterior pixels must be fully transparent right up to crisp object edge.ONE closed wide accessible restroom sliding door, sage-gray solid panel, brushed metal frame with a narrow overhead sliding rail, long vertical pull handle, small ivory plaque with a simple wheelchair pictogram only. Entire self-contained frame. Transparent outside; opaque interior.",
+      "sourcePath": "source/door-restroom-accessible.png"
+    },
+    {
+      "id": "door-office-wood",
+      "category": "doors",
+      "label": "목재 사무실 문",
+      "size": [
+        256,
+        512
+      ],
+      "world": 140,
+      "prompt": "ONE closed tall office door, dark walnut timber with a narrow vertically frosted glass slit, charcoal rectangular frame, silver lever handle and small plain metal blank nameplate. Full frame and threshold visible. Transparent exterior, opaque dark frosted glass.",
+      "generationPrompt": "Use case: stylized-concept. Asset type: a reusable production PNG sprite for ARCHI, a Korean 2D side-scrolling office mystery game. Match attached references ONLY for art style: finely detailed anime-inspired PIXEL ART with crisp stepped contours and hard pixel clusters, realistic proportions, muted cool gray, restrained midnight office atmosphere, readable neutral highlights. Straight-on FRONT ELEVATION for a side-view game, minimal top surfaces visible, no isometric or 3/4 rotation. Complete silhouette, no clipping, ample padding. True transparent alpha in every empty region. No background, room, floor plane, cast shadow, halo, checkerboard, caption, frame border, watermark, logo or people. No readable text or code. One object only unless a two-state sheet is explicitly requested.  CRITICAL: absolutely no glow, ambient aura, vignette, cast shadows or partially transparent gray fog around the object. Exterior pixels must be fully transparent right up to crisp object edge.ONE closed tall office door, dark walnut timber with a narrow vertically frosted glass slit, charcoal rectangular frame, silver lever handle and small plain metal blank nameplate. Full frame and threshold visible. Transparent exterior, opaque dark frosted glass.",
+      "sourcePath": "source/door-office-wood.png"
+    },
+    {
+      "id": "door-fire-exit",
+      "category": "doors",
+      "label": "비상계단 방화문",
+      "size": [
+        256,
+        512
+      ],
+      "world": 145,
+      "prompt": "ONE closed tall industrial fire-exit door, weathered desaturated moss-green steel, charcoal rectangular frame, horizontal steel panic push bar, small narrow wired-glass upper window, lower kick plate, visible hydraulic closer at top. No signs or text. Transparent outside frame, opaque interior.",
+      "generationPrompt": "Use case: stylized-concept. Asset type: a reusable production PNG sprite for ARCHI, a Korean 2D side-scrolling office mystery game. Match attached references ONLY for art style: finely detailed anime-inspired PIXEL ART with crisp stepped contours and hard pixel clusters, realistic proportions, muted cool gray, restrained midnight office atmosphere, readable neutral highlights. Straight-on FRONT ELEVATION for a side-view game, minimal top surfaces visible, no isometric or 3/4 rotation. Complete silhouette, no clipping, ample padding. True transparent alpha in every empty region. No background, room, floor plane, cast shadow, halo, checkerboard, caption, frame border, watermark, logo or people. No readable text or code. One object only unless a two-state sheet is explicitly requested.  CRITICAL: absolutely no glow, ambient aura, vignette, cast shadows or partially transparent gray fog around the object. Exterior pixels must be fully transparent right up to crisp object edge.ONE closed tall industrial fire-exit door, weathered desaturated moss-green steel, charcoal rectangular frame, horizontal steel panic push bar, small narrow wired-glass upper window, lower kick plate, visible hydraulic closer at top. No signs or text. Transparent outside frame, opaque interior.",
+      "sourcePath": "source/door-fire-exit.png"
+    },
+    {
+      "id": "plant-monstera",
+      "category": "plants",
+      "label": "몬스테라 화분",
+      "size": [
+        256,
+        256
+      ],
+      "world": 105,
+      "prompt": "One lush compact monstera with distinctive split and perforated deep-green leaves, in a squat terracotta ceramic pot on a small matching saucer. Several asymmetric leaves, pot and all leaves visible, front elevation.",
+      "generationPrompt": "Use case: stylized-concept. Asset type: a reusable production PNG sprite for ARCHI, a Korean 2D side-scrolling office mystery game. Match attached references ONLY for art style: finely detailed anime-inspired PIXEL ART with crisp stepped contours and hard pixel clusters, realistic proportions, muted cool gray, restrained midnight office atmosphere, readable neutral highlights. Straight-on FRONT ELEVATION for a side-view game, minimal top surfaces visible, no isometric or 3/4 rotation. Complete silhouette, no clipping, ample padding. True transparent alpha in every empty region. No background, room, floor plane, cast shadow, halo, checkerboard, caption, frame border, watermark, logo or people. No readable text or code. One object only unless a two-state sheet is explicitly requested.  CRITICAL: absolutely no glow, ambient aura, vignette, cast shadows or partially transparent gray fog around the object. Exterior pixels must be fully transparent right up to crisp object edge.One lush compact monstera with distinctive split and perforated deep-green leaves, in a squat terracotta ceramic pot on a small matching saucer. Several asymmetric leaves, pot and all leaves visible, front elevation.",
+      "sourcePath": "source/plant-monstera.png"
+    },
+    {
+      "id": "plant-snake",
+      "category": "plants",
+      "label": "산세베리아 화분",
+      "size": [
+        256,
+        512
+      ],
+      "world": 65,
+      "prompt": "One tall narrow snake plant with upright sword-shaped dark green striped leaves and muted yellow edges, in a charcoal faceted cylindrical pot. Distinct thin vertical silhouette, no broad leaves.",
+      "generationPrompt": "Use case: stylized-concept. Asset type: a reusable production PNG sprite for ARCHI, a Korean 2D side-scrolling office mystery game. Match attached references ONLY for art style: finely detailed anime-inspired PIXEL ART with crisp stepped contours and hard pixel clusters, realistic proportions, muted cool gray, restrained midnight office atmosphere, readable neutral highlights. Straight-on FRONT ELEVATION for a side-view game, minimal top surfaces visible, no isometric or 3/4 rotation. Complete silhouette, no clipping, ample padding. True transparent alpha in every empty region. No background, room, floor plane, cast shadow, halo, checkerboard, caption, frame border, watermark, logo or people. No readable text or code. One object only unless a two-state sheet is explicitly requested.  CRITICAL: absolutely no glow, ambient aura, vignette, cast shadows or partially transparent gray fog around the object. Exterior pixels must be fully transparent right up to crisp object edge.One tall narrow snake plant with upright sword-shaped dark green striped leaves and muted yellow edges, in a charcoal faceted cylindrical pot. Distinct thin vertical silhouette, no broad leaves.",
+      "sourcePath": "source/plant-snake.png"
+    },
+    {
+      "id": "plant-palm",
+      "category": "plants",
+      "label": "야자 화분",
+      "size": [
+        256,
+        512
+      ],
+      "world": 130,
+      "prompt": "One indoor areca palm, several arching feathery fronds made of many narrow leaflets, thin trunks, tall cream square planter. Broad airy canopy with transparent gaps among leaves, realistic office palm.",
+      "generationPrompt": "Use case: stylized-concept. Asset type: a reusable production PNG sprite for ARCHI, a Korean 2D side-scrolling office mystery game. Match attached references ONLY for art style: finely detailed anime-inspired PIXEL ART with crisp stepped contours and hard pixel clusters, realistic proportions, muted cool gray, restrained midnight office atmosphere, readable neutral highlights. Straight-on FRONT ELEVATION for a side-view game, minimal top surfaces visible, no isometric or 3/4 rotation. Complete silhouette, no clipping, ample padding. True transparent alpha in every empty region. No background, room, floor plane, cast shadow, halo, checkerboard, caption, frame border, watermark, logo or people. No readable text or code. One object only unless a two-state sheet is explicitly requested.  CRITICAL: absolutely no glow, ambient aura, vignette, cast shadows or partially transparent gray fog around the object. Exterior pixels must be fully transparent right up to crisp object edge.One indoor areca palm, several arching feathery fronds made of many narrow leaflets, thin trunks, tall cream square planter. Broad airy canopy with transparent gaps among leaves, realistic office palm.",
+      "sourcePath": "source/plant-palm.png"
+    },
+    {
+      "id": "plant-withered",
+      "category": "plants",
+      "label": "시든 화분",
+      "size": [
+        256,
+        256
+      ],
+      "world": 95,
+      "prompt": "One neglected withered office houseplant with drooping ochre and dull olive leaves on sparse brown stems, dry dark soil in a subtly cracked muted blue ceramic pot and attached saucer. No leaves floating outside object, no gore, readable sad silhouette.",
+      "generationPrompt": "Use case: stylized-concept. Asset type: a reusable production PNG sprite for ARCHI, a Korean 2D side-scrolling office mystery game. Match attached references ONLY for art style: finely detailed anime-inspired PIXEL ART with crisp stepped contours and hard pixel clusters, realistic proportions, muted cool gray, restrained midnight office atmosphere, readable neutral highlights. Straight-on FRONT ELEVATION for a side-view game, minimal top surfaces visible, no isometric or 3/4 rotation. Complete silhouette, no clipping, ample padding. True transparent alpha in every empty region. No background, room, floor plane, cast shadow, halo, checkerboard, caption, frame border, watermark, logo or people. No readable text or code. One object only unless a two-state sheet is explicitly requested.  CRITICAL: absolutely no glow, ambient aura, vignette, cast shadows or partially transparent gray fog around the object. Exterior pixels must be fully transparent right up to crisp object edge.One neglected withered office houseplant with drooping ochre and dull olive leaves on sparse brown stems, dry dark soil in a subtly cracked muted blue ceramic pot and attached saucer. No leaves floating outside object, no gore, readable sad silhouette.",
+      "sourcePath": "source/plant-withered.png"
+    },
+    {
+      "id": "computer-crt",
+      "category": "computers",
+      "label": "구형 CRT 컴퓨터",
+      "size": [
+        512,
+        256
+      ],
+      "world": 150,
+      "sheet": true,
+      "prompt": "TWO STATE SHEET, 2 equal square cells side by side. ONE identical vintage beige desktop PC per cell: bulky curved-glass CRT on horizontal desktop computer chassis, ivory keyboard and wired mouse. LEFT OFF black screen all indicators dark. RIGHT ON pleasant blue desktop with small folder icons and a simple calendar window represented by squares, no readable text. Identical hardware geometry, scale and bottom baseline between cells.",
+      "generationPrompt": "Use case: stylized-concept. Asset type: a reusable production PNG sprite for ARCHI, a Korean 2D side-scrolling office mystery game. Match attached references ONLY for art style: finely detailed anime-inspired PIXEL ART with crisp stepped contours and hard pixel clusters, realistic proportions, muted cool gray, restrained midnight office atmosphere, readable neutral highlights. Straight-on FRONT ELEVATION for a side-view game, minimal top surfaces visible, no isometric or 3/4 rotation. Complete silhouette, no clipping, ample padding. True transparent alpha in every empty region. No background, room, floor plane, cast shadow, halo, checkerboard, caption, frame border, watermark, logo or people. No readable text or code. One object only unless a two-state sheet is explicitly requested.  CRITICAL: absolutely no glow, ambient aura, vignette, cast shadows or partially transparent gray fog around the object. Exterior pixels must be fully transparent right up to crisp object edge.TWO STATE SHEET, 2 equal square cells side by side. ONE identical vintage beige desktop PC per cell: bulky curved-glass CRT on horizontal desktop computer chassis, ivory keyboard and wired mouse. LEFT OFF black screen all indicators dark. RIGHT ON pleasant blue desktop with small folder icons and a simple calendar window represented by squares, no readable text. Identical hardware geometry, scale and bottom baseline between cells. Layout ratio 2:1, exactly 2 equal square cells, no gutters, each computer completely inside its own cell with generous padding.",
+      "sourcePath": "source/computer-crt.png"
+    },
+    {
+      "id": "computer-all-in-one",
+      "category": "computers",
+      "label": "일체형 컴퓨터",
+      "size": [
+        512,
+        256
+      ],
+      "world": 145,
+      "sheet": true,
+      "prompt": "TWO STATE SHEET, 2 equal square cells side by side. ONE identical silver all-in-one computer per cell: slim wide display, thick lower silver bezel, curved aluminum single stand, compact white keyboard and mouse, NO tower. LEFT OFF black glass all indicators dark. RIGHT ON soft green landscape wallpaper with a few tiny abstract folder icons, no text. Precisely same hardware, scale, position and bottom baseline.",
+      "generationPrompt": "Use case: stylized-concept. Asset type: a reusable production PNG sprite for ARCHI, a Korean 2D side-scrolling office mystery game. Match attached references ONLY for art style: finely detailed anime-inspired PIXEL ART with crisp stepped contours and hard pixel clusters, realistic proportions, muted cool gray, restrained midnight office atmosphere, readable neutral highlights. Straight-on FRONT ELEVATION for a side-view game, minimal top surfaces visible, no isometric or 3/4 rotation. Complete silhouette, no clipping, ample padding. True transparent alpha in every empty region. No background, room, floor plane, cast shadow, halo, checkerboard, caption, frame border, watermark, logo or people. No readable text or code. One object only unless a two-state sheet is explicitly requested.  CRITICAL: absolutely no glow, ambient aura, vignette, cast shadows or partially transparent gray fog around the object. Exterior pixels must be fully transparent right up to crisp object edge.TWO STATE SHEET, 2 equal square cells side by side. ONE identical silver all-in-one computer per cell: slim wide display, thick lower silver bezel, curved aluminum single stand, compact white keyboard and mouse, NO tower. LEFT OFF black glass all indicators dark. RIGHT ON soft green landscape wallpaper with a few tiny abstract folder icons, no text. Precisely same hardware, scale, position and bottom baseline. Layout ratio 2:1, exactly 2 equal square cells, no gutters, each computer completely inside its own cell with generous padding.",
+      "sourcePath": "source/computer-all-in-one.png"
+    },
+    {
+      "id": "computer-rugged-laptop",
+      "category": "computers",
+      "label": "산업용 노트북",
+      "size": [
+        512,
+        256
+      ],
+      "world": 115,
+      "sheet": true,
+      "prompt": "TWO STATE SHEET, 2 equal square cells side by side. ONE identical open rugged industrial laptop per cell, dark gray reinforced shell, rubber corner bumpers, carrying handle folded along front edge, compact black keyboard. LEFT OFF black screen. RIGHT ON simple building maintenance dashboard with four colored gauges and a diagram, no code or text. Exact same open angle, hardware, position, scale and baseline in both cells.",
+      "generationPrompt": "Use case: stylized-concept. Asset type: a reusable production PNG sprite for ARCHI, a Korean 2D side-scrolling office mystery game. Match attached references ONLY for art style: finely detailed anime-inspired PIXEL ART with crisp stepped contours and hard pixel clusters, realistic proportions, muted cool gray, restrained midnight office atmosphere, readable neutral highlights. Straight-on FRONT ELEVATION for a side-view game, minimal top surfaces visible, no isometric or 3/4 rotation. Complete silhouette, no clipping, ample padding. True transparent alpha in every empty region. No background, room, floor plane, cast shadow, halo, checkerboard, caption, frame border, watermark, logo or people. No readable text or code. One object only unless a two-state sheet is explicitly requested.  CRITICAL: absolutely no glow, ambient aura, vignette, cast shadows or partially transparent gray fog around the object. Exterior pixels must be fully transparent right up to crisp object edge.TWO STATE SHEET, 2 equal square cells side by side. ONE identical open rugged industrial laptop per cell, dark gray reinforced shell, rubber corner bumpers, carrying handle folded along front edge, compact black keyboard. LEFT OFF black screen. RIGHT ON simple building maintenance dashboard with four colored gauges and a diagram, no code or text. Exact same open angle, hardware, position, scale and baseline in both cells. Layout ratio 2:1, exactly 2 equal square cells, no gutters, each computer completely inside its own cell with generous padding.",
+      "sourcePath": "source/computer-rugged-laptop.png"
+    },
+    {
+      "id": "computer-ultrawide",
+      "category": "computers",
+      "label": "울트라와이드 워크스테이션",
+      "size": [
+        512,
+        256
+      ],
+      "world": 195,
+      "sheet": true,
+      "prompt": "TWO STATE SHEET, 2 equal square cells side by side. ONE identical charcoal ultrawide office workstation per cell: one broad flat 21:9 monitor on two-leg V stand, compact tower to right, keyboard and mouse below. LEFT OFF black screen all indicators off. RIGHT ON abstract spreadsheet grid and bar chart side-by-side on a pale gray desktop, no readable text, no code. Precisely identical hardware, placement, scale and bottom baseline.",
+      "generationPrompt": "Use case: stylized-concept. Asset type: a reusable production PNG sprite for ARCHI, a Korean 2D side-scrolling office mystery game. Match attached references ONLY for art style: finely detailed anime-inspired PIXEL ART with crisp stepped contours and hard pixel clusters, realistic proportions, muted cool gray, restrained midnight office atmosphere, readable neutral highlights. Straight-on FRONT ELEVATION for a side-view game, minimal top surfaces visible, no isometric or 3/4 rotation. Complete silhouette, no clipping, ample padding. True transparent alpha in every empty region. No background, room, floor plane, cast shadow, halo, checkerboard, caption, frame border, watermark, logo or people. No readable text or code. One object only unless a two-state sheet is explicitly requested.  CRITICAL: absolutely no glow, ambient aura, vignette, cast shadows or partially transparent gray fog around the object. Exterior pixels must be fully transparent right up to crisp object edge.TWO STATE SHEET, 2 equal square cells side by side. ONE identical charcoal ultrawide office workstation per cell: one broad flat 21:9 monitor on two-leg V stand, compact tower to right, keyboard and mouse below. LEFT OFF black screen all indicators off. RIGHT ON abstract spreadsheet grid and bar chart side-by-side on a pale gray desktop, no readable text, no code. Precisely identical hardware, placement, scale and bottom baseline. Layout ratio 2:1, exactly 2 equal square cells, no gutters, each computer completely inside its own cell with generous padding.",
+      "sourcePath": "source/computer-ultrawide.png"
+    },
+    {
+      "id": "cleaning-cart",
+      "category": "utility",
+      "label": "청소 카트",
+      "size": [
+        256,
+        256
+      ],
+      "world": 135,
+      "prompt": "One compact office janitorial cart: muted blue plastic trolley frame, yellow mop bucket and wringer, short shelves with two unbranded bottles, tied charcoal refuse bag at right, upright mop secured to frame, four level casters. Single complete unified prop.",
+      "generationPrompt": "Use case: stylized-concept. Asset type: a reusable production PNG sprite for ARCHI, a Korean 2D side-scrolling office mystery game. Match attached references ONLY for art style: finely detailed anime-inspired PIXEL ART with crisp stepped contours and hard pixel clusters, realistic proportions, muted cool gray, restrained midnight office atmosphere, readable neutral highlights. Straight-on FRONT ELEVATION for a side-view game, minimal top surfaces visible, no isometric or 3/4 rotation. Complete silhouette, no clipping, ample padding. True transparent alpha in every empty region. No background, room, floor plane, cast shadow, halo, checkerboard, caption, frame border, watermark, logo or people. No readable text or code. One object only unless a two-state sheet is explicitly requested.  CRITICAL: absolutely no glow, ambient aura, vignette, cast shadows or partially transparent gray fog around the object. Exterior pixels must be fully transparent right up to crisp object edge.One compact office janitorial cart: muted blue plastic trolley frame, yellow mop bucket and wringer, short shelves with two unbranded bottles, tied charcoal refuse bag at right, upright mop secured to frame, four level casters. Single complete unified prop.",
+      "sourcePath": "source/cleaning-cart.png"
+    },
+    {
+      "id": "restroom-urinal",
+      "category": "restroom",
+      "label": "소변기",
+      "size": [
+        256,
+        256
+      ],
+      "world": 65,
+      "prompt": "One white ceramic wall-mounted urinal isolated without wall, elongated bowl with subtle blue-gray inner shadows, small chrome top flush pipe and sensor unit. Complete fixture straight-on, no backing wall, clean realistic form.",
+      "generationPrompt": "Use case: stylized-concept. Asset type: a reusable production PNG sprite for ARCHI, a Korean 2D side-scrolling office mystery game. Match attached references ONLY for art style: finely detailed anime-inspired PIXEL ART with crisp stepped contours and hard pixel clusters, realistic proportions, muted cool gray, restrained midnight office atmosphere, readable neutral highlights. Straight-on FRONT ELEVATION for a side-view game, minimal top surfaces visible, no isometric or 3/4 rotation. Complete silhouette, no clipping, ample padding. True transparent alpha in every empty region. No background, room, floor plane, cast shadow, halo, checkerboard, caption, frame border, watermark, logo or people. No readable text or code. One object only unless a two-state sheet is explicitly requested.  CRITICAL: absolutely no glow, ambient aura, vignette, cast shadows or partially transparent gray fog around the object. Exterior pixels must be fully transparent right up to crisp object edge.One white ceramic wall-mounted urinal isolated without wall, elongated bowl with subtle blue-gray inner shadows, small chrome top flush pipe and sensor unit. Complete fixture straight-on, no backing wall, clean realistic form.",
+      "sourcePath": "source/restroom-urinal.png"
+    },
+    {
+      "id": "task-chair",
+      "category": "utility",
+      "label": "사무용 의자",
+      "size": [
+        256,
+        256
+      ],
+      "world": 85,
+      "prompt": "One ergonomic office swivel task chair front-on, charcoal mesh backrest, muted burgundy seat, two black armrests, gas cylinder and five-star caster base, entire chair and wheels level.",
+      "generationPrompt": "Use case: stylized-concept. Asset type: a reusable production PNG sprite for ARCHI, a Korean 2D side-scrolling office mystery game. Match attached references ONLY for art style: finely detailed anime-inspired PIXEL ART with crisp stepped contours and hard pixel clusters, realistic proportions, muted cool gray, restrained midnight office atmosphere, readable neutral highlights. Straight-on FRONT ELEVATION for a side-view game, minimal top surfaces visible, no isometric or 3/4 rotation. Complete silhouette, no clipping, ample padding. True transparent alpha in every empty region. No background, room, floor plane, cast shadow, halo, checkerboard, caption, frame border, watermark, logo or people. No readable text or code. One object only unless a two-state sheet is explicitly requested.  CRITICAL: absolutely no glow, ambient aura, vignette, cast shadows or partially transparent gray fog around the object. Exterior pixels must be fully transparent right up to crisp object edge.One ergonomic office swivel task chair front-on, charcoal mesh backrest, muted burgundy seat, two black armrests, gas cylinder and five-star caster base, entire chair and wheels level.",
+      "sourcePath": "source/task-chair.png"
+    },
+    {
+      "id": "fire-extinguisher",
+      "category": "utility",
+      "label": "소화기",
+      "size": [
+        256,
+        256
+      ],
+      "world": 45,
+      "prompt": "One red fire extinguisher in a low black floor cradle, blank off-white label patch, black hose, brass valve and small round pressure gauge, squeeze handle. No readable marks.",
+      "generationPrompt": "Use case: stylized-concept. Asset type: a reusable production PNG sprite for ARCHI, a Korean 2D side-scrolling office mystery game. Match attached references ONLY for art style: finely detailed anime-inspired PIXEL ART with crisp stepped contours and hard pixel clusters, realistic proportions, muted cool gray, restrained midnight office atmosphere, readable neutral highlights. Straight-on FRONT ELEVATION for a side-view game, minimal top surfaces visible, no isometric or 3/4 rotation. Complete silhouette, no clipping, ample padding. True transparent alpha in every empty region. No background, room, floor plane, cast shadow, halo, checkerboard, caption, frame border, watermark, logo or people. No readable text or code. One object only unless a two-state sheet is explicitly requested.  CRITICAL: absolutely no glow, ambient aura, vignette, cast shadows or partially transparent gray fog around the object. Exterior pixels must be fully transparent right up to crisp object edge.One red fire extinguisher in a low black floor cradle, blank off-white label patch, black hose, brass valve and small round pressure gauge, squeeze handle. No readable marks.",
+      "sourcePath": "source/fire-extinguisher.png"
+    },
+    {
+      "id": "recycling-bin",
+      "category": "utility",
+      "label": "분리수거함",
+      "size": [
+        256,
+        256
+      ],
+      "world": 100,
+      "prompt": "One connected office waste sorting bin with three narrow brushed steel compartments and muted blue, olive-green and charcoal lids, circular openings, no labels or text. Clearly a low practical three-section bin.",
+      "generationPrompt": "Use case: stylized-concept. Asset type: a reusable production PNG sprite for ARCHI, a Korean 2D side-scrolling office mystery game. Match attached references ONLY for art style: finely detailed anime-inspired PIXEL ART with crisp stepped contours and hard pixel clusters, realistic proportions, muted cool gray, restrained midnight office atmosphere, readable neutral highlights. Straight-on FRONT ELEVATION for a side-view game, minimal top surfaces visible, no isometric or 3/4 rotation. Complete silhouette, no clipping, ample padding. True transparent alpha in every empty region. No background, room, floor plane, cast shadow, halo, checkerboard, caption, frame border, watermark, logo or people. No readable text or code. One object only unless a two-state sheet is explicitly requested.  CRITICAL: absolutely no glow, ambient aura, vignette, cast shadows or partially transparent gray fog around the object. Exterior pixels must be fully transparent right up to crisp object edge.One connected office waste sorting bin with three narrow brushed steel compartments and muted blue, olive-green and charcoal lids, circular openings, no labels or text. Clearly a low practical three-section bin.",
+      "sourcePath": "source/recycling-bin.png"
+    },
+    {
+      "id": "acoustic-divider",
+      "category": "utility",
+      "label": "이동식 파티션",
+      "size": [
+        512,
+        256
+      ],
+      "world": 240,
+      "prompt": "One wide office acoustic privacy divider, muted petrol-green fabric rectangular panel in thin aluminum frame with two short steel T feet. Freestanding, wider than tall, realistic woven texture, no papers.",
+      "generationPrompt": "Use case: stylized-concept. Asset type: a reusable production PNG sprite for ARCHI, a Korean 2D side-scrolling office mystery game. Match attached references ONLY for art style: finely detailed anime-inspired PIXEL ART with crisp stepped contours and hard pixel clusters, realistic proportions, muted cool gray, restrained midnight office atmosphere, readable neutral highlights. Straight-on FRONT ELEVATION for a side-view game, minimal top surfaces visible, no isometric or 3/4 rotation. Complete silhouette, no clipping, ample padding. True transparent alpha in every empty region. No background, room, floor plane, cast shadow, halo, checkerboard, caption, frame border, watermark, logo or people. No readable text or code. One object only unless a two-state sheet is explicitly requested.  CRITICAL: absolutely no glow, ambient aura, vignette, cast shadows or partially transparent gray fog around the object. Exterior pixels must be fully transparent right up to crisp object edge.One wide office acoustic privacy divider, muted petrol-green fabric rectangular panel in thin aluminum frame with two short steel T feet. Freestanding, wider than tall, realistic woven texture, no papers.",
+      "sourcePath": "source/acoustic-divider.png"
+    }
+  ],
+  "backgrounds": [
+    {
+      "id": "restroom-modern",
+      "label": "현대식 공용 화장실",
+      "prompt": "Use case: stylized-concept. Create one finished wide reusable restroom background for ARCHI, a 2D side-scrolling Korean office mystery game. Style: detailed anime-inspired pixel art, crisp visible pixel clusters and stepped contours, realistic human scale, restrained cool midnight atmosphere, no painterly blur. Output landscape 3:1 panorama. STRICT FLAT FRONT ORTHOGRAPHIC ELEVATION of the back wall, no isometric, no receding side walls or vanishing point. A perfectly horizontal walkable floor line spans the image at 82% height; bottom 18% is a flat dark cutaway floor foundation, not a perspective tiled floor. Furnishings attached to the back wall leave foreground walk lane clear. Complete room wall across full width, ceiling strip above. No people, monsters, blood, captions, UI, readable text, logos or watermark. Fully opaque image. Modern shared office restroom: pale cool gray rectangular wall tiles with thin navy horizontal stripe, left quarter has two rectangular mirrors over a double washbasin vanity, center has two white wall-mounted urinals with narrow privacy screens, right third has two closed navy stall doors with thin metal legs. Simple ceiling fluorescent housings OFF, dim cool ambient light, modest clean wear. Far left slim utility door. Fixtures and stall feet align consistently.",
+      "sourcePath": "../../background/restroom-variants/restroom-modern.png"
+    },
+    {
+      "id": "restroom-old",
+      "label": "노후 화장실",
+      "prompt": "Use case: stylized-concept. Create one finished wide reusable restroom background for ARCHI, a 2D side-scrolling Korean office mystery game. Style: detailed anime-inspired pixel art, crisp visible pixel clusters and stepped contours, realistic human scale, restrained cool midnight atmosphere, no painterly blur. Output landscape 3:1 panorama. STRICT FLAT FRONT ORTHOGRAPHIC ELEVATION of the back wall, no isometric, no receding side walls or vanishing point. A perfectly horizontal walkable floor line spans the image at 82% height; bottom 18% is a flat dark cutaway floor foundation, not a perspective tiled floor. Furnishings attached to the back wall leave foreground walk lane clear. Complete room wall across full width, ceiling strip above. No people, monsters, blood, captions, UI, readable text, logos or watermark. Fully opaque image. Older service-floor restroom: small desaturated sage square wall tiles with worn grout and localized water stains, exposed dull plumbing high on wall, left has old single sink and lightly cracked mirror, center has two shut muted brown toilet cubicles with chipped paint, right has a plain gray service door, a dark ventilation grille above. Uneasy abandoned office mood, no destruction or gore, readable subdued gray-green ambient lighting, all fixtures off.",
+      "sourcePath": "../../background/restroom-variants/restroom-old.png"
+    },
+    {
+      "id": "restroom-executive",
+      "label": "고급층 화장실",
+      "prompt": "Use case: stylized-concept. Create one finished wide reusable restroom background for ARCHI, a 2D side-scrolling Korean office mystery game. Style: detailed anime-inspired pixel art, crisp visible pixel clusters and stepped contours, realistic human scale, restrained cool midnight atmosphere, no painterly blur. Output landscape 3:1 panorama. STRICT FLAT FRONT ORTHOGRAPHIC ELEVATION of the back wall, no isometric, no receding side walls or vanishing point. A perfectly horizontal walkable floor line spans the image at 82% height; bottom 18% is a flat dark cutaway floor foundation, not a perspective tiled floor. Furnishings attached to the back wall leave foreground walk lane clear. Complete room wall across full width, ceiling strip above. No people, monsters, blood, captions, UI, readable text, logos or watermark. Fully opaque image. Executive-floor restroom: charcoal stone wall panels with thin bronze trims, warm walnut accents, left has a long floating dark-stone vanity with two white basins and two round mirrors, center is clear textured stone wall with one wall-mounted paper dispenser, right has two full-height closed walnut cubicle doors with discreet brass pulls. Restrained elegant upscale atmosphere, soft dim warm mirror lights contrasting blue-gray shadows. No plants or foreground furniture.",
+      "sourcePath": "../../background/restroom-variants/restroom-executive.png"
+    }
+  ]
+}

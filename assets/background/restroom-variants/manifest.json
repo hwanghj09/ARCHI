@@ -1,0 +1,37 @@
+{
+  "backgrounds": [
+    {
+      "id": "restroom-modern",
+      "label": "현대식 공용 화장실",
+      "file": "restroom-modern.png",
+      "size": [
+        2172,
+        724
+      ],
+      "sourceFloorYApprox": 591,
+      "integrated": false
+    },
+    {
+      "id": "restroom-old",
+      "label": "노후 화장실",
+      "file": "restroom-old.png",
+      "size": [
+        2172,
+        724
+      ],
+      "sourceFloorYApprox": 578,
+      "integrated": false
+    },
+    {
+      "id": "restroom-executive",
+      "label": "고급층 화장실",
+      "file": "restroom-executive.png",
+      "size": [
+        2172,
+        724
+      ],
+      "sourceFloorYApprox": 567,
+      "integrated": false
+    }
+  ]
+}
