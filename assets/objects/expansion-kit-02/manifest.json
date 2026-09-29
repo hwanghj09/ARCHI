@@ -1,0 +1,586 @@
+{
+  "version": 1,
+  "generator": "built-in image_gen",
+  "assets": [
+    {
+      "id": "snack-vending-machine",
+      "label": "간식 자판기",
+      "category": "amenity",
+      "file": "snack-vending-machine.png",
+      "source": "source/snack-vending-machine.png",
+      "size": [
+        256,
+        512
+      ],
+      "sourceSize": [
+        1254,
+        1254
+      ],
+      "sourceBounds": [
+        303,
+        82,
+        954,
+        1195
+      ],
+      "anchor": [
+        128,
+        504
+      ],
+      "placement": "floor",
+      "suggestedWorldWidth": 145,
+      "frames": 1,
+      "integrated": false
+    },
+    {
+      "id": "coffee-machine",
+      "label": "전자동 커피머신",
+      "category": "amenity",
+      "file": "coffee-machine.png",
+      "source": "source/coffee-machine.png",
+      "size": [
+        256,
+        256
+      ],
+      "sourceSize": [
+        1254,
+        1254
+      ],
+      "sourceBounds": [
+        303,
+        109,
+        1011,
+        1139
+      ],
+      "anchor": [
+        128,
+        248
+      ],
+      "placement": "surface",
+      "suggestedWorldWidth": 75,
+      "frames": 1,
+      "integrated": false
+    },
+    {
+      "id": "microwave-cart",
+      "label": "전자레인지 이동대",
+      "category": "amenity",
+      "file": "microwave-cart.png",
+      "source": "source/microwave-cart.png",
+      "size": [
+        256,
+        256
+      ],
+      "sourceSize": [
+        1254,
+        1254
+      ],
+      "sourceBounds": [
+        181,
+        230,
+        1075,
+        1190
+      ],
+      "anchor": [
+        128,
+        248
+      ],
+      "placement": "floor",
+      "suggestedWorldWidth": 125,
+      "frames": 1,
+      "integrated": false
+    },
+    {
+      "id": "water-fountain",
+      "label": "벽걸이 음수대",
+      "category": "amenity",
+      "file": "water-fountain.png",
+      "source": "source/water-fountain.png",
+      "size": [
+        256,
+        256
+      ],
+      "sourceSize": [
+        1254,
+        1254
+      ],
+      "sourceBounds": [
+        176,
+        240,
+        1079,
+        1011
+      ],
+      "anchor": [
+        128,
+        248
+      ],
+      "placement": "wall",
+      "suggestedWorldWidth": 90,
+      "frames": 1,
+      "integrated": false
+    },
+    {
+      "id": "security-turnstile",
+      "label": "보안 출입 게이트",
+      "category": "security",
+      "file": "security-turnstile.png",
+      "source": "source/security-turnstile.png",
+      "size": [
+        256,
+        256
+      ],
+      "sourceSize": [
+        1254,
+        1254
+      ],
+      "sourceBounds": [
+        60,
+        131,
+        1193,
+        1144
+      ],
+      "anchor": [
+        128,
+        248
+      ],
+      "placement": "floor",
+      "suggestedWorldWidth": 140,
+      "frames": 1,
+      "integrated": false
+    },
+    {
+      "id": "first-aid-cabinet",
+      "label": "구급함",
+      "category": "security",
+      "file": "first-aid-cabinet.png",
+      "source": "source/first-aid-cabinet.png",
+      "size": [
+        256,
+        256
+      ],
+      "sourceSize": [
+        1254,
+        1254
+      ],
+      "sourceBounds": [
+        233,
+        158,
+        1019,
+        1104
+      ],
+      "anchor": [
+        128,
+        248
+      ],
+      "placement": "wall",
+      "suggestedWorldWidth": 65,
+      "frames": 1,
+      "integrated": false
+    },
+    {
+      "id": "fire-hose-cabinet",
+      "label": "소화전 보관함",
+      "category": "security",
+      "file": "fire-hose-cabinet.png",
+      "source": "source/fire-hose-cabinet.png",
+      "size": [
+        256,
+        512
+      ],
+      "sourceSize": [
+        1254,
+        1254
+      ],
+      "sourceBounds": [
+        323,
+        27,
+        931,
+        1206
+      ],
+      "anchor": [
+        128,
+        504
+      ],
+      "placement": "wall",
+      "suggestedWorldWidth": 110,
+      "frames": 1,
+      "integrated": false
+    },
+    {
+      "id": "emergency-light",
+      "label": "비상 조명등",
+      "category": "security",
+      "file": "emergency-light.png",
+      "source": "source/emergency-light.png",
+      "size": [
+        512,
+        256
+      ],
+      "sourceSize": [
+        1254,
+        1254
+      ],
+      "sourceBounds": [
+        53,
+        275,
+        1201,
+        957
+      ],
+      "anchor": [
+        256,
+        248
+      ],
+      "placement": "wall",
+      "suggestedWorldWidth": 100,
+      "frames": 1,
+      "integrated": false
+    },
+    {
+      "id": "desk-telephone",
+      "label": "사무실 전화기",
+      "category": "office",
+      "file": "desk-telephone.png",
+      "source": "source/desk-telephone.png",
+      "size": [
+        256,
+        256
+      ],
+      "sourceSize": [
+        1254,
+        1254
+      ],
+      "sourceBounds": [
+        74,
+        185,
+        1174,
+        1171
+      ],
+      "anchor": [
+        128,
+        248
+      ],
+      "placement": "surface",
+      "suggestedWorldWidth": 55,
+      "frames": 1,
+      "integrated": false
+    },
+    {
+      "id": "paper-shredder",
+      "label": "문서 세단기",
+      "category": "office",
+      "file": "paper-shredder.png",
+      "source": "source/paper-shredder.png",
+      "size": [
+        256,
+        256
+      ],
+      "sourceSize": [
+        1254,
+        1254
+      ],
+      "sourceBounds": [
+        248,
+        108,
+        1005,
+        1165
+      ],
+      "anchor": [
+        128,
+        248
+      ],
+      "placement": "floor",
+      "suggestedWorldWidth": 80,
+      "frames": 1,
+      "integrated": false
+    },
+    {
+      "id": "projector-cart",
+      "label": "프로젝터 이동대",
+      "category": "office",
+      "file": "projector-cart.png",
+      "source": "source/projector-cart.png",
+      "size": [
+        256,
+        256
+      ],
+      "sourceSize": [
+        1254,
+        1254
+      ],
+      "sourceBounds": [
+        159,
+        224,
+        1127,
+        1106
+      ],
+      "anchor": [
+        128,
+        248
+      ],
+      "placement": "floor",
+      "suggestedWorldWidth": 115,
+      "frames": 1,
+      "integrated": false
+    },
+    {
+      "id": "wall-clock",
+      "label": "사무실 벽시계",
+      "category": "office",
+      "file": "wall-clock.png",
+      "source": "source/wall-clock.png",
+      "size": [
+        256,
+        256
+      ],
+      "sourceSize": [
+        1254,
+        1254
+      ],
+      "sourceBounds": [
+        80,
+        81,
+        1172,
+        1178
+      ],
+      "anchor": [
+        128,
+        248
+      ],
+      "placement": "wall",
+      "suggestedWorldWidth": 60,
+      "frames": 1,
+      "integrated": false
+    },
+    {
+      "id": "folding-ladder",
+      "label": "접이식 사다리",
+      "category": "maintenance",
+      "file": "folding-ladder.png",
+      "source": "source/folding-ladder.png",
+      "size": [
+        256,
+        512
+      ],
+      "sourceSize": [
+        1254,
+        1254
+      ],
+      "sourceBounds": [
+        258,
+        62,
+        995,
+        1188
+      ],
+      "anchor": [
+        128,
+        504
+      ],
+      "placement": "floor",
+      "suggestedWorldWidth": 105,
+      "frames": 1,
+      "integrated": false
+    },
+    {
+      "id": "pallet-jack",
+      "label": "수동 파렛트 운반기",
+      "category": "maintenance",
+      "file": "pallet-jack.png",
+      "source": "source/pallet-jack.png",
+      "size": [
+        256,
+        512
+      ],
+      "sourceSize": [
+        1254,
+        1254
+      ],
+      "sourceBounds": [
+        292,
+        30,
+        962,
+        1221
+      ],
+      "anchor": [
+        128,
+        504
+      ],
+      "placement": "floor",
+      "suggestedWorldWidth": 100,
+      "frames": 1,
+      "integrated": false
+    },
+    {
+      "id": "industrial-fan",
+      "label": "공업용 선풍기",
+      "category": "maintenance",
+      "file": "industrial-fan.png",
+      "source": "source/industrial-fan.png",
+      "size": [
+        256,
+        512
+      ],
+      "sourceSize": [
+        1254,
+        1254
+      ],
+      "sourceBounds": [
+        308,
+        12,
+        946,
+        1231
+      ],
+      "anchor": [
+        128,
+        504
+      ],
+      "placement": "floor",
+      "suggestedWorldWidth": 110,
+      "frames": 1,
+      "integrated": false
+    },
+    {
+      "id": "tool-pegboard",
+      "label": "공구 벽걸이판",
+      "category": "maintenance",
+      "file": "tool-pegboard.png",
+      "source": "source/tool-pegboard.png",
+      "size": [
+        512,
+        256
+      ],
+      "sourceSize": [
+        1536,
+        1024
+      ],
+      "sourceBounds": [
+        190,
+        187,
+        1355,
+        844
+      ],
+      "anchor": [
+        256,
+        248
+      ],
+      "placement": "wall",
+      "suggestedWorldWidth": 200,
+      "frames": 1,
+      "integrated": false
+    },
+    {
+      "id": "lab-microscope",
+      "label": "연구실 현미경",
+      "category": "research",
+      "file": "lab-microscope.png",
+      "source": "source/lab-microscope.png",
+      "size": [
+        256,
+        256
+      ],
+      "sourceSize": [
+        1254,
+        1254
+      ],
+      "sourceBounds": [
+        256,
+        27,
+        1000,
+        1221
+      ],
+      "anchor": [
+        128,
+        248
+      ],
+      "placement": "surface",
+      "suggestedWorldWidth": 65,
+      "frames": 1,
+      "integrated": false
+    },
+    {
+      "id": "medical-bed",
+      "label": "의무실 침대",
+      "category": "research",
+      "file": "medical-bed.png",
+      "source": "source/medical-bed.png",
+      "size": [
+        512,
+        256
+      ],
+      "sourceSize": [
+        1774,
+        887
+      ],
+      "sourceBounds": [
+        71,
+        202,
+        1734,
+        758
+      ],
+      "anchor": [
+        256,
+        248
+      ],
+      "placement": "floor",
+      "suggestedWorldWidth": 235,
+      "frames": 1,
+      "integrated": false
+    },
+    {
+      "id": "hand-dryer",
+      "label": "화장실 핸드드라이어",
+      "category": "restroom",
+      "file": "hand-dryer.png",
+      "source": "source/hand-dryer.png",
+      "size": [
+        256,
+        256
+      ],
+      "sourceSize": [
+        1254,
+        1254
+      ],
+      "sourceBounds": [
+        197,
+        214,
+        1055,
+        994
+      ],
+      "anchor": [
+        128,
+        248
+      ],
+      "placement": "wall",
+      "suggestedWorldWidth": 55,
+      "frames": 1,
+      "integrated": false
+    },
+    {
+      "id": "soap-towel-station",
+      "label": "비누·종이타월 디스펜서",
+      "category": "restroom",
+      "file": "soap-towel-station.png",
+      "source": "source/soap-towel-station.png",
+      "size": [
+        256,
+        256
+      ],
+      "sourceSize": [
+        1254,
+        1254
+      ],
+      "sourceBounds": [
+        137,
+        168,
+        1119,
+        1052
+      ],
+      "anchor": [
+        128,
+        248
+      ],
+      "placement": "wall",
+      "suggestedWorldWidth": 75,
+      "frames": 1,
+      "integrated": false
+    }
+  ]
+}
