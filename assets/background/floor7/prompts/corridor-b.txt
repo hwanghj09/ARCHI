@@ -1,0 +1,12 @@
+Use case: stylized-concept
+Asset type: production background sprite panorama for ARCHI, a 2D side-scrolling mystery/horror game. This is the MIDDLE piece of a long corridor assembled from four pieces.
+Reference image 1 is the existing 17th-floor corridor: elevator lobby style reference only. Reference image 2 is the previous piece of this same corridor: match its black-stone-and-champagne-gold palette and ceiling band exactly.
+Create ONE landscape PNG, 1268 x 720 (ratio about 1.76:1). Strict orthographic SIDE VIEW, camera perpendicular to the wall, NO vanishing point, NO isometric, NO perspective.
+Setting: 7th floor of a Korean software-company tower, midnight, total power outage, all lights OFF. Dark polished black stone with warm champagne-gold trim, restrained anime-inspired pixel art, crisp hard pixel clusters. Mystery 80 percent, horror 20 percent. Human sprite about 162 pixels tall.
+CRITICAL COLLISION GEOMETRY: perfectly horizontal walkable floor top at y=570 of 720 (79.17 percent), full width, dark flat cutaway foundation below. Ceiling band y=0..60 matching reference image 2.
+Composition across width (pixel x of this 1268-wide canvas):
+x=0..18: plain wall (seam from the previous piece, blank).
+x=18..236, x=348..562, x=644..860: THREE shallow recessed elevator bays, each from y=220 to y=570, with champagne-gold brushed-metal frames about 8 px outside these rectangles. Inside each bay draw only a flat dark closed steel surface; the game overlays its own animated elevator doors exactly here. A plain dark strip at y=180..212 above each bay (the game draws a floor indicator there). Small gold call-button plates between the bays at about x=292 and x=603, y=370..410.
+x=860..1088: plain black stone wall with a gold pilaster strip.
+x=1088..1268: a flat recess for the stairwell fire door from y=232 to y=570, flat dark surface only (the game overlays its own door), a small green running-man exit pictogram light above it at about y=196..220, ending with a sliver of plain wall.
+All three elevator bays must be the exact same width and height as each other. No people, no robots, nothing in the walk lane, no UI, no border, no watermark, no captions, no logos, no readable letters except the running-man pictogram. Opaque PNG. Output only the finished background.

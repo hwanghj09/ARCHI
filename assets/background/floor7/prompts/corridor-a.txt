@@ -1,0 +1,18 @@
+Use case: stylized-concept
+Asset type: production background sprite panorama for ARCHI, a 2D side-scrolling mystery/horror game. This is the actual environment artwork, NOT a concept poster. It is the LEFT piece of a long corridor assembled from four pieces.
+Reference image 1 is the existing 17th-floor corridor. Use it ONLY as the architectural, material, lighting and pixel-art style reference. Do not copy its layout.
+Create ONE landscape PNG, 1818 x 720 (ratio 2.53:1). Strict orthographic SIDE VIEW, camera exactly perpendicular to the corridor wall. NO vanishing point, NO isometric, NO perspective.
+CRITICAL FULL BLEED: the previous attempt at this same prompt had solid WHITE letterbox bars along the top and bottom of the canvas (the artwork was squeezed into the middle, not filling the full 720px height). That was wrong. The scene must fill the ENTIRE canvas edge to edge — the ceiling band starts at the very top pixel row (y=0), and the dark floor foundation reaches the very bottom pixel row (y=720). No white space, no padding, no letterboxing, no border of any color anywhere in the image.
+Setting: the 7th floor guest LOUNGE of a Korean software-company tower, a VIP reception area, midnight during a total power outage. All ceiling lights and screens are OFF. Light comes only from faint city glow through a window and one small warm amber accent light. Restrained atmospheric anime-inspired pixel art, crisp hard-edged pixel clusters, realistic adult scale. Palette: dark polished black stone floor and wall panels with warm champagne-gold trim lines and frames — noticeably more luxurious and warmer than a plain office floor, but still dim and abandoned. Mystery 80 percent, horror 20 percent: an expensive room nobody is in right now. Human sprite on screen is about 162 pixels tall; doors on this wall read at that scale.
+CRITICAL COLLISION GEOMETRY: the continuous, perfectly horizontal top edge of the walkable floor is at y=570 of this 720-high canvas (79.17 percent from the top), from extreme left to extreme right. All door bottoms sit exactly on this line. Below it is a dark flat cutaway floor foundation with subtle horizontal slabs. Ceiling band y=0..60, dark with thin gold accent strip lighting (all switched off, just cold metal now).
+Composition across width (pixel x of this 1818-wide canvas):
+x=0..32: plain structural end wall.
+x=32..360: black stone wall with thin vertical champagne-gold pilaster strips every ~150px.
+x=360..510: ONE closed VIP double glass door, top y=220, bottom y=570, slim champagne-gold frame, vertical center seam, frosted dark glass, small unlit reader panel beside it.
+x=510..700: plain black stone wall with gold pilaster strips.
+x=700..1340: a large panoramic lounge window from y=120 to y=350, dark champagne-gold mullions, showing a distant low-detail night skyline through the glass — a few sparse warm lights, nothing detailed; below the window a plain black stone wall down to the floor (kept plain, a sofa sprite stands there).
+x=1340..1440: plain wall.
+x=1440..1680: a shallow blank wall niche/plaque frame with a thin gold border, completely empty inside (the game draws "VIP LOUNGE" lettering here — leave it blank).
+x=1680..1790: plain black stone wall with gold pilaster strips (a display cabinet sprite stands here — keep the lower wall plain).
+x=1790..1818: plain wall (the seam to the next piece — keep it completely blank).
+No people, no monsters, no robots, no floor-standing furniture, nothing in the walk lane, no UI, no border, no watermark, no captions, no logos, no readable letters or numbers anywhere. Opaque PNG. Output only the finished background.

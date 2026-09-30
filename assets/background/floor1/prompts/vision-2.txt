@@ -1,0 +1,11 @@
+[참고 이미지: assets/background/floor17/office-interior-aligned.png (Reference image 1) + vision-1.png (Reference image 2, 직전 단계에서 만든 결과물)]
+
+Use case: stylized-concept
+Asset type: production environment background for ARCHI, a 2D side-scrolling mystery game. This is the RIGHT piece of a room interior assembled from two pieces.
+Reference image 1 is the existing 17th-floor office interior: style reference only. Reference image 2 is the left piece of this same room: match its pale matte-stone-and-satin-brass palette, ceiling band and the wall at its right edge exactly (plain small-company exhibit room, not a museum or luxury gallery).
+Create ONE landscape PNG, 1178 x 720 (ratio about 1.64:1). Strict orthographic side elevation, camera perpendicular to the rear wall, no isometric view, no vanishing point.
+Same room: Vision Hall exhibition gallery on the 1st floor, midnight, total power outage, everything OFF. Pale MATTE gallery walls (not polished, no gloss) with simple brushed satin-brass trim. IMPORTANT OVERALL EXPOSURE: render the OVERALL SCENE dark and dim like the other floors' blackout scenes, not like a bright daytime photo — most surfaces read as mid-to-dark gray in deep shadow. Restrained anime-inspired pixel art, crisp hard pixel clusters. Mystery 80 percent, horror 20 percent.
+IMPORTANT: ARCHITECTURE AND WALL-MOUNTED ITEMS ONLY. Do NOT draw display cabinets, a reception counter or any floor-standing furniture.
+Layout (pixel x): x=0..20 continuing the plain matte wall from reference image 2, brushed-brass picture-rail line at y=160. x=502..1022 a shallow wall-mounted timeline feature from y=130 to y=320: a thin horizontal brass rail with five small unlit marker lights spaced along it (no readable dates or text, just abstract markers). x=1022..1178 plain matte wall, brass trim, kept low-detail near the right edge (a potted plant sprite stands there). Ceiling band y=0..60 continuing reference image 2 with switched-off gallery track lighting.
+Geometry: walkable floor top is one perfectly straight horizontal line at y=570 of the 720-high canvas (79.17 percent), full width, dark flat foundation cutaway below. Human height about 162 px.
+No characters, no robots, no UI, no captions, no logos, no watermarks, no legible text or numbers, no foreground occluders. Opaque background. Output only the finished game background.

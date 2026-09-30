@@ -204,11 +204,27 @@ function buildDynamicScene(config) {
   }
   // 감시 카메라(cameras, B2 복도): 카메라와 시야를 그리고 지키는 방 문을 찾아 둔다. 돌아가기와 발각은 cctv.js가 맡는다.
   const cameras = buildCameras(config, doorList);
+  // elevatorOffsets/elevatorWidthDeltas: 층 그림 속 엘리베이터 벽감이 BUILDING_CORE 좌표와 어긋날 때, 그 층만
+  // 상호작용 가능한 엘리베이터(문·판정)의 위치·폭을 보정한다(다른 층의 BUILDING_CORE 좌표는 그대로 둔다).
+  // elevatorYDeltas/elevatorHeightDeltas: 같은 목적으로 세로 위치·높이를 보정한다(음수 Y델타는 위로 올림,
+  // 델타는 바닥선에 매인 기본 높이에 더해지므로 둘을 함께 주면 문 아래쪽(바닥에 닿는 자리)도 따라 움직인다).
+  // hiddenElevators: 그 층에서만 특정 엘리베이터(carIndex)를 통째로 뺀다(임시 확인용).
+  // stairsOffset/stairsWidthDelta/stairsYDelta/stairsHeightDelta: elevatorOffsets와 같은 목적으로,
+  // 그 층 그림 속 비상계단 벽감이 BUILDING_CORE.stairs 좌표와 어긋날 때만 그 층의 판정 위치·크기를
+  // 보정한다(다른 층은 그대로).
   const sceneDoors = config.id === 'rooftop' ?
     [{ name: '17층 계단', type: 'stairs', x: 160, y: 232, width: 180 }] : !isFloor ? [] : [
-      ...BUILDING_CORE.elevators.map((car, carIndex) => ({ name: elevatorCars[carIndex].name, type: 'elevator', carIndex,
-        x: car.x, y: BUILDING_CORE.elevatorY, width: car.width })),
-      { name: '비상계단', type: 'stairs', locked: true, message: lockedStairsMessage, ...BUILDING_CORE.stairs },
+      ...BUILDING_CORE.elevators
+        .map((car, carIndex) => ({ name: elevatorCars[carIndex].name, type: 'elevator', carIndex,
+        x: car.x + (config.elevatorOffsets?.[carIndex] ?? 0),
+        y: BUILDING_CORE.elevatorY + (config.elevatorYDeltas?.[carIndex] ?? 0),
+        width: car.width + (config.elevatorWidthDeltas?.[carIndex] ?? 0),
+        height: floorY - BUILDING_CORE.elevatorY + (config.elevatorHeightDeltas?.[carIndex] ?? 0) }))
+        .filter(door => !(config.hiddenElevators || []).includes(door.carIndex)),
+      { name: '비상계단', type: 'stairs', locked: true, message: lockedStairsMessage, ...BUILDING_CORE.stairs,
+        x: BUILDING_CORE.stairs.x + (config.stairsOffset ?? 0), width: BUILDING_CORE.stairs.width + (config.stairsWidthDelta ?? 0),
+        y: BUILDING_CORE.stairs.y + (config.stairsYDelta ?? 0),
+        height: floorY - BUILDING_CORE.stairs.y + (config.stairsHeightDelta ?? 0) },
     ];
   const coreDoors = [];
   sceneDoors.forEach(door => {
@@ -217,7 +233,7 @@ function buildDynamicScene(config) {
     door.element.dataset.open = 'false';
     door.element.setAttribute('role', 'img');
     Object.assign(door.element.style, {
-      left: `${door.x}px`, top: `${door.y}px`, width: `${door.width}px`, height: `${floorY - door.y}px`,
+      left: `${door.x}px`, top: `${door.y}px`, width: `${door.width}px`, height: `${door.height ?? floorY - door.y}px`,
     });
     const image = new Image();
     image.src = `assets/objects/floor17/${door.type}.png`;

@@ -13,13 +13,28 @@
 // 리허설에서는 완벽한 ARCHI 자동 반주(2층 영사실 녹화와 이어짐). 정전 상태(조명·모니터 꺼짐, 로봇 정비 패널만 도크 배터리)를 기준으로 썼다.
 const FLOOR1_LAYOUT = {
   header: '1F · 로비', background: '#1d1b17', theme: 'atrium',
+  backgroundImage: { src: 'assets/background/floor1/corridor.png', height: 720, top: 0 },
+  // 엘리베이터 3대: 그림 속 벽감이 BUILDING_CORE 좌표보다 오른쪽으로/좁게 쏠려 있어(실측) 보정.
+  elevatorOffsets: [130, 74, 51],
+  elevatorWidthDeltas: [-21, -16, -16],
+  elevatorYDeltas: [0, 0, 0], elevatorHeightDeltas: [-10, -10, -10],
+  // 비상계단: 그림 속 문이 BUILDING_CORE.stairs보다 왼쪽으로/훨씬 좁게 나와서 보정.
+  stairsOffset: -11, stairsWidthDelta: -35, stairsHeightDelta: -20,
+  // 화장실: 그림 속 문이 BUILDING_CORE.restroom보다 오른쪽으로 쏠려 있어 보정. doorStyle은 17층
+  // 확장구역 문처럼 'art-door'(CSS 문 완전히 숨김)로 바꿔서, corridor.png에 이미 그려진 문 위에
+  // 기본 CSS 금속문(.metal)이 겹쳐 그려지지 않게 한다.
+  restroomOverride: { doorX: 3733, doorWidth: 158, doorStyle: 'art-door' },
+  // 자동 계산되는 화장실 출구 스폰 위치(524)에서 실측 기준 총 190px 왼쪽으로.
+  restroomExitX: 334,
   rooms: [
+    // 문 좌표는 설계값이 아니라 assets/background/floor1/corridor.png(실제 그림)에서 육안 실측한 값이다.
+    // GENERATED.md의 "문 좌표 보정" 절 참고.
     { name: 'Harmony Hall', x: 40, width: 520, style: 'hall-portal', target: 'f1-harmony',
-      doorX: 215, doorWidth: 170, doorStyle: 'hall-double' },
+      doorX: 223, doorWidth: 225, doorStyle: 'hall-double' },
     { name: 'Vision Hall', x: 560, width: 380, style: 'gallery', target: 'f1-vision',
-      doorX: 600, doorWidth: 130, doorStyle: 'pivot-glass' },
+      doorX: 650, doorWidth: 143, doorStyle: 'pivot-glass' },
     { name: '건강관리실', x: 940, width: 300, style: 'clinic', target: 'f1-clinic',
-      doorX: 1100, doorWidth: 110, doorStyle: 'clinic-door' },
+      doorX: 1023, doorWidth: 99, doorStyle: 'clinic-door' },
   ],
   fixtures: [
     { name: '층별 안내판', x: 1380, y: 110, width: 360, style: 'directory-board',
@@ -46,14 +61,14 @@ const FLOOR1_LAYOUT = {
         'B3  주차장 / 전기실 / 기계실',
       ],
       message: '층별 안내판이다. 12F 기술본부 · ARCHI 개발팀, 7F AI 테스트·검증실, B2 AI 서버실. 수호의 눈이 그 세 줄에서 자꾸 멈춘다.' },
-    { name: '스피드 게이트', x: 4330, y: 470, width: 120, style: 'speed-gates',
+    { name: '스피드 게이트', x: 4300, y: 470, width: 100, style: 'speed-gates',
       message: '출입증을 대자 작은 화면이 붉게 깜빡인다: "미등록 출입증." 그래도 날개는 정전 때 저절로 풀리는 방식이라 손으로 밀면 그냥 열린다.' },
-    { name: '경비 로봇', x: 4520, y: 440, width: 72, style: 'guard-bot', lines: ['R-01'],
+    { name: '경비 로봇', x: 4495, y: 440, width: 70, style: 'guard-bot', lines: ['R-01'],
       code: '0914', gives: 'f1-robot-log',
       codePrompt: '충전 도크의 배터리로 정비 패널만 희미하게 켜져 있다. 네 자리 번호. 패널 스티커: "정비 코드 = 제작일(월일)."',
       message: '정비 패널이 열린다. 마지막 기록: "23:58 모드 변경 · 순찰 → 차단 · 명령 SYSTEM. 차단 대상: 미등록 출입증 1명(17F 정수호). 최우선 방어 구역: B2 서버실. 대기 중 · 로비 전력이 돌아오면 기동."',
       takenMessage: '정비 패널은 다시 꺼져 있다. 방금 읽은 줄이 떠오른다. 차단 대상 17F 정수호. 사각형 센서 헤드는 엘리베이터 쪽을 향해 있다.' },
-    { name: '정문', x: 4650, y: 140, width: 280, style: 'revolving-door', lines: ['TMAXSOFT TOWER'],
+    { name: '정문', x: 4610, y: 140, width: 320, style: 'revolving-door', lines: ['TMAXSOFT TOWER'],
       message: '회전문도 옆 자동문도 멈춰 있다. 유리 너머 거리의 가로등은 멀쩡히 켜져 있다. 문틀 위 작은 표시창만 배터리로 깜빡인다: "출입 통제 중 · SYSTEM."' },
   ],
   props: [
@@ -64,7 +79,9 @@ const FLOOR1_LAYOUT = {
   ],
 };
 const FLOOR1_ROOMS = interiorRooms(1, [
-  { id: 'f1-harmony', name: 'Harmony Hall', width: 3224, interiorStyle: 'stalls',
+  { id: 'f1-harmony', name: 'Harmony Hall', width: 3224, interiorStyle: 'stalls', exitX: 1215,
+    // exitX: harmony.png에 이미 문이 x=1215 부근에 그려져 있어(실측), 복도 doorX 변경과 무관하게 고정한다.
+    backgroundImage: { src: 'assets/background/floor1/harmony.png', height: 720, top: 0 },
     fixtures: [
       { name: '1층 객석', x: 120, y: 470, width: 1240, style: 'stall-rows' },
       { name: '무대', x: 2000, y: 96, width: 1192, style: 'stage' },
@@ -77,7 +94,9 @@ const FLOOR1_ROOMS = interiorRooms(1, [
         message: '대관 일정표 맨 아래 줄: "매일 03:00~04:00 · 대관 SYSTEM · 무관객 리허설." 시설팀 메모: "새벽에 홀 문이 안에서 잠겨 있음. 2층 영사실 녹화도 같은 시간."' },
       { file: 'water-cooler', size: [256, 512], worldWidth: 62, x: 3150 },
     ] },
-  { id: 'f1-vision', name: 'Vision Hall', width: 2356, interiorStyle: 'exhibit',
+  { id: 'f1-vision', name: 'Vision Hall', width: 2356, interiorStyle: 'exhibit', exitX: 205,
+    // exitX: vision.png에 이미 문이 x=205 부근에 그려져 있어(실측), 복도 doorX 변경과 무관하게 고정한다.
+    backgroundImage: { src: 'assets/background/floor1/vision.png', height: 720, top: 0 },
     fixtures: [
       { name: '기술 연혁 벽', x: 1680, y: 130, width: 520, height: 190, style: 'history-wall',
         lines: ['TMAXSOFT 기술 연혁', '1997 · 2003 · 2008 · 2015 · 2021', '올해 · ARCHI 사내 공개'] },
@@ -91,9 +110,11 @@ const FLOOR1_ROOMS = interiorRooms(1, [
         message: '방명록 마지막 장. 낮 방문객 이름 아래, 새벽 03:14에 적힌 한 줄: "다시 왔습니다 · R-01." 사람 손글씨가 아니라 자로 잰 듯 반듯하다. 진열장 빈 칸 앞 바닥에는 바퀴 자국이 원을 그리고 있다.' },
       { file: 'large-planter', size: [256, 512], worldWidth: 78, x: 2280 },
     ] },
-  { id: 'f1-clinic', name: '건강관리실', width: 1860, windowless: true, interiorStyle: 'ward',
+  { id: 'f1-clinic', name: '건강관리실', width: 1860, windowless: true, interiorStyle: 'ward', exitX: 865,
+    // exitX: clinic.png에 이미 문이 x=865 부근에 그려져 있어(실측), 복도 doorX 변경과 무관하게 고정한다.
+    backgroundImage: { src: 'assets/background/floor1/clinic.png', height: 720, top: 0 },
     fixtures: [
-      { name: '여성휴게실', x: 1680, y: 250, width: 120, style: 'rest-door', lines: ['여성휴게실'],
+      { name: '여성휴게실', x: 1600, y: 250, width: 125, style: 'rest-door', lines: ['여성휴게실'],
         message: '건강관리실 안쪽의 여성휴게실 문이다. 잠겨 있고 문틈도 캄캄하다. 수호는 손잡이에서 손을 거두고 돌아선다.' },
     ],
     props: [

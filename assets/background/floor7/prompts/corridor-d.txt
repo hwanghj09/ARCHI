@@ -1,0 +1,15 @@
+Use case: stylized-concept
+Asset type: production background sprite panorama for ARCHI, a 2D side-scrolling mystery/horror game. This is the RIGHT piece of a long corridor assembled from four pieces.
+Reference image 1 is the existing 17th-floor corridor: material reference only. Reference image 2 is the previous piece of this same corridor: match its ceiling band and wall material at the seam exactly.
+Create ONE landscape PNG, 718 x 720 (ratio about 1:1). Strict orthographic SIDE VIEW, camera perpendicular to the wall, NO vanishing point, NO isometric, NO perspective.
+CRITICAL CANVAS SHAPE: the previous attempt at this same prompt was rendered as 1485x1059 (ratio 1.4:1) — noticeably WIDER than square. That was wrong. The output MUST be very close to a perfect SQUARE (718 wide, 720 tall). If the two doors and wall segments below don't fit comfortably at that width, compress the plain wall margins, NOT the canvas shape — do not widen the canvas to make room.
+Setting: 7th floor, the restricted AI test/verification wing behind the gold lounge, midnight, total power outage, all lights OFF. The material shifts here from black stone to a colder, plainer gray laboratory wall (perforated metal panels, no more gold trim) — this is the working/technical half of the floor. Restrained anime-inspired pixel art, crisp hard pixel clusters. Mystery 80 percent, horror 20 percent. Human sprite about 162 pixels tall.
+CRITICAL COLLISION GEOMETRY: perfectly horizontal walkable floor top at y=570 of 720 (79.17 percent), full width, dark flat cutaway foundation below. Ceiling band y=0..60, cold gray, cable trays instead of gold strip lighting.
+Composition across width (pixel x of this 718-wide canvas):
+x=0..18: seam from the previous piece — a transition strip where black stone with gold trim fades into plain perforated gray metal panels.
+x=18..238: perforated dark gray metal wall, one small unlit wall monitor at y=170..260.
+x=138..248: ONE closed lab sliding door, top y=250, bottom y=570, thin steel frame, small unlit motion sensor above it.
+x=248..378: perforated dark gray metal wall, a small yellow-and-black hazard stripe along the base y=552..570 starting here and continuing to the end.
+x=378..478: ONE closed heavy airlock-style door, top y=290, bottom y=570, thick steel frame with visible bolts around the edge, a single dim red status LED beside it (interlock armed), a small warning light fixture above it.
+x=478..718: perforated dark gray metal wall, hazard stripe continues along the base, plain structural end wall at the very right edge.
+No people, no robots, nothing in the walk lane, no UI, no border, no watermark, no captions, no logos, no readable letters or numbers. Opaque PNG. Output only the finished background.

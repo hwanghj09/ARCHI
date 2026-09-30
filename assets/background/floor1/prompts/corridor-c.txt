@@ -1,0 +1,14 @@
+[참고 이미지: assets/background/floor17/floor17.png (Reference image 1) + corridor-b.png (Reference image 2, 직전 단계에서 만든 결과물)]
+
+Use case: stylized-concept
+Asset type: production background sprite panorama for ARCHI, a 2D side-scrolling mystery/horror game. This is the third piece of a long corridor assembled from four pieces.
+Reference image 1 is the existing 17th-floor corridor extension: material reference only. Reference image 2 is the previous piece of this same corridor: match its pale matte-stone-and-satin-brass palette and ceiling band exactly (plain public-building look, not luxurious, no floor gloss).
+Create ONE landscape PNG, 1196 x 720 (ratio about 1.66:1). Strict orthographic SIDE VIEW, camera perpendicular to the wall, NO vanishing point, NO isometric, NO perspective.
+Setting: ground-floor lobby, midnight, total power outage, all lights OFF. Pale MATTE stone (not polished marble, no gloss, no floor reflections) with simple brushed satin-brass trim (not shiny/ornate) — a plain corporate/public-sector building, not a luxury hotel. IMPORTANT OVERALL EXPOSURE: even though the stone is pale-colored, render the OVERALL SCENE dark and dim like the other floors' blackout scenes, not like a bright daytime photo — most surfaces read as mid-to-dark gray in deep shadow. Restrained anime-inspired pixel art, crisp hard pixel clusters. Mystery 80 percent, horror 20 percent. Human sprite about 162 pixels tall.
+CRITICAL COLLISION GEOMETRY: perfectly horizontal walkable floor top at y=570 of 720 (79.17 percent), full width, flat cutaway foundation below. The floor is plain matte stone — no gloss, no reflections. Ceiling band y=0..60 matching reference image 2.
+Composition across width (pixel x of this 1196-wide canvas):
+x=0..30: seam from the previous piece, blank.
+x=30..470: plain travertine wall with a shallow alcove around x=174-254 (a water cooler sprite stands there — leave it as plain recessed wall).
+x=470..1196: a restroom front, cool pale gray-green matte tile wall (fine tile grid, no gloss) — the same universal restroom material used on every floor, independent of this floor's warm theme.
+x=526..671: ONE plain flat dark metal recess from y=210 to y=570 (the game overlays its own restroom door here), small male/female pictograms on the wall above it, no letters.
+No people, no robots, nothing in the walk lane, no UI, no border, no watermark, no captions, no logos, no readable letters or numbers except the restroom pictograms. Opaque PNG. Output only the finished background.
