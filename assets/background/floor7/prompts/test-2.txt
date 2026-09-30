@@ -1,0 +1,9 @@
+Use case: stylized-concept
+Asset type: production environment background for ARCHI, a 2D side-scrolling mystery game. This is the RIGHT piece of a room interior assembled from two pieces.
+Reference image 1 is the existing 17th-floor office interior: style reference only. Reference image 2 is the left piece of this same room: match its cold gray perforated-metal palette, ceiling band and the panel column at its right edge exactly.
+Create ONE landscape PNG, 1154 x 720 (ratio about 1.6:1). Strict orthographic side elevation, camera perpendicular to the rear wall, no isometric view, no vanishing point.
+Same room: the AI test bay on the 7th floor, midnight, total power outage, everything OFF. Cold gray laboratory wall, perforated metal panels, restrained anime-inspired pixel art, crisp hard pixel clusters. Mystery 80 percent, horror 20 percent.
+IMPORTANT: ARCHITECTURE AND WALL-MOUNTED ITEMS ONLY. Do NOT draw an electronics bench, instrument cart or desk.
+Layout (pixel x): x=0..20 the right half of the plain gray panel column that ends reference image 2. x=20..1134 perforated dark gray metal wall, panel seams every ~200px, a small wall-mounted power meter panel at about x=550..650, y=250..340 with one tiny amber LED. x=1134..1154 plain end wall. Ceiling band y=0..60 continuing reference image 2.
+Geometry: walkable floor top is one perfectly straight horizontal line at y=570 of the 720-high canvas (79.17 percent), full width, dark flat foundation cutaway below. Human height about 162 px.
+No characters, no robots, no UI, no captions, no logos, no watermarks, no legible text or numbers, no foreground occluders. Opaque background. Output only the finished game background.

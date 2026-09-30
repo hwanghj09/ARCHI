@@ -1,0 +1,22 @@
+[참고 이미지: assets/background/floor17/floor17.png (Reference image 1)]
+
+Use case: stylized-concept
+Asset type: production background sprite panorama for ARCHI, a 2D side-scrolling mystery/horror game. This is the actual environment artwork, NOT a concept poster. It is the LEFT piece of a long corridor assembled from four pieces.
+Reference image 1 is the existing 17th-floor corridor. Use it ONLY as the architectural, material, lighting and pixel-art style reference. Do not copy its layout.
+Create ONE landscape PNG, 1818 x 720 (ratio 2.53:1). Strict orthographic SIDE VIEW, camera exactly perpendicular to the wall. NO vanishing point, NO isometric, NO perspective.
+Setting: the GROUND-FLOOR LOBBY of a Korean software-company tower, the west wing with a concert hall and an exhibition hall, midnight during a total power outage. All ceiling lights are OFF. Light comes only from faint ambient glow and one small green exit pictogram. Restrained atmospheric anime-inspired pixel art, crisp hard-edged pixel clusters, realistic adult scale. Palette: pale beige-cream stone floor and walls — MATTE stone, NOT polished marble, NOT glossy, no mirror reflections on the floor — with simple brushed satin-brass trim (not shiny/polished gold, not ornate). This is a plain corporate/public-sector office building lobby, like a mid-size company headquarters or a government building, NOT a luxury hotel or five-star retail space. No ornate moldings, no decorative arches, no rich glossy wood — keep every surface plain and functional. IMPORTANT OVERALL EXPOSURE: even though the stone is pale-colored, render the OVERALL SCENE dark and dim, matching the underexposed blackout look of the other floors of this same building (a pitch-dark corridor lit only by faint ambient glow) — most surfaces should read as mid-to-dark gray in deep shadow, NOT lit like a daytime photo or a real-estate listing photo. Only the small green exit pictogram and thin brass accent lines should stand out as the brightest points in the frame. Mystery 80 percent, horror 20 percent: an empty public lobby at night. Human sprite on screen is about 162 pixels tall; doors on this wall read at that scale.
+CRITICAL COLLISION GEOMETRY: the continuous, perfectly horizontal top edge of the walkable floor is at y=570 of this 720-high canvas (79.17 percent from the top), from extreme left to extreme right. All door bottoms sit exactly on this line. Below it is a flat cutaway floor foundation, no perspective. The floor itself is plain matte stone — no gloss, no wet-look shine, no reflections of the doors or ceiling. Ceiling band y=0..60, pale stone with a thin brass accent strip (switched off recessed lights).
+Composition across width (pixel x of this 1818-wide canvas):
+x=0..32: plain structural end wall.
+x=32..215: pale travertine wall with a brass pilaster strip.
+x=215..385: ONE closed double door for a concert hall entrance, top y=140, bottom y=570, plain flush wood-veneer double doors (matte finish, NOT rich mahogany, NOT glossy) with simple brushed-brass push bars, a small plain rectangular brass name-plate frame above it — no ornate arch, no decorative molding, keep it functional-looking like a public auditorium entrance.
+x=385..600: pale travertine wall, brass trim.
+x=600..730: ONE closed pivoting glass door for an exhibition hall, top y=180, bottom y=570, slim brass frame, single large glass pane.
+x=730..940: pale travertine wall.
+x=940..1100: pale travertine wall, slightly more clinical/plain in tone (a health-clinic front approaching).
+x=1100..1210: ONE closed clinic door, top y=230, bottom y=570, plain pale door with a small frosted glass panel and a brass handle.
+x=1210..1380: pale travertine wall with brass pilaster strip.
+x=1380..1740: a tall shallow wall niche/frame with a thin brass border, completely empty inside (the game draws a 19-line floor directory here — leave it blank).
+x=1740..1790: plain travertine wall (a potted plant sprite stands here — keep the lower wall plain).
+x=1790..1818: plain wall (the seam to the next piece — keep it completely blank).
+No people, no monsters, no robots, no floor-standing furniture, nothing in the walk lane, no UI, no border, no watermark, no captions, no logos, no readable letters or numbers anywhere. Opaque PNG. Output only the finished background.

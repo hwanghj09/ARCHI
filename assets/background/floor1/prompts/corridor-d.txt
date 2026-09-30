@@ -1,0 +1,17 @@
+[참고 이미지: assets/background/floor17/floor17.png (Reference image 1) + corridor-c.png (Reference image 2, 직전 단계에서 만든 결과물)]
+
+Use case: stylized-concept
+Asset type: production background sprite panorama for ARCHI, a 2D side-scrolling mystery/horror game. This is the RIGHT piece of a long corridor assembled from four pieces.
+Reference image 1 is the existing 17th-floor corridor: material reference only. Reference image 2 is the previous piece of this same corridor: match its ceiling band and wall material at the seam exactly.
+Create ONE landscape PNG, 718 x 720 (ratio about 1:1). Strict orthographic SIDE VIEW, camera perpendicular to the wall, NO vanishing point, NO isometric, NO perspective.
+Setting: the main entrance area of the ground-floor lobby, midnight, a few minutes into a building-wide power outage. Pale MATTE stone (not polished marble, no gloss) with simple brushed satin-brass trim (not shiny/ornate) — a plain corporate/public-sector building entrance, not a luxury hotel. IMPORTANT OVERALL EXPOSURE: even though the stone is pale-colored, render the OVERALL SCENE dark and dim like the other floors' blackout scenes, not like a bright daytime photo — most surfaces read as mid-to-dark gray in deep shadow now that the lights are off; only the street lamps outside the glass and small LEDs should read as bright points. Restrained atmospheric anime-inspired pixel art, crisp hard pixel clusters. Mystery 80 percent, horror 20 percent. Human sprite about 162 pixels tall; door openings read as roughly 250-300px tall at this scale — do not draw the robot or gates undersized relative to a person.
+CRITICAL COLLISION GEOMETRY: the continuous, perfectly horizontal top edge of the walkable floor sits at y=570 of this 720-tall canvas, unbroken across the full width. Below it a flat cutaway floor foundation, no perspective. The floor is a plain matte stone walkway, not glossy, no reflections.
+Composition across width (pixel x of this 718-wide canvas):
+x=0..48: seam from the previous piece, plain travertine wall with brass trim.
+x=48..168: a row of waist-high glass turnstile security gates, paddles closed, brass frame posts, one tiny dim red LED per gate — a fixed architectural feature, not a game prop.
+x=168..238: plain travertine wall.
+x=238..310: standing motionless at floor level, ONE powered-down security robot on a small charging dock — simple boxy/humanoid utility chassis, matte pale gray with brass trim accents matching the lobby, no face detail, head slightly bowed, a single tiny dim status light on its chest, currently unlit (no power). It is doing nothing, not a person, no readable text on it, roughly human height using the scale above.
+x=310..400: plain travertine wall.
+x=400..680: a tall glass entrance storefront with a revolving door and glass double doors leading outside, brass frame mullions, from y=140 to the floor. Through the glass: a distant, low-detail night skyline in silhouette and one or two working street lamps outside (the power outage is only inside the building), kept simple and flat, no rain, no wet reflections.
+x=680..718: plain structural end wall (the far corner of the lobby).
+No large readable lettering; everything blank except small pictograms. No people other than the one motionless robot, no other robots, no monsters, no UI, no border, no watermark, no captions. Opaque PNG. Output only the finished background.

@@ -1,0 +1,5 @@
+Use case: stylized-concept
+Asset type: a single small production game prop tile for ARCHI, a 2D side-scrolling mystery/horror pixel-art game. This is NOT a scene, just one isolated wall-mounted object to be composited into an existing corridor background later.
+Create ONE small square PNG, 128 x 128, opaque background filled with plain dark graphite gray wall material (matching a 12th-floor office corridor: cool steel gray, restrained anime-inspired pixel art, crisp hard pixel clusters), so it can be pasted directly onto a matching wall without a visible seam.
+Centered in the tile: a small unlit elevator call-button plate, identical in style to a standard modern elevator call panel — a vertical brushed-steel rectangular housing, about 40% of the tile's width and 60% of its height, with two small circular buttons stacked vertically inside it (both unlit/dark, no glow, power outage), a thin dark bezel around the housing.
+Strict orthographic front-on view, flat lighting, no shadows besides a subtle contact shadow directly under the housing. No people, no text, no numbers, no logos, no UI, no watermark, no border. Output only the finished tile.

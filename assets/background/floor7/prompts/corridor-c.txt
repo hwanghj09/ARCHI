@@ -1,0 +1,13 @@
+Use case: stylized-concept
+Asset type: production background sprite panorama for ARCHI, a 2D side-scrolling mystery/horror game. This is the third piece of a long corridor assembled from four pieces.
+Reference image 1 is the existing 17th-floor corridor extension: material and lighting reference only. Reference image 2 is the previous piece of this same corridor: match its black-stone-and-champagne-gold palette and ceiling band exactly.
+Create ONE landscape PNG, 1196 x 720 (ratio about 1.66:1). Strict orthographic SIDE VIEW, camera perpendicular to the wall, NO vanishing point, NO isometric, NO perspective.
+Setting: 7th floor, midnight, total power outage, all lights OFF. Dark polished black stone with warm champagne-gold trim, restrained anime-inspired pixel art, crisp hard pixel clusters. Mystery 80 percent, horror 20 percent. Human sprite about 162 pixels tall.
+CRITICAL COLLISION GEOMETRY: perfectly horizontal walkable floor top at y=570 of 720 (79.17 percent), full width, dark flat cutaway foundation below. Ceiling band y=0..60 matching reference image 2.
+Composition across width (pixel x of this 1196-wide canvas):
+x=0..10: seam from the previous piece, blank.
+x=10..94: a shallow blank wall niche with a thin dark-red border, completely empty inside (the game draws a "관계자 외 출입 금지" restricted-access sign here — leave it blank of text, just the frame and a faint warning stripe).
+x=94..470: plain black stone wall, gold pilaster strips.
+x=470..1196: a restroom front, clean pale gray-green rectangular tiles from y=118 to the floor (same universal restroom material used on every floor, independent of this floor's gold theme).
+x=526..671: ONE plain flat dark metal recess from y=210 to y=570 (the game overlays its own restroom door here), small male/female pictograms on the wall above it, no letters.
+No people, no robots, nothing in the walk lane, no UI, no border, no watermark, no captions, no logos, no readable letters or numbers except the restroom pictograms. Opaque PNG. Output only the finished background.
