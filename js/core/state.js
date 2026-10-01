@@ -21,3 +21,10 @@ let selectingFloor = false;
 let usingComputer = false;
 // 도어락 키패드(방 문·소품의 code): 열려 있는 동안 플레이어 조작을 멈춘다.
 let usingKeypad = false;
+// 휴대폰과 옥상 전력 분배 UI. 전력은 지상층 중 정확히 한 층만 선택할 수 있다.
+let usingPhone = false;
+let usingPowerPanel = false;
+let usingInspection = false;
+let phoneBattery = 100;
+let phoneLightOn = false;
+let solarPoweredFloor = null;

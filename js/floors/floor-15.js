@@ -18,7 +18,7 @@ const FLOOR15_LAYOUT = {
     { file: 'water-cooler', size: [256, 512], worldWidth: 62, x: 1640 },
     { file: 'large-planter', size: [256, 512], worldWidth: 78, x: 1740 },
     { file: 'waiting-sofa', size: [512, 256], worldWidth: 250, x: 4420 },
-    { file: 'research-board', size: [512, 256], worldWidth: 362, x: 4730, name: '연구본부 소식지',
+    { file: 'research-news-board', size: [512, 256], worldWidth: 362, x: 4730, name: '연구본부 소식지',
       message: '월간 연구본부 소식: "12층 ARCHI 개발팀에 연구 클러스터 야간 사용 권한 부여 (시범)." 그 밑에 손글씨: "시범이 석 달째."' },
   ],
 };

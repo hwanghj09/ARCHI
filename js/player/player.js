@@ -25,7 +25,7 @@ function animate(distance, sprinting = false, elapsed = 0) {
   const walking = grounded && walkReady && distance > .1 && !running;
   walkDistance = walking ? (walkDistance + distance) % (frameDistance * walkFrames) : 0;
   runDistance = running ? (runDistance + distance) % (runFrameDistance * runFrames) : 0;
-  const state = !grounded ? (body.velocity.y < 0 ? 'jump' : 'fall') :
+  const state = usingPhone ? 'phone' : !grounded ? (body.velocity.y < 0 ? 'jump' : 'fall') :
     interactionTime > 0 ? 'interact' : running ? 'run' : walking ? 'walk' : 'idle';
   idleTime = state === 'idle' && sprite.dataset.state === 'idle' ? (idleTime + elapsed) % 3200 : 0;
   const index = state === 'fall' ? 1 : state === 'interact' ? Number(interactionTime <= 240) :

@@ -11,8 +11,10 @@
       body { margin: 0; overflow: hidden; background: #27292b; color: #eee; font: 14px Arial, sans-serif; }
       #stage { position: relative; width: 100%; height: 100dvh; overflow: hidden; touch-action: none; }
       #world { position: absolute; transform-origin: top left; background: #151f25; }
-      #darkness { display: none; position: absolute; inset: 0; z-index: 1; pointer-events: none; background: radial-gradient(circle at var(--sight-x, 640px) var(--sight-y, 489px), #0000000d 0 90px, #000000e6 160px, #000 210px); }
-      #world[data-lights="off"][data-floor="17"] #darkness { display: block; }
+      #darkness { display: none; position: absolute; inset: 0; z-index: 1; pointer-events: none; background: radial-gradient(circle at var(--sight-x, 640px) var(--sight-y, 489px), #00000018 0 46px, #000000f0 90px, #000 125px); }
+      #world[data-blackout="true"] #darkness { display: block; }
+      #world[data-blackout="true"][data-flashlight="on"] #darkness { background: radial-gradient(ellipse 320px 190px at var(--sight-x, 640px) var(--sight-y, 489px), #00000008 0 90px, #000000d9 230px, #000 320px); }
+      #world[data-lights="off"][data-floor="17"][data-powered="false"] #darkness { display: block; }
       #background { position: absolute; inset: 0; overflow: hidden; pointer-events: none; user-select: none; }
       #background img { position: absolute; width: 256px; height: 256px; image-rendering: pixelated; }
       #office-background { display: none; position: absolute; pointer-events: none; user-select: none; image-rendering: pixelated; }
@@ -27,6 +29,7 @@
       #dynamic-scene > .floor { background: #171b1a; border-top: 2px solid #626963; }
       .solar-supply { position: absolute; width: 360px; height: 360px; overflow: hidden; pointer-events: none; image-rendering: pixelated; }
       .solar-supply img { display: block; width: 200%; height: 100%; max-width: none; }
+      .solar-supply[data-active="true"] img { transform: translateX(-50%); }
       .floor-room { position: absolute; top: 118px; height: 452px; border: 6px solid #2a363b; border-bottom: 0; background: linear-gradient(#172025, #11181b); pointer-events: none; }
       .floor-room::before { content: ''; position: absolute; top: 34px; left: 28px; right: 28px; height: 190px; border: 5px solid #2f3d43; background: radial-gradient(circle, #c9b77a55 0 1.5px, transparent 2px) 0 60px / 26px 22px, linear-gradient(transparent 38%, #0b1116 38%), linear-gradient(#0c1a2b, #16273a); }
       .floor-room-sign { position: absolute; top: -40px; left: 50%; transform: translateX(-50%); padding: 3px 12px; border: 2px solid #3d4e52; background: #0d1417; color: #a9bfb6; font: bold 15px Arial, sans-serif; white-space: nowrap; }
@@ -399,7 +402,11 @@
       .barrier { position: absolute; pointer-events: none; }
       .barrier.near { outline: 2px solid #96b7aa; }
       .barrier.shutter { border: 3px solid #5b5f66; border-top: 0; background: radial-gradient(circle at 50% 80%, #0d0f12 0 3px, #c9a13b 3px 5px, transparent 5px), repeating-linear-gradient(#8a8f96 0 9px, #5e636b 9px 12px, #3c4046 12px 14px); box-shadow: inset 0 -12px #c9a13b; }
+      .barrier.shutter[data-sprite="true"] { overflow: visible; border: 0; background: none; box-shadow: none; }
+      .barrier.shutter[data-sprite="true"] img { position: absolute; left: -12px; top: -30px; width: 96px; height: calc(100% + 30px); max-width: none; clip-path: inset(0 48px 0 0); }
+      .barrier.shutter[data-sprite="true"][data-open="true"] img { transform: translateX(-48px); clip-path: inset(0 0 0 48px); }
       .barrier.shutter::before { content: ''; position: absolute; top: -30px; left: -12px; right: -12px; height: 30px; border: 3px solid #4a4f58; background: linear-gradient(#3a3f47, #2a2e35); }
+      .barrier.shutter[data-sprite="true"]::before { display: none; }
       .barrier.shutter[data-open="true"] { border: 0; background: repeating-linear-gradient(#8a8f96 0 9px, #5e636b 9px 12px, #3c4046 12px 14px) 0 0 / 100% 24px no-repeat; box-shadow: none; }
       /* 10F 경영관리본부: 짙은 옥색 벽과 크림색 몰딩(finance 테마), 창 없는 금고실과 이중 잠금 서류함 */
       #dynamic-scene[data-theme="finance"] > .floor { background: repeating-linear-gradient(90deg, #17201d 0 158px, #26302c 158px 160px); border-top-color: #b3a784; }
@@ -712,6 +719,7 @@
       #player[data-state="jump"] #jump-sheet,
       #player[data-state="fall"] #jump-sheet,
       #player[data-state="interact"] #interact-sheet { display: block; }
+      #player[data-state="phone"] #interact-sheet { display: block; }
       #interact-sheet { position: relative; top: -4px; }
       header { position: absolute; inset: max(24px, env(safe-area-inset-top)) max(24px, env(safe-area-inset-right)) auto max(24px, env(safe-area-inset-left)); display: flex; justify-content: space-between; gap: 16px; pointer-events: none; }
       header strong { font-size: 18px; font-weight: 600; }
@@ -738,6 +746,20 @@
       #keypad-error { min-height: 1.3em; margin: 8px 0; color: #e08a7a; }
       #keypad .keypad-buttons { display: flex; justify-content: flex-end; gap: 8px; }
       #keypad button { padding: 8px 14px; font: 14px Arial, sans-serif; }
+      .device-dialog { position: fixed; z-index: 8; left: 50%; top: 50%; box-sizing: border-box; width: min(380px, calc(100vw - 28px)); padding: 18px; border: 2px solid #526064; border-radius: 18px; background: #091013f5; color: #e4ebe7; transform: translate(-50%, -50%); box-shadow: 0 16px 60px #000d; }
+      .device-dialog[hidden] { display: none; }
+      .device-dialog h2 { margin: 0 0 14px; font-size: 18px; }
+      .device-dialog button { min-height: 42px; padding: 8px 12px; border: 1px solid #647579; background: #192328; color: inherit; cursor: pointer; }
+      .device-dialog button[aria-pressed="true"], .device-dialog button.active { border-color: #b9e89c; background: #304a38; }
+      #phone-battery-track { height: 12px; margin: 8px 0 18px; border: 1px solid #89989a; background: #111; }
+      #phone-battery-fill { display: block; height: 100%; width: 100%; background: #8fe06a; }
+      #power-floor-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; margin: 12px 0; }
+      .dialog-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 14px; }
+      #inspection { width: min(560px, calc(100vw - 28px)); border-radius: 6px; background: #172126f5; }
+      #inspection[data-kind="paper"] { border-color: #9f906d; background: #ddd2b9; color: #28251f; box-shadow: 0 16px 60px #000d, inset 0 0 50px #8f7d5422; }
+      #inspection[data-kind="note"] { width: min(420px, calc(100vw - 28px)); border: 0; border-radius: 1px; background: #d8cf78; color: #292713; transform: translate(-50%, -50%) rotate(-1deg); box-shadow: 3px 7px 20px #0009; }
+      #inspection h2 { padding-bottom: 9px; border-bottom: 1px solid currentColor; }
+      #inspection-text { min-height: 7em; margin: 0; font-size: 16px; line-height: 1.8; white-space: pre-line; }
       @media (max-height: 480px) {
         nav { bottom: max(12px, env(safe-area-inset-bottom)); }
         nav button { width: 48px; height: 44px; }
@@ -786,6 +808,9 @@
     <script src="js/interaction/cctv.js" defer></script>
     <script src="js/interaction/keypad.js" defer></script>
     <script src="js/interaction/interaction.js" defer></script>
+    <script src="js/interaction/phone.js" defer></script>
+    <script src="js/interaction/power.js" defer></script>
+    <script src="js/interaction/inspection.js" defer></script>
     <script src="js/computer/documents.js" defer></script>
     <script src="js/computer/computer.js" defer></script>
     <script src="js/elevator/cabin.js" defer></script>
@@ -823,6 +848,7 @@
         <button type="button" data-direction="1" aria-label="오른쪽 이동" title="오른쪽 이동 (D / →)">→</button>
         <button id="interact" type="button" aria-label="상호작용" title="상호작용 (E)">E</button>
         <button id="jump" type="button" aria-label="점프" title="점프 (Space / W / ↑)">↑</button>
+        <button id="phone-button" type="button" aria-label="휴대폰" title="휴대폰 (P)">▣</button>
       </nav>
       <div id="interaction-status" role="status" aria-live="polite"></div>
     </main>
@@ -838,6 +864,25 @@
         <button type="submit" id="keypad-submit">확인</button>
       </div>
     </form>
+    <section id="phone" class="device-dialog" role="dialog" aria-modal="true" aria-labelledby="phone-title" hidden>
+      <h2 id="phone-title">수호의 휴대폰</h2>
+      <div><span>배터리</span> <output id="phone-battery">100%</output></div>
+      <div id="phone-battery-track" aria-hidden="true"><span id="phone-battery-fill"></span></div>
+      <button id="phone-light" type="button" aria-pressed="false">라이트 켜기 <small>(F)</small></button>
+      <div class="dialog-actions"><button id="phone-close" type="button">닫기 (P)</button></div>
+    </section>
+    <section id="power-panel" class="device-dialog" role="dialog" aria-modal="true" aria-labelledby="power-title" hidden>
+      <h2 id="power-title">옥상 태양광 비상 전력</h2>
+      <p>지상층 중 한 층에만 전력을 공급할 수 있습니다.</p>
+      <output id="power-status">공급 중인 층 없음</output>
+      <div id="power-floor-grid"></div>
+      <div class="dialog-actions"><button id="power-off" type="button">공급 중단</button><button id="power-close" type="button">닫기</button></div>
+    </section>
+    <section id="inspection" class="device-dialog" role="dialog" aria-modal="true" aria-labelledby="inspection-title" data-kind="object" hidden>
+      <h2 id="inspection-title">조사</h2>
+      <p id="inspection-text"></p>
+      <div class="dialog-actions"><button id="inspection-close" type="button">닫기 (E / Esc)</button></div>
+    </section>
     <form id="debug-floor" aria-label="테스트용 층 이동">
       <label for="debug-floor-select">TEST 층 이동</label>
       <select id="debug-floor-select"></select>

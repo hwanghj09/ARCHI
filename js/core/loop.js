@@ -13,10 +13,12 @@ function update() {
     updateCabin();
     return;
   }
-  if (usingComputer || usingKeypad) {
+  if (usingComputer || usingKeypad || usingPhone || usingPowerPanel || usingInspection) {
     updateElevators();
+    updatePhone(step);
     return;
   }
+  updatePhone(step);
   const directions = [...keys].map(key => movementKeys[key]).concat([...pointers.values()]);
   if (pulseTime > 0) directions.push(pulseDirection);
   pulseTime = Math.max(0, pulseTime - step);

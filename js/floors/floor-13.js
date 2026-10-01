@@ -23,7 +23,7 @@ const FLOOR13_LAYOUT = {
     { file: 'support-workstation', size: [512, 256], worldWidth: 270, x: 480 },
     { file: 'support-workstation', size: [512, 256], worldWidth: 270, x: 760 },
     { file: 'support-workstation', size: [512, 256], worldWidth: 270, x: 1040 },
-    { file: 'rolling-whiteboard', size: [512, 256], worldWidth: 350, x: 1400, name: '출동 현황판',
+    { file: 'dispatch-board', size: [512, 256], worldWidth: 350, x: 1400, name: '출동 현황판',
       message: '엔지니어 출동 현황: 전원 "고객사 상주". 본사 야간 대기: 0명. 아래 공지: "야간 장애 알림은 자동 종결 시스템이 대응합니다."' },
     { file: 'water-cooler', size: [256, 512], worldWidth: 62, x: 1680 },
   ],
@@ -55,7 +55,7 @@ const FLOOR13_ROOMS = interiorRooms(13, [
     { file: 'network-rack', size: [256, 512], worldWidth: 96, x: 1640 },
   ] },
   { id: 'f13-training', name: '고객 교육장', width: 1824, props: [
-    { file: 'rolling-whiteboard', size: [512, 256], worldWidth: 350, x: 300, name: '교육 자료 보드',
+    { file: 'training-slide-board', size: [512, 256], worldWidth: 350, x: 300, name: '교육 자료 보드',
       message: '사내 안전 교육 슬라이드 출력물: "정전 시 옥상 태양광 비상 전력 장치를 쓴다. 용량이 작아 한 번에 한 층에만 전력을 보낼 수 있다. 다른 층을 켜려면 켜 둔 층을 먼저 끌 것."' },
     { file: 'training-workstation', size: [512, 256], worldWidth: 300, x: 720 },
     { file: 'training-workstation', size: [512, 256], worldWidth: 300, x: 1120, name: '교육생 자리',

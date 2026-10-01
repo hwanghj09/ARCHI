@@ -2,12 +2,13 @@
 function pressAction(button) {
   if (button.id === 'jump') jumpQueued = true;
   else if (button.id === 'interact') interact();
+  else if (button.id === 'phone-button') togglePhone();
 }
 
 buttons.forEach(button => {
   const direction = Number(button.dataset.direction) || 0;
   button.addEventListener('pointerdown', event => {
-    if (event.button !== 0 || transitioning || selectingFloor || usingComputer || usingKeypad) return;
+    if (event.button !== 0 || transitioning || selectingFloor || usingComputer || usingKeypad || usingPhone || usingPowerPanel || usingInspection) return;
     event.preventDefault();
     button.setPointerCapture(event.pointerId);
     if (direction) pointers.set(event.pointerId, direction);
@@ -21,7 +22,7 @@ buttons.forEach(button => {
   ['pointerup', 'pointercancel', 'lostpointercapture'].forEach(name => button.addEventListener(name, release));
   button.addEventListener('contextmenu', event => event.preventDefault());
   button.addEventListener('click', event => {
-    if (event.detail !== 0 || transitioning || selectingFloor || usingComputer || usingKeypad) return;
+    if (event.detail !== 0 || transitioning || selectingFloor || usingComputer || usingKeypad || usingPhone || usingPowerPanel || usingInspection) return;
     if (direction) {
       pulseDirection = direction;
       pulseTime = 150;
