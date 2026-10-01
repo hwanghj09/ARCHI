@@ -1,0 +1,1042 @@
+{
+  "generator": "built-in image_gen",
+  "spec": "docs/INTERACTION-SPRITES.md",
+  "integrated": false,
+  "layout": "horizontal",
+  "assets": [
+    {
+      "id": "cafe-table-badge-states",
+      "path": "assets/objects/floor16/cafe-table-badge-states.png",
+      "source": "assets/interaction-sprites/source/cafe-table-badge-states.png",
+      "sheetSize": [
+        1024,
+        256
+      ],
+      "frameSize": [
+        512,
+        256
+      ],
+      "frames": 2,
+      "states": [
+        "badge-present",
+        "badge-collected"
+      ],
+      "anchor": [
+        256,
+        248
+      ],
+      "transforms": [
+        {
+          "sourceCell": [
+            0,
+            0,
+            1086,
+            724
+          ],
+          "sourceCrop": [
+            36,
+            254,
+            1076,
+            576
+          ],
+          "destinationRect": [
+            8,
+            98,
+            496,
+            150
+          ]
+        },
+        {
+          "sourceCell": [
+            1086,
+            0,
+            2172,
+            724
+          ],
+          "sourceCrop": [
+            10,
+            254,
+            1050,
+            576
+          ],
+          "destinationRect": [
+            8,
+            98,
+            496,
+            150
+          ]
+        }
+      ],
+      "worldWidth": 356
+    },
+    {
+      "id": "shutter-panel-states",
+      "path": "assets/objects/floor16/shutter-panel-states.png",
+      "source": "assets/interaction-sprites/source/shutter-panel-states.png",
+      "sheetSize": [
+        512,
+        512
+      ],
+      "frameSize": [
+        256,
+        512
+      ],
+      "frames": 2,
+      "states": [
+        "system-locked",
+        "manual-open"
+      ],
+      "anchor": [
+        128,
+        504
+      ],
+      "transforms": [
+        {
+          "sourceCell": [
+            0,
+            0,
+            630,
+            1247
+          ],
+          "sourceCrop": [
+            280,
+            40,
+            575,
+            1203
+          ],
+          "destinationRect": [
+            63,
+            8,
+            130,
+            496
+          ]
+        },
+        {
+          "sourceCell": [
+            630,
+            0,
+            1261,
+            1247
+          ],
+          "sourceCrop": [
+            108,
+            40,
+            404,
+            1204
+          ],
+          "destinationRect": [
+            63,
+            8,
+            130,
+            496
+          ]
+        }
+      ],
+      "worldWidth": 89
+    },
+    {
+      "id": "archive-worklight-states",
+      "path": "assets/objects/floor14/archive-worklight-states.png",
+      "source": "assets/interaction-sprites/source/archive-worklight-states.png",
+      "sheetSize": [
+        512,
+        256
+      ],
+      "frameSize": [
+        256,
+        256
+      ],
+      "frames": 2,
+      "states": [
+        "off",
+        "on"
+      ],
+      "anchor": [
+        128,
+        248
+      ],
+      "transforms": [
+        {
+          "sourceCell": [
+            0,
+            0,
+            887,
+            887
+          ],
+          "sourceCrop": [
+            82,
+            49,
+            841,
+            848
+          ],
+          "destinationRect": [
+            14,
+            8,
+            228,
+            240
+          ]
+        },
+        {
+          "sourceCell": [
+            887,
+            0,
+            1774,
+            887
+          ],
+          "sourceCrop": [
+            62,
+            49,
+            821,
+            848
+          ],
+          "destinationRect": [
+            14,
+            8,
+            228,
+            240
+          ]
+        }
+      ],
+      "worldWidthNote": "Use existing runtime object width; floor-kit manifest does not specify a suggestedWorldWidth for this asset."
+    },
+    {
+      "id": "testbay-ups-states",
+      "path": "assets/objects/floor13/testbay-ups-states.png",
+      "source": "assets/interaction-sprites/source/testbay-ups-states.png",
+      "sheetSize": [
+        512,
+        256
+      ],
+      "frameSize": [
+        256,
+        256
+      ],
+      "frames": 2,
+      "states": [
+        "off",
+        "emergency-output"
+      ],
+      "anchor": [
+        128,
+        248
+      ],
+      "transforms": [
+        {
+          "sourceCell": [
+            0,
+            0,
+            887,
+            887
+          ],
+          "sourceCrop": [
+            137,
+            39,
+            833,
+            873
+          ],
+          "destinationRect": [
+            28,
+            8,
+            200,
+            240
+          ]
+        },
+        {
+          "sourceCell": [
+            887,
+            0,
+            1774,
+            887
+          ],
+          "sourceCrop": [
+            54,
+            39,
+            750,
+            873
+          ],
+          "destinationRect": [
+            28,
+            8,
+            200,
+            240
+          ]
+        }
+      ],
+      "worldWidthNote": "Use existing runtime object width; floor-kit manifest does not specify a suggestedWorldWidth for this asset."
+    },
+    {
+      "id": "incident-printer-states",
+      "path": "assets/objects/floor13/incident-printer-states.png",
+      "source": "assets/interaction-sprites/source/incident-printer-states.png",
+      "sheetSize": [
+        512,
+        256
+      ],
+      "frameSize": [
+        256,
+        256
+      ],
+      "frames": 2,
+      "states": [
+        "off",
+        "warning-printed"
+      ],
+      "anchor": [
+        128,
+        248
+      ],
+      "transforms": [
+        {
+          "sourceCell": [
+            0,
+            0,
+            887,
+            887
+          ],
+          "sourceCrop": [
+            166,
+            82,
+            760,
+            859
+          ],
+          "destinationRect": [
+            43,
+            26,
+            170,
+            222
+          ]
+        },
+        {
+          "sourceCell": [
+            887,
+            0,
+            1774,
+            887
+          ],
+          "sourceCrop": [
+            127,
+            41,
+            724,
+            859
+          ],
+          "destinationRect": [
+            42,
+            14,
+            171,
+            234
+          ]
+        }
+      ],
+      "worldWidthNote": "Use existing runtime object width; floor-kit manifest does not specify a suggestedWorldWidth for this asset."
+    },
+    {
+      "id": "emergency-cabinet-states",
+      "path": "assets/objects/floor11/emergency-cabinet-states.png",
+      "source": "assets/interaction-sprites/source/emergency-cabinet-states.png",
+      "sheetSize": [
+        1024,
+        256
+      ],
+      "frameSize": [
+        512,
+        256
+      ],
+      "frames": 2,
+      "states": [
+        "crank-present",
+        "empty-hooks"
+      ],
+      "anchor": [
+        256,
+        248
+      ],
+      "transforms": [
+        {
+          "sourceCell": [
+            0,
+            0,
+            1086,
+            724
+          ],
+          "sourceCrop": [
+            60,
+            105,
+            1075,
+            615
+          ],
+          "destinationRect": [
+            18,
+            8,
+            475,
+            240
+          ]
+        },
+        {
+          "sourceCell": [
+            1086,
+            0,
+            2172,
+            724
+          ],
+          "sourceCrop": [
+            11,
+            105,
+            1027,
+            614
+          ],
+          "destinationRect": [
+            18,
+            8,
+            475,
+            240
+          ]
+        }
+      ],
+      "worldWidth": 198
+    },
+    {
+      "id": "jeong-suho-phone-idle",
+      "path": "assets/player/jeong-suho-phone-idle.png",
+      "source": "assets/interaction-sprites/source/jeong-suho-phone-idle.png",
+      "sheetSize": [
+        1024,
+        256
+      ],
+      "frameSize": [
+        256,
+        256
+      ],
+      "frames": 4,
+      "states": [
+        "take-from-pocket",
+        "raise",
+        "look",
+        "breathe"
+      ],
+      "anchor": [
+        128,
+        239
+      ],
+      "transforms": [
+        {
+          "sourceCell": [
+            0,
+            0,
+            543,
+            724
+          ],
+          "sourceCrop": [
+            146,
+            39,
+            387,
+            702
+          ],
+          "destinationRect": [
+            92,
+            18,
+            80,
+            221
+          ]
+        },
+        {
+          "sourceCell": [
+            543,
+            0,
+            1086,
+            724
+          ],
+          "sourceCrop": [
+            167,
+            39,
+            387,
+            702
+          ],
+          "destinationRect": [
+            99,
+            18,
+            73,
+            221
+          ]
+        },
+        {
+          "sourceCell": [
+            1086,
+            0,
+            1629,
+            724
+          ],
+          "sourceCrop": [
+            168,
+            40,
+            387,
+            702
+          ],
+          "destinationRect": [
+            99,
+            18,
+            73,
+            221
+          ]
+        },
+        {
+          "sourceCell": [
+            1629,
+            0,
+            2172,
+            724
+          ],
+          "sourceCrop": [
+            162,
+            40,
+            382,
+            702
+          ],
+          "destinationRect": [
+            99,
+            18,
+            73,
+            221
+          ]
+        }
+      ],
+      "worldWidthNote": "Use existing runtime object width; floor-kit manifest does not specify a suggestedWorldWidth for this asset."
+    },
+    {
+      "id": "labeling-board-states",
+      "path": "assets/objects/floor14/labeling-board-states.png",
+      "source": "assets/interaction-sprites/source/labeling-board-states.png",
+      "sheetSize": [
+        1024,
+        256
+      ],
+      "frameSize": [
+        512,
+        256
+      ],
+      "frames": 2,
+      "states": [
+        "unfinished",
+        "completed-overnight"
+      ],
+      "anchor": [
+        256,
+        248
+      ],
+      "transforms": [
+        {
+          "sourceCell": [
+            0,
+            0,
+            1086,
+            724
+          ],
+          "sourceCrop": [
+            18,
+            86,
+            1067,
+            659
+          ],
+          "destinationRect": [
+            8,
+            23,
+            496,
+            225
+          ]
+        },
+        {
+          "sourceCell": [
+            1086,
+            0,
+            2172,
+            724
+          ],
+          "sourceCrop": [
+            19,
+            86,
+            1068,
+            658
+          ],
+          "destinationRect": [
+            8,
+            23,
+            496,
+            225
+          ]
+        }
+      ],
+      "worldWidth": 350
+    },
+    {
+      "id": "voice-kiosk-states",
+      "path": "assets/objects/floor16/voice-kiosk-states.png",
+      "source": "assets/interaction-sprites/source/voice-kiosk-states.png",
+      "sheetSize": [
+        768,
+        512
+      ],
+      "frameSize": [
+        256,
+        512
+      ],
+      "frames": 3,
+      "states": [
+        "off",
+        "standby",
+        "greeting"
+      ],
+      "anchor": [
+        128,
+        504
+      ],
+      "transforms": [
+        {
+          "sourceCell": [
+            0,
+            0,
+            512,
+            1024
+          ],
+          "sourceCrop": [
+            256,
+            42,
+            510,
+            976
+          ],
+          "destinationRect": [
+            60,
+            8,
+            135,
+            496
+          ]
+        },
+        {
+          "sourceCell": [
+            512,
+            0,
+            1024,
+            1024
+          ],
+          "sourceCrop": [
+            131,
+            42,
+            385,
+            976
+          ],
+          "destinationRect": [
+            60,
+            8,
+            135,
+            496
+          ]
+        },
+        {
+          "sourceCell": [
+            1024,
+            0,
+            1536,
+            1024
+          ],
+          "sourceCrop": [
+            8,
+            42,
+            261,
+            976
+          ],
+          "destinationRect": [
+            61,
+            8,
+            134,
+            496
+          ]
+        }
+      ],
+      "worldWidthNote": "New asset: proposed width 89, matching food-shutter-panel; not wired to runtime."
+    },
+    {
+      "id": "printer-feed",
+      "path": "assets/objects/floor13/printer-feed.png",
+      "source": "assets/interaction-sprites/source/printer-feed.png",
+      "sheetSize": [
+        1024,
+        256
+      ],
+      "frameSize": [
+        256,
+        256
+      ],
+      "frames": 4,
+      "states": [
+        "paper-edge",
+        "paper-third",
+        "paper-two-thirds",
+        "paper-out"
+      ],
+      "anchor": [
+        128,
+        248
+      ],
+      "transforms": [
+        {
+          "sourceCell": [
+            0,
+            0,
+            543,
+            724
+          ],
+          "sourceCrop": [
+            49,
+            122,
+            504,
+            708
+          ],
+          "destinationRect": [
+            42,
+            26,
+            172,
+            222
+          ]
+        },
+        {
+          "sourceCell": [
+            543,
+            0,
+            1086,
+            724
+          ],
+          "sourceCrop": [
+            46,
+            123,
+            502,
+            708
+          ],
+          "destinationRect": [
+            41,
+            26,
+            173,
+            222
+          ]
+        },
+        {
+          "sourceCell": [
+            1086,
+            0,
+            1629,
+            724
+          ],
+          "sourceCrop": [
+            40,
+            122,
+            497,
+            708
+          ],
+          "destinationRect": [
+            41,
+            26,
+            173,
+            222
+          ]
+        },
+        {
+          "sourceCell": [
+            1629,
+            0,
+            2172,
+            724
+          ],
+          "sourceCrop": [
+            38,
+            67,
+            495,
+            708
+          ],
+          "destinationRect": [
+            41,
+            5,
+            173,
+            243
+          ]
+        }
+      ],
+      "worldWidthNote": "Use existing runtime object width; floor-kit manifest does not specify a suggestedWorldWidth for this asset."
+    },
+    {
+      "id": "fire-shutter-crank",
+      "path": "assets/objects/floor11/fire-shutter-crank.png",
+      "source": "assets/interaction-sprites/source/fire-shutter-crank.png",
+      "sheetSize": [
+        768,
+        1952
+      ],
+      "frameSize": [
+        192,
+        1952
+      ],
+      "frames": 4,
+      "states": [
+        "inserted-closed",
+        "turn-raising-1",
+        "turn-raising-2",
+        "fully-open"
+      ],
+      "anchor": [
+        82,
+        1944
+      ],
+      "transforms": [
+        {
+          "sourceCell": [
+            0,
+            0,
+            384,
+            1024
+          ],
+          "sourceCrop": [
+            159,
+            7,
+            346,
+            996
+          ],
+          "destinationRect": [
+            38,
+            8,
+            146,
+            1936
+          ]
+        },
+        {
+          "sourceCell": [
+            384,
+            0,
+            768,
+            1024
+          ],
+          "sourceCrop": [
+            142,
+            8,
+            291,
+            996
+          ],
+          "destinationRect": [
+            36,
+            8,
+            116,
+            1936
+          ]
+        },
+        {
+          "sourceCell": [
+            768,
+            0,
+            1152,
+            1024
+          ],
+          "sourceCrop": [
+            117,
+            8,
+            253,
+            996
+          ],
+          "destinationRect": [
+            29,
+            8,
+            106,
+            1936
+          ]
+        },
+        {
+          "sourceCell": [
+            1152,
+            0,
+            1536,
+            1024
+          ],
+          "sourceCrop": [
+            113,
+            8,
+            239,
+            996
+          ],
+          "destinationRect": [
+            36,
+            8,
+            98,
+            1936
+          ]
+        }
+      ],
+      "worldWidthNote": "Use existing runtime object width; floor-kit manifest does not specify a suggestedWorldWidth for this asset."
+    },
+    {
+      "id": "jeong-suho-phone-light",
+      "path": "assets/player/jeong-suho-phone-light.png",
+      "source": "assets/interaction-sprites/source/jeong-suho-phone-light.png",
+      "sheetSize": [
+        1024,
+        256
+      ],
+      "frameSize": [
+        256,
+        256
+      ],
+      "frames": 4,
+      "states": [
+        "neutral",
+        "wrist-up-inhale",
+        "neutral",
+        "wrist-down-exhale"
+      ],
+      "anchor": [
+        128,
+        239
+      ],
+      "transforms": [
+        {
+          "sourceCell": [
+            0,
+            0,
+            543,
+            724
+          ],
+          "sourceCrop": [
+            166,
+            35,
+            389,
+            704
+          ],
+          "destinationRect": [
+            99,
+            18,
+            74,
+            221
+          ]
+        },
+        {
+          "sourceCell": [
+            543,
+            0,
+            1086,
+            724
+          ],
+          "sourceCrop": [
+            167,
+            35,
+            390,
+            704
+          ],
+          "destinationRect": [
+            99,
+            18,
+            74,
+            221
+          ]
+        },
+        {
+          "sourceCell": [
+            1086,
+            0,
+            1629,
+            724
+          ],
+          "sourceCrop": [
+            166,
+            35,
+            389,
+            704
+          ],
+          "destinationRect": [
+            99,
+            18,
+            74,
+            221
+          ]
+        },
+        {
+          "sourceCell": [
+            1629,
+            0,
+            2172,
+            724
+          ],
+          "sourceCrop": [
+            167,
+            37,
+            390,
+            704
+          ],
+          "destinationRect": [
+            99,
+            18,
+            74,
+            221
+          ]
+        }
+      ],
+      "worldWidthNote": "Use existing runtime object width; floor-kit manifest does not specify a suggestedWorldWidth for this asset."
+    },
+    {
+      "id": "jeong-suho-phone-away",
+      "path": "assets/player/jeong-suho-phone-away.png",
+      "source": "assets/interaction-sprites/source/jeong-suho-phone-away.png",
+      "sheetSize": [
+        512,
+        256
+      ],
+      "frameSize": [
+        256,
+        256
+      ],
+      "frames": 2,
+      "states": [
+        "screen-off",
+        "pocketed"
+      ],
+      "anchor": [
+        128,
+        239
+      ],
+      "transforms": [
+        {
+          "sourceCell": [
+            0,
+            0,
+            887,
+            887
+          ],
+          "sourceCrop": [
+            459,
+            17,
+            738,
+            865
+          ],
+          "destinationRect": [
+            100,
+            18,
+            73,
+            221
+          ]
+        },
+        {
+          "sourceCell": [
+            887,
+            0,
+            1774,
+            887
+          ],
+          "sourceCrop": [
+            125,
+            17,
+            446,
+            865
+          ],
+          "destinationRect": [
+            90,
+            18,
+            84,
+            221
+          ]
+        }
+      ],
+      "worldWidthNote": "Use existing runtime object width; floor-kit manifest does not specify a suggestedWorldWidth for this asset."
+    }
+  ]
+}
