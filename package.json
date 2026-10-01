@@ -4,7 +4,7 @@
   "scripts": {
     "test:floor15": "node tests/floor15-art.mjs",
     "test:floor16": "node tests/floor16-art.mjs",
-    "test": "node tests/movement.mjs && node tests/office.mjs && node tests/elevator.mjs && node tests/rooftop.mjs && node tests/running.mjs && node tests/lighting.mjs && node tests/computer.mjs && node tests/floor17-extension.mjs"
+    "test": "node tests/movement.mjs && node tests/office.mjs && node tests/elevator.mjs && node tests/rooftop.mjs && node tests/running.mjs && node tests/lighting.mjs && node tests/computer.mjs && node tests/floor17-extension.mjs && node tests/floor-prop-art.mjs && node tests/phone-power.mjs && node tests/inspection-ui.mjs"
   },
   "devDependencies": {
     "playwright": "^1.63.0"

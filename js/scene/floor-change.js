@@ -30,6 +30,7 @@ function performFloorChange(destId, carIndex = 0, arrivalKey = null) {
   const dest = floorById.get(destId);
   currentSceneFloor = dest.floor;
   world.dataset.floor = String(currentSceneFloor);
+  updatePowerState();
   lightSwitch.hidden = currentSceneFloor !== 17;
   movingParts = [];
   activeCameras = [];

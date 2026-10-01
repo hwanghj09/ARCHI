@@ -1,6 +1,35 @@
 // 키보드 조작: A/D·방향키 이동, Space/W/위 점프, Shift 달리기, E 상호작용, Esc 닫기.
 window.addEventListener('keydown', event => {
   if (transitioning) { event.preventDefault(); return; }
+  if (event.code === 'KeyP' && !event.repeat && !selectingFloor && !usingComputer && !usingKeypad && !usingPowerPanel && !usingInspection) {
+    event.preventDefault();
+    togglePhone();
+    return;
+  }
+  if (usingPhone) {
+    if (event.code === 'Escape') closePhone();
+    if (event.code === 'KeyF' && !event.repeat) togglePhoneLight();
+    event.preventDefault();
+    return;
+  }
+  if (usingPowerPanel) {
+    if (event.code === 'Escape') closePowerPanel();
+    event.preventDefault();
+    return;
+  }
+  if (usingInspection) {
+    if (event.code === 'Escape' || event.code === 'KeyE') {
+      closeInspection();
+      event.preventDefault();
+      return;
+    }
+    // 이동을 시작하면 조사 UI를 자연스럽게 접고 해당 입력은 그대로 게임에 전달한다.
+    if (Object.hasOwn(movementKeys, event.code) || jumpKeys.has(event.code)) closeInspection();
+    else {
+      event.preventDefault();
+      return;
+    }
+  }
   if (usingKeypad) {
     if (event.code === 'Escape') closeKeypad();
     return;

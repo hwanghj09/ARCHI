@@ -74,6 +74,14 @@ function buildDynamicScene(config) {
     element.setAttribute('aria-label', barrier.name);
     Object.assign(element.style, { left: `${barrier.x}px`, top: `${barrier.y}px`, width: `${barrier.width}px`,
       height: `${floorY - barrier.y}px` });
+    if (barrier.sprite) {
+      const image = new Image();
+      image.src = barrier.sprite;
+      image.alt = '';
+      image.draggable = false;
+      element.append(image);
+      element.dataset.sprite = 'true';
+    }
     dynamicScene.append(element);
     const solid = open ? null : Bodies.rectangle(barrier.x + barrier.width / 2, (barrier.y + floorY) / 2,
       barrier.width, floorY - barrier.y, { isStatic: true });
@@ -83,6 +91,7 @@ function buildDynamicScene(config) {
   if (config.id === 'rooftop') {
     const supply = document.createElement('div');
     supply.className = 'solar-supply';
+    supply.dataset.active = String(solarPoweredFloor !== null);
     supply.setAttribute('role', 'img');
     supply.setAttribute('aria-label', '태양광 임시 전력장치 · 화면 꺼짐');
     // The first 887px cell has transparent padding; its bottom edge is y=691.
@@ -93,6 +102,7 @@ function buildDynamicScene(config) {
     image.draggable = false;
     supply.append(image);
     dynamicScene.append(supply);
+    doorList.push({ name: '태양광 발전기', type: 'power', element: supply, x: 720, y: 250, width: 360 });
   }
   if (config.interior) {
     const backdrop = document.createElement('div');

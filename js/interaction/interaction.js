@@ -29,6 +29,7 @@ function updateInteraction() {
 
 function doorHintText(door) {
   if (door.type === 'computer') return 'E · 컴퓨터 사용';
+  if (door.type === 'power') return 'E · 태양광 전력 제어';
   if (door.type === 'inspect') return `E · ${door.name} 조사`;
   if (door.locked) return `E · ${door.name} (잠김)`;
   if (door.type === 'room') return door.hint;
@@ -44,7 +45,7 @@ function doorHintText(door) {
 }
 
 function interact() {
-  if (transitioning || selectingFloor || usingComputer || usingKeypad) return;
+  if (transitioning || selectingFloor || usingComputer || usingKeypad || usingPhone || usingPowerPanel || usingInspection) return;
   updateInteraction();
   if (!nearbyDoor) return;
   if (nearbyDoor.type === 'computer') {
@@ -55,6 +56,10 @@ function interact() {
       computerWindow.hidden = true;
       hint.hidden = true;
     });
+    return;
+  }
+  if (nearbyDoor.type === 'power') {
+    openPowerPanel();
     return;
   }
   if (nearbyDoor.type === 'inspect' || nearbyDoor.locked) {
@@ -99,7 +104,9 @@ function interact() {
     const lacking = required.filter(item => !collectedItems.has(item)).length;
     const missing = !unreadable && lacking && nearbyDoor.missingMessage &&
       (lacking < required.length && nearbyDoor.partialMessage || nearbyDoor.missingMessage);
-    showStatus(unreadable || missing || (gives && collectedItems.has(gives) ? nearbyDoor.takenMessage : nearbyDoor.message), 5000);
+    const inspectionMessage = unreadable || missing || (gives && collectedItems.has(gives) ? nearbyDoor.takenMessage : nearbyDoor.message);
+    openInspection(nearbyDoor.name, inspectionMessage);
+    showStatus(inspectionMessage, 5000);
     if (missing) return;
     if (gives) collectedItems.add(gives);
     if (gives) refreshReady();
