@@ -1,0 +1,567 @@
+{
+  "props": [
+    {
+      "name": "sales-kpi-board",
+      "label": "영업 실적 보드",
+      "floor": 11,
+      "width": 512,
+      "height": 256,
+      "worldWidth": 350,
+      "sourceSize": [
+        1821,
+        864
+      ],
+      "bounds": [
+        13,
+        9,
+        498,
+        248
+      ],
+      "sourceBounds": [
+        69,
+        13,
+        1752,
+        845
+      ],
+      "scale": 0.28846153846153844,
+      "worldOpaqueHeight": 163.38,
+      "newSource": false
+    },
+    {
+      "name": "sales-desk",
+      "label": "영업 책상",
+      "floor": 11,
+      "width": 512,
+      "height": 256,
+      "worldWidth": 252,
+      "sourceSize": [
+        1810,
+        869
+      ],
+      "bounds": [
+        8,
+        23,
+        504,
+        248
+      ],
+      "sourceBounds": [
+        34,
+        36,
+        1776,
+        829
+      ],
+      "scale": 0.2847301951779564,
+      "worldOpaqueHeight": 110.74,
+      "newSource": true
+    },
+    {
+      "name": "floor-emergency-cabinet",
+      "label": "층 비상 대응함",
+      "floor": 11,
+      "width": 512,
+      "height": 256,
+      "worldWidth": 198,
+      "sourceSize": [
+        1734,
+        907
+      ],
+      "bounds": [
+        18,
+        8,
+        493,
+        248
+      ],
+      "sourceBounds": [
+        137,
+        91,
+        1600,
+        829
+      ],
+      "scale": 0.3252032520325203,
+      "worldOpaqueHeight": 92.81,
+      "newSource": false
+    },
+    {
+      "name": "trophy-cabinet",
+      "label": "트로피 진열장",
+      "floor": 11,
+      "width": 256,
+      "height": 512,
+      "worldWidth": 111,
+      "sourceSize": [
+        996,
+        1579
+      ],
+      "bounds": [
+        10,
+        8,
+        246,
+        504
+      ],
+      "sourceBounds": [
+        128,
+        11,
+        869,
+        1565
+      ],
+      "scale": 0.31917631917631917,
+      "worldOpaqueHeight": 215.06,
+      "newSource": false
+    },
+    {
+      "name": "boardroom-table",
+      "label": "전략회의실 테이블",
+      "floor": 11,
+      "width": 512,
+      "height": 256,
+      "worldWidth": 356,
+      "sourceSize": [
+        2172,
+        724
+      ],
+      "bounds": [
+        8,
+        147,
+        504,
+        248
+      ],
+      "sourceBounds": [
+        9,
+        153,
+        2163,
+        595
+      ],
+      "scale": 0.23026926648096566,
+      "worldOpaqueHeight": 70.23,
+      "newSource": true
+    },
+    {
+      "name": "strategy-board",
+      "label": "전략 보드",
+      "floor": 11,
+      "width": 512,
+      "height": 256,
+      "worldWidth": 350,
+      "sourceSize": [
+        1816,
+        866
+      ],
+      "bounds": [
+        8,
+        28,
+        504,
+        248
+      ],
+      "sourceBounds": [
+        19,
+        56,
+        1796,
+        846
+      ],
+      "scale": 0.2791221159257175,
+      "worldOpaqueHeight": 150.39,
+      "newSource": true
+    },
+    {
+      "name": "brochure-rack",
+      "label": "브로슈어 진열장",
+      "floor": 11,
+      "width": 256,
+      "height": 512,
+      "worldWidth": 111,
+      "sourceSize": [
+        1024,
+        1536
+      ],
+      "bounds": [
+        8,
+        130,
+        247,
+        504
+      ],
+      "sourceBounds": [
+        51,
+        60,
+        973,
+        1500
+      ],
+      "scale": 0.2603036876355748,
+      "worldOpaqueHeight": 162.16,
+      "newSource": true
+    },
+    {
+      "name": "materials-desk",
+      "label": "마케팅 자료실 책상",
+      "floor": 11,
+      "width": 512,
+      "height": 256,
+      "worldWidth": 252,
+      "sourceSize": [
+        1903,
+        826
+      ],
+      "bounds": [
+        8,
+        27,
+        504,
+        248
+      ],
+      "sourceBounds": [
+        65,
+        12,
+        1838,
+        802
+      ],
+      "scale": 0.27975183305132545,
+      "worldOpaqueHeight": 108.77,
+      "newSource": false
+    },
+    {
+      "name": "dispatch-board",
+      "label": "출동 현황판",
+      "floor": 13,
+      "width": 512,
+      "height": 256,
+      "worldWidth": 350,
+      "sourceSize": [
+        1816,
+        866
+      ],
+      "bounds": [
+        8,
+        10,
+        504,
+        248
+      ],
+      "sourceBounds": [
+        12,
+        0,
+        1805,
+        863
+      ],
+      "scale": 0.2766313441160067,
+      "worldOpaqueHeight": 162.7,
+      "newSource": true
+    },
+    {
+      "name": "training-slide-board",
+      "label": "교육 자료 보드",
+      "floor": 13,
+      "width": 512,
+      "height": 256,
+      "worldWidth": 350,
+      "sourceSize": [
+        1817,
+        866
+      ],
+      "bounds": [
+        8,
+        22,
+        504,
+        248
+      ],
+      "sourceBounds": [
+        21,
+        37,
+        1798,
+        847
+      ],
+      "scale": 0.2791221159257175,
+      "worldOpaqueHeight": 154.49,
+      "newSource": true
+    },
+    {
+      "name": "patent-display-cabinet",
+      "label": "연구 성과 전시장",
+      "floor": 14,
+      "width": 256,
+      "height": 512,
+      "worldWidth": 111,
+      "sourceSize": [
+        1024,
+        1536
+      ],
+      "bounds": [
+        8,
+        118,
+        248,
+        504
+      ],
+      "sourceBounds": [
+        72,
+        82,
+        953,
+        1500
+      ],
+      "scale": 0.2724177071509648,
+      "worldOpaqueHeight": 167.37,
+      "newSource": true
+    },
+    {
+      "name": "records-cabinet",
+      "label": "기록 보관함",
+      "floor": 14,
+      "width": 256,
+      "height": 512,
+      "worldWidth": 72,
+      "sourceSize": [
+        887,
+        1774
+      ],
+      "bounds": [
+        38,
+        8,
+        216,
+        504
+      ],
+      "sourceBounds": [
+        155,
+        111,
+        734,
+        1707
+      ],
+      "scale": 0.3107769423558897,
+      "worldOpaqueHeight": 139.5,
+      "newSource": true
+    },
+    {
+      "name": "labeling-board",
+      "label": "라벨링 현황판",
+      "floor": 14,
+      "width": 512,
+      "height": 256,
+      "worldWidth": 350,
+      "sourceSize": [
+        1817,
+        866
+      ],
+      "bounds": [
+        8,
+        23,
+        504,
+        248
+      ],
+      "sourceBounds": [
+        29,
+        43,
+        1793,
+        846
+      ],
+      "scale": 0.2811791383219955,
+      "worldOpaqueHeight": 153.81,
+      "newSource": true
+    },
+    {
+      "name": "experiment-table",
+      "label": "실험 테이블",
+      "floor": 14,
+      "width": 512,
+      "height": 256,
+      "worldWidth": 356,
+      "sourceSize": [
+        1981,
+        793
+      ],
+      "bounds": [
+        8,
+        100,
+        504,
+        248
+      ],
+      "sourceBounds": [
+        57,
+        117,
+        1929,
+        679
+      ],
+      "scale": 0.26495726495726496,
+      "worldOpaqueHeight": 102.91,
+      "newSource": true
+    },
+    {
+      "name": "research-news-board",
+      "label": "연구본부 소식지 게시판",
+      "floor": 15,
+      "width": 512,
+      "height": 256,
+      "worldWidth": 362,
+      "sourceSize": [
+        1870,
+        841
+      ],
+      "bounds": [
+        24,
+        8,
+        487,
+        248
+      ],
+      "sourceBounds": [
+        186,
+        23,
+        1685,
+        800
+      ],
+      "scale": 0.3088803088803089,
+      "worldOpaqueHeight": 169.69,
+      "newSource": false
+    },
+    {
+      "name": "food-cafe-table",
+      "label": "카페 테이블",
+      "floor": 16,
+      "width": 512,
+      "height": 256,
+      "worldWidth": 356,
+      "sourceSize": [
+        1709,
+        521
+      ],
+      "bounds": [
+        9,
+        98,
+        504,
+        247
+      ],
+      "sourceBounds": [
+        1,
+        1,
+        1706,
+        520
+      ],
+      "scale": 0.2909090909090909,
+      "worldOpaqueHeight": 103.6,
+      "newSource": false
+    },
+    {
+      "name": "food-kitchen-board",
+      "label": "주방 게시판",
+      "floor": 16,
+      "width": 512,
+      "height": 256,
+      "worldWidth": 350,
+      "sourceSize": [
+        1152,
+        675
+      ],
+      "bounds": [
+        51,
+        8,
+        460,
+        248
+      ],
+      "sourceBounds": [
+        0,
+        0,
+        1152,
+        675
+      ],
+      "scale": 0.35555555555555557,
+      "worldOpaqueHeight": 164.06,
+      "newSource": false
+    },
+    {
+      "name": "food-voice-board",
+      "label": "고객의 소리 게시판",
+      "floor": 16,
+      "width": 512,
+      "height": 256,
+      "worldWidth": 350,
+      "sourceSize": [
+        872,
+        723
+      ],
+      "bounds": [
+        111,
+        8,
+        400,
+        248
+      ],
+      "sourceBounds": [
+        0,
+        0,
+        872,
+        723
+      ],
+      "scale": 0.33195020746887965,
+      "worldOpaqueHeight": 164.06,
+      "newSource": false
+    },
+    {
+      "name": "food-shutter-panel",
+      "label": "셔터 제어함",
+      "floor": 16,
+      "width": 256,
+      "height": 512,
+      "worldWidth": 89,
+      "sourceSize": [
+        769,
+        1538
+      ],
+      "bounds": [
+        63,
+        8,
+        193,
+        504
+      ],
+      "sourceBounds": [
+        182,
+        0,
+        586,
+        1538
+      ],
+      "scale": 0.32249674902470743,
+      "worldOpaqueHeight": 172.44,
+      "newSource": false
+    }
+  ],
+  "shutter": [
+    {
+      "name": "fire-shutter-closed",
+      "sourceSize": [
+        1241,
+        1267
+      ],
+      "sourceCrop": [
+        550,
+        21,
+        758,
+        1243
+      ],
+      "cell": [
+        192,
+        1952
+      ],
+      "anchor": [
+        8,
+        8
+      ],
+      "baseline": 1944,
+      "scaleX": 0.8461538461538461,
+      "scaleY": 1.5842880523731588
+    },
+    {
+      "name": "fire-shutter-open",
+      "sourceSize": [
+        1241,
+        1267
+      ],
+      "sourceCrop": [
+        548,
+        19,
+        756,
+        1248
+      ],
+      "cell": [
+        192,
+        1952
+      ],
+      "anchor": [
+        8,
+        8
+      ],
+      "baseline": 1944,
+      "scaleX": 0.8461538461538461,
+      "scaleY": 1.5752644426362896
+    }
+  ]
+}
