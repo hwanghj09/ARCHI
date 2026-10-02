@@ -235,6 +235,47 @@ try {
   assert(await page.locator('#inspection-sheet').evaluate(el => el.scrollTop > 0));
   assert(await page.locator('#inspection').isVisible(), 'Page Down scrolls instead of closing');
   await page.screenshot({ path: '.local/writing-landscape.png' });
+  // 텍스트만, 완성 그림만, 글 사이의 그림을 같은 조사 UI에서 지원한다.
+  for (const [, width, height] of views) {
+    await page.setViewportSize({ width, height });
+    for (const surface of ['whiteboard', 'notebook']) {
+      for (const imageOnly of [true, false]) {
+        await page.evaluate(({ surface, imageOnly }) => {
+          closeInspection();
+          openInspection('이미지 단서', '옥상 열쇠에 관한 기록이다.', {
+            surface,
+            ...(imageOnly ? { image: 'assets/ui/notebook/notebook-open-blank.png' } : {
+              writing: ['옥상 열쇠', { as: 'image', src: 'assets/ui/rooftop-key.png', alt: '낡은 황동 열쇠' }, '소화전 안에서 찾았다.'],
+            }),
+          });
+        }, { surface, imageOnly });
+        const image = page.locator(imageOnly ? '.writing-art' : '.writing-image');
+        await image.evaluate(image => image.decode());
+        assert(await image.isVisible());
+        assert.equal(await page.locator('#inspection').getAttribute('data-surface'), surface);
+        assert.equal(await page.locator('#inspection-description').textContent(), '옥상 열쇠에 관한 기록이다.');
+        assert(await image.evaluate(image => {
+          const panel = document.getElementById('inspection-sheet').getBoundingClientRect();
+          const rect = image.getBoundingClientRect();
+          return rect.width > 0 && rect.height > 0 && rect.left >= panel.left && rect.right <= panel.right + 1;
+        }), `${surface} image fits at ${width}x${height}`);
+        if (!imageOnly) {
+          assert.match(await page.locator('#inspection-sheet').textContent(), /소화전 안에서 찾았다/);
+          assert(await page.locator('.writing-pages').evaluateAll(pages => pages.every(page =>
+            getComputedStyle(page).overflowY === 'auto' || page.scrollWidth <= page.clientWidth + 1)), 'Notebook does not clip image columns');
+        }
+      }
+    }
+  }
+  // 실제 소품 데이터의 image가 장면 생성과 E 조사 경로를 통과하는지도 확인한다.
+  await page.evaluate(() => {
+    const board = floorById.get('f12-dev').props.find(prop => prop.name === '화이트보드');
+    board.image = 'assets/ui/notebook/notebook-open-blank.png';
+  });
+  await inspectAt('f12-dev', '화이트보드');
+  assert.equal(await page.locator('.writing-art').getAttribute('src'), 'assets/ui/notebook/notebook-open-blank.png');
+  assert.equal(await page.locator('.writing-board').count(), 0, 'Finished artwork takes precedence over text rendering');
+  await page.evaluate(() => { delete floorById.get('f12-dev').props.find(prop => prop.name === '화이트보드').image; });
   assert.deepEqual(errors, []);
   console.log(`PASS: ${items.length} writing surfaces (${Object.entries(counts).map(([key, value]) => `${key} ${value}`).join(', ')}) keep message details, fit desktop/mobile/landscape, open from real inspection (dark room waits for the lamp), and normal inspection keeps the dialogue box.`);
 } finally {

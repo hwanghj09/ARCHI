@@ -7,7 +7,9 @@
 //   screen: monitor(기본) · terminal(초록 콘솔) · lcd(장비의 작은 액정)
 //   memo: sticky(기본, 노랑) · sticky-pink · sticky-blue · sticky-green · slip(뜯어 낸 쪽지)
 //   label: tape(기본, 라벨 테이프) · sticker(인쇄 스티커) · warning(경고 스티커) · plate(금속 명판) · tag(종이 꼬리표)
-// card는 writing 대신 image(사원증 그림 경로)를 보여 준다.
+// image는 글까지 그려진 완성 그림 경로다. 모든 표면에서 지원하며 writing보다 우선한다(기존 card는 함께 표시).
+// 글 사이에 그림을 넣으려면 writing에 { as: 'image', src: 'assets/...png', alt: '그림 설명' }를 넣는다.
+// 화면 낭독기는 조사 대상의 message를 읽으므로 그림의 단서도 message에 적는다.
 // writing은 항목 목록이다. 문자열은 한 줄이고(손글씨 표면은 손글씨, 인쇄 표면은 인쇄체), 객체는 { as, text, ... }다.
 // text의 \n은 줄바꿈이고 연속 공백도 그대로 보인다.
 //   as: 'line'(기본) · 'title' 제목 · 'hand' 손글씨 줄(인쇄 표면 위 볼펜·펜 글씨) · 'strike' 그어 지운 줄
@@ -65,12 +67,21 @@ function writingTable(entry) {
   return table;
 }
 
+function writingImage(src, className, alt = '') {
+  const image = writingNode('img', className);
+  image.src = src;
+  image.alt = alt;
+  image.draggable = false;
+  return image;
+}
+
 function writingItem(item, index) {
   const entry = typeof item === 'string' ? { text: item } : item;
   const kind = entry.as || 'line';
   let node;
   if (kind === 'page') return writingNode('div', 'writing-page');
   if (kind === 'table') node = writingTable(entry);
+  else if (kind === 'image') node = writingImage(entry.src, 'writing-image', entry.alt);
   else if (kind === 'rule') node = writingNode('hr', 'writing-rule');
   else if (kind === 'field' || kind === 'redacted') {
     node = writingNode('p', `writing-${kind === 'field' ? 'field' : 'redacted-field'}`);
@@ -138,13 +149,7 @@ function writingScreen(writing) {
 
 function writingCard(sheet) {
   const card = writingNode('div', 'writing-card');
-  if (sheet.image) {
-    const image = new Image();
-    image.src = sheet.image;
-    image.alt = '';
-    image.draggable = false;
-    card.append(image);
-  }
+  if (sheet.image) card.append(writingImage(sheet.image, ''));
   for (const page of writingSheets(sheet.writing || [], 'writing-card-face')) card.append(page);
   return card;
 }
@@ -155,7 +160,8 @@ function renderWritingSheet(sheet) {
   const root = writingNode('div', 'writing-sheet');
   root.dataset.surface = surface;
   if (look) root.dataset.look = look;
-  if (surface === 'notebook') {
+  if (sheet.image && surface !== 'card') root.append(writingImage(sheet.image, 'writing-art'));
+  else if (surface === 'notebook') {
     const book = writingNode('div', 'writing-book');
     const pages = writingNode('div', 'writing-pages');
     writing.forEach((item, index) => pages.append(writingItem(item, index)));
@@ -172,7 +178,7 @@ function renderWritingSheet(sheet) {
     stack.append(...sheets);
     root.append(stack);
   }
-  if (surface === 'whiteboard' || surface === 'chalkboard') root.append(writingNode('div', 'writing-tray'));
+  if (!sheet.image && (surface === 'whiteboard' || surface === 'chalkboard')) root.append(writingNode('div', 'writing-tray'));
   if (caption) root.append(writingNode('p', 'writing-caption', caption));
   return root;
 }
@@ -192,7 +198,7 @@ function writingSurfaceLabel(sheet) {
   return WRITING_LOOK_LABELS[sheet.look] || WRITING_SURFACE_LABELS[sheet.surface];
 }
 
-// 표면을 펼칠 수 있는가: 아는 표면이고 적힌 내용(카드는 그림)이 있어야 한다.
+// 표면을 펼칠 수 있는가: 아는 표면이고 적힌 내용 또는 완성 그림이 있어야 한다.
 function hasWritingSheet(sheet) {
-  return Boolean(sheet && WRITING_SURFACE_LABELS[sheet.surface] && (sheet.writing?.length || (sheet.surface === 'card' && sheet.image)));
+  return Boolean(sheet && WRITING_SURFACE_LABELS[sheet.surface] && (sheet.writing?.length || sheet.image));
 }

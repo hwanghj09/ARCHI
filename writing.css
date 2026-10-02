@@ -77,6 +77,8 @@
 .writing-sheet [data-ink="red"] { --ink: var(--ink-red); }
 .writing-sheet [data-ink="green"] { --ink: var(--ink-green); }
 .writing-item { margin: 0; }
+.writing-art { display: block; width: auto; max-width: 100%; height: auto; max-height: 65dvh; object-fit: contain; margin: auto; }
+.writing-image { display: block; width: auto; max-width: 100%; height: auto; max-height: 160px; object-fit: contain; margin: .5em auto; }
 .writing-main, .writing-pinned { position: relative; z-index: 1; min-width: 0; }
 
 /* 손글씨 줄 */

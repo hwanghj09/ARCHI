@@ -122,7 +122,7 @@ function buildDynamicScene(config) {
         y: outside.doorY ?? parent.roomDoorY ?? 250, width: doorWidth, style: outside.doorStyle,
         unlocked: collectedItems.has(outside.unlockedBy),
         locked: Boolean(lock) && !collectedItems.has(lock.until), lockedUntil: lock?.until, message: lock?.message,
-        surface: lock?.surface, look: lock?.look, writing: lock?.writing, caption: lock?.caption }));
+        surface: lock?.surface, look: lock?.look, writing: lock?.writing, caption: lock?.caption, image: lock?.image }));
     }
     // 벽을 맞댄 방끼리의 연결문(links, 16층 주방 반입문): 복도를 거치지 않고 옆방에 있는 짝 연결문 앞으로 나온다. 다른 층의 방과도
     // 이을 수 있고, 그때는 hint로 안내 문구를 바꾼다.
@@ -144,7 +144,7 @@ function buildDynamicScene(config) {
     dynamicScene.append(roomElement);
     doorList.push(addRoomDoor({ name: roomConfig.name, type: 'room', hint: `E · ${roomConfig.name} 들어가기`,
       locked: roomConfig.locked && !collectedItems.has(roomConfig.unlockedBy), message: roomConfig.message,
-      surface: roomConfig.surface, look: roomConfig.look, writing: roomConfig.writing, caption: roomConfig.caption,
+      surface: roomConfig.surface, look: roomConfig.look, writing: roomConfig.writing, caption: roomConfig.caption, image: roomConfig.image,
       unlocked: collectedItems.has(roomConfig.unlockedBy),
       code: roomConfig.code, codeMessage: roomConfig.codeMessage, unlockedBy: roomConfig.unlockedBy,
       target: roomConfig.target, arrivalKey: 'exit', key: `room:${roomConfig.target}`,
