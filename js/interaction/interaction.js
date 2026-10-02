@@ -105,9 +105,10 @@ function interact() {
     const missing = !unreadable && lacking && nearbyDoor.missingMessage &&
       (lacking < required.length && nearbyDoor.partialMessage || nearbyDoor.missingMessage);
     const inspectionMessage = unreadable || missing || (gives && collectedItems.has(gives) ? nearbyDoor.takenMessage : nearbyDoor.message);
-    openInspection(nearbyDoor.name, inspectionMessage);
-    showStatus(inspectionMessage, 5000);
+    // 글이 적힌 소품은 지금 보이는 문구에 맞는 표면을 펼친다(message는 소품, takenMessage·missingMessage는 그 sheet).
+    openInspection(nearbyDoor.name, inspectionMessage, writingSheetFor(nearbyDoor, inspectionMessage));
     if (missing) return;
+    const alreadyCollected = gives && collectedItems.has(gives);
     if (gives) collectedItems.add(gives);
     if (gives) refreshReady();
     if (gives && room === 'dynamic' && floorById.get(dynamicFloorId).litBy === gives) world.dataset.dark = 'false';
@@ -118,6 +119,7 @@ function interact() {
       nearbyDoor.solid = null;
       nearbyDoor.element.dataset.open = 'true';
     }
+    if (!unreadable && !alreadyCollected) playPropAnimation(nearbyDoor);
     // 등 뒤에서 잠긴 출구(exitLock)는 풀어 주는 물건을 챙기는 즉시 열린다.
     for (const door of currentDoors) {
       if (!door.locked || !door.lockedUntil || !collectedItems.has(door.lockedUntil)) continue;

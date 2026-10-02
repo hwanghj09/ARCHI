@@ -63,6 +63,8 @@ try {
   await page.screenshot({ path: '.local/solar-supply-mobile.png' });
   await page.keyboard.press('e');
   assert.equal((await state()).room, 'dynamic', 'The solar device is not a stair interaction');
+  assert(await page.locator('#power-panel').isVisible(), 'The solar device opens its power controls');
+  await page.keyboard.press('Escape');
   await page.setViewportSize({ width: 1280, height: 720 });
   await hold('d', 11000);
   assert(Math.abs((await state()).x - 2348) < 1, 'Roof boundary blocks movement');

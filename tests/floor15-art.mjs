@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { mkdir } from 'node:fs/promises';
 import { chromium } from 'playwright';
-import { finishSceneTransition } from './scene-transition.mjs';
+import { interactionMessage, finishSceneTransition } from './scene-transition.mjs';
 import { assertMirroredDoor, exitDoor, roomFront, worldWidth } from './room-geometry.mjs';
 
 await mkdir('.local', { recursive: true });
@@ -85,19 +85,19 @@ try {
     return door.x + door.width / 2;
   };
   await jumpFloor('f15');
-  assert((await checkArt()).some(p => p.file === 'research-board.png'));
+  assert((await checkArt()).some(p => p.file === 'research-news-board.png'));
   await use(4730);
-  assert.match(await page.locator('#interaction-status').textContent(), /야간 사용 권한/);
+  assert.match(await interactionMessage(page), /야간 사용 권한/);
   await walk(650);
   await capture('doors');
 
   const labExit = await enter('연구실');
   assert.equal((await checkArt()).filter(p => p.file === 'research-workstation.png').length, 6);
   await use(1400);
-  assert.match(await page.locator('#interaction-status').textContent(), /사용률은 100%/);
+  assert.match(await interactionMessage(page), /사용률은 100%/);
   await capture('workstations');
   await use(2450);
-  assert.match(await page.locator('#interaction-status').textContent(), /일부러 틀릴/);
+  assert.match(await interactionMessage(page), /일부러 틀릴/);
   await capture('research-board');
   await use(labExit);
 
@@ -112,7 +112,7 @@ try {
     })));
   assert.deepEqual(crates, [[110, 50, 'gpu-shipping-crate.png'], [90, 60, 'gpu-shipping-crate.png']]);
   await use(420);
-  assert.match(await page.locator('#interaction-status').textContent(), /B2 서버실 이관 2차분/);
+  assert.match(await interactionMessage(page), /B2 서버실 이관 2차분/);
   await walk(730);
   await page.keyboard.down('d');
   await page.clock.runFor(500);
@@ -126,7 +126,7 @@ try {
   await jump('d');
   assert(await position() > 1470, 'Jump clears second crate');
   await use(1800);
-  assert.match(await page.locator('#interaction-status').textContent(), /승인: 대기/);
+  assert.match(await interactionMessage(page), /승인: 대기/);
   await capture('seminar');
   await walk(1520);
   await jump('a');
@@ -137,7 +137,7 @@ try {
   const directorExit = await enter('연구본부장실');
   assert((await checkArt()).some(p => p.file === 'research-director-desk.png'));
   await use(900);
-  assert.match(await page.locator('#interaction-status').textContent(), /자동 승인/);
+  assert.match(await interactionMessage(page), /자동 승인/);
   await capture('director');
   await page.setViewportSize({ width: 390, height: 844 });
   await page.clock.runFor(100);

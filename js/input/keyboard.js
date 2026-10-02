@@ -19,7 +19,10 @@ window.addEventListener('keydown', event => {
   }
   if (usingInspection) {
     if (event.code === 'Escape' || event.code === 'KeyE') {
-      closeInspection();
+      if (!event.repeat) {
+        if (event.code === 'Escape') closeInspection();
+        else advanceInspection();
+      }
       event.preventDefault();
       return;
     }

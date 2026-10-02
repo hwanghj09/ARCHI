@@ -1,5 +1,17 @@
 import assert from 'node:assert/strict';
 
+export async function interactionMessage(page) {
+  const message = await page.evaluate(() => document.getElementById('inspection').hidden ?
+    document.getElementById('interaction-status').textContent : document.getElementById('inspection-description').textContent);
+  // Route tests read the full accessible description, then dismiss the new modal before continuing.
+  // Character-by-character rendering and reveal controls are covered by inspection-ui.mjs.
+  if (await page.locator('#inspection').isVisible()) {
+    await page.keyboard.press('Escape');
+    assert(await page.locator('#inspection').isHidden());
+  }
+  return message;
+}
+
 export async function finishSceneTransition(page) {
   await page.clock.runFor(800);
   assert.equal(await page.locator('#room-transition').getAttribute('data-phase'), 'idle');

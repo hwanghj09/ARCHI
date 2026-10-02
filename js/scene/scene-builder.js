@@ -17,7 +17,7 @@ function buildDynamicScene(config) {
   for (const art of [config.backgroundImage].flat().filter(Boolean)) {
     const image = new Image();
     image.className = 'floor-background';
-    image.src = art.src;
+    setPowerBackground(image, art.src);
     image.alt = '';
     image.draggable = false;
     Object.assign(image.style, { left: `${art.left ?? 0}px`, width: `${art.width ?? config.width}px`, height: `${art.height}px`, top: `${art.top}px` });
@@ -121,7 +121,8 @@ function buildDynamicScene(config) {
         arrivalKey: `room:${config.id}`, key: 'exit', x: config.exitX ?? exitDoorX(outside, config.width, doorWidth),
         y: outside.doorY ?? parent.roomDoorY ?? 250, width: doorWidth, style: outside.doorStyle,
         unlocked: collectedItems.has(outside.unlockedBy),
-        locked: Boolean(lock) && !collectedItems.has(lock.until), lockedUntil: lock?.until, message: lock?.message }));
+        locked: Boolean(lock) && !collectedItems.has(lock.until), lockedUntil: lock?.until, message: lock?.message,
+        surface: lock?.surface, look: lock?.look, writing: lock?.writing, caption: lock?.caption }));
     }
     // 벽을 맞댄 방끼리의 연결문(links, 16층 주방 반입문): 복도를 거치지 않고 옆방에 있는 짝 연결문 앞으로 나온다. 다른 층의 방과도
     // 이을 수 있고, 그때는 hint로 안내 문구를 바꾼다.
@@ -143,6 +144,7 @@ function buildDynamicScene(config) {
     dynamicScene.append(roomElement);
     doorList.push(addRoomDoor({ name: roomConfig.name, type: 'room', hint: `E · ${roomConfig.name} 들어가기`,
       locked: roomConfig.locked && !collectedItems.has(roomConfig.unlockedBy), message: roomConfig.message,
+      surface: roomConfig.surface, look: roomConfig.look, writing: roomConfig.writing, caption: roomConfig.caption,
       unlocked: collectedItems.has(roomConfig.unlockedBy),
       code: roomConfig.code, codeMessage: roomConfig.codeMessage, unlockedBy: roomConfig.unlockedBy,
       target: roomConfig.target, arrivalKey: 'exit', key: `room:${roomConfig.target}`,
@@ -190,11 +192,19 @@ function buildDynamicScene(config) {
       width: `${prop.worldWidth}px`, height: `${height * scale}px`,
     });
     const image = new Image();
-    image.src = `assets/objects/floor-kit/${prop.file}.png`;
+    image.src = prop.sprite || `assets/objects/floor-kit/${prop.file}.png`;
     image.alt = '';
     image.draggable = false;
     element.append(image);
     dynamicScene.append(element);
+    if (prop.sprite) {
+      element.style.overflow = 'hidden';
+      image.style.width = `${(prop.frames || 2) * 100}%`;
+      element.dataset.spriteFrames = prop.frames || 2;
+      if (prop.stateBy) element.dataset.stateBy = prop.stateBy;
+      if (prop.poweredSprite) element.dataset.poweredSprite = 'true';
+      element.dataset.spriteFrame = prop.spriteFrame || 0;
+    }
     if (!prop.message) continue;
     element.setAttribute('role', 'img');
     element.setAttribute('aria-label', prop.name);
@@ -208,11 +218,15 @@ function buildDynamicScene(config) {
       takenMessage: prop.takenMessage, darkMessage: prop.darkMessage, requires: prop.requires,
       missingMessage: prop.missingMessage, partialMessage: prop.partialMessage, element, standY: floorY - base,
       code: prop.code, codePrompt: prop.codePrompt, cycle: prop.cycle, opens: prop.opens,
+      animation: prop.animation, poweredSprite: prop.poweredSprite,
+      surface: prop.surface || WRITING_SURFACE_BY_FILE[prop.file], look: prop.look, writing: prop.writing, caption: prop.caption,
+      image: prop.image, missingSheet: prop.missingSheet, takenSheet: prop.takenSheet,
       sequence: sequence && { ...sequence, step: prop.step },
       ring: prop.ring && !collectedItems.has(prop.gives) ? { ...prop.ring, elapsed: 0, state: 'waiting' } : null,
       x: prop.x - prop.worldWidth / 2, y: floorY - base - (height - 8) * scale, width: prop.worldWidth });
   }
   // 감시 카메라(cameras, B2 복도): 카메라와 시야를 그리고 지키는 방 문을 찾아 둔다. 돌아가기와 발각은 cctv.js가 맡는다.
+  refreshReady();
   const cameras = buildCameras(config, doorList);
   // elevatorOffsets/elevatorWidthDeltas: 층 그림 속 엘리베이터 벽감이 BUILDING_CORE 좌표와 어긋날 때, 그 층만
   // 상호작용 가능한 엘리베이터(문·판정)의 위치·폭을 보정한다(다른 층의 BUILDING_CORE 좌표는 그대로 둔다).

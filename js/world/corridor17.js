@@ -31,6 +31,7 @@ for (const door of doors) {
 }
 
 const extension = document.getElementById('floor17-extension');
+setPowerBackground(extension.querySelector('img'), 'assets/background/floor17/service-corridor.png');
 for (const entry of FLOOR17.rooms) {
   const door = addRoomDoor({ name: entry.name, type: 'room', hint: `E · ${entry.name} 들어가기`,
     target: entry.target, arrivalKey: 'exit', key: `room:${entry.target}`, locked: entry.locked, message: entry.message,
@@ -45,14 +46,10 @@ doors.push({ name: '소화전', type: 'inspect', x: 4023, y: 248, width: 145,
   element: document.getElementById('floor17-hydrant'), message: '소화전 안에 호스와 관창이 정리되어 있다. 옆에는 소화기가 비치되어 있다.' });
 
 const background = document.getElementById('background');
-for (let row = 0; row < Math.ceil(worldHeight / 256); row++) {
-  for (let col = 0; col < Math.ceil(3200 / 256); col++) {
-    const tile = new Image(256, 256);
-    tile.src = `assets/background/floor17/tiles/${row}-${col}.png`;
-    tile.alt = '';
-    tile.draggable = false;
-    tile.style.left = `${col * 256}px`;
-    tile.style.top = `${row * 256}px`;
-    background.append(tile);
-  }
-}
+// 기존 39개 타일과 동일한 아틀라스를 사용해 전원 변경 시 그림을 한 번에 교체한다.
+const corridorBackground = new Image(3328, 768);
+setPowerBackground(corridorBackground, 'assets/background/floor17/floor17.png');
+corridorBackground.alt = '';
+corridorBackground.draggable = false;
+Object.assign(corridorBackground.style, { left: '0px', top: '0px', width: '3328px', height: '768px' });
+background.append(corridorBackground);

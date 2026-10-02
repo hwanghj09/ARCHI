@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { mkdir } from 'node:fs/promises';
 import { chromium } from 'playwright';
-import { finishSceneTransition } from './scene-transition.mjs';
+import { interactionMessage, finishSceneTransition } from './scene-transition.mjs';
 import { assertMirroredDoor, exitDoor, roomFront, worldWidth } from './room-geometry.mjs';
 
 await mkdir('.local', { recursive: true });
@@ -66,7 +66,7 @@ try {
     assert.equal(await page.locator('#dynamic-scene').getAttribute('data-art'), 'walls');
     await page.locator('#dynamic-scene img').evaluateAll(images => Promise.all(images.map(img => img.decode())));
     const panels = await page.locator('.floor-background').evaluateAll(images => images.map(img => ({
-      file: img.src.split('/').pop(), left: parseFloat(img.style.left), width: parseFloat(img.style.width),
+      file: img.src.split('/').pop().replace('-off.png', '.png'), left: parseFloat(img.style.left), width: parseFloat(img.style.width),
       top: parseFloat(img.style.top), height: parseFloat(img.style.height), natural: [img.naturalWidth, img.naturalHeight],
     })));
     assert.equal(panels.length, count);
@@ -100,7 +100,7 @@ try {
   await walk(750);
   await capture('dining');
   await use(2330);
-  assert.match(await page.locator('#interaction-status').textContent(), /02:00~05:00/);
+  assert.match(await interactionMessage(page), /02:00~05:00/);
   await capture('kitchen');
   await walk(3410);
   await capture('service-door');
@@ -108,10 +108,10 @@ try {
   assert.equal(await page.locator('header span').textContent(), '16F · CU 편의점');
   await checkArt(1);
   await use(470);
-  assert.match(await page.locator('#interaction-status').textContent(), /새벽 전원 차단/);
+  assert.match(await interactionMessage(page), /새벽 전원 차단/);
   await capture('refrigerators');
   await use(1150);
-  assert.match(await page.locator('#interaction-status').textContent(), /23:47/);
+  assert.match(await interactionMessage(page), /23:47/);
   await capture('cu');
   const exit = await exitDoor(page);
   await use(exit.x + exit.width / 2);
@@ -128,7 +128,7 @@ try {
   await use(4406);
   await checkArt(1);
   await use(1330);
-  assert.match(await page.locator('#interaction-status').textContent(), /먼저 인사/);
+  assert.match(await interactionMessage(page), /먼저 인사/);
   await capture('cafe');
   await page.setViewportSize({ width: 390, height: 844 });
   await page.clock.runFor(100);

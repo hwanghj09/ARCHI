@@ -4,6 +4,11 @@ const walkSheet = document.getElementById('walk-sheet');
 const runSheet = document.getElementById('run-sheet');
 const jumpSheet = document.getElementById('jump-sheet');
 const interactSheet = document.getElementById('interact-sheet');
+const phoneSheet = document.getElementById('phone-sheet');
+const phoneLightSheet = document.getElementById('phone-light-sheet');
+const phoneAwaySheet = document.getElementById('phone-away-sheet');
+let phoneTime = 0;
+let phoneAwayTime = 0;
 
 let walkDistance = 0;
 let runDistance = 0;
@@ -25,10 +30,16 @@ function animate(distance, sprinting = false, elapsed = 0) {
   const walking = grounded && walkReady && distance > .1 && !running;
   walkDistance = walking ? (walkDistance + distance) % (frameDistance * walkFrames) : 0;
   runDistance = running ? (runDistance + distance) % (runFrameDistance * runFrames) : 0;
-  const state = usingPhone ? 'phone' : !grounded ? (body.velocity.y < 0 ? 'jump' : 'fall') :
-    interactionTime > 0 ? 'interact' : running ? 'run' : walking ? 'walk' : 'idle';
+  if (distance > .1 || !grounded) phoneAwayTime = 0;
+  else phoneAwayTime = Math.max(0, phoneAwayTime - elapsed);
+  const state = usingPhone ? (phoneLightOn ? 'phone-light' : 'phone') : !grounded ? (body.velocity.y < 0 ? 'jump' : 'fall') :
+    interactionTime > 0 ? 'interact' : running ? 'run' : walking ? 'walk' :
+    phoneLightOn ? 'phone-light' : phoneAwayTime > 0 ? 'phone-away' : 'idle';
+  phoneTime = state === sprite.dataset.state && (state === 'phone' || state === 'phone-light') ? phoneTime + elapsed : 0;
   idleTime = state === 'idle' && sprite.dataset.state === 'idle' ? (idleTime + elapsed) % 3200 : 0;
-  const index = state === 'fall' ? 1 : state === 'interact' ? Number(interactionTime <= 240) :
+  const index = state === 'phone' ? (phoneTime < 360 ? Math.floor(phoneTime / 180) : 2 + Math.floor((phoneTime - 360) / 600) % 2) :
+    state === 'phone-light' ? Math.floor(phoneTime / 240) % 4 : state === 'phone-away' ? Number(phoneAwayTime <= 180) :
+    state === 'fall' ? 1 : state === 'interact' ? Number(interactionTime <= 240) :
     running ? Math.floor(runDistance / runFrameDistance) : walking ? Math.floor(walkDistance / frameDistance) :
     state === 'idle' ? (idleTime < 1200 ? 0 : idleTime < 2100 ? 1 : idleTime < 2220 ? 2 : 3) : 0;
   sprite.dataset.state = state;
@@ -44,4 +55,7 @@ function animate(distance, sprinting = false, elapsed = 0) {
   if (state === 'run') runSheet.style.transform = `translateX(${-index * 100 / runFrames}%)`;
   if (state === 'jump' || state === 'fall') jumpSheet.style.transform = `translateX(${-index * 50}%)`;
   if (state === 'interact') interactSheet.style.transform = `translateX(${-index * 50}%)`;
+  if (state === 'phone') phoneSheet.style.transform = `translateX(${-index * 25}%)`;
+  if (state === 'phone-light') phoneLightSheet.style.transform = `translateX(${-index * 25}%)`;
+  if (state === 'phone-away') phoneAwaySheet.style.transform = `translateX(${-index * 50}%)`;
 }

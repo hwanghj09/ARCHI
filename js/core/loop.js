@@ -16,6 +16,7 @@ function update() {
   if (usingComputer || usingKeypad || usingPhone || usingPowerPanel || usingInspection) {
     updateElevators();
     updatePhone(step);
+    if (usingPhone || phoneAwayTime > 0) animate(0, false, step);
     return;
   }
   updatePhone(step);

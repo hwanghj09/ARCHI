@@ -2,6 +2,7 @@
 const officeComputer = { type: 'computer', x: 612, y: 392, width: 88, element: document.getElementById('office-computer') };
 
 const officeBackground = document.getElementById('office-background');
+setPowerBackground(officeBackground, 'assets/background/floor17/office-interior-aligned.png');
 const lightSwitch = document.getElementById('floor17-light-switch');
 const lights = document.getElementById('floor17-lights');
 lights.addEventListener('change', () => {
@@ -10,7 +11,7 @@ lights.addEventListener('change', () => {
     return;
   }
   world.dataset.lights = lights.checked ? 'on' : 'off';
-  document.getElementById('floor17-light-state').value = lights.checked ? '조명 켜짐' : '조명 꺼짐';
+  refreshBackgroundPower();
 });
 // The generated office floor starts at source y=504; align it with the physics floor.
 Object.assign(officeBackground.style, {

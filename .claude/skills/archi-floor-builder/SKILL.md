@@ -196,6 +196,19 @@ work while standing on the floor (y=570), never from on top of a crate.
   (`partialMessage` when some are) and does not hand out `gives` (10F dual-key cabinet). `base` stands a prop on
   a platform that high (`data-base`) and makes it inspectable only while standing at that height (`standY`);
   `assertHumanScale` accounts for it. `style` adds a class to `.floor-prop`.
+- Readable surfaces (`js/interaction/writing.js`, `writing.css`): anything whose message quotes text written, printed or
+  shown on the object gets `surface` + `writing` (the content as it physically appears; item kinds and options are in the
+  header of `writing.js`). Surfaces: `whiteboard`/`corkboard`/`chalkboard` (from the `file`, `WRITING_SURFACE_BY_FILE`; such a
+  prop must have `writing`), `notebook` (노트·일지·방명록), `memo` (포스트잇·쪽지), `document` (출력물·서류, `look` notice·sign·
+  poster·certificate·plaque), `screen` (모니터, `look` terminal·lcd), `receipt`, `label` (`look` sticker·warning·plate·tag) and
+  `card` (`image` of an ID card). Props, solids, fixtures, barriers and locked `rooms` entries accept it. E then opens that
+  surface instead of the dialogue box for `message` (also after a keypad `code` and on the last `sequences` step);
+  `missingMessage`/`takenMessage` use `missingSheet`/`takenSheet` (`{ surface, look, writing, caption }`) when given, an
+  `exitLock` takes the same fields, and `darkMessage`, `partialMessage` and status-line feedback stay as they are. `caption` is a short narration strip
+  for what is not written. `message` stays the full description (screen readers read it), and every digit/Latin token
+  of it must appear on the surface. `tests/writing-ui.mjs` checks that, the fit at 1280×720/390×844/844×390, and fails
+  when a board-type prop has no `writing`; `node scripts/check-writing.mjs <floor>` prints the same checks and
+  screenshots per item. The 11F/13F/14F/15F/16F design docs (section 8) give the approved layouts.
 - `sequences` on a room: `[{ id, steps, gives, wrongMessage }]`, and props with `sequence: id, step: n` (props only,
   not fixtures). Inspecting the next step (or the current one again) advances and sets `data-done` (green light);
   a wrong or skipped step resets and shows `wrongMessage`; the last step collects `gives`, after which every step

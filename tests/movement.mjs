@@ -42,11 +42,11 @@ try {
   };
   const tiles = page.locator('#background img');
   await tiles.evaluateAll(images => Promise.all(images.map(image => image.decode())));
-  assert.equal(await tiles.count(), 39, 'The original corridor retains its 13x3 tiles; the extension has separate art');
-  assert(await tiles.evaluateAll(images => images.every((image, index) =>
-    image.naturalWidth === 256 && image.naturalHeight === 256 &&
-    image.offsetLeft === (index % 13) * 256 && image.offsetTop === Math.floor(index / 13) * 256)),
-  'Background sprites must be 256x256 and meet without gaps');
+  assert.equal(await tiles.count(), 1, 'The corridor uses one registered power-switchable atlas');
+  assert(await tiles.evaluateAll(images => images.every(image =>
+    image.naturalWidth === 3328 && image.naturalHeight === 768 &&
+    image.offsetLeft === 0 && image.offsetTop === 0 && image.clientWidth === 3328 && image.clientHeight === 768)),
+  'The full corridor atlas retains its original dimensions and alignment');
   near((await state()).feet, 570, 'Player must stand on the floor');
   const doors = page.locator('.door');
   await doors.locator('img').evaluateAll(images => Promise.all(images.map(image => image.decode())));
@@ -260,7 +260,7 @@ try {
   near((await state()).x, beforeResize.x, 'Resize must preserve world position');
   near((await state()).feet, beforeResize.feet, 'Resize must preserve floor contact');
   assert.equal(await page.locator('nav').count(), 1, 'On-screen controls must be present for touch');
-  assert.equal(await page.locator('nav button').count(), 4, 'Left, right, interact and jump buttons must exist');
+  assert.equal(await page.locator('nav button').count(), 5, 'Left, right, interact, jump and phone buttons must exist');
 
   const holdButton = async (selector, duration) => {
     const box = await page.locator(selector).boundingBox();
@@ -301,13 +301,13 @@ try {
   await hold(stepsToElevator0 > 0 ? 'a' : 'd', Math.abs(stepsToElevator0));
   await page.keyboard.press('e');
   await finishSceneTransition(page);
-  await page.locator('[data-floor="12"]').click();
-  assert.equal(await page.locator('[data-floor="12"]').getAttribute('aria-pressed'), 'false', '12F needs an employee ID card');
+  await page.locator('#cabin-floor-buttons [data-floor="12"]').click();
+  assert.equal(await page.locator('#cabin-floor-buttons [data-floor="12"]').getAttribute('aria-pressed'), 'false', '12F needs an employee ID card');
   assert.match(await page.locator('#cabin-status').textContent(), /사원증 인증 층이다/);
   // tests/elevator.mjs picks the card up on 16F; here it is handed over directly to keep the ride short.
   await page.evaluate(() => collectedItems.add('f16-badge'));
-  await page.locator('[data-floor="12"]').click();
-  assert.equal(await page.locator('[data-floor="12"]').getAttribute('aria-pressed'), 'true');
+  await page.locator('#cabin-floor-buttons [data-floor="12"]').click();
+  assert.equal(await page.locator('#cabin-floor-buttons [data-floor="12"]').getAttribute('aria-pressed'), 'true');
   await page.locator('#cabin-close').click();
   await page.clock.runFor(8500);
   await page.locator('#cabin-exit').click();
@@ -322,7 +322,7 @@ try {
 
   await page.keyboard.press('e');
   await finishSceneTransition(page);
-  await page.locator('[data-floor="17"]').click();
+  await page.locator('#cabin-floor-buttons [data-floor="17"]').click();
   await page.locator('#cabin-close').click();
   await page.clock.runFor(8500);
   await page.locator('#cabin-exit').click();

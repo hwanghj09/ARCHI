@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { mkdir, readFile } from 'node:fs/promises';
 import { chromium } from 'playwright';
-import { finishSceneTransition, reachInitialCorridor } from './scene-transition.mjs';
+import { interactionMessage, finishSceneTransition, reachInitialCorridor } from './scene-transition.mjs';
 import { assertMirroredDoor, exitDoor } from './room-geometry.mjs';
 
 await mkdir('.local', { recursive: true });
@@ -73,14 +73,14 @@ try {
   await walkTo(4095);
   assert.equal(await hint(), 'E · 소화전 조사');
   await page.keyboard.press('e');
-  assert.match(await page.locator('#interaction-status').textContent(), /호스와 관창/);
+  assert.match(await interactionMessage(page), /호스와 관창/);
   await page.screenshot({ path: '.local/floor17-extension.png' });
   await walkTo(4463);
   assert.equal(await hint(), 'E · 관리자 외 출입금지 (잠김)');
   await page.keyboard.press('e');
   await page.clock.runFor(800);
   assert.equal(await page.locator('#world').getAttribute('data-room'), 'corridor');
-  assert.match(await page.locator('#interaction-status').textContent(), /관리자실 문이 잠겨/);
+  assert.match(await interactionMessage(page), /관리자실 문이 잠겨/);
   await page.setViewportSize({ width: 390, height: 844 });
   await page.clock.runFor(100);
   await page.locator('#interact').click();

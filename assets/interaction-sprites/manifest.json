@@ -1,7 +1,7 @@
 {
   "generator": "built-in image_gen",
   "spec": "docs/INTERACTION-SPRITES.md",
-  "integrated": false,
+  "integrated": true,
   "layout": "horizontal",
   "assets": [
     {

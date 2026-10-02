@@ -1,30 +1,85 @@
-// 게시판·포스트잇·서류·일반 소품의 조사 결과를 읽을 수 있는 모달 UI로 보여 준다.
+// 조사 결과를 화면 하단 대화창에 표시한다. 글이 적힌 물건(writing: 화이트보드·노트·서류·화면·메모 ...)은
+// 적힌 모습 그대로 크게 펼쳐 보인다.
 const inspectionPanel = document.getElementById('inspection');
+const inspectionLabel = inspectionPanel.querySelector('.inspection-label');
 const inspectionTitle = document.getElementById('inspection-title');
+const inspectionSheet = document.getElementById('inspection-sheet');
 const inspectionText = document.getElementById('inspection-text');
 const inspectionClose = document.getElementById('inspection-close');
+const inspectionDescription = document.getElementById('inspection-description');
+const inspectionHelp = inspectionPanel.querySelector('.inspection-help');
+let inspectionTypingTimer = null;
 
-function inspectionKind(name, message) {
-  if (/포스트잇|메모/.test(message)) return 'note';
-  if (/게시판|보드|현황판|일지|기록|서류|출력|안내|표/.test(`${name} ${message}`)) return 'paper';
-  return 'object';
+function finishInspectionText() {
+  clearInterval(inspectionTypingTimer);
+  inspectionTypingTimer = null;
+  inspectionText.textContent = inspectionDescription.textContent;
+  inspectionClose.textContent = '닫기 ▾';
+  inspectionHelp.textContent = 'E / Esc';
 }
 
-function openInspection(name, message) {
+function advanceInspection() {
+  if (inspectionTypingTimer !== null) finishInspectionText();
+  else closeInspection();
+}
+
+// sheet: { surface, look, writing, caption, image }를 가진 조사 대상. 펼친 표면은 보이기만 하고, 화면 낭독기는 message를 읽는다.
+function openInspection(name, message, sheet) {
   if (!message) return;
   usingInspection = true;
+  const surface = hasWritingSheet(sheet) ? sheet.surface : null;
   inspectionTitle.textContent = name;
-  inspectionText.textContent = message;
-  inspectionPanel.dataset.kind = inspectionKind(name, message);
+  inspectionDescription.textContent = message;
+  finishInspectionText();
+  if (!surface && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    const characters = Array.from(new Intl.Segmenter('ko', { granularity: 'grapheme' }).segment(message), part => part.segment);
+    let cursor = 0;
+    inspectionText.textContent = '';
+    inspectionClose.textContent = '전체 보기 ▾';
+    inspectionHelp.textContent = 'E · 전체 보기 / Esc · 닫기';
+    inspectionTypingTimer = setInterval(() => {
+      inspectionText.textContent += characters[cursor++];
+      if (cursor === characters.length) finishInspectionText();
+    }, 30);
+  }
+  inspectionText.scrollTop = 0;
+  inspectionText.tabIndex = surface ? -1 : 0;
+  inspectionLabel.textContent = surface ? writingSurfaceLabel(sheet) : '조사';
+  inspectionSheet.replaceChildren(...(surface ? [renderWritingSheet(sheet)] : []));
+  inspectionSheet.hidden = !surface;
+  inspectionSheet.scrollTop = 0;
+  if (surface) inspectionPanel.dataset.surface = surface;
+  else delete inspectionPanel.dataset.surface;
+  clearTimeout(statusTimer);
+  status.textContent = '';
   inspectionPanel.hidden = false;
+  hint.hidden = true;
   releaseInput();
   inspectionClose.focus();
 }
 
 function closeInspection() {
+  clearInterval(inspectionTypingTimer);
+  inspectionTypingTimer = null;
   usingInspection = false;
   inspectionPanel.hidden = true;
   stage.focus();
 }
 
-inspectionClose.addEventListener('click', closeInspection);
+const INSPECTION_SCROLL_KEYS = { PageDown: 0.8, PageUp: -0.8, End: Infinity, Home: -Infinity };
+
+inspectionClose.addEventListener('click', advanceInspection);
+inspectionText.addEventListener('click', finishInspectionText);
+inspectionPanel.addEventListener('keydown', event => {
+  // 펼친 표면이 화면보다 길면 Page Up/Down·Home/End로 넘겨 본다(방향키는 이동이라 조사를 닫는다).
+  if (!inspectionSheet.hidden && Object.hasOwn(INSPECTION_SCROLL_KEYS, event.key)) {
+    const step = INSPECTION_SCROLL_KEYS[event.key];
+    inspectionSheet.scrollTop = Number.isFinite(step) ? inspectionSheet.scrollTop + step * inspectionSheet.clientHeight :
+      step > 0 ? inspectionSheet.scrollHeight : 0;
+    event.preventDefault();
+    return;
+  }
+  if (event.key !== 'Tab') return;
+  event.preventDefault();
+  (document.activeElement === inspectionClose && inspectionText.tabIndex === 0 ? inspectionText : inspectionClose).focus();
+});

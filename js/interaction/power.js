@@ -9,6 +9,8 @@ function updatePowerState() {
   const blackout = currentSceneFloor >= 1 && currentSceneFloor <= 17 && !solarPowered;
   world.dataset.blackout = String(blackout);
   world.dataset.powered = String(emergencyPowered || solarPowered);
+  refreshBackgroundPower();
+  refreshReady();
   document.querySelectorAll('#power-floor-grid button').forEach(button => {
     button.classList.toggle('active', Number(button.dataset.floor) === solarPoweredFloor);
     button.setAttribute('aria-pressed', String(Number(button.dataset.floor) === solarPoweredFloor));

@@ -19,6 +19,8 @@ function refreshPhone() {
 function togglePhone() {
   if (usingPhone) return closePhone();
   usingPhone = true;
+  phoneTime = 0;
+  phoneAwayTime = 0;
   phonePanel.hidden = false;
   releaseInput();
   animate(0);
@@ -27,7 +29,9 @@ function togglePhone() {
 }
 
 function closePhone() {
+  if (!usingPhone) return;
   usingPhone = false;
+  phoneAwayTime = phoneLightOn ? 0 : 360;
   phonePanel.hidden = true;
   animate(0);
   stage.focus();
@@ -36,6 +40,7 @@ function closePhone() {
 function togglePhoneLight() {
   if (!phoneLightOn && phoneBattery <= 0) return showStatus('휴대폰 배터리가 없습니다.');
   phoneLightOn = !phoneLightOn;
+  animate(0);
   refreshPhone();
   showStatus(`휴대폰 라이트를 ${phoneLightOn ? '켰습니다' : '껐습니다'}.`);
 }

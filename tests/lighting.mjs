@@ -12,6 +12,9 @@ try {
   await page.clock.install({ time: new Date('2026-09-21T00:00:00Z') });
   await page.goto(new URL('../index.html', import.meta.url).href);
   await page.clock.pauseAt(new Date('2026-09-21T00:01:00Z'));
+  // The switch can illuminate 17F only after the rooftop generator supplies it.
+  assert(await page.locator('#darkness').isVisible(), 'The building starts without mains power');
+  await page.locator('#power-floor-grid [data-floor="17"]').dispatchEvent('click');
   await page.locator('#office-background').evaluate(img => img.decode());
   const lights = page.getByRole('checkbox', { name: '17층 조명' });
   const filter = selector => page.locator(selector).evaluate(el => getComputedStyle(el).filter);
