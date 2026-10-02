@@ -37,6 +37,9 @@ try {
   assert.equal(await ownsKey(), false, 'Closing without a click leaves the key');
   await page.keyboard.press('e');
   const key = page.getByRole('button', { name: '낡은 열쇠 줍기' });
+  await page.locator('.hydrant-cabinet > img').evaluate(image => image.decode());
+  assert(await page.locator('.hydrant-cabinet > img').evaluate(image => image.naturalWidth === 256 && image.naturalHeight === 256 &&
+    getComputedStyle(image).imageRendering === 'pixelated'), 'Cabinet uses the 256x256 pixel-art sprite specification');
   await key.hover();
   assert.match(await page.locator('#item-description').textContent(), /옥상문.*더럽다/);
   await page.screenshot({ path: '.local/hydrant-desktop.png' });

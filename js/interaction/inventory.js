@@ -29,15 +29,14 @@ function openItemPanel(title, description, surface, content) {
 
 function openHydrant() {
   const cabinet = writingNode('div', 'hydrant-cabinet');
-  const title = writingNode('div', 'hydrant-sign', '소화전 · FIRE HOSE');
-  const hose = writingNode('div', 'hydrant-hose');
-  hose.setAttribute('aria-hidden', 'true');
-  const nozzle = writingNode('div', 'hydrant-nozzle');
-  nozzle.setAttribute('aria-hidden', 'true');
+  const image = new Image();
+  image.src = 'assets/ui/hydrant-interior.png';
+  image.alt = '붉은 철문이 열린 소화전. 내부에 천 호스, 황동 밸브와 금속 관창이 있고 아래에 선반이 있다.';
+  image.draggable = false;
   const description = writingNode('p', 'item-description', '호스와 관창이 정리되어 있다. 안쪽을 살펴보자.');
   description.id = 'item-description';
   description.setAttribute('role', 'status');
-  cabinet.append(title, hose, nozzle);
+  cabinet.append(image);
   const content = writingNode('div', 'item-panel');
   content.append(cabinet, description);
   if (!collectedItems.has('rooftop-key')) {
