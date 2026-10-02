@@ -16,7 +16,7 @@
 | ../floor-kit/testbay-ups.png | 256×256, 불투명 높이 240 | 107 |
 | ../floor-kit/server-validation-bench.png | 512×256, 불투명 높이 232 | 260 |
 | ../floor-kit/training-workstation.png | 512×256, 불투명 높이 185 | 300 |
-| restroom-door.png | 원본 793×1983, 화장실 문 (2026-09-29 추가, **미연결**) | 145 |
+| restroom-door.png | 원본 793×1983, 화장실 문 (2026-09-29 추가, 2026-10-02 support 테마 `.metal`에 연결) | 145 |
 
 ## 검증
 

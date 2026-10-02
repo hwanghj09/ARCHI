@@ -13,7 +13,7 @@
 | ../floor-kit/data-workstation.png | 512×256 | 276 |
 | ../floor-kit/observation-console.png | 512×256 | 272 |
 | ../floor-kit/archive-worklight.png | 256×256 | 106 |
-| restroom-door.png | 생성 원본 793×1984, 화장실 문 (2026-09-29 추가, **미연결**) | 145 |
+| restroom-door.png | 생성 원본 793×1984, 화장실 문 (2026-09-29 추가, 2026-10-02 dataset 테마 `.metal`에 연결) | 145 |
 
 ## 검증
 

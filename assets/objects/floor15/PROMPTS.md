@@ -20,6 +20,9 @@
 | 연구실 보안문 | [research-door.png](research-door.png) | 생성 원본 / 게임 크기 140×320 |
 | 세미나실 방음문 | [seminar-door.png](seminar-door.png) | 생성 원본 / 게임 크기 130×320 |
 | 본부장실 목재문 | [director-door.png](director-door.png) | 생성 원본 / 게임 크기 120×330 |
+| 화장실 문 | [restroom-door.png](restroom-door.png) | 생성 원본 793×1983 / 게임 크기 145×360 / 2026-10-02 research 테마 `.metal`에 연결 |
+
+화장실 문(2026-09-30)은 ChatGPT 이미지 생성으로 만들었다. 기획과 프롬프트는 `docs/floor-design/15F.md` 4장·6장에 있다. 연구본부 소식지(`research-news-board`) 제작 기록은 `../floor-kit/DESIGN-COMPLETION-2026-10-01.md`에 있다.
 
 ## 실제 생성 프롬프트
 
