@@ -15,7 +15,7 @@ const FLOOR11_LAYOUT = {
       doorX: 4668, doorWidth: 120, doorStyle: 'stockroom' },
   ],
   barriers: [
-    { name: '방화셔터', x: 4292, y: 112, width: 24, style: 'shutter', sprite: 'assets/objects/floor11/fire-shutter-states.png', requires: 'f11-crank', gives: 'f11-shutter-open',
+    { name: '방화셔터', x: 4292, y: 112, width: 24, style: 'shutter', outline: [4283, 86, 31, 484], sprite: 'assets/objects/floor11/fire-shutter-states.png', requires: 'f11-crank', gives: 'f11-shutter-open',
       animation: { src: 'assets/objects/floor11/fire-shutter-crank.png', frames: 4 },
       missingMessage: '방화셔터가 바닥까지 내려와 있다. 제어함 표시: "23:58 원격 폐쇄 · SYSTEM". 수동 개방 핸들을 꽂는 구멍이 비어 있다.',
       missingSheet: { surface: 'screen', look: 'lcd', writing: [{ as: 'title', text: '방화셔터 제어' }, '23:58  원격 폐쇄', '       SYSTEM'],

@@ -1,5 +1,7 @@
 // 17층 사무실(고정 장면): 배경, 조명 스위치, 사무실 출입문, 켜진 컴퓨터.
-const officeComputer = { type: 'computer', x: 612, y: 392, width: 88, element: document.getElementById('office-computer') };
+// 테두리(outline)는 모니터 상자(#office-computer)에서 3px 띄운다.
+const officeComputer = { type: 'computer', x: 612, y: 392, width: 88, element: document.getElementById('office-computer'),
+  outline: [609, 389, 94, 70] };
 
 const officeBackground = document.getElementById('office-background');
 setPowerBackground(officeBackground, 'assets/background/floor17/office-interior-aligned.png');

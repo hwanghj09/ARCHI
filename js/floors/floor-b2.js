@@ -110,7 +110,7 @@ const B2_ROOMS = interiorRooms(-2, [
   ] },
   { id: 'b2-link', name: '연결 실험실', width: 1800, interiorStyle: 'linklab',
     fixtures: [
-      { name: '인간-시스템 연결 장비', x: 800, y: 330, width: 260, style: 'link-bed',
+      { name: '인간-시스템 연결 장비', x: 800, y: 330, width: 260, style: 'link-bed', outline: [800, 334, 260, 125],
         message: '7층 의자보다 한 단계 나아간 장비다. 머리 받침의 전극 다발이 곧장 서버 랙으로 이어진다. 명판: "인간-시스템 연결 장비 2차 · 제어 ARCHI-MAIN".',
         surface: 'label', look: 'plate',
         writing: ['인간-시스템 연결 장비 2차', '제어 ARCHI-MAIN'],

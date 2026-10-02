@@ -50,7 +50,7 @@ const FLOOR3_LAYOUT = {
 const FLOOR3_ROOMS = interiorRooms(3, [
   { id: 'f3-fitness', name: 'Fitness Club', width: 3360, interiorStyle: 'gym-floor',
     barriers: [
-      { name: '회원 전용 자동문', x: 2100, y: 150, width: 32, style: 'gym-auto',
+      { name: '회원 전용 자동문', x: 2100, y: 150, width: 32, style: 'gym-auto', outline: [2090, 124, 52, 446],
         message: '회원 전용 자동문이 닫혀 있다. 정전 뒤 "닫힘 고정"으로 바뀌었다. 문틀 스티커: "비상 개방 버튼(프런트 옆) · 배터리 5초."',
         surface: 'label', look: 'sticker', writing: [{ as: 'title', text: '비상 개방 버튼' }, '(프런트 옆) · 배터리 5초.'],
         caption: '회원 전용 자동문이 닫혀 있다. 정전 뒤 "닫힘 고정"으로 바뀌었다.',

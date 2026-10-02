@@ -61,7 +61,7 @@ const FLOOR2_ROOMS = interiorRooms(2, [
   { id: 'f2-booth', name: '영사실', width: 1920, windowless: true, interiorStyle: 'projection',
     fixtures: [
       { name: '관람창', x: 780, y: 120, width: 460, height: 150, style: 'booth-window', requires: 'f2-projected' },
-      { name: '영사기', x: 900, y: 380, width: 200, style: 'projector', requires: 'f2-reel', gives: 'f2-projected',
+      { name: '영사기', x: 900, y: 380, width: 200, style: 'projector', outline: [930, 396, 160, 174], requires: 'f2-reel', gives: 'f2-projected',
         missingMessage: '배터리로 도는 디지털 영사기다. 전원 표시등은 켜져 있지만 투입구가 비어 있다. 라벨: "녹화 NAS 디스크 전용 · 원본은 서버실."',
         missingSheet: { surface: 'label', writing: ['녹화 NAS 디스크 전용 · 원본은 서버실.'],
           caption: '배터리로 도는 디지털 영사기다. 전원 표시등은 켜져 있지만 투입구가 비어 있다.' },

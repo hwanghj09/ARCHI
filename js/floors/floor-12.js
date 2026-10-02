@@ -23,7 +23,8 @@ const FLOOR12_LAYOUT = {
     // 문 좌표는 CSS 임시 그림이 아니라 assets/background/floor12/corridor.png(실제 손그림)에서 육안 실측한 값이다.
     // GENERATED.md의 "문 좌표 보정(2026-09-28)" 절 참고 — 그림 속 문 위치가 애초 설계 좌표와 상당히 달랐다.
     { name: '개발실', x: 64, width: 800, style: 'frosted', target: 'f12-dev',
-      doorX: 708, doorWidth: 132, doorStyle: 'slide' },
+      // doorOutline/exitOutline: 판정은 그대로 두고 근접 테두리만 그림 속 양쪽 미닫이문 전체에 맞춘다(실측).
+      doorX: 708, doorWidth: 132, doorStyle: 'slide', doorOutline: [707, 250, 209, 318] },
     { name: '모델 평가실', x: 3100, width: 440, style: 'lab', target: 'f12-eval',
       doorX: 3020, doorWidth: 140, doorY: 314, doorStyle: 'security' },
     { name: '팀장실', x: 4330, width: 520, style: 'blinds', target: 'f12-lead',
@@ -39,7 +40,7 @@ const FLOOR12_LAYOUT = {
   ],
 };
 const FLOOR12_ROOMS = interiorRooms(12, [
-  { id: 'f12-dev', name: '개발실', width: 3280, exitX: 1550,
+  { id: 'f12-dev', name: '개발실', width: 3280, exitX: 1550, exitOutline: [1502, 277, 233, 291],
     // exitX: office.png에 이미 문이 x=1550 부근에 그려져 있어(실측), 복도 doorX 변경과 무관하게 고정한다.
     backgroundImage: { src: 'assets/background/floor12/office.png', height: 720, top: 0 }, props: [
     { file: 'large-planter', size: [256, 512], worldWidth: 78, x: 100 },
@@ -64,7 +65,7 @@ const FLOOR12_ROOMS = interiorRooms(12, [
       takenMessage: '서랍은 비어 있다. 팀장실 보조키는 이미 챙겼다.' },
     { file: 'water-cooler', size: [256, 512], worldWidth: 62, x: 3200 },
   ] },
-  { id: 'f12-eval', name: '모델 평가실', width: 1804, windowless: true, exitX: 344,
+  { id: 'f12-eval', name: '모델 평가실', width: 1804, windowless: true, exitX: 344, exitOutline: [335, 312, 174, 256],
     // exitX: eval.png에 이미 문이 x=344 부근에 그려져 있어(실측), 복도 doorX 변경과 무관하게 고정한다.
     backgroundImage: { src: 'assets/background/floor12/eval.png', height: 720, top: 0 }, props: [
     { file: 'server-rack', size: [256, 512], worldWidth: 96, x: 110 },
@@ -82,7 +83,7 @@ const FLOOR12_ROOMS = interiorRooms(12, [
     { file: 'server-cooling-unit', size: [256, 512], worldWidth: 96, x: 1460 },
     { file: 'ups-cabinet', size: [256, 256], worldWidth: 158, x: 1660 },
   ] },
-  { id: 'f12-lead', name: '팀장실', width: 2132, exitX: 1863,
+  { id: 'f12-lead', name: '팀장실', width: 2132, exitX: 1863, exitOutline: [1815, 290, 180, 278],
     // exitX: lead.png에 이미 문이 x=1863 부근에 그려져 있어(실측), 복도 doorX 변경과 무관하게 고정한다.
     backgroundImage: { src: 'assets/background/floor12/lead.png', height: 720, top: 0 }, props: [
     { file: 'large-planter', size: [256, 512], worldWidth: 78, x: 100 },

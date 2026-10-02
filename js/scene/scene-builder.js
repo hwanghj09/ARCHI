@@ -102,7 +102,8 @@ function buildDynamicScene(config) {
     image.draggable = false;
     supply.append(image);
     dynamicScene.append(supply);
-    doorList.push({ name: '태양광 발전기', type: 'power', element: supply, x: 720, y: 250, width: 360 });
+    doorList.push({ name: '태양광 발전기', type: 'power', element: supply, x: 720, y: 250, width: 360,
+      outline: spriteOutline(image.getAttribute('src'), 720, floorY - 691 * 360 / 887, 360, 360) });
   }
   if (config.interior) {
     const backdrop = document.createElement('div');
@@ -122,7 +123,8 @@ function buildDynamicScene(config) {
         y: outside.doorY ?? parent.roomDoorY ?? 250, width: doorWidth, style: outside.doorStyle,
         unlocked: collectedItems.has(outside.unlockedBy),
         locked: Boolean(lock) && !collectedItems.has(lock.until), lockedUntil: lock?.until, message: lock?.message,
-        surface: lock?.surface, look: lock?.look, writing: lock?.writing, caption: lock?.caption, image: lock?.image }));
+        surface: lock?.surface, look: lock?.look, writing: lock?.writing, caption: lock?.caption, image: lock?.image,
+        outline: config.exitOutline }));
     }
     // 벽을 맞댄 방끼리의 연결문(links, 16층 주방 반입문): 복도를 거치지 않고 옆방에 있는 짝 연결문 앞으로 나온다. 다른 층의 방과도
     // 이을 수 있고, 그때는 hint로 안내 문구를 바꾼다.
@@ -130,7 +132,7 @@ function buildDynamicScene(config) {
       const next = floorById.get(link.target);
       doorList.push(addRoomDoor({ name: next.name, type: 'room', hint: link.hint ?? `E · ${next.name} 들어가기`, target: link.target,
         arrivalKey: `link:${config.id}`, key: `link:${link.target}`, x: link.x, y: link.y ?? 250,
-        width: link.width ?? 120, style: link.style }));
+        width: link.width ?? 120, style: link.style, outline: link.outline }));
     }
   }
   for (const roomConfig of config.rooms || []) {
@@ -149,7 +151,7 @@ function buildDynamicScene(config) {
       code: roomConfig.code, codeMessage: roomConfig.codeMessage, unlockedBy: roomConfig.unlockedBy,
       target: roomConfig.target, arrivalKey: 'exit', key: `room:${roomConfig.target}`,
       x: roomConfig.doorX, y: roomConfig.doorY ?? config.roomDoorY ?? 250, width: roomConfig.doorWidth ?? 120,
-      style: roomConfig.doorStyle }));
+      style: roomConfig.doorStyle, outline: roomConfig.doorOutline }));
   }
   // 벽에 붙은 설비(fixtures: 1층 층별 안내판·정문처럼 소품 그림이 없는 것)는 CSS로 그리고 lines를 글줄로 넣는다.
   // 충돌은 없고, message가 있으면 조사할 수 있다(requires·gives·code·opens도 소품처럼 쓴다). requires가 있는 설비는 그 물건을
@@ -187,12 +189,12 @@ function buildDynamicScene(config) {
     const element = document.createElement('div');
     element.className = `floor-prop ${prop.style || ''}`.trim();
     if (base) element.dataset.base = String(base);
-    Object.assign(element.style, {
-      left: `${prop.x - width / 2 * scale}px`, top: `${floorY - base - (height - 8) * scale}px`,
-      width: `${prop.worldWidth}px`, height: `${height * scale}px`,
-    });
+    const left = prop.x - width / 2 * scale;
+    const top = floorY - base - (height - 8) * scale;
+    Object.assign(element.style, { left: `${left}px`, top: `${top}px`, width: `${prop.worldWidth}px`, height: `${height * scale}px` });
+    const src = prop.sprite || `assets/objects/floor-kit/${prop.file}.png`;
     const image = new Image();
-    image.src = prop.sprite || `assets/objects/floor-kit/${prop.file}.png`;
+    image.src = src;
     image.alt = '';
     image.draggable = false;
     element.append(image);
@@ -223,7 +225,9 @@ function buildDynamicScene(config) {
       image: prop.image, missingSheet: prop.missingSheet, takenSheet: prop.takenSheet,
       sequence: sequence && { ...sequence, step: prop.step },
       ring: prop.ring && !collectedItems.has(prop.gives) ? { ...prop.ring, elapsed: 0, state: 'waiting' } : null,
-      x: prop.x - prop.worldWidth / 2, y: floorY - base - (height - 8) * scale, width: prop.worldWidth });
+      x: prop.x - prop.worldWidth / 2, y: top, width: prop.worldWidth,
+      // 근접 테두리는 캔버스가 아니라 그림이 차지하는 상자를 감싼다(그림이 배경과 어긋나면 prop.outline으로 덮어쓴다).
+      outline: prop.outline || spriteOutline(src, left, top, prop.worldWidth, height * scale) });
   }
   // 감시 카메라(cameras, B2 복도): 카메라와 시야를 그리고 지키는 방 문을 찾아 둔다. 돌아가기와 발각은 cctv.js가 맡는다.
   refreshReady();

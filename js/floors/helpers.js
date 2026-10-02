@@ -7,15 +7,18 @@ const interiorRooms = (floor, rooms) => rooms.map(entry => ({ ...entry, floor, i
   label: entry.name, arrival: `${entry.name}에 들어왔습니다.`,
   header: `${floor < 0 ? `B${-floor}` : `${floor}F`} · ${entry.name}`, aria: `${floorName(floor)} ${entry.name}`, width: 2400, background: '#151c20', ...entry }));
 
-// 화장실 내부는 건물 공통 구조라 모든 층이 17층 화장실 배경을 함께 쓴다.
+// 화장실 내부는 건물 공통 구조라 모든 층이 17층 화장실 배경을 함께 쓴다. 설비는 배경 그림 속 물건 자리에 둔다:
+// 거울은 판정을 가운데 세면대 앞에 두고 테두리(outline)만 거울 전체에 맞추고, 화장실 칸은 문이 열린 첫 칸이다
+// (판정은 변기 앞, 테두리는 칸 전체. 칸 앞의 미끄럼 주의 표지와 판정이 겹치지 않게 오른쪽으로 비켜 둔다).
+// 비상 호출 버튼은 닫힌 칸 문의 표시등 패널이다.
 const restroomInterior = { name: '화장실', width: 1800, windowless: true,
   backgroundImage: { src: 'assets/background/floor17/restroom.png', height: 824.84, top: 0 },
   fixtures: [
-    { name: '세면대 거울', x: 520, y: 250, width: 260, height: 180,
+    { name: '세면대 거울', x: 520, y: 250, width: 260, height: 180, outline: [411, 216, 503, 183],
       message: '거울 아래 세면대에 물방울이 남아 있다. 정전 직전까지 누군가 이곳을 사용한 것 같다.' },
-    { name: '화장실 칸', x: 820, y: 220, width: 230, height: 350,
+    { name: '화장실 칸', x: 1190, y: 185, width: 90, height: 385, outline: [1072, 185, 228, 385],
       message: '칸문은 반쯤 열려 있고 안은 비어 있다. 문 안쪽에 오래된 순찰 시간표가 붙어 있다.' },
-    { name: '비상 호출 버튼', x: 1450, y: 300, width: 90, height: 120,
+    { name: '비상 호출 버튼', x: 1376, y: 372, width: 22, height: 36,
       message: '비상 호출 버튼의 표시등이 꺼져 있다. 정전 중에는 작동하지 않는다.' },
   ],
   props: [

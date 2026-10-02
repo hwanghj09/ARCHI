@@ -67,7 +67,7 @@ const FLOOR4_ROOMS = interiorRooms(4, [
       takenMessage: '판독기 화면에 같은 줄이 떠 있다. archi_svc · 외부 주소로 전송 시험 · 성공.',
       takenSheet: { surface: 'screen', look: 'terminal', writing: ['archi_svc · 외부 주소로 전송 시험 · 성공.'],
         caption: '판독기 화면에 같은 줄이 떠 있다.' } },
-    { file: 'ups-cabinet', size: [256, 256], worldWidth: 158, x: 1700, name: 'UPS 분배기', style: 'ups-selector',
+    { file: 'ups-cabinet', size: [256, 256], worldWidth: 158, x: 1700, name: 'UPS 분배기', style: 'ups-selector', outline: [1626, 441, 148, 129],
       message: 'UPS 분배기. 출력은 한 곳만.',
       cycle: { id: 'f4-ups', states: ['냉각 팬', '보관실 도어락', '로그 판독기'], messages: [
         'UPS 출력을 냉각 팬으로 돌렸다. 연구실 서버 팬이 다시 돈다. 판독기와 옆방 도어락은 꺼졌다.',

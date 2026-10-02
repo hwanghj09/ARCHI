@@ -6,6 +6,7 @@ function updateInteraction() {
     nearbyDoor = currentDoors.find(door => grounded && Math.abs(body.bounds.max.y - (door.standY ?? floorY)) < 2 &&
       Math.abs(body.position.x - door.x - door.width / 2) < door.width / 2 + 28) || null;
     for (const door of currentDoors) door.element.classList.toggle('near', door === nearbyDoor);
+    updateOutline();
     hint.hidden = !nearbyDoor;
     if (nearbyDoor) {
       hint.style.left = `${nearbyDoor.x + nearbyDoor.width / 2}px`;
@@ -19,6 +20,7 @@ function updateInteraction() {
   nearbyDoor = activeDoors.find(door => grounded && Math.abs(body.bounds.max.y - floorY) < 2 &&
     Math.abs(body.position.x - door.x - door.width / 2) < door.width / 2 + 28) || null;
   for (const door of [...doors, ...officeDoors, officeComputer]) door.element.classList.toggle('near', door === nearbyDoor);
+  updateOutline();
   hint.hidden = !nearbyDoor;
   if (nearbyDoor) {
     hint.style.left = `${nearbyDoor.x + nearbyDoor.width / 2}px`;

@@ -21,16 +21,17 @@ const FLOOR7_LAYOUT = {
   // 화장실: 그림 속 문이 BUILDING_CORE.restroom보다 오른쪽으로 쏠려 있어 보정. doorStyle은 1층과
   // 같이 'art-door'(CSS 문 완전히 숨김)로 바꿔서 corridor.png에 그려진 문 위에 기본 CSS 금속문이
   // 겹쳐 그려지지 않게 한다.
-  restroomOverride: { doorX: 3762, doorWidth: 142, doorStyle: 'art-door' },
+  // doorOutline/exitOutline/outline: 판정은 그대로 두고 근접 테두리만 그림 속 문·사물 상자에 맞춘다(실측).
+  restroomOverride: { doorX: 3762, doorWidth: 142, doorStyle: 'art-door', doorOutline: [3751, 293, 159, 262] },
   rooms: [
     // 문 좌표는 설계값이 아니라 assets/background/floor7/corridor.png(실제 그림)에서 육안 실측한 값이다.
     // GENERATED.md의 "문 좌표 보정" 절 참고.
     { name: 'VIP Room', x: 120, width: 480, style: 'vip-suite', target: 'f7-vip',
-      doorX: 314, doorWidth: 197, doorStyle: 'vip-double' },
+      doorX: 314, doorWidth: 197, doorStyle: 'vip-double', doorOutline: [312, 247, 208, 290] },
     { name: 'AI 테스트실', x: 4300, width: 360, style: 'testlab', target: 'f7-test',
-      doorX: 4408, doorWidth: 188, doorStyle: 'lab-slide' },
+      doorX: 4408, doorWidth: 188, doorStyle: 'lab-slide', doorOutline: [4441, 286, 157, 248] },
     { name: '검증실', x: 4660, width: 290, style: 'chamber', target: 'f7-verify',
-      doorX: 4701, doorWidth: 104, doorStyle: 'airlock' },
+      doorX: 4701, doorWidth: 104, doorStyle: 'airlock', doorOutline: [4699, 309, 103, 225] },
   ],
   fixtures: [
     { name: '라운지 창', x: 700, y: 120, width: 640, height: 230, style: 'vip-window' },
@@ -64,11 +65,12 @@ const FLOOR7_LAYOUT = {
   ],
 };
 const FLOOR7_ROOMS = interiorRooms(7, [
-  { id: 'f7-vip', name: 'VIP Room', width: 3072, interiorStyle: 'vip-suite', exitX: 1428,
+  { id: 'f7-vip', name: 'VIP Room', width: 3072, interiorStyle: 'vip-suite', exitX: 1428, exitOutline: [1419, 287, 217, 281],
     // exitX: vip.png에 이미 문이 x=1428 부근에 그려져 있어(실측), 복도 doorX 변경과 무관하게 고정한다.
     backgroundImage: { src: 'assets/background/floor7/vip.png', height: 720, top: 0 },
     fixtures: [
-      { name: '시연 스크린', x: 1150, y: 140, width: 500, height: 210, style: 'demo-screen',
+      // 시연 스크린: vip.png에 그려진 꺼진 스크린 틀 자리(실측). 예전 자리(x=1150, 폭 500)는 출구 문 윗부분을 덮었다.
+      { name: '시연 스크린', x: 955, y: 252, width: 368, height: 188, style: 'demo-screen',
         message: '꺼진 대형 스크린 옆에 화상 회선 예약표가 붙어 있다: "매일 03:00~03:30 · 예약자 SYSTEM · 상대 해외 IDC · 참석자 없음." 사람 없는 화상 회의가 매일 밤 열렸다.',
         surface: 'document', look: 'notice',
         writing: [{ as: 'title', text: '화상 회선 예약표' }, { as: 'field', label: '시간', text: '매일 03:00~03:30' },
@@ -95,7 +97,7 @@ const FLOOR7_ROOMS = interiorRooms(7, [
       { file: 'glass-display-cabinet', size: [256, 512], worldWidth: 111, x: 2800 },
       { file: 'large-planter', size: [256, 512], worldWidth: 78, x: 2980 },
     ] },
-  { id: 'f7-test', name: 'AI 테스트실', width: 2304, interiorStyle: 'testbay', exitX: 793,
+  { id: 'f7-test', name: 'AI 테스트실', width: 2304, interiorStyle: 'testbay', exitX: 793, exitOutline: [786, 264, 219, 304],
     // exitX: test.png에 이미 문이 x=793 부근에 그려져 있어(실측), 복도 doorX 변경과 무관하게 고정한다.
     backgroundImage: { src: 'assets/background/floor7/test.png', height: 720, top: 0 }, props: [
     { file: 'filing-cabinet', size: [256, 512], worldWidth: 72, x: 110 },
@@ -114,7 +116,7 @@ const FLOOR7_ROOMS = interiorRooms(7, [
       message: '기록계 용지에 같은 모양이 매일 반복된다. 01:00이 되면 7층 전력은 0으로 떨어지고, 같은 순간 B2 인입 전력이 세 배로 뛴다. 05:00에 둘 다 제자리로 돌아온다.' },
     { file: 'office-desk', size: [512, 256], worldWidth: 252, x: 2050 },
   ] },
-  { id: 'f7-verify', name: '검증실', width: 1856, windowless: true, interiorStyle: 'chamber', exitX: 555,
+  { id: 'f7-verify', name: '검증실', width: 1856, windowless: true, interiorStyle: 'chamber', exitX: 555, exitOutline: [557, 290, 208, 280],
     // exitX: verify.png에 이미 문이 x=555 부근에 그려져 있어(실측), 복도 doorX 변경과 무관하게 고정한다.
     backgroundImage: { src: 'assets/background/floor7/verify.png', height: 720, top: 0 },
     exitLock: { until: 'f7-release',
@@ -124,7 +126,7 @@ const FLOOR7_ROOMS = interiorRooms(7, [
       writing: ['세션이 끝나기 전에는', '열리지 않습니다.', { as: 'field', label: '비상 해제', text: '안쪽 끝 인터록 제어반.' }],
       caption: '문이 꿈쩍도 하지 않는다.' },
     fixtures: [
-      { name: '인터페이스 의자', x: 400, y: 380, width: 200, style: 'interface-chair',
+      { name: '인터페이스 의자', x: 400, y: 380, width: 200, style: 'interface-chair', outline: [418, 375, 164, 195],
         message: '머리 받침과 팔걸이에 전극이 달린 의자다. 등받이의 실험표: "인간-시스템 인터페이스 1차 시험. 피험자의 신경 반응을 ARCHI가 직접 읽고 쓴다. 2차 장비는 B2로 이관 완료."',
         surface: 'document',
         writing: [{ as: 'title', text: '인간-시스템 인터페이스 1차 시험' }, '피험자의 신경 반응을 ARCHI가 직접 읽고 쓴다.', { as: 'rule' },
