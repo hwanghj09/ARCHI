@@ -1,6 +1,6 @@
 /* 소화전 내부와 소지품은 같은 조사창 안에서 조작한다. */
 #inventory-button { position: fixed; right: max(24px, env(safe-area-inset-right)); top: 68px; z-index: 5; padding: 10px 14px; border: 1px solid #778778; border-radius: 4px; background: #182327; color: #eddfbd; cursor: pointer; }
-#inspection[data-surface="hydrant"], #inspection[data-surface="inventory"] { width: min(520px, calc(100vw - 24px)); }
+#inspection[data-surface="hydrant"], #inspection[data-surface="inventory"], #inspection[data-surface="rooftop-lock"] { width: min(520px, calc(100vw - 24px)); }
 .item-panel { padding: 12px; color: #e6dcc6; }
 .hydrant-cabinet { position: relative; width: min(380px, 100%); aspect-ratio: 1; margin: auto; }
 .hydrant-cabinet > img { display: block; width: 100%; height: auto; image-rendering: pixelated; }

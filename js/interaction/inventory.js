@@ -62,6 +62,24 @@ function openHydrant() {
   openItemPanel('17층 소화전', description.textContent, 'hydrant', content);
 }
 
+function openRooftopLock() {
+  const content = writingNode('div', 'item-panel inventory-content');
+  const description = writingNode('p', 'item-description', '비상문이 잠겨 있다. 소화전에서 찾은 열쇠로 문을 열 수 있을 것 같다.');
+  description.id = 'item-description';
+  const useKey = itemButton('rooftop-key');
+  useKey.querySelector('.item-name').textContent = '열쇠 사용하기';
+  useKey.addEventListener('click', () => {
+    updateInteraction();
+    if (!usingInspection || inspectionPanel.dataset.surface !== 'rooftop-lock' || currentSceneFloor !== 17 ||
+        nearbyDoor?.type !== 'stairs' || !collectedItems.has('rooftop-key')) return;
+    collectedItems.add('rooftop-unlocked');
+    closeInspection();
+    interact();
+  });
+  content.append(description, useKey);
+  openItemPanel('옥상 비상문', description.textContent, 'rooftop-lock', content);
+}
+
 function toggleInventory() {
   if (usingInspection && inspectionPanel.dataset.surface === 'inventory') {
     closeInspection();
@@ -82,7 +100,7 @@ function toggleInventory() {
     grid.append(button);
   }
   content.append(grid, description);
-  openItemPanel('가방', '챙긴 물건을 확인한다. 열쇠는 맞는 문을 조사할 때 자동으로 사용한다.', 'inventory', content);
+  openItemPanel('가방', '챙긴 물건을 확인한다. 옥상 비상문 앞에서 조사한 뒤 열쇠 사용하기를 누르면 잠금을 해제한다.', 'inventory', content);
   inventoryButton.setAttribute('aria-expanded', 'true');
 }
 

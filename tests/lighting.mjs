@@ -71,6 +71,7 @@ try {
   await page.keyboard.up('d');
   await page.clock.runFor(34);
   await page.keyboard.press('e');
+  await page.getByRole('button', { name: '열쇠 사용하기', exact: true }).click();
   await finishSceneTransition(page);
   assert.equal(await page.locator('header span').textContent(), 'RF · 옥상');
   assert(await page.locator('#floor17-light-switch').isHidden());

@@ -144,8 +144,9 @@ function interact() {
   }
   if (nearbyDoor.type === 'stairs') {
     const destId = currentSceneFloor === 18 ? 'f17' : 'rooftop';
-    if (destId === 'rooftop' && !collectedItems.has('rooftop-key')) {
-      openInspection('옥상문', '문이 잠겨 있다. 옥상문을 열 열쇠가 필요하다.');
+    if (destId === 'rooftop' && !collectedItems.has('rooftop-unlocked')) {
+      if (collectedItems.has('rooftop-key')) openRooftopLock();
+      else openInspection('옥상문', '문이 잠겨 있다. 옥상문을 열 열쇠가 필요하다.');
       return;
     }
     if (destId === 'rooftop' && (!rooftopBackground.complete || !rooftopBackground.naturalWidth)) {

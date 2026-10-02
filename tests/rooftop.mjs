@@ -39,6 +39,7 @@ try {
   assert.equal((await state()).room, 'corridor', 'Airborne stair use is blocked');
   await page.clock.runFor(1000);
   await page.keyboard.down('e');
+  await page.getByRole('button', { name: '열쇠 사용하기', exact: true }).click();
   await arrived('dynamic');
   await page.keyboard.down('e');
   await page.keyboard.up('e');

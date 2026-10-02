@@ -82,12 +82,41 @@ try {
   await approach('stairs');
   await page.evaluate(() => rooftopBackground.decode());
   await page.keyboard.press('e');
+  const useKey = page.getByRole('button', { name: '열쇠 사용하기', exact: true });
+  assert(await useKey.isVisible());
+  assert.equal(await page.evaluate(() => currentSceneFloor), 17, 'Owning the key does not automatically use it');
+  await page.keyboard.press('Escape');
+  assert.equal(await page.evaluate(() => collectedItems.has('rooftop-unlocked')), false, 'Closing cancels key use');
+  await page.keyboard.press('e');
+  await page.keyboard.press('d');
+  assert(await page.locator('#inspection').isHidden(), 'Walking cancels key use');
+  assert.equal(await page.evaluate(() => collectedItems.has('rooftop-unlocked')), false);
+  await approach('stairs');
+  await page.keyboard.press('e');
+  for (const viewport of [{ width: 1280, height: 720 }, { width: 390, height: 844 }, { width: 844, height: 390 }]) {
+    await page.setViewportSize(viewport);
+    await useKey.scrollIntoViewIfNeeded();
+    assert(await useKey.isVisible());
+    assert(await useKey.evaluate(button => {
+      const rect = button.getBoundingClientRect();
+      return rect.left >= 0 && rect.right <= innerWidth && rect.top >= 0 && rect.bottom <= innerHeight;
+    }), 'Key use button is reachable on desktop and mobile');
+  }
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.screenshot({ path: '.local/rooftop-use-key.png' });
+  await page.locator('#inspection-close').focus();
+  await page.keyboard.press('Tab');
+  assert(await useKey.evaluate(button => button === document.activeElement));
+  await page.keyboard.press('Enter');
   await page.clock.runFor(1000);
   assert.equal(await page.evaluate(() => currentSceneFloor), 18);
   await page.keyboard.press('e');
   await page.clock.runFor(1000);
   assert.equal(await page.evaluate(() => currentSceneFloor), 17);
   assert.equal(await ownsKey(), true, 'Round trip keeps the key');
+  await page.keyboard.press('e');
+  await page.clock.runFor(1000);
+  assert.equal(await page.evaluate(() => currentSceneFloor), 18, 'Unlocked rooftop no longer asks to use the key');
   await page.evaluate(() => { usingPhone = true; });
   await page.keyboard.press('i');
   assert(await page.locator('#inspection').isHidden(), 'Inventory cannot overlap another modal');

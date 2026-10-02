@@ -93,7 +93,9 @@ try {
   await walkTo(4990);
   assert(Math.abs(await position() - 4948) < 1, 'Extended corridor ends at the new wall');
   await walkTo(2996);
-  await enter();
+  await page.keyboard.press('e');
+  await page.getByRole('button', { name: '열쇠 사용하기', exact: true }).click();
+  await finishSceneTransition(page);
   assert.equal(await page.locator('header span').textContent(), 'RF · 옥상');
   await enter();
   assert.equal(await page.locator('#world').evaluate(el => el.style.width), '5000px');
