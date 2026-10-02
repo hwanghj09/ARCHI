@@ -167,11 +167,12 @@
       .room-door.seminar { border-color: #4a5a4c; background: linear-gradient(90deg, transparent 18%, #152326 18% 32%, transparent 32%) 0 30px / 100% 150px no-repeat, linear-gradient(90deg, transparent 80%, #b7ab85 80% 84%, transparent 84%), repeating-linear-gradient(#3d4a3e 0 36px, #35412f 36px 38px); box-shadow: inset 0 0 0 4px #1b221b; }
       .room-door.director { border-color: #5b4a30; background: linear-gradient(90deg, transparent 76%, #c2a060 76% 84%, transparent 84%) 0 150px / 100% 12px no-repeat, repeating-linear-gradient(90deg, #3a2a1c 0 20px, #33251a 20px 22px); box-shadow: inset 0 0 0 6px #241a10; }
       /* 15층 연구본부 전용 문과 GPU 포장 상자. 상자 그림의 불투명 영역을 기존 충돌 크기에 맞춘다. */
-      #dynamic-scene[data-theme="research"] .room-door:is(.research, .seminar, .director) { border: 0; box-shadow: none; background-color: #131618; background-size: 100% 100%; background-repeat: no-repeat; background-position: 0 0; image-rendering: pixelated; }
+      #dynamic-scene[data-theme="research"] .room-door:is(.research, .seminar, .director, .metal) { border: 0; box-shadow: none; background-color: #131618; background-size: 100% 100%; background-repeat: no-repeat; background-position: 0 0; image-rendering: pixelated; }
       #dynamic-scene[data-theme="research"] .room-door.research { background-image: url('assets/objects/floor15/research-door.png'); }
       #dynamic-scene[data-theme="research"] .room-door.research::after { content: none; }
       #dynamic-scene[data-theme="research"] .room-door.seminar { background-image: url('assets/objects/floor15/seminar-door.png'); }
       #dynamic-scene[data-theme="research"] .room-door.director { background-image: url('assets/objects/floor15/director-door.png'); }
+      #dynamic-scene[data-theme="research"] .room-door.metal { background-image: url('assets/objects/floor15/restroom-door.png'); }
       #dynamic-scene[data-theme="research"] > .crate { border: 0; box-shadow: none; background: url('assets/objects/floor-kit/gpu-shipping-crate.png') 50% 92.920354% / 103.225806% 179.020979% no-repeat; image-rendering: pixelated; }
       /* 14층 연구본부: 창 없는 블록벽(자료실)·막대그래프 포스터 유리벽(데이터 연구실)·반사 유리와 꺼진 "실험 중" 표시(사용자 실험실), 키패드 철문·파란 띠 유리문·관찰창 문. 방 안은 서가 벽(자료실)·관찰 유리(실험실) */
       #dynamic-scene[data-theme="dataset"] .room-interior { background: linear-gradient(#0c0e18 0 44px, #2c3352 44px 50px, #191c2e 50px 420px, #242a44 420px 424px, #151827 424px); }
@@ -190,11 +191,12 @@
       #dynamic-scene .room-interior.stacks { background: linear-gradient(#0a0b12 0 44px, #262b44 44px 50px, transparent 50px), repeating-linear-gradient(transparent 0 64px, #2a2f48 64px 70px) 0 90px / 100% 330px no-repeat, repeating-linear-gradient(90deg, #171a2a 0 240px, #121421 240px 246px) !important; }
       #dynamic-scene .room-interior.mirror::before { top: 80px; left: 180px; right: auto; width: 700px; height: 240px; border: 8px solid #2c3352; background: linear-gradient(115deg, transparent 0 30%, #ffffff0d 30% 33%, transparent 33%), linear-gradient(#07080d, #0c0e16); }
       /* 14층 전용 문: 복도와 방 안에 같은 스프라이트를 사용한다. */
-      #dynamic-scene[data-theme="dataset"] .room-door:is(.vault, .datalab, .observe) { border: 0; box-shadow: none; background-color: #14172a; background-size: 100% 100%; background-repeat: no-repeat; background-position: 0 0; image-rendering: pixelated; }
+      #dynamic-scene[data-theme="dataset"] .room-door:is(.vault, .datalab, .observe, .metal) { border: 0; box-shadow: none; background-color: #14172a; background-size: 100% 100%; background-repeat: no-repeat; background-position: 0 0; image-rendering: pixelated; }
       #dynamic-scene[data-theme="dataset"] .room-door.vault { background-image: url('assets/objects/floor14/archive-door.png'); }
       #dynamic-scene[data-theme="dataset"] .room-door.vault::after { content: none; }
       #dynamic-scene[data-theme="dataset"] .room-door.datalab { background-image: url('assets/objects/floor14/data-door.png'); }
       #dynamic-scene[data-theme="dataset"] .room-door.observe { background-image: url('assets/objects/floor14/observation-door.png'); }
+      #dynamic-scene[data-theme="dataset"] .room-door.metal { background-image: url('assets/objects/floor14/restroom-door.png'); }
       /* 13층 기술본부(support 테마): 꺼진 모니터 벽이 비치는 유리(상황실)·철망 우리와 고전압 표지(장비 검증실)·높은 띠창과 꺼진 "교육 중" 표시(교육장), 주황 띠 유리 양문·철망 문·작은 창 문. 상황실 안은 꺼진 모니터 벽 */
       #dynamic-scene[data-theme="support"] .room-interior { background: linear-gradient(#0e0f11 0 44px, #36393e 44px 50px, #1d1f22 50px 420px, #2a2c30 420px 424px, #18191c 424px); }
       #dynamic-scene[data-theme="support"] .room-interior::before { border-color: #3a3d42; }
@@ -210,10 +212,11 @@
       .room-door.cage { border-color: #5c6066; background: linear-gradient(90deg, transparent 80%, #a0a4aa 80% 84%, transparent 84%), repeating-linear-gradient(45deg, transparent 0 8px, #5c606699 8px 9px), repeating-linear-gradient(-45deg, transparent 0 8px, #5c606699 8px 9px), #101113; box-shadow: inset 0 0 0 4px #1d1f22; }
       .room-door.classroom { border-color: #4e5258; background: linear-gradient(#0c1a2b, #0c1a2b) 30% 50px / 40% 60px no-repeat, linear-gradient(90deg, transparent 80%, #a8acb2 80% 84%, transparent 84%), linear-gradient(#3a3d43, #2c2e33); box-shadow: inset 0 0 0 4px #1a1b1e; }
       /* 13층 전용 문: 복도와 방 안에 같은 스프라이트를 사용한다. */
-      #dynamic-scene[data-theme="support"] .room-door:is(.ops, .cage, .classroom) { border: 0; box-shadow: none; background-color: #18191b; background-size: 100% 100%; background-repeat: no-repeat; background-position: 0 0; image-rendering: pixelated; }
+      #dynamic-scene[data-theme="support"] .room-door:is(.ops, .cage, .classroom, .metal) { border: 0; box-shadow: none; background-color: #18191b; background-size: 100% 100%; background-repeat: no-repeat; background-position: 0 0; image-rendering: pixelated; }
       #dynamic-scene[data-theme="support"] .room-door.ops { background-image: url('assets/objects/floor13/ops-door.png'); }
       #dynamic-scene[data-theme="support"] .room-door.cage { background-image: url('assets/objects/floor13/testbay-door.png'); }
       #dynamic-scene[data-theme="support"] .room-door.classroom { background-image: url('assets/objects/floor13/training-door.png'); }
+      #dynamic-scene[data-theme="support"] .room-door.metal { background-image: url('assets/objects/floor13/restroom-door.png'); }
       #dynamic-scene .room-interior.monitors { background: linear-gradient(#0c0d0f 0 44px, #33363b 44px 50px, #1a1c1f 50px 420px, #282a2e 420px 424px, #151618 424px); }
       #dynamic-scene .room-interior.monitors::before { top: 70px; left: 240px; right: 560px; height: 230px; border: 6px solid #2c2f34; background: repeating-linear-gradient(90deg, transparent 0 146px, #2c2f34 146px 152px), repeating-linear-gradient(transparent 0 70px, #2c2f34 70px 76px), linear-gradient(#0a0d0f, #111618); }
       /* 4층 TmaxTibero 연구본부(rnd): 흰 에폭시 바닥과 청회색 벽, 민트색 표지. 로그 연구실 유리벽·백업 보관실 강판과 전기 잠금 문·연구원 사무실 간유리.
@@ -389,6 +392,11 @@
       #dynamic-scene[data-theme="sales"] .room-interior::before { border-color: #3a4466; background: linear-gradient(90deg, transparent 0 calc(100% - 6px), #8a7446 0) 0 0 / 180px 100%, radial-gradient(circle, #c9b77a55 0 1.5px, transparent 2px) 0 80px / 26px 22px, linear-gradient(transparent 38%, #0a0d17 38%), linear-gradient(#0d1426, #1a2440); }
       #dynamic-scene[data-theme="sales"] .room-interior::after { background: repeating-linear-gradient(90deg, transparent 0 240px, #3a4466 240px 380px); }
       #dynamic-scene[data-theme="sales"] .room-interior.windowless { background: linear-gradient(#0b0e18 0 44px, #2c3450 44px 50px, transparent 50px), repeating-linear-gradient(90deg, #19203a 0 150px, #141a2e 150px 154px) !important; }
+      #dynamic-scene[data-theme="sales"] .room-door:is(.gilt, .privacy, .stockroom, .metal) { border: 0; box-shadow: none; background-color: #141824; background-size: 100% 100%; background-repeat: no-repeat; background-position: 0 0; image-rendering: pixelated; }
+      #dynamic-scene[data-theme="sales"] .room-door.gilt { background-image: url('assets/objects/floor11/sales-door.png'); }
+      #dynamic-scene[data-theme="sales"] .room-door.privacy { background-image: url('assets/objects/floor11/strategy-door.png'); }
+      #dynamic-scene[data-theme="sales"] .room-door.stockroom { background-image: url('assets/objects/floor11/materials-door.png'); }
+      #dynamic-scene[data-theme="sales"] .room-door.metal { background-image: url('assets/objects/floor11/restroom-door.png'); }
       #dynamic-scene .floor-room.sales { background: linear-gradient(transparent 70%, #8a7446 70% 71%, transparent 71%), linear-gradient(#1a2238, #121828); }
       #dynamic-scene .floor-room.sales::before { top: 30px; left: 22px; right: 22px; height: 250px; border-color: #8a7446; background: linear-gradient(90deg, transparent 0 calc(100% - 5px), #8a7446 0) 0 0 / 150px 100%, radial-gradient(circle, #c9b77a55 0 1.5px, transparent 2px) 0 70px / 26px 22px, linear-gradient(transparent 40%, #0a0e19 40%), linear-gradient(#0d1528, #1a2542); }
       #dynamic-scene .floor-room.war-room { background: linear-gradient(#1a2032, #101422); }
