@@ -4,13 +4,11 @@
 .item-panel { padding: 12px; color: #e6dcc6; }
 .hydrant-cabinet { position: relative; width: min(380px, 100%); aspect-ratio: 1; margin: auto; }
 .hydrant-cabinet > img { display: block; width: 100%; height: auto; image-rendering: pixelated; }
-.inventory-item { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 18px; min-width: 108px; min-height: 100px; padding: 14px; border: 1px solid #68776c; border-radius: 3px; background: #202c2f; color: #e6dcc6; cursor: pointer; }
+.inventory-item { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; min-width: 108px; min-height: 100px; padding: 14px; border: 1px solid #68776c; border-radius: 3px; background: #202c2f; color: #e6dcc6; cursor: pointer; }
 .inventory-item:hover, .inventory-item:focus-visible { outline: 2px solid #dbc18b; outline-offset: 2px; background: #344038; }
-.item-key { position: relative; display: block; width: 64px; height: 12px; margin: 14px 2px 3px; border: 2px solid #8e774b; background: linear-gradient(#d2be83, #8e7447); transform: rotate(-18deg); filter: drop-shadow(2px 3px 1px #0009); }
-.item-key::before { content: ''; position: absolute; left: -10px; top: -12px; width: 24px; height: 24px; border: 7px solid #b29a64; border-radius: 50%; background: #302d27; }
-.item-key::after { content: ''; position: absolute; right: 3px; top: 7px; width: 9px; height: 13px; border-left: 5px solid #ad925b; border-right: 5px solid #ad925b; }
-.hydrant-cabinet .inventory-item { position: absolute; bottom: 22%; left: 65%; transform: translateX(-50%); min-width: 96px; min-height: 48px; padding: 0; border-color: transparent; background: transparent; }
-.hydrant-cabinet .item-key { transform: rotate(-18deg) scale(.6); }
+.item-key { display: block; width: 80px; height: 80px; object-fit: contain; image-rendering: pixelated; }
+.hydrant-cabinet .inventory-item { position: absolute; bottom: 17%; left: 65%; transform: translateX(-50%); min-width: 96px; min-height: 48px; padding: 0; border-color: transparent; background: transparent; }
+.hydrant-cabinet .item-key { width: 64px; height: 64px; }
 .hydrant-cabinet .item-name { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
 .item-description { min-height: 3.5em; margin: 14px 0 0; padding: 12px; border-top: 1px solid #657064; line-height: 1.7; font-size: 14px; word-break: keep-all; }
 .inventory-content { min-height: 200px; background: #172125; border: 1px solid #57665b; }

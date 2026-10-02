@@ -9,8 +9,10 @@ function itemButton(id) {
   const button = writingNode('button', 'inventory-item');
   button.type = 'button';
   button.dataset.item = id;
-  const icon = writingNode('span', 'item-key');
-  icon.setAttribute('aria-hidden', 'true');
+  const icon = writingNode('img', 'item-key');
+  icon.src = 'assets/ui/rooftop-key.png';
+  icon.alt = '';
+  icon.draggable = false;
   button.append(icon, writingNode('span', 'item-name', item.name));
   button.setAttribute('aria-describedby', 'item-description');
   return button;

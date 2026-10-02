@@ -37,6 +37,9 @@ try {
   assert.equal(await ownsKey(), false, 'Closing without a click leaves the key');
   await page.keyboard.press('e');
   const key = page.getByRole('button', { name: '낡은 열쇠 줍기' });
+  await key.locator('img').evaluate(image => image.decode());
+  assert(await key.locator('img').evaluate(image => image.naturalWidth === 256 && image.naturalHeight === 256 &&
+    getComputedStyle(image).imageRendering === 'pixelated'), 'Key uses a loaded 256x256 pixel-art sprite');
   await page.locator('.hydrant-cabinet > img').evaluate(image => image.decode());
   assert(await page.locator('.hydrant-cabinet > img').evaluate(image => image.naturalWidth === 256 && image.naturalHeight === 256 &&
     getComputedStyle(image).imageRendering === 'pixelated'), 'Cabinet uses the 256x256 pixel-art sprite specification');
@@ -68,6 +71,7 @@ try {
   await page.locator('#inventory-button').click();
   const item = page.locator('.inventory-item');
   assert.equal(await item.count(), 1);
+  assert.equal(await item.locator('img').getAttribute('src'), 'assets/ui/rooftop-key.png', 'Inventory reuses the same key art');
   await item.hover();
   assert.match(await page.locator('#item-description').textContent(), /옥상문.*더럽다/);
   await page.setViewportSize({ width: 390, height: 844 });
