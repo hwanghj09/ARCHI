@@ -17,7 +17,7 @@
 //       'progress' 진행 막대(value: 0~100, text) · 'sticker' 스티커(color: red·yellow)
 //       'note' 포스트잇(color: yellow·pink·blue·green, title) · 'paper' 붙여 둔 인쇄물(title, hand: 그 위 손글씨)
 //       'page' 다음 쪽(노트 오른쪽 쪽, 서류 다음 장, 메모·라벨 한 장 더)
-//   ink: black·blue·red·green(글씨 색), mark: circle·underline·highlight(동그라미·밑줄·형광펜), size: small·large,
+//   ink: black·blue·red·green(글씨 색), mark: circle·underline·highlight(동그라미·밑줄·형광펜), size: small·large, bold: true(굵게),
 //   align: center·right, tilt: 기울기(도, 기본은 항목 순서대로 조금씩),
 //   place: 'main'(화이트보드에서 note·paper를 오른쪽 대신 그 자리 아래에 붙임)
 // caption은 표면 아래에 보이는 서술(적혀 있지 않은 것)이다. 조사 문구(message)는 화면 낭독기용 설명으로 그대로 쓴다.
@@ -93,7 +93,7 @@ function writingItem(item, index) {
     if (entry.hand) node.append(writingNode('p', 'writing-hand', entry.hand));
   } else node = writingNode(kind === 'sticker' ? 'span' : 'p', `writing-${kind}`, entry.text);
   node.classList.add('writing-item');
-  for (const key of ['ink', 'mark', 'size', 'align', 'color']) if (entry[key]) node.dataset[key] = entry[key];
+  for (const key of ['ink', 'mark', 'size', 'align', 'color', 'bold']) if (entry[key]) node.dataset[key] = entry[key];
   const tilts = WRITING_PINNED.has(kind) ? WRITING_PINNED_TILTS : WRITING_LINE_TILTS;
   node.style.setProperty('--tilt', `${entry.tilt ?? tilts[index % tilts.length]}deg`);
   return node;

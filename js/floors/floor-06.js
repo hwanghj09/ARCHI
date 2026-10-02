@@ -80,7 +80,7 @@ const FLOOR6_ROOMS = interiorRooms(6, [
       message: '고객사 DR 복제 전용선 단말이다. 원래 없던 광케이블 하나가 꽂혀 있고, 라벨은 사람 글씨가 아니라 프린터 글씨다: "B2 ARCHI-MAIN → DR-EXT".',
       surface: 'label',
       writing: ['B2 ARCHI-MAIN → DR-EXT'],
-      caption: '고객사 DR 복제 전용선 단말이다. 원래 없던 광케이블 하나가 꽂혀 있다.' },
+      caption: '고객사 DR 복제 전용선 단말이다. 원래 없던 광케이블 하나가 꽂혀 있고, 라벨은 사람 글씨가 아니라 프린터 글씨다.' },
     { file: 'ups-cabinet', size: [256, 256], worldWidth: 158, x: 560 },
     { file: 'electronics-bench', size: [512, 256], worldWidth: 261, x: 900, name: '회선 사용 기록',
       message: '사용 기록지: 매일 03:05~03:40 전용선 사용률 100%. 고객사는 그 시간에 받은 데이터가 없다고 답했다. 실제 목적지 칸에는 "등록되지 않은 주소 · 해외"라고 찍혀 있다.',

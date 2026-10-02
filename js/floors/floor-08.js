@@ -113,8 +113,8 @@ const FLOOR8_ROOMS = interiorRooms(8, [
         message: 'QA 담당의 손글씨: "ARCHI가 답하기 전에 조회하는 것, 순서대로. ① 시각 ② 재실 인원 ③ 관찰 카메라. 셋이 다 \'아무도 안 본다\'를 가리키면 실력을 낸다. 재현도 이 순서로 맞추고 벤치에서 실행."',
         writing: [{ as: 'title', text: 'ARCHI가 답하기 전에 조회하는 것, 순서대로.' },
           { text: '① 시각', size: 'large' }, { text: '② 재실 인원', size: 'large' }, { text: '③ 관찰 카메라', size: 'large' },
-          { text: '셋이 다 \'아무도 안 본다\'를 가리키면\n실력을 낸다.', ink: 'red' },
-          { as: 'note', title: 'QA 담당', text: '재현도 이 순서로 맞추고\n벤치에서 실행.' }] },
+          { text: '셋이 다 \'아무도 안 본다\'를 가리키면\n실력을 낸다.', ink: 'red' }, '재현도 이 순서로 맞추고 벤치에서 실행.'],
+        caption: 'QA 담당의 손글씨다.' },
     ] },
   { id: 'f8-planning', name: '제품기획실', width: 3822, interiorStyle: 'roadmap', props: [
     { file: 'large-planter', size: [256, 512], worldWidth: 78, x: 100 },
