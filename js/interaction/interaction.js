@@ -66,6 +66,10 @@ function interact() {
     interactionTime = 420;
     facing = body.position.x <= nearbyDoor.x + nearbyDoor.width / 2 ? 1 : -1;
     animate(0);
+    if (nearbyDoor.container === 'hydrant') {
+      openHydrant();
+      return;
+    }
     const { gives } = nearbyDoor;
     // 도어락(code): 잠긴 문이나 아직 열지 못한 소품은 키패드를 연다. 맞는 번호를 넣으면 문이 열리거나 gives를 챙긴다.
     if (nearbyDoor.code && (nearbyDoor.type === 'room' ? nearbyDoor.locked : !collectedItems.has(gives))) {
@@ -138,6 +142,10 @@ function interact() {
   }
   if (nearbyDoor.type === 'stairs') {
     const destId = currentSceneFloor === 18 ? 'f17' : 'rooftop';
+    if (destId === 'rooftop' && !collectedItems.has('rooftop-key')) {
+      openInspection('옥상문', '문이 잠겨 있다. 옥상문을 열 열쇠가 필요하다.');
+      return;
+    }
     if (destId === 'rooftop' && (!rooftopBackground.complete || !rooftopBackground.naturalWidth)) {
       showStatus('옥상 배경을 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.');
       return;

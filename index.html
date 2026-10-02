@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="elevator.css" />
     <link rel="stylesheet" href="computer.css" />
     <link rel="stylesheet" href="writing.css" />
+    <link rel="stylesheet" href="inventory.css" />
     <style>
       * { box-sizing: border-box; }
       body { margin: 0; overflow: hidden; background: #27292b; color: #eee; font: 14px Arial, sans-serif; }
@@ -839,6 +840,7 @@
     <script src="js/interaction/phone.js" defer></script>
     <script src="js/interaction/power.js" defer></script>
     <script src="js/interaction/inspection.js" defer></script>
+    <script src="js/interaction/inventory.js" defer></script>
     <script src="js/computer/documents.js" defer></script>
     <script src="js/computer/computer.js" defer></script>
     <script src="js/elevator/cabin.js" defer></script>
@@ -916,6 +918,7 @@
       <span id="inspection-description" hidden></span>
       <div class="dialog-actions"><span class="inspection-help">E / Esc</span><button id="inspection-close" type="button">닫기 ▾</button></div>
     </section>
+    <button id="inventory-button" type="button" aria-controls="inspection" aria-expanded="false">가방 · I</button>
     <form id="debug-floor" aria-label="테스트용 층 이동">
       <label for="debug-floor-select">TEST 층 이동</label>
       <select id="debug-floor-select"></select>

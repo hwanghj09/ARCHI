@@ -47,6 +47,7 @@ function openInspection(name, message, sheet) {
   inspectionLabel.textContent = surface ? writingSurfaceLabel(sheet) : '조사';
   inspectionSheet.replaceChildren(...(surface ? [renderWritingSheet(sheet)] : []));
   inspectionSheet.hidden = !surface;
+  inspectionSheet.setAttribute('aria-hidden', 'true');
   inspectionSheet.scrollTop = 0;
   if (surface) inspectionPanel.dataset.surface = surface;
   else delete inspectionPanel.dataset.surface;
@@ -63,6 +64,7 @@ function closeInspection() {
   inspectionTypingTimer = null;
   usingInspection = false;
   inspectionPanel.hidden = true;
+  document.getElementById('inventory-button').setAttribute('aria-expanded', 'false');
   stage.focus();
 }
 
@@ -81,5 +83,7 @@ inspectionPanel.addEventListener('keydown', event => {
   }
   if (event.key !== 'Tab') return;
   event.preventDefault();
-  (document.activeElement === inspectionClose && inspectionText.tabIndex === 0 ? inspectionText : inspectionClose).focus();
+  const focusable = [...inspectionPanel.querySelectorAll('button:not(:disabled), [tabindex="0"]')];
+  const index = focusable.indexOf(document.activeElement);
+  focusable[(index + (event.shiftKey ? -1 : 1) + focusable.length) % focusable.length].focus();
 });

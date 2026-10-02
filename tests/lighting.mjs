@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { mkdir } from 'node:fs/promises';
 import { chromium } from 'playwright';
-import { finishSceneTransition, reachInitialCorridor } from './scene-transition.mjs';
+import { finishSceneTransition, reachInitialCorridor, collectRooftopKey } from './scene-transition.mjs';
 
 await mkdir('.local', { recursive: true });
 const browser = await chromium.launch();
@@ -63,6 +63,7 @@ try {
     'Space on the light checkbox must not jump');
   await lights.uncheck();
   await reachInitialCorridor(page);
+  await collectRooftopKey(page);
   assert(await darkness.isVisible(), 'Corridor shares the office light state');
   assert(await alignedSight());
   await page.keyboard.down('d');

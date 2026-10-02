@@ -43,7 +43,8 @@ for (const entry of FLOOR17.rooms) {
   doors.push(door);
 }
 doors.push({ name: '소화전', type: 'inspect', x: 4023, y: 248, width: 145,
-  element: document.getElementById('floor17-hydrant'), message: '소화전 안에 호스와 관창이 정리되어 있다. 옆에는 소화기가 비치되어 있다.' });
+  element: document.getElementById('floor17-hydrant'), container: 'hydrant',
+  message: '소화전 안에 호스와 관창이 정리되어 있다. 호스 아래에 작은 열쇠가 숨겨져 있다.' });
 
 const background = document.getElementById('background');
 // 기존 39개 타일과 동일한 아틀라스를 사용해 전원 변경 시 그림을 한 번에 교체한다.

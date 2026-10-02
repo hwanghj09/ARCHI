@@ -1,6 +1,12 @@
 // 키보드 조작: A/D·방향키 이동, Space/W/위 점프, Shift 달리기, E 상호작용, Esc 닫기.
 window.addEventListener('keydown', event => {
   if (transitioning) { event.preventDefault(); return; }
+  if (event.code === 'KeyI' && !event.repeat && !selectingFloor && !usingComputer && !usingKeypad &&
+      !usingPhone && !usingPowerPanel && (!usingInspection || inspectionPanel.dataset.surface === 'inventory')) {
+    event.preventDefault();
+    toggleInventory();
+    return;
+  }
   if (event.code === 'KeyP' && !event.repeat && !selectingFloor && !usingComputer && !usingKeypad && !usingPowerPanel && !usingInspection) {
     event.preventDefault();
     togglePhone();
@@ -18,6 +24,8 @@ window.addEventListener('keydown', event => {
     return;
   }
   if (usingInspection) {
+    // 조사창 안의 실제 물건 버튼은 Enter/Space로도 누를 수 있다.
+    if ((event.code === 'Enter' || event.code === 'Space') && event.target.closest('button')) return;
     if (event.code === 'Escape' || event.code === 'KeyE') {
       if (!event.repeat) {
         if (event.code === 'Escape') closeInspection();

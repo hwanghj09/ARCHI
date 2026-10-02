@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { mkdir } from 'node:fs/promises';
 import { chromium } from 'playwright';
-import { reachInitialCorridor } from './scene-transition.mjs';
+import { reachInitialCorridor, collectRooftopKey } from './scene-transition.mjs';
 
 await mkdir('.local', { recursive: true });
 const browser = await chromium.launch();
@@ -13,6 +13,7 @@ try {
   await page.goto(new URL('../index.html', import.meta.url).href);
   await page.clock.pauseAt(new Date('2026-09-20T00:01:00Z'));
   await reachInitialCorridor(page);
+  await collectRooftopKey(page);
   const state = () => page.locator('#player').evaluate(el => {
     const matrix = new DOMMatrix(getComputedStyle(el).transform);
     return { x: matrix.m41 + 96, feet: matrix.m42 + 178, room: el.parentElement.dataset.room };

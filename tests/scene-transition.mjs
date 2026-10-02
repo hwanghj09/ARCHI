@@ -18,6 +18,24 @@ export async function finishSceneTransition(page) {
   assert.equal(await page.locator('#room-transition').evaluate(el => getComputedStyle(el).opacity), '0');
 }
 
+export async function collectRooftopKey(page) {
+  const position = () => page.locator('#player').evaluate(el => new DOMMatrix(getComputedStyle(el).transform).m41 + 96);
+  const start = await position();
+  for (const target of [4095, start]) {
+    const x = await position();
+    const key = target > x ? 'd' : 'a';
+    await page.keyboard.down(key);
+    await page.clock.runFor(Math.abs(target - x) / 200 * 1000);
+    await page.keyboard.up(key);
+    await page.clock.runFor(34);
+    if (target === 4095) {
+      await page.keyboard.press('e');
+      await page.getByRole('button', { name: '낡은 열쇠 줍기' }).click();
+      await page.keyboard.press('Escape');
+    }
+  }
+}
+
 export async function reachInitialCorridor(page) {
   assert.equal(await page.locator('#world').getAttribute('data-room'), 'office');
   await page.locator('#office-background').evaluate(img => img.decode());

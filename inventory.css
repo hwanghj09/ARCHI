@@ -1,0 +1,28 @@
+/* 소화전 내부와 소지품은 같은 조사창 안에서 조작한다. */
+#inventory-button { position: fixed; right: max(24px, env(safe-area-inset-right)); top: 68px; z-index: 5; padding: 10px 14px; border: 1px solid #778778; border-radius: 4px; background: #182327; color: #eddfbd; cursor: pointer; }
+#inspection[data-surface="hydrant"], #inspection[data-surface="inventory"] { width: min(520px, calc(100vw - 24px)); }
+.item-panel { padding: 12px; color: #e6dcc6; }
+.hydrant-cabinet { position: relative; width: min(300px, 100%); height: 310px; margin: auto; border: 14px ridge #8a3730; background: repeating-linear-gradient(6deg, #352c27 0 5px, #302823 6px 8px); box-shadow: inset 0 6px 30px #000; }
+.hydrant-sign { padding: 8px 4px; text-align: center; background: #963e34; color: #f3dfb7; font-size: 12px; letter-spacing: 2px; }
+.hydrant-hose { position: absolute; left: 17%; top: 52px; width: 64%; aspect-ratio: 1; border: 4px solid #958d74; border-radius: 50%; background: repeating-radial-gradient(circle, #302d25 0 5px, #b0a68b 6px 13px, #766f5b 14px 18px); box-shadow: 4px 10px 10px #0009; }
+.hydrant-nozzle { position: absolute; right: 13px; top: 68px; width: 15px; height: 134px; border: 3px solid #a5a59a; border-radius: 3px 3px 7px 7px; background: linear-gradient(90deg, #555d57, #d1c9ac, #5a625a); transform: rotate(-12deg); }
+.inventory-item { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 18px; min-width: 108px; min-height: 100px; padding: 14px; border: 1px solid #68776c; border-radius: 3px; background: #202c2f; color: #e6dcc6; cursor: pointer; }
+.inventory-item:hover, .inventory-item:focus-visible { outline: 2px solid #dbc18b; outline-offset: 2px; background: #344038; }
+.item-key { position: relative; display: block; width: 64px; height: 12px; margin: 14px 2px 3px; border: 2px solid #8e774b; background: linear-gradient(#d2be83, #8e7447); transform: rotate(-18deg); filter: drop-shadow(2px 3px 1px #0009); }
+.item-key::before { content: ''; position: absolute; left: -10px; top: -12px; width: 24px; height: 24px; border: 7px solid #b29a64; border-radius: 50%; background: #302d27; }
+.item-key::after { content: ''; position: absolute; right: 3px; top: 7px; width: 9px; height: 13px; border-left: 5px solid #ad925b; border-right: 5px solid #ad925b; }
+.hydrant-cabinet .inventory-item { position: absolute; bottom: 9px; left: 28%; min-width: 112px; min-height: 56px; padding: 0; border-color: transparent; background: transparent; }
+.hydrant-cabinet .item-name { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+.item-description { min-height: 3.5em; margin: 14px 0 0; padding: 12px; border-top: 1px solid #657064; line-height: 1.7; font-size: 14px; word-break: keep-all; }
+.inventory-content { min-height: 200px; background: #172125; border: 1px solid #57665b; }
+.inventory-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(108px, 1fr)); gap: 12px; min-height: 100px; }
+@media (max-height: 480px) {
+  .hydrant-cabinet { height: 220px; width: 260px; }
+  .hydrant-hose { width: 44%; left: 22%; top: 40px; }
+  .hydrant-nozzle { height: 95px; top: 45px; }
+}
+@media (max-height: 480px) and (min-width: 600px) {
+  #inspection[data-surface="hydrant"] .item-panel { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; align-items: center; padding: 4px 12px; }
+  .hydrant-cabinet { width: 100%; }
+  #inspection[data-surface="hydrant"] .item-description { margin: 0; }
+}

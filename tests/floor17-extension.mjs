@@ -73,6 +73,9 @@ try {
   await walkTo(4095);
   assert.equal(await hint(), 'E · 소화전 조사');
   await page.keyboard.press('e');
+  await page.getByRole('button', { name: '낡은 열쇠 줍기' }).click();
+  await page.keyboard.press('Escape');
+  await page.keyboard.press('e');
   assert.match(await interactionMessage(page), /호스와 관창/);
   await page.screenshot({ path: '.local/floor17-extension.png' });
   await walkTo(4463);
