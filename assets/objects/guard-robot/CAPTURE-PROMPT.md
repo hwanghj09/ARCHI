@@ -3,14 +3,18 @@
 - Tool: built-in `image_gen`; existing guard and Suho sprites used as identity references.
 - `capture-source.png`: original 1536×1024 RGBA, six poses. Reach poses cross nominal column boundaries; extraction uses the transparent gaps.
 - `guard-capture.png`: 2304×256 RGBA, six horizontal **384×256** cells. Wider than patrol cells to keep extended arms intact. Fixed chassis x=128 and wheel baseline y=237. Display cell 240×160, mirror around chassis x=80 in the world.
-- Frame 0 amber alert, 1 red chase, 2 unfolding arms, 3 reaching, 4 closing grippers, 5 holding. Padded grippers are nonlethal and restrain the waist/legs.
+- Frames 0–1: red-face chase wheel loop (120ms/frame), 2 unfolding arms, 3 reaching, 4 closing grippers, 5 holding. All six heads and camera eyes are red. Padded grippers are nonlethal and restrain the waist/legs.
 - `assets/player/jeong-suho-caught-source.png`: original 1254×1254 RGBA, 2×2.
 - `assets/player/jeong-suho-caught.png`: 1024×256 RGBA, four horizontal **256×256** cells. Startled pose and three struggling poses; soles y=237, rendered in the existing 192px player cell.
 - Reproduce mechanical extraction with `scripts/prepare-guard-capture.ps1`. It preserves generated alpha and uses nearest-neighbor scaling.
-- Runtime: forward sensor 360px, close proximity 65px, warning 450ms, chase 270px/s, lost target 1800ms beyond 600px, grounded capture within 84px. Arms unfold/extend/close/hold over 660ms; retry appears at 900ms. Power loss releases Suho. Retry returns to the lobby elevator while preserving collected clues and battery.
+- Runtime: forward sensor 360px, close proximity 65px, immediate chase at 270px/s on detection, lost target 1800ms beyond 600px, grounded capture within 84px. Arms unfold/extend/close/hold over 660ms; retry appears at 900ms. Power loss releases Suho. Retry returns to the lobby elevator while preserving collected clues and battery.
 - Tests: `node tests/guard-capture.mjs`, `node tests/guard-patrol.mjs`.
 
 ## Robot animation prompt
+
+### Red sensor head correction (latest applied)
+
+Precise recoloring edit of this exact six-frame game robot sprite atlas. Keep the exact canvas 1536x1024, transparency, six poses, all body positions, scale, wheels, torso, bilateral arms, claws and pixel details unchanged. Change ONLY each robot's square FACE / SENSOR HEAD in ALL SIX frames: the entire ivory head casing becomes clearly vivid deep warning RED, with brighter red face edges, and both camera lenses glow red rather than blue. The whole rectangular head should read RED at small in-game scale, not merely a tiny red status LED. Preserve black lens rims and dark recesses so cameras remain identifiable. Keep the torso ivory white and graphite, torso blue LED unchanged, arms white, wheels black: red color must be restricted to the HEAD. First frame's amber head LED must also become red. Subtle restrained red illumination within the head, NO glow spilling beyond head silhouette, no halo, no background. No geometry changes, no red body, no text, no new objects. Preserve real alpha transparency outside the original robot silhouettes. Production sprite atlas edit, identical framing and anchors.
 
 ### Bilateral-arm correction (applied)
 

@@ -71,13 +71,14 @@ try {
   assert.equal((await state()).x, away, 'Returning keeps patrol progress without duplicating the robot');
   assert.equal(await robot.count(), 1); assert.equal(await page.locator('.robot-dock-patch').count(), 1);
   await page.evaluate(() => {
+    solarPoweredFloor = 2; updatePowerState();
     Body.setPosition(body, { x: guardPatrol.x, y: floorY - 81 }); grounded = true; updateInteraction();
     cameraX = cameraTarget(); render();
   });
   assert.match(await page.locator('#interaction-hint').textContent(), /경비 로봇/);
   await page.clock.runFor(100);
   assert(await page.evaluate(() => Math.abs(parseFloat(interactionOutline.style.left) - guardPatrol.x + 39) < .01),
-    'The same nearby robot keeps its outline aligned while moving');
+    'The powered-down robot retains its correct maintenance outline');
   await page.keyboard.press('e'); assert(await page.locator('#keypad').isVisible(), 'Maintenance interaction moves with the robot');
   const maintenance = await state(); await page.clock.runFor(700); assert.deepEqual(await state(), maintenance);
   await page.keyboard.press('Escape');
@@ -85,6 +86,7 @@ try {
   await page.setViewportSize({ width: 390, height: 844 }); await page.clock.runFor(100);
   await page.screenshot({ path: '.local/guard-mobile.png' });
   await page.evaluate(() => {
+    solarPoweredFloor = 1; updatePowerState();
     guardPatrol.x = 4538; guardPatrol.facing = 1; guardPatrol.wait = 0; guardPatrol.mode = 'patrol';
     Body.setPosition(body, { x: 1500, y: floorY - 81 });
   });

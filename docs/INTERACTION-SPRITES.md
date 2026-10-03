@@ -38,7 +38,7 @@
 
 ### 감지·추적·붙잡기
 
-경비 로봇의 감지·추적·붙잡기는 `assets/objects/guard-robot/guard-capture.png`의 384×256 가로 6프레임을 사용한다(팔이 잘리지 않도록 셀 폭 확장). 수호의 붙잡힘·저항 동작은 `assets/player/jeong-suho-caught.png`의 256×256 가로 4프레임이다. 로봇은 전방에서 수호를 감지하면 주황 경고 후 빨간 추적으로 전환하고, 가까운 지상 플레이어에게 팔을 펼쳐 붙잡는다. 다시 시도하면 수집한 단서를 유지한 채 로비 엘리베이터 앞에서 재개한다. 규격·프롬프트는 `assets/objects/guard-robot/CAPTURE-PROMPT.md`, 검증은 `node tests/guard-capture.mjs`.
+경비 로봇의 감지·추적·붙잡기는 `assets/objects/guard-robot/guard-capture.png`의 384×256 가로 6프레임을 사용한다(팔이 잘리지 않도록 셀 폭 확장). 수호의 붙잡힘·저항 동작은 `assets/player/jeong-suho-caught.png`의 256×256 가로 4프레임이다. 로봇은 전방에서 수호를 감지하면 얼굴 전체와 카메라 눈이 빨개지며 즉시 추적하고, 가까운 지상 플레이어에게 팔을 펼쳐 붙잡는다. 다시 시도하면 수집한 단서를 유지한 채 로비 엘리베이터 앞에서 재개한다. 규격·프롬프트는 `assets/objects/guard-robot/CAPTURE-PROMPT.md`, 검증은 `node tests/guard-capture.mjs`.
 
 ## 태양광 비상 배전반 UI
 

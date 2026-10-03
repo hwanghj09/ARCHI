@@ -26,7 +26,7 @@ function performRoomChange() {
 
 function performFloorChange(destId, carIndex = 0, arrivalKey = null) {
   if (playerCaught) releaseGuardCapture();
-  guardPatrol.mode = 'patrol'; guardPatrol.alertTime = guardPatrol.lostTime = 0;
+  guardPatrol.mode = 'patrol'; guardPatrol.lostTime = 0;
   guardPatrol.door = null;
   guardPatrol.image = null;
   Composite.remove(engine.world, currentTerrain);

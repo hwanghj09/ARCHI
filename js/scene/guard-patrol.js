@@ -1,5 +1,5 @@
 // R-01 keeps its position when the player leaves the lobby. Patrol uses the game's paused clock.
-const guardPatrol = { x: 4530, facing: -1, wait: 0, elapsed: 0, mode: 'patrol', alertTime: 0,
+const guardPatrol = { x: 4530, facing: -1, wait: 0, elapsed: 0, mode: 'patrol',
   lostTime: 0, captureTime: 0, door: null, image: null };
 const guardCapturePanel = document.getElementById('guard-capture');
 let guardBlocked = [];
@@ -7,7 +7,7 @@ let guardBlocked = [];
 function releaseGuardCapture() {
   playerCaught = false;
   guardPatrol.mode = 'patrol';
-  guardPatrol.alertTime = guardPatrol.lostTime = guardPatrol.captureTime = 0;
+  guardPatrol.lostTime = guardPatrol.captureTime = 0;
   guardCapturePanel.hidden = true;
   for (const element of guardBlocked) element.inert = false;
   guardBlocked = [];
@@ -66,7 +66,7 @@ function updateGuardPatrol(delta) {
   const powered = world.dataset.powered === 'true';
   if (!powered) {
     if (playerCaught) { releaseGuardCapture(); stage.focus(); }
-    robot.mode = 'patrol'; robot.alertTime = robot.lostTime = 0;
+    robot.mode = 'patrol'; robot.lostTime = 0;
   } else if (playerCaught) {
     robot.captureTime += delta;
     Body.setPosition(body, { x: robot.x + robot.facing * 82, y: floorY - 81 });
@@ -82,12 +82,8 @@ function updateGuardPatrol(delta) {
     const sameLevel = Math.abs(body.bounds.max.y - floorY) < 180;
     const seesPlayer = sameLevel && (Math.abs(dx) < 65 || (dx * robot.facing > 0 && Math.abs(dx) < 360));
     if (robot.mode === 'patrol' && seesPlayer) {
-      robot.mode = 'alert'; robot.alertTime = 0;
+      robot.mode = 'chase'; robot.lostTime = 0;
       showStatus('경비 로봇이 수호를 감지했다. 거리를 벌려야 한다.', 2400);
-    }
-    if (robot.mode === 'alert') {
-      robot.alertTime += delta;
-      if (robot.alertTime >= 450) robot.mode = 'chase';
     }
     if (robot.mode === 'chase') {
       robot.lostTime = sameLevel && Math.abs(dx) < 600 ? 0 : robot.lostTime + delta;
@@ -115,7 +111,7 @@ function updateGuardPatrol(delta) {
     }
   }
   const attack = powered && robot.mode !== 'patrol';
-  const frame = !powered ? 7 : robot.mode === 'alert' ? 0 : robot.mode === 'chase' ? 1 :
+  const frame = !powered ? 7 : robot.mode === 'chase' ? Math.floor(robot.elapsed / 120) % 2 :
     playerCaught ? (robot.captureTime < 220 ? 2 : robot.captureTime < 440 ? 3 : robot.captureTime < 660 ? 4 : 5) :
     robot.wait > 0 ? 4 + Math.min(2, Math.floor((pause - robot.wait) / (pause / 3))) : Math.floor(robot.elapsed / 120) % 4;
   const { door } = robot;

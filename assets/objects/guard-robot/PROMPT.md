@@ -5,7 +5,7 @@
   patrols the building, escalates from a harmless-looking service robot to ARCHI's physical
   enforcer once ARCHI controls a floor's systems.
 - Status: **patrol sprites generated and integrated on 1F**. `guard-patrol.png` is 2048×256 RGBA: eight horizontal 256×256 cells, four rolling frames, three scanning frames and one power-off frame. Source, exact production prompt and integration details: [PATROL-PROMPT.md](PATROL-PROMPT.md).
-- Detection/chase/capture are also integrated: amber warning, red pursuit and concealed restraint arms. Robot and player atlas specifications and actual production prompts: [CAPTURE-PROMPT.md](CAPTURE-PROMPT.md).
+- Detection immediately turns the entire sensor head red and starts pursuit with concealed restraint arms. Robot and player atlas specifications and actual production prompts: [CAPTURE-PROMPT.md](CAPTURE-PROMPT.md).
 
 ## Design brief (from 기획.md)
 
