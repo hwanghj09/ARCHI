@@ -29,8 +29,8 @@ function Pack-Sheet($sourcePath, $outputPath, $cellWidth, $cells, $ratio) {
     } finally { $graphics.Dispose(); $sheet.Dispose(); $source.Dispose() }
 }
 # Reach poses extend across the nominal source grid; split in the actual transparent gaps.
-$robotCells = @(@(0,0,500,512,232), @(500,0,520,512,216), @(1020,0,516,512,188),
-    @(0,512,580,512,187), @(580,512,480,512,126), @(1060,512,476,512,146))
+$robotCells = @(@(0,0,443,443,164), @(443,0,443,443,164), @(886,0,443,443,164), @(1329,0,445,443,164),
+    @(0,443,470,444,164), @(470,443,454,444,138), @(924,443,442,444,126), @(1366,443,408,444,128))
 Pack-Sheet 'assets/objects/guard-robot/capture-source.png' 'assets/objects/guard-robot/guard-capture.png' 384 $robotCells .5
 $playerCells = @(@(0,0,627,627,340), @(627,0,627,627,317), @(0,627,627,627,330), @(627,627,627,627,311))
 Pack-Sheet 'assets/player/jeong-suho-caught-source.png' 'assets/player/jeong-suho-caught.png' 256 $playerCells .39

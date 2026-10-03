@@ -72,7 +72,7 @@ function updateGuardPatrol(delta) {
     Body.setPosition(body, { x: robot.x + robot.facing * 82, y: floorY - 81 });
     Body.setVelocity(body, { x: 0, y: 0 });
     grounded = true;
-    if (robot.captureTime >= 900 && guardCapturePanel.hidden) {
+    if (robot.captureTime >= 1100 && guardCapturePanel.hidden) {
       robot.mode = 'caught';
       guardCapturePanel.hidden = false;
       document.getElementById('guard-retry').focus();
@@ -112,7 +112,7 @@ function updateGuardPatrol(delta) {
   }
   const attack = powered && robot.mode !== 'patrol';
   const frame = !powered ? 7 : robot.mode === 'chase' ? Math.floor(robot.elapsed / 120) % 2 :
-    playerCaught ? (robot.captureTime < 220 ? 2 : robot.captureTime < 440 ? 3 : robot.captureTime < 660 ? 4 : 5) :
+    playerCaught ? 2 + Math.min(5, Math.floor(robot.captureTime / 160)) :
     robot.wait > 0 ? 4 + Math.min(2, Math.floor((pause - robot.wait) / (pause / 3))) : Math.floor(robot.elapsed / 120) % 4;
   const { door } = robot;
   door.x = robot.x - door.width / 2;
@@ -125,8 +125,8 @@ function updateGuardPatrol(delta) {
   door.element.firstElementChild.style.width = attack ? '240px' : '160px';
   const src = `assets/objects/guard-robot/${attack ? 'guard-capture' : 'guard-patrol'}.png`;
   if (robot.image.getAttribute('src') !== src) robot.image.src = src;
-  robot.image.style.width = attack ? '600%' : '800%';
-  robot.image.style.transform = `translateX(${-frame * 100 / (attack ? 6 : 8)}%)`;
+  robot.image.style.width = '800%';
+  robot.image.style.transform = `translateX(${-frame * 100 / 8}%)`;
   // The nearby target remains the same object while its outline follows the moving sprite.
   if (outlinedDoor === door) outlinedDoor = null;
 }
