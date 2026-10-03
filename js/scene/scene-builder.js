@@ -91,9 +91,9 @@ function buildDynamicScene(config) {
   if (config.id === 'rooftop') {
     const supply = document.createElement('div');
     supply.className = 'solar-supply';
-    supply.dataset.active = String(solarPoweredFloor !== null);
+    supply.dataset.active = String(solarEnabled);
     supply.setAttribute('role', 'img');
-    supply.setAttribute('aria-label', '태양광 임시 전력장치 · 화면 꺼짐');
+    supply.setAttribute('aria-label', `태양광 임시 전력장치 · ${solarEnabled ? '전원 켜짐' : '전원 꺼짐'}`);
     // The first 887px cell has transparent padding; its bottom edge is y=691.
     Object.assign(supply.style, { left: '720px', top: `${floorY - 691 * 360 / 887}px` });
     const image = new Image();

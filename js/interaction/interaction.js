@@ -2,6 +2,7 @@
 let nearbyDoor = null;
 
 function updateInteraction() {
+  if (openingActive) { hint.hidden = true; return; }
   if (room === 'dynamic') {
     nearbyDoor = currentDoors.find(door => grounded && Math.abs(body.bounds.max.y - (door.standY ?? floorY)) < 2 &&
       Math.abs(body.position.x - door.x - door.width / 2) < door.width / 2 + 28) || null;
@@ -19,6 +20,7 @@ function updateInteraction() {
     [...officeDoors.filter(door => door.room === room), officeComputer];
   nearbyDoor = activeDoors.find(door => grounded && Math.abs(body.bounds.max.y - floorY) < 2 &&
     Math.abs(body.position.x - door.x - door.width / 2) < door.width / 2 + 28) || null;
+  if (room === 'corridor' && currentSceneFloor === 17 && nearbyDoor?.type === 'elevator') triggerBuildingBlackout();
   for (const door of [...doors, ...officeDoors, officeComputer]) door.element.classList.toggle('near', door === nearbyDoor);
   updateOutline();
   hint.hidden = !nearbyDoor;
@@ -47,12 +49,13 @@ function doorHintText(door) {
 }
 
 function interact() {
-  if (transitioning || selectingFloor || usingComputer || usingKeypad || usingPhone || usingPowerPanel || usingInspection) return;
+  if (openingActive || transitioning || selectingFloor || usingComputer || usingKeypad || usingPhone || usingPowerPanel || usingInspection) return;
   updateInteraction();
   if (!nearbyDoor) return;
   if (nearbyDoor.type === 'computer') {
     computerReturnFocus = document.activeElement;
     transitionScene(() => {
+      setOfficeComputerPower('on');
       usingComputer = true;
       computer.hidden = false;
       computerWindow.hidden = true;

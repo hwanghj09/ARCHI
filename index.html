@@ -8,6 +8,10 @@
     <link rel="stylesheet" href="computer.css" />
     <link rel="stylesheet" href="writing.css" />
     <link rel="stylesheet" href="inventory.css" />
+    <link rel="stylesheet" href="opening.css" />
+    <link rel="stylesheet" href="power.css" />
+    <link rel="preload" as="image" href="assets/player/jeong-suho-phone-walk-on.png" />
+    <link rel="preload" as="image" href="assets/player/jeong-suho-phone-run-on.png" />
     <style>
       * { box-sizing: border-box; }
       body { margin: 0; overflow: hidden; background: #27292b; color: #eee; font: 14px Arial, sans-serif; }
@@ -15,7 +19,12 @@
       #world { position: absolute; transform-origin: top left; background: #151f25; }
       #darkness { display: none; position: absolute; inset: 0; z-index: 1; pointer-events: none; background: radial-gradient(circle at var(--sight-x, 640px) var(--sight-y, 489px), #00000018 0 46px, #000000f0 90px, #000 125px); }
       #world[data-blackout="true"] #darkness { display: block; }
-      #world[data-background-lights="off"][data-flashlight="on"] #darkness { background: radial-gradient(ellipse 320px 190px at var(--sight-x, 640px) var(--sight-y, 489px), #00000008 0 90px, #000000d9 230px, #000 320px); }
+      #world[data-flashlight="on"] #darkness {
+        mask-image: radial-gradient(ellipse 390px 210px at var(--beam-x) var(--beam-y), #0000 0 35px, #0004 180px, #000 390px), conic-gradient(from var(--beam-angle) at var(--beam-x) var(--beam-y), #0000 0deg 44deg, #000 48deg 356deg, #0000 360deg);
+        mask-composite: add;
+      }
+      #flashlight-beam { display: none; position: absolute; left: var(--beam-x); top: calc(var(--beam-y) - 170px); width: 390px; height: 340px; transform: scaleX(var(--beam-facing)); transform-origin: 0 50%; clip-path: polygon(0 50%, 100% 0, 100% 100%); background: linear-gradient(90deg, #fff4bb24, #fff4bb00); pointer-events: none; }
+      #world[data-flashlight="on"] #flashlight-beam { display: block; }
       #world[data-lights="off"][data-floor="17"] #darkness { display: block; }
       #background { position: absolute; inset: 0; overflow: hidden; pointer-events: none; user-select: none; }
       #background img { position: absolute; width: 256px; height: 256px; image-rendering: pixelated; }
@@ -725,19 +734,24 @@
       #player { position: absolute; top: 0; left: 0; width: 192px; height: 192px; overflow: hidden; image-rendering: pixelated; user-select: none; pointer-events: none; }
       #player img { display: none; width: 100%; height: 100%; }
       #player #idle-sprite { width: 357.39px; height: 357.39px; transform: translate(3.375px, 1.585px); clip-path: inset(0 50% 50% 0); }
-      #player #walk-sheet { width: 600%; height: 100%; }
-      #player #run-sheet { width: 800%; height: 100%; }
+      #player #walk-sheet, #player #phone-walk-sheet { width: 600%; height: 100%; }
+      #player #run-sheet, #player #phone-run-sheet { width: 800%; height: 100%; }
       #player .action-sheet { width: 200%; height: 100%; }
       #player[data-state="idle"] #idle-sprite,
-      #player[data-state="walk"] #walk-sheet,
-      #player[data-state="run"] #run-sheet,
-      #player[data-state="jump"] #jump-sheet,
-      #player[data-state="fall"] #jump-sheet,
+      #player:not([data-phone-held="true"])[data-state="walk"] #walk-sheet,
+      #player:not([data-phone-held="true"])[data-state="run"] #run-sheet,
+      #player:not([data-phone-held="true"])[data-state="jump"] #jump-sheet,
+      #player:not([data-phone-held="true"])[data-state="fall"] #jump-sheet,
       #player[data-state="interact"] #interact-sheet { display: block; }
+      #player[data-phone-held="true"][data-state="walk"] #phone-walk-sheet,
+      #player[data-phone-held="true"][data-state="run"] #phone-run-sheet,
+      #player[data-phone-held="true"][data-state="jump"] #phone-run-sheet,
+      #player[data-phone-held="true"][data-state="fall"] #phone-run-sheet { display: block; }
       #player .phone-sheet { position: relative; top: -1.25px; width: 400%; height: 100%; }
       #player #phone-away-sheet { width: 200%; }
       #player[data-state="phone"] #phone-sheet,
       #player[data-state="phone-light"] #phone-light-sheet,
+      #player[data-state="phone-ready"] #phone-light-sheet,
       #player[data-state="phone-away"] #phone-away-sheet { display: block; }
       #interact-sheet { position: relative; top: -4px; }
       header { position: absolute; inset: max(24px, env(safe-area-inset-top)) max(24px, env(safe-area-inset-right)) auto max(24px, env(safe-area-inset-left)); display: flex; justify-content: space-between; gap: 16px; pointer-events: none; }
@@ -772,7 +786,6 @@
       .device-dialog button[aria-pressed="true"], .device-dialog button.active { border-color: #b9e89c; background: #304a38; }
       #phone-battery-track { height: 12px; margin: 8px 0 18px; border: 1px solid #89989a; background: #111; }
       #phone-battery-fill { display: block; height: 100%; width: 100%; background: #8fe06a; }
-      #power-floor-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; margin: 12px 0; }
       .dialog-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 14px; }
       #inspection { top: auto; bottom: max(100px, calc(env(safe-area-inset-bottom) + 84px)); width: min(1040px, calc(100vw - 32px)); max-height: calc(100dvh - 140px); padding: 16px 24px 12px; border: 24px solid #77857c; border-image: url('assets/ui/dialogue-frame.png') 110 fill / 24px stretch; border-radius: 0; background: #10181c; background-clip: padding-box; color: #f0eee4; transform: translateX(-50%); box-shadow: 0 12px 36px #0009; }
       #inspection:not([hidden]) { display: flex; flex-direction: column; }
@@ -855,26 +868,31 @@
     <script src="js/input/keyboard.js" defer></script>
     <script src="js/input/touch.js" defer></script>
     <script src="js/debug/floor-select.js" defer></script>
+    <script src="js/scene/opening.js" defer></script>
     <script src="js/main.js" defer></script>
   </head>
   <body>
     <main id="stage" tabindex="-1" aria-label="ARCHI 17층 사무실 사이드뷰 스테이지">
-      <div id="world" data-room="office" data-floor="17" data-lights="on">
+      <div id="world" data-room="office" data-floor="17" data-lights="on" data-opening="loading">
         <div id="darkness" aria-hidden="true"></div>
+        <div id="flashlight-beam" aria-hidden="true"></div>
         <div id="background" aria-hidden="true"></div>
         <div id="floor17-extension">
           <img src="assets/background/floor17/service-corridor.png" alt="" draggable="false" />
           <div id="floor17-hydrant" role="img" aria-label="소화전과 소화기"></div>
         </div>
         <img id="office-background" src="assets/background/floor17/office-interior-aligned.png" alt="" width="2196" height="724" draggable="false" />
-        <div id="office-computer" role="img" aria-label="켜진 컴퓨터"></div>
+        <div id="office-computer" role="img" aria-label="켜진 컴퓨터" data-power="on"></div>
         <div id="dynamic-scene" aria-hidden="true"></div>
         <div id="interaction-outline" hidden></div>
         <div id="interaction-hint" hidden></div>
         <div id="player" role="img" aria-label="정수호" data-state="idle" data-frame="0">
+          <img id="opening-sheet" src="assets/player/jeong-suho-opening.png" alt="" width="1536" height="256" draggable="false" />
           <img id="idle-sprite" src="assets/player/jeong-suho-idle-four.png" alt="" width="1254" height="1254" draggable="false" />
           <img id="walk-sheet" src="assets/player/jeong-suho-walk-six.png" alt="" width="1536" height="256" draggable="false" />
           <img id="run-sheet" src="assets/player/jeong-suho-run-eight.png" alt="" width="2048" height="256" draggable="false" />
+          <img id="phone-walk-sheet" src="assets/player/jeong-suho-phone-walk-off.png" alt="" width="1536" height="256" draggable="false" />
+          <img id="phone-run-sheet" src="assets/player/jeong-suho-phone-run-off.png" alt="" width="2048" height="256" draggable="false" />
           <img id="jump-sheet" class="action-sheet" src="assets/player/jeong-suho-jump-fall.png" alt="" width="1774" height="887" draggable="false" />
           <img id="interact-sheet" class="action-sheet" src="assets/player/jeong-suho-interact.png" alt="" width="1774" height="887" draggable="false" />
           <img id="phone-sheet" class="phone-sheet" src="assets/player/jeong-suho-phone-idle.png" alt="" width="1024" height="256" draggable="false" />
@@ -892,6 +910,11 @@
       </nav>
       <div id="interaction-status" role="status" aria-live="polite"></div>
     </main>
+    <section id="opening" role="region" aria-label="퇴근 오프닝 컷씬">
+      <p id="opening-label">17F · 야근이 끝난 뒤</p>
+      <p id="opening-caption" role="status" aria-live="polite">사무실을 불러오는 중…</p>
+      <button id="opening-skip" type="button">건너뛰기 · Esc</button>
+    </section>
     <!-- 테스트용 층 이동 창 -->
     <!-- 도어락 키패드 -->
     <form id="keypad" role="dialog" aria-modal="true" aria-labelledby="keypad-title" hidden>
@@ -909,14 +932,19 @@
       <div><span>배터리</span> <output id="phone-battery">100%</output></div>
       <div id="phone-battery-track" aria-hidden="true"><span id="phone-battery-fill"></span></div>
       <button id="phone-light" type="button" aria-pressed="false">라이트 켜기 <small>(F)</small></button>
-      <div class="dialog-actions"><button id="phone-close" type="button">닫기 (P)</button></div>
+      <p>닫은 뒤에도 휴대폰을 들고 이동합니다. F키로 라이트를 전환하며, 켜져 있는 동안에는 걷기만 가능합니다.</p>
+      <div class="dialog-actions"><button id="phone-stow" type="button">휴대폰 넣기</button><button id="phone-close" type="button">들고 이동 (P)</button></div>
     </section>
-    <section id="power-panel" class="device-dialog" role="dialog" aria-modal="true" aria-labelledby="power-title" hidden>
-      <h2 id="power-title">옥상 태양광 비상 전력</h2>
-      <p>지상층 중 한 층에만 전력을 공급할 수 있습니다.</p>
-      <output id="power-status">공급 중인 층 없음</output>
-      <div id="power-floor-grid"></div>
-      <div class="dialog-actions"><button id="power-off" type="button">공급 중단</button><button id="power-close" type="button">닫기</button></div>
+    <section id="power-panel" role="dialog" aria-modal="true" aria-labelledby="power-title" aria-describedby="power-help" hidden>
+      <div class="power-cabinet">
+        <div class="power-art" aria-hidden="true"><img src="assets/ui/power/panel-off-on.png" alt="" /></div>
+        <h2 id="power-title">태양광 비상 배전반</h2>
+        <output id="power-status" aria-live="polite">비상 전력 꺼짐</output>
+        <button id="power-lever" type="button" aria-pressed="false" aria-label="레버 내리기 · 비상 전력 켜기"><span id="power-lever-label">OFF · 내려서 켜기</span></button>
+        <div id="power-floor-grid" role="group" aria-label="전력 공급층 선택"></div>
+        <p id="power-help">① 레버 내리기 → ② 층 선택 · 한 층만 공급</p>
+        <button id="power-close" type="button">닫기 · Esc</button>
+      </div>
     </section>
     <section id="inspection" class="device-dialog" role="dialog" aria-modal="true" aria-labelledby="inspection-title" aria-describedby="inspection-description" hidden>
       <div class="inspection-heading"><span class="inspection-label">조사</span><h2 id="inspection-title">조사 대상</h2></div>

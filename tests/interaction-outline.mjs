@@ -15,6 +15,7 @@ try {
   page.on('pageerror', error => errors.push(error.message));
   await page.clock.install();
   await page.goto(new URL('../index.html', import.meta.url).href);
+  await page.locator('#opening-skip').click();
   await page.clock.runFor(100);
 
   assert.deepEqual(await page.evaluate(() => PROP_OUTLINES), await measurePropOutlines(page),

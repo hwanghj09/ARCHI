@@ -10,6 +10,7 @@ try {
   page.on('pageerror', error => errors.push(error.message));
   await page.clock.install();
   await page.goto(new URL('../index.html', import.meta.url).href);
+  await page.locator('#opening-skip').click();
   await page.clock.pauseAt(new Date(Date.now() + 1000));
   const approach = type => page.evaluate(type => {
     performFloorChange('f17', null);

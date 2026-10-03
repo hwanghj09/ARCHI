@@ -13,6 +13,7 @@ try {
   const start = async () => {
     await page.clock.install({ time: new Date('2026-09-24T00:00:00Z') });
     await page.goto(new URL('../index.html', import.meta.url).href);
+    await page.locator('#opening-skip').click();
     await page.clock.pauseAt(new Date('2026-09-24T00:01:00Z'));
     await reachInitialCorridor(page);
     await page.locator('#floor17-extension > img').evaluate(img => img.decode());
@@ -107,6 +108,7 @@ try {
   assert(source.includes(locked));
   await page.route('**/js/floors/floor-17.js', route => route.fulfill({ contentType: 'text/javascript', body: source.replace(locked, locked.replace('true', 'false')) }));
   await page.goto(new URL('../index.html', import.meta.url).href);
+  await page.locator('#opening-skip').click();
   await page.clock.runFor(100);
   await reachInitialCorridor(page);
   await walkTo(4463);

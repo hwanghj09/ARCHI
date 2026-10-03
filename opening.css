@@ -1,0 +1,18 @@
+#opening { position: fixed; inset: 0; z-index: 20; pointer-events: none; color: #eee8d8; }
+#opening[hidden] { display: none; }
+#opening::before, #opening::after { content: ''; position: absolute; left: 0; right: 0; height: clamp(36px, 8vh, 72px); background: #050708; }
+#opening::before { top: 0; }
+#opening::after { bottom: 0; }
+#opening-label { position: absolute; top: 24px; left: 28px; z-index: 1; margin: 0; color: #aab5b8; font-size: 12px; letter-spacing: .16em; }
+#opening-caption { position: absolute; left: 20px; right: 20px; bottom: max(90px, 14vh); margin: 0; text-align: center; font-size: clamp(15px, 2vw, 19px); line-height: 1.7; text-shadow: 0 2px 6px #000, 0 0 14px #000; }
+#opening-skip { position: absolute; z-index: 1; right: max(20px, env(safe-area-inset-right)); bottom: max(10px, env(safe-area-inset-bottom)); min-height: 44px; padding: 8px 14px; border: 1px solid #677174; border-radius: 4px; background: #101719; color: #dce2df; cursor: pointer; pointer-events: auto; font: inherit; }
+#opening-skip:focus-visible { outline: 2px solid #e1cf9b; outline-offset: 3px; }
+body:has(#world[data-opening]) :is(header, nav, #debug-floor, #inventory-button, #interaction-hint, #interaction-status, #interaction-outline) { visibility: hidden; }
+#world[data-opening] #darkness { display: none; }
+#world[data-opening="loading"] #player { visibility: hidden; }
+#player #opening-sheet { width: 600%; height: 100%; }
+#player[data-state="opening"] #opening-sheet { display: block; }
+#office-computer::before { content: ''; position: absolute; inset: 6px 5px 10px; background: #090f12; border: 1px solid #152126; }
+#office-computer[data-power="on"]::before { background: repeating-linear-gradient(0deg, #375e66 0 1px, transparent 1px 5px), linear-gradient(110deg, #1b3036, #385863); box-shadow: 0 0 24px #78bacb45; }
+#office-computer[data-power="shutting-down"]::before { background: radial-gradient(circle at center, #b7d5d9 0 2px, #1b3036 3px); box-shadow: 0 0 14px #78bacb26; }
+@media (max-width: 600px) { #opening-label { top: 12px; left: 16px; } #opening-caption { bottom: 22vh; } }

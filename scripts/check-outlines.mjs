@@ -20,6 +20,7 @@ const errors = [];
 page.on('pageerror', error => errors.push(error.message));
 await page.clock.install();
 await page.goto(new URL('../index.html', import.meta.url).href);
+await page.locator('#opening-skip').click();
 await page.clock.runFor(100);
 await page.addStyleTag({ content: '#darkness, #player, #interaction-hint, #interaction-status, #debug-floor, #room-transition { display: none !important; }' });
 // 게임 루프를 멈춰 카메라와 테두리가 단계 사이에 움직이지 않게 한다.

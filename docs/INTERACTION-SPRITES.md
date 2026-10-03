@@ -32,17 +32,26 @@
 
 11F 방화셔터는 이미 `assets/objects/floor11/fire-shutter-states.png`의 닫힘/열림 2프레임을 사용하므로 추가 정지 이미지는 필요하지 않다.
 
+## 태양광 비상 배전반 UI
+
+`assets/ui/power/panel-off-on.png`는 768×512 투명 PNG, 가로 384×512 셀 2개다. 정면 직교 시점과 동일한 캐비닛 기준선을 유지하며 0번은 레버 위/OFF, 1번은 아래/ON이다. 글자와 층 번호는 HTML로 겹쳐 표시한다. 레버를 내린 뒤에만 층 선택이 가능하고, 다시 올리면 공급층이 해제된다. 드래그·클릭·터치·Enter/Space를 지원한다. 원본과 프롬프트는 `assets/ui/power/PROMPT.md`, 검증은 `node tests/solar-ui.mjs`.
+
 ## 휴대폰 플레이어 애니메이션
 
-휴대폰 UI와 라이트 기능은 구현되어 있지만 현재 플레이어는 조사 자세를 임시로 재사용한다. 아래 시트가 준비되면 `phone` 상태 전용 애니메이션으로 교체한다.
+휴대폰 꺼내기·대기·넣기와 이동 전용 시트가 적용되어 있다. UI를 닫으면 휴대폰을 계속 들고 이동하며, ‘휴대폰 넣기’로 빈손 동작에 복귀한다.
 
 | 파일 제안 | 프레임 | 구성 |
 |---|---:|---|
 | `assets/player/jeong-suho-phone-idle.png` | 4 | 주머니에서 꺼냄 / 들어 올림 / 화면을 봄 / 미세 호흡 |
 | `assets/player/jeong-suho-phone-light.png` | 4 | 휴대폰을 앞쪽으로 들고 라이트를 비추는 반복 자세 |
 | `assets/player/jeong-suho-phone-away.png` | 2 | 화면을 끄고 주머니에 넣음 |
+| `assets/player/jeong-suho-phone-walk-off.png` / `-on.png` | 각각 6 | 휴대폰을 앞으로 든 걷기, 라이트 OFF / ON |
+| `assets/player/jeong-suho-phone-run-off.png` | 8 | 라이트 OFF 상태에서만 달리기 |
+| `assets/player/jeong-suho-phone-run-on.png` | 8 중 2개 사용 | 라이트 ON 점프·낙하 자세만 재사용; 달리기에는 사용하지 않음 |
 
 - 기존 플레이어 시트처럼 프레임당 256×256, 발 기준선과 엉덩이 중심을 걷기 시트에 맞춘다.
 - 좌우 반전 사용을 전제로 휴대폰은 캐릭터 정면 쪽 손에 둔다.
 - 라이트의 실제 빛 원뿔은 CSS가 그리므로 스프라이트에는 흰 원뿔이나 렌즈 플레어를 그리지 않는다.
 - `phone-idle`과 `phone-light`의 몸통 위치를 동일하게 유지해 라이트 전환 때 캐릭터가 튀지 않게 한다.
+
+이동 시트는 프레임당 256×256이며 게임에서는 192×192로 표시한다. 점프·낙하에는 달리기의 공중 자세를 재사용해 휴대폰이 사라지지 않는다. 원본과 생성 프롬프트는 `assets/player/phone-movement-source/`, 재분할 스크립트는 `scripts/prepare-phone-movement.ps1`에 있다. `js/scene/camera.js`의 LED 좌표가 이동·좌우 반전·카메라·점프를 따라 빛의 시작점을 잡으며, CSS 마스크가 어둠에서 전방 원뿔을 드러낸다. 프레임·입력·배터리·모바일·전방/후방 실제 밝기는 `node tests/phone-movement.mjs`로 검증한다.

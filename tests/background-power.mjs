@@ -14,16 +14,20 @@ try {
   const errors = [];
   page.on('pageerror', error => errors.push(error.message));
   await page.goto(new URL('../index.html', import.meta.url).href);
+  await page.locator('#opening-skip').click();
   const decode = () => page.locator('img[data-lit-src]').evaluateAll(imgs => Promise.all(imgs.map(img => img.decode())));
   const check = off => page.locator('img[data-lit-src]').evaluateAll((imgs, off) =>
     imgs.every(img => img.getAttribute('src') === (off ? img.dataset.unlitSrc : img.dataset.litSrc)), off);
   await decode();
-  assert(await check(true), 'Initial 17F office and corridor are unlit');
+  assert(await check(false), 'Initial 17F office and corridor are lit');
+  await page.evaluate(() => triggerBuildingBlackout());
+  await decode();
+  assert(await check(true), 'The outage switches both backgrounds off');
   await page.evaluate(() => { phoneLightOn = true; refreshPhone(); });
   assert(await check(true), 'Flashlight does not turn background lamps on');
   await mkdir('.local', { recursive: true });
   await page.screenshot({ path: '.local/background-office-off.png' });
-  await page.evaluate(() => powerGrid.querySelector('[data-floor="17"]').click());
+  await page.evaluate(() => { powerLever.click(); powerGrid.querySelector('[data-floor="17"]').click(); });
   await decode(); assert(await check(false));
   const before = await page.locator('#office-background').boundingBox();
   await page.screenshot({ path: '.local/background-office-on.png' });
@@ -32,7 +36,7 @@ try {
   assert.deepEqual(await page.locator('#office-background').boundingBox(), before, 'Lighting preserves geometry');
   await page.locator('#floor17-lights').check();
   await decode(); assert(await check(false));
-  await page.evaluate(() => document.getElementById('power-off').click());
+  await page.evaluate(() => powerLever.click());
   await decode(); assert(await check(true));
 
   const scenes = await page.evaluate(() => [...floorById.values()]
@@ -45,11 +49,11 @@ try {
     const floor = await page.evaluate(() => currentSceneFloor);
     assert(await check(floor > 0), `${id}: power state on entry, including shared restrooms`);
     if (floor > 0) {
-      await page.evaluate(floor => powerGrid.querySelector(`[data-floor="${floor}"]`).click(), floor);
+      await page.evaluate(floor => { powerLever.click(); powerGrid.querySelector(`[data-floor="${floor}"]`).click(); }, floor);
       await decode(); assert(await check(false), `${id}: power restored`);
       await page.evaluate(floor => powerGrid.querySelector(`[data-floor="${floor === 17 ? 16 : 17}"]`).click(), floor);
       await decode(); assert(await check(true), `${id}: power reassigned`);
-      await page.evaluate(() => document.getElementById('power-off').click());
+      await page.evaluate(() => powerLever.click());
     } else assert.equal(await page.locator('#world').getAttribute('data-powered'), 'true');
   }
   await page.evaluate(() => {

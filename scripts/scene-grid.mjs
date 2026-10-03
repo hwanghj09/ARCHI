@@ -19,6 +19,7 @@ const browser = await chromium.launch();
 const page = await browser.newPage({ viewport: { width, height: Math.max(200, height) } });
 await page.clock.install();
 await page.goto(new URL('../index.html', import.meta.url).href);
+await page.locator('#opening-skip').click();
 await page.clock.runFor(100);
 await page.addStyleTag({ content: `#darkness, #player, #interaction-hint, #interaction-status, #debug-floor, #room-transition, header, nav { display: none !important; }
   .grid-line { position: absolute; z-index: 5; pointer-events: none; }

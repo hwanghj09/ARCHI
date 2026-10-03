@@ -19,6 +19,7 @@ function refreshPhone() {
 function togglePhone() {
   if (usingPhone) return closePhone();
   usingPhone = true;
+  phoneHeld = true;
   phoneTime = 0;
   phoneAwayTime = 0;
   phonePanel.hidden = false;
@@ -31,7 +32,7 @@ function togglePhone() {
 function closePhone() {
   if (!usingPhone) return;
   usingPhone = false;
-  phoneAwayTime = phoneLightOn ? 0 : 360;
+  phoneAwayTime = 0;
   phonePanel.hidden = true;
   animate(0);
   stage.focus();
@@ -40,9 +41,20 @@ function closePhone() {
 function togglePhoneLight() {
   if (!phoneLightOn && phoneBattery <= 0) return showStatus('휴대폰 배터리가 없습니다.');
   phoneLightOn = !phoneLightOn;
-  animate(0);
+  phoneHeld = true;
+  phoneAwayTime = 0;
+  if (usingPhone) animate(0);
   refreshPhone();
   showStatus(`휴대폰 라이트를 ${phoneLightOn ? '켰습니다' : '껐습니다'}.`);
+}
+
+function stowPhone() {
+  closePhone();
+  phoneHeld = false;
+  phoneLightOn = false;
+  phoneAwayTime = 360;
+  animate(0);
+  refreshPhone();
 }
 
 function updatePhone(elapsed) {
@@ -60,4 +72,5 @@ function updatePhone(elapsed) {
 
 phoneLightButton.addEventListener('click', togglePhoneLight);
 document.getElementById('phone-close').addEventListener('click', closePhone);
+document.getElementById('phone-stow').addEventListener('click', stowPhone);
 refreshPhone();

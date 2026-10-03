@@ -9,6 +9,8 @@ try {
   page.on('pageerror', error => errors.push(error.message));
   await page.clock.install();
   await page.goto(new URL('../index.html', import.meta.url).href);
+  await page.locator('#opening-skip').click();
+  await page.evaluate(() => triggerBuildingBlackout());
   await page.clock.runFor(100);
   await mkdir('.local', { recursive: true });
   // Decode every delivered sheet, including transient animation frames.
@@ -121,6 +123,9 @@ try {
   await page.keyboard.down('d'); await page.clock.runFor(100); await page.keyboard.up('d');
   assert.equal(await page.locator('#player').getAttribute('data-state'), 'walk');
   await page.keyboard.press('p'); await page.keyboard.press('f'); await page.keyboard.press('p');
+  assert.equal(await page.locator('#player').getAttribute('data-state'), 'phone-ready');
+  await page.keyboard.press('p');
+  await page.locator('#phone-stow').click();
   assert.equal(await page.locator('#player').getAttribute('data-state'), 'phone-away');
   await page.clock.runFor(210);
   assert.equal(await page.locator('#player').getAttribute('data-frame'), '1');

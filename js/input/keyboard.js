@@ -1,5 +1,10 @@
 // 키보드 조작: A/D·방향키 이동, Space/W/위 점프, Shift 달리기, E 상호작용, Esc 닫기.
 window.addEventListener('keydown', event => {
+  if (openingActive) {
+    if (event.code === 'Escape') { event.preventDefault(); finishOpening(); }
+    else if (event.code !== 'Tab' && !(event.target.id === 'opening-skip' && ['Enter', 'Space'].includes(event.code))) event.preventDefault();
+    return;
+  }
   if (transitioning) { event.preventDefault(); return; }
   if (event.code === 'KeyI' && !event.repeat && !selectingFloor && !usingComputer && !usingKeypad &&
       !usingPhone && !usingPowerPanel && (!usingInspection || inspectionPanel.dataset.surface === 'inventory')) {
@@ -19,6 +24,7 @@ window.addEventListener('keydown', event => {
     return;
   }
   if (usingPowerPanel) {
+    if (event.code === 'Tab' || (['Enter', 'Space'].includes(event.code) && event.target.closest('#power-panel button'))) return;
     if (event.code === 'Escape') closePowerPanel();
     event.preventDefault();
     return;
@@ -55,6 +61,11 @@ window.addEventListener('keydown', event => {
   }
   if (selectingFloor) {
     if (event.code === 'Escape') exitCabin();
+    return;
+  }
+  if (event.code === 'KeyF') {
+    event.preventDefault();
+    if (!event.repeat) togglePhoneLight();
     return;
   }
   if (event.target instanceof Element && event.target.closest('button, input') && event.code === 'Space') return;

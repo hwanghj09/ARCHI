@@ -12,6 +12,7 @@ try {
   page.on('requestfailed', request => errors.push(request.url()));
   await page.clock.install();
   await page.goto(new URL('../index.html', import.meta.url).href);
+  await page.locator('#opening-skip').click();
   await page.clock.pauseAt(new Date(Date.now() + 1000));
   await page.clock.runFor(100);
   const pc = page.locator('#computer');
@@ -94,6 +95,7 @@ try {
   await page.keyboard.press('e');
   assert(await pc.isHidden(), 'A distant computer cannot be used');
   await page.reload();
+  await page.locator('#opening-skip').click();
   await page.clock.runFor(100);
   await page.keyboard.press('Space');
   await page.clock.runFor(150);

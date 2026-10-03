@@ -3,6 +3,7 @@ let previousTime = null;
 let accumulator = 0;
 
 function update() {
+  if (openingActive) { updateOpening(step); return; }
   if (transitioning) {
     updateSceneTransition();
     updateElevators();
@@ -24,7 +25,7 @@ function update() {
   if (pulseTime > 0) directions.push(pulseDirection);
   pulseTime = Math.max(0, pulseTime - step);
   const direction = Number(directions.includes(1)) - Number(directions.includes(-1));
-  const sprinting = [...runKeys].some(key => keys.has(key));
+  const sprinting = !phoneLightOn && [...runKeys].some(key => keys.has(key));
   interactionTime = direction || jumpQueued ? 0 : Math.max(0, interactionTime - step);
   if (direction) facing = direction;
   Body.setVelocity(body, { x: direction * (sprinting ? runSpeed : speed) / 60, y: jumpQueued && grounded ? -10.8 : body.velocity.y });

@@ -6,5 +6,6 @@ new ResizeObserver(() => {
   render();
 }).observe(stage);
 
+startOpening();
 render();
 requestAnimationFrame(frame);

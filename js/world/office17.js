@@ -3,6 +3,11 @@
 const officeComputer = { type: 'computer', x: 612, y: 392, width: 88, element: document.getElementById('office-computer'),
   outline: [609, 389, 94, 70] };
 
+function setOfficeComputerPower(power) {
+  officeComputer.element.dataset.power = power;
+  officeComputer.element.setAttribute('aria-label', power === 'off' ? '꺼진 컴퓨터' : power === 'on' ? '켜진 컴퓨터' : '종료 중인 컴퓨터');
+}
+
 const officeBackground = document.getElementById('office-background');
 setPowerBackground(officeBackground, 'assets/background/floor17/office-interior-aligned.png');
 const lightSwitch = document.getElementById('floor17-light-switch');

@@ -9,7 +9,7 @@ const switchableBackgrounds = new Set([
 
 function backgroundLightsOff() {
   return currentSceneFloor >= 1 && currentSceneFloor <= 17 &&
-    (solarPoweredFloor !== currentSceneFloor || (currentSceneFloor === 17 && world.dataset.lights === 'off'));
+    ((buildingBlackout && solarPoweredFloor !== currentSceneFloor) || (currentSceneFloor === 17 && world.dataset.lights === 'off'));
 }
 
 function setPowerBackground(image, src) {
@@ -25,7 +25,7 @@ function refreshBackgroundPower() {
   world.dataset.backgroundLights = off ? 'off' : 'on';
   if (currentSceneFloor === 17) {
     document.getElementById('floor17-light-state').value = !off ? '조명 켜짐' :
-      solarPoweredFloor === 17 ? '조명 꺼짐' : '조명 꺼짐 · 전력 없음';
+      !buildingBlackout || solarPoweredFloor === 17 ? '조명 꺼짐' : '조명 꺼짐 · 전력 없음';
   }
   for (const image of world.querySelectorAll('img[data-lit-src]')) {
     const src = off ? image.dataset.unlitSrc : image.dataset.litSrc;
