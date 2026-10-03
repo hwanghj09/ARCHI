@@ -15,6 +15,7 @@ function updatePowerState() {
   world.dataset.powered = String(emergencyPowered || mainsPowered || solarPowered);
   refreshBackgroundPower();
   refreshReady();
+  updateGuardPatrol(0);
   document.querySelectorAll('#power-floor-grid button').forEach(button => {
     button.disabled = !solarEnabled;
     button.classList.toggle('active', Number(button.dataset.floor) === solarPoweredFloor);

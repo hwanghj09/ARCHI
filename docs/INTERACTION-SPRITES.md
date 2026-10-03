@@ -32,6 +32,14 @@
 
 11F 방화셔터는 이미 `assets/objects/floor11/fire-shutter-states.png`의 닫힘/열림 2프레임을 사용하므로 추가 정지 이미지는 필요하지 않다.
 
+## 경비 로봇 순찰
+
+`assets/objects/guard-robot/guard-patrol.png`: 2048×256 투명 PNG, 가로 256×256 셀 8개. 0~3은 바퀴 회전, 4~6은 정지 탐색, 7은 전원 OFF다. 셀의 바퀴 바닥 y=237, 게임 표시 160×160으로 로봇 높이는 약 120px이다. 1층 R-01이 전력 공급 시 x=1510~4540 구간을 80px/s로 왕복하고 끝에서 1.4초 탐색한 뒤 돌아선다. 정전·조작창·장면 전환 동안 멈추고 재방문 시 위치를 유지한다. 실제 생성 프롬프트는 `assets/objects/guard-robot/PATROL-PROMPT.md`, 검증은 `node tests/guard-patrol.mjs`.
+
+### 감지·추적·붙잡기
+
+경비 로봇의 감지·추적·붙잡기는 `assets/objects/guard-robot/guard-capture.png`의 384×256 가로 6프레임을 사용한다(팔이 잘리지 않도록 셀 폭 확장). 수호의 붙잡힘·저항 동작은 `assets/player/jeong-suho-caught.png`의 256×256 가로 4프레임이다. 로봇은 전방에서 수호를 감지하면 주황 경고 후 빨간 추적으로 전환하고, 가까운 지상 플레이어에게 팔을 펼쳐 붙잡는다. 다시 시도하면 수집한 단서를 유지한 채 로비 엘리베이터 앞에서 재개한다. 규격·프롬프트는 `assets/objects/guard-robot/CAPTURE-PROMPT.md`, 검증은 `node tests/guard-capture.mjs`.
+
 ## 태양광 비상 배전반 UI
 
 `assets/ui/power/panel-off-on.png`는 768×512 투명 PNG, 가로 384×512 셀 2개다. 정면 직교 시점과 동일한 캐비닛 기준선을 유지하며 0번은 레버 위/OFF, 1번은 아래/ON이다. 글자와 층 번호는 HTML로 겹쳐 표시한다. 레버를 내린 뒤에만 층 선택이 가능하고, 다시 올리면 공급층이 해제된다. 드래그·클릭·터치·Enter/Space를 지원한다. 원본과 프롬프트는 `assets/ui/power/PROMPT.md`, 검증은 `node tests/solar-ui.mjs`.

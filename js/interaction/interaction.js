@@ -2,9 +2,10 @@
 let nearbyDoor = null;
 
 function updateInteraction() {
-  if (openingActive) { hint.hidden = true; return; }
+  if (openingActive || playerCaught) { hint.hidden = true; return; }
   if (room === 'dynamic') {
-    nearbyDoor = currentDoors.find(door => grounded && Math.abs(body.bounds.max.y - (door.standY ?? floorY)) < 2 &&
+    const candidates = guardPatrol.door ? [guardPatrol.door, ...currentDoors] : currentDoors;
+    nearbyDoor = candidates.find(door => grounded && Math.abs(body.bounds.max.y - (door.standY ?? floorY)) < 2 &&
       Math.abs(body.position.x - door.x - door.width / 2) < door.width / 2 + 28) || null;
     for (const door of currentDoors) door.element.classList.toggle('near', door === nearbyDoor);
     updateOutline();
@@ -49,7 +50,7 @@ function doorHintText(door) {
 }
 
 function interact() {
-  if (openingActive || transitioning || selectingFloor || usingComputer || usingKeypad || usingPhone || usingPowerPanel || usingInspection) return;
+  if (openingActive || playerCaught || transitioning || selectingFloor || usingComputer || usingKeypad || usingPhone || usingPowerPanel || usingInspection) return;
   updateInteraction();
   if (!nearbyDoor) return;
   if (nearbyDoor.type === 'computer') {

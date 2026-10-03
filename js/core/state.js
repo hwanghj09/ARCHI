@@ -18,6 +18,7 @@ const timedBarriers = [];
 // 조작을 막는 모드: 장면 전환 중, 엘리베이터 안, 컴퓨터 사용 중, 키패드 입력 중.
 let transitioning = false;
 let openingActive = true;
+let playerCaught = false;
 let selectingFloor = false;
 let usingComputer = false;
 // 도어락 키패드(방 문·소품의 code): 열려 있는 동안 플레이어 조작을 멈춘다.

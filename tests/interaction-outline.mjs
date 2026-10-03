@@ -73,7 +73,8 @@ try {
 
   // Art doors and fixtures use the measured box from the floor data; the hit range does not move.
   assert.deepEqual((await stand('f1', 'Harmony Hall')).outline, [204, 261, 237, 296]);
-  assert.deepEqual((await stand('f1', '경비 로봇')).outline, [4531, 406, 55, 151]);
+  const robot = await stand('f1', '경비 로봇');
+  assert.deepEqual(robot.outline, await page.evaluate(() => [guardPatrol.x - 39, floorY - 124, 78, 124]));
   assert.deepEqual((await stand('f1-harmony', '복도')).outline, [1220, 257, 265, 311]);
   // Without an outline the element box is used.
   const elevator = await stand('f5', '1번 엘리베이터');

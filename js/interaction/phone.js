@@ -17,6 +17,7 @@ function refreshPhone() {
 }
 
 function togglePhone() {
+  if (playerCaught) return;
   if (usingPhone) return closePhone();
   usingPhone = true;
   phoneHeld = true;
@@ -39,6 +40,7 @@ function closePhone() {
 }
 
 function togglePhoneLight() {
+  if (playerCaught) return;
   if (!phoneLightOn && phoneBattery <= 0) return showStatus('휴대폰 배터리가 없습니다.');
   phoneLightOn = !phoneLightOn;
   phoneHeld = true;

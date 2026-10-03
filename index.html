@@ -10,6 +10,8 @@
     <link rel="stylesheet" href="inventory.css" />
     <link rel="stylesheet" href="opening.css" />
     <link rel="stylesheet" href="power.css" />
+    <link rel="stylesheet" href="guard-patrol.css" />
+    <link rel="preload" as="image" href="assets/objects/guard-robot/guard-capture.png" />
     <link rel="preload" as="image" href="assets/player/jeong-suho-phone-walk-on.png" />
     <link rel="preload" as="image" href="assets/player/jeong-suho-phone-run-on.png" />
     <style>
@@ -850,6 +852,7 @@
     <script src="js/scene/transition.js" defer></script>
     <script src="js/scene/prop-outlines.js" defer></script>
     <script src="js/scene/scene-builder.js" defer></script>
+    <script src="js/scene/guard-patrol.js" defer></script>
     <script src="js/scene/floor-change.js" defer></script>
     <script src="js/interaction/puzzles.js" defer></script>
     <script src="js/interaction/cctv.js" defer></script>
@@ -888,6 +891,7 @@
         <div id="interaction-hint" hidden></div>
         <div id="player" role="img" aria-label="정수호" data-state="idle" data-frame="0">
           <img id="opening-sheet" src="assets/player/jeong-suho-opening.png" alt="" width="1536" height="256" draggable="false" />
+          <img id="caught-sheet" src="assets/player/jeong-suho-caught.png" alt="" width="1024" height="256" draggable="false" />
           <img id="idle-sprite" src="assets/player/jeong-suho-idle-four.png" alt="" width="1254" height="1254" draggable="false" />
           <img id="walk-sheet" src="assets/player/jeong-suho-walk-six.png" alt="" width="1536" height="256" draggable="false" />
           <img id="run-sheet" src="assets/player/jeong-suho-run-eight.png" alt="" width="2048" height="256" draggable="false" />
@@ -934,6 +938,11 @@
       <button id="phone-light" type="button" aria-pressed="false">라이트 켜기 <small>(F)</small></button>
       <p>닫은 뒤에도 휴대폰을 들고 이동합니다. F키로 라이트를 전환하며, 켜져 있는 동안에는 걷기만 가능합니다.</p>
       <div class="dialog-actions"><button id="phone-stow" type="button">휴대폰 넣기</button><button id="phone-close" type="button">들고 이동 (P)</button></div>
+    </section>
+    <section id="guard-capture" role="dialog" aria-modal="true" aria-labelledby="guard-capture-title" hidden>
+      <h2 id="guard-capture-title">로봇에게 붙잡혔다</h2>
+      <p>로비 엘리베이터 앞에서 다시 시도합니다. 수집한 단서는 유지됩니다.</p>
+      <button id="guard-retry" type="button">다시 시도</button>
     </section>
     <section id="power-panel" role="dialog" aria-modal="true" aria-labelledby="power-title" aria-describedby="power-help" hidden>
       <div class="power-cabinet">

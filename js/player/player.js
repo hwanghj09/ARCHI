@@ -9,6 +9,7 @@ const phoneLightSheet = document.getElementById('phone-light-sheet');
 const phoneAwaySheet = document.getElementById('phone-away-sheet');
 const phoneWalkSheet = document.getElementById('phone-walk-sheet');
 const phoneRunSheet = document.getElementById('phone-run-sheet');
+const caughtSheet = document.getElementById('caught-sheet');
 let phoneTime = 0;
 let phoneAwayTime = 0;
 
@@ -29,6 +30,12 @@ checkWalkSheet();
 
 function animate(distance, sprinting = false, elapsed = 0) {
   if (openingActive) return;
+  if (playerCaught) {
+    const frame = guardPatrol.captureTime < 440 ? 0 : 1 + Math.floor((guardPatrol.captureTime - 440) / 240) % 3;
+    sprite.dataset.state = 'caught'; sprite.dataset.frame = frame;
+    caughtSheet.style.transform = `translateX(${-frame * 25}%)`;
+    return;
+  }
   const running = grounded && sprinting && distance > .1 && runSheet.naturalWidth === 256 * runFrames && runSheet.naturalHeight === 256;
   const walking = grounded && walkReady && distance > .1 && !running;
   const holdingPhone = phoneHeld || phoneLightOn;

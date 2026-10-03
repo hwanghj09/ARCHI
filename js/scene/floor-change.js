@@ -25,6 +25,10 @@ function performRoomChange() {
 }
 
 function performFloorChange(destId, carIndex = 0, arrivalKey = null) {
+  if (playerCaught) releaseGuardCapture();
+  guardPatrol.mode = 'patrol'; guardPatrol.alertTime = guardPatrol.lostTime = 0;
+  guardPatrol.door = null;
+  guardPatrol.image = null;
   Composite.remove(engine.world, currentTerrain);
   dynamicScene.innerHTML = '';
   const dest = floorById.get(destId);
@@ -78,6 +82,7 @@ function performFloorChange(destId, carIndex = 0, arrivalKey = null) {
   const lockedIn = dest.exitLock && !collectedItems.has(dest.exitLock.until) && dest.exitLock.arrivalMessage;
   showStatus(lockedIn || dest.arrival || (arrivalKey ? '복도로 나왔습니다.' : `${dest.label}에 도착했습니다.`), lockedIn ? 5000 : 2500);
   refreshSceneElevatorDoors();
+  mountGuardPatrol();
   updateInteraction();
   render();
 }

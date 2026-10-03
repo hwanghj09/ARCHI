@@ -1,5 +1,9 @@
 // 키보드 조작: A/D·방향키 이동, Space/W/위 점프, Shift 달리기, E 상호작용, Esc 닫기.
 window.addEventListener('keydown', event => {
+  if (playerCaught) {
+    if (event.code !== 'Tab' && !(['Enter', 'Space'].includes(event.code) && event.target.id === 'guard-retry')) event.preventDefault();
+    return;
+  }
   if (openingActive) {
     if (event.code === 'Escape') { event.preventDefault(); finishOpening(); }
     else if (event.code !== 'Tab' && !(event.target.id === 'opening-skip' && ['Enter', 'Space'].includes(event.code))) event.preventDefault();

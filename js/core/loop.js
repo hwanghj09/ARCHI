@@ -4,6 +4,12 @@ let accumulator = 0;
 
 function update() {
   if (openingActive) { updateOpening(step); return; }
+  if (playerCaught) {
+    updateGuardPatrol(step);
+    animate(0, false, step);
+    cameraX += (cameraTarget() - cameraX) * .13;
+    return;
+  }
   if (transitioning) {
     updateSceneTransition();
     updateElevators();
@@ -38,6 +44,7 @@ function update() {
     return normalY < -.5;
   });
   animate(Math.abs(body.position.x - oldX), sprinting, step);
+  updateGuardPatrol(step);
   updateElevators();
   updateInteraction();
   updateCall();
