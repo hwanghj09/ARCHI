@@ -1,5 +1,10 @@
 // 키보드 조작: A/D·방향키 이동, Space/W/위 점프, Shift 달리기, E 상호작용, Esc 닫기.
 window.addEventListener('keydown', event => {
+  if (blackoutSceneActive) {
+    if (event.code === 'Escape') { event.preventDefault(); finishBlackoutScene(); }
+    else if (event.code !== 'Tab' && !(event.target.id === 'blackout-skip' && ['Enter', 'Space'].includes(event.code))) event.preventDefault();
+    return;
+  }
   if (playerCaught) {
     if (event.code !== 'Tab' && !(['Enter', 'Space'].includes(event.code) && event.target.id === 'guard-retry')) event.preventDefault();
     return;
@@ -22,6 +27,7 @@ window.addEventListener('keydown', event => {
     return;
   }
   if (usingPhone) {
+    if (event.code === 'Tab' || (['Enter', 'Space'].includes(event.code) && event.target.closest('#phone button'))) return;
     if (event.code === 'Escape') closePhone();
     if (event.code === 'KeyF' && !event.repeat) togglePhoneLight();
     event.preventDefault();

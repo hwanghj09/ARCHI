@@ -29,7 +29,7 @@ walkSheet.addEventListener('load', checkWalkSheet);
 checkWalkSheet();
 
 function animate(distance, sprinting = false, elapsed = 0) {
-  if (openingActive) return;
+  if (openingActive || blackoutSceneActive) return;
   if (playerCaught) {
     const frame = guardPatrol.captureTime < 640 ? 0 : 1 + Math.floor((guardPatrol.captureTime - 640) / 240) % 3;
     sprite.dataset.state = 'caught'; sprite.dataset.frame = frame;
@@ -38,14 +38,14 @@ function animate(distance, sprinting = false, elapsed = 0) {
   }
   const running = grounded && sprinting && distance > .1 && runSheet.naturalWidth === 256 * runFrames && runSheet.naturalHeight === 256;
   const walking = grounded && walkReady && distance > .1 && !running;
-  const holdingPhone = phoneHeld || phoneLightOn;
+  const holdingPhone = usingPhone || phoneLightOn;
   walkDistance = walking ? (walkDistance + distance) % (frameDistance * walkFrames) : 0;
   runDistance = running ? (runDistance + distance) % (runFrameDistance * runFrames) : 0;
   if (distance > .1 || !grounded) phoneAwayTime = 0;
   else phoneAwayTime = Math.max(0, phoneAwayTime - elapsed);
   const state = usingPhone ? (phoneLightOn ? 'phone-light' : 'phone') : !grounded ? (body.velocity.y < 0 ? 'jump' : 'fall') :
     interactionTime > 0 && !holdingPhone ? 'interact' : running ? 'run' : walking ? 'walk' :
-    phoneLightOn ? 'phone-light' : holdingPhone ? 'phone-ready' : phoneAwayTime > 0 ? 'phone-away' : 'idle';
+    phoneLightOn ? 'phone-light' : phoneAwayTime > 0 ? 'phone-away' : 'idle';
   phoneTime = state === sprite.dataset.state && (state === 'phone' || state === 'phone-light') ? phoneTime + elapsed : 0;
   idleTime = state === 'idle' && sprite.dataset.state === 'idle' ? (idleTime + elapsed) % 3200 : 0;
   const index = state === 'phone' ? (phoneTime < 360 ? Math.floor(phoneTime / 180) : 2 + Math.floor((phoneTime - 360) / 600) % 2) :
@@ -76,6 +76,5 @@ function animate(distance, sprinting = false, elapsed = 0) {
   if (state === 'interact') interactSheet.style.transform = `translateX(${-index * 50}%)`;
   if (state === 'phone') phoneSheet.style.transform = `translateX(${-index * 25}%)`;
   if (state === 'phone-light') phoneLightSheet.style.transform = `translateX(${-index * 25}%)`;
-  if (state === 'phone-ready') phoneLightSheet.style.transform = 'translateX(0)';
   if (state === 'phone-away') phoneAwaySheet.style.transform = `translateX(${-index * 50}%)`;
 }

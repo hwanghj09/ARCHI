@@ -70,6 +70,14 @@ function buildDynamicScene(config) {
     const element = document.createElement('div');
     element.className = `barrier ${barrier.style || ''}`.trim();
     element.dataset.open = String(open);
+    if (barrier.accessGate) {
+      const glass = document.createElement('div');
+      glass.className = 'access-glass';
+      const reader = document.createElement('span');
+      reader.className = 'access-reader';
+      reader.textContent = `${config.short} · ID`;
+      element.append(glass, reader);
+    }
     element.setAttribute('role', 'img');
     element.setAttribute('aria-label', barrier.name);
     Object.assign(element.style, { left: `${barrier.x}px`, top: `${barrier.y}px`, width: `${barrier.width}px`,

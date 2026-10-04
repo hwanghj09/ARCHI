@@ -4,6 +4,7 @@ const phoneBatteryOutput = document.getElementById('phone-battery');
 const phoneBatteryFill = document.getElementById('phone-battery-fill');
 const phoneLightButton = document.getElementById('phone-light');
 let phoneDrainAccumulator = 0;
+let phoneBlocked = [];
 
 function refreshPhone() {
   const percent = Math.max(0, Math.ceil(phoneBattery));
@@ -12,51 +13,47 @@ function refreshPhone() {
   phoneBatteryFill.style.background = percent <= 20 ? '#e27b68' : '#8fe06a';
   phoneLightButton.disabled = percent === 0;
   phoneLightButton.setAttribute('aria-pressed', String(phoneLightOn));
-  phoneLightButton.firstChild.textContent = phoneLightOn ? '라이트 끄기 ' : '라이트 켜기 ';
+  phoneLightButton.setAttribute('aria-label', phoneLightOn ? '플래시 끄기' : '플래시 켜기');
+  document.getElementById('phone-light-state').textContent = phoneLightOn ? '켜짐' : '꺼짐';
+  document.getElementById('phone-help').textContent = percent === 0 ? '배터리가 소진되었습니다.' :
+    phoneLightOn ? '앞을 비추고 있습니다. 화면을 닫고 이동하세요.' : '플래시를 켜면 앞을 비추며 걸을 수 있습니다.';
   world.dataset.flashlight = phoneLightOn ? 'on' : 'off';
 }
 
 function togglePhone() {
-  if (playerCaught) return;
+  if (playerCaught || blackoutSceneActive) return;
   if (usingPhone) return closePhone();
   usingPhone = true;
-  phoneHeld = true;
   phoneTime = 0;
   phoneAwayTime = 0;
   phonePanel.hidden = false;
   releaseInput();
   animate(0);
   refreshPhone();
-  phoneLightButton.focus();
+  phoneBlocked = [...document.body.children].filter(element => element !== phonePanel && element.tagName !== 'SCRIPT' && !element.inert);
+  for (const element of phoneBlocked) element.inert = true;
+  (phoneBattery > 0 ? phoneLightButton : document.getElementById('phone-close')).focus();
 }
 
 function closePhone() {
   if (!usingPhone) return;
   usingPhone = false;
-  phoneAwayTime = 0;
+  phoneAwayTime = phoneLightOn ? 0 : 360;
   phonePanel.hidden = true;
+  for (const element of phoneBlocked) element.inert = false;
+  phoneBlocked = [];
   animate(0);
   stage.focus();
 }
 
 function togglePhoneLight() {
-  if (playerCaught) return;
+  if (playerCaught || blackoutSceneActive) return;
   if (!phoneLightOn && phoneBattery <= 0) return showStatus('휴대폰 배터리가 없습니다.');
   phoneLightOn = !phoneLightOn;
-  phoneHeld = true;
-  phoneAwayTime = 0;
-  if (usingPhone) animate(0);
+  phoneAwayTime = !phoneLightOn && !usingPhone ? 360 : 0;
+  if (usingPhone || Math.abs(body.velocity.x) < .01) animate(0);
   refreshPhone();
   showStatus(`휴대폰 라이트를 ${phoneLightOn ? '켰습니다' : '껐습니다'}.`);
-}
-
-function stowPhone() {
-  closePhone();
-  phoneHeld = false;
-  phoneLightOn = false;
-  phoneAwayTime = 360;
-  animate(0);
-  refreshPhone();
 }
 
 function updatePhone(elapsed) {
@@ -67,6 +64,7 @@ function updatePhone(elapsed) {
   phoneDrainAccumulator %= 1000;
   if (phoneBattery === 0) {
     phoneLightOn = false;
+    phoneAwayTime = usingPhone ? 0 : 360;
     showStatus('휴대폰 배터리가 모두 소모되어 라이트가 꺼졌습니다.');
   }
   refreshPhone();
@@ -74,5 +72,4 @@ function updatePhone(elapsed) {
 
 phoneLightButton.addEventListener('click', togglePhoneLight);
 document.getElementById('phone-close').addEventListener('click', closePhone);
-document.getElementById('phone-stow').addEventListener('click', stowPhone);
 refreshPhone();

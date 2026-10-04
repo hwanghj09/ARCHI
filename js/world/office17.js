@@ -3,6 +3,24 @@
 const officeComputer = { type: 'computer', x: 612, y: 392, width: 88, element: document.getElementById('office-computer'),
   outline: [609, 389, 94, 70] };
 
+const officeBadge = {
+  type: 'inspect', name: '수호의 출입증', x: 730, y: 450, width: 32, gives: 'f17-badge',
+  message: '책상 위에 두었던 내 출입증이다. ARCHI · 정수호 · 개발팀. 퇴근하기 전에 챙겼다.',
+  surface: 'card', image: 'assets/objects/id-cards/jeong-suho.png',
+  caption: 'ARCHI · 정수호 · 개발팀. 수호의 출입증을 챙겼다.',
+  element: document.createElement('div'),
+};
+officeBadge.element.id = 'office-badge';
+officeBadge.element.setAttribute('role', 'img');
+officeBadge.element.setAttribute('aria-label', '책상 위 수호의 출입증');
+Object.assign(officeBadge.element.style, { left: `${officeBadge.x}px`, top: `${officeBadge.y}px` });
+const officeBadgeImage = new Image();
+officeBadgeImage.src = officeBadge.image;
+officeBadgeImage.alt = '';
+officeBadgeImage.draggable = false;
+officeBadge.element.append(officeBadgeImage);
+world.insertBefore(officeBadge.element, sprite);
+
 function setOfficeComputerPower(power) {
   officeComputer.element.dataset.power = power;
   officeComputer.element.setAttribute('aria-label', power === 'off' ? '꺼진 컴퓨터' : power === 'on' ? '켜진 컴퓨터' : '종료 중인 컴퓨터');

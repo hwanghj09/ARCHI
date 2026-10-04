@@ -8,6 +8,14 @@ const FLOORS = FLOOR_NUMBERS.map(floor => {
   const layout = FLOOR_LAYOUTS[floor] || {};
   return { id: floorId(floor), floor, short, label: floorName(floor),
     header: `${short} · 빈 층`, aria: floorName(floor), background: '#252b2a', ...layout,
+    // 인증은 하차 후 로비 양쪽 칸막이에서 한다. 한 번 인증하면 그 층의 양쪽 통로가 열린다.
+    barriers: [...(layout.barriers || []), ...([12, 13, 14, 15].includes(floor) ? [1774, 2740].map((x, index) => ({
+      name: `${floor}층 ${index ? '동쪽' : '서쪽'} 인증 게이트`, x, y: 128, width: 32,
+      style: 'access-gate', accessGate: true, requires: 'f16-badge', gives: `f${floor}-access`,
+      message: '조현아 팀장 사원증 인증 완료. 유리 칸막이가 열렸다. 이 층의 업무 구역으로 들어갈 수 있다.',
+      missingMessage: '사원증을 리더에 태그해야 한다. 출입증이 없으면 업무 구역으로 들어갈 수 없다.',
+      takenMessage: '인증이 완료된 게이트다. 통과할 수 있다.',
+    })) : [])],
     // restroomOverride: elevatorOffsets와 같은 목적으로, 그 층 그림 속 화장실 문이 BUILDING_CORE.restroom
     // 좌표와 어긋날 때만 그 층의 doorX/doorWidth/doorY를 보정한다(다른 층은 그대로).
     rooms: [...(layout.rooms || []), { name: '화장실', target: `${floorId(floor)}-restroom`, ...BUILDING_CORE.restroom, ...(layout.restroomOverride || {}) }],

@@ -1,8 +1,15 @@
 // 실제 소지품만 등록한다. collectedItems의 퍼즐 진행 플래그는 가방에 표시하지 않는다.
 const INVENTORY_ITEMS = {
+  'f17-badge': { name: '수호의 출입증', description: '17층 책상에서 챙긴 내 출입증. ARCHI · 정수호 · 개발팀.', image: 'assets/objects/id-cards/jeong-suho.png' },
+  'f16-badge': { name: '조현아 팀장 사원증', description: '16층 카페에서 챙긴 사원증. 12~15층의 인증 게이트에서 사용할 수 있다.', image: 'assets/objects/id-cards/jo-hyeon-a.png' },
   'rooftop-key': { name: '낡은 열쇠', description: '옥상문을 열 수 있을 것만 같다… 조금 더럽다.' },
 };
 const inventoryButton = document.getElementById('inventory-button');
+
+function refreshInventoryCount() {
+  const count = Object.keys(INVENTORY_ITEMS).filter(id => collectedItems.has(id)).length;
+  inventoryButton.textContent = count ? `가방 (${count}) · I` : '가방 · I';
+}
 
 function itemButton(id) {
   const item = INVENTORY_ITEMS[id];
@@ -10,7 +17,7 @@ function itemButton(id) {
   button.type = 'button';
   button.dataset.item = id;
   const icon = writingNode('img', 'item-key');
-  icon.src = 'assets/ui/rooftop-key.png';
+  icon.src = item.image || 'assets/ui/rooftop-key.png';
   icon.alt = '';
   icon.draggable = false;
   button.append(icon, writingNode('span', 'item-name', item.name));
@@ -52,7 +59,7 @@ function openHydrant() {
       key.remove();
       description.textContent = '낡은 열쇠를 가방에 넣었다. 옥상문을 열 수 있을 것 같다.';
       inspectionDescription.textContent = description.textContent;
-      inventoryButton.textContent = '가방 (1) · I';
+      refreshInventoryCount();
       inspectionClose.focus();
     });
     cabinet.append(key);
@@ -96,7 +103,12 @@ function toggleInventory() {
   for (const id of items) {
     const button = itemButton(id);
     const describe = () => { description.textContent = INVENTORY_ITEMS[id].description; };
-    for (const event of ['pointerenter', 'focus', 'click']) button.addEventListener(event, describe);
+    for (const event of ['pointerenter', 'focus']) button.addEventListener(event, describe);
+    button.addEventListener('click', () => {
+      const item = INVENTORY_ITEMS[id];
+      if (item.image) openInspection(item.name, item.description, { surface: 'card', image: item.image, caption: item.description });
+      else describe();
+    });
     grid.append(button);
   }
   content.append(grid, description);

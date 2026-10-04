@@ -32,6 +32,10 @@
 
 11F 방화셔터는 이미 `assets/objects/floor11/fire-shutter-states.png`의 닫힘/열림 2프레임을 사용하므로 추가 정지 이미지는 필요하지 않다.
 
+## 엘리베이터 앞 정전 컷씬
+
+17층 최초 엘리베이터 접근 시에는 `assets/player/jeong-suho-blackout-call.png`의 256×256 가로 2프레임으로 등을 보인 채 호출 버튼에 손을 뻗는다. 조명이 두 번 깜빡인 후 정전되면 기존 놀람 자세로 24px 물러난다. 컷씬은 4.8초이며 한 번만 재생한다. 규격·생성 프롬프트·타이밍은 `assets/player/BLACKOUT-PROMPT.md`, 검증은 `tests/blackout-scene.mjs`에 있다.
+
 ## 경비 로봇 순찰
 
 `assets/objects/guard-robot/guard-patrol.png`: 2048×256 투명 PNG, 가로 256×256 셀 8개. 0~3은 바퀴 회전, 4~6은 정지 탐색, 7은 전원 OFF다. 셀의 바퀴 바닥 y=237, 게임 표시 160×160으로 로봇 높이는 약 120px이다. 1층 R-01이 전력 공급 시 x=1510~4540 구간을 80px/s로 왕복하고 끝에서 1.4초 탐색한 뒤 돌아선다. 정전·조작창·장면 전환 동안 멈추고 재방문 시 위치를 유지한다. 실제 생성 프롬프트는 `assets/objects/guard-robot/PATROL-PROMPT.md`, 검증은 `node tests/guard-patrol.mjs`.
@@ -46,15 +50,15 @@
 
 ## 휴대폰 플레이어 애니메이션
 
-휴대폰 꺼내기·대기·넣기와 이동 전용 시트가 적용되어 있다. UI를 닫으면 휴대폰을 계속 들고 이동하며, ‘휴대폰 넣기’로 빈손 동작에 복귀한다.
+휴대폰 꺼내기·대기·넣기와 이동 전용 시트가 적용되어 있다. 플래시가 켜져 있을 때만 UI를 닫은 뒤에도 들고 이동한다. OFF 또는 배터리 소진 시 자동으로 넣고 빈손 이동으로 복귀한다. 별도 들기·넣기 버튼은 없다. UI는 `assets/ui/phone-device.png`의 실제 기기 이미지 위에 배터리·플래시·홈 바를 배치하며, 규격과 생성 프롬프트는 `assets/ui/PHONE-PROMPT.md`, UI 검증은 `node tests/phone-ui.mjs`에 있다.
 
 | 파일 제안 | 프레임 | 구성 |
 |---|---:|---|
 | `assets/player/jeong-suho-phone-idle.png` | 4 | 주머니에서 꺼냄 / 들어 올림 / 화면을 봄 / 미세 호흡 |
 | `assets/player/jeong-suho-phone-light.png` | 4 | 휴대폰을 앞쪽으로 들고 라이트를 비추는 반복 자세 |
 | `assets/player/jeong-suho-phone-away.png` | 2 | 화면을 끄고 주머니에 넣음 |
-| `assets/player/jeong-suho-phone-walk-off.png` / `-on.png` | 각각 6 | 휴대폰을 앞으로 든 걷기, 라이트 OFF / ON |
-| `assets/player/jeong-suho-phone-run-off.png` | 8 | 라이트 OFF 상태에서만 달리기 |
+| `assets/player/jeong-suho-phone-walk-on.png` | 6 | 플래시를 앞으로 비추며 걷기; OFF 시트는 이전 제작물로 보존 |
+| `assets/player/jeong-suho-phone-run-off.png` | 8 | 이전 제작물로 보존; 플래시 OFF 시 일반 빈손 달리기 사용 |
 | `assets/player/jeong-suho-phone-run-on.png` | 8 중 2개 사용 | 라이트 ON 점프·낙하 자세만 재사용; 달리기에는 사용하지 않음 |
 
 - 기존 플레이어 시트처럼 프레임당 256×256, 발 기준선과 엉덩이 중심을 걷기 시트에 맞춘다.

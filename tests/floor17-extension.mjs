@@ -20,12 +20,17 @@ try {
   };
   const position = () => page.locator('#player').evaluate(el => new DOMMatrix(getComputedStyle(el).transform).m41 + 96);
   const walkTo = async x => {
+    const wasDark = await page.evaluate(() => buildingBlackout);
     const from = await position();
     const key = x > from ? 'd' : 'a';
     await page.keyboard.down(key);
     await page.clock.runFor(Math.abs(x - from) / 200 * 1000);
     await page.keyboard.up(key);
     await page.clock.runFor(100);
+    if (!wasDark && await page.evaluate(() => buildingBlackout || blackoutSceneActive)) {
+      if (await page.locator('#blackout-scene').isVisible()) await page.clock.runFor(5000);
+      await walkTo(x);
+    }
   };
   const enter = async () => {
     await page.keyboard.press('e');

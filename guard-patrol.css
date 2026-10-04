@@ -6,7 +6,7 @@
 #dynamic-scene .fixture.guard-bot[data-patrol="grab"], #dynamic-scene .fixture.guard-bot[data-patrol="caught"] { z-index: 2; }
 #player #caught-sheet { width: 400%; height: 100%; }
 #player[data-state="caught"] #caught-sheet { display: block; }
-#guard-capture { position: fixed; z-index: 12; bottom: 16px; left: 50%; transform: translateX(-50%); width: min(480px, calc(100vw - 24px)); padding: 14px 18px; background: #111b20f5; border: 2px solid #ad7666; color: #eee5d6; text-align: center; }
+#guard-capture { position: fixed; z-index: 12; bottom: 16px; left: 50%; transform: translateX(-50%); width: min(480px, calc(100vw - 24px)); padding: 14px 18px; background: #111b20f5; border: 2px solid #ad7666; color: #eee5d6; text-align: left; }
 #guard-capture[hidden] { display: none; }
 #guard-capture h2 { margin: 0 0 8px; font-size: 18px; }
 #guard-capture p { margin: 0 0 10px; font-size: 12px; line-height: 1.5; }

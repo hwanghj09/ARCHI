@@ -9,7 +9,7 @@ const switchableBackgrounds = new Set([
 
 function backgroundLightsOff() {
   return currentSceneFloor >= 1 && currentSceneFloor <= 17 &&
-    ((buildingBlackout && solarPoweredFloor !== currentSceneFloor) || (currentSceneFloor === 17 && world.dataset.lights === 'off'));
+    (world.dataset.powerFlicker === 'off' || (buildingBlackout && solarPoweredFloor !== currentSceneFloor) || (currentSceneFloor === 17 && world.dataset.lights === 'off'));
 }
 
 function setPowerBackground(image, src) {

@@ -57,7 +57,9 @@ try {
   const active = () => page.locator('#player img:visible');
   await page.keyboard.press('p');
   await page.keyboard.press('p');
-  assert.equal((await state()).state, 'phone-ready', 'Closing phone retains unlit phone in hand');
+  assert.equal((await state()).state, 'phone-away', 'Closing with the flashlight OFF automatically puts the phone away');
+  await page.clock.runFor(400);
+  assert.equal((await state()).state, 'idle');
   await page.evaluate(() => {
     performFloorChange('f16', 0, null);
     Body.setPosition(body, { x: 1450, y: floorY - 81 });
@@ -78,8 +80,8 @@ try {
       await active().evaluate(img => img.decode());
       assert.equal(await active().count(), 1, 'Exactly one character sheet is displayed');
       assert.equal((await state()).state, activeMotion, 'Light ON forces walking even with Shift held');
-      assert.equal(await active().getAttribute('id'), `phone-${activeMotion}-sheet`);
-      assert((await active().getAttribute('src')).endsWith(`${activeMotion}-${light}.png`));
+      assert.equal(await active().getAttribute('id'), `${light === 'on' ? 'phone-' : ''}${activeMotion}-sheet`);
+      if (light === 'on') assert((await active().getAttribute('src')).endsWith(`${activeMotion}-on.png`));
       assert(await page.evaluate(running => Math.abs(Math.abs(body.velocity.x) - (running ? runSpeed : speed) / 60) < .01,
         activeMotion === 'run'), 'Physics speed matches the allowed gait');
       assert.equal(await page.locator('#world').getAttribute('data-flashlight'), light);
@@ -111,12 +113,12 @@ try {
   await page.keyboard.down('d');
   await page.clock.runFor(1100);
   assert.equal(await page.locator('#world').getAttribute('data-flashlight'), 'off');
-  assert((await active().getAttribute('src')).endsWith('walk-off.png'), 'Battery exhaustion switches to unlit movement');
+  assert.equal(await active().getAttribute('id'), 'walk-sheet', 'Battery exhaustion restores empty-handed movement');
   await page.keyboard.up('d');
   await page.keyboard.press('f');
   assert.equal(await page.evaluate(() => phoneLightOn), false, 'Empty battery cannot turn on');
   await page.keyboard.press('p');
-  await page.locator('#phone-stow').click();
+  await page.locator('#phone-close').click();
   assert.equal((await state()).state, 'phone-away');
   await page.clock.runFor(400);
   assert.equal((await state()).state, 'idle');
@@ -140,7 +142,7 @@ try {
   await page.addStyleTag({ content: '#world { background: white !important; } #world > * { visibility: hidden; } #world > #darkness { visibility: visible; }' });
   for (const facingDirection of [1, -1]) {
     await page.evaluate(direction => {
-      releaseInput(); facing = direction; phoneLightOn = true; phoneHeld = true;
+      releaseInput(); facing = direction; phoneLightOn = true;
       Body.setPosition(body, { x: 1500, y: floorY - 81 });
       grounded = true; animate(0); refreshPhone(); cameraX = 860; render();
     }, facingDirection);
@@ -160,7 +162,7 @@ try {
     assert(front > 100 && rear < 20, `Directional mask ${facingDirection} illuminates ahead only: ${front}/${rear} at ${JSON.stringify(origin)}`);
   }
   assert.deepEqual(errors, []);
-  console.log('PASS: transparent sheets, every frame/LED, both directions, light-ON sprint blocked in physics and animation, jump, battery, stow, touch and directional light.');
+  console.log('PASS: transparent sheets, every frame/LED, both directions, flashlight-only carrying, sprint gating, jump, automatic stow, battery, touch and directional light.');
 } finally {
   await browser.close();
 }

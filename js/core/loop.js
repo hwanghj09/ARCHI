@@ -4,6 +4,7 @@ let accumulator = 0;
 
 function update() {
   if (openingActive) { updateOpening(step); return; }
+  if (blackoutSceneActive) { updateBlackoutScene(step); return; }
   if (playerCaught) {
     updateGuardPatrol(step);
     animate(0, false, step);

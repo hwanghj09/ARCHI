@@ -18,6 +18,7 @@ const timedBarriers = [];
 // 조작을 막는 모드: 장면 전환 중, 엘리베이터 안, 컴퓨터 사용 중, 키패드 입력 중.
 let transitioning = false;
 let openingActive = true;
+let blackoutSceneActive = false;
 let playerCaught = false;
 let selectingFloor = false;
 let usingComputer = false;
@@ -29,7 +30,6 @@ let usingPowerPanel = false;
 let usingInspection = false;
 let phoneBattery = 100;
 let phoneLightOn = false;
-let phoneHeld = false;
 let solarPoweredFloor = null;
 let solarEnabled = false;
 let buildingBlackout = false;

@@ -19,8 +19,12 @@ function catchPlayer() {
   playerCaught = true;
   robot.mode = 'grab'; robot.captureTime = 0;
   robot.facing = body.position.x >= robot.x ? 1 : -1;
+  // Keep the held body inside the 32px walls without shortening the arm reach.
+  const margin = 32 + (body.bounds.max.x - body.bounds.min.x) / 2;
+  const heldX = Math.max(margin, Math.min(worldWidth - margin, robot.x + robot.facing * 82));
+  robot.x = heldX - robot.facing * 82;
   facing = -robot.facing;
-  phoneHeld = phoneLightOn = false;
+  phoneLightOn = false;
   refreshPhone();
   releaseInput();
   Body.setVelocity(body, { x: 0, y: 0 });

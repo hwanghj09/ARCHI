@@ -1,5 +1,6 @@
 // 장면 교체: 17층 사무실과 복도 사이, 그리고 다른 층·방·옥상으로 이동.
 function performRoomChange() {
+  if (blackoutSceneActive) finishBlackoutScene();
   const entering = room === 'corridor';
   if (entering) returnX = body.position.x;
   for (const solid of entering ? solids : officeSolids) Composite.remove(engine.world, solid);
@@ -25,6 +26,7 @@ function performRoomChange() {
 }
 
 function performFloorChange(destId, carIndex = 0, arrivalKey = null) {
+  if (blackoutSceneActive) finishBlackoutScene();
   if (playerCaught) releaseGuardCapture();
   guardPatrol.mode = 'patrol'; guardPatrol.lostTime = 0;
   guardPatrol.door = null;

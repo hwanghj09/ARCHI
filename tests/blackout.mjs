@@ -35,6 +35,15 @@ try {
     await page.clock.runFor(200); await page.keyboard.up('d');
     assert.equal((await state()).blackout, false, 'Only standing in the call range triggers the outage');
     await page.clock.runFor(1000);
+    assert.equal(await page.evaluate(() => blackoutSceneActive), true, 'Landing starts the call attempt cutscene');
+    assert.equal((await state()).blackout, false, 'Approach is still illuminated');
+    const phases = new Set();
+    for (let i = 0; i < 52; i++) {
+      phases.add(await page.locator('#world').getAttribute('data-power-flicker'));
+      await page.clock.runFor(100);
+    }
+    assert(phases.has('off') && phases.has('on'), 'Lights flicker before the permanent outage');
+    assert.equal(await page.evaluate(() => blackoutSceneActive), false);
     assert.deepEqual(await state(), { blackout: true, powered: 'false', lights: 'off', called: false });
     assert(await page.locator('#darkness').isVisible());
     assert.match(await page.locator('#interaction-status').textContent(), /건물 전체의 불이 꺼졌다/);

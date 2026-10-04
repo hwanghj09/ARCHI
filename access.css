@@ -1,0 +1,13 @@
+/* 기존 장애물과 같은 월드 좌표로 그리는 유리 보안 칸막이. 리더는 독립 비상 전원을 사용한다. */
+.barrier.access-gate { border: 3px solid #62767c; background: #15252a; box-shadow: 3px 0 #0d171d, -3px 0 #0d171d; }
+.access-glass { position: absolute; inset: 5px -13px 8px; border: 3px solid #8ba9ad; background: repeating-linear-gradient(0deg, transparent 0 90px, #9dbdbd55 90px 93px), linear-gradient(100deg, #3d707dce, #91b5b754 46%, #294951dd); box-shadow: inset 3px 0 #d3e4dc55; transform-origin: top; transition: transform .45s ease; }
+.access-glass::after { content: ''; position: absolute; left: -3px; right: -3px; top: 60%; height: 24px; border-block: 3px solid #99aaa8; background: repeating-linear-gradient(135deg, #31494e 0 9px, #a8b4ac 9px 14px); }
+.access-reader { position: absolute; top: 64%; left: -19px; width: 64px; height: 68px; padding-top: 42px; border: 4px solid #899b9f; background: radial-gradient(circle at 50% 24%, #df7464 0 5px, #4e262d 6px 10px, transparent 11px), #17282d; box-shadow: 3px 4px #0c151b; color: #cbdad3; font: bold 9px monospace; text-align: center; }
+.access-reader::before { content: ''; position: absolute; top: 27px; left: 20px; width: 16px; height: 11px; border: 1px solid #91a4aa; }
+.access-gate[data-open="true"] .access-glass { transform: scaleY(.05); }
+.barrier.access-gate[data-open="true"] { background: transparent; }
+.access-gate[data-open="true"] .access-reader { background: radial-gradient(circle at 50% 24%, #7cdca8 0 5px, #254c3e 6px 10px, transparent 11px), #17282d; }
+#office-badge { position: absolute; width: 32px; height: 22px; pointer-events: none; }
+#office-badge img { position: absolute; left: 5px; top: -6px; width: 22px; height: 34px; transform: rotate(82deg); image-rendering: pixelated; filter: drop-shadow(1px 2px 0 #101e24); }
+#world:not([data-room="office"]) #office-badge, #office-badge[hidden] { display: none; }
+@media (prefers-reduced-motion: reduce) { .access-glass { transition: none; } }

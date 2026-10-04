@@ -2,9 +2,10 @@
 let nearbyDoor = null;
 
 function updateInteraction() {
-  if (openingActive || playerCaught) { hint.hidden = true; return; }
+  if (openingActive || blackoutSceneActive || playerCaught) { hint.hidden = true; return; }
   if (room === 'dynamic') {
-    const candidates = guardPatrol.door ? [guardPatrol.door, ...currentDoors] : currentDoors;
+    const candidates = [...(guardPatrol.door ? [guardPatrol.door] : []),
+      ...currentDoors.filter(door => door.accessGate && door.solid), ...currentDoors.filter(door => !door.accessGate)];
     nearbyDoor = candidates.find(door => grounded && Math.abs(body.bounds.max.y - (door.standY ?? floorY)) < 2 &&
       Math.abs(body.position.x - door.x - door.width / 2) < door.width / 2 + 28) || null;
     for (const door of currentDoors) door.element.classList.toggle('near', door === nearbyDoor);
@@ -18,11 +19,14 @@ function updateInteraction() {
     return;
   }
   const activeDoors = room === 'corridor' ? [...doors, ...officeDoors.filter(door => door.room === room)] :
-    [...officeDoors.filter(door => door.room === room), officeComputer];
+    [...officeDoors.filter(door => door.room === room), officeComputer, ...(!collectedItems.has('f17-badge') ? [officeBadge] : [])];
   nearbyDoor = activeDoors.find(door => grounded && Math.abs(body.bounds.max.y - floorY) < 2 &&
     Math.abs(body.position.x - door.x - door.width / 2) < door.width / 2 + 28) || null;
-  if (room === 'corridor' && currentSceneFloor === 17 && nearbyDoor?.type === 'elevator') triggerBuildingBlackout();
-  for (const door of [...doors, ...officeDoors, officeComputer]) door.element.classList.toggle('near', door === nearbyDoor);
+  if (!buildingBlackout && room === 'corridor' && currentSceneFloor === 17 && nearbyDoor?.type === 'elevator') {
+    startBlackoutScene(nearbyDoor);
+    return;
+  }
+  for (const door of [...doors, ...officeDoors, officeComputer, officeBadge]) door.element.classList.toggle('near', door === nearbyDoor);
   updateOutline();
   hint.hidden = !nearbyDoor;
   if (nearbyDoor) {
@@ -35,6 +39,8 @@ function updateInteraction() {
 function doorHintText(door) {
   if (door.type === 'computer') return 'E · 컴퓨터 사용';
   if (door.type === 'power') return 'E · 태양광 전력 제어';
+  if (door.accessGate) return door.element.dataset.open === 'true' ? '인증 완료 · 통과 가능' : 'E · 출입증 태그';
+  if (door === officeBadge) return 'E · 출입증 챙기기';
   if (door.type === 'inspect') return `E · ${door.name} 조사`;
   if (door.locked) return `E · ${door.name} (잠김)`;
   if (door.type === 'room') return door.hint;
@@ -50,8 +56,9 @@ function doorHintText(door) {
 }
 
 function interact() {
-  if (openingActive || playerCaught || transitioning || selectingFloor || usingComputer || usingKeypad || usingPhone || usingPowerPanel || usingInspection) return;
+  if (openingActive || blackoutSceneActive || playerCaught || transitioning || selectingFloor || usingComputer || usingKeypad || usingPhone || usingPowerPanel || usingInspection) return;
   updateInteraction();
+  if (blackoutSceneActive) return;
   if (!nearbyDoor) return;
   if (nearbyDoor.type === 'computer') {
     computerReturnFocus = document.activeElement;
@@ -112,6 +119,10 @@ function interact() {
     // 그 소품의 gives도 주지 않는다.
     const required = [].concat(nearbyDoor.requires || []);
     const lacking = required.filter(item => !collectedItems.has(item)).length;
+    if (nearbyDoor.accessGate && lacking && collectedItems.has('f17-badge')) {
+      openInspection(nearbyDoor.name, '정수호의 출입증을 태그했다. "미등록 출입증 · 인증 거부". 칸막이가 열리지 않는다. 다른 유효한 사원증이 필요하다.');
+      return;
+    }
     const missing = !unreadable && lacking && nearbyDoor.missingMessage &&
       (lacking < required.length && nearbyDoor.partialMessage || nearbyDoor.missingMessage);
     const inspectionMessage = unreadable || missing || (gives && collectedItems.has(gives) ? nearbyDoor.takenMessage : nearbyDoor.message);
@@ -121,13 +132,14 @@ function interact() {
     const alreadyCollected = gives && collectedItems.has(gives);
     if (gives) collectedItems.add(gives);
     if (gives) refreshReady();
+    if (gives) refreshInventoryCount();
     if (gives && room === 'dynamic' && floorById.get(dynamicFloorId).litBy === gives) world.dataset.dark = 'false';
     // 걷힌 장애물(barriers)은 그 자리에서 충돌체를 치운다.
-    if (gives && nearbyDoor.solid) {
-      Composite.remove(engine.world, nearbyDoor.solid);
-      currentTerrain = currentTerrain.filter(solid => solid !== nearbyDoor.solid);
-      nearbyDoor.solid = null;
-      nearbyDoor.element.dataset.open = 'true';
+    for (const barrier of currentDoors.filter(door => gives && door.gives === gives && door.solid)) {
+      Composite.remove(engine.world, barrier.solid);
+      currentTerrain = currentTerrain.filter(solid => solid !== barrier.solid);
+      barrier.solid = null;
+      barrier.element.dataset.open = 'true';
     }
     if (!unreadable && !alreadyCollected) playPropAnimation(nearbyDoor);
     // 등 뒤에서 잠긴 출구(exitLock)는 풀어 주는 물건을 챙기는 즉시 열린다.

@@ -23,6 +23,8 @@ try {
     await page.clock.runFor(34);
   };
   await hold('d', 8200);
+  // The first call position now plays the outage scene before allowing a real call.
+  if (await page.locator('#blackout-scene').isVisible()) await page.clock.runFor(5000);
   await page.keyboard.press('e');
   await page.clock.runFor(19400);
   await page.keyboard.press('e');
@@ -59,17 +61,12 @@ try {
   assert.deepEqual(await floorButtons.evaluateAll(els => els.map(el => Number(el.dataset.floor))),
     [17, 16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, -1, -2]);
   assert.deepEqual(await page.locator('#cabin-floor-buttons [data-badge]').evaluateAll(els => els.map(el => el.dataset.floor)),
-    ['15', '14', '13', '12'], '15F..12F need an employee ID card');
+    [], 'Employee authentication happens at the landing gates, not in the elevator');
   assert.deepEqual(await page.locator('#cabin-floor-buttons [data-restricted]').evaluateAll(els => els.map(el => el.dataset.floor)),
     ['-2'], 'ARCHI keeps the elevator away from B2');
   for (const button of await floorButtons.all()) {
     if (await button.isDisabled()) continue;
     await button.click();
-    if (await button.getAttribute('data-badge')) {
-      assert.equal(await button.getAttribute('aria-pressed'), 'false', 'Badge floors refuse Suho\'s deregistered card');
-      assert.match(await page.locator('#cabin-status').textContent(), /사원증 인증 층이다/);
-      continue;
-    }
     if (await button.getAttribute('data-restricted')) {
       assert.equal(await button.getAttribute('aria-pressed'), 'false', 'B2 stays restricted until B1 lifts it');
       assert.match(await page.locator('#cabin-status').textContent(), /운행 제한 중이다.*B1 방재 관제실/);
@@ -2049,13 +2046,20 @@ try {
   for (let floor = 15; floor >= 1; floor--) {
     console.log(`Checking ${floor}F route and puzzles...`);
     await page.locator(`#cabin-floor-buttons [data-floor="${floor}"]`).click();
-    if (floor === 15) assert.equal(await page.locator('#cabin-status').textContent(), '조현아 팀장 사원증 인증 · 15층 선택',
-      'The café ID card opens the badge floors');
+    if (floor === 15) assert.equal(await page.locator('#cabin-status').textContent(), '15층 선택');
     if (floor !== 15) await page.locator('#cabin-close').click();
     await page.clock.runFor(floor === 15 ? 5300 : 3600);
     assert.equal(await cabin.getAttribute('data-floor'), String(floor));
     await page.locator('#cabin-exit').click();
     await finishSceneTransition(page);
+    if (floor >= 12) {
+      await walkTo(1828);
+      assert.equal(await hint(), 'E · 출입증 태그');
+      await page.keyboard.press('e');
+      assert.match(await interactionMessage(page), /조현아 팀장 사원증 인증 완료/);
+      assert.equal(await page.locator('.access-gate[data-open="true"]').count(), 2);
+      await walkTo(floor === 12 ? 1893 : 1858);
+    }
     if (floor === 15) {
       await checkFloor15();
     } else if (floor === 14) {

@@ -123,9 +123,6 @@ try {
   await page.keyboard.down('d'); await page.clock.runFor(100); await page.keyboard.up('d');
   assert.equal(await page.locator('#player').getAttribute('data-state'), 'walk');
   await page.keyboard.press('p'); await page.keyboard.press('f'); await page.keyboard.press('p');
-  assert.equal(await page.locator('#player').getAttribute('data-state'), 'phone-ready');
-  await page.keyboard.press('p');
-  await page.locator('#phone-stow').click();
   assert.equal(await page.locator('#player').getAttribute('data-state'), 'phone-away');
   await page.clock.runFor(210);
   assert.equal(await page.locator('#player').getAttribute('data-frame'), '1');
