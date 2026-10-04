@@ -41,6 +41,28 @@ try {
   assert(await page.locator('#darkness').isHidden(), 'Office lighting stays on during the opening');
   assert.equal((await status()).blocked, true);
   assert.equal(await page.locator('#player img:visible').count(), 1);
+  const chair = page.locator('#opening-chair-front');
+  assert(await chair.isVisible(), 'Chair back is in front during seated poses');
+  const chairBounds = await chair.boundingBox();
+  const shirtPixel = { x: Math.floor(chairBounds.x + chairBounds.width * .5),
+    y: Math.floor(chairBounds.y + chairBounds.height * .35), width: 1, height: 1 };
+  const brightness = async () => {
+    const shot = await page.screenshot({ clip: shirtPixel });
+    return page.evaluate(async src => {
+      const img = new Image(); img.src = src; await img.decode();
+      const canvas = document.createElement('canvas'); canvas.width = canvas.height = 1;
+      const ctx = canvas.getContext('2d'); ctx.drawImage(img, 0, 0);
+      const [r, g, b] = ctx.getImageData(0, 0, 1, 1).data;
+      return r + g + b;
+    }, `data:image/png;base64,${shot.toString('base64')}`);
+  };
+  const chairPixel = await brightness();
+  await chair.evaluate(el => { el.style.visibility = 'hidden'; });
+  const exposedShirtPixel = await brightness();
+  await chair.evaluate(el => { el.style.visibility = ''; });
+  assert(chairPixel < exposedShirtPixel * .6, 'Rendered chair back covers the white shirt');
+  await page.screenshot({ path: '.local/opening-chair-layer.png', clip: {
+    x: Math.floor(chairBounds.x - 140), y: Math.floor(chairBounds.y - 90), width: 340, height: 240 } });
   await page.keyboard.down('d');
   for (const key of ['e', 'p', 'f', 'i']) await page.keyboard.press(key);
   await page.clock.runFor(100);
@@ -53,6 +75,7 @@ try {
     await page.clock.runFor(Math.max(0, at - await page.evaluate(() => openingElapsed)) + 34);
     const current = await status();
     assert.equal(current.phase, phase); assert.equal(current.frame, frame); assert.equal(current.power, power);
+    assert.equal(await chair.isVisible(), frame <= 3, 'Chair foreground clears when the player rises');
     assert(await page.locator('#opening-sheet').evaluate((img, frame) =>
       Math.abs(new DOMMatrix(getComputedStyle(img).transform).m41 + frame * 192) < .01, frame));
     await page.screenshot({ path: `.local/opening-${phase}.png` });
@@ -63,6 +86,7 @@ try {
   assert.equal(completed.facing, 1); assert.equal(completed.grounded, true);
   assert(Math.abs(completed.x - 656) < 1 && Math.abs(completed.feet - 570) < 1, 'Handoff lands at the existing gameplay position');
   assert(await page.locator('#opening').isHidden());
+  assert(await chair.isHidden(), 'Chair foreground is hidden after the opening');
   assert(await page.locator('#darkness').isHidden(), 'Shutting down the computer does not turn off the room lights');
   await page.keyboard.down('d'); await page.clock.runFor(200); await page.keyboard.up('d');
   assert((await status()).x > 690, 'Movement resumes after opening');
@@ -74,6 +98,7 @@ try {
   await page.keyboard.press('Escape');
   assert.equal((await status()).active, false); assert.equal((await status()).power, 'off');
   assert.equal((await status()).x, 656, 'Skip uses the same completed state');
+  assert(await chair.isHidden(), 'Skipping clears the chair foreground');
   await page.keyboard.press('e'); await page.clock.runFor(800);
   assert.equal((await status()).computer, true); assert.equal((await status()).power, 'on', 'Computer can be powered back on for documents');
 
@@ -94,5 +119,5 @@ try {
   await page.waitForFunction(() => !openingActive, null, { polling: 50 });
   assert.equal((await status()).blocked, false, 'Missing artwork cannot trap gameplay');
   assert.deepEqual(errors, []);
-  console.log('PASS: rear seated poses, shutdown, right turn, rise, handoff, input lock, skip, office re-entry, computer restart, mobile and missing-art recovery.');
+  console.log('PASS: chair foreground occlusion, rear seated poses, shutdown, right turn, rise, handoff, input lock, skip, office re-entry, computer restart, mobile and missing-art recovery.');
 } finally { await browser.close(); }

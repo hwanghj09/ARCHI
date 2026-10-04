@@ -23,7 +23,8 @@ try {
   }, type);
   const ownsKey = () => page.evaluate(() => collectedItems.has('rooftop-key'));
   await page.keyboard.press('i');
-  assert.match(await page.locator('#item-description').textContent(), /비어/);
+  assert.equal(await page.locator('.inventory-item').count(), 1);
+  assert(await page.locator('[data-item="f17-badge"]').isVisible(), 'The starting inventory contains Suho’s badge');
   await page.keyboard.press('i');
   assert(await page.locator('#inspection').isHidden());
   await approach('stairs');
@@ -72,7 +73,8 @@ try {
   assert.match(await page.locator('#item-description').textContent(), /이미 챙겼다/);
   await page.keyboard.press('Escape');
   await page.locator('#inventory-button').click();
-  const item = page.locator('.inventory-item');
+  assert.equal(await page.locator('.inventory-item').count(), 2);
+  const item = page.locator('[data-item="rooftop-key"]');
   assert.equal(await item.count(), 1);
   assert.equal(await item.locator('img').getAttribute('src'), 'assets/ui/rooftop-key.png', 'Inventory reuses the same key art');
   await item.hover();

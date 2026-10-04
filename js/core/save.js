@@ -70,6 +70,8 @@ function restoreProgress(data) {
     roomTransition.dataset.phase = 'idle';
     for (const key of ['opening', 'blackoutScene', 'powerFlicker']) delete world.dataset[key];
     collectedItems.clear();
+    // 자신의 출입증은 기본 소지품이며, 이전 저장에도 진행 상황을 유지한 채 추가한다.
+    collectedItems.add('f17-badge');
     for (const item of data.items) collectedItems.add(item);
     buildingBlackout = data.blackout === true;
     solarEnabled = data.solarEnabled === true;

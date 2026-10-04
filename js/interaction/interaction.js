@@ -21,14 +21,14 @@ function updateInteraction() {
   }
   const activeDoors = room === 'corridor' ? [...doors.filter(door => door.phoneCharger), ...doors.filter(door => !door.phoneCharger),
     ...officeDoors.filter(door => door.room === room)] :
-    [...officeDoors.filter(door => door.room === room), officeComputer, ...(!collectedItems.has('f17-badge') ? [officeBadge] : [])];
+    [...officeDoors.filter(door => door.room === room), officeComputer];
   nearbyDoor = activeDoors.find(door => grounded && Math.abs(body.bounds.max.y - floorY) < 2 &&
     Math.abs(body.position.x - door.x - door.width / 2) < door.width / 2 + 28) || null;
   if (!buildingBlackout && room === 'corridor' && currentSceneFloor === 17 && nearbyDoor?.type === 'elevator') {
     startBlackoutScene(nearbyDoor);
     return;
   }
-  for (const door of [...doors, ...officeDoors, officeComputer, officeBadge]) door.element.classList.toggle('near', door === nearbyDoor);
+  for (const door of [...doors, ...officeDoors, officeComputer]) door.element.classList.toggle('near', door === nearbyDoor);
   updateOutline();
   hint.hidden = !nearbyDoor;
   if (nearbyDoor) {
@@ -43,7 +43,6 @@ function doorHintText(door) {
   if (door.type === 'power') return 'E · 태양광 전력 제어';
   if (door.phoneCharger) return phoneChargerHint(door);
   if (door.accessGate) return door.element.dataset.open === 'true' ? '인증 완료 · 통과 가능' : 'E · 출입증 태그';
-  if (door === officeBadge) return 'E · 출입증 챙기기';
   if (door.type === 'inspect') return `E · ${door.name} 조사`;
   if (door.locked) return `E · ${door.name} (잠김)`;
   if (door.type === 'room') return door.hint;

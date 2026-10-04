@@ -3,24 +3,6 @@
 const officeComputer = { type: 'computer', x: 612, y: 392, width: 88, element: document.getElementById('office-computer'),
   outline: [609, 389, 94, 70] };
 
-const officeBadge = {
-  type: 'inspect', name: '수호의 출입증', x: 730, y: 450, width: 32, gives: 'f17-badge',
-  message: '책상 위에 두었던 내 출입증이다. ARCHI · 정수호 · 개발팀. 퇴근하기 전에 챙겼다.',
-  surface: 'card', image: 'assets/objects/id-cards/jeong-suho.png',
-  caption: 'ARCHI · 정수호 · 개발팀. 수호의 출입증을 챙겼다.',
-  element: document.createElement('div'),
-};
-officeBadge.element.id = 'office-badge';
-officeBadge.element.setAttribute('role', 'img');
-officeBadge.element.setAttribute('aria-label', '책상 위 수호의 출입증');
-Object.assign(officeBadge.element.style, { left: `${officeBadge.x}px`, top: `${officeBadge.y}px` });
-const officeBadgeImage = new Image();
-officeBadgeImage.src = officeBadge.image;
-officeBadgeImage.alt = '';
-officeBadgeImage.draggable = false;
-officeBadge.element.append(officeBadgeImage);
-world.insertBefore(officeBadge.element, sprite);
-
 function setOfficeComputerPower(power) {
   officeComputer.element.dataset.power = power;
   officeComputer.element.setAttribute('aria-label', power === 'off' ? '꺼진 컴퓨터' : power === 'on' ? '켜진 컴퓨터' : '종료 중인 컴퓨터');
@@ -43,6 +25,7 @@ Object.assign(officeBackground.style, {
   width: `${officeWidth}px`, height: `${724 * floorY / 504}px`,
   left: '0px', top: '0px',
 });
+document.getElementById('opening-chair-front').style.backgroundSize = `${officeWidth}px ${724 * floorY / 504}px`;
 // 복도 그림에서 사무실 유리벽은 x=32..1555이고 문은 그 왼쪽에서 39% 지점이다. 방 안 배경
 // (office-interior-aligned.png)도 문을 같은 비율 위치에 두어, 문 양옆 공간과 켜진 책상의 방향이 복도에서 본 것과 같다.
 const officeDoors = [

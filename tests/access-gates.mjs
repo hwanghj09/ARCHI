@@ -24,27 +24,18 @@ try {
   };
   const message = () => page.locator('#inspection-description').textContent();
   const close = () => page.keyboard.press('Escape');
-  await page.locator('#office-badge img').evaluate(img => img.decode());
-  assert(await page.locator('#office-badge').isVisible());
+  assert.equal(await page.locator('#office-badge').count(), 0, 'The badge is no longer placed on the desk');
+  assert(await page.evaluate(() => collectedItems.has('f17-badge')), 'Suho starts with his own badge');
   assert.equal(await page.locator('#interaction-hint').textContent(), 'E · 컴퓨터 사용');
-  await hold('d', 450);
-  assert.equal(await page.locator('#interaction-hint').textContent(), 'E · 출입증 챙기기');
-  await page.screenshot({ path: '.local/suho-badge-desk.png' });
-  await page.keyboard.press('e');
-  assert.match(await message(), /내 출입증.*정수호/);
-  assert(await page.locator('#office-badge').isHidden());
   assert.equal(await page.locator('#inventory-button').textContent(), '가방 (1) · I');
-  await page.locator('#inspection-sheet img').evaluate(img => img.decode());
-  await page.clock.runFor(600);
-  await page.screenshot({ path: '.local/suho-badge-inspection.png' });
-  await close();
   await page.keyboard.press('i');
   await page.locator('[data-item="f17-badge"]').click();
   assert.equal(await page.locator('#inspection').getAttribute('data-surface'), 'card');
   assert.match(await page.locator('#inspection-sheet img').getAttribute('src'), /jeong-suho/);
+  assert.match(await message(), /늘 지니고 다니는 내 출입증.*정수호/);
   await close();
   await page.evaluate(() => { performRoomChange(); performRoomChange(); });
-  assert(await page.locator('#office-badge').isHidden(), 'Returning to desk must not respawn the badge');
+  assert.equal(await page.locator('#office-badge').count(), 0, 'Returning to the desk does not create a pickup');
   await page.evaluate(() => { triggerBuildingBlackout(); solarEnabled = true; performFloorChange('f17'); showCabin(0); elevatorCars[0].floor = 17; refreshCabin(); });
   // All formerly restricted floor buttons work with no badge at all; keep B2 restriction.
   await page.evaluate(() => collectedItems.delete('f17-badge'));
@@ -112,5 +103,5 @@ try {
   assert(cardBox.width > 100 && cardBox.height > 100 && cardBox.x >= 0 && cardBox.x + cardBox.width <= 390, 'Mobile card is visible within the viewport');
   await page.screenshot({ path: '.local/suho-badge-mobile.png' });
   assert.deepEqual(errors, []);
-  console.log('PASS: desk pickup, inventory/card/touch, unrestricted elevator travel, all 4 floors × 3 landings, bilateral walk/jump blocking, missing/revoked/valid badges, per-floor authentication and persistent reopening.');
+  console.log('PASS: starting badge with no desk pickup, inventory/card/touch, unrestricted elevator travel, all 4 floors × 3 landings, bilateral walk/jump blocking, missing/revoked/valid badges, per-floor authentication and persistent reopening.');
 } finally { await browser.close(); }

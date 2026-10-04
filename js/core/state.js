@@ -6,7 +6,7 @@ let returnX = 644;
 let currentSceneFloor = 17;
 
 // 조사해서 챙긴 물건(소품의 gives). 방의 unlockedBy와 같은 물건이 있으면 그 방 문은 다음에 층을 그릴 때부터 열린다.
-const collectedItems = new Set();
+const collectedItems = new Set(['f17-badge']);
 // 차례대로 조사해야 하는 소품 묶음(방의 sequences, 8층 재현 절차)의 진행 단계. 방을 나가면 처음부터다.
 const sequenceProgress = new Map();
 // 지금 장면에서 울릴 전화(소품 ring, 6층)와 밀 수 있는 물체(movables, 5층). performFloorChange가 장면마다 다시 채운다.

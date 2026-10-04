@@ -83,7 +83,6 @@ function updateTimedBarriers() {
 // requires가 있는 설비(data-requires)의 data-ready를 지금 챙긴 물건에 맞춘다. 장면을 그릴 때와 물건을 챙기거나 출력을 옮길 때
 // 부르므로, 같은 방에서 조건이 채워지면 그림도 바로 바뀐다(2층 영사실 관람창).
 function refreshReady() {
-  officeBadge.element.hidden = collectedItems.has('f17-badge');
   const scene = floorById.get(dynamicFloorId);
   world.dataset.localLight = String(room === 'dynamic' && scene?.floor === currentSceneFloor &&
     Boolean(scene?.litBy) && collectedItems.has(scene.litBy));

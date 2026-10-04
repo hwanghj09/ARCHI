@@ -111,8 +111,23 @@ try {
   await page.locator('#menu-start').tap(); await page.locator('#menu-new-confirm').tap(); await page.locator('#opening-skip').click();
   const fresh = await state();
   assert.equal(fresh.id, 'office'); assert.equal(fresh.battery, 100); assert.equal(fresh.sanity, 100);
-  assert.deepEqual(fresh.items, []); assert.equal(fresh.dock, null); assert.equal(fresh.blackout, false); assert.equal(fresh.solarEnabled, false);
-  assert.deepEqual((await stored()).items, []);
+  assert.deepEqual(fresh.items, ['f17-badge']); assert.equal(fresh.dock, null); assert.equal(fresh.blackout, false); assert.equal(fresh.solarEnabled, false);
+  assert.deepEqual((await stored()).items, ['f17-badge']);
+  // Saves made before the badge became a starting item retain their location and other items.
+  await page.locator('#game-menu-button').tap();
+  await page.evaluate(() => {
+    const legacy = JSON.parse(localStorage.getItem(progressKey));
+    legacy.items = ['rooftop-key'];
+    legacy.scene.id = 'f16'; legacy.scene.x = 2222;
+    localStorage.setItem(progressKey, JSON.stringify(legacy));
+  });
+  await page.reload(); await page.locator('#menu-continue').click();
+  const migrated = await state();
+  assert.equal(migrated.id, 'f16'); assert.equal(migrated.x, 2222);
+  assert.deepEqual(migrated.items, ['f17-badge', 'rooftop-key']);
+  assert.equal(await page.locator('#office-badge').count(), 0);
+  await checkpoint();
+  assert.deepEqual((await stored()).items, ['f17-badge', 'rooftop-key']);
   // Invalid saves are ignored, and blocked storage cannot prevent a fresh game.
   await page.locator('#game-menu-button').tap();
   await page.evaluate(() => localStorage.setItem(progressKey, JSON.stringify({ version: 1, scene: { id: 'missing', x: 1, y: 1 }, items: [] })));

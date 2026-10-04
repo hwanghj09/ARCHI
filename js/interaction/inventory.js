@@ -1,6 +1,6 @@
 // 실제 소지품만 등록한다. collectedItems의 퍼즐 진행 플래그는 가방에 표시하지 않는다.
 const INVENTORY_ITEMS = {
-  'f17-badge': { name: '수호의 출입증', description: '17층 책상에서 챙긴 내 출입증. ARCHI · 정수호 · 개발팀.', image: 'assets/objects/id-cards/jeong-suho.png' },
+  'f17-badge': { name: '수호의 출입증', description: '늘 지니고 다니는 내 출입증. ARCHI · 정수호 · 개발팀.', image: 'assets/objects/id-cards/jeong-suho.png' },
   'f16-badge': { name: '조현아 팀장 사원증', description: '16층 카페에서 챙긴 사원증. 12~15층의 인증 게이트에서 사용할 수 있다.', image: 'assets/objects/id-cards/jo-hyeon-a.png' },
   'rooftop-key': { name: '낡은 열쇠', description: '옥상문을 열 수 있을 것만 같다… 조금 더럽다.' },
 };
