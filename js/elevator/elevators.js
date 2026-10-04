@@ -7,6 +7,11 @@ const elevatorCars = [
   { name: '3번 엘리베이터', floor: 1, travelling: false, elapsed: 0, destination: null, rider: false, open: false, pendingDestId: null },
 ];
 
+const elevatorPowerMessage = '전력이 없어 엘리베이터가 멈췄다. 옥상에서 태양광 비상 전력 레버를 내려야 한다.';
+function elevatorHasPower() {
+  return !buildingBlackout || solarEnabled;
+}
+
 function addElevatorPanels(door) {
   door.element.classList.add('elevator');
   const panels = document.createElement('div');
@@ -17,8 +22,9 @@ function addElevatorPanels(door) {
 function updateFloorIndicator(door) {
   const car = elevatorCars[door.carIndex];
   const label = floorShortLabel(car.floor);
-  door.indicator.textContent = `${car.travelling ? (car.destination > car.floor ? '↑ ' : '↓ ') : ''}${label}`;
-  door.indicator.setAttribute('aria-label', `${door.name} ${label}${car.travelling ? ' 이동 중' : ''}`);
+  const powered = elevatorHasPower();
+  door.indicator.textContent = `${car.travelling && powered ? (car.destination > car.floor ? '↑ ' : '↓ ') : ''}${label}`;
+  door.indicator.setAttribute('aria-label', `${door.name} ${label}${!powered ? ' 전력 없음' : car.travelling ? ' 이동 중' : ''}`);
 }
 
 function refreshSceneElevatorDoors() {
@@ -32,7 +38,8 @@ function refreshSceneElevatorDoors() {
 
 function updateElevators() {
   for (const car of elevatorCars) {
-    if (!car.travelling) continue;
+    // 전력 차단 시 호출·탑승 운행 모두 같은 위치와 경과 시간에서 멈춘다. 복구하면 이어서 운행한다.
+    if (!elevatorHasPower() || !car.travelling) continue;
     car.elapsed += step;
     if (car.elapsed < elevatorFloorTime) continue;
     car.elapsed -= elevatorFloorTime;

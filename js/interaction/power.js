@@ -1,18 +1,22 @@
-// 옥상 태양광 발전기: 1~17층 중 한 층만 선택해 정전 상태를 해제한다.
+// 옥상 레버는 모든 엘리베이터 운행을 복구한다. 층 선택은 해당 층의 조명·설비만 추가로 공급한다.
 const powerPanel = document.getElementById('power-panel');
 const powerGrid = document.getElementById('power-floor-grid');
 const powerStatus = document.getElementById('power-status');
 const powerLever = document.getElementById('power-lever');
 let powerBlocked = [];
 
+function floorHasPower(floor) {
+  if (floor === -1 || floor === -2) return true;
+  if (floor === 18) return solarEnabled;
+  return floor >= 1 && floor <= 17 && (!buildingBlackout || (solarEnabled && solarPoweredFloor === floor));
+}
+
 function updatePowerState() {
-  const emergencyPowered = currentSceneFloor === -1 || currentSceneFloor === -2;
   const solarPowered = currentSceneFloor === solarPoweredFloor;
   const aboveGround = currentSceneFloor >= 1 && currentSceneFloor <= 17;
-  const mainsPowered = aboveGround && !buildingBlackout;
   const blackout = aboveGround && buildingBlackout && !solarPowered;
   world.dataset.blackout = String(blackout);
-  world.dataset.powered = String(emergencyPowered || mainsPowered || solarPowered);
+  world.dataset.powered = String(floorHasPower(currentSceneFloor));
   refreshBackgroundPower();
   refreshReady();
   updateGuardPatrol(0);
@@ -31,6 +35,8 @@ function updatePowerState() {
     supply.dataset.active = String(solarEnabled);
     supply.setAttribute('aria-label', `태양광 임시 전력장치 · ${solarEnabled ? '전원 켜짐' : '전원 꺼짐'}`);
   }
+  if (selectingFloor) refreshCabin();
+  refreshPhone();
 }
 
 function triggerBuildingBlackout() {
@@ -81,6 +87,8 @@ powerLever.addEventListener('click', () => {
   solarEnabled = !solarEnabled;
   if (!solarEnabled) solarPoweredFloor = null;
   updatePowerState();
+  showStatus(solarEnabled ? '태양광 비상 전력 ON · 엘리베이터 운행이 복구됐다. 조명을 켤 층을 선택하자.' :
+    '태양광 비상 전력 OFF · 정전 상태에서는 엘리베이터가 멈춘다.', 6000);
 });
 // Dragging down operates the same native button as click, touch and keyboard.
 powerLever.addEventListener('pointerdown', event => {

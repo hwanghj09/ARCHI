@@ -5,7 +5,8 @@ function updateInteraction() {
   if (openingActive || blackoutSceneActive || playerCaught) { hint.hidden = true; return; }
   if (room === 'dynamic') {
     const candidates = [...(guardPatrol.door ? [guardPatrol.door] : []),
-      ...currentDoors.filter(door => door.accessGate && door.solid), ...currentDoors.filter(door => !door.accessGate)];
+      ...currentDoors.filter(door => door.accessGate && door.solid), ...currentDoors.filter(door => door.phoneCharger),
+      ...currentDoors.filter(door => !door.accessGate && !door.phoneCharger)];
     nearbyDoor = candidates.find(door => grounded && Math.abs(body.bounds.max.y - (door.standY ?? floorY)) < 2 &&
       Math.abs(body.position.x - door.x - door.width / 2) < door.width / 2 + 28) || null;
     for (const door of currentDoors) door.element.classList.toggle('near', door === nearbyDoor);
@@ -18,7 +19,8 @@ function updateInteraction() {
     }
     return;
   }
-  const activeDoors = room === 'corridor' ? [...doors, ...officeDoors.filter(door => door.room === room)] :
+  const activeDoors = room === 'corridor' ? [...doors.filter(door => door.phoneCharger), ...doors.filter(door => !door.phoneCharger),
+    ...officeDoors.filter(door => door.room === room)] :
     [...officeDoors.filter(door => door.room === room), officeComputer, ...(!collectedItems.has('f17-badge') ? [officeBadge] : [])];
   nearbyDoor = activeDoors.find(door => grounded && Math.abs(body.bounds.max.y - floorY) < 2 &&
     Math.abs(body.position.x - door.x - door.width / 2) < door.width / 2 + 28) || null;
@@ -39,6 +41,7 @@ function updateInteraction() {
 function doorHintText(door) {
   if (door.type === 'computer') return 'E · 컴퓨터 사용';
   if (door.type === 'power') return 'E · 태양광 전력 제어';
+  if (door.phoneCharger) return phoneChargerHint(door);
   if (door.accessGate) return door.element.dataset.open === 'true' ? '인증 완료 · 통과 가능' : 'E · 출입증 태그';
   if (door === officeBadge) return 'E · 출입증 챙기기';
   if (door.type === 'inspect') return `E · ${door.name} 조사`;
@@ -47,6 +50,7 @@ function doorHintText(door) {
   if (door.type === 'stairs') return currentSceneFloor === 18 ? 'E · 17층으로 내려가기' : 'E · 옥상으로 올라가기';
   if (door.type === 'panel') return 'E · 조사';
   if (door.type === 'elevator') {
+    if (!elevatorHasPower()) return 'E · 엘리베이터 전력 없음';
     const car = elevatorCars[door.carIndex];
     if (car.travelling) return car.rider ? '이동 중…' : '호출 중…';
     if (car.floor === currentSceneFloor) return 'E · 탑승';
@@ -79,6 +83,10 @@ function interact() {
     interactionTime = 420;
     facing = body.position.x <= nearbyDoor.x + nearbyDoor.width / 2 ? 1 : -1;
     animate(0);
+    if (nearbyDoor.phoneCharger) {
+      chargePhone(nearbyDoor);
+      return;
+    }
     if (nearbyDoor.container === 'hydrant') {
       openHydrant();
       return;
@@ -182,6 +190,10 @@ function interact() {
   }
   if (nearbyDoor.type === 'elevator') {
     const car = elevatorCars[nearbyDoor.carIndex];
+    if (!elevatorHasPower() && car.floor !== currentSceneFloor) {
+      showStatus(elevatorPowerMessage, 6000);
+      return;
+    }
     if (car.travelling) return;
     interactionTime = 420;
     facing = body.position.x <= nearbyDoor.x + nearbyDoor.width / 2 ? 1 : -1;

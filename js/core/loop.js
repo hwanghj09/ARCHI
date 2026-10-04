@@ -3,6 +3,8 @@ let previousTime = null;
 let accumulator = 0;
 
 function update() {
+  updatePhoneCharging(step);
+  updateSanity(step);
   if (openingActive) { updateOpening(step); return; }
   if (blackoutSceneActive) { updateBlackoutScene(step); return; }
   if (playerCaught) {

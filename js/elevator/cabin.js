@@ -36,6 +36,10 @@ panelFloors.forEach((floor, index) => {
   button.addEventListener('click', () => {
     const car = elevatorCars[cabinCarIndex];
     if (transitioning || !car || car.travelling || floor === car.floor) return;
+    if (!elevatorHasPower()) {
+      cabinStatus.textContent = elevatorPowerMessage;
+      return;
+    }
     if (button.dataset.restricted && selectedFloor !== floor && !collectedItems.has(restrictionItem)) {
       cabinStatus.textContent = `${button.title}은 운행 제한 중이다. 버튼 옆 표시: "SYSTEM 제한 · 해제는 B1 방재 관제실".`;
       return;
@@ -82,26 +86,35 @@ function refreshCabin() {
   if (cabinCarIndex === null) return;
   const car = elevatorCars[cabinCarIndex];
   const label = car.floor < 0 ? `B${-car.floor}` : String(car.floor);
-  const display = `${car.travelling ? (car.destination > car.floor ? '↑' : '↓') : ''}${label}`;
+  const powered = elevatorHasPower();
+  const display = `${car.travelling && powered ? (car.destination > car.floor ? '↑' : '↓') : ''}${label}`;
   if (cabinDisplay.textContent !== display) cabinDisplay.textContent = display;
-  cabin.dataset.moving = String(car.travelling);
+  cabin.dataset.moving = String(car.travelling && powered);
+  cabinScene.dataset.powered = String(powered);
   cabin.dataset.floor = car.floor;
   cabinScene.dataset.floor = car.floor;
   // The cabin uses the building circuit; restoring one floor does not relight a moving car.
   cabinScene.dataset.blackout = String(buildingBlackout);
   cabinScene.dataset.hallBlackout = String(buildingBlackout && car.floor > 0 && car.floor !== solarPoweredFloor);
   cabinOpen.disabled = car.travelling;
-  cabinClose.disabled = car.travelling;
+  cabinClose.disabled = !powered || car.travelling;
   cabinExit.disabled = car.travelling || cabinScene.dataset.door !== 'open';
   for (const button of cabinFloorButtons) {
-    button.disabled = car.travelling || Number(button.dataset.floor) === car.floor;
+    button.disabled = !powered || car.travelling || Number(button.dataset.floor) === car.floor;
     button.setAttribute('aria-pressed', String(Number(button.dataset.floor) === (car.travelling ? car.destination : selectedFloor)));
   }
+  if (!powered) cabinStatus.textContent = elevatorPowerMessage;
+  else if (cabinStatus.textContent === elevatorPowerMessage) cabinStatus.textContent = car.travelling ?
+    `${floorShortLabel(car.destination)} 이동 중` : `${floorShortLabel(car.floor)} · 문 열림`;
 }
 
 function setCabinDoor(open) {
   const car = elevatorCars[cabinCarIndex];
   if (transitioning || !car || car.travelling) return;
+  if (!open && !elevatorHasPower()) {
+    cabinStatus.textContent = elevatorPowerMessage;
+    return;
+  }
   cabinAutoClose = 0;
   const phase = cabinScene.dataset.door;
   if (phase === (open ? 'open' : 'closed') || phase === (open ? 'opening' : 'closing')) return;
@@ -115,6 +128,11 @@ function setCabinDoor(open) {
 function updateCabin() {
   if (cabinCarIndex === null) return;
   const car = elevatorCars[cabinCarIndex];
+  if (!elevatorHasPower() && !car.travelling) {
+    selectedFloor = null;
+    cabinAutoClose = 0;
+    setCabinDoor(true);
+  }
   if (cabinAutoClose > 0) {
     cabinAutoClose = Math.max(0, cabinAutoClose - step);
     if (!cabinAutoClose) setCabinDoor(false);
@@ -124,7 +142,7 @@ function updateCabin() {
     cabinScene.style.setProperty('--door-open', cabinDoorAmount);
     if (cabinDoorAmount === (car.open ? 1 : 0)) cabinScene.dataset.door = car.open ? 'open' : 'closed';
   }
-  if (!car.travelling && cabinScene.dataset.door === 'closed' && selectedFloor !== null && !cabinAutoClose) {
+  if (elevatorHasPower() && !car.travelling && cabinScene.dataset.door === 'closed' && selectedFloor !== null && !cabinAutoClose) {
     car.destination = selectedFloor;
     car.travelling = true;
     car.elapsed = 0;

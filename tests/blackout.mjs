@@ -52,10 +52,12 @@ try {
     await page.locator('img[data-lit-src]').evaluateAll(imgs => Promise.all(imgs.map(img => img.decode())));
     await page.screenshot({ path: `.local/blackout-elevator-${viewport.width}.png` });
     await page.keyboard.press('e');
-    assert.equal((await state()).called, true, 'Elevator remains callable after the outage');
+    assert.equal((await state()).called, false, 'Elevator is stopped until rooftop emergency power is enabled');
+    assert.match(await page.locator('#interaction-status').textContent(), /옥상.*태양광 비상 전력/);
     await page.evaluate(() => { performRoomChange(); });
     assert.equal((await state()).lights, 'off', 'Office remains dark on return');
-    await page.evaluate(() => { solarPoweredFloor = 17; updatePowerState(); performRoomChange(); });
+    await page.evaluate(() => { solarEnabled = true; solarPoweredFloor = 17; updatePowerState(); performRoomChange(); });
+    await page.keyboard.press('e');
     assert.deepEqual(await state(), { blackout: true, powered: 'true', lights: 'on', called: true });
     assert(await page.locator('#darkness').isHidden(), 'Returning to the elevator does not repeat the outage after restoration');
     await page.evaluate(() => performFloorChange('f16'));

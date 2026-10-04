@@ -15,7 +15,7 @@ try {
   const reset = (index = 0, side = -1) => page.evaluate(([index, side]) => {
     if (blackoutSceneActive) finishBlackoutScene();
     buildingBlackout = true; performFloorChange('f17');
-    buildingBlackout = false; solarPoweredFloor = null; updatePowerState();
+    buildingBlackout = false; solarEnabled = false; solarPoweredFloor = null; updatePowerState();
     const door = doors[index];
     Body.setPosition(body, { x: side < 0 ? door.x - 20 : door.x + door.width + 20, y: floorY - 81 });
     Body.setVelocity(body, { x: 0, y: 0 }); grounded = true;
@@ -60,6 +60,8 @@ try {
   await advance(4900);
   assert.equal((await state()).active, false); assert.equal((await state()).inert, false);
   assert.equal((await state()).lights, 'off'); assert(await page.locator('#blackout-scene').isHidden());
+  await page.keyboard.press('e'); assert.equal((await state()).called, false);
+  await page.locator('#power-lever').dispatchEvent('click');
   await page.keyboard.press('e'); assert.equal((await state()).called, true);
   await page.evaluate(() => { solarPoweredFloor = 17; updatePowerState(); updateInteraction(); });
   assert.equal((await state()).active, false); assert.equal((await state()).lights, 'on');

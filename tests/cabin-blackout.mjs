@@ -27,6 +27,8 @@ try {
   assert.match(await page.locator('#cabin-doorway').evaluate(el => getComputedStyle(el).backgroundImage), /floor17-off/);
   assert(await page.locator('#cabin-display').evaluate(el => Number(getComputedStyle(el).zIndex) > 1));
   await page.screenshot({ path: '.local/cabin-blackout-open.png' });
+  assert(await page.locator('#cabin-floor-buttons [data-floor="16"]').isDisabled());
+  await page.locator('#power-lever').dispatchEvent('click');
   await page.locator('#cabin-floor-buttons [data-floor="16"]').click();
   assert.equal(await page.locator('#cabin-floor-buttons [data-floor="16"]').getAttribute('aria-pressed'), 'true');
   await page.locator('#cabin-close').click(); await page.clock.runFor(1200);

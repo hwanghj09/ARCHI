@@ -6,8 +6,13 @@ const FLOOR_NUMBERS = [-2, -1, ...Array.from({ length: 16 }, (_, index) => index
 const FLOORS = FLOOR_NUMBERS.map(floor => {
   const short = floor < 0 ? `B${-floor}` : `${floor}F`;
   const layout = FLOOR_LAYOUTS[floor] || {};
+  // 그 층 그림에 맞춘 1·2번 승강기 사이 벽면에 둔다. 12층의 좁은 간격도 문을 덮지 않는다.
+  const firstEnd = BUILDING_CORE.elevators[0].x + (layout.elevatorOffsets?.[0] ?? 0) +
+    BUILDING_CORE.elevators[0].width + (layout.elevatorWidthDeltas?.[0] ?? 0);
+  const secondStart = BUILDING_CORE.elevators[1].x + (layout.elevatorOffsets?.[1] ?? 0);
   return { id: floorId(floor), floor, short, label: floorName(floor),
     header: `${short} · 빈 층`, aria: floorName(floor), background: '#252b2a', ...layout,
+    fixtures: [...(layout.fixtures || []), phoneChargerFixture(Math.round((firstEnd + secondStart) / 2 - 20))],
     // 인증은 하차 후 로비 양쪽 칸막이에서 한다. 한 번 인증하면 그 층의 양쪽 통로가 열린다.
     barriers: [...(layout.barriers || []), ...([12, 13, 14, 15].includes(floor) ? [1774, 2740].map((x, index) => ({
       name: `${floor}층 ${index ? '동쪽' : '서쪽'} 인증 게이트`, x, y: 128, width: 32,
@@ -26,5 +31,6 @@ const FLOORS = FLOOR_NUMBERS.map(floor => {
 const RESTROOMS = FLOOR_NUMBERS.flatMap(floor => interiorRooms(floor, [{ id: `${floorId(floor)}-restroom`, ...restroomInterior,
   ...(FLOOR_LAYOUTS[floor]?.restroomExitX !== undefined ? { exitX: FLOOR_LAYOUTS[floor].restroomExitX } : {}) }]));
 const ALL_FLOORS = [FLOOR17, ...FLOORS];
-const ROOFTOP = { id: 'rooftop', floor: 18, label: '옥상', header: 'RF · 옥상', aria: '옥상', width: 2400, background: '#11191d' };
+const ROOFTOP = { id: 'rooftop', floor: 18, label: '옥상', header: 'RF · 옥상', aria: '옥상', width: 2400, background: '#11191d',
+  fixtures: [phoneChargerFixture(1200, 64)] };
 const floorById = new Map([...ALL_FLOORS, ROOFTOP, ...FLOOR1_ROOMS, ...FLOOR2_ROOMS, ...FLOOR3_ROOMS, ...FLOOR4_ROOMS, ...FLOOR5_ROOMS, ...FLOOR6_ROOMS, ...FLOOR7_ROOMS, ...FLOOR8_ROOMS, ...FLOOR9_ROOMS, ...FLOOR10_ROOMS, ...FLOOR11_ROOMS, ...FLOOR12_ROOMS, ...FLOOR13_ROOMS, ...FLOOR14_ROOMS, ...FLOOR15_ROOMS, ...FLOOR16_ROOMS, ...FLOOR17_ROOMS, ...B1_ROOMS, ...B2_ROOMS, ...RESTROOMS].map(entry => [entry.id, entry]));

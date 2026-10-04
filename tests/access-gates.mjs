@@ -43,7 +43,7 @@ try {
   await close();
   await page.evaluate(() => { performRoomChange(); performRoomChange(); });
   assert(await page.locator('#office-badge').isHidden(), 'Returning to desk must not respawn the badge');
-  await page.evaluate(() => { triggerBuildingBlackout(); performFloorChange('f17'); showCabin(0); elevatorCars[0].floor = 17; refreshCabin(); });
+  await page.evaluate(() => { triggerBuildingBlackout(); solarEnabled = true; performFloorChange('f17'); showCabin(0); elevatorCars[0].floor = 17; refreshCabin(); });
   // All formerly restricted floor buttons work with no badge at all; keep B2 restriction.
   await page.evaluate(() => collectedItems.delete('f17-badge'));
   for (const floor of [12, 13, 14, 15]) {

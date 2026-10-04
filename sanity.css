@@ -1,0 +1,18 @@
+#sanity-hud { position: fixed; z-index: 11; left: max(24px, env(safe-area-inset-left)); top: 116px; width: 152px; padding: 10px 12px; border: 1px solid #637c73; background: #101c20e8; color: #dbe5d8; pointer-events: none; font: 12px/1.5 Arial, sans-serif; }
+.sanity-heading { display: flex; justify-content: space-between; gap: 12px; }
+#sanity-value { font-variant-numeric: tabular-nums; }
+#sanity-meter { height: 7px; margin: 7px 0 4px; border: 1px solid #3e534a; background: #050c10; }
+#sanity-fill { display: block; height: 100%; width: 100%; background: #8fbda3; }
+#sanity-state { color: #96aaa0; font-size: 10px; }
+#sanity-hud[data-state="low"] { border-color: #ae9766; }
+#sanity-hud[data-state="low"] #sanity-fill { background: #c7aa75; }
+#sanity-hud[data-state="hallucinating"] { border-color: #986779; background: #22171fe8; }
+#sanity-hud[data-state="hallucinating"] #sanity-state { color: #d396b0; }
+#hallucinations { position: fixed; z-index: 11; inset: 0; overflow: hidden; pointer-events: none; background: radial-gradient(ellipse at center, transparent 38%, #2714266b 78%, #130b20bd); }
+#hallucinations[hidden], #hallucination-shadow[hidden] { display: none; }
+#hallucination-shadow { position: absolute; image-rendering: pixelated; filter: brightness(0) invert(.75) sepia(.3) drop-shadow(0 0 6px #bba0c8); pointer-events: none; user-select: none; }
+body:has(#world[data-opening]) #sanity-hud,
+body:has(#world[data-blackout-scene]) #sanity-hud { visibility: hidden; }
+@media (max-width: 480px) { #sanity-hud { width: 136px; padding: 8px 10px; } }
+@media (max-height: 480px) { #sanity-hud { top: 106px; } }
+@media (prefers-reduced-motion: reduce) { #hallucination-shadow { filter: brightness(0) invert(.7); } }

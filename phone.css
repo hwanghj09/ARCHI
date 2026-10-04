@@ -36,3 +36,13 @@
   #phone #phone-light { grid-template-columns: 26px 1fr; padding: 8px; }
   #phone-light svg { width: 24px; }
 }
+/* 충전함은 기존 벽면 설비와 같은 CSS 픽셀 스타일이며, 문·통로와 충돌하지 않는다. */
+.phone-charger { position: absolute; padding: 48px 1px 0; border: 3px solid #7a8c8d; background: linear-gradient(90deg, #17272d, #304349 48%, #17272d); box-shadow: inset 2px 0 #c4cebd55, 3px 3px #0b171d; pointer-events: none; }
+.phone-charger::before { content: ''; position: absolute; left: 50%; top: 12px; width: 20px; height: 24px; transform: translateX(-50%); border: 2px solid #a4baa2; background: repeating-linear-gradient(90deg, #8cc98e 0 4px, #2f4b3e 4px 6px) 2px 3px / 14px 14px no-repeat, #111f25; }
+.phone-charger::after { content: ''; position: absolute; left: 50%; top: 72px; width: 18px; height: 10px; transform: translateX(-50%); border: 2px solid #9ea9a7; border-radius: 3px; background: #081218; box-shadow: 0 13px 0 -5px #d1c89b; }
+.phone-charger > span { display: block; color: #d8e3c6; font: bold 8px/12px Arial, sans-serif; text-align: center; white-space: nowrap; }
+#world:not([data-room="corridor"]) > .phone-charger[data-fixed] { display: none; }
+.phone-charger[data-powered="false"]::before { background: #111719; border-color: #566260; }
+.phone-charger .docked-phone { position: absolute; left: 50%; top: 7px; width: 22px; height: 44px; transform: translateX(-50%); image-rendering: pixelated; }
+#phone-button[data-docked="true"] { color: #879292; }
+#phone-button[data-docked="true"]::after { content: attr(data-charge); position: fixed; right: max(24px, env(safe-area-inset-right)); bottom: 88px; max-width: calc(100vw - 48px); padding: 6px 9px; border: 1px solid #758a78; background: #101c20ed; color: #dbe5d8; font: 11px/1.5 Arial, sans-serif; pointer-events: none; }

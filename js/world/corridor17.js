@@ -46,6 +46,22 @@ doors.push({ name: '소화전', type: 'inspect', x: 4023, y: 248, width: 145,
   element: document.getElementById('floor17-hydrant'), container: 'hydrant',
   message: '소화전 안에 호스와 관창이 정리되어 있다. 호스 아래에 작은 열쇠가 숨겨져 있다.' });
 
+for (const fixture of FLOOR17.fixtures) {
+  const element = document.createElement('div');
+  element.className = 'fixture phone-charger';
+  element.dataset.fixed = 'true';
+  element.setAttribute('role', 'img');
+  element.setAttribute('aria-label', fixture.name);
+  Object.assign(element.style, { left: `${fixture.x}px`, top: `${fixture.y}px`, width: `${fixture.width}px`, height: `${fixture.height}px` });
+  for (const line of fixture.lines) {
+    const label = document.createElement('span');
+    label.textContent = line;
+    element.append(label);
+  }
+  world.insertBefore(element, sprite);
+  doors.push({ ...fixture, type: 'inspect', element });
+}
+
 const background = document.getElementById('background');
 // 기존 39개 타일과 동일한 아틀라스를 사용해 전원 변경 시 그림을 한 번에 교체한다.
 const corridorBackground = new Image(3328, 768);

@@ -13,6 +13,7 @@
     <link rel="stylesheet" href="power.css" />
     <link rel="stylesheet" href="guard-patrol.css" />
     <link rel="stylesheet" href="phone.css" />
+    <link rel="stylesheet" href="sanity.css" />
     <link rel="stylesheet" href="blackout.css" />
     <link rel="preload" as="image" href="assets/objects/guard-robot/guard-capture.png" />
     <link rel="preload" as="image" href="assets/player/jeong-suho-phone-walk-on.png" />
@@ -868,6 +869,7 @@
     <script src="js/computer/documents.js" defer></script>
     <script src="js/computer/computer.js" defer></script>
     <script src="js/elevator/cabin.js" defer></script>
+    <script src="js/player/sanity.js" defer></script>
     <script src="js/core/loop.js" defer></script>
     <script src="js/input/input.js" defer></script>
     <script src="js/input/keyboard.js" defer></script>
@@ -967,7 +969,7 @@
         <output id="power-status" aria-live="polite">비상 전력 꺼짐</output>
         <button id="power-lever" type="button" aria-pressed="false" aria-label="레버 내리기 · 비상 전력 켜기"><span id="power-lever-label">OFF · 내려서 켜기</span></button>
         <div id="power-floor-grid" role="group" aria-label="전력 공급층 선택"></div>
-        <p id="power-help">① 레버 내리기 → ② 층 선택 · 한 층만 공급</p>
+        <p id="power-help">① 레버 내리기 · 엘리베이터 운행 복구 → ② 조명 공급층 선택 · 한 층만 공급</p>
         <button id="power-close" type="button">닫기 · Esc</button>
       </div>
     </section>
@@ -978,6 +980,16 @@
       <span id="inspection-description" hidden></span>
       <div class="dialog-actions"><span class="inspection-help">E / Esc</span><button id="inspection-close" type="button">닫기 ▾</button></div>
     </section>
+    <aside id="sanity-hud" aria-label="정신력 상태">
+      <div class="sanity-heading"><span>정신력</span><output id="sanity-value">100%</output></div>
+      <div id="sanity-meter" role="meter" aria-label="정신력" aria-valuemin="0" aria-valuemax="100" aria-valuenow="100">
+        <span id="sanity-fill" aria-hidden="true"></span>
+      </div>
+      <span id="sanity-state" aria-live="polite">안정</span>
+    </aside>
+    <div id="hallucinations" aria-hidden="true" hidden>
+      <img id="hallucination-shadow" src="assets/player/jeong-suho.png" alt="" width="256" height="256" draggable="false" hidden />
+    </div>
     <button id="inventory-button" type="button" aria-controls="inspection" aria-expanded="false">가방 · I</button>
     <form id="debug-floor" aria-label="테스트용 층 이동">
       <label for="debug-floor-select">TEST 층 이동</label>

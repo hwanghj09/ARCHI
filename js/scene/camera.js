@@ -28,4 +28,5 @@ function render() {
     part.element.style.top = `${part.body.position.y - part.height / 2}px`;
   }
   world.style.transform = `translate(${-cameraX * scale}px, ${stage.clientHeight - worldHeight * scale}px) scale(${scale})`;
+  renderHallucination();
 }

@@ -15,6 +15,7 @@ try {
   await page.clock.pauseAt(new Date('2026-09-19T00:01:00Z'));
   await page.clock.runFor(100);
   await reachInitialCorridor(page);
+  await page.locator('#power-lever').dispatchEvent('click');
   const state = () => page.locator('#player').evaluate(el => {
     const player = new DOMMatrix(getComputedStyle(el).transform);
     const world = new DOMMatrix(getComputedStyle(el.parentElement).transform);
@@ -302,11 +303,6 @@ try {
   await hold(stepsToElevator0 > 0 ? 'a' : 'd', Math.abs(stepsToElevator0));
   await page.keyboard.press('e');
   await finishSceneTransition(page);
-  await page.locator('#cabin-floor-buttons [data-floor="12"]').click();
-  assert.equal(await page.locator('#cabin-floor-buttons [data-floor="12"]').getAttribute('aria-pressed'), 'false', '12F needs an employee ID card');
-  assert.match(await page.locator('#cabin-status').textContent(), /사원증 인증 층이다/);
-  // tests/elevator.mjs picks the card up on 16F; here it is handed over directly to keep the ride short.
-  await page.evaluate(() => collectedItems.add('f16-badge'));
   await page.locator('#cabin-floor-buttons [data-floor="12"]').click();
   assert.equal(await page.locator('#cabin-floor-buttons [data-floor="12"]').getAttribute('aria-pressed'), 'true');
   await page.locator('#cabin-close').click();
