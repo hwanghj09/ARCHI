@@ -45,6 +45,7 @@ panelFloors.forEach((floor, index) => {
       return;
     }
     selectedFloor = selectedFloor === floor ? null : floor;
+    playGameSound('switch');
     cabinAutoClose = selectedFloor === null ? 0 : 1600;
     cabinStatus.textContent = selectedFloor === null ? '층 선택 취소' : `${button.title} 선택`;
     refreshCabin();
@@ -61,6 +62,7 @@ function enterCabin(carIndex) {
     return;
   }
   cabinReturnFocus = document.activeElement;
+  if (!elevatorCars[carIndex].open) playGameSound('elevator-door');
   transitionScene(() => showCabin(carIndex));
 }
 
@@ -118,6 +120,7 @@ function setCabinDoor(open) {
   cabinAutoClose = 0;
   const phase = cabinScene.dataset.door;
   if (phase === (open ? 'open' : 'closed') || phase === (open ? 'opening' : 'closing')) return;
+  playGameSound('elevator-door');
   car.open = open;
   cabinScene.dataset.door = open ? 'opening' : 'closing';
   cabinStatus.textContent = open ? '문이 열립니다.' : '문이 닫힙니다.';
@@ -173,17 +176,7 @@ cabinExit.addEventListener('click', exitCabin);
 document.getElementById('cabin-alarm').addEventListener('click', () => {
   if (transitioning) return;
   cabinStatus.textContent = '비상벨 작동';
-  const AudioContext = window.AudioContext || window.webkitAudioContext;
-  if (!AudioContext || gameVolume === 0) return;
-  const audio = new AudioContext();
-  const oscillator = audio.createOscillator();
-  const gain = audio.createGain();
-  gain.gain.value = .08 * gameVolume;
-  oscillator.frequency.value = 880;
-  oscillator.connect(gain).connect(audio.destination);
-  oscillator.start();
-  oscillator.stop(audio.currentTime + .4);
-  oscillator.onended = () => { audio.close(); };
+  playGameSound('elevator-alarm');
 });
 cabin.addEventListener('keydown', event => {
   if (event.code !== 'Tab') return;

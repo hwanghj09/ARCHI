@@ -1,8 +1,10 @@
 // 게임 루프: 고정 시간 간격(step)으로 update를 돌리고 매 프레임 render한다.
 let previousTime = null;
 let accumulator = 0;
+let soundStepDistance = 0;
 
 function update() {
+  updateGameAudio(step);
   if (mainMenuActive) return;
   updatePhoneCharging(step);
   updateSanity(step);
@@ -41,13 +43,24 @@ function update() {
   Body.setVelocity(body, { x: direction * (sprinting ? runSpeed : speed) / 60, y: jumpQueued && grounded ? -10.8 : body.velocity.y });
   jumpQueued = false;
   const oldX = body.position.x;
+  const wasGrounded = grounded;
+  const fallingSpeed = body.velocity.y;
   Engine.update(engine, step);
   grounded = engine.pairs.list.some(pair => {
     if (!pair.isActive || (pair.bodyA !== body && pair.bodyB !== body)) return false;
     const normalY = pair.collision.normal.y * (pair.bodyA === body ? 1 : -1);
     return normalY < -.5;
   });
-  animate(Math.abs(body.position.x - oldX), sprinting, step);
+  const moved = Math.abs(body.position.x - oldX);
+  if (grounded && moved > .1) {
+    soundStepDistance += moved;
+    if (soundStepDistance >= (sprinting ? 96 : 92)) {
+      soundStepDistance %= sprinting ? 96 : 92;
+      playGameSound('step', { running: sprinting, x: body.position.x });
+    }
+  } else soundStepDistance = 0;
+  if (!wasGrounded && grounded && fallingSpeed > 3) playGameSound('step', { landing: true, x: body.position.x });
+  animate(moved, sprinting, step);
   updateGuardPatrol(step);
   updateElevators();
   updateInteraction();

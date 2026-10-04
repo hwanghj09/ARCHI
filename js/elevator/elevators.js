@@ -49,10 +49,16 @@ function updateElevators() {
       car.travelling = false;
       car.open = true;
       if (car.rider) {
+        playGameSound('elevator-arrive');
         selectedFloor = null;
         setCabinDoor(true);
         cabinStatus.textContent = `${floorShortLabel(car.floor)} 도착 · 문이 열립니다.`;
       } else if (car.floor === currentSceneFloor) {
+        const door = currentDoors.find(candidate => candidate.type === 'elevator' && elevatorCars[candidate.carIndex] === car);
+        if (door && !selectingFloor) {
+          playGameSound('elevator-arrive', { x: door.x + door.width / 2 });
+          playGameSound('elevator-door', { x: door.x + door.width / 2 });
+        }
         showStatus(`${car.name}가 ${car.floor}층에 도착했습니다.`);
       }
     }

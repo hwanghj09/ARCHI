@@ -41,6 +41,7 @@ function updatePowerState() {
 
 function triggerBuildingBlackout() {
   if (buildingBlackout) return;
+  playGameSound('blackout');
   buildingBlackout = true;
   updatePowerState();
   showStatus('갑자기 건물 전체의 불이 꺼졌다. 휴대폰(P)의 라이트를 켜 보자.', 6000);
@@ -71,6 +72,7 @@ for (let floor = 17; floor >= 1; floor -= 1) {
   button.textContent = `${floor}F`;
   button.addEventListener('click', () => {
     if (!solarEnabled) return;
+    if (solarPoweredFloor !== floor) playGameSound('switch');
     solarPoweredFloor = floor;
     updatePowerState();
     showStatus(`${floor}층에 태양광 비상 전력을 공급합니다.`);
@@ -85,6 +87,7 @@ powerLever.addEventListener('click', () => {
   leverDrag = 0;
   if (wrongDirection) return;
   solarEnabled = !solarEnabled;
+  playGameSound('switch');
   if (!solarEnabled) solarPoweredFloor = null;
   updatePowerState();
   showStatus(solarEnabled ? '태양광 비상 전력 ON · 엘리베이터 운행이 복구됐다. 조명을 켤 층을 선택하자.' :

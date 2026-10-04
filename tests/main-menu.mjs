@@ -63,19 +63,15 @@ try {
   const startX = (await frozen()).x;
   await page.keyboard.down('d'); await page.clock.runFor(200); await page.keyboard.up('d');
   assert((await frozen()).x > startX + 20, 'Starting the game hands off to movement');
-  // The saved volume controls the real elevator bell, including mute.
+  // The saved volume controls the shared audio output, including the elevator bell.
   await page.evaluate(() => {
-    window.bellContexts = 0;
-    const NativeAudio = window.AudioContext;
-    window.AudioContext = class extends NativeAudio {
-      constructor() { super(); window.bellContexts++; }
-      createGain() { return window.bellGain = super.createGain(); }
-    };
     elevatorCars[0].floor = 17; showCabin(0);
+    window.sharedAudio = gameAudioContext;
   });
-  await page.locator('#cabin-alarm').click(); assert.equal(await page.evaluate(() => window.bellContexts), 0);
+  await page.locator('#cabin-alarm').click();
+  assert(await page.evaluate(() => ![...gameAudioEffects].some(effect => effect.name === 'elevator-alarm') && gameAudioAppliedVolume === 0));
   await page.evaluate(() => { gameVolume = .5; }); await page.locator('#cabin-alarm').click();
-  assert(Math.abs(await page.evaluate(() => window.bellGain.gain.value) - .04) < .0001);
+  assert(await page.evaluate(() => gameAudioContext === window.sharedAudio && gameAudioAppliedVolume === .5 && [...gameAudioEffects].some(effect => effect.name === 'elevator-alarm')));
   // Touch, narrow and short landscape layouts stay within the menu viewport.
   for (const viewport of [{ width: 390, height: 844 }, { width: 844, height: 390 }]) {
     await page.setViewportSize(viewport); await page.reload(); await page.clock.runFor(100);

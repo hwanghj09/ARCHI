@@ -3,16 +3,21 @@
 function updateCall() {
   if (!activeCall) return;
   const call = activeCall.ring;
+  const previousElapsed = call.elapsed;
   call.elapsed += step;
   if (call.state === 'waiting' && call.elapsed >= call.after) {
     call.state = 'ringing';
     activeCall.element.dataset.ringing = 'true';
+    playGameSound('call-ring', { x: activeCall.x });
     showStatus(call.startMessage, call.duration);
   } else if (call.state === 'ringing' && call.elapsed >= call.after + call.duration) {
     call.state = 'missed';
     activeCall.element.dataset.ringing = 'false';
     showStatus(call.missedMessage, 4000);
     activeCall = null;
+    stopGameSound('call-ring');
+  } else if (call.state === 'ringing' && Math.floor((call.elapsed - call.after) / 2200) > Math.floor((previousElapsed - call.after) / 2200)) {
+    playGameSound('call-ring', { x: activeCall.x });
   }
 }
 
@@ -32,6 +37,7 @@ function advanceSequence(door) {
     // 마지막 단계의 결과(8층 재현 벤치 출력지)는 조사 창으로 펼친다. 중간 단계는 짧은 상태 문구다.
     if (order === steps) {
       collectedItems.add(gives);
+      if (order !== progress) playGameSound('pickup');
       openInspection(door.name, door.message, door);
     } else showStatus(door.message, 5000);
     return;
@@ -53,6 +59,7 @@ function openTimedBarrier(button) {
   Composite.remove(engine.world, barrier.solid);
   currentTerrain = currentTerrain.filter(solid => solid !== barrier.solid);
   barrier.parked = barrier.solid;
+  playGameSound('door', { x: barrier.x });
   barrier.solid = null;
   barrier.element.dataset.open = 'true';
   timedBarriers.push(barrier);
@@ -65,6 +72,7 @@ function updateTimedBarriers() {
     Composite.add(engine.world, barrier.parked);
     currentTerrain = [...currentTerrain, barrier.parked];
     barrier.solid = barrier.parked;
+    playGameSound('door', { x: barrier.x });
     barrier.parked = null;
     barrier.element.dataset.open = 'false';
     timedBarriers.splice(timedBarriers.indexOf(barrier), 1);

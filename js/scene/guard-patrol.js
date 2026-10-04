@@ -15,6 +15,7 @@ function releaseGuardCapture() {
 }
 
 function catchPlayer() {
+  playGameSound('robot-grab', { x: guardPatrol.x });
   const robot = guardPatrol;
   playerCaught = true;
   robot.mode = 'grab'; robot.captureTime = 0;
@@ -87,6 +88,7 @@ function updateGuardPatrol(delta) {
     const seesPlayer = sameLevel && (Math.abs(dx) < 65 || (dx * robot.facing > 0 && Math.abs(dx) < 360));
     if (robot.mode === 'patrol' && seesPlayer) {
       robot.mode = 'chase'; robot.lostTime = 0;
+      playGameSound('robot-alert', { x: robot.x });
       showStatus('경비 로봇이 수호를 감지했다. 거리를 벌려야 한다.', 2400);
     }
     if (robot.mode === 'chase') {

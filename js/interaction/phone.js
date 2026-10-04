@@ -67,6 +67,7 @@ function togglePhone() {
   if (usingPhone) return closePhone();
   if (phoneDock) return showStatus(`${phoneDockLocation()} 충전함에 휴대폰을 두었다. 그 충전함 앞에서 E로 가져오자.`, 4000);
   usingPhone = true;
+  playGameSound('phone');
   phoneTime = 0;
   phoneAwayTime = 0;
   phonePanel.hidden = false;
@@ -94,6 +95,7 @@ function togglePhoneLight() {
   if (phoneDock) return showStatus(`${phoneDockLocation()} 충전함에 휴대폰을 두어 플래시를 사용할 수 없다.`, 4000);
   if (!phoneLightOn && phoneBattery <= 0) return showStatus('휴대폰 배터리가 없습니다.');
   phoneLightOn = !phoneLightOn;
+  playGameSound('phone');
   phoneAwayTime = !phoneLightOn && !usingPhone ? 360 : 0;
   if (usingPhone || Math.abs(body.velocity.x) < .01) animate(0);
   refreshPhone();
@@ -102,6 +104,7 @@ function togglePhoneLight() {
 
 function chargePhone(door) {
   if (isPhoneDock(door)) {
+    playGameSound('pickup');
     phoneDock = null;
     phoneChargeAccumulator = 0;
     phoneDrainAccumulator = 0;
@@ -116,6 +119,7 @@ function chargePhone(door) {
     return;
   }
   phoneDock = { floor: currentSceneFloor, x: door.x };
+  playGameSound('charger');
   phoneLightOn = false;
   phoneAwayTime = 0;
   phoneChargeAccumulator = 0;

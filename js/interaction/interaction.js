@@ -119,6 +119,7 @@ function interact() {
       nearbyDoor.ring.state = 'answered';
       nearbyDoor.element.dataset.ringing = 'false';
       activeCall = null;
+      stopGameSound('call-ring');
     }
     // 어두운 방에서는 darkMessage가 있는 소품을 읽을 수 없다.
     const unreadable = world.dataset.dark === 'true' && nearbyDoor.darkMessage;
@@ -138,7 +139,10 @@ function interact() {
     openInspection(nearbyDoor.name, inspectionMessage, writingSheetFor(nearbyDoor, inspectionMessage));
     if (missing) return;
     const alreadyCollected = gives && collectedItems.has(gives);
-    if (gives) collectedItems.add(gives);
+    if (gives) {
+      collectedItems.add(gives);
+      if (!alreadyCollected) playGameSound('pickup');
+    }
     if (gives) refreshReady();
     if (gives) refreshInventoryCount();
     if (gives && room === 'dynamic' && floorById.get(dynamicFloorId).litBy === gives) world.dataset.dark = 'false';
@@ -163,6 +167,7 @@ function interact() {
     // 방 안에서 복도 문으로 나오면 그 방 id를 챙긴 것으로 친다: 안쪽 걸쇠로 잠긴 방(unlockedBy: 자기 방 id)은
     // 한 번 안에서 열고 나오면 그 뒤로 복도에서도 열린다.
     if (nearbyDoor.key === 'exit') collectedItems.add(dynamicFloorId);
+    playGameSound('door');
     changeRoom(() => performFloorChange(target, null, arrivalKey));
     return;
   }
@@ -177,10 +182,12 @@ function interact() {
       showStatus('옥상 배경을 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.');
       return;
     }
+    playGameSound('door');
     changeRoom(() => performFloorChange(destId, null));
     return;
   }
   if (nearbyDoor.type === 'office') {
+    playGameSound('door');
     changeRoom();
     return;
   }
@@ -207,6 +214,7 @@ function interact() {
     car.destination = currentSceneFloor;
     car.elapsed = 0;
     car.open = false;
+    playGameSound('switch');
     updateFloorIndicator(nearbyDoor);
     showStatus(`${nearbyDoor.name}를 호출했습니다.`);
     updateInteraction();
@@ -216,6 +224,7 @@ function interact() {
   facing = body.position.x <= nearbyDoor.x + nearbyDoor.width / 2 ? 1 : -1;
   animate(0);
   const open = nearbyDoor.element.dataset.open !== 'true';
+  playGameSound('door');
   setDoorOpen(nearbyDoor, open);
   showStatus(`${nearbyDoor.name} 문을 ${open ? '열었습니다' : '닫았습니다'}.`);
   updateInteraction();

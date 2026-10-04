@@ -38,6 +38,7 @@ function updateOpening(elapsed) {
   if (world.dataset.opening !== phase) {
     world.dataset.opening = phase;
     if (phase === 'shutdown') {
+      playGameSound('switch');
       setOfficeComputerPower('shutting-down');
       openingCaption.textContent = '작업을 저장하고 컴퓨터를 종료했다.';
     }

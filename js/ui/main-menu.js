@@ -11,6 +11,7 @@ let menuReturnButton = menuStart;
 
 function applyMenuSettings() {
   gameVolume = Number(menuVolume.value) / 100;
+  refreshGameAudioVolume();
   document.documentElement.style.setProperty('--scene-brightness', Number(menuBrightness.value) / 100);
   document.getElementById('menu-volume-value').value = `${menuVolume.value}%`;
   document.getElementById('menu-brightness-value').value = `${menuBrightness.value}%`;
@@ -24,6 +25,7 @@ try {
 applyMenuSettings();
 
 function showMainMenu() {
+  pauseGameAudio();
   mainMenu.inert = false;
   mainMenu.hidden = false;
   menuBlocked = [...document.body.children].filter(el => el !== mainMenu && el.tagName !== 'SCRIPT' && !el.inert);

@@ -43,6 +43,7 @@ function updateBlackoutScene(elapsed) {
   const light = dim ? 'off' : 'on';
   if (world.dataset.powerFlicker !== light) {
     world.dataset.powerFlicker = light;
+    if (light === 'off') playGameSound('switch');
     refreshBackgroundPower();
   }
   if (phase === 'shock') triggerBuildingBlackout();
