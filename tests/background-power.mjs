@@ -14,6 +14,8 @@ try {
   const errors = [];
   page.on('pageerror', error => errors.push(error.message));
   await page.goto(new URL('../index.html', import.meta.url).href);
+  await page.locator('#menu-start').click();
+  if (await page.locator('#menu-new-confirm').isVisible()) await page.locator('#menu-new-confirm').click();
   await page.locator('#opening-skip').click();
   const decode = () => page.locator('img[data-lit-src]').evaluateAll(imgs => Promise.all(imgs.map(img => img.decode())));
   const check = off => page.locator('img[data-lit-src]').evaluateAll((imgs, off) =>

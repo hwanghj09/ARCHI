@@ -12,6 +12,8 @@ try {
   page.on('requestfailed', request => errors.push(request.url()));
   await page.clock.install();
   await page.goto(new URL('../index.html', import.meta.url).href);
+  await page.locator('#menu-start').click();
+  if (await page.locator('#menu-new-confirm').isVisible()) await page.locator('#menu-new-confirm').click();
   await page.locator('#opening-skip').click();
   await page.clock.pauseAt(new Date(Date.now() + 1000));
   await page.clock.runFor(100);
@@ -95,6 +97,8 @@ try {
   await page.keyboard.press('e');
   assert(await pc.isHidden(), 'A distant computer cannot be used');
   await page.reload();
+  await page.locator('#menu-start').click();
+  if (await page.locator('#menu-new-confirm').isVisible()) await page.locator('#menu-new-confirm').click();
   await page.locator('#opening-skip').click();
   await page.clock.runFor(100);
   await page.keyboard.press('Space');
@@ -117,7 +121,7 @@ try {
   assert.equal(await documentScroll.evaluate(el => el.scrollTop), 0, 'Opening another document resets reading position');
   await page.screenshot({ path: '.local/computer-company-document-mobile.png' });
   await pc.locator('.computer-shortcuts [data-computer-app="notes"]').click();
-  assert.equal(await note.inputValue(), saved, 'Saved memo survives page reload');
+  assert.equal(await note.inputValue(), '', 'Starting a new game clears the previous playthrough memo');
   await page.screenshot({ path: '.local/computer-mobile-notes.png' });
   const bounds = await app.boundingBox();
   assert(bounds.x >= 0 && bounds.x + bounds.width <= 390 && bounds.y + bounds.height <= 844);

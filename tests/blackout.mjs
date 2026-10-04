@@ -12,6 +12,8 @@ try {
     page.on('pageerror', error => errors.push(error.message));
     await page.clock.install({ time: new Date('2026-10-03T00:00:00Z') });
     await page.goto(new URL('../index.html', import.meta.url).href);
+    await page.locator('#menu-start').click();
+    if (await page.locator('#menu-new-confirm').isVisible()) await page.locator('#menu-new-confirm').click();
     await page.clock.pauseAt(new Date('2026-10-03T00:01:00Z'));
     const state = () => page.evaluate(() => ({ blackout: buildingBlackout, powered: world.dataset.powered,
       lights: world.dataset.backgroundLights, called: elevatorCars.some(car => car.travelling) }));

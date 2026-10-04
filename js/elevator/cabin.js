@@ -174,11 +174,11 @@ document.getElementById('cabin-alarm').addEventListener('click', () => {
   if (transitioning) return;
   cabinStatus.textContent = '비상벨 작동';
   const AudioContext = window.AudioContext || window.webkitAudioContext;
-  if (!AudioContext) return;
+  if (!AudioContext || gameVolume === 0) return;
   const audio = new AudioContext();
   const oscillator = audio.createOscillator();
   const gain = audio.createGain();
-  gain.gain.value = .08;
+  gain.gain.value = .08 * gameVolume;
   oscillator.frequency.value = 880;
   oscillator.connect(gain).connect(audio.destination);
   oscillator.start();

@@ -10,6 +10,8 @@ try {
     const errors = [];
     page.on('pageerror', error => errors.push(error.message));
     await page.goto(new URL('../index.html', import.meta.url).href);
+    await page.locator('#menu-start').click();
+    if (await page.locator('#menu-new-confirm').isVisible()) await page.locator('#menu-new-confirm').click();
     await page.locator('#opening-skip').click();
     await page.evaluate(() => {
       triggerBuildingBlackout(); performFloorChange('rooftop', null);

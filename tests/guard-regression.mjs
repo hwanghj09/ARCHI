@@ -16,6 +16,8 @@ try {
   });
   await page.clock.install({ time: new Date('2026-10-04T00:00:00Z') });
   await page.goto(new URL('../index.html', import.meta.url).href);
+  await page.locator('#menu-start').click();
+  if (await page.locator('#menu-new-confirm').isVisible()) await page.locator('#menu-new-confirm').click();
   await page.locator('#opening-skip').click();
   await page.clock.pauseAt(new Date('2026-10-04T00:01:00Z'));
   const reset = (options = {}) => page.evaluate(options => {

@@ -10,6 +10,8 @@ try {
   page.on('pageerror', error => errors.push(error.message));
   await page.clock.install({ time: new Date('2026-10-03T00:00:00Z') });
   await page.goto(new URL('../index.html', import.meta.url).href);
+  await page.locator('#menu-start').click();
+  if (await page.locator('#menu-new-confirm').isVisible()) await page.locator('#menu-new-confirm').click();
   await page.clock.pauseAt(new Date('2026-10-03T00:01:00Z'));
   await page.clock.runFor(100);
   const status = () => page.evaluate(() => ({ active: openingActive, ready: openingReady, phase: world.dataset.opening,
@@ -67,6 +69,8 @@ try {
   await page.evaluate(() => { performRoomChange(); performRoomChange(); });
   assert(await page.locator('#opening').isHidden(), 'Re-entering office does not replay the opening');
   await page.reload();
+  await page.locator('#menu-start').click();
+  if (await page.locator('#menu-new-confirm').isVisible()) await page.locator('#menu-new-confirm').click();
   await page.keyboard.press('Escape');
   assert.equal((await status()).active, false); assert.equal((await status()).power, 'off');
   assert.equal((await status()).x, 656, 'Skip uses the same completed state');
@@ -75,7 +79,9 @@ try {
 
   await page.setViewportSize({ width: 390, height: 844 });
   await page.emulateMedia({ reducedMotion: 'reduce' });
-  await page.reload(); await page.clock.runFor(100);
+  await page.reload();
+  await page.locator('#menu-start').click();
+  if (await page.locator('#menu-new-confirm').isVisible()) await page.locator('#menu-new-confirm').click(); await page.clock.runFor(100);
   await page.screenshot({ path: '.local/opening-mobile-back.png' });
   const skip = await page.locator('#opening-skip').boundingBox();
   assert(skip.x >= 0 && skip.x + skip.width <= 390 && skip.height >= 44);
@@ -83,6 +89,8 @@ try {
   assert.equal((await status()).active, false); assert.equal((await status()).blocked, false);
   await page.route('**/jeong-suho-opening.png', route => route.abort());
   await page.reload();
+  await page.locator('#menu-start').click();
+  if (await page.locator('#menu-new-confirm').isVisible()) await page.locator('#menu-new-confirm').click();
   await page.waitForFunction(() => !openingActive, null, { polling: 50 });
   assert.equal((await status()).blocked, false, 'Missing artwork cannot trap gameplay');
   assert.deepEqual(errors, []);

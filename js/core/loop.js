@@ -3,6 +3,7 @@ let previousTime = null;
 let accumulator = 0;
 
 function update() {
+  if (mainMenuActive) return;
   updatePhoneCharging(step);
   updateSanity(step);
   if (openingActive) { updateOpening(step); return; }

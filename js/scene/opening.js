@@ -51,7 +51,7 @@ function updateOpening(elapsed) {
 }
 
 function finishOpening() {
-  if (!openingActive) return;
+  if (mainMenuActive || !openingActive) return;
   openingActive = false;
   delete world.dataset.opening;
   opening.hidden = true;

@@ -12,6 +12,8 @@ try {
   page.on('pageerror', error => errors.push(error.message));
   await page.clock.install();
   await page.goto(new URL('../index.html', import.meta.url).href);
+  await page.locator('#menu-start').click();
+  if (await page.locator('#menu-new-confirm').isVisible()) await page.locator('#menu-new-confirm').click();
   await page.locator('#opening-skip').click();
   await page.clock.pauseAt(new Date(Date.now() + 1000));
   await page.clock.runFor(100);

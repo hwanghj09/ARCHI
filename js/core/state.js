@@ -17,6 +17,9 @@ const timedBarriers = [];
 
 // 조작을 막는 모드: 장면 전환 중, 엘리베이터 안, 컴퓨터 사용 중, 키패드 입력 중.
 let transitioning = false;
+let mainMenuActive = true;
+let gameStarted = false;
+let gameVolume = .7;
 let openingActive = true;
 let blackoutSceneActive = false;
 let playerCaught = false;
