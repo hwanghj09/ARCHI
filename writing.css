@@ -183,6 +183,14 @@
   display: grid; grid-template-columns: minmax(0, 1.75fr) minmax(0, 1fr); gap: clamp(14px, 2.6cqw, 36px); align-items: start;
 }
 .writing-board[data-layout="pinned"] .writing-pinned { flex-flow: row wrap; justify-content: center; align-items: flex-start; }
+/* 붙임종이가 많은 판도 왼쪽·오른쪽 묶음을 유지하며 가로 공간을 쓴다. */
+.writing-board[data-pins="many"] { padding: 16px 20px; gap: 20px; }
+.writing-board[data-pins="many"][data-layout="split"] { grid-template-columns: minmax(0, var(--main-ratio)) minmax(0, 1fr); }
+.writing-board[data-pins="many"] .writing-main { display: grid; grid-template-columns: repeat(var(--pin-columns), minmax(0, 1fr)); gap: 12px; align-items: start; }
+.writing-board[data-pins="many"] .writing-main > :not(.writing-note, .writing-paper) { grid-column: 1 / -1; margin-bottom: 0; }
+.writing-board[data-pins="many"] .writing-pinned { display: grid; grid-template-columns: repeat(var(--pin-columns), minmax(0, 1fr)); gap: 12px; padding-top: 0; }
+.writing-board[data-pins="many"] :is(.writing-note, .writing-paper) { width: 100%; min-height: 0; margin: 0; }
+.writing-board[data-pins="many"] .writing-note { padding: .75em .7em .6em; }
 .writing-sheet[data-surface="whiteboard"] .writing-board {
   background:
     linear-gradient(#272d32, #272d32) left top / var(--cap) var(--cap) no-repeat border-box,
@@ -288,6 +296,9 @@
 .writing-page { break-before: column; }
 @container writing (max-width: 560px) {
   .writing-board[data-layout="split"] { grid-template-columns: minmax(0, 1fr); }
+  .writing-board[data-pins="many"][data-layout="split"] { grid-template-columns: minmax(0, 1fr); }
+  .writing-board[data-pins="many"] .writing-main { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .writing-board[data-pins="many"] .writing-pinned { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .writing-pinned { flex-flow: row wrap; justify-content: center; align-items: flex-start; }
   .writing-note, .writing-paper { width: min(100%, 230px); }
   .writing-book {
@@ -313,7 +324,7 @@
 }
 
 .writing-caption {
-  box-sizing: border-box; width: fit-content; max-width: min(100%, 46em); margin: 14px auto 0; padding: 9px 16px;
+  box-sizing: border-box; margin: 14px 0 0; padding: 9px 16px; text-align: left;
   border: 1px solid #3f4c4d; border-left: 3px solid #b9a77a; background: #0b1215f2; color: #e9e4d6;
   font: 15px/1.7 var(--print); white-space: pre-line;
 }

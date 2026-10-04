@@ -17,7 +17,10 @@ try {
   await page.clock.pauseAt(new Date('2026-09-19T00:01:00Z'));
   await page.clock.runFor(100);
   await reachInitialCorridor(page);
+  // This suite checks powered movement; outage and recovery have their own regression routes.
+  await page.evaluate(() => triggerBuildingBlackout());
   await page.locator('#power-lever').dispatchEvent('click');
+  await page.locator('#power-floor-grid [data-floor="17"]').dispatchEvent('click');
   const state = () => page.locator('#player').evaluate(el => {
     const player = new DOMMatrix(getComputedStyle(el).transform);
     const world = new DOMMatrix(getComputedStyle(el.parentElement).transform);

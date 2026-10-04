@@ -39,7 +39,7 @@ try {
   assert.equal(await position(), initialPosition, 'Desktop keyboard input cannot move the player');
   await pc.locator('.computer-shortcuts [data-computer-app="files"]').click();
   const records = pc.locator('[data-computer-document]');
-  assert.equal(await records.count(), 8);
+  assert.equal(await records.count(), 9);
   assert.equal(await pc.locator('[data-computer-card], #computer-card').count(), 0);
   assert.equal(await pc.getByText(/사원증/).count(), 0, 'Employee badges are not available on the PC');
   await page.screenshot({ path: '.local/computer-company-files.png' });
@@ -54,7 +54,15 @@ try {
     if (documentId === 'weekly-report') await page.screenshot({ path: '.local/computer-company-report.png' });
     await pc.getByRole('button', { name: '파일 목록으로' }).click();
   }
-  assert.equal(titles.size, 8, 'Each company record opens its own contents');
+  assert.equal(titles.size, 9, 'Each company record opens its own contents');
+  await pc.getByRole('combobox', { name: '문서 분류' }).selectOption('안내');
+  assert.equal(await pc.locator('[data-computer-document]:visible').count(), 1);
+  await pc.locator('[data-computer-document="controls"]').click();
+  assert.equal(await page.locator('#computer-document-title').textContent(), '조작 키 안내');
+  await page.keyboard.press('Escape');
+  assert(await app.isHidden(), 'Escape closes the document app and keeps the computer desktop open');
+  assert(await pc.isVisible());
+  await pc.locator('.computer-shortcuts [data-computer-app="files"]').click();
   await pc.getByRole('combobox', { name: '문서 분류' }).selectOption('프로젝트');
   assert.equal(await pc.locator('[data-computer-document]:visible').count(), 3);
   await pc.getByRole('searchbox', { name: '문서 검색' }).fill('조현아');
@@ -117,6 +125,9 @@ try {
   await documentScroll.evaluate(el => { el.scrollTop = el.scrollHeight; });
   assert(await documentScroll.evaluate(el => el.scrollTop > 0), 'Long documents can scroll to the final section');
   await pc.getByRole('button', { name: '파일 목록으로' }).click();
+  await pc.locator('[data-computer-document="controls"]').click();
+  assert(await documentScroll.evaluate(el => el.scrollWidth <= el.clientWidth + 1), 'The controls document fits mobile width');
+  await pc.getByRole('button', { name: '파일 목록으로' }).click();
   await pc.locator('[data-computer-document="organization"]').click();
   assert.equal(await documentScroll.evaluate(el => el.scrollTop), 0, 'Opening another document resets reading position');
   await page.screenshot({ path: '.local/computer-company-document-mobile.png' });
@@ -142,7 +153,7 @@ try {
   const landscape = await app.boundingBox();
   assert(landscape.width > 200 && landscape.height > 150);
   assert.deepEqual(errors, []);
-  console.log('PASS: computer proximity, fades, eight company documents, search, filters, no badges, mobile reading, memo persistence and input isolation.');
+  console.log('PASS: computer proximity, fades, nine company documents, search, filters, no badges, mobile reading, memo persistence and input isolation.');
 } finally {
   await browser.close();
 }

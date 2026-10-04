@@ -130,6 +130,14 @@ function writingBoard(writing) {
   });
   board.dataset.layout = main.childElementCount && pinned.childElementCount ? 'split' :
     pinned.childElementCount ? 'pinned' : 'main';
+  // ponytail: 종이 수로 열을 정한다. 긴 내용이 늘면 표면별 배치를 지정한다.
+  const mainPins = main.querySelectorAll('.writing-note, .writing-paper').length;
+  if (mainPins > 3 || pinned.childElementCount > 3) {
+    board.dataset.pins = 'many';
+    board.style.setProperty('--main-ratio', pinned.childElementCount > 6 ? '.5fr' : '1.75fr');
+    main.style.setProperty('--pin-columns', mainPins > 3 ? 3 : 2);
+    pinned.style.setProperty('--pin-columns', pinned.childElementCount > 6 ? 3 : 2);
+  }
   if (main.childElementCount) board.append(main);
   if (pinned.childElementCount) board.append(pinned);
   return board;

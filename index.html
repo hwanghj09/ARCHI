@@ -793,7 +793,7 @@
       #phone-battery-track { height: 12px; margin: 8px 0 18px; border: 1px solid #89989a; background: #111; }
       #phone-battery-fill { display: block; height: 100%; width: 100%; background: #8fe06a; }
       .dialog-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 14px; }
-      #inspection { top: auto; bottom: max(100px, calc(env(safe-area-inset-bottom) + 84px)); width: min(1040px, calc(100vw - 32px)); max-height: calc(100dvh - 140px); padding: 16px 24px 12px; border: 24px solid #77857c; border-image: url('assets/ui/dialogue-frame.png') 110 fill / 24px stretch; border-radius: 0; background: #10181c; background-clip: padding-box; color: #f0eee4; transform: translateX(-50%); box-shadow: 0 12px 36px #0009; }
+      #inspection { z-index: 12; top: auto; bottom: max(100px, calc(env(safe-area-inset-bottom) + 84px)); width: min(1040px, calc(100vw - 32px)); max-height: calc(100dvh - 140px); padding: 16px 24px 12px; border: 24px solid #77857c; border-image: url('assets/ui/dialogue-frame.png') 110 fill / 24px stretch; border-radius: 0; background: #10181c; background-clip: padding-box; color: #f0eee4; transform: translateX(-50%); box-shadow: 0 12px 36px #0009; }
       #inspection:not([hidden]) { display: flex; flex-direction: column; }
       #inspection .inspection-heading { display: flex; align-items: center; gap: 14px; margin-bottom: 14px; }
       #inspection .inspection-label { flex-shrink: 0; color: #9cae9f; font-size: 11px; letter-spacing: .18em; }
@@ -1063,7 +1063,7 @@
           <p class="computer-path">내 컴퓨터 / 사내 공유 / ARCHI</p>
           <div class="computer-file-filters">
             <label>검색<input id="computer-search" type="search" aria-label="문서 검색" /></label>
-            <label>분류<select id="computer-category" aria-label="문서 분류"><option value="">전체 자료</option><option>회사·조직</option><option>프로젝트</option><option>시설·보안</option></select></label>
+            <label>분류<select id="computer-category" aria-label="문서 분류"><option value="">전체 자료</option><option>안내</option><option>회사·조직</option><option>프로젝트</option><option>시설·보안</option></select></label>
           </div>
           <p id="computer-file-count" role="status" aria-live="polite"></p>
           <div id="computer-file-list"></div>

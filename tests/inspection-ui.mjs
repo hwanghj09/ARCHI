@@ -38,6 +38,10 @@ try {
   });
   assert.equal(await page.locator('#inspection-title').textContent(), '카페 테이블');
   assert.equal(await page.locator('#inspection').getAttribute('data-surface'), 'card', 'First inspection displays the ID card');
+  assert(await page.locator('#inspection').evaluate(panel => {
+    const layer = Number(getComputedStyle(panel).zIndex);
+    return ['sanity-hud', 'game-menu-button'].every(id => layer > Number(getComputedStyle(document.getElementById(id)).zIndex));
+  }), 'Gameplay HUD and menu stay behind the inspection content');
   await page.keyboard.press('Escape');
   await page.keyboard.press('e');
   assert(await page.locator('#inspection-sheet').isHidden(), 'Reinspection uses the plain dialogue');

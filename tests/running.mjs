@@ -16,6 +16,10 @@ try {
   await page.locator('#opening-skip').click();
   await page.clock.pauseAt(new Date('2026-09-21T00:01:00Z'));
   await reachInitialCorridor(page);
+  // Keep the sprint route playable; blackout input locking is covered separately.
+  await page.evaluate(() => triggerBuildingBlackout());
+  await page.locator('#power-lever').dispatchEvent('click');
+  await page.locator('#power-floor-grid [data-floor="17"]').dispatchEvent('click');
   await page.locator('#run-sheet').evaluate(img => img.decode());
   const state = () => page.locator('#player').evaluate(el => {
     const transform = new DOMMatrix(getComputedStyle(el).transform);

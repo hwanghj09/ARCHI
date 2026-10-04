@@ -87,7 +87,26 @@ try {
     assertMirroredDoor(front.room, front.door, await worldWidth(page), door, name);
     return door.x + door.width / 2;
   };
+  // Collect the team card and authenticate the floor before walking through its gates.
+  await page.evaluate(() => {
+    performFloorChange('f16-cafe', null, 'exit');
+    Body.setPosition(body, { x: 950, y: floorY - 81 });
+    Body.setVelocity(body, { x: 0, y: 0 }); grounded = true;
+    updateInteraction(); render();
+  });
+  await page.keyboard.press('e');
+  assert.match(await interactionMessage(page), /조현아/);
+  assert(await page.evaluate(() => collectedItems.has('f16-badge')));
   await jumpFloor('f15');
+  await page.evaluate(() => {
+    Body.setPosition(body, { x: 1826, y: floorY - 81 });
+    Body.setVelocity(body, { x: 0, y: 0 }); grounded = true;
+    updateInteraction(); render();
+  });
+  await page.keyboard.press('e');
+  assert.match(await interactionMessage(page), /조현아 팀장 사원증 인증 완료/);
+  await page.clock.runFor(500);
+  assert.equal(await page.locator('.access-gate[data-open="true"]').count(), 2);
   assert((await checkArt()).some(p => p.file === 'research-news-board.png'));
   await use(4730);
   assert.match(await interactionMessage(page), /야간 사용 권한/);

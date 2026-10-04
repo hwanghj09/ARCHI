@@ -93,7 +93,10 @@ try {
   assert.equal(await page.locator('.barrier.shutter').getAttribute('data-open'), 'true');
 
   await visit('f16-cafe'); await checkFrame('음성 주문 키오스크', 0);
-  await page.evaluate(() => { solarPoweredFloor = 16; updatePowerState(); });
+  await page.evaluate(() => {
+    powerLever.click();
+    powerGrid.querySelector('[data-floor="16"]').click();
+  });
   await checkFrame('음성 주문 키오스크', 1);
   await page.evaluate(() => {
     Body.setPosition(body, { x: 1400, y: floorY - 81 });
