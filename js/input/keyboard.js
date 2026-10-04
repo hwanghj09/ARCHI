@@ -22,14 +22,21 @@ window.addEventListener('keydown', event => {
     toggleInventory();
     return;
   }
-  if (event.code === 'KeyP' && !event.repeat && !selectingFloor && !usingComputer && !usingKeypad && !usingPowerPanel && !usingInspection) {
+  if (event.code === 'KeyP' && !event.repeat && !usingPhone && !selectingFloor && !usingComputer && !usingKeypad && !usingPowerPanel && !usingInspection) {
     event.preventDefault();
     togglePhone();
     return;
   }
   if (usingPhone) {
+    if (event.code === 'Escape') {
+      event.preventDefault();
+      if (!event.repeat) { if (phoneAppWindow.hidden) closePhone(); else closePhoneApp(); }
+      return;
+    }
+    // 앱에서 글을 쓰거나 층을 고를 때 P/F와 방향키도 해당 입력으로 전달한다.
+    if (event.target.closest('textarea, input, select')) return;
     if (event.code === 'Tab' || (['Enter', 'Space'].includes(event.code) && event.target.closest('#phone button'))) return;
-    if (event.code === 'Escape') closePhone();
+    if (event.code === 'KeyP' && !event.repeat) closePhone();
     if (event.code === 'KeyF' && !event.repeat) togglePhoneLight();
     event.preventDefault();
     return;

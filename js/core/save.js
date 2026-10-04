@@ -164,8 +164,15 @@ function restoreProgress(data) {
 
 function startNewGame() {
   restoreProgress({ version: 1, scene: { id: 'office', x: 656, y: floorY - 81, facing: 1 }, items: [] });
-  try { localStorage.removeItem('archi.office17.note'); } catch { /* 새 게임은 저장소가 없어도 실행한다. */ }
+  try {
+    localStorage.removeItem('archi.office17.note');
+    localStorage.removeItem('archi.phone.note');
+  } catch { /* 새 게임은 저장소가 없어도 실행한다. */ }
   computerNote.value = '';
+  computerSaveStatus.textContent = '저장됨';
+  phoneNote.value = ''; savedPhoneNote = '';
+  phoneNoteStatus.textContent = '필요한 단서를 적고 저장하세요.';
+  computerMailRead.clear(); showComputerMailInbox();
   openingActive = true;
   openingElapsed = 0; openingReady = false;
   world.dataset.opening = 'loading';

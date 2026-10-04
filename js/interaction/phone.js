@@ -1,12 +1,56 @@
-// 휴대폰(P): UI를 열어 배터리를 확인하고 F 또는 버튼으로 라이트를 켠다.
+// 휴대폰(P): 플래시와 개인 메모·계산기·건물 안내 앱을 사용한다.
 const phonePanel = document.getElementById('phone');
 const phoneBatteryOutput = document.getElementById('phone-battery');
 const phoneBatteryFill = document.getElementById('phone-battery-fill');
 const phoneLightButton = document.getElementById('phone-light');
 const phoneButton = document.getElementById('phone-button');
+const phoneAppWindow = document.getElementById('phone-app-window');
+const phoneNote = document.getElementById('phone-note');
+const phoneNoteStatus = document.getElementById('phone-note-status');
+let currentPhoneApp = null;
+let savedPhoneNote = '';
 let phoneDrainAccumulator = 0;
 let phoneChargeAccumulator = 0;
 let phoneBlocked = [];
+
+function loadPhoneNote() {
+  try {
+    savedPhoneNote = (localStorage.getItem('archi.phone.note') || '').slice(0, 4000);
+    phoneNoteStatus.textContent = savedPhoneNote ? '저장한 메모를 불러왔습니다.' : '필요한 단서를 적고 저장하세요.';
+  } catch {
+    phoneNoteStatus.textContent = '저장소에 접근할 수 없습니다. 메모는 이 화면에 남아 있습니다.';
+    return;
+  }
+  phoneNote.value = savedPhoneNote;
+}
+
+function openPhoneApp(app) {
+  if (!usingPhone || phoneDock || phoneBattery <= 0) return;
+  const view = [...phoneAppWindow.querySelectorAll('[data-phone-view]')].find(element => element.dataset.phoneView === app);
+  if (!view) return;
+  currentPhoneApp = app;
+  document.getElementById('phone-app-title').textContent = { notes: '개인 메모', calculator: '계산기', building: '건물 안내' }[app];
+  phonePanel.querySelector('.phone-owner').hidden = true;
+  phonePanel.querySelector('.phone-controls').hidden = true;
+  for (const element of phoneAppWindow.querySelectorAll('[data-phone-view]')) element.hidden = element !== view;
+  phoneAppWindow.hidden = false;
+  phonePanel.querySelector('.phone-screen').scrollTop = 0;
+  if (app === 'building') refreshBuildingGuides();
+  playGameSound('phone');
+  (app === 'notes' ? phoneNote : app === 'calculator' ? view.querySelector('[data-calculator-key]') : document.getElementById('phone-app-back')).focus();
+}
+
+function closePhoneApp(focus = true) {
+  const previousApp = currentPhoneApp;
+  currentPhoneApp = null;
+  phoneAppWindow.hidden = true;
+  phonePanel.querySelector('.phone-owner').hidden = false;
+  phonePanel.querySelector('.phone-controls').hidden = false;
+  if (focus && usingPhone) {
+    const button = phonePanel.querySelector(`[data-phone-app="${previousApp}"]`);
+    (phoneBattery > 0 ? button || phoneLightButton : document.getElementById('phone-close')).focus();
+  }
+}
 
 function phoneDockLocation() {
   return phoneDock.floor === 18 ? '옥상' : phoneDock.floor < 0 ? `지하 ${-phoneDock.floor}층` : `${phoneDock.floor}층`;
@@ -50,6 +94,8 @@ function refreshPhone() {
   phoneBatteryFill.style.width = `${percent}%`;
   phoneBatteryFill.style.background = percent <= 20 ? '#e27b68' : '#8fe06a';
   phoneLightButton.disabled = percent === 0 || Boolean(phoneDock);
+  for (const button of phonePanel.querySelectorAll('[data-phone-app]')) button.disabled = percent === 0 || Boolean(phoneDock);
+  if (percent === 0 && currentPhoneApp) closePhoneApp();
   phoneLightButton.setAttribute('aria-pressed', String(phoneLightOn));
   phoneLightButton.setAttribute('aria-label', phoneLightOn ? '플래시 끄기' : '플래시 켜기');
   document.getElementById('phone-light-state').textContent = phoneLightOn ? '켜짐' : '꺼짐';
@@ -71,6 +117,7 @@ function togglePhone() {
   phoneTime = 0;
   phoneAwayTime = 0;
   phonePanel.hidden = false;
+  closePhoneApp(false);
   releaseInput();
   animate(0);
   refreshPhone();
@@ -82,6 +129,7 @@ function togglePhone() {
 function closePhone() {
   if (!usingPhone) return;
   usingPhone = false;
+  closePhoneApp(false);
   phoneAwayTime = phoneLightOn ? 0 : 360;
   phonePanel.hidden = true;
   for (const element of phoneBlocked) element.inert = false;
@@ -155,3 +203,35 @@ function updatePhone(elapsed) {
 
 phoneLightButton.addEventListener('click', togglePhoneLight);
 document.getElementById('phone-close').addEventListener('click', closePhone);
+for (const button of phonePanel.querySelectorAll('[data-phone-app]')) {
+  button.addEventListener('click', () => openPhoneApp(button.dataset.phoneApp));
+}
+document.getElementById('phone-app-back').addEventListener('click', () => {
+  playGameSound('phone');
+  closePhoneApp();
+});
+phoneNote.addEventListener('input', () => {
+  phoneNoteStatus.textContent = phoneNote.value === savedPhoneNote ? '저장된 메모입니다.' : '저장하지 않은 메모가 있습니다.';
+});
+document.getElementById('phone-note-save').addEventListener('click', () => {
+  try {
+    localStorage.setItem('archi.phone.note', phoneNote.value);
+    savedPhoneNote = phoneNote.value;
+    phoneNoteStatus.textContent = '메모를 저장했습니다.';
+    playGameSound('ui');
+  } catch {
+    phoneNoteStatus.textContent = '메모를 저장하지 못했습니다. 내용은 화면에 남아 있습니다.';
+  }
+});
+phonePanel.addEventListener('keydown', event => {
+  if (!usingPhone || event.key !== 'Tab') return;
+  event.stopPropagation();
+  const controls = [...phonePanel.querySelectorAll('button, input, textarea, select, [tabindex]')]
+    .filter(element => !element.disabled && element.tabIndex >= 0 && element.getClientRects().length);
+  const first = controls[0], last = controls.at(-1);
+  if (!controls.includes(document.activeElement) || event.shiftKey && document.activeElement === first || !event.shiftKey && document.activeElement === last) {
+    event.preventDefault();
+    (event.shiftKey ? last : first)?.focus();
+  }
+});
+loadPhoneNote();

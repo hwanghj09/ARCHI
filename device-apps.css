@@ -1,0 +1,30 @@
+.app-art { display: inline-block; width: 28px; height: 28px; flex-shrink: 0; background: url('assets/ui/apps/app-icons.png') 0% 49% / 600% 200% no-repeat; image-rendering: pixelated; pointer-events: none; }
+.phone-app-icon.app-art { width: 44px; height: 44px; }
+.app-art[data-app-icon="notes"] { background-position-x: 20%; }
+.app-art[data-app-icon="mail"] { background-position-x: 40%; }
+.app-art[data-app-icon="calculator"] { background-position-x: 60%; }
+.app-art[data-app-icon="building"] { background-position-x: 80%; }
+.app-art[data-app-icon="flashlight"] { background-position-x: 100%; }
+.device-calculator { width: min(100%, 360px); margin: 16px auto; padding: 16px; border-radius: 12px; background: #233246; color: #eef3f8; }
+[data-calculator-history] { display: block; min-height: 20px; overflow-wrap: anywhere; color: #b2c5d2; text-align: right; font: 12px/1.5 Arial, sans-serif; }
+.calculator-display { display: block; width: 100%; padding: 10px 2px 18px; overflow-wrap: anywhere; color: #f4f9fc; text-align: right; font: 32px/1.2 Arial, sans-serif; font-variant-numeric: tabular-nums; }
+.calculator-keys { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; }
+#computer .calculator-keys button, #phone .calculator-keys button { min-width: 0; min-height: 48px; padding: 8px 0; border: 1px solid #52627a; border-radius: 8px; background: #334459; color: #f4f9fc; font: 20px Arial, sans-serif; touch-action: manipulation; }
+#computer .calculator-keys button:nth-child(4n), #phone .calculator-keys button:nth-child(4n) { background: #a9d3c1; color: #132b26; border-color: #bfe7d7; }
+#computer .calculator-keys button:hover, #phone .calculator-keys button:hover { filter: brightness(1.15); }
+.building-guide { max-width: 640px; margin: 0 auto; padding: 24px; line-height: 1.65; overflow-wrap: anywhere; }
+.building-guide label { display: block; font-size: 12px; }
+.building-guide select { display: block; width: 100%; min-height: 44px; margin-top: 6px; padding: 8px; border: 1px solid #9cafae; border-radius: 6px; background: #fff; color: #203a36; font: 14px Arial, sans-serif; }
+.building-guide h3 { margin: 20px 0 12px; }
+[data-building-current] { margin-top: 0; font-size: 12px; }
+[data-building-power] { padding: 8px 12px; border-radius: 6px; background: #eadedb; color: #6d342a; font-weight: bold; }
+[data-building-power][data-powered="true"] { background: #d3e6d9; color: #285239; }
+.building-guide ul { padding-left: 20px; }
+#phone .device-calculator { margin: 0; padding: 10px; border-radius: 0; }
+#phone .calculator-display { padding-bottom: 12px; font-size: 24px; }
+#phone .calculator-keys { gap: 4px; }
+#phone .calculator-keys button { min-height: 44px; font-size: 17px; }
+#phone .building-guide { padding: 12px; font-size: 12px; }
+#phone .building-guide select { font-size: 12px; }
+#phone [data-building-here] { min-height: 44px; margin-top: 8px; }
+@media (max-height: 480px) { #computer .device-calculator { margin-block: 4px; padding: 10px; } #computer .calculator-display { padding-block: 4px; font-size: 24px; } }

@@ -37,6 +37,7 @@ function updatePowerState() {
   }
   if (selectingFloor) refreshCabin();
   refreshPhone();
+  if (typeof refreshBuildingGuides === 'function') refreshBuildingGuides();
 }
 
 function triggerBuildingBlackout() {

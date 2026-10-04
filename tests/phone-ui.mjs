@@ -35,7 +35,13 @@ try {
   await page.keyboard.down('d'); await page.clock.runFor(300); await page.keyboard.up('d');
   assert.equal((await state()).x, before, 'The device pauses movement');
   await page.keyboard.press('Tab');
-  assert.equal(await page.evaluate(() => document.activeElement.id), 'phone-close');
+  assert.equal(await page.evaluate(() => document.activeElement.dataset.phoneApp), 'notes');
+  await page.keyboard.press('Shift+Tab');
+  assert.equal(await page.evaluate(() => document.activeElement.id), 'phone-light');
+  await page.locator('#phone-close').focus();
+  await page.keyboard.press('Tab');
+  assert.equal(await page.evaluate(() => document.activeElement.id), 'phone-light', 'Tab stays inside the phone');
+  await page.locator('#phone-close').focus();
   await page.keyboard.press('Enter');
   assert.equal((await state()).state, 'phone-away');
   await page.clock.runFor(400);

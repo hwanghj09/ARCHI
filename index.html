@@ -16,6 +16,7 @@
     <link rel="stylesheet" href="sanity.css" />
     <link rel="stylesheet" href="main-menu.css" />
     <link rel="stylesheet" href="blackout.css" />
+    <link rel="stylesheet" href="device-apps.css" />
     <link rel="preload" as="image" href="assets/objects/guard-robot/guard-capture.png" />
     <link rel="preload" as="image" href="assets/player/jeong-suho-phone-walk-on.png" />
     <link rel="preload" as="image" href="assets/player/jeong-suho-phone-run-on.png" />
@@ -868,6 +869,7 @@
     <script src="js/interaction/power.js" defer></script>
     <script src="js/interaction/inspection.js" defer></script>
     <script src="js/interaction/inventory.js" defer></script>
+    <script src="js/ui/device-apps.js" defer></script>
     <script src="js/computer/documents.js" defer></script>
     <script src="js/computer/computer.js" defer></script>
     <script src="js/elevator/cabin.js" defer></script>
@@ -999,12 +1001,44 @@
         <div class="phone-controls">
           <p class="phone-section-label">빠른 설정</p>
           <button id="phone-light" type="button" aria-pressed="false" aria-label="플래시 켜기">
-            <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M10 9h12l-3 7v12h-6V16L10 9ZM10 13h12M16 1v4M6 3l3 3M26 3l-3 3"/><path d="M15 20h2v3h-2z"/></svg>
+            <span class="app-art" data-app-icon="flashlight" aria-hidden="true"></span>
             <span>플래시</span><small id="phone-light-state">꺼짐</small>
           </button>
           <p id="phone-help" aria-live="polite">플래시를 켜면 앞을 비추며 걸을 수 있습니다.</p>
+          <p class="phone-section-label">앱</p>
+          <div id="phone-app-grid">
+            <button type="button" data-phone-app="notes"><span class="phone-app-icon app-art" data-app-icon="notes" aria-hidden="true"></span><span>메모</span></button>
+            <button type="button" data-phone-app="calculator"><span class="phone-app-icon app-art" data-app-icon="calculator" aria-hidden="true"></span><span>계산기</span></button>
+            <button type="button" data-phone-app="building"><span class="phone-app-icon app-art" data-app-icon="building" aria-hidden="true"></span><span>시설 안내</span></button>
+          </div>
         </div>
-        <div class="phone-navigation"><span>P / Esc · 닫기</span><button id="phone-close" type="button" aria-label="휴대폰 화면 닫기"><span aria-hidden="true"></span></button></div>
+        <section id="phone-app-window" aria-labelledby="phone-app-title" hidden>
+          <header><button id="phone-app-back" type="button" aria-label="휴대폰 홈으로">‹ 홈</button><h3 id="phone-app-title">메모</h3></header>
+          <div id="phone-notes" data-phone-view="notes" hidden>
+            <label for="phone-note">개인 메모</label>
+            <textarea id="phone-note" maxlength="4000" aria-label="개인 메모 내용" placeholder="찾은 단서나 비밀번호를 기록하세요." spellcheck="false"></textarea>
+            <button id="phone-note-save" type="button">저장</button><output id="phone-note-status" role="status" aria-live="polite">저장됨</output>
+          </div>
+          <div id="phone-calculator" data-phone-view="calculator" hidden>
+            <div class="device-calculator" data-device-calculator aria-label="휴대폰 계산기">
+              <small data-calculator-history aria-hidden="true"></small>
+              <output class="calculator-display" data-calculator-display aria-label="계산 결과" aria-live="polite">0</output>
+              <div class="calculator-keys"></div>
+            </div>
+          </div>
+          <div id="phone-building" data-phone-view="building" hidden>
+            <div class="building-guide" data-building-guide>
+              <p data-building-current></p>
+              <label>층 선택<select data-building-floor aria-label="안내할 층"></select></label>
+              <button type="button" data-building-here>현재 층</button>
+              <h3 data-building-title></h3>
+              <p data-building-power></p><p data-building-access></p>
+              <ul data-building-rooms></ul>
+              <p data-building-charger></p><p data-building-elevator></p>
+            </div>
+          </div>
+        </section>
+        <div class="phone-navigation"><span>P · 닫기 / Esc · 뒤로</span><button id="phone-close" type="button" aria-label="휴대폰 화면 닫기"><span aria-hidden="true"></span></button></div>
       </div>
     </section>
     <section id="guard-capture" role="dialog" aria-modal="true" aria-labelledby="guard-capture-title" hidden>
@@ -1051,8 +1085,11 @@
     <div id="computer" role="dialog" aria-modal="true" aria-label="17층 사무실 컴퓨터" tabindex="-1" hidden>
       <img id="computer-wallpaper" src="assets/ui/computer/wallpaper.png" alt="" draggable="false" />
       <div class="computer-shortcuts">
-        <button type="button" data-computer-app="files"><img src="assets/vendor/lucide/folder.svg" alt="" /><span>파일</span></button>
-        <button type="button" data-computer-app="notes"><img src="assets/vendor/lucide/notebook-pen.svg" alt="" /><span>업무 메모</span></button>
+        <button type="button" data-computer-app="files"><span class="app-art" data-app-icon="files" aria-hidden="true"></span><span>파일</span></button>
+        <button type="button" data-computer-app="notes"><span class="app-art" data-app-icon="notes" aria-hidden="true"></span><span>업무 메모</span></button>
+        <button type="button" data-computer-app="mail"><span class="app-art" data-app-icon="mail" aria-hidden="true"></span><span>사내 메일</span></button>
+        <button type="button" data-computer-app="calculator"><span class="app-art" data-app-icon="calculator" aria-hidden="true"></span><span>계산기</span></button>
+        <button type="button" data-computer-app="building"><span class="app-art" data-app-icon="building" aria-hidden="true"></span><span>시설 안내</span></button>
       </div>
       <section id="computer-window" aria-labelledby="computer-window-title" hidden>
         <div class="computer-titlebar">
@@ -1068,7 +1105,7 @@
           <p id="computer-file-count" role="status" aria-live="polite"></p>
           <div id="computer-file-list"></div>
           <p id="computer-files-empty" hidden>일치하는 문서가 없습니다.</p>
-          <button type="button" data-computer-app="notes"><img src="assets/vendor/lucide/notebook-pen.svg" alt="" /><span>업무 메모</span></button>
+          <button type="button" data-computer-app="notes"><span class="app-art" data-app-icon="notes" aria-hidden="true"></span><span>업무 메모</span></button>
         </div>
         <div id="computer-notes" class="computer-content" hidden>
           <div class="computer-toolbar">
@@ -1090,11 +1127,43 @@
             </article>
           </div>
         </div>
+        <div id="computer-mail" class="computer-content" hidden>
+          <p class="computer-path">ARCHI MAIL / 정수호 / 받은 메일함</p>
+          <label class="computer-mail-search">메일 검색<input id="computer-mail-search" type="search" aria-label="메일 검색" placeholder="제목, 보낸 사람, 본문" /></label>
+          <output id="computer-mail-count" role="status" aria-live="polite"></output>
+          <div id="computer-mail-list"></div>
+          <p id="computer-mail-empty" hidden>일치하는 메일이 없습니다.</p>
+          <article id="computer-mail-reader" hidden>
+            <button id="computer-mail-back" type="button">‹ 받은 메일함</button>
+            <h2 id="computer-mail-subject"></h2><p id="computer-mail-meta"></p><div id="computer-mail-body"></div>
+          </article>
+        </div>
+        <div id="computer-calculator" class="computer-content" hidden>
+          <div class="device-calculator" data-device-calculator aria-label="컴퓨터 계산기">
+            <small data-calculator-history aria-hidden="true"></small>
+            <output class="calculator-display" data-calculator-display aria-label="계산 결과" aria-live="polite">0</output>
+            <div class="calculator-keys"></div>
+          </div>
+        </div>
+        <div id="computer-building" class="computer-content" hidden>
+          <div class="building-guide" data-building-guide>
+            <p data-building-current></p>
+            <label>층 선택<select data-building-floor aria-label="안내할 층"></select></label>
+            <button type="button" data-building-here>현재 층</button>
+            <h3 data-building-title></h3>
+            <p data-building-power></p><p data-building-access></p>
+            <ul data-building-rooms></ul>
+            <p data-building-charger></p><p data-building-elevator></p>
+          </div>
+        </div>
       </section>
       <div class="computer-taskbar">
         <strong>ARCHI</strong>
-        <button type="button" data-computer-app="files" aria-label="파일" title="파일"><img src="assets/vendor/lucide/folder.svg" alt="" /></button>
-        <button type="button" data-computer-app="notes" aria-label="업무 메모" title="업무 메모"><img src="assets/vendor/lucide/notebook-pen.svg" alt="" /></button>
+        <button type="button" data-computer-app="files" aria-label="파일" title="파일"><span class="app-art" data-app-icon="files" aria-hidden="true"></span></button>
+        <button type="button" data-computer-app="notes" aria-label="업무 메모" title="업무 메모"><span class="app-art" data-app-icon="notes" aria-hidden="true"></span></button>
+        <button type="button" data-computer-app="mail" aria-label="사내 메일" title="사내 메일"><span class="app-art" data-app-icon="mail" aria-hidden="true"></span></button>
+        <button type="button" data-computer-app="calculator" aria-label="계산기" title="계산기"><span class="app-art" data-app-icon="calculator" aria-hidden="true"></span></button>
+        <button type="button" data-computer-app="building" aria-label="시설 안내" title="시설 안내"><span class="app-art" data-app-icon="building" aria-hidden="true"></span></button>
         <span>17F · PC-01</span>
         <button id="computer-exit" type="button" aria-label="컴퓨터 사용 종료" title="컴퓨터 사용 종료"><img src="assets/vendor/lucide/log-out.svg" alt="" /></button>
       </div>
