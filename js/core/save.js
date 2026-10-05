@@ -22,7 +22,7 @@ function progressSnapshot() {
     arrivalKey: currentDoors.find(door => door.key === 'exit')?.key || currentDoors.find(door => door.key)?.key };
   if (openingActive) Object.assign(scene, { id: 'office', x: 656, y: floorY - 81, velocity: { x: 0, y: 0 } });
   if (playerCaught) Object.assign(scene, { id: 'f1', x: BUILDING_CORE.elevators[0].x + 40, y: floorY - 81, velocity: { x: 0, y: 0 } });
-  return { version: 1, savedAt: Date.now(), scene, items: [...collectedItems],
+  return { version: 1, savedAt: Date.now(), scene, items: [...collectedItems], clues: clueSnapshot(),
     battery: phoneBattery, sanity, light: phoneLightOn, dock: phoneDock && { ...phoneDock },
     phoneChargeAccumulator, phoneDrainAccumulator,
     blackout: buildingBlackout || blackoutSceneActive, solarEnabled, solarPoweredFloor,
@@ -73,6 +73,7 @@ function restoreProgress(data) {
     // 자신의 출입증은 기본 소지품이며, 이전 저장에도 진행 상황을 유지한 채 추가한다.
     collectedItems.add('f17-badge');
     for (const item of data.items) collectedItems.add(item);
+    restoreClues(data.clues);
     buildingBlackout = data.blackout === true;
     solarEnabled = data.solarEnabled === true;
     solarPoweredFloor = solarEnabled && Number.isInteger(data.solarPoweredFloor) && data.solarPoweredFloor >= 1 && data.solarPoweredFloor <= 17 ? data.solarPoweredFloor : null;
@@ -174,6 +175,7 @@ function startNewGame() {
   computerSaveStatus.textContent = '저장됨';
   phoneNote.value = ''; savedPhoneNote = '';
   phoneNoteStatus.textContent = '필요한 단서를 적고 저장하세요.';
+  showPhoneNoteTab('memo');
   computerMailRead.clear(); showComputerMailInbox();
   openingActive = true;
   openingElapsed = 0; openingReady = false;

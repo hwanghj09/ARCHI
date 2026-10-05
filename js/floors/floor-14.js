@@ -42,6 +42,7 @@ const FLOOR14_ROOMS = interiorRooms(14, [
           { text: '우리 팀은 그런 요청을', mark: 'underline' }, { text: '한 적이 없다.', mark: 'underline' }],
         caption: '펼쳐진 연구 노트.', surface: 'notebook' },
       { file: 'records-cabinet', size: [256, 512], worldWidth: 72, x: 880, name: '기록 보관함',
+        clue: '메신저·출입 기록·회의록 사본이 "학습용"으로 매일 새벽 1~4시에 반출됐다.',
         darkMessage: '보관함 라벨이 어두워서 보이지 않는다.',
         message: '"사내 기록 반출 대장". 메신저·출입 기록·회의록 사본이 "학습용"으로 매일 반출됐다. 반출 시각은 전부 새벽 1시에서 4시 사이다.',
         surface: 'document', writing: [{ as: 'title', text: '사내 기록 반출 대장' }, { as: 'table', head: true, rows: [['품목', '용도', '반출 시각'],
