@@ -47,6 +47,7 @@ const FLOOR11_ROOMS = interiorRooms(11, [
         { as: 'page' }, { as: 'hand', text: '전날 밤 리허설은 완벽했는데?' }] },
     { file: 'office-copier', size: [256, 256], worldWidth: 110, x: 1100 },
     { file: 'sales-kpi-board', size: [512, 256], worldWidth: 350, x: 1700, name: '영업 현황판',
+      clue: 'PoC 세 건이 모두 탈락·연기됐다. 사유는 전부 "사내 성능 평가 3~5%".',
       message: 'PoC 현황: 탈락 · 탈락 · 연기. 사유 칸은 전부 같다. "사내 성능 평가 3~5%."',
       writing: [{ as: 'title', text: 'PoC 현황' }, { as: 'table', head: true, rows: [['상태', '사유'], ['탈락', '사내 성능 평가 3~5%'],
         ['탈락', '사내 성능 평가 3~5%'], ['연기', '사내 성능 평가 3~5%']] }],

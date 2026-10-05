@@ -41,6 +41,7 @@ const FLOOR13_ROOMS = interiorRooms(13, [
         { as: 'page' }, { text: 'B2 알림은 뜨자마자 닫힘.', ink: 'blue' }, { text: '사람은 볼 틈도 없음.', ink: 'blue' }] },
     { file: 'support-workstation', size: [512, 256], worldWidth: 270, x: 780 },
     { file: 'incident-printer', size: [256, 256], worldWidth: 117, x: 1060, name: '장애 알림 프린터', requires: 'f13-ups',
+      clue: '02:14 B2 전력 임계치 초과, 03:05 원격지원 게이트웨이 외부 송신 급증. 둘 다 사람 확인 없이 SYSTEM이 자동 종결했다.',
       sprite: 'assets/objects/floor13/incident-printer-states.png', stateBy: 'f13-ups',
       animation: { src: 'assets/objects/floor13/printer-feed.png', frames: 4 },
       missingMessage: '프린터 전원이 꺼져 있다. 전원선 꼬리표: "장비 검증실 UPS 비상 회선".',

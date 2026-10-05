@@ -17,6 +17,7 @@
     <link rel="stylesheet" href="main-menu.css" />
     <link rel="stylesheet" href="blackout.css" />
     <link rel="stylesheet" href="device-apps.css" />
+    <link rel="stylesheet" href="clues.css" />
     <link rel="preload" as="image" href="assets/objects/guard-robot/guard-capture.png" />
     <link rel="preload" as="image" href="assets/player/jeong-suho-phone-walk-on.png" />
     <link rel="preload" as="image" href="assets/player/jeong-suho-phone-run-on.png" />
@@ -866,6 +867,7 @@
     <script src="js/interaction/outline.js" defer></script>
     <script src="js/interaction/interaction.js" defer></script>
     <script src="js/interaction/phone.js" defer></script>
+    <script src="js/interaction/clues.js" defer></script>
     <script src="js/interaction/power.js" defer></script>
     <script src="js/interaction/inspection.js" defer></script>
     <script src="js/interaction/inventory.js" defer></script>
@@ -1016,9 +1018,19 @@
         <section id="phone-app-window" aria-labelledby="phone-app-title" hidden>
           <header><button id="phone-app-back" type="button" aria-label="휴대폰 홈으로">‹ 홈</button><h3 id="phone-app-title">메모</h3></header>
           <div id="phone-notes" data-phone-view="notes" hidden>
-            <label for="phone-note">개인 메모</label>
-            <textarea id="phone-note" maxlength="4000" aria-label="개인 메모 내용" placeholder="찾은 단서나 비밀번호를 기록하세요." spellcheck="false"></textarea>
-            <button id="phone-note-save" type="button">저장</button><output id="phone-note-status" role="status" aria-live="polite">저장됨</output>
+            <div class="phone-note-tabs" role="tablist" aria-label="메모 종류">
+              <button id="phone-tab-memo" type="button" role="tab" aria-selected="true" aria-controls="phone-memo-pane">메모</button>
+              <button id="phone-tab-clues" type="button" role="tab" aria-selected="false" aria-controls="phone-clue-pane" tabindex="-1">단서<span id="phone-clue-count"></span></button>
+            </div>
+            <div id="phone-memo-pane" role="tabpanel" aria-labelledby="phone-tab-memo">
+              <label for="phone-note">개인 메모</label>
+              <textarea id="phone-note" maxlength="4000" aria-label="개인 메모 내용" placeholder="찾은 단서나 비밀번호를 기록하세요." spellcheck="false"></textarea>
+              <button id="phone-note-save" type="button">저장</button><output id="phone-note-status" role="status" aria-live="polite">저장됨</output>
+            </div>
+            <div id="phone-clue-pane" role="tabpanel" aria-labelledby="phone-tab-clues" hidden>
+              <p id="phone-clue-empty">조사한 단서가 층 이름과 함께 여기에 자동으로 기록됩니다.</p>
+              <ol id="phone-clue-list" aria-label="기록된 단서"></ol>
+            </div>
           </div>
           <div id="phone-calculator" data-phone-view="calculator" hidden>
             <div class="device-calculator" data-device-calculator aria-label="휴대폰 계산기">
