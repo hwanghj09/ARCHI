@@ -187,6 +187,10 @@ try {
     'server-cooling-unit.png': [496, 180, 191], 'ups-cabinet.png': [180, 106, 116],
     'robot-charging-dock.png': [239, 60, 70], 'glass-display-cabinet.png': [406, 170, 182],
     'maintenance-tool-cabinet.png': [239, 88, 98], 'electrical-panel.png': [321, 106, 117], 'reception-counter.png': [162, 97, 107],
+    'security-robot-dock.png': [203, 60, 70], 'bms-control-console.png': [194, 94, 104], 'elevator-control-panel.png': [496, 167, 178],
+    'power-distribution-panel.png': [496, 167, 178], 'solar-intake-panel.png': [200, 118, 129], 'archi-main-console.png': [219, 106, 117],
+    'cctv-distribution-rack.png': [496, 180, 191], 'neural-converter-rack.png': [496, 180, 191], 'experiment-record-cart.png': [226, 94, 105],
+    'link-chair-rig.png': [240, 116, 127], 'power-transfer-panel.png': [496, 167, 178], 'coolant-log-cabinet.png': [496, 134, 145],
     'compact-office-desk.png': [221, 160, 168], 'office-chair.png': [387, 120, 128],
     'janitor-cart.png': [370, 148, 156], 'wet-floor-sign.png': [240, 65, 71],
     'visitor-chair.png': [376, 110, 119], 'short-bookcase.png': [240, 103, 113],
@@ -2033,7 +2037,7 @@ try {
     assert.equal(await worldWidth(page), 1800);
     assert.equal(linkRoom.exit.x, 481);
     assert.equal(await page.locator('#dynamic-scene .room-interior.linklab').count(), 1);
-    assert.equal(await page.locator('#dynamic-scene .floor-prop').count(), 4);
+    assert.equal(await page.locator('#dynamic-scene .floor-prop').count(), 5);
     await assertHumanScale();
     await inspect(930, 'E · 인간-시스템 연결 장비 조사', /2차 · 제어 ARCHI-MAIN/);
     await inspect(1250, 'E · 신경 신호 변환기 조사', /호스트 미연결/);

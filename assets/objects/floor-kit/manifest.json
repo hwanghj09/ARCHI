@@ -784,6 +784,138 @@
         504
       ],
       "suggestedWorldWidth": 89
+    },
+    {
+      "file": "security-robot-dock.png",
+      "name": "B1 경비 로봇 충전 도크",
+      "width": 256,
+      "height": 256,
+      "anchor": [
+        128,
+        248
+      ],
+      "suggestedWorldWidth": 69
+    },
+    {
+      "file": "bms-control-console.png",
+      "name": "B1 BMS 제어 콘솔",
+      "width": 512,
+      "height": 256,
+      "anchor": [
+        256,
+        248
+      ],
+      "suggestedWorldWidth": 261
+    },
+    {
+      "file": "elevator-control-panel.png",
+      "name": "B1 승강기 제어반",
+      "width": 256,
+      "height": 512,
+      "anchor": [
+        128,
+        504
+      ],
+      "suggestedWorldWidth": 89
+    },
+    {
+      "file": "power-distribution-panel.png",
+      "name": "B1 층별 전력 분배반",
+      "width": 256,
+      "height": 512,
+      "anchor": [
+        128,
+        504
+      ],
+      "suggestedWorldWidth": 89
+    },
+    {
+      "file": "solar-intake-panel.png",
+      "name": "B1 태양광 수전반",
+      "width": 256,
+      "height": 256,
+      "anchor": [
+        128,
+        248
+      ],
+      "suggestedWorldWidth": 158
+    },
+    {
+      "file": "archi-main-console.png",
+      "name": "B2 ARCHI 메인 콘솔",
+      "width": 512,
+      "height": 256,
+      "anchor": [
+        256,
+        248
+      ],
+      "suggestedWorldWidth": 261
+    },
+    {
+      "file": "cctv-distribution-rack.png",
+      "name": "B2 CCTV 분배함",
+      "width": 256,
+      "height": 512,
+      "anchor": [
+        128,
+        504
+      ],
+      "suggestedWorldWidth": 96
+    },
+    {
+      "file": "neural-converter-rack.png",
+      "name": "B2 신경 신호 변환기",
+      "width": 256,
+      "height": 512,
+      "anchor": [
+        128,
+        504
+      ],
+      "suggestedWorldWidth": 96
+    },
+    {
+      "file": "experiment-record-cart.png",
+      "name": "B2 실험 기록 카트",
+      "width": 256,
+      "height": 256,
+      "anchor": [
+        128,
+        248
+      ],
+      "suggestedWorldWidth": 113
+    },
+    {
+      "file": "link-chair-rig.png",
+      "name": "B2 인간-시스템 연결 장비",
+      "width": 512,
+      "height": 256,
+      "anchor": [
+        256,
+        248
+      ],
+      "suggestedWorldWidth": 260
+    },
+    {
+      "file": "power-transfer-panel.png",
+      "name": "B2 수전 전환반",
+      "width": 256,
+      "height": 512,
+      "anchor": [
+        128,
+        504
+      ],
+      "suggestedWorldWidth": 89
+    },
+    {
+      "file": "coolant-log-cabinet.png",
+      "name": "B2 냉각 설비 일지",
+      "width": 256,
+      "height": 512,
+      "anchor": [
+        128,
+        504
+      ],
+      "suggestedWorldWidth": 72
     }
   ]
 }
