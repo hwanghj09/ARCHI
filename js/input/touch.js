@@ -7,7 +7,7 @@ function pressAction(button) {
 buttons.forEach(button => {
   const direction = Number(button.dataset.direction) || 0;
   button.addEventListener('pointerdown', event => {
-    if (event.button !== 0 || transitioning || selectingFloor || usingComputer || usingKeypad) return;
+    if (event.button !== 0 || transitioning || selectingFloor || usingComputer || usingKeypad || usingGenerator) return;
     event.preventDefault();
     button.setPointerCapture(event.pointerId);
     if (direction) pointers.set(event.pointerId, direction);
@@ -21,7 +21,7 @@ buttons.forEach(button => {
   ['pointerup', 'pointercancel', 'lostpointercapture'].forEach(name => button.addEventListener(name, release));
   button.addEventListener('contextmenu', event => event.preventDefault());
   button.addEventListener('click', event => {
-    if (event.detail !== 0 || transitioning || selectingFloor || usingComputer || usingKeypad) return;
+    if (event.detail !== 0 || transitioning || selectingFloor || usingComputer || usingKeypad || usingGenerator) return;
     if (direction) {
       pulseDirection = direction;
       pulseTime = 150;

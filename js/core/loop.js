@@ -13,7 +13,7 @@ function update() {
     updateCabin();
     return;
   }
-  if (usingComputer || usingKeypad) {
+  if (usingComputer || usingKeypad || usingGenerator) {
     updateElevators();
     return;
   }

@@ -21,3 +21,8 @@ let selectingFloor = false;
 let usingComputer = false;
 // 도어락 키패드(방 문·소품의 code): 열려 있는 동안 플레이어 조작을 멈춘다.
 let usingKeypad = false;
+// 옥상 발전기 패널(js/interaction/generator.js): 열려 있는 동안 플레이어 조작을 멈춘다.
+let usingGenerator = false;
+// 옥상 태양광 비상 전원으로 지금 켜 둔 층(1~17, 한 번에 하나뿐 — B1·B2는 별도 비상 발전기라 대상이 아니다).
+// null이면 켜진 층 없음. performFloorChange가 장면을 그릴 때마다 world.dataset.powered로 반영한다.
+let poweredFloor = null;

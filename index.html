@@ -11,6 +11,10 @@
       body { margin: 0; overflow: hidden; background: #27292b; color: #eee; font: 14px Arial, sans-serif; }
       #stage { position: relative; width: 100%; height: 100dvh; overflow: hidden; touch-action: none; }
       #world { position: absolute; transform-origin: top left; background: #151f25; }
+      /* 옥상 발전기(js/interaction/generator.js)로 켠 층에 있을 때만 전체적으로 밝게 보인다. 층별로
+         따로 그리지 않는 일반 밝기 보정이다(정전 전용으로 그려진 배경이라 층마다 다른 "켜진" 그림은
+         없다). 17층은 자체 조명 스위치로 따로 밝기를 표현하므로(아래 #darkness 규칙) 여기서는 뺀다. */
+      #world[data-powered="true"] { filter: brightness(1.32) saturate(1.18); }
       #darkness { display: none; position: absolute; inset: 0; z-index: 1; pointer-events: none; background: radial-gradient(circle at var(--sight-x, 640px) var(--sight-y, 489px), #0000000d 0 90px, #000000e6 160px, #000 210px); }
       #world[data-lights="off"][data-floor="17"] #darkness { display: block; }
       #background { position: absolute; inset: 0; overflow: hidden; pointer-events: none; user-select: none; }
@@ -27,6 +31,8 @@
       #dynamic-scene > .floor { background: #171b1a; border-top: 2px solid #626963; }
       .solar-supply { position: absolute; width: 360px; height: 360px; overflow: hidden; pointer-events: none; image-rendering: pixelated; }
       .solar-supply img { display: block; width: 200%; height: 100%; max-width: none; }
+      .solar-supply[data-state="on"] img { transform: translateX(-50%); }
+      .solar-supply.near { outline: 2px solid #96b7aa; }
       .floor-room { position: absolute; top: 118px; height: 452px; border: 6px solid #2a363b; border-bottom: 0; background: linear-gradient(#172025, #11181b); pointer-events: none; }
       .floor-room::before { content: ''; position: absolute; top: 34px; left: 28px; right: 28px; height: 190px; border: 5px solid #2f3d43; background: radial-gradient(circle, #c9b77a55 0 1.5px, transparent 2px) 0 60px / 26px 22px, linear-gradient(transparent 38%, #0b1116 38%), linear-gradient(#0c1a2b, #16273a); }
       .floor-room-sign { position: absolute; top: -40px; left: 50%; transform: translateX(-50%); padding: 3px 12px; border: 2px solid #3d4e52; background: #0d1417; color: #a9bfb6; font: bold 15px Arial, sans-serif; white-space: nowrap; }
@@ -44,6 +50,12 @@
       #floor17-hydrant.near { outline: 2px solid #96b7aa; }
       #dynamic-scene[data-art="true"] .room-door.metal { border: 6px solid #555f66; border-bottom: 0; background: linear-gradient(90deg, #303a40 78%, #8e989e 78% 82%, #303a40 82%); }
       #world[data-dark="true"][data-room="dynamic"] #darkness { display: block; }
+      /* 옥상 발전기로 전력이 안 들어온 층은(17층 제외 — 위의 전용 규칙으로 따로 처리) 17층 조명 꺼짐과
+         같은 원형 암시야로 본다. 방 안(인테리어)도 같은 data-room="dynamic"이라 함께 적용된다. 옥상
+         (floor=18, poweredFloor 대상 아님 — 발전기 조작 화면이 어두워지면 안 됨)과 B1·B2(floor=-1/-2,
+         자체 비상 발전기로 항상 켜져 있음, js/floors/floor-b1.js 참고)는 poweredFloor 대상이 아니라서
+         늘 "꺼짐"으로 잡히므로 여기서 뺀다. */
+      #world[data-powered="false"][data-room="dynamic"]:not([data-floor="18"]):not([data-floor="-1"]):not([data-floor="-2"]) #darkness { display: block; }
       .crate { background: linear-gradient(90deg, transparent 44%, #b89a6a 44% 56%, transparent 56%), #6b5238; border: 4px solid #8a6b4a; box-shadow: inset 0 0 0 3px #4d3a28; }
       #dynamic-scene[data-theme="warm"] > .floor { background: #211a15; border-top-color: #6d5a48; }
       #dynamic-scene[data-theme="warm"] .floor-room { border-color: #4a3b30; background: linear-gradient(#2a211b, #1f1813); }
@@ -738,6 +750,15 @@
       #keypad-error { min-height: 1.3em; margin: 8px 0; color: #e08a7a; }
       #keypad .keypad-buttons { display: flex; justify-content: flex-end; gap: 8px; }
       #keypad button { padding: 8px 14px; font: 14px Arial, sans-serif; }
+      #generator { position: fixed; left: 50%; top: 50%; z-index: 6; box-sizing: border-box; width: min(420px, calc(100vw - 32px)); padding: 18px; border: 2px solid #3d4e52; background: #0d1417f2; color: #cfd9d3; font: 14px Arial, sans-serif; transform: translate(-50%, -50%); box-shadow: 0 12px 40px #000a; }
+      #generator[hidden] { display: none; }
+      #generator h2 { margin: 0 0 8px; color: #e2d2b8; font-size: 16px; }
+      #generator-status { margin: 0 0 12px; min-height: 2.6em; line-height: 1.4; color: #a9bfb6; }
+      #generator-floors { display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; max-height: 240px; overflow-y: auto; }
+      .generator-floor { padding: 8px 0; border: 2px solid #3d4e52; background: #121a1d; color: #cfd9d3; font: bold 13px Arial, sans-serif; }
+      .generator-floor[data-active="true"] { border-color: #e8c77a; background: #3a3220; color: #f4e6c0; }
+      .generator-buttons { display: flex; justify-content: flex-end; margin-top: 12px; }
+      .generator-buttons button { padding: 8px 14px; font: 14px Arial, sans-serif; }
       @media (max-height: 480px) {
         nav { bottom: max(12px, env(safe-area-inset-bottom)); }
         nav button { width: 48px; height: 44px; }
@@ -785,6 +806,7 @@
     <script src="js/interaction/puzzles.js" defer></script>
     <script src="js/interaction/cctv.js" defer></script>
     <script src="js/interaction/keypad.js" defer></script>
+    <script src="js/interaction/generator.js" defer></script>
     <script src="js/interaction/interaction.js" defer></script>
     <script src="js/computer/documents.js" defer></script>
     <script src="js/computer/computer.js" defer></script>
@@ -838,6 +860,14 @@
         <button type="submit" id="keypad-submit">확인</button>
       </div>
     </form>
+    <div id="generator" role="dialog" aria-modal="true" aria-labelledby="generator-title" hidden>
+      <h2 id="generator-title">태양광 임시 전력장치</h2>
+      <p id="generator-status"></p>
+      <div id="generator-floors"></div>
+      <div class="generator-buttons">
+        <button type="button" id="generator-close">닫기</button>
+      </div>
+    </div>
     <form id="debug-floor" aria-label="테스트용 층 이동">
       <label for="debug-floor-select">TEST 층 이동</label>
       <select id="debug-floor-select"></select>

@@ -30,6 +30,8 @@ function performFloorChange(destId, carIndex = 0, arrivalKey = null) {
   const dest = floorById.get(destId);
   currentSceneFloor = dest.floor;
   world.dataset.floor = String(currentSceneFloor);
+  // 옥상 발전기(js/interaction/generator.js)로 켜 둔 층에 들어올 때만 전체적으로 밝아 보인다.
+  world.dataset.powered = String(currentSceneFloor === poweredFloor);
   lightSwitch.hidden = currentSceneFloor !== 17;
   movingParts = [];
   activeCameras = [];

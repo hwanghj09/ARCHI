@@ -84,15 +84,20 @@ function buildDynamicScene(config) {
     const supply = document.createElement('div');
     supply.className = 'solar-supply';
     supply.setAttribute('role', 'img');
-    supply.setAttribute('aria-label', '태양광 임시 전력장치 · 화면 꺼짐');
+    supply.dataset.state = poweredFloor ? 'on' : 'off';
+    supply.setAttribute('aria-label', `태양광 임시 전력장치 · ${poweredFloor ? `${floorShortLabel(poweredFloor)} 공급 중` : '화면 꺼짐'}`);
     // The first 887px cell has transparent padding; its bottom edge is y=691.
-    Object.assign(supply.style, { left: '720px', top: `${floorY - 691 * 360 / 887}px` });
+    const supplyX = 720, supplyWidth = 360;
+    Object.assign(supply.style, { left: `${supplyX}px`, top: `${floorY - 691 * 360 / 887}px` });
     const image = new Image();
     image.src = 'assets/objects/power/solar-supply-off-on.png';
     image.alt = '';
     image.draggable = false;
     supply.append(image);
     dynamicScene.append(supply);
+    // 전력 제어반(generator): E를 누르면 층 선택 패널이 뜬다(js/interaction/generator.js).
+    doorList.push({ name: '태양광 임시 전력장치', type: 'generator', element: supply,
+      x: supplyX, y: floorY - 160, standY: floorY, width: supplyWidth });
   }
   if (config.interior) {
     const backdrop = document.createElement('div');

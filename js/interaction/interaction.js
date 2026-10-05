@@ -29,6 +29,7 @@ function updateInteraction() {
 
 function doorHintText(door) {
   if (door.type === 'computer') return 'E · 컴퓨터 사용';
+  if (door.type === 'generator') return 'E · 전력 제어반 조사';
   if (door.type === 'inspect') return `E · ${door.name} 조사`;
   if (door.locked) return `E · ${door.name} (잠김)`;
   if (door.type === 'room') return door.hint;
@@ -44,9 +45,13 @@ function doorHintText(door) {
 }
 
 function interact() {
-  if (transitioning || selectingFloor || usingComputer || usingKeypad) return;
+  if (transitioning || selectingFloor || usingComputer || usingKeypad || usingGenerator) return;
   updateInteraction();
   if (!nearbyDoor) return;
+  if (nearbyDoor.type === 'generator') {
+    openGenerator(nearbyDoor);
+    return;
+  }
   if (nearbyDoor.type === 'computer') {
     computerReturnFocus = document.activeElement;
     transitionScene(() => {
