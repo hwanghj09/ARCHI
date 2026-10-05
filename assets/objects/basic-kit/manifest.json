@@ -1,0 +1,948 @@
+{
+  "version": 1,
+  "generator": "built-in image_gen",
+  "assets": [
+    {
+      "id": "restroom-toilet-standard",
+      "label": "일반 양변기",
+      "category": "restroom",
+      "file": "restroom-toilet-standard.png",
+      "source": "source/restroom-toilet-standard.png",
+      "size": [
+        256,
+        256
+      ],
+      "sourceSize": [
+        1024,
+        1536
+      ],
+      "frames": [
+        {
+          "name": "default",
+          "rect": [
+            0,
+            0,
+            256,
+            256
+          ],
+          "anchor": [
+            128,
+            248
+          ],
+          "sourceBounds": [
+            242,
+            102,
+            783,
+            1446
+          ]
+        }
+      ],
+      "suggestedWorldWidth": 65,
+      "placement": "floor-or-surface",
+      "integrated": false
+    },
+    {
+      "id": "restroom-toilet-accessible",
+      "label": "장애인 화장실 양변기",
+      "category": "restroom",
+      "file": "restroom-toilet-accessible.png",
+      "source": "source/restroom-toilet-accessible.png",
+      "size": [
+        256,
+        256
+      ],
+      "sourceSize": [
+        1145,
+        1374
+      ],
+      "frames": [
+        {
+          "name": "default",
+          "rect": [
+            0,
+            0,
+            256,
+            256
+          ],
+          "anchor": [
+            128,
+            248
+          ],
+          "sourceBounds": [
+            33,
+            220,
+            1112,
+            1164
+          ]
+        }
+      ],
+      "suggestedWorldWidth": 100,
+      "placement": "wall",
+      "integrated": false
+    },
+    {
+      "id": "restroom-vanity-double",
+      "label": "2인 세면대",
+      "category": "restroom",
+      "file": "restroom-vanity-double.png",
+      "source": "source/restroom-vanity-double.png",
+      "size": [
+        512,
+        256
+      ],
+      "sourceSize": [
+        1536,
+        1024
+      ],
+      "frames": [
+        {
+          "name": "default",
+          "rect": [
+            0,
+            0,
+            512,
+            256
+          ],
+          "anchor": [
+            256,
+            248
+          ],
+          "sourceBounds": [
+            321,
+            81,
+            1215,
+            952
+          ]
+        }
+      ],
+      "suggestedWorldWidth": 240,
+      "placement": "floor-or-surface",
+      "integrated": false
+    },
+    {
+      "id": "door-restroom-men",
+      "label": "남자 화장실 문",
+      "category": "doors",
+      "file": "door-restroom-men.png",
+      "source": "source/door-restroom-men.png",
+      "size": [
+        256,
+        512
+      ],
+      "sourceSize": [
+        887,
+        1774
+      ],
+      "frames": [
+        {
+          "name": "default",
+          "rect": [
+            0,
+            0,
+            256,
+            512
+          ],
+          "anchor": [
+            128,
+            504
+          ],
+          "sourceBounds": [
+            112,
+            82,
+            775,
+            1693
+          ]
+        }
+      ],
+      "suggestedWorldWidth": 140,
+      "placement": "floor-or-surface",
+      "integrated": false
+    },
+    {
+      "id": "door-restroom-women",
+      "label": "여자 화장실 문",
+      "category": "doors",
+      "file": "door-restroom-women.png",
+      "source": "source/door-restroom-women.png",
+      "size": [
+        256,
+        512
+      ],
+      "sourceSize": [
+        887,
+        1774
+      ],
+      "frames": [
+        {
+          "name": "default",
+          "rect": [
+            0,
+            0,
+            256,
+            512
+          ],
+          "anchor": [
+            128,
+            504
+          ],
+          "sourceBounds": [
+            96,
+            86,
+            790,
+            1694
+          ]
+        }
+      ],
+      "suggestedWorldWidth": 140,
+      "placement": "floor-or-surface",
+      "integrated": false
+    },
+    {
+      "id": "door-restroom-accessible",
+      "label": "장애인 화장실 미닫이문",
+      "category": "doors",
+      "file": "door-restroom-accessible.png",
+      "source": "source/door-restroom-accessible.png",
+      "size": [
+        256,
+        512
+      ],
+      "sourceSize": [
+        1024,
+        1536
+      ],
+      "frames": [
+        {
+          "name": "default",
+          "rect": [
+            0,
+            0,
+            256,
+            512
+          ],
+          "anchor": [
+            128,
+            504
+          ],
+          "sourceBounds": [
+            84,
+            112,
+            942,
+            1432
+          ]
+        }
+      ],
+      "suggestedWorldWidth": 170,
+      "placement": "floor-or-surface",
+      "integrated": false
+    },
+    {
+      "id": "door-office-wood",
+      "label": "목재 사무실 문",
+      "category": "doors",
+      "file": "door-office-wood.png",
+      "source": "source/door-office-wood.png",
+      "size": [
+        256,
+        512
+      ],
+      "sourceSize": [
+        887,
+        1774
+      ],
+      "frames": [
+        {
+          "name": "default",
+          "rect": [
+            0,
+            0,
+            256,
+            512
+          ],
+          "anchor": [
+            128,
+            504
+          ],
+          "sourceBounds": [
+            93,
+            32,
+            795,
+            1734
+          ]
+        }
+      ],
+      "suggestedWorldWidth": 140,
+      "placement": "floor-or-surface",
+      "integrated": false
+    },
+    {
+      "id": "door-fire-exit",
+      "label": "비상계단 방화문",
+      "category": "doors",
+      "file": "door-fire-exit.png",
+      "source": "source/door-fire-exit.png",
+      "size": [
+        256,
+        512
+      ],
+      "sourceSize": [
+        887,
+        1774
+      ],
+      "frames": [
+        {
+          "name": "default",
+          "rect": [
+            0,
+            0,
+            256,
+            512
+          ],
+          "anchor": [
+            128,
+            504
+          ],
+          "sourceBounds": [
+            123,
+            212,
+            764,
+            1627
+          ]
+        }
+      ],
+      "suggestedWorldWidth": 145,
+      "placement": "floor-or-surface",
+      "integrated": false
+    },
+    {
+      "id": "plant-monstera",
+      "label": "몬스테라 화분",
+      "category": "plants",
+      "file": "plant-monstera.png",
+      "source": "source/plant-monstera.png",
+      "size": [
+        256,
+        256
+      ],
+      "sourceSize": [
+        1024,
+        1536
+      ],
+      "frames": [
+        {
+          "name": "default",
+          "rect": [
+            0,
+            0,
+            256,
+            256
+          ],
+          "anchor": [
+            128,
+            248
+          ],
+          "sourceBounds": [
+            28,
+            87,
+            1006,
+            1456
+          ]
+        }
+      ],
+      "suggestedWorldWidth": 105,
+      "placement": "floor-or-surface",
+      "integrated": false
+    },
+    {
+      "id": "plant-snake",
+      "label": "산세베리아 화분",
+      "category": "plants",
+      "file": "plant-snake.png",
+      "source": "source/plant-snake.png",
+      "size": [
+        256,
+        512
+      ],
+      "sourceSize": [
+        887,
+        1774
+      ],
+      "frames": [
+        {
+          "name": "default",
+          "rect": [
+            0,
+            0,
+            256,
+            512
+          ],
+          "anchor": [
+            128,
+            504
+          ],
+          "sourceBounds": [
+            235,
+            21,
+            730,
+            1748
+          ]
+        }
+      ],
+      "suggestedWorldWidth": 65,
+      "placement": "floor-or-surface",
+      "integrated": false
+    },
+    {
+      "id": "plant-palm",
+      "label": "야자 화분",
+      "category": "plants",
+      "file": "plant-palm.png",
+      "source": "source/plant-palm.png",
+      "size": [
+        256,
+        512
+      ],
+      "sourceSize": [
+        887,
+        1774
+      ],
+      "frames": [
+        {
+          "name": "default",
+          "rect": [
+            0,
+            0,
+            256,
+            512
+          ],
+          "anchor": [
+            128,
+            504
+          ],
+          "sourceBounds": [
+            10,
+            52,
+            882,
+            1745
+          ]
+        }
+      ],
+      "suggestedWorldWidth": 130,
+      "placement": "floor-or-surface",
+      "integrated": false
+    },
+    {
+      "id": "plant-withered",
+      "label": "시든 화분",
+      "category": "plants",
+      "file": "plant-withered.png",
+      "source": "source/plant-withered.png",
+      "size": [
+        256,
+        256
+      ],
+      "sourceSize": [
+        887,
+        1774
+      ],
+      "frames": [
+        {
+          "name": "default",
+          "rect": [
+            0,
+            0,
+            256,
+            256
+          ],
+          "anchor": [
+            128,
+            248
+          ],
+          "sourceBounds": [
+            62,
+            79,
+            829,
+            1733
+          ]
+        }
+      ],
+      "suggestedWorldWidth": 95,
+      "placement": "floor-or-surface",
+      "integrated": false
+    },
+    {
+      "id": "computer-crt",
+      "label": "구형 CRT 컴퓨터",
+      "category": "computers",
+      "file": "computer-crt.png",
+      "source": "source/computer-crt.png",
+      "size": [
+        512,
+        256
+      ],
+      "sourceSize": [
+        1774,
+        887
+      ],
+      "frames": [
+        {
+          "name": "off",
+          "rect": [
+            0,
+            0,
+            256,
+            256
+          ],
+          "anchor": [
+            128,
+            248
+          ],
+          "sourceBounds": [
+            83,
+            113,
+            870,
+            835
+          ],
+          "file": "computer-crt-off.png"
+        },
+        {
+          "name": "on",
+          "rect": [
+            256,
+            0,
+            256,
+            256
+          ],
+          "anchor": [
+            128,
+            248
+          ],
+          "sourceBounds": [
+            58,
+            113,
+            844,
+            835
+          ],
+          "file": "computer-crt-on.png"
+        }
+      ],
+      "suggestedWorldWidth": 150,
+      "placement": "floor-or-surface",
+      "integrated": false
+    },
+    {
+      "id": "computer-all-in-one",
+      "label": "일체형 컴퓨터",
+      "category": "computers",
+      "file": "computer-all-in-one.png",
+      "source": "source/computer-all-in-one.png",
+      "size": [
+        512,
+        256
+      ],
+      "sourceSize": [
+        1774,
+        887
+      ],
+      "frames": [
+        {
+          "name": "off",
+          "rect": [
+            0,
+            0,
+            256,
+            256
+          ],
+          "anchor": [
+            128,
+            248
+          ],
+          "sourceBounds": [
+            111,
+            192,
+            818,
+            770
+          ],
+          "file": "computer-all-in-one-off.png"
+        },
+        {
+          "name": "on",
+          "rect": [
+            256,
+            0,
+            256,
+            256
+          ],
+          "anchor": [
+            128,
+            248
+          ],
+          "sourceBounds": [
+            71,
+            192,
+            777,
+            770
+          ],
+          "file": "computer-all-in-one-on.png"
+        }
+      ],
+      "suggestedWorldWidth": 145,
+      "placement": "floor-or-surface",
+      "integrated": false
+    },
+    {
+      "id": "computer-rugged-laptop",
+      "label": "산업용 노트북",
+      "category": "computers",
+      "file": "computer-rugged-laptop.png",
+      "source": "source/computer-rugged-laptop.png",
+      "size": [
+        512,
+        256
+      ],
+      "sourceSize": [
+        1774,
+        887
+      ],
+      "frames": [
+        {
+          "name": "off",
+          "rect": [
+            0,
+            0,
+            256,
+            256
+          ],
+          "anchor": [
+            128,
+            248
+          ],
+          "sourceBounds": [
+            78,
+            156,
+            872,
+            784
+          ],
+          "file": "computer-rugged-laptop-off.png"
+        },
+        {
+          "name": "on",
+          "rect": [
+            256,
+            0,
+            256,
+            256
+          ],
+          "anchor": [
+            128,
+            248
+          ],
+          "sourceBounds": [
+            16,
+            156,
+            810,
+            784
+          ],
+          "file": "computer-rugged-laptop-on.png"
+        }
+      ],
+      "suggestedWorldWidth": 115,
+      "placement": "floor-or-surface",
+      "integrated": false
+    },
+    {
+      "id": "computer-ultrawide",
+      "label": "울트라와이드 워크스테이션",
+      "category": "computers",
+      "file": "computer-ultrawide.png",
+      "source": "source/computer-ultrawide.png",
+      "size": [
+        512,
+        256
+      ],
+      "sourceSize": [
+        1774,
+        887
+      ],
+      "frames": [
+        {
+          "name": "off",
+          "rect": [
+            0,
+            0,
+            256,
+            256
+          ],
+          "anchor": [
+            128,
+            248
+          ],
+          "sourceBounds": [
+            58,
+            263,
+            868,
+            690
+          ],
+          "file": "computer-ultrawide-off.png"
+        },
+        {
+          "name": "on",
+          "rect": [
+            256,
+            0,
+            256,
+            256
+          ],
+          "anchor": [
+            128,
+            248
+          ],
+          "sourceBounds": [
+            27,
+            265,
+            837,
+            691
+          ],
+          "file": "computer-ultrawide-on.png"
+        }
+      ],
+      "suggestedWorldWidth": 195,
+      "placement": "floor-or-surface",
+      "integrated": false
+    },
+    {
+      "id": "cleaning-cart",
+      "label": "청소 카트",
+      "category": "utility",
+      "file": "cleaning-cart.png",
+      "source": "source/cleaning-cart.png",
+      "size": [
+        256,
+        256
+      ],
+      "sourceSize": [
+        1159,
+        1357
+      ],
+      "frames": [
+        {
+          "name": "default",
+          "rect": [
+            0,
+            0,
+            256,
+            256
+          ],
+          "anchor": [
+            128,
+            248
+          ],
+          "sourceBounds": [
+            67,
+            15,
+            1134,
+            1320
+          ]
+        }
+      ],
+      "suggestedWorldWidth": 135,
+      "placement": "floor-or-surface",
+      "integrated": false
+    },
+    {
+      "id": "restroom-urinal",
+      "label": "소변기",
+      "category": "restroom",
+      "file": "restroom-urinal.png",
+      "source": "source/restroom-urinal.png",
+      "size": [
+        256,
+        256
+      ],
+      "sourceSize": [
+        1024,
+        1536
+      ],
+      "frames": [
+        {
+          "name": "default",
+          "rect": [
+            0,
+            0,
+            256,
+            256
+          ],
+          "anchor": [
+            128,
+            248
+          ],
+          "sourceBounds": [
+            248,
+            28,
+            776,
+            1514
+          ]
+        }
+      ],
+      "suggestedWorldWidth": 65,
+      "placement": "wall",
+      "integrated": false
+    },
+    {
+      "id": "task-chair",
+      "label": "사무용 의자",
+      "category": "utility",
+      "file": "task-chair.png",
+      "source": "source/task-chair.png",
+      "size": [
+        256,
+        256
+      ],
+      "sourceSize": [
+        1024,
+        1536
+      ],
+      "frames": [
+        {
+          "name": "default",
+          "rect": [
+            0,
+            0,
+            256,
+            256
+          ],
+          "anchor": [
+            128,
+            248
+          ],
+          "sourceBounds": [
+            55,
+            65,
+            969,
+            1471
+          ]
+        }
+      ],
+      "suggestedWorldWidth": 85,
+      "placement": "floor-or-surface",
+      "integrated": false
+    },
+    {
+      "id": "fire-extinguisher",
+      "label": "소화기",
+      "category": "utility",
+      "file": "fire-extinguisher.png",
+      "source": "source/fire-extinguisher.png",
+      "size": [
+        256,
+        256
+      ],
+      "sourceSize": [
+        887,
+        1774
+      ],
+      "frames": [
+        {
+          "name": "default",
+          "rect": [
+            0,
+            0,
+            256,
+            256
+          ],
+          "anchor": [
+            128,
+            248
+          ],
+          "sourceBounds": [
+            110,
+            114,
+            849,
+            1715
+          ]
+        }
+      ],
+      "suggestedWorldWidth": 45,
+      "placement": "floor-or-surface",
+      "integrated": false
+    },
+    {
+      "id": "recycling-bin",
+      "label": "분리수거함",
+      "category": "utility",
+      "file": "recycling-bin.png",
+      "source": "source/recycling-bin.png",
+      "size": [
+        256,
+        256
+      ],
+      "sourceSize": [
+        1156,
+        1360
+      ],
+      "frames": [
+        {
+          "name": "default",
+          "rect": [
+            0,
+            0,
+            256,
+            256
+          ],
+          "anchor": [
+            128,
+            248
+          ],
+          "sourceBounds": [
+            70,
+            250,
+            1084,
+            1216
+          ]
+        }
+      ],
+      "suggestedWorldWidth": 100,
+      "placement": "floor-or-surface",
+      "integrated": false
+    },
+    {
+      "id": "acoustic-divider",
+      "label": "이동식 파티션",
+      "category": "utility",
+      "file": "acoustic-divider.png",
+      "source": "source/acoustic-divider.png",
+      "size": [
+        512,
+        256
+      ],
+      "sourceSize": [
+        1774,
+        887
+      ],
+      "frames": [
+        {
+          "name": "default",
+          "rect": [
+            0,
+            0,
+            512,
+            256
+          ],
+          "anchor": [
+            256,
+            248
+          ],
+          "sourceBounds": [
+            20,
+            128,
+            1754,
+            786
+          ]
+        }
+      ],
+      "suggestedWorldWidth": 240,
+      "placement": "floor-or-surface",
+      "integrated": false
+    }
+  ]
+}

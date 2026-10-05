@@ -1,9 +1,49 @@
 import assert from 'node:assert/strict';
 
+export async function interactionMessage(page) {
+  const message = await page.evaluate(() => document.getElementById('inspection').hidden ?
+    document.getElementById('interaction-status').textContent : document.getElementById('inspection-description').textContent);
+  // Route tests read the full accessible description, then dismiss the new modal before continuing.
+  // Character-by-character rendering and reveal controls are covered by inspection-ui.mjs.
+  if (await page.locator('#inspection').isVisible()) {
+    await page.keyboard.press('Escape');
+    assert(await page.locator('#inspection').isHidden());
+  }
+  return message;
+}
+
 export async function finishSceneTransition(page) {
   await page.clock.runFor(800);
   assert.equal(await page.locator('#room-transition').getAttribute('data-phase'), 'idle');
   assert.equal(await page.locator('#room-transition').evaluate(el => getComputedStyle(el).opacity), '0');
+}
+
+export async function collectRooftopKey(page) {
+  const position = () => page.locator('#player').evaluate(el => new DOMMatrix(getComputedStyle(el).transform).m41 + 96);
+  const start = await position();
+  for (const target of [4095, start]) {
+    const wasDark = await page.evaluate(() => buildingBlackout);
+    const x = await position();
+    const key = target > x ? 'd' : 'a';
+    await page.keyboard.down(key);
+    await page.clock.runFor(Math.abs(target - x) / 200 * 1000);
+    await page.keyboard.up(key);
+    await page.clock.runFor(34);
+    if (!wasDark && await page.evaluate(() => buildingBlackout || blackoutSceneActive)) {
+      if (await page.locator('#blackout-scene').isVisible()) await page.clock.runFor(5000);
+      const remaining = target - await position();
+      const resumeKey = remaining > 0 ? 'd' : 'a';
+      await page.keyboard.down(resumeKey);
+      await page.clock.runFor(Math.abs(remaining) / 200 * 1000);
+      await page.keyboard.up(resumeKey);
+      await page.clock.runFor(34);
+    }
+    if (target === 4095) {
+      await page.keyboard.press('e');
+      await page.getByRole('button', { name: '낡은 열쇠 줍기' }).click();
+      await page.keyboard.press('Escape');
+    }
+  }
 }
 
 export async function reachInitialCorridor(page) {

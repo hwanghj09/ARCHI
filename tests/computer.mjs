@@ -12,6 +12,9 @@ try {
   page.on('requestfailed', request => errors.push(request.url()));
   await page.clock.install();
   await page.goto(new URL('../index.html', import.meta.url).href);
+  await page.locator('#menu-start').click();
+  if (await page.locator('#menu-new-confirm').isVisible()) await page.locator('#menu-new-confirm').click();
+  await page.locator('#opening-skip').click();
   await page.clock.pauseAt(new Date(Date.now() + 1000));
   await page.clock.runFor(100);
   const pc = page.locator('#computer');
@@ -36,7 +39,7 @@ try {
   assert.equal(await position(), initialPosition, 'Desktop keyboard input cannot move the player');
   await pc.locator('.computer-shortcuts [data-computer-app="files"]').click();
   const records = pc.locator('[data-computer-document]');
-  assert.equal(await records.count(), 8);
+  assert.equal(await records.count(), 9);
   assert.equal(await pc.locator('[data-computer-card], #computer-card').count(), 0);
   assert.equal(await pc.getByText(/사원증/).count(), 0, 'Employee badges are not available on the PC');
   await page.screenshot({ path: '.local/computer-company-files.png' });
@@ -51,7 +54,15 @@ try {
     if (documentId === 'weekly-report') await page.screenshot({ path: '.local/computer-company-report.png' });
     await pc.getByRole('button', { name: '파일 목록으로' }).click();
   }
-  assert.equal(titles.size, 8, 'Each company record opens its own contents');
+  assert.equal(titles.size, 9, 'Each company record opens its own contents');
+  await pc.getByRole('combobox', { name: '문서 분류' }).selectOption('안내');
+  assert.equal(await pc.locator('[data-computer-document]:visible').count(), 1);
+  await pc.locator('[data-computer-document="controls"]').click();
+  assert.equal(await page.locator('#computer-document-title').textContent(), '조작 키 안내');
+  await page.keyboard.press('Escape');
+  assert(await app.isHidden(), 'Escape closes the document app and keeps the computer desktop open');
+  assert(await pc.isVisible());
+  await pc.locator('.computer-shortcuts [data-computer-app="files"]').click();
   await pc.getByRole('combobox', { name: '문서 분류' }).selectOption('프로젝트');
   assert.equal(await pc.locator('[data-computer-document]:visible').count(), 3);
   await pc.getByRole('searchbox', { name: '문서 검색' }).fill('조현아');
@@ -94,6 +105,9 @@ try {
   await page.keyboard.press('e');
   assert(await pc.isHidden(), 'A distant computer cannot be used');
   await page.reload();
+  await page.locator('#menu-start').click();
+  if (await page.locator('#menu-new-confirm').isVisible()) await page.locator('#menu-new-confirm').click();
+  await page.locator('#opening-skip').click();
   await page.clock.runFor(100);
   await page.keyboard.press('Space');
   await page.clock.runFor(150);
@@ -111,11 +125,14 @@ try {
   await documentScroll.evaluate(el => { el.scrollTop = el.scrollHeight; });
   assert(await documentScroll.evaluate(el => el.scrollTop > 0), 'Long documents can scroll to the final section');
   await pc.getByRole('button', { name: '파일 목록으로' }).click();
+  await pc.locator('[data-computer-document="controls"]').click();
+  assert(await documentScroll.evaluate(el => el.scrollWidth <= el.clientWidth + 1), 'The controls document fits mobile width');
+  await pc.getByRole('button', { name: '파일 목록으로' }).click();
   await pc.locator('[data-computer-document="organization"]').click();
   assert.equal(await documentScroll.evaluate(el => el.scrollTop), 0, 'Opening another document resets reading position');
   await page.screenshot({ path: '.local/computer-company-document-mobile.png' });
   await pc.locator('.computer-shortcuts [data-computer-app="notes"]').click();
-  assert.equal(await note.inputValue(), saved, 'Saved memo survives page reload');
+  assert.equal(await note.inputValue(), '', 'Starting a new game clears the previous playthrough memo');
   await page.screenshot({ path: '.local/computer-mobile-notes.png' });
   const bounds = await app.boundingBox();
   assert(bounds.x >= 0 && bounds.x + bounds.width <= 390 && bounds.y + bounds.height <= 844);
@@ -136,7 +153,7 @@ try {
   const landscape = await app.boundingBox();
   assert(landscape.width > 200 && landscape.height > 150);
   assert.deepEqual(errors, []);
-  console.log('PASS: computer proximity, fades, eight company documents, search, filters, no badges, mobile reading, memo persistence and input isolation.');
+  console.log('PASS: computer proximity, fades, nine company documents, search, filters, no badges, mobile reading, memo persistence and input isolation.');
 } finally {
   await browser.close();
 }

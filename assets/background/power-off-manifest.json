@@ -1,0 +1,72 @@
+{
+  "generator": "built-in image_gen",
+  "normalization": "Center-crop generated letterboxing to the original aspect ratio, then nearest-neighbor resize to original dimensions.",
+  "prompt": "Precisely edit this existing 2D game background to make an electrical power OFF variant. Keep all architecture, objects, positions, framing, original aspect ratio, floor baseline and material details unchanged. All indoor lamps, fluorescent tubes, hanging pendant lights, wall spotlights and electric signs must be unlit dark material. Remove their warm light pools, glow and illuminated patches on walls and floors. Preserve external city lights visible through windows. Use faint cool ambient night light so objects stay visible rather than turning the image black. Do not crop or add letterboxing, no new objects or text. Keep original canvas dimensions and pixel-art style. This must align with the input when switched during gameplay.",
+  "assets": [
+    {
+      "original": "assets/background/floor17/office-interior-aligned.png",
+      "output": "assets/background/floor17/office-interior-aligned-off.png",
+      "generated": "C:/Users/hwang/.codex/generated_images/01a0f7d2-eddb-74b0-962d-ca5e722f339c/exec-a714d63e-dc46-49d2-b1c9-2c82805fa65c.png"
+    },
+    {
+      "original": "assets/background/floor17/floor17.png",
+      "output": "assets/background/floor17/floor17-off.png",
+      "generated": "C:/Users/hwang/.codex/generated_images/01a0f7d2-eddb-74b0-962d-ca5e722f339c/exec-89874484-2363-4dc1-8644-948801e4d5bc.png"
+    },
+    {
+      "original": "assets/background/floor17/restroom.png",
+      "output": "assets/background/floor17/restroom-off.png",
+      "generated": "C:/Users/hwang/.codex/generated_images/01a0f7d2-eddb-74b0-962d-ca5e722f339c/exec-a137de7f-8c18-42d9-859f-7a7a14a75ae7.png"
+    },
+    {
+      "original": "assets/background/floor17/service-corridor.png",
+      "output": "assets/background/floor17/service-corridor-off.png",
+      "generated": "C:/Users/hwang/.codex/generated_images/01a0f7d2-eddb-74b0-962d-ca5e722f339c/exec-38ed9b5d-2231-4ede-a839-ff18eeb3db0a.png"
+    },
+    {
+      "original": "assets/background/floor7/corridor.png",
+      "output": "assets/background/floor7/corridor-off.png",
+      "generated": "C:/Users/hwang/.codex/generated_images/01a0f7d2-eddb-74b0-962d-ca5e722f339c/exec-216d28c5-5dd9-4c7d-906a-057a5faae11a.png"
+    },
+    {
+      "original": "assets/background/floor7/vip.png",
+      "output": "assets/background/floor7/vip-off.png",
+      "generated": "C:/Users/hwang/.codex/generated_images/01a0f7d2-eddb-74b0-962d-ca5e722f339c/exec-228f8858-340f-4389-b20c-957553458a08.png"
+    },
+    {
+      "original": "assets/background/floor16/amenity-corridor-left.png",
+      "output": "assets/background/floor16/amenity-corridor-left-off.png",
+      "generated": "C:/Users/hwang/.codex/generated_images/01a0f7d2-eddb-74b0-962d-ca5e722f339c/exec-227cc0c6-da68-4ee3-a2a8-c7b98c0f6f21.png"
+    },
+    {
+      "original": "assets/background/floor16/amenity-corridor-core.png",
+      "output": "assets/background/floor16/amenity-corridor-core-off.png",
+      "generated": "C:/Users/hwang/.codex/generated_images/01a0f7d2-eddb-74b0-962d-ca5e722f339c/exec-cb6e4e9c-34a7-48b6-8617-55da34984a39.png"
+    },
+    {
+      "original": "assets/background/floor16/amenity-corridor-right.png",
+      "output": "assets/background/floor16/amenity-corridor-right-off.png",
+      "generated": "C:/Users/hwang/.codex/generated_images/01a0f7d2-eddb-74b0-962d-ca5e722f339c/exec-c8b77c3b-2a6f-4590-9b02-4805a424e5b3.png"
+    },
+    {
+      "original": "assets/background/floor16/amenity-kitchen-dining.png",
+      "output": "assets/background/floor16/amenity-kitchen-dining-off.png",
+      "generated": "C:/Users/hwang/.codex/generated_images/01a0f7d2-eddb-74b0-962d-ca5e722f339c/exec-1d619b6a-08a2-41d0-86d6-cdcaf904332c.png"
+    },
+    {
+      "original": "assets/background/floor16/amenity-kitchen-service.png",
+      "output": "assets/background/floor16/amenity-kitchen-service-off.png",
+      "generated": "C:/Users/hwang/.codex/generated_images/01a0f7d2-eddb-74b0-962d-ca5e722f339c/exec-a0f8b32f-aa27-419c-8cc3-d2bbc8476fc3.png"
+    },
+    {
+      "original": "assets/background/floor16/amenity-cu-interior.png",
+      "output": "assets/background/floor16/amenity-cu-interior-off.png",
+      "generated": "C:/Users/hwang/.codex/generated_images/01a0f7d2-eddb-74b0-962d-ca5e722f339c/exec-25350f09-ff29-4498-a928-b493f0d30368.png"
+    },
+    {
+      "original": "assets/background/floor16/amenity-cafe-interior.png",
+      "output": "assets/background/floor16/amenity-cafe-interior-off.png",
+      "generated": "C:/Users/hwang/.codex/generated_images/01a0f7d2-eddb-74b0-962d-ca5e722f339c/exec-834559d4-6512-43d0-9dc1-37440da1c639.png"
+    }
+  ]
+}

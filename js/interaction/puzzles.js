@@ -3,16 +3,21 @@
 function updateCall() {
   if (!activeCall) return;
   const call = activeCall.ring;
+  const previousElapsed = call.elapsed;
   call.elapsed += step;
   if (call.state === 'waiting' && call.elapsed >= call.after) {
     call.state = 'ringing';
     activeCall.element.dataset.ringing = 'true';
+    playGameSound('call-ring', { x: activeCall.x });
     showStatus(call.startMessage, call.duration);
   } else if (call.state === 'ringing' && call.elapsed >= call.after + call.duration) {
     call.state = 'missed';
     activeCall.element.dataset.ringing = 'false';
     showStatus(call.missedMessage, 4000);
     activeCall = null;
+    stopGameSound('call-ring');
+  } else if (call.state === 'ringing' && Math.floor((call.elapsed - call.after) / 2200) > Math.floor((previousElapsed - call.after) / 2200)) {
+    playGameSound('call-ring', { x: activeCall.x });
   }
 }
 
@@ -21,15 +26,20 @@ function updateCall() {
 function advanceSequence(door) {
   const { id, step: order, steps, gives, wrongMessage } = door.sequence;
   if (collectedItems.has(gives)) {
-    showStatus(door.takenMessage || door.message, 5000);
+    if (door.takenSheet) openInspection(door.name, door.takenMessage || door.message, door.takenSheet);
+    else showStatus(door.takenMessage || door.message, 5000);
     return;
   }
   const progress = sequenceProgress.get(id) || 0;
   if (order === progress || order === progress + 1) {
     sequenceProgress.set(id, order);
     door.element.dataset.done = 'true';
-    showStatus(door.message, 5000);
-    if (order === steps) collectedItems.add(gives);
+    // 마지막 단계의 결과(8층 재현 벤치 출력지)는 조사 창으로 펼친다. 중간 단계는 짧은 상태 문구다.
+    if (order === steps) {
+      collectedItems.add(gives);
+      if (order !== progress) playGameSound('pickup');
+      openInspection(door.name, door.message, door);
+    } else showStatus(door.message, 5000);
     return;
   }
   for (const entry of currentDoors) if (entry.sequence?.id === id) entry.element.dataset.done = 'false';
@@ -49,6 +59,7 @@ function openTimedBarrier(button) {
   Composite.remove(engine.world, barrier.solid);
   currentTerrain = currentTerrain.filter(solid => solid !== barrier.solid);
   barrier.parked = barrier.solid;
+  playGameSound('door', { x: barrier.x });
   barrier.solid = null;
   barrier.element.dataset.open = 'true';
   timedBarriers.push(barrier);
@@ -61,6 +72,7 @@ function updateTimedBarriers() {
     Composite.add(engine.world, barrier.parked);
     currentTerrain = [...currentTerrain, barrier.parked];
     barrier.solid = barrier.parked;
+    playGameSound('door', { x: barrier.x });
     barrier.parked = null;
     barrier.element.dataset.open = 'false';
     timedBarriers.splice(timedBarriers.indexOf(barrier), 1);
@@ -71,9 +83,50 @@ function updateTimedBarriers() {
 // requires가 있는 설비(data-requires)의 data-ready를 지금 챙긴 물건에 맞춘다. 장면을 그릴 때와 물건을 챙기거나 출력을 옮길 때
 // 부르므로, 같은 방에서 조건이 채워지면 그림도 바로 바뀐다(2층 영사실 관람창).
 function refreshReady() {
+  const scene = floorById.get(dynamicFloorId);
+  world.dataset.localLight = String(room === 'dynamic' && scene?.floor === currentSceneFloor &&
+    Boolean(scene?.litBy) && collectedItems.has(scene.litBy));
   for (const element of dynamicScene.querySelectorAll('[data-requires]')) {
     element.dataset.ready = String(element.dataset.requires.split('|').every(item => collectedItems.has(item)));
   }
+  for (const element of dynamicScene.querySelectorAll('[data-sprite-frames]')) {
+    const frame = element.dataset.stateBy ? Number(collectedItems.has(element.dataset.stateBy)) :
+      element.dataset.poweredSprite ? Number(world.dataset.powered === 'true') : Number(element.dataset.spriteFrame);
+    element.dataset.spriteFrame = frame;
+    element.querySelector('img').style.transform = `translateX(${-frame * 100 / Number(element.dataset.spriteFrames)}%)`;
+  }
+}
+
+// 짧은 출력·인사·셔터 동작 뒤에는 현재 게임 상태의 정지 그림으로 돌아간다.
+function playPropAnimation(door) {
+  if (!door.animation || (door.poweredSprite && world.dataset.powered !== 'true')) return;
+  const image = door.element.querySelector('img');
+  for (const animation of image.getAnimations()) {
+    animation.oncancel?.();
+    animation.oncancel = null;
+    animation.cancel();
+  }
+  const { src, frames, duration = 1200, first = 0 } = door.animation;
+  const original = { src: image.src, style: image.getAttribute('style') };
+  image.src = src;
+  const cellWidth = parseFloat(getComputedStyle(image).width) / (Number(door.element.dataset.spriteFrames) || 2);
+  image.style.width = `${cellWidth * frames}px`;
+  const poses = Array.from({ length: frames - first }, (_, i) => {
+    const frame = first + i;
+    return { transform: `translateX(${-frame * cellWidth}px)`,
+      clipPath: `inset(0 ${(frames - frame - 1) * 100 / frames}% 0 ${frame * 100 / frames}%)`,
+      offset: i / (frames - first), easing: 'steps(1, end)' };
+  });
+  poses.push({ ...poses.at(-1), offset: 1 });
+  const animation = image.animate(poses, { duration });
+  const restore = () => {
+    image.src = original.src;
+    if (original.style === null) image.removeAttribute('style');
+    else image.setAttribute('style', original.style);
+    refreshReady();
+  };
+  animation.onfinish = restore;
+  animation.oncancel = restore;
 }
 
 // 출력 선택기(소품의 cycle: { id, states, messages, initial }, 4층 연구실 UPS): 조사할 때마다 states의 다음 칸으로 넘어간다.

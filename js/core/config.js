@@ -21,3 +21,5 @@ const runFrameDistance = 192 / runFrames;
 const walkFrames = 6;
 const frameDistance = 184 / walkFrames;
 const step = 1000 / 60;
+const sanityDrainPerSecond = 1;
+const sanityRecoveryPerSecond = 2;

@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { mkdir } from 'node:fs/promises';
 import { chromium } from 'playwright';
-import { reachInitialCorridor } from './scene-transition.mjs';
+import { reachInitialCorridor, collectRooftopKey } from './scene-transition.mjs';
 
 await mkdir('.local', { recursive: true });
 const browser = await chromium.launch();
@@ -11,8 +11,12 @@ try {
   page.on('pageerror', error => errors.push(error.message));
   await page.clock.install({ time: new Date('2026-09-20T00:00:00Z') });
   await page.goto(new URL('../index.html', import.meta.url).href);
+  await page.locator('#menu-start').click();
+  if (await page.locator('#menu-new-confirm').isVisible()) await page.locator('#menu-new-confirm').click();
+  await page.locator('#opening-skip').click();
   await page.clock.pauseAt(new Date('2026-09-20T00:01:00Z'));
   await reachInitialCorridor(page);
+  await collectRooftopKey(page);
   const state = () => page.locator('#player').evaluate(el => {
     const matrix = new DOMMatrix(getComputedStyle(el).transform);
     return { x: matrix.m41 + 96, feet: matrix.m42 + 178, room: el.parentElement.dataset.room };
@@ -38,6 +42,7 @@ try {
   assert.equal((await state()).room, 'corridor', 'Airborne stair use is blocked');
   await page.clock.runFor(1000);
   await page.keyboard.down('e');
+  await page.getByRole('button', { name: '열쇠 사용하기', exact: true }).click();
   await arrived('dynamic');
   await page.keyboard.down('e');
   await page.keyboard.up('e');
@@ -63,6 +68,8 @@ try {
   await page.screenshot({ path: '.local/solar-supply-mobile.png' });
   await page.keyboard.press('e');
   assert.equal((await state()).room, 'dynamic', 'The solar device is not a stair interaction');
+  assert(await page.locator('#power-panel').isVisible(), 'The solar device opens its power controls');
+  await page.keyboard.press('Escape');
   await page.setViewportSize({ width: 1280, height: 720 });
   await hold('d', 11000);
   assert(Math.abs((await state()).x - 2348) < 1, 'Roof boundary blocks movement');

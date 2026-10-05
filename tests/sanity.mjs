@@ -1,0 +1,107 @@
+import assert from 'node:assert/strict';
+import { chromium } from 'playwright';
+import { mkdir } from 'node:fs/promises';
+
+await mkdir('.local', { recursive: true });
+const browser = await chromium.launch();
+try {
+  const page = await browser.newPage({ viewport: { width: 1280, height: 720 }, hasTouch: true });
+  const errors = [];
+  page.on('pageerror', error => errors.push(error.message));
+  await page.clock.install({ time: new Date('2026-10-04T00:00:00Z') });
+  await page.goto(new URL('../index.html', import.meta.url).href);
+  await page.locator('#menu-start').click();
+  if (await page.locator('#menu-new-confirm').isVisible()) await page.locator('#menu-new-confirm').click();
+  assert.equal(await page.locator('#sanity-meter').getAttribute('aria-valuenow'), '100');
+  assert(await page.locator('#sanity-hud').isHidden(), 'Opening hides the gameplay meter');
+  await page.locator('#opening-skip').click();
+  await page.clock.pauseAt(new Date('2026-10-04T00:01:00Z'));
+  await page.clock.runFor(100);
+  const state = () => page.evaluate(() => ({ sanity, exposure: sanityExposure(), hallucinating: !hallucinations.hidden,
+    shadow: !hallucinationShadow.hidden, battery: phoneBattery, caught: playerCaught, x: body.position.x }));
+  const near = (actual, expected) => assert(Math.abs(actual - expected) < .08, `${actual} ≈ ${expected}`);
+  await page.clock.runFor(2000); assert.equal((await state()).sanity, 100, 'Bright recovery clamps at full capacity');
+  await page.evaluate(() => triggerBuildingBlackout());
+  assert.equal((await state()).exposure, 'dark');
+  await page.clock.runFor(5000); near((await state()).sanity, 95);
+  await page.keyboard.press('f');
+  const shielded = await state();
+  assert.equal(shielded.exposure, 'flashlight');
+  await page.clock.runFor(3000); near((await state()).sanity, shielded.sanity);
+  assert((await state()).battery < shielded.battery, 'Protection still consumes the phone battery');
+  await page.keyboard.press('f');
+  await page.keyboard.press('p');
+  const reading = (await state()).sanity;
+  await page.clock.runFor(5000); near((await state()).sanity, reading);
+  await page.keyboard.press('Escape');
+  await page.evaluate(() => openInspection('메모', '읽는 동안에는 정신력이 줄지 않는다.'));
+  await page.clock.runFor(4000); near((await state()).sanity, reading);
+  await page.keyboard.press('Escape');
+  await page.evaluate(() => { solarEnabled = true; solarPoweredFloor = 17; updatePowerState(); });
+  await page.clock.runFor(2500); assert.equal((await state()).sanity, 100);
+  await page.getByRole('checkbox', { name: '17층 조명' }).uncheck();
+  await page.clock.runFor(2000); near((await state()).sanity, 98);
+  await page.evaluate(() => {
+    phoneBattery = 1; phoneLightOn = true; phoneDrainAccumulator = 0; refreshPhone();
+  });
+  const untilEmpty = (await state()).sanity;
+  await page.clock.runFor(1000); near((await state()).sanity, untilEmpty);
+  await page.clock.runFor(2000); assert((await state()).sanity < untilEmpty - 1.8, 'Depleted phone removes darkness protection');
+  await page.evaluate(() => { performFloorChange('f14-archive', null, 'exit'); });
+  assert.equal((await state()).exposure, 'dark', 'Windowless dark rooms use the same fear rule');
+  await page.evaluate(() => { collectedItems.add('f14-archive-lamp'); refreshReady(); });
+  assert.equal((await state()).exposure, 'bright', 'Local work light overrides the floor outage mask');
+  const underLamp = (await state()).sanity;
+  await page.clock.runFor(1000); near((await state()).sanity, underLamp + 2);
+  for (const id of ['b1', 'b2', 'rooftop']) {
+    await page.evaluate(id => performFloorChange(id, id === 'rooftop' ? null : 0), id);
+    assert.equal((await state()).exposure, 'bright', `${id} is illuminated independently of the outage`);
+  }
+  await page.evaluate(() => { performFloorChange('f16'); sanity = .5; phoneLightOn = false; refreshPhone(); });
+  const bodyCount = await page.evaluate(() => Composite.allBodies(engine.world).length);
+  await page.clock.runFor(1000);
+  assert.equal((await state()).sanity, 0);
+  assert((await state()).hallucinating && (await state()).shadow);
+  assert.equal(await page.locator('#sanity-state').textContent(), '환각');
+  assert.equal(await page.locator('#sanity-meter').getAttribute('aria-valuenow'), '0');
+  assert.equal(await page.locator('#hallucinations').evaluate(el => getComputedStyle(el).pointerEvents), 'none');
+  await page.locator('#hallucination-shadow').evaluate(img => img.decode());
+  await page.screenshot({ path: '.local/sanity-hallucination-desktop.png' });
+  const from = (await state()).x;
+  await page.keyboard.down('d'); await page.clock.runFor(500); await page.keyboard.up('d');
+  assert((await state()).x > from + 80 && !(await state()).caught, 'Hallucination does not immobilize or capture the player');
+  assert.equal(await page.evaluate(() => Composite.allBodies(engine.world).length), bodyCount, 'Hallucinations do not create physical actors');
+  await page.clock.runFor(2000); assert(!(await state()).shadow && (await state()).hallucinating, 'Figure vanishes between sightings');
+  await page.clock.runFor(6500); assert((await state()).shadow, 'Figure reappears on the next cycle');
+  assert.equal((await state()).sanity, 0, 'Prolonged darkness never drains below zero');
+  await page.evaluate(() => { phoneBattery = 100; refreshPhone(); });
+  await page.keyboard.press('f'); await page.clock.runFor(50);
+  assert(!(await state()).hallucinating && (await state()).sanity === 0, 'Phone suppresses sightings without restoring lost sanity');
+  // Cabin darkness is distinct from floor lighting and the side-view flashlight.
+  await page.locator('#cabin-art').evaluate(img => img.decode());
+  await page.evaluate(() => { elevatorCars[0].floor = 16; sanity = 30; showCabin(0); });
+  assert.equal((await state()).exposure, 'dark');
+  await page.clock.runFor(2000); near((await state()).sanity, 28);
+  await page.evaluate(() => { sanity = .1; }); await page.clock.runFor(500);
+  assert((await state()).hallucinating && (await state()).shadow);
+  assert(Number(await page.locator('#hallucinations').evaluate(el => getComputedStyle(el).zIndex)) >
+    Number(await page.locator('#elevator-cabin').evaluate(el => getComputedStyle(el).zIndex)), 'Cabin sightings render above the cabin');
+  await page.keyboard.press('Escape'); await page.clock.runFor(800);
+  assert(!(await state()).hallucinating, 'Transition and flashlight suppress the old cabin effect');
+  await page.evaluate(() => { phoneLightOn = false; performFloorChange('f16'); refreshPhone(); });
+  await page.setViewportSize({ width: 390, height: 844 }); await page.clock.runFor(500);
+  const meter = await page.locator('#sanity-hud').boundingBox();
+  const figure = await page.locator('#hallucination-shadow').boundingBox();
+  assert(meter.x >= 0 && meter.x + meter.width <= 390 && meter.y + meter.height < 700);
+  assert(figure.x >= 0 && figure.x + figure.width <= 390, 'Mobile apparition remains inside the viewport');
+  await page.screenshot({ path: '.local/sanity-hallucination-mobile.png' });
+  await page.evaluate(() => performFloorChange('rooftop', null)); await page.clock.runFor(1000);
+  near((await state()).sanity, 2); assert(!(await state()).hallucinating, 'Bright recovery immediately ends hallucinations');
+  const beforeHidden = (await state()).sanity;
+  await page.evaluate(() => Object.defineProperty(document, 'hidden', { configurable: true, get: () => true }));
+  await page.clock.runFor(5000); near((await state()).sanity, beforeHidden);
+  await page.evaluate(() => { delete document.hidden; }); await page.clock.runFor(1000);
+  near((await state()).sanity, beforeHidden + 2);
+  assert.deepEqual(errors, []);
+  console.log('PASS: sanity HUD/clamps, darkness/flashlight/bright rates, battery exhaustion, reading pause, room light, basement/roof, zero-level sightings/cycles, no collision/capture, cabin, mobile and hidden-tab pause.');
+} finally { await browser.close(); }

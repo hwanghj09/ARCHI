@@ -1,0 +1,22 @@
+/* 소화전 내부와 소지품은 같은 조사창 안에서 조작한다. */
+#inventory-button { position: fixed; right: max(24px, env(safe-area-inset-right)); top: 68px; z-index: 5; padding: 10px 14px; border: 1px solid #778778; border-radius: 4px; background: #182327; color: #eddfbd; cursor: pointer; }
+#inspection[data-surface="hydrant"], #inspection[data-surface="inventory"], #inspection[data-surface="rooftop-lock"] { width: min(520px, calc(100vw - 24px)); }
+.item-panel { padding: 12px; color: #e6dcc6; }
+.hydrant-cabinet { position: relative; width: min(380px, 100%); aspect-ratio: 1; margin: auto; }
+.hydrant-cabinet > img { display: block; width: 100%; height: auto; image-rendering: pixelated; }
+.inventory-item { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; min-width: 108px; min-height: 100px; padding: 14px; border: 1px solid #68776c; border-radius: 3px; background: #202c2f; color: #e6dcc6; cursor: pointer; }
+.inventory-item:hover, .inventory-item:focus-visible { outline: 2px solid #dbc18b; outline-offset: 2px; background: #344038; }
+.item-key { display: block; width: 80px; height: 80px; object-fit: contain; image-rendering: pixelated; }
+.hydrant-cabinet .inventory-item { position: absolute; bottom: 17%; left: 65%; transform: translateX(-50%); min-width: 96px; min-height: 48px; padding: 0; border-color: transparent; background: transparent; }
+.hydrant-cabinet .item-key { width: 64px; height: 64px; }
+.hydrant-cabinet .item-name { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+.item-description { min-height: 3.5em; margin: 14px 0 0; padding: 12px; border-top: 1px solid #657064; line-height: 1.7; font-size: 14px; word-break: keep-all; }
+.inventory-content { min-height: 200px; background: #172125; border: 1px solid #57665b; }
+.inventory-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(108px, 1fr)); gap: 12px; min-height: 100px; }
+@media (max-height: 480px) {
+  .hydrant-cabinet { width: min(220px, 100%); }
+}
+@media (max-height: 480px) and (min-width: 600px) {
+  #inspection[data-surface="hydrant"] .item-panel { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; align-items: center; padding: 4px 12px; }
+  #inspection[data-surface="hydrant"] .item-description { margin: 0; }
+}

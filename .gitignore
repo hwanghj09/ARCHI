@@ -1,2 +1,11 @@
 node_modules/
 .local/
+
+# Leftover Unity Editor cache (this project no longer uses Unity)
+Library/
+Logs/
+UserSettings/
+Temp/
+Obj/
+Build/
+Builds/

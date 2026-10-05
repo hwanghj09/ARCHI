@@ -1,0 +1,267 @@
+{
+  "generator": "built-in image_gen",
+  "date": "2026-09-30",
+  "reference": "../basic-kit/cleaning-cart.png",
+  "assets": [
+    {
+      "id": "snack-vending-machine",
+      "label": "간식 자판기",
+      "category": "amenity",
+      "size": [
+        256,
+        512
+      ],
+      "world": 145,
+      "placement": "floor",
+      "subject": "One tall muted burgundy snack vending machine, glass front shows five rows of spiral dispensers holding varied cream, ochre, teal snack packets without labels. Narrow right payment panel, small dim display and a black lower collection hatch. Clearly snacks not drink cans.",
+      "generationPrompt": "Use case: stylized-concept. Asset type: ONE reusable isolated prop PNG for ARCHI, a Korean 2D side-scrolling office mystery game. Attached image is ONLY a STYLE/material reference, do not copy its object. Finely detailed anime-inspired PIXEL ART, crisp hard pixel clusters and stepped outlines, realistic proportions, muted charcoal, cool gray, teal and modest warm accents, readable neutral ambient highlights. Straight-on FRONT ELEVATION consistent with a side-scrolling game, only minimal top surface visible, no isometric view or rotated 3/4 view. One complete centered object with generous padding and level bottom contact. Actual transparent alpha in all empty spaces and cutouts. No floor, room, wall, background, cast shadow, glow halo, fog, checkerboard, captions, borders, text, logos, watermarks or people. No collage or sprite sheet. No readable writing. Entire object visible including feet and attachments. One tall muted burgundy snack vending machine, glass front shows five rows of spiral dispensers holding varied cream, ochre, teal snack packets without labels. Narrow right payment panel, small dim display and a black lower collection hatch. Clearly snacks not drink cans."
+    },
+    {
+      "id": "coffee-machine",
+      "label": "전자동 커피머신",
+      "category": "amenity",
+      "size": [
+        256,
+        256
+      ],
+      "world": 75,
+      "placement": "surface",
+      "subject": "One compact commercial bean-to-cup coffee machine, charcoal body, transparent top bean hopper with brown beans, twin chrome dispensing nozzles, single white ceramic cup resting on drip tray, small dark display, brushed steel lower face. No cabinet or table.",
+      "generationPrompt": "Use case: stylized-concept. Asset type: ONE reusable isolated prop PNG for ARCHI, a Korean 2D side-scrolling office mystery game. Attached image is ONLY a STYLE/material reference, do not copy its object. Finely detailed anime-inspired PIXEL ART, crisp hard pixel clusters and stepped outlines, realistic proportions, muted charcoal, cool gray, teal and modest warm accents, readable neutral ambient highlights. Straight-on FRONT ELEVATION consistent with a side-scrolling game, only minimal top surface visible, no isometric view or rotated 3/4 view. One complete centered object with generous padding and level bottom contact. Actual transparent alpha in all empty spaces and cutouts. No floor, room, wall, background, cast shadow, glow halo, fog, checkerboard, captions, borders, text, logos, watermarks or people. No collage or sprite sheet. No readable writing. Entire object visible including feet and attachments. One compact commercial bean-to-cup coffee machine, charcoal body, transparent top bean hopper with brown beans, twin chrome dispensing nozzles, single white ceramic cup resting on drip tray, small dark display, brushed steel lower face. No cabinet or table."
+    },
+    {
+      "id": "microwave-cart",
+      "label": "전자레인지 이동대",
+      "category": "amenity",
+      "size": [
+        256,
+        256
+      ],
+      "world": 125,
+      "placement": "floor",
+      "subject": "One compact brushed steel two-tier kitchen trolley on four wheels, ivory microwave with dark glass door on upper shelf, two stacked plain trays and a kettle on lower shelf, no labels. Coherent mobile pantry unit, microwave display off.",
+      "generationPrompt": "Use case: stylized-concept. Asset type: ONE reusable isolated prop PNG for ARCHI, a Korean 2D side-scrolling office mystery game. Attached image is ONLY a STYLE/material reference, do not copy its object. Finely detailed anime-inspired PIXEL ART, crisp hard pixel clusters and stepped outlines, realistic proportions, muted charcoal, cool gray, teal and modest warm accents, readable neutral ambient highlights. Straight-on FRONT ELEVATION consistent with a side-scrolling game, only minimal top surface visible, no isometric view or rotated 3/4 view. One complete centered object with generous padding and level bottom contact. Actual transparent alpha in all empty spaces and cutouts. No floor, room, wall, background, cast shadow, glow halo, fog, checkerboard, captions, borders, text, logos, watermarks or people. No collage or sprite sheet. No readable writing. Entire object visible including feet and attachments. One compact brushed steel two-tier kitchen trolley on four wheels, ivory microwave with dark glass door on upper shelf, two stacked plain trays and a kettle on lower shelf, no labels. Coherent mobile pantry unit, microwave display off."
+    },
+    {
+      "id": "water-fountain",
+      "label": "벽걸이 음수대",
+      "category": "amenity",
+      "size": [
+        256,
+        256
+      ],
+      "world": 90,
+      "placement": "wall",
+      "subject": "One wall-mounted brushed stainless drinking fountain with shallow rounded basin, small bubbler faucet at left and push button on front, compact sloped lower housing. No wall behind it, entirely isolated.",
+      "generationPrompt": "Use case: stylized-concept. Asset type: ONE reusable isolated prop PNG for ARCHI, a Korean 2D side-scrolling office mystery game. Attached image is ONLY a STYLE/material reference, do not copy its object. Finely detailed anime-inspired PIXEL ART, crisp hard pixel clusters and stepped outlines, realistic proportions, muted charcoal, cool gray, teal and modest warm accents, readable neutral ambient highlights. Straight-on FRONT ELEVATION consistent with a side-scrolling game, only minimal top surface visible, no isometric view or rotated 3/4 view. One complete centered object with generous padding and level bottom contact. Actual transparent alpha in all empty spaces and cutouts. No floor, room, wall, background, cast shadow, glow halo, fog, checkerboard, captions, borders, text, logos, watermarks or people. No collage or sprite sheet. No readable writing. Entire object visible including feet and attachments. One wall-mounted brushed stainless drinking fountain with shallow rounded basin, small bubbler faucet at left and push button on front, compact sloped lower housing. No wall behind it, entirely isolated."
+    },
+    {
+      "id": "security-turnstile",
+      "label": "보안 출입 게이트",
+      "category": "security",
+      "size": [
+        256,
+        256
+      ],
+      "world": 140,
+      "placement": "floor",
+      "subject": "One waist-high stainless steel tripod security turnstile, rectangular pedestal with small black card reader at top, three tubular barrier arms, tiny muted green indicator. Front elevation, complete coherent structure.",
+      "generationPrompt": "Use case: stylized-concept. Asset type: ONE reusable isolated prop PNG for ARCHI, a Korean 2D side-scrolling office mystery game. Attached image is ONLY a STYLE/material reference, do not copy its object. Finely detailed anime-inspired PIXEL ART, crisp hard pixel clusters and stepped outlines, realistic proportions, muted charcoal, cool gray, teal and modest warm accents, readable neutral ambient highlights. Straight-on FRONT ELEVATION consistent with a side-scrolling game, only minimal top surface visible, no isometric view or rotated 3/4 view. One complete centered object with generous padding and level bottom contact. Actual transparent alpha in all empty spaces and cutouts. No floor, room, wall, background, cast shadow, glow halo, fog, checkerboard, captions, borders, text, logos, watermarks or people. No collage or sprite sheet. No readable writing. Entire object visible including feet and attachments. One waist-high stainless steel tripod security turnstile, rectangular pedestal with small black card reader at top, three tubular barrier arms, tiny muted green indicator. Front elevation, complete coherent structure."
+    },
+    {
+      "id": "first-aid-cabinet",
+      "label": "구급함",
+      "category": "security",
+      "size": [
+        256,
+        256
+      ],
+      "world": 65,
+      "placement": "wall",
+      "subject": "One wall-mounted ivory metal first-aid cabinet with closed door, simple bold green cross symbol centered on door, small silver latch on right, modest worn corners. No writing or brand, no wall.",
+      "generationPrompt": "Use case: stylized-concept. Asset type: ONE reusable isolated prop PNG for ARCHI, a Korean 2D side-scrolling office mystery game. Attached image is ONLY a STYLE/material reference, do not copy its object. Finely detailed anime-inspired PIXEL ART, crisp hard pixel clusters and stepped outlines, realistic proportions, muted charcoal, cool gray, teal and modest warm accents, readable neutral ambient highlights. Straight-on FRONT ELEVATION consistent with a side-scrolling game, only minimal top surface visible, no isometric view or rotated 3/4 view. One complete centered object with generous padding and level bottom contact. Actual transparent alpha in all empty spaces and cutouts. No floor, room, wall, background, cast shadow, glow halo, fog, checkerboard, captions, borders, text, logos, watermarks or people. No collage or sprite sheet. No readable writing. Entire object visible including feet and attachments. One wall-mounted ivory metal first-aid cabinet with closed door, simple bold green cross symbol centered on door, small silver latch on right, modest worn corners. No writing or brand, no wall."
+    },
+    {
+      "id": "fire-hose-cabinet",
+      "label": "소화전 보관함",
+      "category": "security",
+      "size": [
+        256,
+        512
+      ],
+      "world": 110,
+      "placement": "wall",
+      "subject": "One tall wall-mounted dark red steel fire-hose cabinet, upper glass panel revealing neatly wound cream hose and brass valve, lower closed metal door with small silver handle. Blank surfaces without text. No wall.",
+      "generationPrompt": "Use case: stylized-concept. Asset type: ONE reusable isolated prop PNG for ARCHI, a Korean 2D side-scrolling office mystery game. Attached image is ONLY a STYLE/material reference, do not copy its object. Finely detailed anime-inspired PIXEL ART, crisp hard pixel clusters and stepped outlines, realistic proportions, muted charcoal, cool gray, teal and modest warm accents, readable neutral ambient highlights. Straight-on FRONT ELEVATION consistent with a side-scrolling game, only minimal top surface visible, no isometric view or rotated 3/4 view. One complete centered object with generous padding and level bottom contact. Actual transparent alpha in all empty spaces and cutouts. No floor, room, wall, background, cast shadow, glow halo, fog, checkerboard, captions, borders, text, logos, watermarks or people. No collage or sprite sheet. No readable writing. Entire object visible including feet and attachments. One tall wall-mounted dark red steel fire-hose cabinet, upper glass panel revealing neatly wound cream hose and brass valve, lower closed metal door with small silver handle. Blank surfaces without text. No wall."
+    },
+    {
+      "id": "emergency-light",
+      "label": "비상 조명등",
+      "category": "security",
+      "size": [
+        512,
+        256
+      ],
+      "world": 100,
+      "placement": "wall",
+      "subject": "One compact wall-mounted emergency light unit: ivory central rectangular battery box with tiny dark status LED, two adjustable round white lamp heads on short arms pointing slightly outward symmetrically. Both lamps OFF, no light beam, no wall.",
+      "generationPrompt": "Use case: stylized-concept. Asset type: ONE reusable isolated prop PNG for ARCHI, a Korean 2D side-scrolling office mystery game. Attached image is ONLY a STYLE/material reference, do not copy its object. Finely detailed anime-inspired PIXEL ART, crisp hard pixel clusters and stepped outlines, realistic proportions, muted charcoal, cool gray, teal and modest warm accents, readable neutral ambient highlights. Straight-on FRONT ELEVATION consistent with a side-scrolling game, only minimal top surface visible, no isometric view or rotated 3/4 view. One complete centered object with generous padding and level bottom contact. Actual transparent alpha in all empty spaces and cutouts. No floor, room, wall, background, cast shadow, glow halo, fog, checkerboard, captions, borders, text, logos, watermarks or people. No collage or sprite sheet. No readable writing. Entire object visible including feet and attachments. One compact wall-mounted emergency light unit: ivory central rectangular battery box with tiny dark status LED, two adjustable round white lamp heads on short arms pointing slightly outward symmetrically. Both lamps OFF, no light beam, no wall."
+    },
+    {
+      "id": "desk-telephone",
+      "label": "사무실 전화기",
+      "category": "office",
+      "size": [
+        256,
+        256
+      ],
+      "world": 55,
+      "placement": "surface",
+      "subject": "One dark charcoal office landline desk telephone, handset resting in cradle, small unlit LCD, neat keypad of blank gray buttons, coiled cord contained beside base. Front view with slight visible keypad surface, no labels or digits.",
+      "generationPrompt": "Use case: stylized-concept. Asset type: ONE reusable isolated prop PNG for ARCHI, a Korean 2D side-scrolling office mystery game. Attached image is ONLY a STYLE/material reference, do not copy its object. Finely detailed anime-inspired PIXEL ART, crisp hard pixel clusters and stepped outlines, realistic proportions, muted charcoal, cool gray, teal and modest warm accents, readable neutral ambient highlights. Straight-on FRONT ELEVATION consistent with a side-scrolling game, only minimal top surface visible, no isometric view or rotated 3/4 view. One complete centered object with generous padding and level bottom contact. Actual transparent alpha in all empty spaces and cutouts. No floor, room, wall, background, cast shadow, glow halo, fog, checkerboard, captions, borders, text, logos, watermarks or people. No collage or sprite sheet. No readable writing. Entire object visible including feet and attachments. One dark charcoal office landline desk telephone, handset resting in cradle, small unlit LCD, neat keypad of blank gray buttons, coiled cord contained beside base. Front view with slight visible keypad surface, no labels or digits."
+    },
+    {
+      "id": "paper-shredder",
+      "label": "문서 세단기",
+      "category": "office",
+      "size": [
+        256,
+        256
+      ],
+      "world": 80,
+      "placement": "floor",
+      "subject": "One tall compact office paper shredder, light gray top with narrow paper slot, dark graphite body with a smoked inspection window revealing fine shredded paper strips, small caster wheels, small silver control buttons, no loose paper outside.",
+      "generationPrompt": "Use case: stylized-concept. Asset type: ONE reusable isolated prop PNG for ARCHI, a Korean 2D side-scrolling office mystery game. Attached image is ONLY a STYLE/material reference, do not copy its object. Finely detailed anime-inspired PIXEL ART, crisp hard pixel clusters and stepped outlines, realistic proportions, muted charcoal, cool gray, teal and modest warm accents, readable neutral ambient highlights. Straight-on FRONT ELEVATION consistent with a side-scrolling game, only minimal top surface visible, no isometric view or rotated 3/4 view. One complete centered object with generous padding and level bottom contact. Actual transparent alpha in all empty spaces and cutouts. No floor, room, wall, background, cast shadow, glow halo, fog, checkerboard, captions, borders, text, logos, watermarks or people. No collage or sprite sheet. No readable writing. Entire object visible including feet and attachments. One tall compact office paper shredder, light gray top with narrow paper slot, dark graphite body with a smoked inspection window revealing fine shredded paper strips, small caster wheels, small silver control buttons, no loose paper outside."
+    },
+    {
+      "id": "projector-cart",
+      "label": "프로젝터 이동대",
+      "category": "office",
+      "size": [
+        256,
+        256
+      ],
+      "world": 115,
+      "placement": "floor",
+      "subject": "One two-tier charcoal metal projector trolley on four casters. Off-white projector on top facing viewer with a large dark lens at left, slim remote and neatly coiled cable on lower shelf. No projection beam.",
+      "generationPrompt": "Use case: stylized-concept. Asset type: ONE reusable isolated prop PNG for ARCHI, a Korean 2D side-scrolling office mystery game. Attached image is ONLY a STYLE/material reference, do not copy its object. Finely detailed anime-inspired PIXEL ART, crisp hard pixel clusters and stepped outlines, realistic proportions, muted charcoal, cool gray, teal and modest warm accents, readable neutral ambient highlights. Straight-on FRONT ELEVATION consistent with a side-scrolling game, only minimal top surface visible, no isometric view or rotated 3/4 view. One complete centered object with generous padding and level bottom contact. Actual transparent alpha in all empty spaces and cutouts. No floor, room, wall, background, cast shadow, glow halo, fog, checkerboard, captions, borders, text, logos, watermarks or people. No collage or sprite sheet. No readable writing. Entire object visible including feet and attachments. One two-tier charcoal metal projector trolley on four casters. Off-white projector on top facing viewer with a large dark lens at left, slim remote and neatly coiled cable on lower shelf. No projection beam."
+    },
+    {
+      "id": "wall-clock",
+      "label": "사무실 벽시계",
+      "category": "office",
+      "size": [
+        256,
+        256
+      ],
+      "world": 60,
+      "placement": "wall",
+      "subject": "One round analog office wall clock, brushed steel rim, ivory face, twelve simple dark tick marks instead of numerals, black hour and minute hands indicate ten past ten, thin muted red second hand. Isolated with no wall or shadow.",
+      "generationPrompt": "Use case: stylized-concept. Asset type: ONE reusable isolated prop PNG for ARCHI, a Korean 2D side-scrolling office mystery game. Attached image is ONLY a STYLE/material reference, do not copy its object. Finely detailed anime-inspired PIXEL ART, crisp hard pixel clusters and stepped outlines, realistic proportions, muted charcoal, cool gray, teal and modest warm accents, readable neutral ambient highlights. Straight-on FRONT ELEVATION consistent with a side-scrolling game, only minimal top surface visible, no isometric view or rotated 3/4 view. One complete centered object with generous padding and level bottom contact. Actual transparent alpha in all empty spaces and cutouts. No floor, room, wall, background, cast shadow, glow halo, fog, checkerboard, captions, borders, text, logos, watermarks or people. No collage or sprite sheet. No readable writing. Entire object visible including feet and attachments. One round analog office wall clock, brushed steel rim, ivory face, twelve simple dark tick marks instead of numerals, black hour and minute hands indicate ten past ten, thin muted red second hand. Isolated with no wall or shadow."
+    },
+    {
+      "id": "folding-ladder",
+      "label": "접이식 사다리",
+      "category": "maintenance",
+      "size": [
+        256,
+        512
+      ],
+      "world": 105,
+      "placement": "floor",
+      "subject": "One open aluminum A-frame stepladder facing viewer, four horizontal treads, yellow top platform, two clearly separated front feet with black rubber caps and narrow rear supports, modest scuffs, entire ladder visible.",
+      "generationPrompt": "Use case: stylized-concept. Asset type: ONE reusable isolated prop PNG for ARCHI, a Korean 2D side-scrolling office mystery game. Attached image is ONLY a STYLE/material reference, do not copy its object. Finely detailed anime-inspired PIXEL ART, crisp hard pixel clusters and stepped outlines, realistic proportions, muted charcoal, cool gray, teal and modest warm accents, readable neutral ambient highlights. Straight-on FRONT ELEVATION consistent with a side-scrolling game, only minimal top surface visible, no isometric view or rotated 3/4 view. One complete centered object with generous padding and level bottom contact. Actual transparent alpha in all empty spaces and cutouts. No floor, room, wall, background, cast shadow, glow halo, fog, checkerboard, captions, borders, text, logos, watermarks or people. No collage or sprite sheet. No readable writing. Entire object visible including feet and attachments. One open aluminum A-frame stepladder facing viewer, four horizontal treads, yellow top platform, two clearly separated front feet with black rubber caps and narrow rear supports, modest scuffs, entire ladder visible."
+    },
+    {
+      "id": "pallet-jack",
+      "label": "수동 파렛트 운반기",
+      "category": "maintenance",
+      "size": [
+        256,
+        512
+      ],
+      "world": 100,
+      "placement": "floor",
+      "subject": "One empty industrial manual pallet jack, faded mustard-yellow steel body, upright black loop handle, two long low parallel fork tines extending toward viewer only slightly foreshortened, small dark wheels. Flat readable game prop, no pallet or cargo.",
+      "generationPrompt": "Use case: stylized-concept. Asset type: ONE reusable isolated prop PNG for ARCHI, a Korean 2D side-scrolling office mystery game. Attached image is ONLY a STYLE/material reference, do not copy its object. Finely detailed anime-inspired PIXEL ART, crisp hard pixel clusters and stepped outlines, realistic proportions, muted charcoal, cool gray, teal and modest warm accents, readable neutral ambient highlights. Straight-on FRONT ELEVATION consistent with a side-scrolling game, only minimal top surface visible, no isometric view or rotated 3/4 view. One complete centered object with generous padding and level bottom contact. Actual transparent alpha in all empty spaces and cutouts. No floor, room, wall, background, cast shadow, glow halo, fog, checkerboard, captions, borders, text, logos, watermarks or people. No collage or sprite sheet. No readable writing. Entire object visible including feet and attachments. One empty industrial manual pallet jack, faded mustard-yellow steel body, upright black loop handle, two long low parallel fork tines extending toward viewer only slightly foreshortened, small dark wheels. Flat readable game prop, no pallet or cargo."
+    },
+    {
+      "id": "industrial-fan",
+      "label": "공업용 선풍기",
+      "category": "maintenance",
+      "size": [
+        256,
+        512
+      ],
+      "world": 110,
+      "placement": "floor",
+      "subject": "One tall standing industrial fan, large circular charcoal wire cage with three broad metal blades, dull blue-gray motor housing, adjustable narrow pole and heavy cross-shaped floor base. Fan OFF, no motion blur.",
+      "generationPrompt": "Use case: stylized-concept. Asset type: ONE reusable isolated prop PNG for ARCHI, a Korean 2D side-scrolling office mystery game. Attached image is ONLY a STYLE/material reference, do not copy its object. Finely detailed anime-inspired PIXEL ART, crisp hard pixel clusters and stepped outlines, realistic proportions, muted charcoal, cool gray, teal and modest warm accents, readable neutral ambient highlights. Straight-on FRONT ELEVATION consistent with a side-scrolling game, only minimal top surface visible, no isometric view or rotated 3/4 view. One complete centered object with generous padding and level bottom contact. Actual transparent alpha in all empty spaces and cutouts. No floor, room, wall, background, cast shadow, glow halo, fog, checkerboard, captions, borders, text, logos, watermarks or people. No collage or sprite sheet. No readable writing. Entire object visible including feet and attachments. One tall standing industrial fan, large circular charcoal wire cage with three broad metal blades, dull blue-gray motor housing, adjustable narrow pole and heavy cross-shaped floor base. Fan OFF, no motion blur."
+    },
+    {
+      "id": "tool-pegboard",
+      "label": "공구 벽걸이판",
+      "category": "maintenance",
+      "size": [
+        512,
+        256
+      ],
+      "world": 200,
+      "placement": "wall",
+      "subject": "One wide dark teal perforated workshop pegboard in thin steel frame holding an orderly arrangement of two wrenches, pliers, three screwdrivers, hammer, and small shallow lower parts tray. Tools all fully inside board outline, no labels, isolated board with opaque backing.",
+      "generationPrompt": "Use case: stylized-concept. Asset type: ONE reusable isolated prop PNG for ARCHI, a Korean 2D side-scrolling office mystery game. Attached image is ONLY a STYLE/material reference, do not copy its object. Finely detailed anime-inspired PIXEL ART, crisp hard pixel clusters and stepped outlines, realistic proportions, muted charcoal, cool gray, teal and modest warm accents, readable neutral ambient highlights. Straight-on FRONT ELEVATION consistent with a side-scrolling game, only minimal top surface visible, no isometric view or rotated 3/4 view. One complete centered object with generous padding and level bottom contact. Actual transparent alpha in all empty spaces and cutouts. No floor, room, wall, background, cast shadow, glow halo, fog, checkerboard, captions, borders, text, logos, watermarks or people. No collage or sprite sheet. No readable writing. Entire object visible including feet and attachments. One wide dark teal perforated workshop pegboard in thin steel frame holding an orderly arrangement of two wrenches, pliers, three screwdrivers, hammer, and small shallow lower parts tray. Tools all fully inside board outline, no labels, isolated board with opaque backing."
+    },
+    {
+      "id": "lab-microscope",
+      "label": "연구실 현미경",
+      "category": "research",
+      "size": [
+        256,
+        256
+      ],
+      "world": 65,
+      "placement": "surface",
+      "subject": "One laboratory binocular microscope, ivory and charcoal curved frame, two angled dark eyepieces, rotating objective turret, flat specimen stage with blank glass slide and dark knobs, heavy horseshoe-shaped base. Front elevation, single complete scientific instrument.",
+      "generationPrompt": "Use case: stylized-concept. Asset type: ONE reusable isolated prop PNG for ARCHI, a Korean 2D side-scrolling office mystery game. Attached image is ONLY a STYLE/material reference, do not copy its object. Finely detailed anime-inspired PIXEL ART, crisp hard pixel clusters and stepped outlines, realistic proportions, muted charcoal, cool gray, teal and modest warm accents, readable neutral ambient highlights. Straight-on FRONT ELEVATION consistent with a side-scrolling game, only minimal top surface visible, no isometric view or rotated 3/4 view. One complete centered object with generous padding and level bottom contact. Actual transparent alpha in all empty spaces and cutouts. No floor, room, wall, background, cast shadow, glow halo, fog, checkerboard, captions, borders, text, logos, watermarks or people. No collage or sprite sheet. No readable writing. Entire object visible including feet and attachments. One laboratory binocular microscope, ivory and charcoal curved frame, two angled dark eyepieces, rotating objective turret, flat specimen stage with blank glass slide and dark knobs, heavy horseshoe-shaped base. Front elevation, single complete scientific instrument."
+    },
+    {
+      "id": "medical-bed",
+      "label": "의무실 침대",
+      "category": "research",
+      "size": [
+        512,
+        256
+      ],
+      "world": 235,
+      "placement": "floor",
+      "subject": "One simple office infirmary examination bed seen in flat long-side elevation: pale sage vinyl mattress, slightly raised small pillow section on left, folded ivory blanket at foot right, thin white tubular steel legs and low stretcher-style rail. Empty bed, no patient, no room.",
+      "generationPrompt": "Use case: stylized-concept. Asset type: ONE reusable isolated prop PNG for ARCHI, a Korean 2D side-scrolling office mystery game. Attached image is ONLY a STYLE/material reference, do not copy its object. Finely detailed anime-inspired PIXEL ART, crisp hard pixel clusters and stepped outlines, realistic proportions, muted charcoal, cool gray, teal and modest warm accents, readable neutral ambient highlights. Straight-on FRONT ELEVATION consistent with a side-scrolling game, only minimal top surface visible, no isometric view or rotated 3/4 view. One complete centered object with generous padding and level bottom contact. Actual transparent alpha in all empty spaces and cutouts. No floor, room, wall, background, cast shadow, glow halo, fog, checkerboard, captions, borders, text, logos, watermarks or people. No collage or sprite sheet. No readable writing. Entire object visible including feet and attachments. One simple office infirmary examination bed seen in flat long-side elevation: pale sage vinyl mattress, slightly raised small pillow section on left, folded ivory blanket at foot right, thin white tubular steel legs and low stretcher-style rail. Empty bed, no patient, no room."
+    },
+    {
+      "id": "hand-dryer",
+      "label": "화장실 핸드드라이어",
+      "category": "restroom",
+      "size": [
+        256,
+        256
+      ],
+      "world": 55,
+      "placement": "wall",
+      "subject": "One wall-mounted automatic hand dryer, compact brushed silver rounded housing, recessed black lower air nozzle and tiny dark sensor, subtle vents, no logo, no wall. Front elevation, inactive.",
+      "generationPrompt": "Use case: stylized-concept. Asset type: ONE reusable isolated prop PNG for ARCHI, a Korean 2D side-scrolling office mystery game. Attached image is ONLY a STYLE/material reference, do not copy its object. Finely detailed anime-inspired PIXEL ART, crisp hard pixel clusters and stepped outlines, realistic proportions, muted charcoal, cool gray, teal and modest warm accents, readable neutral ambient highlights. Straight-on FRONT ELEVATION consistent with a side-scrolling game, only minimal top surface visible, no isometric view or rotated 3/4 view. One complete centered object with generous padding and level bottom contact. Actual transparent alpha in all empty spaces and cutouts. No floor, room, wall, background, cast shadow, glow halo, fog, checkerboard, captions, borders, text, logos, watermarks or people. No collage or sprite sheet. No readable writing. Entire object visible including feet and attachments. One wall-mounted automatic hand dryer, compact brushed silver rounded housing, recessed black lower air nozzle and tiny dark sensor, subtle vents, no logo, no wall. Front elevation, inactive."
+    },
+    {
+      "id": "soap-towel-station",
+      "label": "비누·종이타월 디스펜서",
+      "category": "restroom",
+      "size": [
+        256,
+        256
+      ],
+      "world": 75,
+      "placement": "wall",
+      "subject": "One integrated wall-mounted hygiene dispenser unit, ivory rectangular housing with slim translucent muted blue soap reservoir on left and stainless paper towel compartment on right, a single folded ivory towel protrudes from lower slot. Single unified object, no text, no wall.",
+      "generationPrompt": "Use case: stylized-concept. Asset type: ONE reusable isolated prop PNG for ARCHI, a Korean 2D side-scrolling office mystery game. Attached image is ONLY a STYLE/material reference, do not copy its object. Finely detailed anime-inspired PIXEL ART, crisp hard pixel clusters and stepped outlines, realistic proportions, muted charcoal, cool gray, teal and modest warm accents, readable neutral ambient highlights. Straight-on FRONT ELEVATION consistent with a side-scrolling game, only minimal top surface visible, no isometric view or rotated 3/4 view. One complete centered object with generous padding and level bottom contact. Actual transparent alpha in all empty spaces and cutouts. No floor, room, wall, background, cast shadow, glow halo, fog, checkerboard, captions, borders, text, logos, watermarks or people. No collage or sprite sheet. No readable writing. Entire object visible including feet and attachments. One integrated wall-mounted hygiene dispenser unit, ivory rectangular housing with slim translucent muted blue soap reservoir on left and stainless paper towel compartment on right, a single folded ivory towel protrudes from lower slot. Single unified object, no text, no wall."
+    }
+  ]
+}

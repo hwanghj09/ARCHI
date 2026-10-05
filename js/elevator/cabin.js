@@ -15,10 +15,6 @@ let cabinReturnFocus = null;
 // Hotspots use the source artwork's 1536x1024 coordinates; CSS scales them with the scene.
 const cabinFloorButtons = [];
 const panelFloors = [null, 17, 16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, -1, -2];
-// 15~12층(연구본부·기술본부)은 카드 리더에 사원증을 태그해야 버튼이 눌린다. 수호의 출입증은 23:58에 등록이
-// 해제돼(1층 단서) 거부되므로, 16층 카페에 두고 간 조현아 팀장의 사원증(badgeItem)을 챙겨야 갈 수 있다.
-const badgeFloors = [15, 14, 13, 12];
-const badgeItem = 'f16-badge';
 // B2는 ARCHI가 23:59에 운행을 막아 두었다(SYSTEM 운행 제한). B1 방재 관제실 승강기 제어반의 열쇠 스위치로 수동 해제해야
 // (restrictionItem) 버튼이 눌린다.
 const restrictedFloors = [-2];
@@ -29,7 +25,6 @@ panelFloors.forEach((floor, index) => {
   button.type = 'button';
   button.className = 'cabin-hit';
   button.dataset.floor = floor;
-  if (badgeFloors.includes(floor)) button.dataset.badge = 'true';
   if (restrictedFloors.includes(floor)) button.dataset.restricted = 'true';
   button.title = floor < 0 ? `지하 ${-floor}층` : `${floor}층`;
   button.setAttribute('aria-label', button.title);
@@ -41,9 +36,8 @@ panelFloors.forEach((floor, index) => {
   button.addEventListener('click', () => {
     const car = elevatorCars[cabinCarIndex];
     if (transitioning || !car || car.travelling || floor === car.floor) return;
-    const badge = button.dataset.badge && selectedFloor !== floor;
-    if (badge && !collectedItems.has(badgeItem)) {
-      cabinStatus.textContent = `${button.title}은 사원증 인증 층이다. 수호의 출입증은 "미등록"으로 거부된다.`;
+    if (!elevatorHasPower()) {
+      cabinStatus.textContent = elevatorPowerMessage;
       return;
     }
     if (button.dataset.restricted && selectedFloor !== floor && !collectedItems.has(restrictionItem)) {
@@ -51,8 +45,9 @@ panelFloors.forEach((floor, index) => {
       return;
     }
     selectedFloor = selectedFloor === floor ? null : floor;
+    playGameSound('switch');
     cabinAutoClose = selectedFloor === null ? 0 : 1600;
-    cabinStatus.textContent = selectedFloor === null ? '층 선택 취소' : `${badge ? '조현아 팀장 사원증 인증 · ' : ''}${button.title} 선택`;
+    cabinStatus.textContent = selectedFloor === null ? '층 선택 취소' : `${button.title} 선택`;
     refreshCabin();
   });
   document.getElementById('cabin-floor-buttons').append(button);
@@ -67,6 +62,7 @@ function enterCabin(carIndex) {
     return;
   }
   cabinReturnFocus = document.activeElement;
+  if (!elevatorCars[carIndex].open) playGameSound('elevator-door');
   transitionScene(() => showCabin(carIndex));
 }
 
@@ -92,26 +88,39 @@ function refreshCabin() {
   if (cabinCarIndex === null) return;
   const car = elevatorCars[cabinCarIndex];
   const label = car.floor < 0 ? `B${-car.floor}` : String(car.floor);
-  const display = `${car.travelling ? (car.destination > car.floor ? '↑' : '↓') : ''}${label}`;
+  const powered = elevatorHasPower();
+  const display = `${car.travelling && powered ? (car.destination > car.floor ? '↑' : '↓') : ''}${label}`;
   if (cabinDisplay.textContent !== display) cabinDisplay.textContent = display;
-  cabin.dataset.moving = String(car.travelling);
+  cabin.dataset.moving = String(car.travelling && powered);
+  cabinScene.dataset.powered = String(powered);
   cabin.dataset.floor = car.floor;
   cabinScene.dataset.floor = car.floor;
+  // The cabin uses the building circuit; restoring one floor does not relight a moving car.
+  cabinScene.dataset.blackout = String(buildingBlackout);
+  cabinScene.dataset.hallBlackout = String(buildingBlackout && car.floor > 0 && car.floor !== solarPoweredFloor);
   cabinOpen.disabled = car.travelling;
-  cabinClose.disabled = car.travelling;
+  cabinClose.disabled = !powered || car.travelling;
   cabinExit.disabled = car.travelling || cabinScene.dataset.door !== 'open';
   for (const button of cabinFloorButtons) {
-    button.disabled = car.travelling || Number(button.dataset.floor) === car.floor;
+    button.disabled = !powered || car.travelling || Number(button.dataset.floor) === car.floor;
     button.setAttribute('aria-pressed', String(Number(button.dataset.floor) === (car.travelling ? car.destination : selectedFloor)));
   }
+  if (!powered) cabinStatus.textContent = elevatorPowerMessage;
+  else if (cabinStatus.textContent === elevatorPowerMessage) cabinStatus.textContent = car.travelling ?
+    `${floorShortLabel(car.destination)} 이동 중` : `${floorShortLabel(car.floor)} · 문 열림`;
 }
 
 function setCabinDoor(open) {
   const car = elevatorCars[cabinCarIndex];
   if (transitioning || !car || car.travelling) return;
+  if (!open && !elevatorHasPower()) {
+    cabinStatus.textContent = elevatorPowerMessage;
+    return;
+  }
   cabinAutoClose = 0;
   const phase = cabinScene.dataset.door;
   if (phase === (open ? 'open' : 'closed') || phase === (open ? 'opening' : 'closing')) return;
+  playGameSound('elevator-door');
   car.open = open;
   cabinScene.dataset.door = open ? 'opening' : 'closing';
   cabinStatus.textContent = open ? '문이 열립니다.' : '문이 닫힙니다.';
@@ -122,6 +131,11 @@ function setCabinDoor(open) {
 function updateCabin() {
   if (cabinCarIndex === null) return;
   const car = elevatorCars[cabinCarIndex];
+  if (!elevatorHasPower() && !car.travelling) {
+    selectedFloor = null;
+    cabinAutoClose = 0;
+    setCabinDoor(true);
+  }
   if (cabinAutoClose > 0) {
     cabinAutoClose = Math.max(0, cabinAutoClose - step);
     if (!cabinAutoClose) setCabinDoor(false);
@@ -131,7 +145,7 @@ function updateCabin() {
     cabinScene.style.setProperty('--door-open', cabinDoorAmount);
     if (cabinDoorAmount === (car.open ? 1 : 0)) cabinScene.dataset.door = car.open ? 'open' : 'closed';
   }
-  if (!car.travelling && cabinScene.dataset.door === 'closed' && selectedFloor !== null && !cabinAutoClose) {
+  if (elevatorHasPower() && !car.travelling && cabinScene.dataset.door === 'closed' && selectedFloor !== null && !cabinAutoClose) {
     car.destination = selectedFloor;
     car.travelling = true;
     car.elapsed = 0;
@@ -162,17 +176,7 @@ cabinExit.addEventListener('click', exitCabin);
 document.getElementById('cabin-alarm').addEventListener('click', () => {
   if (transitioning) return;
   cabinStatus.textContent = '비상벨 작동';
-  const AudioContext = window.AudioContext || window.webkitAudioContext;
-  if (!AudioContext) return;
-  const audio = new AudioContext();
-  const oscillator = audio.createOscillator();
-  const gain = audio.createGain();
-  gain.gain.value = .08;
-  oscillator.frequency.value = 880;
-  oscillator.connect(gain).connect(audio.destination);
-  oscillator.start();
-  oscillator.stop(audio.currentTime + .4);
-  oscillator.onended = () => { audio.close(); };
+  playGameSound('elevator-alarm');
 });
 cabin.addEventListener('keydown', event => {
   if (event.code !== 'Tab') return;

@@ -11,8 +11,15 @@ try {
   page.on('pageerror', error => errors.push(error.message));
   await page.clock.install({ time: new Date('2026-09-21T00:00:00Z') });
   await page.goto(new URL('../index.html', import.meta.url).href);
+  await page.locator('#menu-start').click();
+  if (await page.locator('#menu-new-confirm').isVisible()) await page.locator('#menu-new-confirm').click();
+  await page.locator('#opening-skip').click();
   await page.clock.pauseAt(new Date('2026-09-21T00:01:00Z'));
   await reachInitialCorridor(page);
+  // Keep the sprint route playable; blackout input locking is covered separately.
+  await page.evaluate(() => triggerBuildingBlackout());
+  await page.locator('#power-lever').dispatchEvent('click');
+  await page.locator('#power-floor-grid [data-floor="17"]').dispatchEvent('click');
   await page.locator('#run-sheet').evaluate(img => img.decode());
   const state = () => page.locator('#player').evaluate(el => {
     const transform = new DOMMatrix(getComputedStyle(el).transform);
@@ -96,6 +103,9 @@ try {
   await page.keyboard.up('a');
   await page.keyboard.up('ShiftRight');
   await page.reload();
+  await page.locator('#menu-start').click();
+  if (await page.locator('#menu-new-confirm').isVisible()) await page.locator('#menu-new-confirm').click();
+  await page.locator('#opening-skip').click();
   await page.clock.runFor(100);
   await reachInitialCorridor(page);
   await page.keyboard.down('d');

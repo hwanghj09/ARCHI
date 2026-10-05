@@ -1,5 +1,6 @@
 // 장면 교체: 17층 사무실과 복도 사이, 그리고 다른 층·방·옥상으로 이동.
 function performRoomChange() {
+  if (blackoutSceneActive) finishBlackoutScene();
   const entering = room === 'corridor';
   if (entering) returnX = body.position.x;
   for (const solid of entering ? solids : officeSolids) Composite.remove(engine.world, solid);
@@ -25,13 +26,17 @@ function performRoomChange() {
 }
 
 function performFloorChange(destId, carIndex = 0, arrivalKey = null) {
+  if (blackoutSceneActive) finishBlackoutScene();
+  if (playerCaught) releaseGuardCapture();
+  guardPatrol.mode = 'patrol'; guardPatrol.lostTime = 0;
+  guardPatrol.door = null;
+  guardPatrol.image = null;
   Composite.remove(engine.world, currentTerrain);
   dynamicScene.innerHTML = '';
   const dest = floorById.get(destId);
   currentSceneFloor = dest.floor;
   world.dataset.floor = String(currentSceneFloor);
-  // 옥상 발전기(js/interaction/generator.js)로 켜 둔 층에 들어올 때만 전체적으로 밝아 보인다.
-  world.dataset.powered = String(currentSceneFloor === poweredFloor);
+  updatePowerState();
   lightSwitch.hidden = currentSceneFloor !== 17;
   movingParts = [];
   activeCameras = [];
@@ -79,6 +84,8 @@ function performFloorChange(destId, carIndex = 0, arrivalKey = null) {
   const lockedIn = dest.exitLock && !collectedItems.has(dest.exitLock.until) && dest.exitLock.arrivalMessage;
   showStatus(lockedIn || dest.arrival || (arrivalKey ? '복도로 나왔습니다.' : `${dest.label}에 도착했습니다.`), lockedIn ? 5000 : 2500);
   refreshSceneElevatorDoors();
+  mountGuardPatrol();
+  refreshPhone();
   updateInteraction();
   render();
 }

@@ -47,7 +47,8 @@ function submitKeypad() {
   } else {
     if (target.gives) collectedItems.add(target.gives);
     closeKeypad();
-    showStatus(target.message, 5000);
+    // 열린 소품의 내용은 조사 창으로 보인다(1층 경비 로봇 정비 패널은 writing이 있으면 그 화면으로).
+    openInspection(target.name, target.message, target);
   }
 }
 

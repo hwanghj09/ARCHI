@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { mkdir, readFile } from 'node:fs/promises';
 import { chromium } from 'playwright';
-import { finishSceneTransition, reachInitialCorridor } from './scene-transition.mjs';
+import { interactionMessage, finishSceneTransition, reachInitialCorridor } from './scene-transition.mjs';
 import { assertMirroredDoor, exitDoor } from './room-geometry.mjs';
 
 await mkdir('.local', { recursive: true });
@@ -13,18 +13,26 @@ try {
   const start = async () => {
     await page.clock.install({ time: new Date('2026-09-24T00:00:00Z') });
     await page.goto(new URL('../index.html', import.meta.url).href);
+    await page.locator('#menu-start').click();
+    if (await page.locator('#menu-new-confirm').isVisible()) await page.locator('#menu-new-confirm').click();
+    await page.locator('#opening-skip').click();
     await page.clock.pauseAt(new Date('2026-09-24T00:01:00Z'));
     await reachInitialCorridor(page);
     await page.locator('#floor17-extension > img').evaluate(img => img.decode());
   };
   const position = () => page.locator('#player').evaluate(el => new DOMMatrix(getComputedStyle(el).transform).m41 + 96);
   const walkTo = async x => {
+    const wasDark = await page.evaluate(() => buildingBlackout);
     const from = await position();
     const key = x > from ? 'd' : 'a';
     await page.keyboard.down(key);
     await page.clock.runFor(Math.abs(x - from) / 200 * 1000);
     await page.keyboard.up(key);
     await page.clock.runFor(100);
+    if (!wasDark && await page.evaluate(() => buildingBlackout || blackoutSceneActive)) {
+      if (await page.locator('#blackout-scene').isVisible()) await page.clock.runFor(5000);
+      await walkTo(x);
+    }
   };
   const enter = async () => {
     await page.keyboard.press('e');
@@ -73,14 +81,17 @@ try {
   await walkTo(4095);
   assert.equal(await hint(), 'E · 소화전 조사');
   await page.keyboard.press('e');
-  assert.match(await page.locator('#interaction-status').textContent(), /호스와 관창/);
+  await page.getByRole('button', { name: '낡은 열쇠 줍기' }).click();
+  await page.keyboard.press('Escape');
+  await page.keyboard.press('e');
+  assert.match(await interactionMessage(page), /호스와 관창/);
   await page.screenshot({ path: '.local/floor17-extension.png' });
   await walkTo(4463);
   assert.equal(await hint(), 'E · 관리자 외 출입금지 (잠김)');
   await page.keyboard.press('e');
   await page.clock.runFor(800);
   assert.equal(await page.locator('#world').getAttribute('data-room'), 'corridor');
-  assert.match(await page.locator('#interaction-status').textContent(), /관리자실 문이 잠겨/);
+  assert.match(await interactionMessage(page), /관리자실 문이 잠겨/);
   await page.setViewportSize({ width: 390, height: 844 });
   await page.clock.runFor(100);
   await page.locator('#interact').click();
@@ -90,7 +101,9 @@ try {
   await walkTo(4990);
   assert(Math.abs(await position() - 4948) < 1, 'Extended corridor ends at the new wall');
   await walkTo(2996);
-  await enter();
+  await page.keyboard.press('e');
+  await page.getByRole('button', { name: '열쇠 사용하기', exact: true }).click();
+  await finishSceneTransition(page);
   assert.equal(await page.locator('header span').textContent(), 'RF · 옥상');
   await enter();
   assert.equal(await page.locator('#world').evaluate(el => el.style.width), '5000px');
@@ -102,6 +115,9 @@ try {
   assert(source.includes(locked));
   await page.route('**/js/floors/floor-17.js', route => route.fulfill({ contentType: 'text/javascript', body: source.replace(locked, locked.replace('true', 'false')) }));
   await page.goto(new URL('../index.html', import.meta.url).href);
+  await page.locator('#menu-start').click();
+  if (await page.locator('#menu-new-confirm').isVisible()) await page.locator('#menu-new-confirm').click();
+  await page.locator('#opening-skip').click();
   await page.clock.runFor(100);
   await reachInitialCorridor(page);
   await walkTo(4463);

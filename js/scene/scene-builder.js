@@ -17,7 +17,7 @@ function buildDynamicScene(config) {
   for (const art of [config.backgroundImage].flat().filter(Boolean)) {
     const image = new Image();
     image.className = 'floor-background';
-    image.src = art.src;
+    setPowerBackground(image, art.src);
     image.alt = '';
     image.draggable = false;
     Object.assign(image.style, { left: `${art.left ?? 0}px`, width: `${art.width ?? config.width}px`, height: `${art.height}px`, top: `${art.top}px` });
@@ -70,10 +70,26 @@ function buildDynamicScene(config) {
     const element = document.createElement('div');
     element.className = `barrier ${barrier.style || ''}`.trim();
     element.dataset.open = String(open);
+    if (barrier.accessGate) {
+      const glass = document.createElement('div');
+      glass.className = 'access-glass';
+      const reader = document.createElement('span');
+      reader.className = 'access-reader';
+      reader.textContent = `${config.short} · ID`;
+      element.append(glass, reader);
+    }
     element.setAttribute('role', 'img');
     element.setAttribute('aria-label', barrier.name);
     Object.assign(element.style, { left: `${barrier.x}px`, top: `${barrier.y}px`, width: `${barrier.width}px`,
       height: `${floorY - barrier.y}px` });
+    if (barrier.sprite) {
+      const image = new Image();
+      image.src = barrier.sprite;
+      image.alt = '';
+      image.draggable = false;
+      element.append(image);
+      element.dataset.sprite = 'true';
+    }
     dynamicScene.append(element);
     const solid = open ? null : Bodies.rectangle(barrier.x + barrier.width / 2, (barrier.y + floorY) / 2,
       barrier.width, floorY - barrier.y, { isStatic: true });
@@ -83,21 +99,19 @@ function buildDynamicScene(config) {
   if (config.id === 'rooftop') {
     const supply = document.createElement('div');
     supply.className = 'solar-supply';
+    supply.dataset.active = String(solarEnabled);
     supply.setAttribute('role', 'img');
-    supply.dataset.state = poweredFloor ? 'on' : 'off';
-    supply.setAttribute('aria-label', `태양광 임시 전력장치 · ${poweredFloor ? `${floorShortLabel(poweredFloor)} 공급 중` : '화면 꺼짐'}`);
+    supply.setAttribute('aria-label', `태양광 임시 전력장치 · ${solarEnabled ? '전원 켜짐' : '전원 꺼짐'}`);
     // The first 887px cell has transparent padding; its bottom edge is y=691.
-    const supplyX = 720, supplyWidth = 360;
-    Object.assign(supply.style, { left: `${supplyX}px`, top: `${floorY - 691 * 360 / 887}px` });
+    Object.assign(supply.style, { left: '720px', top: `${floorY - 691 * 360 / 887}px` });
     const image = new Image();
     image.src = 'assets/objects/power/solar-supply-off-on.png';
     image.alt = '';
     image.draggable = false;
     supply.append(image);
     dynamicScene.append(supply);
-    // 전력 제어반(generator): E를 누르면 층 선택 패널이 뜬다(js/interaction/generator.js).
-    doorList.push({ name: '태양광 임시 전력장치', type: 'generator', element: supply,
-      x: supplyX, y: floorY - 160, standY: floorY, width: supplyWidth });
+    doorList.push({ name: '태양광 발전기', type: 'power', element: supply, x: 720, y: 250, width: 360,
+      outline: spriteOutline(image.getAttribute('src'), 720, floorY - 691 * 360 / 887, 360, 360) });
   }
   if (config.interior) {
     const backdrop = document.createElement('div');
@@ -116,7 +130,9 @@ function buildDynamicScene(config) {
         arrivalKey: `room:${config.id}`, key: 'exit', x: config.exitX ?? exitDoorX(outside, config.width, doorWidth),
         y: outside.doorY ?? parent.roomDoorY ?? 250, width: doorWidth, style: outside.doorStyle,
         unlocked: collectedItems.has(outside.unlockedBy),
-        locked: Boolean(lock) && !collectedItems.has(lock.until), lockedUntil: lock?.until, message: lock?.message }));
+        locked: Boolean(lock) && !collectedItems.has(lock.until), lockedUntil: lock?.until, message: lock?.message,
+        surface: lock?.surface, look: lock?.look, writing: lock?.writing, caption: lock?.caption, image: lock?.image,
+        outline: config.exitOutline }));
     }
     // 벽을 맞댄 방끼리의 연결문(links, 16층 주방 반입문): 복도를 거치지 않고 옆방에 있는 짝 연결문 앞으로 나온다. 다른 층의 방과도
     // 이을 수 있고, 그때는 hint로 안내 문구를 바꾼다.
@@ -124,7 +140,7 @@ function buildDynamicScene(config) {
       const next = floorById.get(link.target);
       doorList.push(addRoomDoor({ name: next.name, type: 'room', hint: link.hint ?? `E · ${next.name} 들어가기`, target: link.target,
         arrivalKey: `link:${config.id}`, key: `link:${link.target}`, x: link.x, y: link.y ?? 250,
-        width: link.width ?? 120, style: link.style }));
+        width: link.width ?? 120, style: link.style, outline: link.outline }));
     }
   }
   for (const roomConfig of config.rooms || []) {
@@ -138,11 +154,12 @@ function buildDynamicScene(config) {
     dynamicScene.append(roomElement);
     doorList.push(addRoomDoor({ name: roomConfig.name, type: 'room', hint: `E · ${roomConfig.name} 들어가기`,
       locked: roomConfig.locked && !collectedItems.has(roomConfig.unlockedBy), message: roomConfig.message,
+      surface: roomConfig.surface, look: roomConfig.look, writing: roomConfig.writing, caption: roomConfig.caption, image: roomConfig.image,
       unlocked: collectedItems.has(roomConfig.unlockedBy),
       code: roomConfig.code, codeMessage: roomConfig.codeMessage, unlockedBy: roomConfig.unlockedBy,
       target: roomConfig.target, arrivalKey: 'exit', key: `room:${roomConfig.target}`,
       x: roomConfig.doorX, y: roomConfig.doorY ?? config.roomDoorY ?? 250, width: roomConfig.doorWidth ?? 120,
-      style: roomConfig.doorStyle }));
+      style: roomConfig.doorStyle, outline: roomConfig.doorOutline }));
   }
   // 벽에 붙은 설비(fixtures: 1층 층별 안내판·정문처럼 소품 그림이 없는 것)는 CSS로 그리고 lines를 글줄로 넣는다.
   // 충돌은 없고, message가 있으면 조사할 수 있다(requires·gives·code·opens도 소품처럼 쓴다). requires가 있는 설비는 그 물건을
@@ -180,16 +197,24 @@ function buildDynamicScene(config) {
     const element = document.createElement('div');
     element.className = `floor-prop ${prop.style || ''}`.trim();
     if (base) element.dataset.base = String(base);
-    Object.assign(element.style, {
-      left: `${prop.x - width / 2 * scale}px`, top: `${floorY - base - (height - 8) * scale}px`,
-      width: `${prop.worldWidth}px`, height: `${height * scale}px`,
-    });
+    const left = prop.x - width / 2 * scale;
+    const top = floorY - base - (height - 8) * scale;
+    Object.assign(element.style, { left: `${left}px`, top: `${top}px`, width: `${prop.worldWidth}px`, height: `${height * scale}px` });
+    const src = prop.sprite || `assets/objects/floor-kit/${prop.file}.png`;
     const image = new Image();
-    image.src = `assets/objects/floor-kit/${prop.file}.png`;
+    image.src = src;
     image.alt = '';
     image.draggable = false;
     element.append(image);
     dynamicScene.append(element);
+    if (prop.sprite) {
+      element.style.overflow = 'hidden';
+      image.style.width = `${(prop.frames || 2) * 100}%`;
+      element.dataset.spriteFrames = prop.frames || 2;
+      if (prop.stateBy) element.dataset.stateBy = prop.stateBy;
+      if (prop.poweredSprite) element.dataset.poweredSprite = 'true';
+      element.dataset.spriteFrame = prop.spriteFrame || 0;
+    }
     if (!prop.message) continue;
     element.setAttribute('role', 'img');
     element.setAttribute('aria-label', prop.name);
@@ -203,11 +228,17 @@ function buildDynamicScene(config) {
       takenMessage: prop.takenMessage, darkMessage: prop.darkMessage, requires: prop.requires,
       missingMessage: prop.missingMessage, partialMessage: prop.partialMessage, element, standY: floorY - base,
       code: prop.code, codePrompt: prop.codePrompt, cycle: prop.cycle, opens: prop.opens,
+      animation: prop.animation, poweredSprite: prop.poweredSprite,
+      surface: prop.surface || WRITING_SURFACE_BY_FILE[prop.file], look: prop.look, writing: prop.writing, caption: prop.caption,
+      image: prop.image, missingSheet: prop.missingSheet, takenSheet: prop.takenSheet,
       sequence: sequence && { ...sequence, step: prop.step },
       ring: prop.ring && !collectedItems.has(prop.gives) ? { ...prop.ring, elapsed: 0, state: 'waiting' } : null,
-      x: prop.x - prop.worldWidth / 2, y: floorY - base - (height - 8) * scale, width: prop.worldWidth });
+      x: prop.x - prop.worldWidth / 2, y: top, width: prop.worldWidth,
+      // 근접 테두리는 캔버스가 아니라 그림이 차지하는 상자를 감싼다(그림이 배경과 어긋나면 prop.outline으로 덮어쓴다).
+      outline: prop.outline || spriteOutline(src, left, top, prop.worldWidth, height * scale) });
   }
   // 감시 카메라(cameras, B2 복도): 카메라와 시야를 그리고 지키는 방 문을 찾아 둔다. 돌아가기와 발각은 cctv.js가 맡는다.
+  refreshReady();
   const cameras = buildCameras(config, doorList);
   // elevatorOffsets/elevatorWidthDeltas: 층 그림 속 엘리베이터 벽감이 BUILDING_CORE 좌표와 어긋날 때, 그 층만
   // 상호작용 가능한 엘리베이터(문·판정)의 위치·폭을 보정한다(다른 층의 BUILDING_CORE 좌표는 그대로 둔다).

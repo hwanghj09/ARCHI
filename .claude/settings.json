@@ -1,0 +1,16 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "startup|clear",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo '[archi-sync] New session. Before anything else, run the archi-sync skill: check local commits and changes, fetch origin, pull new commits, report what came in, then continue with the user request.'",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  }
+}

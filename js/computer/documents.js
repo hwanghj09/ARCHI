@@ -1,6 +1,33 @@
 // Fictional in-game records based on 기획.md, not real company documents.
 const officeDocuments = [
   {
+    id: 'controls', category: '안내', code: 'HLP-001', revision: '1.0',
+    title: '조작 키 안내', owner: '업무지원 담당', updated: '09.19 09:00', status: '상시 게시',
+    summary: '이동·상호작용·조사창·휴대폰 조작 키와 화면 버튼',
+    body: `<h2>01. 이동</h2><table><thead><tr><th>키</th><th>동작</th><th>화면 버튼</th></tr></thead><tbody>
+        <tr><td>A / ←</td><td>왼쪽으로 이동</td><td>←</td></tr>
+        <tr><td>D / →</td><td>오른쪽으로 이동</td><td>→</td></tr>
+        <tr><td>Shift (누른 채)</td><td>달리기</td><td>-</td></tr>
+        <tr><td>Space / W / ↑</td><td>점프</td><td>↑</td></tr>
+      </tbody></table>
+      <h2>02. 상호작용</h2><table><thead><tr><th>키</th><th>동작</th><th>화면 버튼</th></tr></thead><tbody>
+        <tr><td>E</td><td>가까이 있는 문·장치·물건을 조사하거나 사용한다.</td><td>E</td></tr>
+        <tr><td>I</td><td>가방을 열고 닫는다.</td><td>가방 · I</td></tr>
+        <tr><td>P</td><td>휴대폰 화면을 열고 닫는다. 플래시를 켠 동안만 손에 들고 이동한다.</td><td>▣</td></tr>
+        <tr><td>F</td><td>휴대폰 플래시를 켜고 끈다. 켜져 있는 동안에는 달릴 수 없다.</td><td>휴대폰의 라이트 버튼</td></tr>
+      </tbody></table>
+      <h2>03. 조사창</h2><table><thead><tr><th>키</th><th>동작</th></tr></thead><tbody>
+        <tr><td>E</td><td>글이 나오는 중이면 전체를 보이고, 다 나왔으면 닫는다.</td></tr>
+        <tr><td>Esc</td><td>바로 닫는다.</td></tr>
+        <tr><td>Page Up / Page Down</td><td>화면보다 긴 문서·게시물을 넘겨 본다.</td></tr>
+        <tr><td>Home / End</td><td>문서의 처음과 끝으로 간다.</td></tr>
+        <tr><td>이동·점프 키</td><td>조사창을 닫고 바로 움직인다.</td></tr>
+      </tbody></table>
+      <h2>04. 창 닫기</h2><p>Esc는 휴대폰, 키패드, 전원 패널을 닫는다. 엘리베이터에서는 정차 후 문이 열렸을 때 내린다. 컴퓨터에서는 열린 앱 창을 먼저 닫고, 바탕화면에서 다시 누르면 컴퓨터 화면에서 나온다. 오프닝·정전 장면도 Esc로 건너뛸 수 있다. 이동 중에는 Esc로 저장 후 메인 메뉴를 연다.</p>
+      <p>충전함에 휴대폰을 두면 P와 F를 사용할 수 없다. 맡긴 충전함 앞에서 E로 다시 가져온다.</p>
+      <p class="document-note">화면 아래 버튼은 터치와 마우스로 같은 동작을 한다.</p>`
+  },
+  {
     id: 'organization', category: '회사·조직', code: 'ADM-001', revision: '1.2',
     title: '조직 및 업무 분장 안내', owner: '경영지원팀', updated: '09.19 09:00', status: '배포 완료',
     summary: '타워 내 부서별 역할 및 ARCHI 프로젝트 보고 체계',

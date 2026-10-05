@@ -1,0 +1,17 @@
+# 앱 이미지
+
+내장 `image_gen`으로 생성한 게임용 원본 PNG이며, 별도 외부 소스를 사용하지 않았다.
+
+- `app-icons.png`: 2172 × 724, 실제 알파 투명 배경. 가로 6칸(칸 폭 362px), 파일 → 메모 → 메일 → 계산기 → 시설 안내 → 플래시 순서.
+- 아이콘의 논리 표시 프레임은 362 × 362 정사각형이다. CSS `background-size: 600% 200%`, 세로 위치 `49%`로 중앙 띠를 표시한다. 가로 위치는 `0/20/40/60/80/100%`. 원본을 재편집하지 않고 CSS로 분할해 각 앱에 적용한다.
+- `phone-wallpaper.png`: 887 × 1774, 세로 1:2 스마트폰 배경. 부드러운 남색·파랑·청록색의 유리 곡면을 표현한 실제 기기 기본 배경 스타일이다. 모든 글자·버튼·앱 기능은 실제 HTML로 표시한다.
+- PC 바로가기·작업표시줄과 휴대폰 홈·플래시에 동일한 아이콘 프레임을 사용한다.
+
+## 아이콘 생성 프롬프트
+
+Use case: stylized-concept. Asset type: production raster UI icon sprite atlas for a Korean pixel-art office horror game, ARCHI. Create one horizontal 1x6 sprite sheet, intended canvas 1536x256: exactly SIX equal square cells in one row, each cell 256x256. Transparent background outside each icon. Icon order left to right: 1 yellow manila FILE FOLDER with papers, 2 warm ivory NOTEBOOK with spiral binding and an amber pencil, 3 pale blue MAIL envelope with a small letter, 4 slate navy CALCULATOR with mint green display and legible simple physical keypad shapes, 5 muted emerald OFFICE BUILDING facade with lit windows and a small floor directory accent, 6 slate blue FLASHLIGHT with ivory lamp lens pointing upward. Each is a full finished rounded-square realistic app tile, subtly beveled enamel/plastic with restrained highlights, centered in its own exact cell, occupying 80% of cell width and height, equal visual size, no clipping, generous equal transparent padding. Style: meticulously drawn clean pixel art, 4-pixel steps, crisp square pixels, restrained detailed object shading, compatible with a moody 2D office game but attractive and recognizable at 44px. Flat front view, icons face viewer, no perspective skew. Keep silhouettes extremely distinct. No labels, no numbers, no letters, no logos, no UI screen mockup, no decorative background, no extra icons, no divider lines, no checkerboard drawn into the image. Preserve real alpha transparency. Sheet must be a very wide thin strip with cells evenly spaced, each icon in its own cell; all six complete and aligned.
+
+## 휴대폰 배경 생성 프롬프트
+
+Use case: stylized-concept. Asset type: real smartphone stock home-screen wallpaper, portrait 1:2, intended canvas 1024x2048. Make a premium modern OEM-style abstract phone wallpaper: large softly curved layers of translucent frosted glass and silky flowing ribbons, deep midnight navy fading into refined cobalt blue and soft teal, a restrained pale cyan glowing curve across the lower third. Smooth realistic gradients, exquisite soft lighting, subtle depth, polished photographic CGI material quality, extremely clean composition. Design it specifically as a wallpaper someone would actually choose on their everyday smartphone. Keep the top quarter quiet and darker so white live status bar and clock remain clearly legible. Center area has simple broad flowing shapes with restrained contrast so overlaid colorful app icons and white labels remain readable. Full bleed, no border. No skyline, city, landscape, moon, stars, pixel art, game scene, illustration grain, phone hardware, interface, app icons, text, numerals, logos or watermark. This is ONLY the wallpaper image, not a mockup or a picture of a phone. Avoid white patches that compete with white UI. Elegant realistic contemporary smartphone home-screen background.
+

@@ -354,14 +354,436 @@
         248
       ]
     },
-    { "file": "archive-reading-desk.png", "name": "자료실 열람 책상", "width": 512, "height": 256, "anchor": [256, 248] },
-    { "file": "data-workstation.png", "name": "데이터 연구 작업대", "width": 512, "height": 256, "anchor": [256, 248] },
-    { "file": "observation-console.png", "name": "행동 관찰 콘솔", "width": 512, "height": 256, "anchor": [256, 248] },
-    { "file": "archive-worklight.png", "name": "충전식 작업등 카트", "width": 256, "height": 256, "anchor": [128, 248] },
-    { "file": "support-workstation.png", "name": "기술지원 엔지니어 작업대", "width": 512, "height": 256, "anchor": [256, 248] },
-    { "file": "incident-printer.png", "name": "장애 알림 프린터", "width": 256, "height": 256, "anchor": [128, 248] },
-    { "file": "testbay-ups.png", "name": "장비 검증실 UPS", "width": 256, "height": 256, "anchor": [128, 248] },
-    { "file": "server-validation-bench.png", "name": "서버 검증 벤치", "width": 512, "height": 256, "anchor": [256, 248] },
-    { "file": "training-workstation.png", "name": "고객 교육용 책상", "width": 512, "height": 256, "anchor": [256, 248] }
+    {
+      "file": "archive-reading-desk.png",
+      "name": "자료실 열람 책상",
+      "width": 512,
+      "height": 256,
+      "anchor": [
+        256,
+        248
+      ]
+    },
+    {
+      "file": "data-workstation.png",
+      "name": "데이터 연구 작업대",
+      "width": 512,
+      "height": 256,
+      "anchor": [
+        256,
+        248
+      ]
+    },
+    {
+      "file": "observation-console.png",
+      "name": "행동 관찰 콘솔",
+      "width": 512,
+      "height": 256,
+      "anchor": [
+        256,
+        248
+      ]
+    },
+    {
+      "file": "archive-worklight.png",
+      "name": "충전식 작업등 카트",
+      "width": 256,
+      "height": 256,
+      "anchor": [
+        128,
+        248
+      ]
+    },
+    {
+      "file": "support-workstation.png",
+      "name": "기술지원 엔지니어 작업대",
+      "width": 512,
+      "height": 256,
+      "anchor": [
+        256,
+        248
+      ]
+    },
+    {
+      "file": "incident-printer.png",
+      "name": "장애 알림 프린터",
+      "width": 256,
+      "height": 256,
+      "anchor": [
+        128,
+        248
+      ]
+    },
+    {
+      "file": "testbay-ups.png",
+      "name": "장비 검증실 UPS",
+      "width": 256,
+      "height": 256,
+      "anchor": [
+        128,
+        248
+      ]
+    },
+    {
+      "file": "server-validation-bench.png",
+      "name": "서버 검증 벤치",
+      "width": 512,
+      "height": 256,
+      "anchor": [
+        256,
+        248
+      ]
+    },
+    {
+      "file": "training-workstation.png",
+      "name": "고객 교육용 책상",
+      "width": 512,
+      "height": 256,
+      "anchor": [
+        256,
+        248
+      ]
+    },
+    {
+      "file": "compact-office-desk.png",
+      "name": "소형 사무 책상",
+      "width": 256,
+      "height": 256,
+      "anchor": [
+        128,
+        248
+      ],
+      "suggestedWorldWidth": 190
+    },
+    {
+      "file": "office-chair.png",
+      "name": "사무용 의자",
+      "width": 256,
+      "height": 512,
+      "anchor": [
+        128,
+        504
+      ],
+      "suggestedWorldWidth": 82
+    },
+    {
+      "file": "janitor-cart.png",
+      "name": "청소 카트",
+      "width": 256,
+      "height": 512,
+      "anchor": [
+        128,
+        504
+      ],
+      "suggestedWorldWidth": 105
+    },
+    {
+      "file": "wet-floor-sign.png",
+      "name": "미끄럼 주의 표지",
+      "width": 256,
+      "height": 256,
+      "anchor": [
+        128,
+        248
+      ],
+      "suggestedWorldWidth": 72
+    },
+    {
+      "file": "visitor-chair.png",
+      "name": "방문객 의자",
+      "width": 256,
+      "height": 512,
+      "anchor": [
+        128,
+        504
+      ],
+      "suggestedWorldWidth": 78
+    },
+    {
+      "file": "short-bookcase.png",
+      "name": "낮은 서가",
+      "width": 512,
+      "height": 256,
+      "anchor": [
+        256,
+        248
+      ],
+      "suggestedWorldWidth": 230
+    },
+    {
+      "file": "coat-rack.png",
+      "name": "옷걸이",
+      "width": 256,
+      "height": 512,
+      "anchor": [
+        128,
+        504
+      ],
+      "suggestedWorldWidth": 75
+    },
+    {
+      "file": "parcel-boxes.png",
+      "name": "택배 상자 묶음",
+      "width": 256,
+      "height": 256,
+      "anchor": [
+        128,
+        248
+      ],
+      "suggestedWorldWidth": 150
+    },
+    {
+      "file": "fire-extinguisher.png",
+      "name": "소화기",
+      "width": 256,
+      "height": 512,
+      "anchor": [
+        128,
+        504
+      ],
+      "suggestedWorldWidth": 50
+    },
+    {
+      "file": "umbrella-stand.png",
+      "name": "우산꽂이",
+      "width": 256,
+      "height": 512,
+      "anchor": [
+        128,
+        504
+      ],
+      "suggestedWorldWidth": 60
+    },
+    {
+      "file": "restroom-bin.png",
+      "name": "화장실 휴지통",
+      "width": 256,
+      "height": 256,
+      "anchor": [
+        128,
+        248
+      ],
+      "suggestedWorldWidth": 55
+    },
+    {
+      "file": "restroom-supply-cabinet.png",
+      "name": "위생용품 수납장",
+      "width": 256,
+      "height": 512,
+      "anchor": [
+        128,
+        504
+      ],
+      "suggestedWorldWidth": 80
+    },
+    {
+      "file": "sales-kpi-board.png",
+      "name": "영업 실적 보드",
+      "width": 512,
+      "height": 256,
+      "anchor": [
+        256,
+        248
+      ],
+      "suggestedWorldWidth": 350
+    },
+    {
+      "file": "sales-desk.png",
+      "name": "영업 책상",
+      "width": 512,
+      "height": 256,
+      "anchor": [
+        256,
+        248
+      ],
+      "suggestedWorldWidth": 252
+    },
+    {
+      "file": "floor-emergency-cabinet.png",
+      "name": "층 비상 대응함",
+      "width": 512,
+      "height": 256,
+      "anchor": [
+        256,
+        248
+      ],
+      "suggestedWorldWidth": 198
+    },
+    {
+      "file": "trophy-cabinet.png",
+      "name": "트로피 진열장",
+      "width": 256,
+      "height": 512,
+      "anchor": [
+        128,
+        504
+      ],
+      "suggestedWorldWidth": 111
+    },
+    {
+      "file": "boardroom-table.png",
+      "name": "전략회의실 테이블",
+      "width": 512,
+      "height": 256,
+      "anchor": [
+        256,
+        248
+      ],
+      "suggestedWorldWidth": 356
+    },
+    {
+      "file": "strategy-board.png",
+      "name": "전략 보드",
+      "width": 512,
+      "height": 256,
+      "anchor": [
+        256,
+        248
+      ],
+      "suggestedWorldWidth": 350
+    },
+    {
+      "file": "brochure-rack.png",
+      "name": "브로슈어 진열장",
+      "width": 256,
+      "height": 512,
+      "anchor": [
+        128,
+        504
+      ],
+      "suggestedWorldWidth": 111
+    },
+    {
+      "file": "materials-desk.png",
+      "name": "마케팅 자료실 책상",
+      "width": 512,
+      "height": 256,
+      "anchor": [
+        256,
+        248
+      ],
+      "suggestedWorldWidth": 252
+    },
+    {
+      "file": "dispatch-board.png",
+      "name": "출동 현황판",
+      "width": 512,
+      "height": 256,
+      "anchor": [
+        256,
+        248
+      ],
+      "suggestedWorldWidth": 350
+    },
+    {
+      "file": "training-slide-board.png",
+      "name": "교육 자료 보드",
+      "width": 512,
+      "height": 256,
+      "anchor": [
+        256,
+        248
+      ],
+      "suggestedWorldWidth": 350
+    },
+    {
+      "file": "patent-display-cabinet.png",
+      "name": "연구 성과 전시장",
+      "width": 256,
+      "height": 512,
+      "anchor": [
+        128,
+        504
+      ],
+      "suggestedWorldWidth": 111
+    },
+    {
+      "file": "records-cabinet.png",
+      "name": "기록 보관함",
+      "width": 256,
+      "height": 512,
+      "anchor": [
+        128,
+        504
+      ],
+      "suggestedWorldWidth": 72
+    },
+    {
+      "file": "labeling-board.png",
+      "name": "라벨링 현황판",
+      "width": 512,
+      "height": 256,
+      "anchor": [
+        256,
+        248
+      ],
+      "suggestedWorldWidth": 350
+    },
+    {
+      "file": "experiment-table.png",
+      "name": "실험 테이블",
+      "width": 512,
+      "height": 256,
+      "anchor": [
+        256,
+        248
+      ],
+      "suggestedWorldWidth": 356
+    },
+    {
+      "file": "research-news-board.png",
+      "name": "연구본부 소식지 게시판",
+      "width": 512,
+      "height": 256,
+      "anchor": [
+        256,
+        248
+      ],
+      "suggestedWorldWidth": 362
+    },
+    {
+      "file": "food-cafe-table.png",
+      "name": "카페 테이블",
+      "width": 512,
+      "height": 256,
+      "anchor": [
+        256,
+        248
+      ],
+      "suggestedWorldWidth": 356
+    },
+    {
+      "file": "food-kitchen-board.png",
+      "name": "주방 게시판",
+      "width": 512,
+      "height": 256,
+      "anchor": [
+        256,
+        248
+      ],
+      "suggestedWorldWidth": 350
+    },
+    {
+      "file": "food-voice-board.png",
+      "name": "고객의 소리 게시판",
+      "width": 512,
+      "height": 256,
+      "anchor": [
+        256,
+        248
+      ],
+      "suggestedWorldWidth": 350
+    },
+    {
+      "file": "food-shutter-panel.png",
+      "name": "셔터 제어함",
+      "width": 256,
+      "height": 512,
+      "anchor": [
+        128,
+        504
+      ],
+      "suggestedWorldWidth": 89
+    }
   ]
 }

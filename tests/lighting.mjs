@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { mkdir } from 'node:fs/promises';
 import { chromium } from 'playwright';
-import { finishSceneTransition, reachInitialCorridor } from './scene-transition.mjs';
+import { finishSceneTransition, reachInitialCorridor, collectRooftopKey } from './scene-transition.mjs';
 
 await mkdir('.local', { recursive: true });
 const browser = await chromium.launch();
@@ -11,7 +11,16 @@ try {
   page.on('pageerror', error => errors.push(error.message));
   await page.clock.install({ time: new Date('2026-09-21T00:00:00Z') });
   await page.goto(new URL('../index.html', import.meta.url).href);
+  await page.locator('#menu-start').click();
+  if (await page.locator('#menu-new-confirm').isVisible()) await page.locator('#menu-new-confirm').click();
+  await page.locator('#opening-skip').click();
   await page.clock.pauseAt(new Date('2026-09-21T00:01:00Z'));
+  // The switch can illuminate 17F only after the rooftop generator supplies it.
+  assert(await page.locator('#darkness').isHidden(), 'The building starts with mains power');
+  await page.evaluate(() => triggerBuildingBlackout());
+  assert(await page.locator('#darkness').isVisible(), 'The outage removes mains power');
+  await page.locator('#power-lever').dispatchEvent('click');
+  await page.locator('#power-floor-grid [data-floor="17"]').dispatchEvent('click');
   await page.locator('#office-background').evaluate(img => img.decode());
   const lights = page.getByRole('checkbox', { name: '17층 조명' });
   const filter = selector => page.locator(selector).evaluate(el => getComputedStyle(el).filter);
@@ -60,6 +69,7 @@ try {
     'Space on the light checkbox must not jump');
   await lights.uncheck();
   await reachInitialCorridor(page);
+  await collectRooftopKey(page);
   assert(await darkness.isVisible(), 'Corridor shares the office light state');
   assert(await alignedSight());
   await page.keyboard.down('d');
@@ -67,6 +77,7 @@ try {
   await page.keyboard.up('d');
   await page.clock.runFor(34);
   await page.keyboard.press('e');
+  await page.getByRole('button', { name: '열쇠 사용하기', exact: true }).click();
   await finishSceneTransition(page);
   assert.equal(await page.locator('header span').textContent(), 'RF · 옥상');
   assert(await page.locator('#floor17-light-switch').isHidden());
