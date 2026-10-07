@@ -454,7 +454,13 @@
       .room-door.brass { border-color: #a48d5a; background: linear-gradient(transparent 88%, #a48d5a 88%), linear-gradient(90deg, transparent 76%, #d4bd7c 76% 80%, transparent 80%), linear-gradient(105deg, #243a33 0 30%, #182a25 30%); box-shadow: inset 0 0 0 4px #0c1310; }
       .room-door.lacquer { border-color: #6f6a5b; background: radial-gradient(circle at 82% 56%, #d4bd7c 0 5px, #6b5a30 5px 7px, transparent 7px), linear-gradient(#16291f, #16291f) 50% 12% / 66% 28% no-repeat, linear-gradient(#16291f, #16291f) 50% 88% / 66% 44% no-repeat, linear-gradient(#24422f, #1b3325); box-shadow: inset 0 0 0 4px #0b1410; }
       .room-door.vault-wheel { border: 8px solid #6d7672; border-bottom: 0; background: radial-gradient(circle at 50% 44%, transparent 0 22px, #a9b2ae 22px 26px, transparent 26px), linear-gradient(#a9b2ae, #a9b2ae) 50% 44% / 60px 6px no-repeat, linear-gradient(#a9b2ae, #a9b2ae) 50% 44% / 6px 60px no-repeat, repeating-linear-gradient(#4a524f 0 40px, #414946 40px 44px); box-shadow: inset 0 0 0 5px #252b29; }
-      .floor-prop.double-lock::after { content: ''; position: absolute; left: 50%; top: 20%; width: 34px; height: 12px; margin-left: -17px; background: radial-gradient(circle, #d4bd7c 0 3px, #3a2f16 3px 5px, transparent 5px) 0 0 / 17px 12px; }
+      /* 10F 문 스프라이트(assets/objects/floor10/, 10F.md 6장). 금고문 상자는 doorY 236이라 150×334다. */
+      #dynamic-scene[data-theme="finance"] .room-door:is(.brass, .lacquer, .vault-wheel, .metal) { border: 0; box-shadow: none; background-color: #101a18; background-size: 100% 100%; background-repeat: no-repeat; background-position: 0 0; image-rendering: pixelated; }
+      #dynamic-scene[data-theme="finance"] .room-door.brass { background-image: url('assets/objects/floor10/brass-door.png'); }
+      #dynamic-scene[data-theme="finance"] .room-door.lacquer { background-image: url('assets/objects/floor10/lacquer-door.png'); }
+      #dynamic-scene[data-theme="finance"] .room-door.vault-wheel { background-image: url('assets/objects/floor10/vault-wheel-door.png'); }
+      #dynamic-scene[data-theme="finance"] .room-door.metal { background-image: url('assets/objects/floor10/restroom-door.png'); }
+      /* 이중 잠금 서류함(double-lock-file-cabinet)은 열쇠 구멍 둘을 그림이 그린다. CSS 점은 두지 않는다. */
       /* 9F TmaxTibero 사업본부: 와인색 카펫과 목탄색 벽(wine 테마), 계단식 좌석이 있는 고객 교육장 */
       #dynamic-scene[data-theme="wine"] > .floor { background: repeating-linear-gradient(90deg, #22141a 0 40px, #1d1116 40px 80px); border-top-color: #7a4a58; }
       #dynamic-scene[data-theme="wine"] .floor-room { border-color: #3d2530; }
@@ -476,6 +482,12 @@
       .room-door.push-bar { border-color: #8c5566; background: radial-gradient(circle at 25% 30%, #1a2230 0 12px, #8c5566 12px 14px, transparent 14px), radial-gradient(circle at 75% 30%, #1a2230 0 12px, #8c5566 12px 14px, transparent 14px), linear-gradient(transparent 55%, #b8a0a8 55% 58%, transparent 58%), linear-gradient(90deg, transparent 49%, #150b0f 49% 51%, transparent 51%), linear-gradient(#4a2a36, #3a2029); box-shadow: inset 0 0 0 4px #1a0d12; }
       .room-door.wine { border-color: #6a4250; background: linear-gradient(90deg, transparent 78%, #c9a9b3 78% 82%, transparent 82%), linear-gradient(105deg, #2c2433 0 30%, #201a27 30%); box-shadow: inset 0 0 0 4px #150b0f; }
       .room-door.badge { border-color: #5a5a64; background: linear-gradient(90deg, transparent 80%, #a8a8b4 80% 84%, transparent 84%), linear-gradient(#2e2d35, #232228); box-shadow: inset 0 0 0 4px #141318; }
+      /* 9F 문 스프라이트(assets/objects/floor9/, 9F.md 6장). 라이선스실 문 옆 사원증 리더(badge::after)는 CSS로 남긴다. */
+      #dynamic-scene[data-theme="wine"] .room-door:is(.push-bar, .wine, .badge, .metal) { border: 0; box-shadow: none; background-color: #1c1216; background-size: 100% 100%; background-repeat: no-repeat; background-position: 0 0; image-rendering: pixelated; }
+      #dynamic-scene[data-theme="wine"] .room-door.push-bar { background-image: url('assets/objects/floor9/push-bar-door.png'); }
+      #dynamic-scene[data-theme="wine"] .room-door.wine { background-image: url('assets/objects/floor9/wine-door.png'); }
+      #dynamic-scene[data-theme="wine"] .room-door.badge { background-image: url('assets/objects/floor9/badge-door.png'); }
+      #dynamic-scene[data-theme="wine"] .room-door.metal { background-image: url('assets/objects/floor9/restroom-door.png'); }
       /* B1 시설 관리실(utility 테마): 초록 에폭시 바닥과 노란 안전선, 밝은 콘크리트 벽과 천장 배관. B1·B2는 비상 발전기로 전기가
          살아 있는 층이라 천장 형광등·모니터·카드 리더가 켜진 밝은 색으로 그린다. 테마 규칙은 테두리색만 바꾼다. */
       #dynamic-scene[data-theme="utility"] > .floor { background: linear-gradient(transparent 12px, #c9a93a 12px 18px, transparent 18px), repeating-linear-gradient(90deg, #2a3530 0 240px, #26302b 240px 242px); border-top-color: #7a8a80; }
@@ -701,6 +713,12 @@
       .room-door.seal { border: 8px solid #464d51; border-bottom: 0; background: linear-gradient(#a0a8ac, #a0a8ac) right 10px top 150px / 26px 8px no-repeat, radial-gradient(circle, #1b1e20 0 2px, transparent 2.5px) 6px 6px / 22px 22px, linear-gradient(#30363a, #262b2e); box-shadow: inset 0 0 0 3px #1a1d1f; }
       .room-door.seal::after { content: ''; position: absolute; top: -30px; left: 50%; width: 44px; height: 14px; margin-left: -24px; border: 2px solid #4a3030; background: #1e1214; }
       .room-door.planner { border-color: #6a6250; background: linear-gradient(#0e1a22, #0e1a22) 18px 30px / 24px 58% no-repeat, linear-gradient(#c8c0a8, #c8c0a8) right 14px top 150px / 8px 44px no-repeat, repeating-linear-gradient(90deg, #4a4436 0 14px, #433e31 14px 16px); box-shadow: inset 0 0 0 4px #1e1c16; }
+      /* 8F 문 스프라이트(assets/objects/floor8/, 8F.md 6장). 평가실 문 위 "평가 중" 표시등(seal::after)은 CSS로 남긴다. */
+      #dynamic-scene[data-theme="qa"] .room-door:is(.hazard, .seal, .planner, .metal) { border: 0; box-shadow: none; background-color: #15181a; background-size: 100% 100%; background-repeat: no-repeat; background-position: 0 0; image-rendering: pixelated; }
+      #dynamic-scene[data-theme="qa"] .room-door.hazard { background-image: url('assets/objects/floor8/hazard-door.png'); }
+      #dynamic-scene[data-theme="qa"] .room-door.seal { background-image: url('assets/objects/floor8/seal-door.png'); }
+      #dynamic-scene[data-theme="qa"] .room-door.planner { background-image: url('assets/objects/floor8/planner-door.png'); }
+      #dynamic-scene[data-theme="qa"] .room-door.metal { background-image: url('assets/objects/floor8/restroom-door.png'); }
       #dynamic-scene .room-interior.test-lab.windowless { background: linear-gradient(#0e1011 0 44px, #3a4044 44px 50px, transparent 50px), repeating-linear-gradient(-45deg, #8f7a2e55 0 14px, transparent 14px 28px) 0 548px / 100% 22px no-repeat, repeating-linear-gradient(#262a2d 0 38px, #1f2326 38px 40px) !important; }
       #dynamic-scene .room-interior.test-lab::before { display: block; top: 120px; left: 1480px; right: auto; width: 620px; height: 150px; border: 5px solid #3f464a; background: radial-gradient(circle, #121415 0 2px, transparent 2.5px) 4px 4px / 16px 16px, #2c3134; }
       #dynamic-scene .room-interior.eval-mirror.windowless { background: linear-gradient(#0e1011 0 44px, #3a4044 44px 50px, transparent 50px), radial-gradient(circle, #17191b 0 3px, transparent 3.5px) 14px 64px / 30px 30px, repeating-linear-gradient(90deg, #272c2f 0 58px, #202427 58px 60px) !important; }
