@@ -916,6 +916,94 @@
         504
       ],
       "suggestedWorldWidth": 72
+    },
+    {
+      "file": "observation-camera-cart.png",
+      "name": "8F 관찰 카메라",
+      "width": 256,
+      "height": 256,
+      "anchor": [
+        128,
+        248
+      ],
+      "suggestedWorldWidth": 113
+    },
+    {
+      "file": "occupancy-sensor-mast.png",
+      "name": "8F 재실 센서 마스트",
+      "width": 256,
+      "height": 512,
+      "anchor": [
+        128,
+        504
+      ],
+      "suggestedWorldWidth": 89
+    },
+    {
+      "file": "repro-test-bench.png",
+      "name": "8F 결함 재현 벤치",
+      "width": 512,
+      "height": 256,
+      "anchor": [
+        256,
+        248
+      ],
+      "suggestedWorldWidth": 261
+    },
+    {
+      "file": "test-terminal-desk.png",
+      "name": "8F 시험 단말",
+      "width": 512,
+      "height": 256,
+      "anchor": [
+        256,
+        248
+      ],
+      "suggestedWorldWidth": 252
+    },
+    {
+      "file": "briefing-recorder-rig.png",
+      "name": "9F 브리핑 녹화 장비",
+      "width": 256,
+      "height": 256,
+      "anchor": [
+        128,
+        248
+      ],
+      "suggestedWorldWidth": 113
+    },
+    {
+      "file": "license-server-console.png",
+      "name": "9F 라이선스 서버 콘솔",
+      "width": 512,
+      "height": 256,
+      "anchor": [
+        256,
+        248
+      ],
+      "suggestedWorldWidth": 261
+    },
+    {
+      "file": "double-lock-file-cabinet.png",
+      "name": "10F 이중 잠금 서류함",
+      "width": 256,
+      "height": 512,
+      "anchor": [
+        128,
+        504
+      ],
+      "suggestedWorldWidth": 72
+    },
+    {
+      "file": "executive-desk.png",
+      "name": "10F 본부장 책상",
+      "width": 512,
+      "height": 256,
+      "anchor": [
+        256,
+        248
+      ],
+      "suggestedWorldWidth": 252
     }
   ]
 }
