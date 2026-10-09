@@ -45,6 +45,11 @@
   너무 밝게 나왔다 — 재질 색이 밝은 트래버틴이라 그런지 도구가 "정전=어둡게"를 약하게 반영한 것으로
   보인다. 그래서 9개 파일 전부에 "IMPORTANT OVERALL EXPOSURE" 절을 추가해, 재질 색과 무관하게 장면
   전체 노출을 다른 층 정전 장면만큼 어둡게(중~어두운 회색조) 그리라고 명시했다.
+  **2026-10-09 수정**: corridor-a 속 층별 안내판 벽감이 실제로는 세로 약 305px로 나왔는데, 19줄 텍스트
+  (게임 쪽 폰트 11px/줄간격 1.6 기준 약 354px 필요)가 다 안 들어가서 벽감 밖(맨벽)까지 글자가 흘러
+  내려왔다. `corridor-a.txt`의 해당 절에 y=90..545(455px) 명시 좌표를 추가해 재생성하도록 고쳤다 —
+  재생성 후에는 반드시 실측해서 `floor-01.js`의 안내판 fixture 좌표(지금 x=1325,y=195,height=420)를
+  다시 맞춘다.
 
 ## 파일 목록
 
@@ -99,7 +104,7 @@ x=730..940: pale travertine wall.
 x=940..1100: pale travertine wall, slightly more clinical/plain in tone (a health-clinic front approaching).
 x=1100..1210: ONE closed clinic door, top y=230, bottom y=570, plain pale door with a small frosted glass panel and a brass handle.
 x=1210..1380: pale travertine wall with brass pilaster strip.
-x=1380..1740: a tall shallow wall niche/frame with a thin brass border, completely empty inside (the game draws a 19-line floor directory here — leave it blank).
+x=1380..1740: a VERY TALL shallow wall niche/frame with a thin brass border, from y=90 to y=545 (455 pixels tall — notably taller and narrower than a normal picture frame, like a full floor-directory signboard, not a decorative painting), completely empty and blank inside (pure flat dark panel, no texture, no gradient, no pattern — the game draws 19 lines of small text here and needs the whole inside pitch-plain so the text stays readable; leave it entirely blank, no letters, no lines, no placeholder marks).
 x=1740..1790: plain travertine wall (a potted plant sprite stands here — keep the lower wall plain).
 x=1790..1818: plain wall (the seam to the next piece — keep it completely blank).
 No people, no monsters, no robots, no floor-standing furniture, nothing in the walk lane, no UI, no border, no watermark, no captions, no logos, no readable letters or numbers anywhere. Opaque PNG. Output only the finished background.

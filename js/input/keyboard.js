@@ -69,10 +69,6 @@ window.addEventListener('keydown', event => {
     if (event.code === 'Escape') closeKeypad();
     return;
   }
-  if (usingGenerator) {
-    if (event.code === 'Escape') closeGenerator();
-    return;
-  }
   if (usingComputer) {
     if (event.code === 'Escape' && !event.repeat) {
       event.preventDefault();

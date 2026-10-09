@@ -8,7 +8,7 @@ debugFloorSelect.value = 'f17';
 debugFloor.addEventListener('keydown', event => event.stopPropagation());
 debugFloor.addEventListener('submit', event => {
   event.preventDefault();
-  if (transitioning || selectingFloor || usingComputer || usingKeypad || usingGenerator) return;
+  if (transitioning || selectingFloor || usingComputer || usingKeypad) return;
   const destId = debugFloorSelect.value;
   stage.focus({ preventScroll: true });
   transitionScene(() => performFloorChange(destId, destId === 'rooftop' ? null : 0));

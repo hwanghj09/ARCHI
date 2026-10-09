@@ -38,23 +38,25 @@ const FLOOR1_LAYOUT = {
       doorX: 1023, doorWidth: 99, doorStyle: 'clinic-door', doorOutline: [1030, 302, 106, 254] },
   ],
   fixtures: [
-    { name: '층별 안내판', x: 1380, y: 110, width: 360, style: 'directory-board',
+    // 실측: corridor.png에 이미 금장 테두리 벽감이 그려져 있다(x≈1325~1650, y≈195~500, 안쪽 높이 약
+    // 305px) — CSS 테두리/배경은 art 모드에서 지우고 그 위에 글자만 얹는다. 좌표는 실제 벽감에 맞췄지만,
+    // 20줄 전부는 실제 벽감 높이(약 305px)에 안 들어가서, 덜 중요한 층은 "···"로 묶어 16줄로 줄였다
+    // (단서로 이어지는 12F·7F·B2 세 줄과 위아래 끝 층은 그대로 유지). 높이는 그림 속 벽감 테두리 실측값
+    // 305로 정확히 맞춰서, 글자가 테두리 안쪽에만 들어가고 테두리 밖 맨벽까지 안 내려가게 했다. 강조 줄
+    // CSS(index.html의 nth-child)도 이 배열의 새 줄 번호(5/9/15번째)에 맞춰 고쳤다.
+    { name: '층별 안내판', x: 1325, y: 195, width: 325, height: 305, style: 'directory-board',
       lines: [
         '17F  TmaxSoft 사업테스트본부',
         '16F  The Kitchen / CU 편의점 / Café',
-        '15F  TmaxSoft 연구본부',
-        '14F  TmaxSoft 연구본부',
+        '···',
         '13F  TmaxSoft 기술본부',
         '12F  TmaxSoft 기술본부 · ARCHI 개발팀',
         '11F  TmaxSoft 사업본부 / 전략마케팅본부',
-        '10F  TmaxSoft / TmaxTibero 경영관리본부',
-        '9F  TmaxTibero 사업본부',
+        '···',
         '8F  TmaxTibero QA실, 제품기획실',
         '7F  Lounge / VIP Room · AI 테스트·검증실',
         '6F  TmaxTibero 기술본부',
-        '5F  TmaxTibero 연구본부',
-        '4F  TmaxTibero 연구본부',
-        '3F  Fitness Club / ㈜하누리서비스 / 고객만족센터 / Studio',
+        '···',
         '2F  Harmony Hall / 서버실',
         '1F  Harmony Hall / Vision Hall / 건강관리실 / 여성휴게실',
         'B1  AI 서버실',
