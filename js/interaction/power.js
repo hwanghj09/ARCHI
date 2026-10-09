@@ -71,10 +71,15 @@ for (let floor = 17; floor >= 1; floor -= 1) {
   button.type = 'button';
   button.dataset.floor = String(floor);
   button.textContent = `${floor}F`;
+  if (floor === 1) {
+    button.classList.add('suggested');
+    button.setAttribute('aria-label', '1F · 먼저 가보기를 추천합니다');
+  }
   button.addEventListener('click', () => {
     if (!solarEnabled) return;
     if (solarPoweredFloor !== floor) playGameSound('switch');
     solarPoweredFloor = floor;
+    button.classList.remove('suggested');
     updatePowerState();
     showStatus(`${floor}층에 태양광 비상 전력을 공급합니다.`);
   });
@@ -91,7 +96,7 @@ powerLever.addEventListener('click', () => {
   playGameSound('switch');
   if (!solarEnabled) solarPoweredFloor = null;
   updatePowerState();
-  showStatus(solarEnabled ? '태양광 비상 전력 ON · 엘리베이터 운행이 복구됐다. 조명을 켤 층을 선택하자.' :
+  showStatus(solarEnabled ? '태양광 비상 전력 ON · 엘리베이터 운행이 복구됐다. 먼저 1층부터 가 보자.' :
     '태양광 비상 전력 OFF · 정전 상태에서는 엘리베이터가 멈춘다.', 6000);
 });
 // Dragging down operates the same native button as click, touch and keyboard.
