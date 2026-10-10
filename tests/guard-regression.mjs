@@ -149,10 +149,22 @@ try {
     const returning = await sprite();
     assert.equal(returning.src, 'assets/objects/guard-robot/guard-patrol.png', 'Returning uses the patrol sheet, not the capture sheet');
     assert.equal(returning.phase, 'move'); assert.equal(returning.width, '160px'); assert.equal(returning.flip, 'scaleX(1)');
+    // 전력이 들어온 채 돌아가는 로봇 바로 옆에서도 정비 패널(보조 배터리 화면)은 열리지 않는다. 수호가 비상계단과
+    // 안내 데스크 조사 범위 사이(3068~3121)에 서도록 로봇이 3125를 지날 때 30px 뒤에 세운다.
+    const panel = await page.evaluate(() => {
+      Body.setPosition(body, { x: 2000, y: floorY - 81 });
+      for (let i = 0; i < 600 && guardPatrol.x < 3125; i++) updateGuardPatrol(1000 / 60);
+      Body.setPosition(body, { x: guardPatrol.x - 30, y: floorY - 81 }); grounded = true;
+      updateInteraction();
+      const near = nearbyDoor?.name ?? null, hintShown = !hint.hidden;
+      interact();
+      return { near, hintShown, usingKeypad, keypadHidden: document.getElementById('keypad').hidden, mode: guardPatrol.mode };
+    });
+    assert.deepEqual(panel, { near: null, hintShown: false, usingKeypad: false, keypadHidden: true, mode: 'return' }, JSON.stringify(panel));
     const trip = await page.evaluate(() => {
       const dt = 1000 / 60, { left, right, speed } = guardPatrol.door.patrol;
       const start = guardPatrol.x, result = { maxStep: 0, backward: 0, frames: 0, min: Infinity, max: -Infinity,
-        srcs: new Set(), phases: new Set(), cells: new Set(), modes: new Set(), caught: false };
+        srcs: new Set(), phases: new Set(), cells: new Set(), modes: new Set(), caught: false, robotHint: false };
       while (guardPatrol.mode === 'return' && result.frames++ < 2000) {
         // 돌아가는 로봇 바로 앞(65px 안)에 서 있어도 다시 감지하거나 붙잡지 않는다.
         Body.setPosition(body, { x: guardPatrol.x + 40, y: floorY - 81 }); grounded = true;
@@ -161,7 +173,10 @@ try {
         if (guardPatrol.x < before) result.backward++;
         result.min = Math.min(result.min, guardPatrol.x); result.max = Math.max(result.max, guardPatrol.x);
         result.srcs.add(guardPatrol.image.getAttribute('src')); result.phases.add(guardPatrol.door.element.dataset.patrol);
-        if (guardPatrol.mode === 'return') result.cells.add(guardPatrol.door.element.dataset.frame);
+        if (guardPatrol.mode === 'return') {
+          result.cells.add(guardPatrol.door.element.dataset.frame);
+          updateInteraction(); result.robotHint ||= nearbyDoor === guardPatrol.door;
+        }
         result.modes.add(guardPatrol.mode); result.caught ||= playerCaught;
       }
       return { ...result, srcs: [...result.srcs], phases: [...result.phases], cells: [...result.cells].sort(), modes: [...result.modes],
@@ -173,6 +188,7 @@ try {
     assert(trip.frames >= Math.floor((trip.origin - trip.start) / trip.limit), `Takes the whole walk: ${trip.frames} frames`);
     assert(trip.min >= trip.left && trip.max <= trip.right, 'Stays inside the patrol bounds');
     assert.equal(trip.caught, false); assert.deepEqual(trip.modes, ['return', 'patrol'], 'No detection while returning');
+    assert.equal(trip.robotHint, false, 'The maintenance panel is never offered on the powered, returning robot');
     assert.deepEqual(trip.srcs, ['assets/objects/guard-robot/guard-patrol.png'], 'Never shows the capture sprite while returning');
     assert.deepEqual(trip.cells, ['0', '1', '2', '3'], 'Returning animates the patrol wheel frames');
     assert.equal(trip.x, trip.origin); assert.equal(trip.mode, 'patrol'); assert.equal(trip.wait, trip.pause);

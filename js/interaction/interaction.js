@@ -4,9 +4,12 @@ let nearbyDoor = null;
 function updateInteraction() {
   if (openingActive || blackoutSceneActive || playerCaught) { hint.hidden = true; return; }
   if (room === 'dynamic') {
+    // 전력이 들어온 채 감지했던 자리로 걸어 돌아가는('return') 로봇은 감지를 끈 채 움직이고 있어 바로 옆까지
+    // 갈 수 있다. 정비 패널은 멈춘 로봇의 보조 배터리 화면이므로 그동안은 조사 대상에서 뺀다.
+    const returningRobot = world.dataset.powered === 'true' && guardPatrol.mode === 'return' ? guardPatrol.door : null;
     const candidates = [...(guardPatrol.door ? [guardPatrol.door] : []),
       ...currentDoors.filter(door => door.accessGate && door.solid), ...currentDoors.filter(door => door.phoneCharger),
-      ...currentDoors.filter(door => !door.accessGate && !door.phoneCharger)];
+      ...currentDoors.filter(door => !door.accessGate && !door.phoneCharger)].filter(door => door !== returningRobot);
     nearbyDoor = candidates.find(door => grounded && Math.abs(body.bounds.max.y - (door.standY ?? floorY)) < 2 &&
       Math.abs(body.position.x - door.x - door.width / 2) < door.width / 2 + 28) || null;
     for (const door of currentDoors) door.element.classList.toggle('near', door === nearbyDoor);
