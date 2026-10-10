@@ -19,6 +19,7 @@ function releaseGuardCapture() {
 }
 
 function catchPlayer() {
+  closePhone();
   playGameSound('robot-grab', { x: guardPatrol.x });
   const robot = guardPatrol;
   playerCaught = true;

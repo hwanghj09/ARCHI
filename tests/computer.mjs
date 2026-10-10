@@ -31,6 +31,18 @@ try {
   await finishSceneTransition(page);
   assert(await page.locator('#stage').evaluate(el => el.inert));
   await pc.locator('img').evaluateAll(images => Promise.all(images.filter(img => img.src).map(img => img.decode())));
+  for (const viewport of [{ width: 1280, height: 720 }, { width: 844, height: 390 }, { width: 390, height: 844 }]) {
+    await page.setViewportSize(viewport);
+    assert(await pc.locator('.computer-shortcuts').evaluate(el => {
+      const bounds = el.getBoundingClientRect();
+      return el.scrollWidth === el.clientWidth && el.scrollHeight === el.clientHeight &&
+        [...el.children].every(button => {
+          const rect = button.getBoundingClientRect();
+          return rect.left >= bounds.left && rect.right <= bounds.right && rect.top >= bounds.top && rect.bottom <= bounds.bottom;
+        });
+    }), 'Desktop icons fit without scrolling');
+  }
+  await page.setViewportSize({ width: 1280, height: 720 });
   await page.screenshot({ path: '.local/computer-desktop.png' });
   await page.keyboard.down('d');
   await page.keyboard.press('Space');

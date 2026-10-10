@@ -65,8 +65,10 @@ try {
   const manual = page.locator('#dynamic-scene .fixture[aria-label="태양광 작업 설명서"]');
   assert.equal(await manual.count(), 1);
   assert(await manual.isVisible());
-  assert(await manual.evaluate(el => parseFloat(el.style.left) + el.clientWidth < 720), 'Manual sits beside the solar device');
-  await hold('d', 2000);
+  assert(await manual.evaluate(el => el.offsetHeight === 5 && parseFloat(el.style.top) + el.offsetHeight === 415 &&
+    parseFloat(el.style.left) >= 780 && parseFloat(el.style.left) + el.offsetWidth <= 940),
+    'Manual rests on the solar panel top as a thin sheet');
+  await hold('d', 3300);
   assert.equal(await page.locator('#interaction-hint').textContent(), 'E · 태양광 작업 설명서 조사');
   await page.keyboard.press('e');
   assert.equal(await page.locator('#inspection').getAttribute('data-surface'), 'document');
@@ -96,7 +98,7 @@ try {
   await page.screenshot({ path: '.local/solar-manual-mobile.png' });
   await page.keyboard.press('Escape');
   assert(await page.locator('#inspection').isHidden());
-  await hold('d', 1400);
+  await hold('d', 900);
   await page.setViewportSize({ width: 390, height: 844 });
   await page.clock.runFor(100);
   await page.screenshot({ path: '.local/solar-supply-mobile.png' });

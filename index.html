@@ -595,8 +595,7 @@
       #dynamic-scene .fixture.utility-plaque span:first-child { font-size: 20px; color: #f6ebb6; }
       #dynamic-scene .fixture.robot-board { padding: 14px; border: 5px solid #4a5650; background: #0d1512; color: #8fe0a0; font: bold 13px/1.9 monospace; box-shadow: 0 0 18px #6ae08a22; }
       #dynamic-scene .fixture.robot-board span:first-child { color: #e8f0d8; font-family: Arial, sans-serif; }
-      #dynamic-scene .fixture.power-notice { padding: 14px 12px; border: 4px solid #c9a93a; background: #e8e2c0; color: #22241c; font: bold 12px/1.9 Arial, sans-serif; }
-      #dynamic-scene .fixture.power-notice span:first-child { font-size: 15px; color: #8a2a1a; }
+      #dynamic-scene .fixture.power-notice { background: #eee9d5; transform: skewX(-12deg); border-bottom: 1px solid #b9b39f; box-shadow: 0 2px 1px #0008; }
       #dynamic-scene .fixture.cctv-wall { border: 8px solid #2a3432; background: radial-gradient(circle, #ff5a4a 0 3px, transparent 4px) 108px 8px / 116px 70px, repeating-linear-gradient(90deg, transparent 0 112px, #1a201d 112px 118px), repeating-linear-gradient(transparent 0 66px, #1a201d 66px 72px), linear-gradient(115deg, #7ab0c8 0 20%, #4a7a90 20% 55%, #6a9ab0 55%); box-shadow: 0 0 30px #7ab0c833; }
       /* B2 서버실(core 테마): 격자 이중 바닥, 푸른 서버 불빛과 차가운 천장등, 붉은 경고색. 메인 서버실 앞 천장 감시 카메라(cctv)와
          번갈아 비추는 시야(cctv-cone), 충전 도크의 경비 로봇 셋(dormant-bots). */
@@ -1221,7 +1220,8 @@
         <button type="button" data-computer-app="mail"><span class="app-art" data-app-icon="mail" aria-hidden="true"></span><span>사내 메일</span></button>
         <button type="button" data-computer-app="calculator"><span class="app-art" data-app-icon="calculator" aria-hidden="true"></span><span>계산기</span></button>
         <button type="button" data-computer-app="building"><span class="app-art" data-app-icon="building" aria-hidden="true"></span><span>시설 안내</span></button>
-        <button type="button" data-computer-app="browser"><span class="app-art" data-app-icon="files" aria-hidden="true"></span><span>인터넷</span></button>
+        <button type="button" data-computer-app="browser"><span class="app-art" data-app-icon="notes" aria-hidden="true"></span><span>블로그</span></button>
+        <button type="button" data-computer-app="transfer"><span class="app-art" data-app-icon="files" aria-hidden="true"></span><span>파일 전송</span></button>
       </div>
       <section id="computer-window" aria-labelledby="computer-window-title" hidden>
         <div class="computer-titlebar">
@@ -1289,18 +1289,51 @@
           </div>
         </div>
         <div id="computer-browser" class="computer-content" hidden>
+          <div class="naver-blog">
+            <div class="blog-browser-bar"><span aria-hidden="true">▣</span><span>blog.naver.com / 시설관리의 기록</span></div>
+            <div class="blog-service-bar"><strong><span>NAVER</span> blog</strong><span>시설관리 노트</span></div>
+            <div class="blog-cover"><p>ARCHI BUILDING</p><h2>시설관리의 기록</h2><p>건물의 하루를 기록합니다.</p></div>
+            <div class="blog-connection">
+              <output id="computer-internet-status" role="status" aria-live="polite"></output>
+            </div>
+            <div id="computer-solar-page" class="blog-layout" hidden>
+              <aside class="blog-profile" aria-label="블로그 작성자">
+                <div class="blog-avatar" aria-hidden="true">A</div>
+                <strong>ARCHI 시설관리팀</strong><p>안녕하세요.<br>시설 점검과 비상 전력<br>사용법을 공유합니다.</p>
+                <span>시설관리 · 17F</span>
+              </aside>
+              <article class="blog-post" aria-labelledby="solar-blog-title">
+                <p class="blog-category">비상 전력 / 사용 안내</p>
+                <h2 id="solar-blog-title" tabindex="-1">정전 때 쓰는 태양광 제어 앱<br>다운로드 및 설치 방법</h2>
+                <p class="blog-post-meta">ARCHI 시설관리팀 · 첨부파일 1개</p>
+                <p>매번 옥상까지 올라가기 번거로워서 휴대폰용 제어 앱을 올려 둡니다. 아래 첨부파일을 받아 휴대폰에 설치하면 옥상 태양광 임시 전력 장치를 원격으로 사용할 수 있어요.</p>
+                <h3>먼저 확인해 주세요</h3>
+                <p>옥상 배전반에서 비상 전력을 켜고 17층에 전력을 공급한 뒤, 사무실 컴퓨터로 접속하세요. 휴대폰을 충전함에 맡겨 두었다면 먼저 찾아와 주세요.</p>
+                <h3>앱으로 할 수 있는 일</h3>
+                <ul><li>비상 전력 장치 켜기 / 끄기</li><li>전력을 공급할 층 선택하기</li><li>현재 공급 중인 층 확인하기 · 최대 두 층</li></ul>
+                <h3>다운로드 및 설치</h3>
+                <ol><li>아래 첨부파일을 컴퓨터에 내려받고 다운로드가 끝날 때까지 기다리세요.</li><li>바탕화면의 ‘파일 전송’ 앱에서 ‘휴대폰으로 전송·설치’를 누르고 완료될 때까지 기다리세요.</li><li>휴대폰(P)의 ‘비상 전력 제어’ 앱을 열어 사용하세요.</li></ol>
+                <div class="blog-attachment">
+                  <span class="blog-file-icon" aria-hidden="true">↓</span>
+                  <div><strong>ARCHI_태양광_제어앱.apk</strong><span>휴대폰용 · 비상 전력 제어</span></div>
+                  <button id="computer-solar-download" type="button">첨부파일 다운로드</button>
+                </div>
+                <progress id="computer-solar-download-progress" class="solar-file-progress" max="100" value="0" aria-label="앱 다운로드 진행률" hidden></progress>
+                <output id="computer-solar-status" class="blog-install-status" role="status" aria-live="polite"></output>
+                <p class="blog-post-footer">#태양광 #비상전력 #ARCHI #시설관리</p>
+              </article>
+            </div>
+          </div>
+        </div>
+        <div id="computer-transfer" class="computer-content" hidden>
           <div class="solar-download-page">
-            <p class="computer-path">ARCHI 시설관리 / 비상 전력 제어</p>
-            <button id="computer-internet-connect" type="button">인터넷 접속</button>
-            <output id="computer-internet-status" role="status" aria-live="polite"></output>
-            <article id="computer-solar-page" hidden>
-              <h2>비상 전력 제어</h2>
-              <p>휴대폰으로 옥상 태양광 임시 전력 장치의 전원을 켜거나 끄고, 전력을 공급할 층을 선택하세요.</p>
-              <ol><li>휴대폰용 앱을 다운로드하세요.</li><li>휴대폰으로 전송하면 앱 설치와 장치 등록이 완료됩니다.</li></ol>
-              <button id="computer-solar-download" type="button">휴대폰용 앱 다운로드</button>
-              <button id="computer-solar-transfer" type="button" disabled>휴대폰으로 전송·설치</button>
-              <output id="computer-solar-status" role="status" aria-live="polite"></output>
-            </article>
+            <h2>휴대폰 파일 전송</h2>
+            <p>컴퓨터에 다운로드한 앱을 휴대폰으로 전송하고 설치합니다.</p>
+            <p id="computer-transfer-file" hidden><strong>ARCHI_태양광_제어앱.apk</strong><br>내 컴퓨터 → 정수호의 휴대폰</p>
+            <button id="computer-solar-transfer" type="button" disabled>휴대폰으로 전송·설치</button>
+            <progress id="computer-solar-transfer-progress" class="solar-file-progress" max="100" value="0" aria-label="휴대폰 전송·설치 진행률" hidden></progress>
+            <output id="computer-transfer-status" role="status" aria-live="polite"></output>
+            <p>전력이 끊기거나 컴퓨터 사용을 종료하면 진행 중인 작업이 취소됩니다. 휴대폰을 소지하고 배터리가 남아 있어야 전송할 수 있습니다.</p>
           </div>
         </div>
       </section>

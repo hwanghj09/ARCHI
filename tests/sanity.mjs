@@ -32,13 +32,13 @@ try {
   await page.keyboard.press('f');
   await page.keyboard.press('p');
   const reading = (await state()).sanity;
-  await page.clock.runFor(5000); near((await state()).sanity, reading);
+  await page.clock.runFor(5000); near((await state()).sanity, reading - 5);
   await page.keyboard.press('Escape');
   await page.evaluate(() => openInspection('메모', '읽는 동안에는 정신력이 줄지 않는다.'));
-  await page.clock.runFor(4000); near((await state()).sanity, reading);
+  await page.clock.runFor(4000); near((await state()).sanity, reading - 5);
   await page.keyboard.press('Escape');
   await page.evaluate(() => { solarEnabled = true; solarPoweredFloors = [17]; updatePowerState(); });
-  await page.clock.runFor(2500); assert.equal((await state()).sanity, 100);
+  await page.clock.runFor(5000); assert.equal((await state()).sanity, 100);
   await page.getByRole('checkbox', { name: '17층 조명' }).uncheck();
   await page.clock.runFor(2000); near((await state()).sanity, 98);
   await page.evaluate(() => {

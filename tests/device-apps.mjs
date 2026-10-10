@@ -35,7 +35,7 @@ try {
     const viewport = page.viewportSize();
     assert(box && box.width > 0 && box.height > 0);
     assert(box.x >= -1 && box.y >= -1 && box.x + box.width <= viewport.width + 1 && box.y + box.height <= viewport.height + 1,
-      `${await locator.getAttribute('id') || 'Control'} fits ${viewport.width}×${viewport.height}`);
+      `${await locator.getAttribute('id') || 'Control'} fits ${viewport.width}×${viewport.height}: ${JSON.stringify(box)}`);
   };
   const place = async x => {
     await page.evaluate(x => {
@@ -48,7 +48,7 @@ try {
   await page.keyboard.press('e');
   await finishSceneTransition(page);
   assert(await pc.isVisible());
-  assert.equal(await pc.locator('.computer-shortcuts button').count(), 6);
+  assert.equal(await pc.locator('.computer-shortcuts button').count(), 7);
   await pcApp('mail').click();
   assert.equal(await pc.locator('[data-computer-mail]').count(), 5);
   assert.equal(await pc.locator('#computer-mail-count').textContent(), '5개 메일 · 안 읽음 5개');
@@ -112,7 +112,9 @@ try {
   await page.clock.runFor(300);
   assert(await phone.locator('#phone-notes').isVisible());
   assert.equal(await page.evaluate(() => phoneLightOn), false);
-  assert.deepEqual(await page.evaluate(() => ({ x: body.position.x, y: body.position.y })), initialPosition);
+  const notePosition = await page.evaluate(() => ({ x: body.position.x, y: body.position.y }));
+  assert.equal(notePosition.x, initialPosition.x, 'Typing in phone notes cannot move the player');
+  assert(Math.abs(notePosition.y - initialPosition.y) < 0.001, 'Phone notes tolerate only physics rounding');
   const note = await phone.locator('#phone-note').inputValue();
   assert.match(note, /p f wasd e <img src=x>/);
   await phone.locator('#phone-note-save').click();
