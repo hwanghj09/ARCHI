@@ -36,9 +36,11 @@ function submitKeypad() {
   if (!target) return;
   if (keypadInput.value.trim().toLowerCase() !== String(target.code).toLowerCase()) {
     keypadError.textContent = '비밀번호가 맞지 않는다.';
+    playGameSound('deny');
     keypadInput.select();
     return;
   }
+  if (target.type !== 'power') playGameSound(INVENTORY_ITEMS[target.gives] ? 'item-get' : 'item-use');
   if (target.type === 'power') {
     setSolarPower(true);
     closeKeypad();

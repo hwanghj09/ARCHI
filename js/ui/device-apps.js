@@ -79,9 +79,12 @@ function refreshBuildingGuides() {
     guide.querySelector('[data-building-power]').textContent = `조명 · ${powered ? '전력 공급 중' : '전력 없음'}`;
     guide.querySelector('[data-building-power]').dataset.powered = String(powered);
     const gate = scene.barriers?.find(item => item.accessGate);
+    // 아직 없는 사원증은 마지막으로 확인된 곳(hint)을 함께 보인다.
+    const badge = gate && INVENTORY_ITEMS[gate.requires];
+    const held = gate && collectedItems.has(gate.requires);
     guide.querySelector('[data-building-access]').textContent = !gate ? '층 인증 게이트 없음 · 개별 잠금문은 현장에서 확인' :
       collectedItems.has(gate.gives) ? '층 인증 완료 · 양쪽 칸막이 통과 가능' :
-      `${INVENTORY_ITEMS[gate.requires]?.name || '출입증'} ${collectedItems.has(gate.requires) ? '보유' : '필요'} · 하차 후 게이트에서 E로 인증`;
+      `${badge?.name || '출입증'} ${held ? '보유' : '필요'}${!held && badge?.hint ? ` (${badge.hint})` : ''} · 하차 후 게이트에서 E로 인증`;
     const rooms = [...new Set((scene.rooms || []).map(room => room.name))];
     if (scene.floor === 17) rooms.unshift('개발팀 사무실');
     if (scene.floor === 18) rooms.push('태양광 비상 배전반', '비상계단');

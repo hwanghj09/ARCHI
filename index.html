@@ -179,6 +179,11 @@
       #dynamic-scene[data-theme="food"] .room-door.shutter { background-image: url('assets/objects/floor16/cu-shutter-states.png'); background-size: 200% 100%; }
       #dynamic-scene[data-theme="food"] .room-door.shutter[data-unlocked="true"] { background-position: 100% 0; }
       #dynamic-scene[data-theme="food"] .room-door.shutter::before { content: none; }
+      /* 안에서 처음 올린 CU 셔터(raiseShutter): 열린 칸 위에 닫힌 칸의 셔터 판만 얹어 약 1초 동안 덜컹거리며 말아 올린다.
+         복도가 그려지는 순간 시작해 셔터 소리의 끝(쿵)과 맞춘다. 판은 위로 밀려 올라가고(translateY), 위쪽 끝은 셔터 통
+         아래(문 높이 15%)에서 잘려(clip-path) 통 속으로 감긴다. */
+      #dynamic-scene[data-theme="food"] .room-door.shutter[data-raising="true"]::after { content: ''; position: absolute; inset: 0; background: url('assets/objects/floor16/cu-shutter-states.png') 0 0 / 200% 100% no-repeat; image-rendering: pixelated; animation: cu-shutter-raise .9s linear both; }
+      @keyframes cu-shutter-raise { 0% { transform: translateY(0); clip-path: inset(8.6% 8.4% 1.6%); } 10% { transform: translateY(-2%); clip-path: inset(17% 8.4% 1.6%); } 22% { transform: translateY(-10%); clip-path: inset(25% 8.4% 1.6%); } 30% { transform: translateY(-12%); clip-path: inset(27% 8.4% 1.6%); } 48% { transform: translateY(-36%); clip-path: inset(51% 8.4% 1.6%); } 56% { transform: translateY(-40%); clip-path: inset(55% 8.4% 1.6%); } 78% { transform: translateY(-67%); clip-path: inset(82% 8.4% 1.6%); } 86% { transform: translateY(-73%); clip-path: inset(88% 8.4% 1.6%); } 100% { transform: translateY(-83.4%); clip-path: inset(98.4% 8.4% 1.6%); } }
       #dynamic-scene[data-theme="food"] .room-door.metal { background-image: url('assets/objects/floor16/restroom-door.png'); }
       #dynamic-scene[data-theme="food"] .room-door.cafe { background-image: url('assets/objects/floor16/cafe-door.png'); }
       #dynamic-scene[data-theme="food"] .room-door.backdoor { background-image: url('assets/objects/floor16/service-door.png'); }

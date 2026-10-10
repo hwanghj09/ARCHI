@@ -1,7 +1,9 @@
 // 실제 소지품만 등록한다. collectedItems의 퍼즐 진행 플래그는 가방에 표시하지 않는다.
+// hint: 아직 챙기지 않은 물건이 어디 있는지 건물 안내 앱이 알려 주는 짧은 단서(전부 알려 주지는 않는다).
 const INVENTORY_ITEMS = {
   'f17-badge': { name: '수호의 출입증', description: '늘 지니고 다니는 내 출입증. ARCHI · 정수호 · 개발팀.', image: 'assets/objects/id-cards/jeong-suho.png' },
-  'f16-badge': { name: '조현아 팀장 사원증', description: '16층 카페에서 챙긴 사원증. 12~15층의 인증 게이트에서 사용할 수 있다.', image: 'assets/objects/id-cards/jo-hyeon-a.png' },
+  'f16-badge': { name: '조현아 팀장 사원증', description: '16층 카페에서 챙긴 사원증. 12~15층의 인증 게이트에서 사용할 수 있다.', image: 'assets/objects/id-cards/jo-hyeon-a.png',
+    hint: '16층 Café에서 마지막 확인' },
   'rooftop-key': { name: '낡은 열쇠', description: '옥상문을 열 수 있을 것만 같다… 조금 더럽다.' },
 };
 const inventoryButton = document.getElementById('inventory-button');
@@ -56,6 +58,7 @@ function openHydrant() {
     key.addEventListener('focus', describe);
     key.addEventListener('click', () => {
       collectedItems.add('rooftop-key');
+      playGameSound('item-get');
       key.remove();
       description.textContent = '낡은 열쇠를 가방에 넣었다. 옥상문을 열 수 있을 것 같다.';
       inspectionDescription.textContent = description.textContent;
@@ -80,6 +83,7 @@ function openRooftopLock() {
     if (!usingInspection || inspectionPanel.dataset.surface !== 'rooftop-lock' || currentSceneFloor !== 17 ||
         nearbyDoor?.type !== 'stairs' || !collectedItems.has('rooftop-key')) return;
     collectedItems.add('rooftop-unlocked');
+    playGameSound('item-use');
     closeInspection();
     interact();
   });

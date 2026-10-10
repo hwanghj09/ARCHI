@@ -64,7 +64,8 @@ function buildDynamicScene(config) {
     moving.push({ body: part, element, width: movable.width, height: movable.height });
   }
   // 통로를 막는 장애물(barriers, 예: 11층 방화셔터)은 충돌체이면서 조사할 수 있다. requires 물건을 챙긴 뒤 조사하면
-  // gives를 챙기며 걷히고, 그 뒤로 층을 다시 그릴 때는 충돌체 없이 걷힌 모양(data-open)으로 그린다.
+  // gives를 챙기며 걷히고, 그 뒤로 층을 다시 그릴 때는 충돌체 없이 걷힌 모양(data-open)으로 그린다. sound가 있으면 걷힐 때
+  // 사용음 대신 그 효과음을 낸다(방화셔터는 'shutter').
   for (const barrier of config.barriers || []) {
     const open = collectedItems.has(barrier.gives);
     const element = document.createElement('div');
@@ -125,11 +126,12 @@ function buildDynamicScene(config) {
     if (outside) {
       const doorWidth = outside.doorWidth ?? 120;
       // exitLock: 들어오면 등 뒤에서 잠기는 출구(7층 검증실). until 물건을 챙기면 그 자리에서 풀린다(lockedUntil).
+      // raiseMessage: 안에서만 여는 셔터(16층 CU)를 처음 올리고 나갈 때의 문구. 연출은 interaction.js가 한다.
       const lock = config.exitLock;
       doorList.push(addRoomDoor({ name: '복도', type: 'room', hint: 'E · 복도로 나가기', target: config.parent,
         arrivalKey: `room:${config.id}`, key: 'exit', x: config.exitX ?? exitDoorX(outside, config.width, doorWidth),
         y: outside.doorY ?? parent.roomDoorY ?? 250, width: doorWidth, style: outside.doorStyle,
-        unlocked: collectedItems.has(outside.unlockedBy),
+        unlocked: collectedItems.has(outside.unlockedBy), raiseMessage: outside.raiseMessage,
         locked: Boolean(lock) && !collectedItems.has(lock.until), lockedUntil: lock?.until, message: lock?.message,
         surface: lock?.surface, look: lock?.look, writing: lock?.writing, caption: lock?.caption, image: lock?.image,
         outline: config.exitOutline }));

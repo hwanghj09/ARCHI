@@ -117,7 +117,51 @@ try {
   assert.match(await interactionMessage(page), /23:47/);
   await capture('cu');
   const exit = await exitDoor(page);
-  await use(exit.x + exit.width / 2);
+  // The first exit by the shutter pulls the inner lever: record the store as open at once (a save in the middle of the
+  // event keeps it open), rattle the shutter, then roll it up in the corridor. Later exits are a plain door.
+  await page.evaluate(() => {
+    window.soundLog = [];
+    const original = playGameSound;
+    playGameSound = (name, options) => { soundLog.push(name); original(name, options); };
+  });
+  const raiseMessage = '안쪽 수동 레버를 당기자 셔터가 덜컹거리며 말려 올라간다.';
+  const status = () => page.locator('#interaction-status').textContent();
+  const raising = () => page.locator('.room-door.shutter').getAttribute('data-raising');
+  assert.equal(await page.evaluate(() => collectedItems.has('f16-cu')), false);
+  await walk(exit.x + exit.width / 2);
+  await page.evaluate(() => { soundLog.length = 0; });
+  // The CSS roll runs on real time, not the test clock: hold it at its start so the checks below see it in progress.
+  const holdRoll = await page.addStyleTag({ content: '.room-door.shutter[data-raising="true"]::after { animation-play-state: paused !important; }' });
+  await page.keyboard.press('e');
+  assert.equal(await page.locator('header span').textContent(), '16F · CU 편의점', 'The event starts before the corridor appears');
+  assert(await page.evaluate(() => collectedItems.has('f16-cu') && progressSnapshot().items.includes('f16-cu')), 'The raised shutter is recorded when the event starts');
+  assert.deepEqual(await page.evaluate(() => soundLog), ['shutter'], 'The lever rattles the shutter instead of a door sound');
+  assert.equal(await status(), raiseMessage);
+  await finishSceneTransition(page);
+  assert.equal(await page.locator('header span').textContent(), '16F · 편의시설');
+  assert.equal(await status(), raiseMessage, 'The lever line stays up over the arrival message');
+  assert.equal(await raising(), 'true');
+  assert(await page.locator('.room-door.shutter').evaluate(el => {
+    const animation = el.getAnimations({ subtree: true }).find(item => item.animationName === 'cu-shutter-raise');
+    const timing = animation?.effect.getComputedTiming();
+    const style = getComputedStyle(el, '::after');
+    return animation.effect.pseudoElement === '::after' && timing.duration === 900 && style.backgroundImage.includes('cu-shutter-states.png') &&
+      style.backgroundPositionX === '0px' && style.backgroundSize === '200% 100%';
+  }), 'The closed shutter frame rolls up over about a second');
+  // Look at the roll halfway, then let it finish: the overlay clears and only the open frame remains.
+  await page.locator('.room-door.shutter').evaluate(el => {
+    el.getAnimations({ subtree: true }).find(item => item.animationName === 'cu-shutter-raise').currentTime = 405;
+  });
+  await capture('cu-shutter-raising');
+  const halfway = await page.locator('.room-door.shutter').evaluate(el => getComputedStyle(el, '::after').clipPath);
+  assert.match(halfway, /^inset\((?:4\d|5\d)(?:\.\d+)?%/, `The curtain is about half rolled up: ${halfway}`);
+  await page.locator('.room-door.shutter').evaluate(async el => {
+    const animation = el.getAnimations({ subtree: true }).find(item => item.animationName === 'cu-shutter-raise');
+    animation.finish(); await animation.finished;
+  });
+  await page.waitForFunction(() => !document.querySelector('.room-door.shutter').dataset.raising);
+  await holdRoll.evaluate(style => style.remove());
+  assert.equal(await page.locator('.room-door.shutter').evaluate(el => getComputedStyle(el, '::after').content), 'none');
   assert.equal(await page.locator('.room-door.shutter').getAttribute('aria-label'), 'CU 편의점 출입문');
   await checkDoors();
   assert.equal(await page.locator('.room-door.shutter').getAttribute('data-unlocked'), 'true');
@@ -125,7 +169,13 @@ try {
   await use(1635);
   await checkDoors();
   assert.equal(await page.locator('.room-door.shutter').getAttribute('data-unlocked'), 'true', 'Raised shutter persists inside');
-  await use(exit.x + exit.width / 2);
+  await walk(exit.x + exit.width / 2);
+  await page.evaluate(() => { soundLog.length = 0; });
+  await page.keyboard.press('e');
+  await finishSceneTransition(page);
+  assert.deepEqual(await page.evaluate(() => soundLog), ['door'], 'The second exit is an ordinary door');
+  assert.equal(await raising(), null, 'The shutter is already up the second time');
+  assert.equal(await status(), '복도로 나왔습니다.');
   await walk(4440);
   await capture('cafe-front');
   await use(4406);
@@ -138,6 +188,19 @@ try {
   await checkArt(1);
   await capture('mobile');
   await page.setViewportSize({ width: 1280, height: 720 });
+  // With reduced motion the lever line and sound remain, and the corridor shows the raised shutter without the roll.
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.evaluate(() => { collectedItems.delete('f16-cu'); performFloorChange('f16-cu', null, 'link:f16-kitchen'); });
+  await page.clock.runFor(100);
+  await walk(exit.x + exit.width / 2);
+  await page.evaluate(() => { soundLog.length = 0; });
+  await page.keyboard.press('e');
+  await finishSceneTransition(page);
+  assert.deepEqual(await page.evaluate(() => soundLog), ['shutter']);
+  assert.equal(await status(), raiseMessage);
+  assert.equal(await raising(), null, 'Reduced motion skips the roll');
+  assert.equal(await page.locator('.room-door.shutter').getAttribute('data-unlocked'), 'true');
+  await page.emulateMedia({ reducedMotion: null });
   await jumpFloor('f16');
   await walk(3684);
   await checkDoors();
@@ -151,7 +214,7 @@ try {
   assert.equal(await page.locator('#dynamic-scene').getAttribute('data-art'), 'false', 'CSS floors retain their original renderer');
   assert.equal(await page.locator('.floor-background').count(), 0);
   assert.deepEqual(errors, []);
-  console.log('PASS 16F backgrounds: image loading, floor alignment, doors, room links, clues, mobile and legacy rendering');
+  console.log('PASS 16F backgrounds: image loading, floor alignment, doors, room links, clues, first-exit CU shutter event, mobile and legacy rendering');
 } finally {
   await browser.close();
 }
