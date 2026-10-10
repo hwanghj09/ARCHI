@@ -15,6 +15,7 @@ function startOpening() {
   facing = 1;
   sprite.dataset.state = 'opening';
   sprite.dataset.frame = '0';
+  openingSheet.style.transform = '';
   hint.hidden = true;
   document.getElementById('opening-skip').focus({ preventScroll: true });
   Promise.all([openingSheet.decode(), officeBackground.decode()]).then(() => {
@@ -32,9 +33,11 @@ function updateOpening(elapsed) {
   if (openingElapsed >= 5400) return finishOpening();
   const frame = openingElapsed < 1400 ? 0 : openingElapsed < 2300 ? 1 :
     openingElapsed < 3100 ? 2 : openingElapsed < 3450 ? 3 : openingElapsed < 3800 ? 4 : 5;
-  sprite.dataset.frame = String(frame);
-  openingSheet.style.transform = `translateX(${-frame * 100 / 6}%)`;
   const phase = frame === 0 ? 'work' : frame === 1 ? 'shutdown' : frame === 2 ? 'off' : frame === 3 ? 'turn' : frame === 4 ? 'rising' : 'standing';
+  if (phase !== 'standing') {
+    sprite.dataset.frame = String(frame);
+    openingSheet.style.transform = `translateX(${-frame * 100 / 6}%)`;
+  }
   if (world.dataset.opening !== phase) {
     world.dataset.opening = phase;
     if (phase === 'shutdown') {
@@ -43,7 +46,14 @@ function updateOpening(elapsed) {
       openingCaption.textContent = '작업을 저장하고 컴퓨터를 종료했다.';
     }
     if (phase === 'off') setOfficeComputerPower('off');
-    if (phase === 'standing') openingCaption.textContent = '늦었네. 이제 퇴근하자.';
+    if (phase === 'standing') {
+      // The sheet's last cell is mid-stride, so stand in the gameplay idle pose instead.
+      idleTime = 0;
+      showIdleFrame(0);
+      sprite.dataset.state = 'idle';
+      sprite.dataset.frame = '0';
+      openingCaption.textContent = '늦었네. 이제 퇴근하자.';
+    }
   }
   // Step away from the background chair into the gameplay floor plane while rising.
   const rise = Math.max(0, Math.min(1, (openingElapsed - 3450) / 650));
