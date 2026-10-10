@@ -8,6 +8,14 @@ const savedFloor = value => Number.isInteger(value) && (value === -2 || value ==
 function readProgress() {
   try {
     const data = JSON.parse(localStorage.getItem(progressKey));
+    // 단면 에셋으로 교체되어 사라진 방의 저장은 같은 층 복도에서 재개한다. 소지품·전력·퍼즐 기록은 유지한다.
+    if (data?.version === 1 && ['f2-booth', 'f3-hanuri', 'f4-log', 'f4-ups', 'f4-vault', 'f4-office',
+      'f5-library', 'f5-council', 'f6-remote', 'f6-line', 'f6-duty', 'f8-repro', 'f8-blind',
+      'f9-briefing', 'f9-license', 'f10-finance', 'f10-director', 'f10-vault'].includes(data.scene?.id) &&
+      Number.isFinite(data.scene.x) && Number.isFinite(data.scene.y)) {
+      Object.assign(data.scene, { id: data.scene.id.split('-')[0], x: BUILDING_CORE.elevators[0].x + 40,
+        y: floorY - 81, velocity: { x: 0, y: 0 }, arrivalKey: null });
+    }
     if (data?.version !== 1 || !data.scene || !(data.scene.id === 'office' || floorById.has(data.scene.id)) ||
         !Number.isFinite(data.scene.x) || !Number.isFinite(data.scene.y) || !Array.isArray(data.items) ||
         data.items.length > 1024 || !data.items.every(item => typeof item === 'string' && item.length < 256)) return null;

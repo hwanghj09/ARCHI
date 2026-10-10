@@ -179,6 +179,7 @@ function interact() {
     // 레버 문구와 셔터 소리를 내며 복도로 넘어가고, 복도에서 셔터가 말려 올라간다. 두 번째부터는 보통 문이다.
     const raising = nearbyDoor.key === 'exit' && raiseMessage && !collectedItems.has(dynamicFloorId);
     if (nearbyDoor.key === 'exit') collectedItems.add(dynamicFloorId);
+    nearbyDoor.element.dataset.open = 'true';
     if (raising) showStatus(raiseMessage, 4000);
     playGameSound(raising ? 'shutter' : 'door');
     changeRoom(() => {

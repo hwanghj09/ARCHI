@@ -2,6 +2,11 @@
 function addRoomDoor(door, parent = dynamicScene) {
   door.element = document.createElement('div');
   door.element.className = `room-door ${door.style || ''}`.trim();
+  // sprite: 닫힘|열림 두 칸 문 그림(단면 에셋 층). 그림을 바로 입히고, E를 누르면 data-open으로 열린 칸을 보인다.
+  if (door.sprite) {
+    door.element.classList.add('sprite-door');
+    door.element.style.backgroundImage = `url('${door.sprite}')`;
+  }
   door.element.dataset.unlocked = String(Boolean(door.unlocked));
   door.element.setAttribute('role', 'img');
   door.element.setAttribute('aria-label', `${door.name} 출입문${door.locked ? ' · 잠김' : ''}`);

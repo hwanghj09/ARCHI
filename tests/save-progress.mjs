@@ -60,7 +60,7 @@ try {
   await page.locator('#menu-continue').click(); assert(await page.locator('#main-menu').isHidden());
   // Room-local puzzle steps and moving platforms survive a browser reload.
   await page.evaluate(() => {
-    performFloorChange('f8-repro', null, 'exit');
+    performFloorChange('f8-qa', null, 'exit');
     advanceSequence(currentDoors.find(door => door.sequence?.step === 1));
     advanceSequence(currentDoors.find(door => door.sequence?.step === 2)); closeInspection();
   });
@@ -68,13 +68,13 @@ try {
   assert.equal(await page.evaluate(() => sequenceProgress.get('f8-repro-steps')), 2);
   assert.equal(await page.locator('[data-done="true"]').count(), 2);
   await page.evaluate(() => {
-    performFloorChange('f5-library', null, 'exit');
+    performFloorChange('f5-rnd', null, 'exit');
     Body.setPosition(movingParts[0].body, { x: 1600, y: floorY - movingParts[0].height / 2 });
     Body.setPosition(body, { x: 1600, y: floorY - movingParts[0].height - 81 });
     Body.setVelocity(body, { x: 0, y: 0 });
   });
   await reloadContinue();
-  assert.equal((await state()).id, 'f5-library'); assert.equal((await state()).x, 1600);
+  assert.equal((await state()).id, 'f5-rnd'); assert.equal((await state()).x, 1600);
   assert.equal(await page.evaluate(() => movingParts[0].body.position.x), 1600);
   // Temporary doors restore before the player's physics body, avoiding a closed-door trap.
   await page.evaluate(() => { performFloorChange('f3-fitness', null, 'exit'); openTimedBarrier(currentDoors.find(door => door.opens)); });
@@ -152,6 +152,19 @@ try {
     assert.deepEqual(resaved.solarPoweredFloors, expected); assert(!('solarPoweredFloor' in resaved), 'New saves use only the array');
   }
   // Invalid saves are ignored, and blocked storage cannot prevent a fresh game.
+  await page.evaluate(() => {
+    const saved = localStorage.getItem(progressKey);
+    try {
+      for (const id of ['f2-booth', 'f3-hanuri', 'f4-log', 'f4-ups', 'f4-vault', 'f4-office',
+        'f5-library', 'f5-council', 'f6-remote', 'f6-line', 'f6-duty', 'f8-repro', 'f8-blind',
+        'f9-briefing', 'f9-license', 'f10-finance', 'f10-director', 'f10-vault']) {
+        localStorage.setItem(progressKey, JSON.stringify({ version: 1, scene: { id, x: 1600, y: 400 }, items: ['rooftop-key'] }));
+        const migrated = readProgress();
+        if (migrated?.scene.id !== id.split('-')[0] || migrated.scene.x !== BUILDING_CORE.elevators[0].x + 40 ||
+            migrated.items[0] !== 'rooftop-key') throw new Error(`Legacy room save lost: ${id}`);
+      }
+    } finally { localStorage.setItem(progressKey, saved); }
+  });
   await page.locator('#game-menu-button').tap();
   await page.evaluate(() => localStorage.setItem(progressKey, JSON.stringify({ version: 1, scene: { id: 'missing', x: 1, y: 1 }, items: [] })));
   await page.reload(); assert(await page.locator('#menu-continue').isHidden());

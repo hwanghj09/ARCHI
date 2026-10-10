@@ -102,7 +102,7 @@ try {
   assert.deepEqual(await events(), [], 'Other cars arriving at the departed hall stay silent inside the cabin');
   await page.evaluate(() => {
     selectingFloor = false; cabinCarIndex = null; cabin.hidden = true; stage.inert = false;
-    performFloorChange('f6-duty', null, 'exit'); audioEvents.length = 0;
+    performFloorChange('f6-engineering', null, 'exit'); audioEvents.length = 0;
   });
   await page.clock.runFor(4800);
   assert.equal((await events()).filter(name => name === 'call-ring').length, 2, 'The duty phone rings when the puzzle starts and repeats on the game clock');
@@ -139,10 +139,10 @@ try {
   assert.deepEqual(await inspect('f11-sales', '층 비상 대응함'), ['pickup'], 'A puzzle flag keeps the pickup sound');
   assert.deepEqual(await inspect('f11', '방화셔터'), ['shutter'], 'The fire shutter rattles as it rolls up');
   assert.deepEqual(await inspect('f11', '방화셔터'), [], 'An open shutter stays silent');
-  assert.deepEqual(await inspect('f2-booth', '영사기'), [], 'A device missing its item stays silent');
-  await page.evaluate(() => collectedItems.add('f2-reel'));
-  assert.deepEqual(await inspect('f2-booth', '영사기'), ['item-use'], 'Running a device on a required item is a use, not a pickup');
-  assert.deepEqual(await inspect('f2-booth', '영사기'), [], 'A running device stays silent');
+  assert.deepEqual(await inspect('f2-harmony', '배터리 영사기'), [], 'A device missing its items stays silent');
+  await page.evaluate(() => { collectedItems.add('f2-reel'); collectedItems.add('f2-remote'); });
+  assert.deepEqual(await inspect('f2-harmony', '배터리 영사기'), ['item-use'], 'Running a device on required items is a use, not a pickup');
+  assert.deepEqual(await inspect('f2-harmony', '배터리 영사기'), [], 'A running device stays silent');
   assert.deepEqual(errors, []);
   console.log('PASS: walking/running/landing, shutdown/flicker/outage timing, charger guards, robot alert/grab and return motor, item/keypad/shutter sounds, door transitions, elevator motor/arrival/isolation and repeating/answered duty calls.');
 } finally { await browser.close(); }

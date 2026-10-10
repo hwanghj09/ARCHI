@@ -79,9 +79,10 @@ try {
     assert.deepEqual(missing, [], `${item.sceneId} ${item.name}: message details missing on the surface`);
     counts[item.surface] = (counts[item.surface] || 0) + 1;
   }
-  assert(counts.whiteboard >= 23 && counts.notebook >= 7 && counts.corkboard >= 2 && counts.chalkboard >= 1, JSON.stringify(counts));
-  assert(counts.document >= 40 && counts.screen >= 15 && counts.memo >= 10 && counts.label >= 15 && counts.receipt >= 1 && counts.card >= 1,
-    JSON.stringify(counts));
+  // 단면 에셋 층은 그림 속 조사 지점으로 바뀌므로 고정 소품 수 대신 모든 글 표면의 실제 배치를 검사한다.
+  for (const surface of ['whiteboard', 'notebook', 'corkboard', 'chalkboard', 'document', 'screen', 'memo', 'label', 'receipt', 'card']) {
+    assert(counts[surface] >= 1, `${surface}: at least one real clue exercises its layout`);
+  }
   // 완성 그림(image)은 실제 파일이어야 한다. 없는 그림을 켜면 조사창에 깨진 그림이 뜬다.
   for (const item of items.filter(entry => entry.image)) await stat(item.image);
 
@@ -148,7 +149,7 @@ try {
   assert(await page.locator('#inspection').isHidden());
 
   // 5층 서가 꼭대기(solid)의 숨긴 노트도 노트로 펼친다.
-  const shelf = await inspectAt('f5-library', '서가 꼭대기');
+  const shelf = await inspectAt('f5-rnd', '서가 꼭대기');
   assert.equal(shelf.surface, 'notebook');
   await page.screenshot({ path: '.local/writing-notebook.png' });
 
@@ -179,7 +180,7 @@ try {
   // 8층 결함 재현실: 마지막 단계(재현 벤치)의 출력지는 서류로 펼치고, 중간 단계는 상태 문구다.
   const steps = await page.evaluate(() => {
     closeInspection();
-    performFloorChange('f8-repro', 0, 'exit');
+    performFloorChange('f8-qa', 0, 'exit');
     const result = [];
     for (const name of ['시험 단말', '재실 센서 제어함', '관찰 카메라', '재현 벤치']) {
       closeInspection();
