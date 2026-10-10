@@ -6,7 +6,7 @@
   1. `assets/background/floor17/floor17.png`: 화풍, 팔레트, 픽셀 렌더링만 참고한다. 구도는 따라 하지 않는다.
   2. `assets/player/jeong-suho-idle-four.png`: 정수호 idle 시트(왼쪽 위 칸만 잘라 넣어도 된다). 화면 속 작은 인물의 옷차림과 실루엣.
   3. `assets/objects/guard-robot/guard-patrol.png`: 경비 로봇 R-01. 로비 화면 속 작은 로봇으로 쓴다.
-- 사용: `js/floors/floor-b1.js` 방재 관제실(`b1-control`)의 `CCTV 모니터 벽` 조사 화면. `image`가 있으면 writing(LCD 글자 화면)보다 우선하고(`js/interaction/writing.js`), 크기는 `.writing-art`(`writing.css`, 최대 높이 65dvh)가 조사창에 맞춘다. 16:9라 데스크톱과 모바일 세로 화면 모두 조사창 안에 들어간다.
+- 사용: `js/floors/floor-b1.js` 방재 관제실(`b1-control`)의 `CCTV 모니터 벽` 조사 화면. `image`가 있으면 writing(LCD 글자 화면)보다 우선하고(`js/interaction/writing.js`), 크기는 `.writing-art`(`writing.css`, 최대 높이 65dvh)가 조사창에 맞추고, 아래에 caption이 있으면 caption까지 스크롤 없이 보이도록 조금 더 줄인다. 16:9라 데스크톱과 모바일 세로 화면 모두 조사창 안에 들어간다(높이 480px 이하 가로 화면은 스크롤로 caption을 본다).
 - 그림에는 글자를 넣지 않는다. 단서 "추적 대상 1 · 정수호"는 그림 아래 caption으로 보여 주고, 화면 낭독기는 지금처럼 message를 읽는다.
 
 ## 연결

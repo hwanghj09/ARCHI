@@ -261,6 +261,11 @@ try {
       return box.width > 0 && box.left >= sheet.left && box.right <= sheet.right + 1 && box.top >= sheet.top - 1 &&
         box.bottom <= sheet.bottom + 1 && panel.bottom <= controls.top + 0.5 && Math.abs(box.width / box.height - 16 / 9) < 0.02;
     }), `${view}: the CCTV artwork fits uncropped above the controls`);
+    // 데스크톱과 모바일 세로에서는 그림과 caption이 스크롤 없이 한 화면에 들어간다(가로로 낮은 화면은 스크롤 허용).
+    if (view !== 'landscape') {
+      assert(await page.locator('#inspection-sheet').evaluate(sheet => sheet.scrollHeight <= sheet.clientHeight + 1),
+        `${view}: the CCTV artwork and its caption fit without scrolling`);
+    }
     if (view === 'mobile') await page.screenshot({ path: '.local/writing-cctv-art-mobile.png' });
   }
   await page.evaluate(saved => {
