@@ -71,3 +71,21 @@ function refreshObjective() {
   void objectivePanel.offsetWidth;
   objectivePanel.classList.add('updated');
 }
+
+// 오른쪽 위 버튼 배치: 메뉴 버튼은 가방 버튼을 가리지 않도록 그 왼쪽에 8px 띄워 붙이고, 목표 창은 메뉴 버튼의 왼쪽 끝부터
+// 가방 버튼의 오른쪽 끝까지 가로로 맞춘다. 가방 버튼은 소지품 수에 따라 글자가 길어지므로 크기가 바뀔 때마다 다시 계산한다.
+const hudMenuButton = document.getElementById('game-menu-button');
+const hudInventoryButton = document.getElementById('inventory-button');
+
+function layoutTopRightHud() {
+  const inventory = hudInventoryButton.getBoundingClientRect();
+  if (!inventory.width) return;
+  hudMenuButton.style.right = `${document.documentElement.clientWidth - inventory.left + 8}px`;
+  const menu = hudMenuButton.getBoundingClientRect();
+  objectivePanel.style.width = `${inventory.right - menu.left}px`;
+}
+
+new ResizeObserver(layoutTopRightHud).observe(hudInventoryButton);
+new ResizeObserver(layoutTopRightHud).observe(hudMenuButton);
+window.addEventListener('resize', layoutTopRightHud);
+layoutTopRightHud();

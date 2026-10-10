@@ -20,3 +20,19 @@ function syncDebugSanity() {
   requestAnimationFrame(syncDebugSanity);
 }
 syncDebugSanity();
+
+// 콘솔 창: 버튼으로 환각 이벤트를 바로 실행한다(추격 이벤트 1회, 플레이어 근처의 공격하지 않는 환각 1회).
+const debugConsole = document.getElementById('debug-console');
+const debugConsoleToggle = document.getElementById('debug-console-toggle');
+const debugConsolePanel = document.getElementById('debug-console-panel');
+debugConsole.addEventListener('keydown', event => event.stopPropagation());
+debugConsoleToggle.addEventListener('click', () => {
+  debugConsolePanel.hidden = !debugConsolePanel.hidden;
+  debugConsoleToggle.setAttribute('aria-expanded', String(!debugConsolePanel.hidden));
+});
+for (const [id, trigger] of [['debug-chase-hallucination', debugTriggerChaseHallucination], ['debug-spawn-hallucination', debugTriggerAmbientHallucination]]) {
+  document.getElementById(id).addEventListener('click', () => {
+    if (!trigger()) showStatus('지금은 환각 이벤트를 실행할 수 없다.', 2000);
+    stage.focus({ preventScroll: true }); // 버튼에 포커스가 남아 이동 키가 막히지 않게 한다
+  });
+}

@@ -1,8 +1,8 @@
 // 정신력(공포 연출): 빛 노출은 암전 마스크를 따른다. 플래시/밝은 곳은 소모를 막을 뿐 더 이상 회복시키지 않는다.
 // 어두운 곳에서는 3초에 1%씩, 경비 로봇에게 쫓기는 동안(guardPatrol.mode === 'chase')은 1초에 10%씩 줄어든다(보스전 제외).
 // 50/40/30/20/10% 미만마다 화면 연출이 단계적으로 심해지고(sanityTierOf), 0%에 닿으면 '환각'이 플레이어를 노리는
-// 이벤트가 시작된다: 15초 뒤 돌진 → 바라보던 반대쪽에서 뛰어들고, 그 방향으로 플래시를 비추면 회피 → 5초 뒤 재시도 →
-// 두 번째 회피 이후 근처에 항불안제가 반짝이며 나타난다. 회피하지 못하면 잡아먹혀 게임 오버.
+// 이벤트가 시작된다: 15초 뒤 돌진 → 바라보던 반대쪽에서 뛰어들고, 그 방향으로 플래시를 비추면 회피 → 5초 뒤 재시도.
+// 회피하지 못하면 잡아먹혀 게임 오버.
 const sanityHud = document.getElementById('sanity-hud');
 const sanityValue = document.getElementById('sanity-value');
 const sanityMeter = document.getElementById('sanity-meter');
@@ -12,7 +12,6 @@ const hallucinations = document.getElementById('hallucinations');
 const hallucinationShadow = document.getElementById('hallucination-shadow');
 const wallEyes = document.getElementById('wall-eyes');
 const blinkFlash = document.getElementById('blink-flash');
-const anxietyPill = document.getElementById('anxiety-pill');
 const hallucinationCapturePanel = document.getElementById('hallucination-caught');
 const fearOverlayRed = document.getElementById('fear-overlay-red');
 
@@ -34,9 +33,8 @@ let zeroEventPhase = 'idle'; // 'idle' | 'waiting' | 'charging' (0%에서만 의
 let zeroEventTimer = 0;
 let zeroEventSide = 1;
 let zeroEventEvasions = 0;
+let zeroEventForced = false; // 콘솔 버튼으로 시작한 추격: 정신력이 0%보다 커도 끝날 때까지 이어진다
 
-let bonusPillActive = false;
-let bonusPillX = 0;
 
 let hallucinationBlocked = [];
 
@@ -80,28 +78,33 @@ function startZeroCharge() {
   zeroEventTimer = 0;
   zeroEventSide = -facing; // 플레이어가 바라보지 않는 쪽
   if (phoneLightOn) { phoneLightOn = false; refreshPhone(); }
-  playGameSound('zero-rush');
   showStatus('어둠 속에서 무언가 빠르게 다가온다 — 반대쪽으로 플래시를 비춰야 한다!', 2600);
   beginHallucinationSighting('charge', zeroEventSide, 320);
 }
 
 function resolveZeroEvasion() {
-  zeroEventEvasions++;
   zeroEventPhase = 'idle';
   zeroEventTimer = 0;
   endHallucinationSighting();
+  if (zeroEventForced) {
+    // 콘솔로 시작한 추격은 회피 횟수(다음 돌진까지의 대기 시간)에 포함하지 않는다.
+    zeroEventForced = false;
+    showStatus('환각이 사라졌다.', 2600);
+    return;
+  }
+  zeroEventEvasions++;
   showStatus(zeroEventEvasions === 1 ? '환각이 사라졌다. 다시 올 것 같다…' : '또 한 번 피했다.', 2600);
-  if (zeroEventEvasions >= 2 && !bonusPillActive) spawnBonusPill();
 }
 
 function triggerDevoured() {
+  zeroEventForced = false;
   zeroEventPhase = 'idle';
   zeroEventTimer = 0;
   hallucinationCaught = true;
   endHallucinationSighting();
   phoneLightOn = false;
   refreshPhone();
-  playGameSound('zero-rush');
+  playHallucinationDevouredSound();
   releaseInput();
   Body.setVelocity(body, { x: 0, y: 0 });
   hint.hidden = interactionOutline.hidden = true;
@@ -130,7 +133,8 @@ document.getElementById('hallucination-retry').addEventListener('click', () => {
 
 function updateZeroEvent(elapsed, fsmPaused) {
   if (hallucinationCaught || fsmPaused) return;
-  if (sanity > 0) {
+  if (zeroEventForced && zeroEventPhase !== 'charging') zeroEventForced = false;
+  if (sanity > 0 && !zeroEventForced) {
     if (zeroEventPhase !== 'idle') { zeroEventPhase = 'idle'; zeroEventTimer = 0; endHallucinationSighting(); }
     return;
   }
@@ -166,14 +170,42 @@ function updateAmbientSighting(elapsed, fsmPaused) {
   if (ambientTimer < ambientNextIn) return;
   ambientTimer = 0;
   ambientNextIn = randomBetween(ambientSightingIntervalRange);
+  startAmbientSighting();
+}
+
+// 플레이어 근처(220~340px)에 나타나 공격하지 않는 환각. 정신력 연출과 콘솔 버튼이 함께 쓴다.
+function startAmbientSighting() {
   hallucinationSide = Math.random() < .5 ? -1 : 1;
   hallucinationAnchorX = Math.max(60, Math.min(worldWidth - 60, body.position.x + hallucinationSide * (220 + Math.random() * 120)));
   hallucinationMode = 'ambient';
+  playHallucinationSound(.5, true); // 멀리서 보이는 환각은 작게
   hallucinationLife = 0;
+}
+
+// 콘솔 창 버튼용. 컷씬·전환·포획·창이 열려 있는 동안은 정신력 진행처럼 실행하지 않는다.
+function hallucinationEventBlocked() {
+  return !gameStarted || mainMenuActive || openingActive || blackoutSceneActive || playerCaught || hallucinationCaught ||
+    transitioning || usingComputer || usingKeypad || usingPhone || usingPowerPanel || usingInspection;
+}
+
+function debugTriggerChaseHallucination() {
+  if (hallucinationEventBlocked()) return false;
+  endHallucinationSighting();
+  zeroEventForced = true;
+  startZeroCharge();
+  return true;
+}
+
+function debugTriggerAmbientHallucination() {
+  if (hallucinationEventBlocked()) return false;
+  endHallucinationSighting();
+  startAmbientSighting();
+  return true;
 }
 
 function beginHallucinationSighting(mode, side, distance) {
   hallucinationMode = mode;
+  playHallucinationSound(1, mode !== 'charge'); // 돌진(추격)만 기존 소리, 예고 환각은 무작위
   hallucinationSide = side;
   hallucinationStartDistance = distance;
   hallucinationLife = 0;
@@ -181,6 +213,7 @@ function beginHallucinationSighting(mode, side, distance) {
 
 function endHallucinationSighting() {
   hallucinationMode = null;
+  delete document.body.dataset.hallucinating;
   hallucinations.hidden = true;
   hallucinationShadow.hidden = true;
 }
@@ -188,52 +221,20 @@ function endHallucinationSighting() {
 function updateHallucinationSighting(elapsed, fsmPaused) {
   if (!hallucinationMode || fsmPaused || hallucinationMode === 'charge') return;
   // 'charge'의 진행은 updateZeroEvent의 zeroEventTimer가 끌고 간다(회피/잡아먹힘 판정과 같은 시계여야 한다).
-  hallucinationLife += elapsed;
+  // approach: 플래시를 비추며 바라보면 같은 시계가 2.6배 빨리 흐른다. 끝나는 시점만 앞당기면 위치·투명도 계산(life 기준)과
+  // 어긋나 환각이 중간에 갑자기 끊기거나 속도가 일정하지 않게 보인다.
+  const towardIt = hallucinationMode === 'approach' && phoneLightOn && facing === hallucinationSide;
+  hallucinationLife += elapsed * (towardIt ? 2.6 : 1);
   if (hallucinationMode === 'ambient') {
     const dist = selectingFloor ? Infinity : Math.abs(body.position.x - hallucinationAnchorX);
     if (hallucinationLife >= ambientSightingLifeMs || dist < 90) endHallucinationSighting();
     return;
   }
   if (hallucinationMode === 'approach') {
-    const towardIt = phoneLightOn && facing === hallucinationSide;
-    const duration = towardIt ? zeroEventApproachDurationMs / 2.6 : zeroEventApproachDurationMs;
-    if (hallucinationLife >= duration) endHallucinationSighting();
+    if (hallucinationLife >= zeroEventApproachDurationMs) endHallucinationSighting();
     return;
   }
   // 'charge'는 updateZeroEvent가 회피/도달 시점에 endHallucinationSighting을 직접 부른다.
-}
-
-// ---- 항불안제: 시작 지점 근처 고정 한 알(office17.js) + 두 번째 회피 이후 반짝이며 나타나는 한 알 ----
-
-function spawnBonusPill() {
-  bonusPillActive = true;
-  relocateBonusPill();
-  anxietyPill.hidden = false;
-  showStatus('근처에서 반짝이는 항불안제를 발견했다. 다가가 E를 눌러 복용하자.', 4200);
-}
-
-function relocateBonusPill() {
-  if (!bonusPillActive) return;
-  const side = Math.random() < .5 ? -1 : 1;
-  bonusPillX = Math.max(60, Math.min(worldWidth - 60, body.position.x + side * (90 + Math.random() * 70)));
-  Object.assign(anxietyPill.style, { left: `${bonusPillX - 18}px`, top: `${floorY - 70}px` });
-}
-
-function removeBonusPill() {
-  bonusPillActive = false;
-  anxietyPill.hidden = true;
-}
-
-// interaction.js의 interact()가 다른 상호작용보다 먼저 호출한다. 복용했으면 true.
-function tryPickUpAnxietyPill() {
-  if (!bonusPillActive) return false;
-  if (Math.abs(body.position.x - bonusPillX) > 70) return false;
-  sanity = Math.min(100, sanity + sanityPillRestore);
-  removeBonusPill();
-  playGameSound('pickup');
-  showStatus('항불안제를 복용했다. 정신력이 조금 돌아왔다.', 3200);
-  refreshSanity();
-  return true;
 }
 
 // ---- 컴퓨터 오류 창: 20% 미만에서 열 때마다 꺼짐·색상바·오류화면·지직거리는 화면 중 하나를 무작위로 보여준다 ----
@@ -320,6 +321,7 @@ function renderHallucination() {
   hallucinations.hidden = false;
   hallucinationShadow.hidden = false;
   hallucinations.dataset.mode = hallucinationMode;
+  document.body.dataset.hallucinating = 'true';
   const width = selectingFloor ? Math.min(260, stage.clientHeight * .4) : Math.min(224 * scale, stage.clientWidth * .4);
   let opacity = .5;
   let targetX;
@@ -343,8 +345,8 @@ function renderHallucination() {
     targetX = (body.position.x - cameraX) * scale < stage.clientWidth / 2 ? stage.clientWidth - width / 2 - 12 : width / 2 + 12;
   }
   const left = Math.max(12, Math.min(stage.clientWidth - width - 12, targetX - width / 2));
-  const top = selectingFloor ? stage.clientHeight * .3 : floorY * scale - 238 * width / 256;
-  Object.assign(hallucinationShadow.style, { left: `${left}px`, top: `${top}px`, width: `${width}px`, height: `${width}px`,
+  const top = selectingFloor ? stage.clientHeight * .3 : floorY * scale - 238 * width / 256 + width * .12;
+  Object.assign(hallucinationShadow.style, { left: `${left}px`, top: `${top}px`, width: `${width}px`, height: `${width * 2 / 3}px`,
     opacity: String(Math.max(0, opacity)), transform: `scaleX(${hallucinationSide})` });
 }
 

@@ -16,7 +16,7 @@
 #sanity-hud[data-state="hallucinating"] #sanity-state { color: #d396b0; }
 #hallucinations { position: fixed; z-index: 11; inset: 0; overflow: hidden; pointer-events: none; background: radial-gradient(ellipse at center, transparent 38%, #2714266b 78%, #130b20bd); }
 #hallucinations[hidden], #hallucination-shadow[hidden] { display: none; }
-#hallucination-shadow { position: absolute; image-rendering: pixelated; filter: brightness(0) invert(.75) sepia(.3) drop-shadow(0 0 6px #bba0c8); pointer-events: none; user-select: none; }
+#hallucination-shadow { position: absolute; object-fit: contain; filter: blur(.8px) drop-shadow(0 0 10px #9aa4b0aa); pointer-events: none; user-select: none; }
 body:has(#world[data-opening]) #sanity-hud,
 body:has(#world[data-blackout-scene]) #sanity-hud,
 body:has(#world[data-opening]) #fear-overlay, body:has(#world[data-opening]) #fear-overlay-red,
@@ -25,7 +25,7 @@ body:has(#world[data-opening]) #blink-flash, body:has(#world[data-blackout-scene
 body:has(#world[data-opening]) #wall-eyes, body:has(#world[data-blackout-scene]) #wall-eyes { visibility: hidden; }
 @media (max-width: 480px) { #sanity-hud { width: 136px; padding: 8px 10px; } }
 @media (max-height: 480px) { #sanity-hud { top: 106px; } }
-@media (prefers-reduced-motion: reduce) { #hallucination-shadow { filter: brightness(0) invert(.7); } }
+@media (prefers-reduced-motion: reduce) { #hallucination-shadow { filter: blur(.8px); } }
 
 /* 50/40/30/20/10% 미만 단계별 화면 연출: 검은 비네트 → 흐림 → (30~20%에서) 붉게 전환. */
 #fear-overlay, #fear-overlay-red { position: fixed; z-index: 10; inset: 0; pointer-events: none; opacity: 0;
@@ -53,8 +53,17 @@ body[data-fear-tier="5"] #fear-overlay { opacity: .8; filter: blur(3.2px); }
 /* 30% 미만: 더 지친 모습(새 그림이 없어 필터로 대신한다) + 이동 속도 저하는 config.js의 sanitySpeedFactor가 맡는다. */
 body[data-weary="true"] #player { filter: grayscale(.35) brightness(.82) contrast(1.05); }
 
-/* 0%가 되기 전/후 환각이 다가오는 동안 화면이 심하게 지직거린다. */
-#hallucinations[data-mode="approach"], #hallucinations[data-mode="charge"] { animation: fear-glitch .22s steps(2) infinite; }
+/* 환각이 보이는 동안(어느 종류든) 화면이 지직거리고, 환각이 사라질 때까지 장면이 살짝 떨린다. */
+#hallucinations[data-mode] { animation: fear-glitch .22s steps(2) infinite; }
+#hallucinations::after { content: ""; position: absolute; inset: 0; background: repeating-linear-gradient(0deg, #ffffff14 0 1px, transparent 1px 4px); animation: static-flicker .14s steps(2) infinite; }
+@keyframes static-flicker { 0% { opacity: .9; transform: translateY(0); } 50% { opacity: .35; transform: translateY(2px); } 100% { opacity: .7; transform: translateY(-1px); } }
+body[data-hallucinating="true"] #stage { animation: screen-tremor .16s steps(2) infinite; }
+@keyframes screen-tremor {
+  0% { transform: translate(0, 0) scale(1.012); }
+  33% { transform: translate(-1.5px, 1px) scale(1.012); }
+  66% { transform: translate(1px, -1.5px) scale(1.012); }
+  100% { transform: translate(0, 0) scale(1.012); }
+}
 @keyframes fear-glitch {
   0% { transform: translate(0, 0); filter: hue-rotate(0deg); }
   25% { transform: translate(-3px, 2px); filter: hue-rotate(-12deg); }
@@ -63,11 +72,6 @@ body[data-weary="true"] #player { filter: grayscale(.35) brightness(.82) contras
   100% { transform: translate(0, 0); filter: hue-rotate(0deg); }
 }
 
-/* 항불안제: 시작 지점 근처 고정 한 알과, 두 번째 회피 이후 반짝이며 나타나는 한 알이 같은 모습을 쓴다. */
-.pill-prop { position: absolute; width: 36px; height: 36px; border-radius: 50%; pointer-events: none;
-  background: radial-gradient(circle, #d9ffe0 0%, #6fd98a 45%, #1f5a33 100%); box-shadow: 0 0 14px 4px #7af09980;
-  animation: pill-pulse 1.6s ease-in-out infinite; }
-@keyframes pill-pulse { 0%, 100% { opacity: .75; transform: scale(.9); } 50% { opacity: 1; transform: scale(1.08); } }
 
 /* CCTV: 20% 미만에서 카메라 렌즈에 붉은 눈이 맺힌다(기존 감지 LED ::after와 겹치지 않는 별도 요소). */
 .cctv-fear-eye { display: none; position: absolute; left: 32px; top: 7px; width: 9px; height: 9px;
@@ -103,7 +107,13 @@ body[data-weary="true"] #player { filter: grayscale(.35) brightness(.82) contras
 #hallucination-retry:focus-visible { outline: 3px solid #eac47d; outline-offset: 3px; }
 
 @media (prefers-reduced-motion: reduce) {
-  #hallucinations[data-mode="approach"], #hallucinations[data-mode="charge"], #computer-fear-window { animation: none; }
+  #hallucinations[data-mode], #hallucinations::after, body[data-hallucinating="true"] #stage, #computer-fear-window { animation: none; }
   .wall-eye { animation: none; opacity: .85; }
-  .pill-prop { animation: none; }
 }
+
+/* 테스트용 콘솔 창: 정신력 창 맨 아래. 누르면 환각 이벤트 버튼 두 개가 아래로 펼쳐진다. */
+#debug-console { margin-top: 8px; padding-top: 8px; border-top: 1px dashed #c9a13b; pointer-events: auto; }
+#debug-console button { display: block; width: 100%; min-height: 28px; margin: 0; padding: 4px 8px; border: 1px solid #4e5851; border-radius: 3px; background: #19211de6; color: #ddd; font: 11px Arial, sans-serif; cursor: pointer; }
+#debug-console button:hover { border-color: #c9a13b; }
+#debug-console-panel { display: grid; gap: 6px; margin-top: 6px; }
+#debug-console-panel[hidden] { display: none; }

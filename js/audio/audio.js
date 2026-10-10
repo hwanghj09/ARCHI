@@ -38,7 +38,7 @@ function gameAudioBuffer(name) {
   const durations = { step: .2, door: .65, 'elevator-door': 1.05, 'elevator-arrive': 1.05,
     'elevator-alarm': .95, blackout: 1.5, 'robot-servo': .48, 'robot-alert': .6,
     'robot-grab': .65, 'call-ring': .85, phone: .14, charger: .24, pickup: .22, 'item-get': .5, 'item-use': .3, deny: .46,
-    shutter: 1.35, switch: .12, ui: .09, 'zero-rush': .9 };
+    shutter: 1.35, switch: .12, ui: .09 };
   const loop = ['office', 'dark', 'wind', 'motor'].includes(name);
   const duration = loop ? 8 : durations[name];
   if (!duration) return null;
@@ -80,7 +80,6 @@ function gameAudioBuffer(name) {
         (.2 * soft + .06 * sin(420, t)) * Math.exp(-((t * 22) % 1) * 4.5) * (.75 + .25 * sin(2.3, t)) * gate(t, .1, 1) + (.2 * sin(70, t) + .16 * soft) * hit(t, 1.15, 26); break;
       case 'switch': sample = (.28 * soft + .1 * sin(210, t)) * hit(t, .008, 48); break;
       case 'ui': sample = .09 * sin(720 - 900 * t, t) * Math.sin(Math.PI * t / duration) * Math.exp(-25 * t); break;
-      case 'zero-rush': sample = .55 * noise * hit(t, 0, 7) + .4 * sin(Math.max(140, 1500 - 1700 * t), t) * hit(t, 0, 3) + .32 * low * hit(t, .05, 4.5); break;
       case 'office': sample = .6 * low + .09 * sin(62.5, t) + .025 * sin(125, t); break;
       case 'dark': sample = .46 * low + .065 * sin(37.5, t) * (1 + .18 * sin(.125, t)); break;
       case 'wind': sample = .95 * low * (.65 + .2 * sin(.25, t) + .12 * sin(.625, t)); break;
@@ -119,7 +118,7 @@ function playGameSound(name, options = {}) {
   source.buffer = buffer;
   source.playbackRate.value = name === 'step' ? .94 + Math.random() * .12 : 1;
   gain.gain.value = (name === 'step' ? (options.landing ? .65 : options.running ? .6 : .42) : name === 'blackout' ? .7 :
-    name === 'robot-servo' ? .35 : name === 'zero-rush' ? .85 : .6) * (1 - distance / 800);
+    name === 'robot-servo' ? .35 : .6) * (1 - distance / 800);
   source.connect(gain).connect(gameAudioMaster);
   const effect = { source, gain, name, stopping: false };
   gameAudioEffects.add(effect);
@@ -136,7 +135,43 @@ function stopGameAudioSource(sound) {
   sound.source.stop(now + .08);
 }
 
+// 환각이 나타날 때의 효과음은 합성음이 아닌 mp3 파일이다. fetch·decodeAudioData는 file://에서 막히므로 <audio>로 재생한다.
+const hallucinationSoundElement = new Audio('assets/audio/hallucination-jumpscare.mp3');
+hallucinationSoundElement.preload = 'auto';
+// 추격이 아닌 환각은 이 세 소리 중 하나를 무작위로 들려준다. 직전에 들려준 소리만 빼고 고르므로 연달아 같은 소리는 없고,
+// 다른 소리가 한 번 나온 뒤에는 다시 나올 수 있다.
+const hallucinationSightingElements = ['1', '2', '3'].map(n => {
+  const element = new Audio(`assets/audio/hallucination-sighting-${n}.mp3`);
+  element.preload = 'auto';
+  return element;
+});
+let lastHallucinationSightingSound = -1;
+// 환각에게 삼켜져 쓰러질 때의 소리.
+const hallucinationDevouredElement = new Audio('assets/audio/hallucination-devoured.mp3');
+hallucinationDevouredElement.preload = 'auto';
+
+function playHallucinationDevouredSound() {
+  if (document.hidden || gameVolume <= 0) return;
+  hallucinationDevouredElement.volume = Math.max(0, Math.min(1, gameVolume));
+  hallucinationDevouredElement.currentTime = 0;
+  hallucinationDevouredElement.play().catch(() => {});
+}
+
+function playHallucinationSound(volume = 1, randomSighting = false) {
+  if (document.hidden || gameVolume <= 0 || mainMenuActive || !gameStarted || restoringProgress) return;
+  let element = hallucinationSoundElement;
+  if (randomSighting) {
+    const choices = hallucinationSightingElements.map((_, index) => index).filter(index => index !== lastHallucinationSightingSound);
+    lastHallucinationSightingSound = choices[Math.floor(Math.random() * choices.length)];
+    element = hallucinationSightingElements[lastHallucinationSightingSound];
+  }
+  element.volume = Math.max(0, Math.min(1, gameVolume * volume));
+  element.currentTime = 0;
+  element.play().catch(() => {});
+}
+
 function pauseGameAudio() {
+  if (document.hidden || mainMenuActive || !gameStarted) for (const element of [hallucinationSoundElement, ...hallucinationSightingElements, hallucinationDevouredElement]) element.pause();
   if (!gameAudioContext) return;
   for (const sound of gameAudioAmbience.values()) stopGameAudioSource(sound);
   gameAudioAmbience.clear();

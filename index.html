@@ -1008,7 +1008,6 @@
         <img id="office-background" src="assets/background/floor17/office-interior-aligned.png" alt="" width="2196" height="724" draggable="false" />
         <div id="office-computer" role="img" aria-label="켜진 컴퓨터" data-power="on"></div>
         <div id="dynamic-scene" aria-hidden="true"></div>
-        <div id="anxiety-pill" class="pill-prop" role="img" aria-label="반짝이는 항불안제" hidden></div>
         <div id="interaction-outline" hidden></div>
         <div id="interaction-hint" hidden></div>
         <div id="player" role="img" aria-label="정수호" data-state="idle" data-frame="0">
@@ -1209,13 +1208,20 @@
         <input id="debug-sanity-range" type="range" min="0" max="100" value="100" />
         <input id="debug-sanity-number" type="number" min="0" max="100" value="100" />
       </form>
+      <div id="debug-console">
+        <button id="debug-console-toggle" type="button" aria-expanded="false" aria-controls="debug-console-panel">콘솔 창</button>
+        <div id="debug-console-panel" hidden>
+          <button id="debug-chase-hallucination" type="button">환각 추격 이벤트</button>
+          <button id="debug-spawn-hallucination" type="button">환각 생성 이벤트</button>
+        </div>
+      </div>
     </aside>
     <div id="fear-overlay" aria-hidden="true"></div>
     <div id="fear-overlay-red" aria-hidden="true"></div>
     <div id="blink-flash" aria-hidden="true" data-active="false"></div>
     <div id="wall-eyes" aria-hidden="true"></div>
     <div id="hallucinations" aria-hidden="true" hidden>
-      <img id="hallucination-shadow" src="assets/player/jeong-suho.png" alt="" width="256" height="256" draggable="false" hidden />
+      <img id="hallucination-shadow" src="assets/ui/hallucination/ghost-face.png" alt="" width="540" height="360" draggable="false" hidden />
     </div>
     <section id="hallucination-caught" role="dialog" aria-modal="true" aria-labelledby="hallucination-caught-title" hidden>
       <h2 id="hallucination-caught-title">환각에게 삼켜졌다</h2>

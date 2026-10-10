@@ -73,14 +73,6 @@ try {
   assert.equal((await state()).sanity, 100, '보스전 중에는 추격 감소가 없다');
   await page.evaluate(() => { guardPatrol.mode = 'patrol'; bossFightActive = false; });
 
-  // ---- 17층 사무실 시작 지점 근처 항불안제 ----
-  await page.evaluate(() => { sanity = 40; Body.setPosition(body, { x: 1760, y: floorY - 81 }); grounded = true; updateInteraction(); });
-  assert.equal(await page.evaluate(() => nearbyDoor?.gives), 'sanity-pill-start');
-  await page.evaluate(() => interact());
-  assert.equal((await state()).sanity, 58, '항불안제를 복용하면 정신력이 회복된다');
-  assert(await page.evaluate(() => collectedItems.has('sanity-pill-start')));
-  await page.keyboard.press('Escape'); // interact()가 연 조사창을 닫아야 이어지는 테스트에서 정신력 진행이 멈추지 않는다
-
   // ---- 0%가 되기 전의 1회성 예고 환각 ----
   await page.evaluate(() => { sanity = 2; zeroEventApproachDone = false; hallucinationMode = null; updateSanity(16); });
   assert.equal((await state()).mode, 'approach');
@@ -88,10 +80,9 @@ try {
   await page.evaluate(() => { hallucinationMode = null; updateSanity(16); });
   assert.equal((await state()).mode, null, '예고는 한 번만 나타난다');
 
-  // ---- 0% 돌진: 회피 두 번 → 항불안제 생성 → 복용, 또는 회피 실패 → 잡아먹힘 ----
+  // ---- 0% 돌진: 회피 두 번, 또는 회피 실패 → 잡아먹힘 ----
   await page.evaluate(() => {
     sanity = 0; facing = 1; phoneLightOn = false; zeroEventEvasions = 0; zeroEventPhase = 'idle'; zeroEventTimer = 0;
-    bonusPillActive = false; anxietyPill.hidden = true;
   });
   await page.clock.runFor(15100); // 15초 대기 후 첫 돌진
   const charge1 = await page.evaluate(() => ({ phase: zeroEventPhase, side: zeroEventSide, mode: hallucinationMode }));
@@ -112,16 +103,6 @@ try {
   await page.evaluate(side => { facing = side; phoneLightOn = true; }, charge2.side);
   await page.clock.runFor(100);
   assert.equal(await page.evaluate(() => zeroEventEvasions), 2);
-  assert.equal(await page.evaluate(() => bonusPillActive), true, '두 번째 회피 이후 항불안제가 나타난다');
-  assert.equal(await page.locator('#anxiety-pill').isHidden(), false);
-
-  const pillX = await page.evaluate(() => bonusPillX);
-  await page.evaluate(x => { Body.setPosition(body, { x, y: floorY - 81 }); grounded = true; }, pillX);
-  const beforePill = (await state()).sanity;
-  await page.evaluate(() => interact());
-  assert(( await state()).sanity > beforePill, '반짝이는 항불안제를 복용하면 정신력이 돌아온다');
-  assert.equal(await page.evaluate(() => bonusPillActive), false);
-
   // ---- 회피하지 못하면 환각에게 잡아먹혀 게임 오버, 다시 정신을 차리고 이어간다 ----
   await page.evaluate(() => {
     sanity = 0; facing = 1; phoneLightOn = false; zeroEventEvasions = 0; zeroEventPhase = 'idle'; zeroEventTimer = 0;
@@ -138,5 +119,5 @@ try {
 
   assert.deepEqual(errors, []);
   console.log('PASS: sanity HUD/clamps, dark-only drain (no bright/flashlight recovery), chase drain with boss exemption, ' +
-    'fear tiers and speed penalty, start/bonus anxiety pills, pre-zero warning sighting, 0% charge/evade/retry chain, devoured game over and recovery.');
+    'fear tiers and speed penalty, pre-zero warning sighting, 0% charge/evade/retry chain, devoured game over and recovery.');
 } finally { await browser.close(); }

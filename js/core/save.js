@@ -72,8 +72,6 @@ function restoreProgress(data) {
     for (const element of [phonePanel, computer, keypad, powerPanel, inspectionPanel, cabin, guardCapturePanel, hallucinationCapturePanel, opening, blackoutScene]) element.hidden = true;
     for (const element of document.body.children) if (element !== mainMenu) element.inert = false;
     phoneBlocked = powerBlocked = guardBlocked = hallucinationBlocked = openingBlocked = blackoutBlocked = [];
-    bonusPillActive = false;
-    anxietyPill.hidden = true;
     zeroEventPhase = 'idle'; zeroEventTimer = 0; zeroEventEvasions = 0; zeroEventApproachDone = false;
     endHallucinationSighting();
     clearInterval(inspectionTypingTimer);
