@@ -61,7 +61,7 @@ function closeMainMenu() {
 }
 
 function openGameMenu() {
-  if (!gameStarted || mainMenuActive || openingActive || blackoutSceneActive || playerCaught || transitioning ||
+  if (!gameStarted || mainMenuActive || openingActive || blackoutSceneActive || playerCaught || hallucinationCaught || transitioning ||
       usingPhone || usingComputer || usingKeypad || usingInspection || usingPowerPanel) return;
   saveProgress();
   mainMenuActive = true;
@@ -123,10 +123,14 @@ menuFullscreen.disabled = !document.fullscreenEnabled;
 menuFullscreen.addEventListener('click', async () => {
   try {
     if (document.fullscreenElement) await document.exitFullscreen();
-    else await document.documentElement.requestFullscreen();
+    else {
+      await document.documentElement.requestFullscreen();
+      try { await navigator.keyboard?.lock?.(['Escape']); } catch { /* 잠금을 허용하지 않으면 브라우저의 Esc 동작을 쓴다. */ }
+    }
   } catch { menuSettingsStatus.textContent = '전체화면을 사용할 수 없습니다.'; }
 });
 document.addEventListener('fullscreenchange', () => {
+  if (!document.fullscreenElement) navigator.keyboard?.unlock?.();
   menuFullscreen.textContent = document.fullscreenElement ? '전체화면 해제 ↙' : '전체화면으로 전환 ↗';
 });
 mainMenu.addEventListener('keydown', event => {

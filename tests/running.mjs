@@ -18,7 +18,7 @@ try {
   await reachInitialCorridor(page);
   // Keep the sprint route playable; blackout input locking is covered separately.
   await page.evaluate(() => triggerBuildingBlackout());
-  await page.locator('#power-lever').dispatchEvent('click');
+  await page.evaluate(() => { solarEnabled = true; updatePowerState(); });
   await page.locator('#power-floor-grid [data-floor="17"]').dispatchEvent('click');
   await page.locator('#run-sheet').evaluate(img => img.decode());
   const state = () => page.locator('#player').evaluate(el => {

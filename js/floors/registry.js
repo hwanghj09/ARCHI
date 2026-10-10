@@ -32,5 +32,18 @@ const RESTROOMS = FLOOR_NUMBERS.flatMap(floor => interiorRooms(floor, [{ id: `${
   ...(FLOOR_LAYOUTS[floor]?.restroomExitX !== undefined ? { exitX: FLOOR_LAYOUTS[floor].restroomExitX } : {}) }]));
 const ALL_FLOORS = [FLOOR17, ...FLOORS];
 const ROOFTOP = { id: 'rooftop', floor: 18, label: '옥상', header: 'RF · 옥상', aria: '옥상', width: 2400, background: '#11191d',
-  fixtures: [phoneChargerFixture(1200, 64)] };
+  fixtures: [phoneChargerFixture(1200, 64),
+    { name: '태양광 작업 설명서', x: 810, y: 410, width: 72, height: 5, style: 'power-notice',
+      surface: 'document', look: 'sheet',
+      message: '태양광 임시 전력 장치 — 비상 운용 안내\n\n① 축전지 잔량을 확인하십시오.\n② 공급 대상을 선택하십시오.\n③ ‘비상 전력 공급’ 버튼을 누르십시오.\n\n비상 전력은 지정된 조명, 작업용 컴퓨터 및 통신 장비에 우선 공급됩니다.\n\n전용 앱을 설치하면 휴대폰으로 전력 공급 상태를 확인하고 원격으로 제어할 수 있습니다.\n앱 다운로드 및 장치 등록에는 작업용 컴퓨터를 이용하십시오.',
+      writing: [
+        { as: 'title', text: '태양광 임시 전력 장치 — 비상 운용 안내' },
+        '① 축전지 잔량을 확인하십시오.',
+        '② 공급 대상을 선택하십시오.',
+        '③ ‘비상 전력 공급’ 버튼을 누르십시오.',
+        '비상 전력은 지정된 조명, 작업용 컴퓨터 및 통신 장비에 우선 공급됩니다.',
+        { text: '전용 앱을 설치하면 휴대폰으로 전력 공급 상태를 확인하고 원격으로 제어할 수 있습니다.', bold: true },
+        '앱 다운로드 및 장치 등록에는 작업용 컴퓨터를 이용하십시오.',
+      ] },
+  ] };
 const floorById = new Map([...ALL_FLOORS, ROOFTOP, ...FLOOR1_ROOMS, ...FLOOR2_ROOMS, ...FLOOR3_ROOMS, ...FLOOR4_ROOMS, ...FLOOR5_ROOMS, ...FLOOR6_ROOMS, ...FLOOR7_ROOMS, ...FLOOR8_ROOMS, ...FLOOR9_ROOMS, ...FLOOR10_ROOMS, ...FLOOR11_ROOMS, ...FLOOR12_ROOMS, ...FLOOR13_ROOMS, ...FLOOR14_ROOMS, ...FLOOR15_ROOMS, ...FLOOR16_ROOMS, ...FLOOR17_ROOMS, ...B1_ROOMS, ...B2_ROOMS, ...RESTROOMS].map(entry => [entry.id, entry]));

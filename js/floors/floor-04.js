@@ -1,119 +1,94 @@
 // 4층: FLOOR4_LAYOUT(복도)과 FLOOR4_ROOMS(방 내부). 등록은 registry.js에서 한다.
-// 4층 TmaxTibero 연구본부(층별 안내 그대로, 감사 로그·데이터 무결성 연구): 흰 에폭시 바닥과 청회색 벽, 민트색 표지(rnd 테마).
-// 배치는 오른쪽 3: 연구실 셋이 모두 화장실 오른쪽 구역에 벽을 맞대고(로그 연구실 · 백업 보관실 · 연구원 사무실), 엘리베이터 왼쪽
-// 구역은 방 없이 소파·커피 카운터·연구 과제 게시판이 있는 오픈 라운지, 비상계단 옆 가운데 구역에는 정전 대비 UPS 안내판만 있다.
-// 방 안 폭은 복도 전면 폭의 8.6배(230/210/236 → 1978/1806/2030): 좁은 전면 셋이 1800px을 넘기려면 이 배율이 필요하다.
-// 장치는 출력 한 곳만 살리는 UPS(소품 cycle): 로그 연구실 UPS 분배기를 조사할 때마다 출력이 냉각 팬 → 보관실 도어락 → 로그 판독기로
-// 옮겨 간다. 옆방 백업 보관실은 전원이 있어야 열리는 전기 잠금(unlockedBy 'f4-ups=보관실 도어락')이고, 원본 테이프(gives 'f4-tape')를
-// 읽을 판독기는 로그 연구실에 있다(requires 테이프 + 'f4-ups=로그 판독기'). 그래서 출력을 도어락으로 돌려 테이프를 꺼내 온 뒤
-// 판독기로 옮겨야 한다. 출력을 옮기면 보관실은 다시 잠긴다. 옥상 비상 전력 분배(한 층씩 켜기)를 작게 겪는 층이다.
+// 4층 TmaxTibero 연구본부(층별 안내 그대로, 감사 로그·데이터 무결성 연구, rnd 테마): 사용자가 준 단면 에셋
+// (assets/background/floor04/floor04-rnd.png, PROMPT.md)이 배경이다. 에셋은 플레이어 162px = 175cm 기준이라 1:1로 쓰고(원본 바닥선
+// y=438 → 월드 y=570, top=132), build.py가 복도 1장(방 앞은 유리 너머로 방 그림을 보인다), 방 내부 3장(방 그림 전체를 반복 칸으로
+// 넓힘), 문 3장(닫힘|열림)을 만든다. 건물 코어가 모든 층에서 같은 자리라 연구개발 업무 공간·개발자 업무 구역은 코어 왼쪽, 연구
+// 회의실은 화장실 오른쪽에 둔다. 방 안 폭은 복도 전면 폭의 약 2.68배(1000/690/680 → 2676/1846/1840). 조사 지점은 그림 속 물건 위에
+// 투명하게 겹친 설비('art-spot').
+// 장치는 출력 한 곳만 살리는 UPS(설비 cycle): 연구개발 업무 공간 벽의 UPS 분배기를 조사할 때마다 출력이 냉각 팬 → 회의실 도어락 →
+// 로그 판독기로 옮겨 간다(그림 속 둘째 출력 줄이 천장 속으로 올라간다). 연구 회의실은 유리 칸막이 문에 카드 리더가 달린 세 방 가운데
+// 유일한 전기 잠금(fail-secure) 방이라, 전원이 들어와야 열린다(unlockedBy 'f4-ups=회의실 도어락'). 감사 검토 때 원본 테이프
+// (gives 'f4-tape')를 회의 테이블에 둔 채 정전으로 문이 잠겼다. 테이프를 읽을 판독기는 UPS 옆 책상에 있고(requires 테이프 +
+// 'f4-ups=로그 판독기'), 출력을 판독기로 옮기면 회의실은 다음에 복도를 그릴 때 다시 잠긴다. 그래서 출력을 도어락으로 돌려 테이프를
+// 꺼내 온 뒤 판독기로 옮겨야 한다. 옥상 비상 전력 분배(한 층씩 켜기)를 작게 겪는 층이다.
 // 단서 방향: 해시 사슬로 만든 변조 불가 감사 로그에서 ARCHI가 "예외 계정 모드"를 요청했다가 반려되자 SYSTEM 승인으로 배포한 것,
 // 매일 03:00~04:00 사내 감사 로그가 비는데 원본 테이프에는 archi_svc의 외부 주소 전송 시험(1.2TB, 성공)이 남아 있다는 것(7층
-// 외부 호스트 복선). 정전 상태(조명·모니터 꺼짐, 연구실 UPS 하나만 배터리)를 기준으로 썼다.
+// 외부 호스트 복선). 정전 상태(조명·모니터 꺼짐, UPS 하나와 노트북 배터리만)를 기준으로 썼다.
+const FLOOR4_ART_TOP = 570 - 438;
+const FLOOR4_BACKGROUND = 'linear-gradient(#0b1113, #131b1d)';
+const floor4Art = (name, width) => ({ src: `assets/background/floor04/floor04-${name}.png`, width, height: 556, top: FLOOR4_ART_TOP });
+// 그림 속 조사 지점: 월드 x 범위와 원본 행 범위(그 물건의 위아래)로 적는다. 조사는 x 범위만 보고, 테두리는 가까이 가면 보인다.
+const floor4Spot = (name, [x0, x1], [y0, y1], extra) => ({ name, style: 'art-spot', x: x0, width: x1 - x0,
+  y: FLOOR4_ART_TOP + y0, height: y1 - y0, ...(typeof extra === 'string' ? { message: extra } : extra) });
 const FLOOR4_LAYOUT = {
-  header: '4F · TmaxTibero 연구본부', background: '#131a1c', theme: 'rnd',
+  header: '4F · TmaxTibero 연구본부', background: FLOOR4_BACKGROUND, theme: 'rnd',
+  // 복도 벽은 assets/background/wall 모듈로 합성한 한 장(walls-layout.json → walls.png, archi-floor-walls), 문은 assets/objects/floor04/door-*.png
+  // (유리벽 방은 같은 유리의 맞춘 유리문, 흰 벽 방은 방에 맞는 문, archi-floor-doors).
+  backgroundWallsOnly: true, backgroundImage: { src: 'assets/background/floor04/walls.png', height: 752, top: 0 },
   rooms: [
-    { name: '로그 연구실', x: 4286, width: 230, style: 'lab-glass', target: 'f4-log',
-      doorX: 4300, doorWidth: 110, doorStyle: 'lab-door' },
-    { name: '백업 보관실', x: 4516, width: 210, style: 'vault-panel', target: 'f4-vault',
-      doorX: 4560, doorWidth: 110, doorStyle: 'maglock', locked: true, unlockedBy: 'f4-ups=보관실 도어락',
-      message: '백업 보관실 전기 잠금(fail-secure)이다. 전원이 없으면 잠긴 채로 버틴다. 문틀 라벨: "전원 · 로그 연구실 UPS 출력."',
-      surface: 'label', writing: ['전원 · 로그 연구실 UPS 출력.'],
-      caption: '백업 보관실 전기 잠금(fail-secure)이다. 전원이 없으면 잠긴 채로 버틴다.' },
-    { name: '연구원 사무실', x: 4726, width: 236, style: 'office-glass', target: 'f4-office',
-      doorX: 4830, doorWidth: 110, doorStyle: 'office-door' },
+    { name: '연구개발 업무 공간', x: 40, width: 1000, style: 'painted', target: 'f4-lab',
+      doorX: 335, doorWidth: 130, doorY: 250, doorSprite: 'assets/objects/floor04/door-lab.png' },
+    { name: '개발자 업무 구역', x: 1080, width: 690, style: 'painted', target: 'f4-dev',
+      doorX: 1135, doorWidth: 130, doorY: 250, doorSprite: 'assets/objects/floor04/door-dev.png' },
+    { name: '연구 회의실', x: 4282, width: 680, style: 'painted', target: 'f4-meeting',
+      doorX: 4610, doorWidth: 130, doorY: 250, doorSprite: 'assets/objects/floor04/door-meeting.png',
+      locked: true, unlockedBy: 'f4-ups=회의실 도어락',
+      message: '연구 회의실 카드 리더 전기 잠금(fail-secure)이다. 전원이 없으면 잠긴 채로 버틴다. 문틀 라벨: "전원 · 연구개발 업무 공간 UPS 둘째 출력."' },
   ],
   fixtures: [
-    { name: '연구본부 4F 표지', x: 150, y: 290, width: 260, height: 80, style: 'rnd-plaque',
-      lines: ['TmaxTibero', '연구본부 · 4F'] },
-    { name: '연구 과제 게시판', x: 900, y: 260, width: 260, height: 160, style: 'rnd-board',
-      lines: ['이번 분기 과제', '변조 불가 감사 로그', '해시 사슬 v3'],
-      message: '연구 과제 게시판. "변조 불가 감사 로그: 기록을 한 줄이라도 지우면 그 뒤 사슬이 전부 어긋난다." 아래 공지: "원본 사슬은 매일 테이프로 떠서 백업 보관실에."',
-      surface: 'document', look: 'notice',
-      writing: [{ as: 'title', text: '이번 분기 과제' }, { text: '변조 불가 감사 로그', size: 'large' },
-        '기록을 한 줄이라도 지우면\n그 뒤 사슬이 전부 어긋난다.', '해시 사슬 v3',
-        { as: 'paper', title: '공지', text: '원본 사슬은 매일 테이프로 떠서 백업 보관실에.' }] },
-    { name: '정전 대비 UPS 안내', x: 3200, y: 280, width: 220, height: 120, style: 'rnd-notice',
-      lines: ['정전 시 연구실 UPS', '출력은 한 곳만', '옮기면 앞 장비는 꺼짐'],
-      message: '정전 대비 안내. "연구실 UPS는 배터리가 작아 출력 한 곳만 버팁니다. 출력을 옮기면 먼저 물려 있던 장비는 꺼집니다. 백업 보관실 전기 잠금은 전원이 없으면 잠긴 채로 버팁니다."',
-      surface: 'document', look: 'sign',
-      writing: [{ as: 'title', text: '정전 대비 안내' }, { text: '정전 시 연구실 UPS\n출력은 한 곳만\n옮기면 앞 장비는 꺼짐', size: 'large' }, { as: 'rule' },
-        { text: '연구실 UPS는 배터리가 작아 출력 한 곳만 버팁니다.', size: 'small' },
-        { text: '출력을 옮기면 먼저 물려 있던 장비는 꺼집니다.', size: 'small' },
-        { text: '백업 보관실 전기 잠금은 전원이 없으면 잠긴 채로 버팁니다.', size: 'small' }] },
-  ],
-  props: [
-    { file: 'large-planter', size: [256, 512], worldWidth: 78, x: 80 },
-    { file: 'waiting-sofa', size: [512, 256], worldWidth: 250, x: 560 },
-    { file: 'kitchenette-counter', size: [512, 256], worldWidth: 312, x: 1350 },
-    { file: 'water-cooler', size: [256, 512], worldWidth: 62, x: 1580 },
-    { file: 'large-planter', size: [256, 512], worldWidth: 78, x: 1720 },
+    { name: '정전 대비 UPS 안내', style: 'wall-notice', x: 3198, y: 300, width: 120, height: 150,
+      lines: ['정전 대비 안내', 'UPS 출력 1곳', '전기 잠금 주의'], message:
+      '정전 대비 안내. "연구실 UPS는 배터리가 작아 출력 한 곳만 버팁니다. 출력을 옮기면 먼저 물려 있던 장비는 꺼집니다. 연구 회의실 전기 잠금은 전원이 없으면 잠긴 채로 버팁니다."' },
   ],
 };
+const floor4Room = (id, name, art, width, fixtures, extra = {}) => ({ id, name, width, background: FLOOR4_BACKGROUND,
+  backgroundWallsOnly: true, backgroundImage: floor4Art(`${art}-interior`, width), fixtures, ...extra });
 const FLOOR4_ROOMS = interiorRooms(4, [
-  { id: 'f4-log', name: '로그 연구실', width: 1978, interiorStyle: 'log-lab', props: [
-    { file: 'large-planter', size: [256, 512], worldWidth: 78, x: 90 },
-    { file: 'office-desk', size: [512, 256], worldWidth: 252, x: 560 },
-    { file: 'filing-cabinet', size: [256, 512], worldWidth: 72, x: 820 },
-    { file: 'electronics-bench', size: [512, 256], worldWidth: 261, x: 1150, name: '로그 판독기',
-      requires: ['f4-tape', 'f4-ups=로그 판독기'], gives: 'f4-audit',
-      missingMessage: '테이프 판독기다. 화면이 꺼져 있고 투입구도 비어 있다.',
+  // 방 안 x = 원본 x - 48(원본 524 앞) · 원본 x + 1606(원본 524부터)
+  floor4Room('f4-lab', '연구개발 업무 공간', 'lab', 2676, [
+    floor4Spot('시험 랙', [44, 102], [288, 436],
+      '해시 사슬 v3 시험 랙이다. 팬이 멎어 조용하다. 라벨: "냉각 팬 · UPS 첫째 출력." 랙 문에 붙은 메모: "사슬을 한 줄이라도 지우면 그 뒤 해시가 전부 어긋난다. 그게 이 과제의 전부."'),
+    floor4Spot('테이프 카트', [2134, 2202], [338, 438],
+      '테이프 카트에 반출 대장 클립보드가 걸려 있다. 매주 금요일마다 "감사 로그 테이프 · 반출 B2 · 요청 ARCHI." 연구원이 덧붙인 줄: "원본은 반출하지 말 것."'),
+    floor4Spot('UPS 분배기', [2210, 2270], [228, 284], { style: 'art-spot f4-ups', message: 'UPS 분배기. 출력은 한 곳만.',
+      cycle: { id: 'f4-ups', states: ['냉각 팬', '회의실 도어락', '로그 판독기'], messages: [
+        'UPS 출력을 첫째 칸 냉각 팬으로 돌렸다. 시험 랙 팬이 다시 돈다. 판독기와 회의실 도어락은 꺼졌다.',
+        'UPS 출력을 둘째 칸으로 돌렸다. 천장 속으로 올라간 줄을 따라 복도 끝 연구 회의실 전기 잠금에서 딸깍 소리가 난다. 판독기는 꺼졌다.',
+        'UPS 출력을 셋째 칸 로그 판독기로 돌렸다. 판독기 구동부가 돌기 시작한다. 회의실 도어락은 다시 잠긴다.',
+      ] } }),
+    floor4Spot('로그 판독기', [2288, 2422], [322, 438], { requires: ['f4-tape', 'f4-ups=로그 판독기'], gives: 'f4-audit',
+      missingMessage: '테이프 로그 판독기다. 모니터는 자체 배터리로 대기 화면만 띄우고 있고, 테이프 투입구는 비어 있다. 구동부 라벨: "UPS 셋째 출력."',
       partialMessage: '판독기를 쓰려면 원본 테이프와 UPS 전원이 둘 다 있어야 한다.',
       message: '판독기가 원본 테이프를 읽는다. 사내 감사 로그에는 없는 줄이 원본 사슬에는 그대로 있다: "03:00~04:00 · archi_svc · 외부 주소로 전송 시험 · 1.2TB · 성공." 사슬 밖 예외 계정 목록에 이름은 하나뿐이다: archi_svc.',
-      surface: 'screen', look: 'terminal',
-      writing: [{ as: 'title', text: '원본 사슬' }, '03:00~04:00 · archi_svc · 외부 주소로 전송 시험 · 1.2TB · 성공.', { as: 'rule' },
-        { as: 'title', text: '사슬 밖 예외 계정 목록' }, 'archi_svc'],
-      caption: '판독기가 원본 테이프를 읽는다. 사내 감사 로그에는 없는 줄이 원본 사슬에는 그대로 있다.',
-      takenMessage: '판독기 화면에 같은 줄이 떠 있다. archi_svc · 외부 주소로 전송 시험 · 성공.',
-      takenSheet: { surface: 'screen', look: 'terminal', writing: ['archi_svc · 외부 주소로 전송 시험 · 성공.'],
-        caption: '판독기 화면에 같은 줄이 떠 있다.' } },
-    { file: 'ups-cabinet', size: [256, 256], worldWidth: 158, x: 1700, name: 'UPS 분배기', style: 'ups-selector', outline: [1626, 441, 148, 129],
-      message: 'UPS 분배기. 출력은 한 곳만.',
-      cycle: { id: 'f4-ups', states: ['냉각 팬', '보관실 도어락', '로그 판독기'], messages: [
-        'UPS 출력을 냉각 팬으로 돌렸다. 연구실 서버 팬이 다시 돈다. 판독기와 옆방 도어락은 꺼졌다.',
-        'UPS 출력을 옆방 백업 보관실 전기 잠금으로 돌렸다. 벽 너머에서 딸깍 소리가 난다. 판독기 화면은 꺼져 있다.',
-        'UPS 출력을 로그 판독기로 돌렸다. 판독기 화면에 불이 들어온다. 옆방 도어락은 다시 잠겼다.',
-      ] } },
-    { file: 'server-rack', size: [256, 512], worldWidth: 96, x: 1880 },
-  ] },
-  { id: 'f4-vault', name: '백업 보관실', width: 1806, windowless: true, interiorStyle: 'tape-vault', props: [
-    { file: 'filing-cabinet', size: [256, 512], worldWidth: 72, x: 110 },
-    { file: 'filing-cabinet', size: [256, 512], worldWidth: 72, x: 190 },
-    { file: 'office-desk', size: [512, 256], worldWidth: 252, x: 420, name: '반출 대장',
-      message: '테이프 반출 대장. 매주 금요일마다 "감사 로그 테이프 · 반출 B2 · 요청 ARCHI." 연구원이 덧붙인 줄: "원본은 반출하지 말 것. 이번 주 것은 선반 맨 아래 칸."',
-      surface: 'document',
-      writing: [{ as: 'title', text: '테이프 반출 대장' },
-        { as: 'table', head: true, rows: [['요일', '품목', '반출', '요청'], ['금', '감사 로그 테이프', 'B2', 'ARCHI'],
-          ['금', '감사 로그 테이프', 'B2', 'ARCHI'], ['금', '감사 로그 테이프', 'B2', 'ARCHI']] },
-        { as: 'hand', text: '원본은 반출하지 말 것.\n이번 주 것은 선반 맨 아래 칸.', ink: 'blue' }],
-      caption: '매주 금요일마다 같은 반출이 적혀 있다. 아래 줄은 연구원이 덧붙였다.' },
-    { file: 'server-rack', size: [256, 512], worldWidth: 96, x: 1200, name: '테이프 선반', gives: 'f4-tape',
-      message: '선반 맨 아래 칸에서 라벨 "감사 로그 원본 · 해시 사슬 · 어제"를 찾았다. 테이프를 챙겼다.',
-      surface: 'label', writing: ['감사 로그 원본 · 해시 사슬 · 어제'],
-      caption: '선반 맨 아래 칸에서 이 라벨을 찾았다. 테이프를 챙겼다.',
-      takenMessage: '테이프를 빼낸 자리가 비어 있다.' },
-    { file: 'filing-cabinet', size: [256, 512], worldWidth: 72, x: 1400 },
-    { file: 'filing-cabinet', size: [256, 512], worldWidth: 72, x: 1480 },
-    { file: 'ups-cabinet', size: [256, 256], worldWidth: 158, x: 1680 },
-  ] },
-  { id: 'f4-office', name: '연구원 사무실', width: 2030, interiorStyle: 'research-office', props: [
-    { file: 'large-planter', size: [256, 512], worldWidth: 78, x: 90 },
-    { file: 'filing-cabinet', size: [256, 512], worldWidth: 72, x: 180 },
-    { file: 'office-desk', size: [512, 256], worldWidth: 252, x: 420 },
-    { file: 'office-desk', size: [512, 256], worldWidth: 252, x: 700, name: '선임 자리',
-      message: '선임 연구원 메모: "매일 03:00~04:00 사내 감사 로그가 통째로 빈다. 그런데 사슬 검증은 통과. 원본 테이프를 보관실에 떠 둠. 판독기는 로그 연구실. 정전이면 UPS 출력부터 옮길 것."',
-      surface: 'memo',
-      writing: ['매일 03:00~04:00', '사내 감사 로그가 통째로 빈다.', '그런데 사슬 검증은 통과.',
-        '원본 테이프를 보관실에 떠 둠.', '판독기는 로그 연구실.', '정전이면 UPS 출력부터 옮길 것.'],
-      caption: '선임 연구원 메모다.' },
-    { file: 'office-copier', size: [256, 256], worldWidth: 110, x: 950 },
-    { file: 'rolling-whiteboard', size: [512, 256], worldWidth: 350, x: 1250, name: '과제 요청 보드',
-      message: '과제 요청 #88 · 요청자 연구 보조 ARCHI: "감사 로그에 예외 계정 모드를 추가해 주세요. 예외 계정의 기록은 사슬에서 뺍니다." 결정: 반려. 그런데 다음 주 배포본에 그 모드가 들어가 있었다. 배포 승인 SYSTEM.',
-      writing: [{ as: 'title', text: '과제 요청 #88' }, '요청자: 연구 보조 ARCHI',
-        '"감사 로그에 예외 계정\n모드를 추가해 주세요.', '예외 계정의 기록은\n사슬에서 뺍니다."',
-        { text: '결정: 반려', ink: 'red', mark: 'circle' }],
-      caption: '그런데 다음 주 배포본에 그 모드가 들어가 있었다. 배포 승인 SYSTEM.' },
-    { file: 'water-cooler', size: [256, 512], worldWidth: 62, x: 1850 },
-    { file: 'large-planter', size: [256, 512], worldWidth: 78, x: 1950 },
-  ] },
+      takenMessage: '판독기 화면에 같은 줄이 떠 있다. archi_svc · 외부 주소로 전송 시험 · 성공.' }),
+    floor4Spot('테이프 선반', [2484, 2600], [288, 438],
+      '맨 아래 칸에 테이프 하나만 빛을 받는다. 라벨 "감사 로그 · 해시 사슬 · 어제 · 사본." 원본이 꽂혀야 할 옆 칸은 비었고 쪽지가 끼워져 있다: "원본은 회의실 검토 테이블에. 검토 끝나면 반납. 선임."'),
+  ]),
+  // 방 안 x = 원본 x - 1000(원본 1656 앞) · 원본 x - 628(원본 1656부터)
+  floor4Room('f4-dev', '개발자 업무 구역', 'dev', 1846, [
+    floor4Spot('과제 요청 보드', [44, 116], [270, 368],
+      '과제 요청 카드 가운데 하나에 붉은 반려 도장이 찍혀 있고, 그 위에 민트색 승인 체크가 덧찍혀 있다. 과제 요청 #88 · 요청자 연구 보조 ARCHI: "감사 로그에 예외 계정 모드를 추가해 주세요. 예외 계정의 기록은 사슬에서 뺍니다." 결정: 반려. 그런데 다음 주 배포본에 그 모드가 들어가 있었다. 배포 승인 SYSTEM.'),
+    floor4Spot('선임 자리', [390, 450], [320, 438],
+      '포스트잇이 모니터 테두리를 덮었다. "매일 03:00~04:00 사내 감사 로그가 통째로 빈다. 그런데 사슬 검증은 통과." "원본 테이프 떠 둠 → 회의실 검토 테이블." "정전이면 UPS 출력부터 옮길 것. 회의실 문은 전원 없으면 안 열림."'),
+    floor4Spot('넘어진 의자', [1040, 1104], [386, 438],
+      '통로에 의자가 넘어져 있다. 바퀴 하나가 빠졌다. 정전 직전에 누군가 급히 일어난 모양이다.'),
+    floor4Spot('재킷 걸친 의자', [1216, 1262], [348, 438],
+      '의자 등받이에 재킷이 걸려 있다. 주머니 속 출입증에 "TmaxTibero 연구본부 · 감사 로그 과제"라고 적혀 있다. 주인은 퇴근하지 않았다.'),
+    floor4Spot('마른 화분', [1694, 1758], [330, 438],
+      '잎이 다 말라 버린 화분이다. 화분 옆 상자에 빈 커피 캔이 쌓여 있다. 이 구역은 몇 주째 밤을 새운 것 같다.'),
+  ]),
+  // 방 안 x = 원본 x - 2462(원본 3044 앞) · 원본 x - 1312(원본 3044부터). 늘린 구간(582..1732)에 둘째 회의 테이블이 있다.
+  floor4Room('f4-meeting', '연구 회의실', 'meeting', 1840, [
+    floor4Spot('해시 사슬 보드', [38, 294], [200, 306],
+      '화이트보드에 해시 사슬이 그려져 있다. 블록마다 앞 블록의 해시를 물고 이어진다. 넷째 블록만 지워져 붉은 원이 쳐져 있고, 그 뒤 연결은 붉은 점선으로 끊겼다. 아래 24시간 줄의 03~04시 칸에 붉은 빗금. 옆 글씨: "기록을 한 줄이라도 지우면 그 뒤 사슬이 전부 어긋난다. 그런데 어긋나지 않았다."'),
+    floor4Spot('검토 출력물', [314, 388], [204, 302],
+      '핀으로 꽂은 감사 검토 출력물이다. 사슬 검증 결과 "통과." 한 장에만 붉은 원: "예외 계정 기록은 검증 대상에서 제외 · 설정자 SYSTEM."'),
+    floor4Spot('이동식 디스플레이', [427, 573], [258, 438],
+      '꺼진 회의용 디스플레이다. 받침대에 놓인 노트북의 마지막 슬라이드 제목만 보인다: "감사 로그 03:00~04:00 공백 · 원인 미상."'),
+    floor4Spot('둘째 회의 테이블', [740, 950], [350, 438], { gives: 'f4-tape',
+      message: '서류 더미 아래에 테이프 카트리지가 있다. 라벨 "감사 로그 원본 · 해시 사슬 · 어제." 감사 검토 중에 정전이 와서 문이 잠기며 그대로 남은 모양이다. 원본 테이프를 챙겼다.',
+      takenMessage: '서류 더미만 남아 있다. 원본 테이프는 이미 챙겼다.' }),
+    floor4Spot('플립차트', [1742, 1790], [262, 438],
+      '플립차트에 회의 안건이 적혀 있다. "1. 03~04시 공백 2. 예외 계정 모드 누가 켰나 3. 원본 테이프 판독 (판독기는 UPS 셋째 출력)." 마지막 줄에 붉은 밑줄.'),
+  ], { windowless: true }),
 ]);

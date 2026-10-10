@@ -8,6 +8,11 @@ function setOfficeComputerPower(power) {
   officeComputer.element.setAttribute('aria-label', power === 'off' ? '꺼진 컴퓨터' : power === 'on' ? '켜진 컴퓨터' : '종료 중인 컴퓨터');
 }
 
+// 17층 전력이 끊기면 켜 둔 컴퓨터도 꺼진다. 전력이 돌아와도 E로 다시 켜기 전까지는 꺼진 채로 둔다.
+function refreshOfficeComputerPower() {
+  if (!floorHasPower(17) && officeComputer.element.dataset.power !== 'off') setOfficeComputerPower('off');
+}
+
 const officeBackground = document.getElementById('office-background');
 setPowerBackground(officeBackground, 'assets/background/floor17/office-interior-aligned.png');
 const lightSwitch = document.getElementById('floor17-light-switch');
@@ -44,3 +49,15 @@ for (const door of officeDoors) {
   });
   world.insertBefore(door.element, sprite);
 }
+
+// 정신력 공포 연출: 시작 장소(17층 사무실) 근처에 항불안제 한 알을 둔다.
+const anxietyPillStart = { name: '항불안제', type: 'inspect', room: 'office', x: 1760, y: 250, width: 48,
+  message: '책상 서랍 구석에 항불안제 한 알이 남아 있다. 조사해서 챙긴다.', takenMessage: '항불안제는 이미 챙겼다.',
+  gives: 'sanity-pill-start', restoresSanity: sanityPillRestore };
+anxietyPillStart.element = document.createElement('div');
+anxietyPillStart.element.className = 'pill-prop';
+anxietyPillStart.element.setAttribute('role', 'img');
+anxietyPillStart.element.setAttribute('aria-label', '항불안제');
+Object.assign(anxietyPillStart.element.style, { left: `${anxietyPillStart.x}px`, top: `${floorY - 86}px` });
+world.insertBefore(anxietyPillStart.element, sprite);
+officeDoors.push(anxietyPillStart);

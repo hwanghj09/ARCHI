@@ -19,7 +19,7 @@ try {
   assert(await page.locator('#darkness').isHidden(), 'The building starts with mains power');
   await page.evaluate(() => triggerBuildingBlackout());
   assert(await page.locator('#darkness').isVisible(), 'The outage removes mains power');
-  await page.locator('#power-lever').dispatchEvent('click');
+  await page.evaluate(() => { solarEnabled = true; updatePowerState(); });
   await page.locator('#power-floor-grid [data-floor="17"]').dispatchEvent('click');
   await page.locator('#office-background').evaluate(img => img.decode());
   const lights = page.getByRole('checkbox', { name: '17층 조명' });

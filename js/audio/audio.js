@@ -37,7 +37,8 @@ function gameAudioBuffer(name) {
   if (gameAudioBuffers.has(name)) return gameAudioBuffers.get(name);
   const durations = { step: .2, door: .65, 'elevator-door': 1.05, 'elevator-arrive': 1.05,
     'elevator-alarm': .95, blackout: 1.5, 'robot-servo': .48, 'robot-alert': .6,
-    'robot-grab': .65, 'call-ring': .85, phone: .14, charger: .24, pickup: .22, switch: .12, ui: .09 };
+    'robot-grab': .65, 'call-ring': .85, phone: .14, charger: .24, pickup: .22, 'item-get': .5, 'item-use': .3, deny: .46,
+    shutter: 1.35, switch: .12, ui: .09, 'zero-rush': .9 };
   const loop = ['office', 'dark', 'wind', 'motor'].includes(name);
   const duration = loop ? 8 : durations[name];
   if (!duration) return null;
@@ -47,6 +48,8 @@ function gameAudioBuffer(name) {
   let seed = 12345, low = 0, soft = 0;
   const sin = (frequency, t) => Math.sin(2 * Math.PI * frequency * t);
   const hit = (t, at, decay) => t >= at ? Math.exp(-(t - at) * decay) : 0;
+  // 버저·삑 소리처럼 일정하게 이어지는 음은 at부터 length 동안만 켜고 양끝을 짧게 다듬는다.
+  const gate = (t, at, length) => t >= at && t < at + length ? Math.min(1, (t - at) / .006, (at + length - t) / .02) : 0;
   for (let i = 0; i < samples.length; i++) {
     const t = i / rate;
     seed = (Math.imul(seed, 1664525) + 1013904223) >>> 0;
@@ -68,8 +71,16 @@ function gameAudioBuffer(name) {
       case 'phone': sample = .12 * sin(680 - 850 * t, t) * Math.sin(Math.PI * t / duration) * Math.exp(-18 * t); break;
       case 'charger': sample = .11 * sin(470, t) * hit(t, .01, 35) + .1 * sin(620, t) * hit(t, .105, 30); break;
       case 'pickup': sample = .3 * low * Math.sin(Math.PI * t / duration) + .07 * sin(310, t) * hit(t, .07, 30); break;
+      // 가방에 넣는 물건은 밝은 2음 차임, 물건을 써서 여는 장치는 철컥 뒤 짧은 삑, 거부는 낮게 내려가는 2음 버저.
+      case 'item-get': sample = (.16 * sin(988, t) + .035 * sin(1976, t)) * hit(t, .004, 11) + (.16 * sin(1319, t) + .035 * sin(2637, t)) * hit(t, .1, 7.5); break;
+      case 'item-use': sample = (.3 * soft + .12 * sin(180, t)) * hit(t, .004, 60) + .2 * soft * hit(t, .055, 75) + .1 * sin(1480, t) * gate(t, .15, .1); break;
+      case 'deny': sample = (.11 * sin(t < .19 ? 220 : 165, t) + .05 * sin(t < .19 ? 660 : 495, t) + .025 * sin(t < .19 ? 1100 : 825, t)) * (gate(t, 0, .16) + gate(t, .21, .22)); break;
+      // 셔터: 수동 레버의 철컥, 말려 올라가는 철판의 덜컹거림과 낮은 마찰음, 끝까지 감겼을 때의 쿵.
+      case 'shutter': sample = (.26 * soft + .1 * sin(150, t)) * hit(t, .005, 45) + .18 * low * gate(t, .08, 1.04) +
+        (.2 * soft + .06 * sin(420, t)) * Math.exp(-((t * 22) % 1) * 4.5) * (.75 + .25 * sin(2.3, t)) * gate(t, .1, 1) + (.2 * sin(70, t) + .16 * soft) * hit(t, 1.15, 26); break;
       case 'switch': sample = (.28 * soft + .1 * sin(210, t)) * hit(t, .008, 48); break;
       case 'ui': sample = .09 * sin(720 - 900 * t, t) * Math.sin(Math.PI * t / duration) * Math.exp(-25 * t); break;
+      case 'zero-rush': sample = .55 * noise * hit(t, 0, 7) + .4 * sin(Math.max(140, 1500 - 1700 * t), t) * hit(t, 0, 3) + .32 * low * hit(t, .05, 4.5); break;
       case 'office': sample = .6 * low + .09 * sin(62.5, t) + .025 * sin(125, t); break;
       case 'dark': sample = .46 * low + .065 * sin(37.5, t) * (1 + .18 * sin(.125, t)); break;
       case 'wind': sample = .95 * low * (.65 + .2 * sin(.25, t) + .12 * sin(.625, t)); break;
@@ -107,7 +118,8 @@ function playGameSound(name, options = {}) {
   const gain = gameAudioContext.createGain();
   source.buffer = buffer;
   source.playbackRate.value = name === 'step' ? .94 + Math.random() * .12 : 1;
-  gain.gain.value = (name === 'step' ? (options.landing ? .65 : options.running ? .6 : .42) : name === 'blackout' ? .7 : name === 'robot-servo' ? .35 : .6) * (1 - distance / 800);
+  gain.gain.value = (name === 'step' ? (options.landing ? .65 : options.running ? .6 : .42) : name === 'blackout' ? .7 :
+    name === 'robot-servo' ? .35 : name === 'zero-rush' ? .85 : .6) * (1 - distance / 800);
   source.connect(gain).connect(gameAudioMaster);
   const effect = { source, gain, name, stopping: false };
   gameAudioEffects.add(effect);
@@ -145,7 +157,7 @@ function updateGameAudio() {
   const moving = selectingFloor && cabinCarIndex !== null && elevatorCars[cabinCarIndex].travelling && elevatorHasPower();
   const wanted = new Map([[background, roof ? .23 : lit ? .18 : .14]]);
   if (moving) wanted.set('motor', .25);
-  if (!selectingFloor && !openingActive && !blackoutSceneActive && !usingComputer && !usingKeypad && !usingPhone && !usingPowerPanel && !usingInspection && !transitioning && !playerCaught && guardPatrol.door && lit && (guardPatrol.mode === 'chase' || !guardPatrol.wait)) {
+  if (!selectingFloor && !openingActive && !blackoutSceneActive && !usingComputer && !usingKeypad && !usingPowerPanel && !usingInspection && !transitioning && !playerCaught && guardPatrol.door && lit && (guardPatrol.mode === 'chase' || !guardPatrol.wait)) {
     playGameSound('robot-servo', { x: guardPatrol.x });
   }
   for (const [name, sound] of gameAudioAmbience) {

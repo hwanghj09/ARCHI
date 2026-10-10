@@ -2,11 +2,14 @@
 let nearbyDoor = null;
 
 function updateInteraction() {
-  if (openingActive || blackoutSceneActive || playerCaught) { hint.hidden = true; return; }
+  if (openingActive || blackoutSceneActive || playerCaught || hallucinationCaught) { hint.hidden = true; return; }
   if (room === 'dynamic') {
+    // 전력이 들어온 채 감지했던 자리로 걸어 돌아가는('return') 로봇은 감지를 끈 채 움직이고 있어 바로 옆까지
+    // 갈 수 있다. 정비 패널은 멈춘 로봇의 보조 배터리 화면이므로 그동안은 조사 대상에서 뺀다.
+    const returningRobot = world.dataset.powered === 'true' && guardPatrol.mode === 'return' ? guardPatrol.door : null;
     const candidates = [...(guardPatrol.door ? [guardPatrol.door] : []),
       ...currentDoors.filter(door => door.accessGate && door.solid), ...currentDoors.filter(door => door.phoneCharger),
-      ...currentDoors.filter(door => !door.accessGate && !door.phoneCharger)];
+      ...currentDoors.filter(door => !door.accessGate && !door.phoneCharger)].filter(door => door !== returningRobot);
     nearbyDoor = candidates.find(door => grounded && Math.abs(body.bounds.max.y - (door.standY ?? floorY)) < 2 &&
       Math.abs(body.position.x - door.x - door.width / 2) < door.width / 2 + 28) || null;
     for (const door of currentDoors) door.element.classList.toggle('near', door === nearbyDoor);
@@ -39,7 +42,7 @@ function updateInteraction() {
 }
 
 function doorHintText(door) {
-  if (door.type === 'computer') return 'E · 컴퓨터 사용';
+  if (door.type === 'computer') return floorHasPower(currentSceneFloor) ? 'E · 컴퓨터 사용' : 'E · 전원 없음';
   if (door.type === 'power') return 'E · 태양광 전력 제어';
   if (door.phoneCharger) return phoneChargerHint(door);
   if (door.accessGate) return door.element.dataset.open === 'true' ? '인증 완료 · 통과 가능' : 'E · 출입증 태그';
@@ -59,11 +62,14 @@ function doorHintText(door) {
 }
 
 function interact() {
-  if (openingActive || blackoutSceneActive || playerCaught || transitioning || selectingFloor || usingComputer || usingKeypad || usingPhone || usingPowerPanel || usingInspection) return;
+  if (openingActive || blackoutSceneActive || playerCaught || hallucinationCaught || transitioning || selectingFloor || usingComputer || usingKeypad || usingPhone || usingPowerPanel || usingInspection) return;
+  if (tryPickUpAnxietyPill()) return;
   updateInteraction();
   if (blackoutSceneActive) return;
   if (!nearbyDoor) return;
   if (nearbyDoor.type === 'computer') {
+    // 정전 중에는 켜지지 않는다. 옥상 태양광 전력을 17층에 보내면 다시 쓸 수 있다.
+    if (!floorHasPower(currentSceneFloor)) return showStatus('전원이 들어오지 않는다. 전력을 공급해야 한다.', 4000);
     computerReturnFocus = document.activeElement;
     transitionScene(() => {
       setOfficeComputerPower('on');
@@ -128,7 +134,9 @@ function interact() {
     const required = [].concat(nearbyDoor.requires || []);
     const lacking = required.filter(item => !collectedItems.has(item)).length;
     if (nearbyDoor.accessGate && lacking && collectedItems.has('f17-badge')) {
-      openInspection(nearbyDoor.name, '정수호의 출입증을 태그했다. "미등록 출입증 · 인증 거부". 칸막이가 열리지 않는다. 다른 유효한 사원증이 필요하다.');
+      // 거부 화면은 유효한 사원증의 주인과 마지막으로 확인된 곳(16층 카페)까지만 알려 준다.
+      playGameSound('deny');
+      openInspection(nearbyDoor.name, '정수호의 출입증을 태그했다. "미등록 출입증 · 인증 거부". 칸막이가 열리지 않는다. 리더 화면에 야간 출입 권한자가 떠 있다: "조현아 팀장 · 16층 Café에서 마지막 확인". 다른 유효한 사원증이 필요하다.');
       return;
     }
     const missing = !unreadable && lacking && nearbyDoor.missingMessage &&
@@ -137,11 +145,19 @@ function interact() {
     // 글이 적힌 소품은 지금 보이는 문구에 맞는 표면을 펼친다(message는 소품, takenMessage·missingMessage는 그 sheet).
     openInspection(nearbyDoor.name, inspectionMessage, writingSheetFor(nearbyDoor, inspectionMessage));
     if (missing) return;
-    if (!unreadable) recordClue(nearbyDoor);
+    if (!unreadable) { recordClue(nearbyDoor); noteObjectiveRead(nearbyDoor); }
     const alreadyCollected = gives && collectedItems.has(gives);
     if (gives) {
       collectedItems.add(gives);
-      if (!alreadyCollected) playGameSound('pickup');
+      // 처음 챙길 때의 효과음: requires를 써서 움직인 설비(인증 게이트·2층 영사기)는 사용음, 가방에 들어가는 소지품
+      // (INVENTORY_ITEMS)은 획득음, 그 밖의 단서·진행은 pickup이다. sound가 있는 설비(11층 방화셔터)는 그 소리를 낸다.
+      if (!alreadyCollected) playGameSound(nearbyDoor.sound || (required.length ? 'item-use' : INVENTORY_ITEMS[gives] ? 'item-get' : 'pickup'));
+      // 항불안제 같은 정신력 회복 소품(restoresSanity): 처음 챙길 때만 정신력을 올리고, 다 먹었으니 모습을 감춘다.
+      if (!alreadyCollected && nearbyDoor.restoresSanity) {
+        sanity = Math.min(100, sanity + nearbyDoor.restoresSanity);
+        refreshSanity();
+        nearbyDoor.element.hidden = true;
+      }
     }
     if (gives) refreshReady();
     if (gives) refreshInventoryCount();
@@ -163,12 +179,20 @@ function interact() {
     return;
   }
   if (nearbyDoor.type === 'room') {
-    const { target, arrivalKey } = nearbyDoor;
+    const { target, arrivalKey, raiseMessage } = nearbyDoor;
     // 방 안에서 복도 문으로 나오면 그 방 id를 챙긴 것으로 친다: 안쪽 걸쇠로 잠긴 방(unlockedBy: 자기 방 id)은
     // 한 번 안에서 열고 나오면 그 뒤로 복도에서도 열린다.
+    // 안에서 처음 올리는 셔터(raiseMessage, 16층 CU)는 연출을 시작할 때 기록해 도중에 저장·종료돼도 열린 채 남는다.
+    // 레버 문구와 셔터 소리를 내며 복도로 넘어가고, 복도에서 셔터가 말려 올라간다. 두 번째부터는 보통 문이다.
+    const raising = nearbyDoor.key === 'exit' && raiseMessage && !collectedItems.has(dynamicFloorId);
     if (nearbyDoor.key === 'exit') collectedItems.add(dynamicFloorId);
-    playGameSound('door');
-    changeRoom(() => performFloorChange(target, null, arrivalKey));
+    nearbyDoor.element.dataset.open = 'true';
+    if (raising) showStatus(raiseMessage, 4000);
+    playGameSound(raising ? 'shutter' : 'door');
+    changeRoom(() => {
+      performFloorChange(target, null, arrivalKey);
+      if (raising) raiseShutter(currentDoors.find(door => door.key === arrivalKey), raiseMessage);
+    });
     return;
   }
   if (nearbyDoor.type === 'stairs') {

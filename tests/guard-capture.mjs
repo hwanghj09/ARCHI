@@ -14,13 +14,13 @@ try {
   if (await page.locator('#menu-new-confirm').isVisible()) await page.locator('#menu-new-confirm').click();
   await page.locator('#opening-skip').click();
   await page.clock.pauseAt(new Date('2026-10-03T00:01:00Z'));
-  await page.evaluate(() => { triggerBuildingBlackout(); solarEnabled = true; solarPoweredFloor = 1; performFloorChange('f1'); });
+  await page.evaluate(() => { triggerBuildingBlackout(); solarEnabled = true; solarPoweredFloors = [1]; performFloorChange('f1'); });
   const state = () => page.evaluate(() => ({ caught: playerCaught, mode: guardPatrol.mode, x: guardPatrol.x,
     playerX: body.position.x, time: guardPatrol.captureTime, frame: guardPatrol.door.element.dataset.frame }));
   const arrange = (x = 3210, facing = 1) => page.evaluate(([x, direction]) => {
     if (playerCaught) releaseGuardCapture();
     Object.assign(guardPatrol, { x: 3000, facing: direction, mode: 'patrol', wait: 0, lostTime: 0, captureTime: 0 });
-    solarPoweredFloor = 1; updatePowerState();
+    solarPoweredFloors = [1]; updatePowerState();
     Body.setPosition(body, { x, y: floorY - 81 }); Body.setVelocity(body, { x: 0, y: 0 });
     grounded = true; updateInteraction(); cameraX = cameraTarget(); render();
   }, [x, facing]);
@@ -55,6 +55,9 @@ try {
   const chaseFrames = new Set();
   for (let i = 0; i < 6; i++) { chaseFrames.add((await state()).frame); await page.clock.runFor(34); }
   assert.deepEqual([...chaseFrames].sort(), ['0', '1'], 'Red-monitor chase animates its wheels');
+  // 쫓는 동안은 수호가 로봇 앞에 서고, 붙잡는 동안은 두 팔이 수호의 허리를 앞에서 감싼다.
+  const robotOverPlayer = () => page.evaluate(() => Number(getComputedStyle(guardPatrol.door.element).zIndex) > Number(getComputedStyle(sprite).zIndex));
+  assert.equal(await robotOverPlayer(), false, 'The chasing robot passes behind the player');
   await page.screenshot({ path: '.local/guard-detected.png' });
   // Sprinting is faster than the robot and can break contact.
   await page.keyboard.down('Shift'); await page.keyboard.down('d'); await page.clock.runFor(1200);
@@ -68,11 +71,13 @@ try {
   await arrange(); await page.evaluate(() => { collectedItems.add('f16-badge'); phoneBattery = 73; });
   await page.clock.runFor(600);
   assert.equal((await state()).caught, true); assert.equal((await state()).mode, 'grab');
+  assert(await robotOverPlayer(), 'Grabbing arms are drawn in front of the player');
   await page.screenshot({ path: '.local/guard-arms-out.png' });
   const armFrames = new Set();
   for (let i = 0; i < 36; i++) { armFrames.add((await state()).frame); await page.clock.runFor(32); }
   assert.deepEqual([...armFrames].sort(), ['2', '3', '4', '5', '6', '7'], 'Both arms unfold, extend, close and hold through all six poses');
   assert.equal((await state()).mode, 'caught'); assert.equal((await state()).frame, '7');
+  assert(await robotOverPlayer(), 'The robot keeps holding the player from the front');
   assert.equal(await page.locator('#player').getAttribute('data-state'), 'caught');
   assert(await page.locator('#guard-capture').isVisible());
   const pinned = (await state()).playerX;
@@ -94,7 +99,7 @@ try {
   await page.locator('#guard-retry').click(); assert.equal((await state()).caught, false);
   await arrange(); await page.clock.runFor(600);
   assert.equal((await state()).mode, 'grab', 'Cut power while the arms are still unfolding');
-  await page.evaluate(() => { solarPoweredFloor = 2; updatePowerState(); });
+  await page.evaluate(() => { solarPoweredFloors = [2]; updatePowerState(); });
   assert.equal((await state()).caught, false); assert.equal((await state()).frame, '7');
   assert(await page.locator('#guard-capture').isHidden()); assert.equal(await page.locator('#stage').evaluate(el => el.inert), false);
   await page.keyboard.down('d'); await page.clock.runFor(150); await page.keyboard.up('d');

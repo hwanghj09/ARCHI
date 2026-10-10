@@ -64,7 +64,8 @@ function buildDynamicScene(config) {
     moving.push({ body: part, element, width: movable.width, height: movable.height });
   }
   // 통로를 막는 장애물(barriers, 예: 11층 방화셔터)은 충돌체이면서 조사할 수 있다. requires 물건을 챙긴 뒤 조사하면
-  // gives를 챙기며 걷히고, 그 뒤로 층을 다시 그릴 때는 충돌체 없이 걷힌 모양(data-open)으로 그린다.
+  // gives를 챙기며 걷히고, 그 뒤로 층을 다시 그릴 때는 충돌체 없이 걷힌 모양(data-open)으로 그린다. sound가 있으면 걷힐 때
+  // 사용음 대신 그 효과음을 낸다(방화셔터는 'shutter').
   for (const barrier of config.barriers || []) {
     const open = collectedItems.has(barrier.gives);
     const element = document.createElement('div');
@@ -125,11 +126,12 @@ function buildDynamicScene(config) {
     if (outside) {
       const doorWidth = outside.doorWidth ?? 120;
       // exitLock: 들어오면 등 뒤에서 잠기는 출구(7층 검증실). until 물건을 챙기면 그 자리에서 풀린다(lockedUntil).
+      // raiseMessage: 안에서만 여는 셔터(16층 CU)를 처음 올리고 나갈 때의 문구. 연출은 interaction.js가 한다.
       const lock = config.exitLock;
       doorList.push(addRoomDoor({ name: '복도', type: 'room', hint: 'E · 복도로 나가기', target: config.parent,
         arrivalKey: `room:${config.id}`, key: 'exit', x: config.exitX ?? exitDoorX(outside, config.width, doorWidth),
-        y: outside.doorY ?? parent.roomDoorY ?? 250, width: doorWidth, style: outside.doorStyle,
-        unlocked: collectedItems.has(outside.unlockedBy),
+        y: outside.doorY ?? parent.roomDoorY ?? 250, width: doorWidth, style: outside.doorStyle, sprite: outside.doorSprite,
+        unlocked: collectedItems.has(outside.unlockedBy), raiseMessage: outside.raiseMessage,
         locked: Boolean(lock) && !collectedItems.has(lock.until), lockedUntil: lock?.until, message: lock?.message,
         surface: lock?.surface, look: lock?.look, writing: lock?.writing, caption: lock?.caption, image: lock?.image,
         outline: config.exitOutline }));
@@ -140,7 +142,7 @@ function buildDynamicScene(config) {
       const next = floorById.get(link.target);
       doorList.push(addRoomDoor({ name: next.name, type: 'room', hint: link.hint ?? `E · ${next.name} 들어가기`, target: link.target,
         arrivalKey: `link:${config.id}`, key: `link:${link.target}`, x: link.x, y: link.y ?? 250,
-        width: link.width ?? 120, style: link.style, outline: link.outline }));
+        width: link.width ?? 120, style: link.style, sprite: link.sprite, outline: link.outline }));
     }
   }
   for (const roomConfig of config.rooms || []) {
@@ -159,7 +161,7 @@ function buildDynamicScene(config) {
       code: roomConfig.code, codeMessage: roomConfig.codeMessage, unlockedBy: roomConfig.unlockedBy,
       target: roomConfig.target, arrivalKey: 'exit', key: `room:${roomConfig.target}`,
       x: roomConfig.doorX, y: roomConfig.doorY ?? config.roomDoorY ?? 250, width: roomConfig.doorWidth ?? 120,
-      style: roomConfig.doorStyle, outline: roomConfig.doorOutline }));
+      style: roomConfig.doorStyle, sprite: roomConfig.doorSprite, outline: roomConfig.doorOutline }));
   }
   // 벽에 붙은 설비(fixtures: 1층 층별 안내판·정문처럼 소품 그림이 없는 것)는 CSS로 그리고 lines를 글줄로 넣는다.
   // 충돌은 없고, message가 있으면 조사할 수 있다(requires·gives·code·opens도 소품처럼 쓴다). requires가 있는 설비는 그 물건을
@@ -178,7 +180,16 @@ function buildDynamicScene(config) {
       element.append(text);
     }
     dynamicScene.append(element);
-    if (fixture.message) doorList.push({ ...fixture, type: 'inspect', element });
+    if (!fixture.message) continue;
+    // 그림에 그려진 장치(단면 에셋 층)도 소품처럼 sequence·ring·cycle을 쓸 수 있다(아래 소품 설명 참고).
+    const sequence = fixture.sequence && config.sequences.find(entry => entry.id === fixture.sequence);
+    if (sequence && collectedItems.has(sequence.gives)) element.dataset.done = 'true';
+    if (fixture.cycle) element.dataset.state = String(cycleState(fixture.cycle));
+    const fixtureDoor = { ...fixture, type: 'inspect', element, sequence: sequence && { ...sequence, step: fixture.step },
+      ring: fixture.ring && !collectedItems.has(fixture.gives) ? { ...fixture.ring, elapsed: 0, state: 'waiting' } : null };
+    // 패널 위 설명서는 겹치는 발전기보다 먼저 조사할 수 있어야 한다.
+    if (config.id === 'rooftop' && fixture.style === 'power-notice') doorList.unshift(fixtureDoor);
+    else doorList.push(fixtureDoor);
   }
   refreshReady();
   const isFloor = config.id !== 'rooftop' && !config.interior;
@@ -225,6 +236,7 @@ function buildDynamicScene(config) {
     // cycle: 조사할 때마다 출력 칸이 바뀌는 선택기(4층 UPS). 지금 칸 번호를 data-state로 그린다.
     if (prop.cycle) element.dataset.state = String(cycleState(prop.cycle));
     doorList.push({ name: prop.name, type: 'inspect', message: prop.message, gives: prop.gives,
+      restoresSanity: prop.restoresSanity,
       takenMessage: prop.takenMessage, darkMessage: prop.darkMessage, requires: prop.requires,
       missingMessage: prop.missingMessage, partialMessage: prop.partialMessage, element, standY: floorY - base,
       code: prop.code, codePrompt: prop.codePrompt, cycle: prop.cycle, opens: prop.opens,

@@ -26,16 +26,21 @@ function loadPhoneNote() {
 
 function openPhoneApp(app) {
   if (!usingPhone || phoneDock || phoneBattery <= 0) return;
+  if (app === 'solar' && !collectedItems.has('solar-app-installed')) return;
   const view = [...phoneAppWindow.querySelectorAll('[data-phone-view]')].find(element => element.dataset.phoneView === app);
   if (!view) return;
   currentPhoneApp = app;
-  document.getElementById('phone-app-title').textContent = { notes: '개인 메모', calculator: '계산기', building: '건물 안내' }[app];
+  document.getElementById('phone-app-title').textContent = { notes: '개인 메모', calculator: '계산기', building: '건물 안내', solar: '비상 전력 제어' }[app];
   phonePanel.querySelector('.phone-owner').hidden = true;
   phonePanel.querySelector('.phone-controls').hidden = true;
   for (const element of phoneAppWindow.querySelectorAll('[data-phone-view]')) element.hidden = element !== view;
   phoneAppWindow.hidden = false;
   phonePanel.querySelector('.phone-screen').scrollTop = 0;
   if (app === 'building') refreshBuildingGuides();
+  if (app === 'solar') {
+    document.getElementById('phone-solar-floor').value = String(solarPoweredFloors[0] || 17);
+    refreshSolarApp();
+  }
   playGameSound('phone');
   (app === 'notes' ? phoneNote : app === 'calculator' ? view.querySelector('[data-calculator-key]') : document.getElementById('phone-app-back')).focus();
 }
@@ -95,6 +100,7 @@ function refreshPhone() {
   phoneBatteryFill.style.background = percent <= 20 ? '#e27b68' : '#8fe06a';
   phoneLightButton.disabled = percent === 0 || Boolean(phoneDock);
   for (const button of phonePanel.querySelectorAll('[data-phone-app]')) button.disabled = percent === 0 || Boolean(phoneDock);
+  phonePanel.querySelector('[data-phone-app="solar"]').hidden = !collectedItems.has('solar-app-installed');
   if (percent === 0 && currentPhoneApp) closePhoneApp();
   phoneLightButton.setAttribute('aria-pressed', String(phoneLightOn));
   phoneLightButton.setAttribute('aria-label', phoneLightOn ? '플래시 끄기' : '플래시 켜기');
@@ -106,10 +112,11 @@ function refreshPhone() {
   phoneButton.dataset.charge = phoneDock ? `${phoneDockLocation()} · ${percent}% · ${phoneChargeState()}` : '';
   phoneButton.setAttribute('aria-label', phoneDock ? `${phoneButton.dataset.charge} · 충전함에서 휴대폰 가져오기` : '휴대폰 열기');
   refreshPhoneChargers();
+  if (typeof refreshSolarApp === 'function') refreshSolarApp();
 }
 
 function togglePhone() {
-  if (playerCaught || blackoutSceneActive) return;
+  if (playerCaught || hallucinationCaught || blackoutSceneActive) return;
   if (usingPhone) return closePhone();
   if (phoneDock) return showStatus(`${phoneDockLocation()} 충전함에 휴대폰을 두었다. 그 충전함 앞에서 E로 가져오자.`, 4000);
   usingPhone = true;
@@ -139,7 +146,7 @@ function closePhone() {
 }
 
 function togglePhoneLight() {
-  if (playerCaught || blackoutSceneActive) return;
+  if (playerCaught || hallucinationCaught || blackoutSceneActive) return;
   if (phoneDock) return showStatus(`${phoneDockLocation()} 충전함에 휴대폰을 두어 플래시를 사용할 수 없다.`, 4000);
   if (!phoneLightOn && phoneBattery <= 0) return showStatus('휴대폰 배터리가 없습니다.');
   phoneLightOn = !phoneLightOn;

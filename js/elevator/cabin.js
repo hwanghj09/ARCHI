@@ -11,6 +11,7 @@ let selectedFloor = null;
 let cabinDoorAmount = 1;
 let cabinAutoClose = 0;
 let cabinReturnFocus = null;
+let cabinArrivalOpen = false;
 
 // Hotspots use the source artwork's 1536x1024 coordinates; CSS scales them with the scene.
 const cabinFloorButtons = [];
@@ -44,10 +45,12 @@ panelFloors.forEach((floor, index) => {
       cabinStatus.textContent = `${button.title}은 운행 제한 중이다. 버튼 옆 표시: "SYSTEM 제한 · 해제는 B1 방재 관제실".`;
       return;
     }
-    selectedFloor = selectedFloor === floor ? null : floor;
+    if (selectedFloor !== null) return;
+    selectedFloor = floor;
     playGameSound('switch');
-    cabinAutoClose = selectedFloor === null ? 0 : 1600;
-    cabinStatus.textContent = selectedFloor === null ? '층 선택 취소' : `${button.title} 선택`;
+    // 문이 닫힌 뒤 updateCabin이 페이드 아웃으로 층을 바꾸고, 페이드 인이 끝나면 문을 연다.
+    if (cabinScene.dataset.door === 'closed') cabinStatus.textContent = `${button.title} 이동 중`;
+    else setCabinDoor(false);
     refreshCabin();
   });
   document.getElementById('cabin-floor-buttons').append(button);
@@ -69,6 +72,7 @@ function enterCabin(carIndex) {
 function showCabin(carIndex) {
   cabinCarIndex = carIndex;
   selectedFloor = null;
+  cabinArrivalOpen = false;
   cabinAutoClose = 0;
   cabinDoorAmount = 1;
   cabinScene.style.setProperty('--door-open', '1');
@@ -84,6 +88,24 @@ function showCabin(carIndex) {
   cabin.scrollLeft = cabin.scrollWidth - cabin.clientWidth;
 }
 
+function arriveCabinAt(car, floor) {
+  car.floor = floor;
+  car.destination = null;
+  car.travelling = false;
+  car.elapsed = 0;
+  selectedFloor = null;
+  cabinAutoClose = 0;
+  car.open = false;
+  cabinDoorAmount = 0;
+  cabinScene.style.setProperty('--door-open', '0');
+  cabinScene.dataset.door = 'closed';
+  cabinArrivalOpen = true;
+  playGameSound('elevator-arrive');
+  cabinStatus.textContent = `${floorShortLabel(floor)} 도착`;
+  refreshSceneElevatorDoors();
+  refreshCabin();
+}
+
 function refreshCabin() {
   if (cabinCarIndex === null) return;
   const car = elevatorCars[cabinCarIndex];
@@ -97,7 +119,7 @@ function refreshCabin() {
   cabinScene.dataset.floor = car.floor;
   // The cabin uses the building circuit; restoring one floor does not relight a moving car.
   cabinScene.dataset.blackout = String(buildingBlackout);
-  cabinScene.dataset.hallBlackout = String(buildingBlackout && car.floor > 0 && car.floor !== solarPoweredFloor);
+  cabinScene.dataset.hallBlackout = String(buildingBlackout && car.floor > 0 && !solarPoweredFloors.includes(car.floor));
   cabinOpen.disabled = car.travelling;
   cabinClose.disabled = !powered || car.travelling;
   cabinExit.disabled = car.travelling || cabinScene.dataset.door !== 'open';
@@ -145,11 +167,15 @@ function updateCabin() {
     cabinScene.style.setProperty('--door-open', cabinDoorAmount);
     if (cabinDoorAmount === (car.open ? 1 : 0)) cabinScene.dataset.door = car.open ? 'open' : 'closed';
   }
-  if (elevatorHasPower() && !car.travelling && cabinScene.dataset.door === 'closed' && selectedFloor !== null && !cabinAutoClose) {
-    car.destination = selectedFloor;
-    car.travelling = true;
-    car.elapsed = 0;
-    cabinStatus.textContent = `${floorShortLabel(selectedFloor)} 이동 중`;
+  if (selectedFloor !== null && cabinScene.dataset.door === 'open') setCabinDoor(false);
+  if (cabinArrivalOpen && !transitioning) {
+    cabinArrivalOpen = false;
+    setCabinDoor(true);
+  }
+  if (elevatorHasPower() && !transitioning && !car.travelling && cabinScene.dataset.door === 'closed' && selectedFloor !== null) {
+    const floor = selectedFloor;
+    cabinStatus.textContent = `${floorShortLabel(floor)} 이동 중`;
+    transitionScene(() => arriveCabinAt(car, floor));
   }
   refreshCabin();
 }

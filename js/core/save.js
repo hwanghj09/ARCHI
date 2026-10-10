@@ -8,6 +8,14 @@ const savedFloor = value => Number.isInteger(value) && (value === -2 || value ==
 function readProgress() {
   try {
     const data = JSON.parse(localStorage.getItem(progressKey));
+    // 단면 에셋으로 교체되어 사라진 방의 저장은 같은 층 복도에서 재개한다. 소지품·전력·퍼즐 기록은 유지한다.
+    if (data?.version === 1 && ['f2-booth', 'f3-hanuri', 'f4-log', 'f4-ups', 'f4-vault', 'f4-office',
+      'f5-library', 'f5-council', 'f6-remote', 'f6-line', 'f6-duty', 'f8-repro', 'f8-blind',
+      'f9-briefing', 'f9-license', 'f10-finance', 'f10-director', 'f10-vault'].includes(data.scene?.id) &&
+      Number.isFinite(data.scene.x) && Number.isFinite(data.scene.y)) {
+      Object.assign(data.scene, { id: data.scene.id.split('-')[0], x: BUILDING_CORE.elevators[0].x + 40,
+        y: floorY - 81, velocity: { x: 0, y: 0 }, arrivalKey: null });
+    }
     if (data?.version !== 1 || !data.scene || !(data.scene.id === 'office' || floorById.has(data.scene.id)) ||
         !Number.isFinite(data.scene.x) || !Number.isFinite(data.scene.y) || !Array.isArray(data.items) ||
         data.items.length > 1024 || !data.items.every(item => typeof item === 'string' && item.length < 256)) return null;
@@ -25,7 +33,7 @@ function progressSnapshot() {
   return { version: 1, savedAt: Date.now(), scene, items: [...collectedItems], clues: clueSnapshot(),
     battery: phoneBattery, sanity, light: phoneLightOn, dock: phoneDock && { ...phoneDock },
     phoneChargeAccumulator, phoneDrainAccumulator,
-    blackout: buildingBlackout || blackoutSceneActive, solarEnabled, solarPoweredFloor,
+    blackout: buildingBlackout || blackoutSceneActive, solarEnabled, solarPoweredFloors: [...solarPoweredFloors],
     lights: world.dataset.lights, computerPower: openingActive ? 'off' : officeComputer.element.dataset.power,
     elevators: elevatorCars.map(({ name, ...car }) => ({ ...car })),
     cabin: selectingFloor ? { index: cabinCarIndex, selectedFloor, autoClose: cabinAutoClose,
@@ -56,16 +64,22 @@ function restoreProgress(data) {
     releaseInput();
     // 재개할 때 조사·휴대폰 등의 창은 닫는다. 퍼즐 진행과 실제 게임 상태는 복원한다.
     usingPhone = usingComputer = usingKeypad = usingPowerPanel = usingInspection = selectingFloor = false;
-    transitioning = playerCaught = blackoutSceneActive = false;
+    transitioning = playerCaught = blackoutSceneActive = hallucinationCaught = false;
     openingActive = true; // 장면을 조립하는 동안 정전 컷씬과 입력이 시작되지 않게 한다.
     sceneTransition = null;
     cabinCarIndex = null;
     selectedFloor = null;
-    for (const element of [phonePanel, computer, keypad, powerPanel, inspectionPanel, cabin, guardCapturePanel, opening, blackoutScene]) element.hidden = true;
+    for (const element of [phonePanel, computer, keypad, powerPanel, inspectionPanel, cabin, guardCapturePanel, hallucinationCapturePanel, opening, blackoutScene]) element.hidden = true;
     for (const element of document.body.children) if (element !== mainMenu) element.inert = false;
-    phoneBlocked = powerBlocked = guardBlocked = openingBlocked = blackoutBlocked = [];
+    phoneBlocked = powerBlocked = guardBlocked = hallucinationBlocked = openingBlocked = blackoutBlocked = [];
+    bonusPillActive = false;
+    anxietyPill.hidden = true;
+    zeroEventPhase = 'idle'; zeroEventTimer = 0; zeroEventEvasions = 0; zeroEventApproachDone = false;
+    endHallucinationSighting();
     clearInterval(inspectionTypingTimer);
     inspectionTypingTimer = null;
+    delete inspectionPanel.dataset.returnTo;
+    inventoryButton.setAttribute('aria-expanded', 'false');
     roomTransition.classList.remove('visible');
     roomTransition.dataset.phase = 'idle';
     for (const key of ['opening', 'blackoutScene', 'powerFlicker']) delete world.dataset[key];
@@ -76,7 +90,10 @@ function restoreProgress(data) {
     restoreClues(data.clues);
     buildingBlackout = data.blackout === true;
     solarEnabled = data.solarEnabled === true;
-    solarPoweredFloor = solarEnabled && Number.isInteger(data.solarPoweredFloor) && data.solarPoweredFloor >= 1 && data.solarPoweredFloor <= 17 ? data.solarPoweredFloor : null;
+    // 한 층만 켜던 예전 저장은 숫자 solarPoweredFloor를 [숫자]로 읽는다. 켠 순서를 지키고 최근 두 층만 남긴다.
+    const solarFloors = Array.isArray(data.solarPoweredFloors) ? data.solarPoweredFloors : [data.solarPoweredFloor];
+    solarPoweredFloors = solarEnabled ?
+      [...new Set(solarFloors.filter(floor => Number.isInteger(floor) && floor >= 1 && floor <= 17))].slice(-solarFloorLimit) : [];
     world.dataset.lights = data.lights === 'off' ? 'off' : 'on';
     document.getElementById('floor17-lights').checked = world.dataset.lights === 'on';
     phoneBattery = savedNumber(data.battery, 100, 0, 100);

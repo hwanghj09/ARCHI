@@ -4,6 +4,12 @@
 #sanity-meter { height: 7px; margin: 7px 0 4px; border: 1px solid #3e534a; background: #050c10; }
 #sanity-fill { display: block; height: 100%; width: 100%; background: #8fbda3; }
 #sanity-state { color: #96aaa0; font-size: 10px; }
+/* 테스트용 정신력 조정 콘솔: 게이지 바로 아래, 기존 TEST 층 이동 패널과 같은 점선 테두리 느낌을 쓴다. */
+#debug-sanity { display: flex; align-items: center; gap: 6px; margin-top: 8px; padding-top: 8px;
+  border-top: 1px dashed #c9a13b; pointer-events: auto; }
+#debug-sanity label { flex: none; color: #d8be7c; font-size: 10px; white-space: nowrap; }
+#debug-sanity-range { flex: 1; min-width: 0; }
+#debug-sanity-number { width: 44px; min-width: 0; background: #0b1316; border: 1px solid #3e534a; color: #dbe5d8; font: 11px Arial, sans-serif; }
 #sanity-hud[data-state="low"] { border-color: #ae9766; }
 #sanity-hud[data-state="low"] #sanity-fill { background: #c7aa75; }
 #sanity-hud[data-state="hallucinating"] { border-color: #986779; background: #22171fe8; }
@@ -12,7 +18,92 @@
 #hallucinations[hidden], #hallucination-shadow[hidden] { display: none; }
 #hallucination-shadow { position: absolute; image-rendering: pixelated; filter: brightness(0) invert(.75) sepia(.3) drop-shadow(0 0 6px #bba0c8); pointer-events: none; user-select: none; }
 body:has(#world[data-opening]) #sanity-hud,
-body:has(#world[data-blackout-scene]) #sanity-hud { visibility: hidden; }
+body:has(#world[data-blackout-scene]) #sanity-hud,
+body:has(#world[data-opening]) #fear-overlay, body:has(#world[data-opening]) #fear-overlay-red,
+body:has(#world[data-blackout-scene]) #fear-overlay, body:has(#world[data-blackout-scene]) #fear-overlay-red,
+body:has(#world[data-opening]) #blink-flash, body:has(#world[data-blackout-scene]) #blink-flash,
+body:has(#world[data-opening]) #wall-eyes, body:has(#world[data-blackout-scene]) #wall-eyes { visibility: hidden; }
 @media (max-width: 480px) { #sanity-hud { width: 136px; padding: 8px 10px; } }
 @media (max-height: 480px) { #sanity-hud { top: 106px; } }
 @media (prefers-reduced-motion: reduce) { #hallucination-shadow { filter: brightness(0) invert(.7); } }
+
+/* 50/40/30/20/10% 미만 단계별 화면 연출: 검은 비네트 → 흐림 → (30~20%에서) 붉게 전환. */
+#fear-overlay, #fear-overlay-red { position: fixed; z-index: 10; inset: 0; pointer-events: none; opacity: 0;
+  transition: opacity .7s, filter .7s; background: radial-gradient(ellipse at center, transparent 42%, #000 92%); }
+#fear-overlay-red { background: radial-gradient(ellipse at center, transparent 30%, #6e0f0f 92%); }
+body[data-fear-tier="1"] #fear-overlay { opacity: .4; }
+body[data-fear-tier="2"] #fear-overlay { opacity: .55; filter: blur(1.5px); }
+body[data-fear-tier="3"] #fear-overlay { opacity: .62; filter: blur(1.5px); }
+body[data-fear-tier="4"] #fear-overlay { opacity: .72; filter: blur(2.4px); }
+body[data-fear-tier="5"] #fear-overlay { opacity: .8; filter: blur(3.2px); }
+
+/* 눈 깜빡임: 40% 미만부터 가끔 화면이 짧게 어두워진다. */
+#blink-flash { position: fixed; z-index: 13; inset: 0; pointer-events: none; background: #000; opacity: 0; }
+#blink-flash[data-active="true"] { opacity: 1; transition: opacity .07s ease-in; }
+#blink-flash:not([data-active="true"]) { transition: opacity .22s ease-out; }
+
+/* 10% 미만: 깜빡일 때마다 벽 쪽에 붉은 눈이 하나씩 더 생긴다. */
+#wall-eyes { position: fixed; z-index: 9; inset: 0; pointer-events: none; overflow: hidden; }
+.wall-eye { position: absolute; width: 34px; height: 12px; display: flex; gap: 10px; justify-content: center; opacity: 0;
+  animation: wall-eye-in .5s ease-out forwards; }
+.wall-eye::before, .wall-eye::after { content: ''; width: 8px; height: 8px; border-radius: 50%;
+  background: radial-gradient(circle, #ff3b3b 0%, #6e0707 70%, transparent 100%); box-shadow: 0 0 6px 1px #ff3b3b99; }
+@keyframes wall-eye-in { from { opacity: 0; transform: scale(.4); } to { opacity: .85; transform: scale(1); } }
+
+/* 30% 미만: 더 지친 모습(새 그림이 없어 필터로 대신한다) + 이동 속도 저하는 config.js의 sanitySpeedFactor가 맡는다. */
+body[data-weary="true"] #player { filter: grayscale(.35) brightness(.82) contrast(1.05); }
+
+/* 0%가 되기 전/후 환각이 다가오는 동안 화면이 심하게 지직거린다. */
+#hallucinations[data-mode="approach"], #hallucinations[data-mode="charge"] { animation: fear-glitch .22s steps(2) infinite; }
+@keyframes fear-glitch {
+  0% { transform: translate(0, 0); filter: hue-rotate(0deg); }
+  25% { transform: translate(-3px, 2px); filter: hue-rotate(-12deg); }
+  50% { transform: translate(2px, -2px); filter: hue-rotate(10deg); }
+  75% { transform: translate(-2px, -1px); filter: hue-rotate(-6deg); }
+  100% { transform: translate(0, 0); filter: hue-rotate(0deg); }
+}
+
+/* 항불안제: 시작 지점 근처 고정 한 알과, 두 번째 회피 이후 반짝이며 나타나는 한 알이 같은 모습을 쓴다. */
+.pill-prop { position: absolute; width: 36px; height: 36px; border-radius: 50%; pointer-events: none;
+  background: radial-gradient(circle, #d9ffe0 0%, #6fd98a 45%, #1f5a33 100%); box-shadow: 0 0 14px 4px #7af09980;
+  animation: pill-pulse 1.6s ease-in-out infinite; }
+@keyframes pill-pulse { 0%, 100% { opacity: .75; transform: scale(.9); } 50% { opacity: 1; transform: scale(1.08); } }
+
+/* CCTV: 20% 미만에서 카메라 렌즈에 붉은 눈이 맺힌다(기존 감지 LED ::after와 겹치지 않는 별도 요소). */
+.cctv-fear-eye { display: none; position: absolute; left: 32px; top: 7px; width: 9px; height: 9px;
+  border-radius: 50%; background: radial-gradient(circle, #ff2e2e 0%, #6e0707 70%, transparent 100%);
+  box-shadow: 0 0 8px 2px #ff2e2ecc; animation: eye-throb 1s ease-in-out infinite; }
+.cctv[data-fear="true"] .cctv-fear-eye { display: block; }
+@keyframes eye-throb { 0%, 100% { opacity: .7; transform: scale(.85); } 50% { opacity: 1; transform: scale(1.1); } }
+
+/* 컴퓨터: 20% 미만에서 화면 절반쯤에 공포스러운 창이 떠 있다. 색상바·오류화면·지직거리는 화면 3장을 돌려가며 보여준다. */
+.computer-fear-window { display: none; position: absolute; right: 6%; top: 16%; width: 38%; min-width: 220px; max-width: 320px;
+  overflow: hidden; background: #0a0a0aee; border: 1px solid #a33; box-shadow: 0 10px 30px #000a;
+  z-index: 5; animation: fear-glitch .3s steps(2) infinite; }
+#computer[data-fear="true"] #computer-fear-window { display: block; }
+.computer-fear-titlebar { padding: 4px 8px; background: #1a0303; border-bottom: 1px solid #733; color: #ff6b6b;
+  font: bold 12px/1.4 monospace; letter-spacing: .08em; }
+.computer-fear-still { display: block; width: 100%; height: 190px; object-fit: cover; image-rendering: pixelated; background: #000; }
+/* 네 가지 중 하나가 "꺼진 화면"일 때: 지직거림을 멈추고 조용한 검은 화면만 보인다(기존 자산 없이 CSS로).
+   클래스 선택자가 기본 규칙(위 .computer-fear-window)보다 뒤에 오게 둬서, 아이디 선택자에 밀려 안 먹는 일이 없게 한다. */
+.computer-fear-window[data-off="true"] { animation: none; border-color: #3a3a3a; }
+.computer-fear-window[data-off="true"] .computer-fear-titlebar { background: #141414; border-bottom-color: #333; color: #6b6b6b; }
+.computer-fear-window[data-off="true"] .computer-fear-still { visibility: hidden; } /* src 없는 img의 깨진 아이콘을 감춘다 */
+.computer-fear-window[data-off="true"]::after { content: ''; position: absolute; right: 10px; bottom: 10px;
+  width: 5px; height: 5px; border-radius: 50%; background: #5a1414; box-shadow: 0 0 4px 1px #5a141499; }
+
+/* 환각에게 잡아먹히는 게임 오버: 경비 로봇 포획 패널과 같은 자리·같은 생김새를 쓴다. */
+#hallucination-caught { position: fixed; z-index: 14; bottom: 16px; left: 50%; transform: translateX(-50%);
+  width: min(480px, calc(100vw - 24px)); padding: 14px 18px; background: #1c0e11f5; border: 2px solid #8a3d4d;
+  color: #eee5d6; text-align: left; }
+#hallucination-caught[hidden] { display: none; }
+#hallucination-caught h2 { margin: 0 0 8px; font-size: 18px; }
+#hallucination-caught p { margin: 0 0 10px; font-size: 12px; line-height: 1.5; }
+#hallucination-retry { min-height: 44px; min-width: 120px; border: 1px solid #c79b9b; background: #3a2328; color: #fff; font: inherit; cursor: pointer; }
+#hallucination-retry:focus-visible { outline: 3px solid #eac47d; outline-offset: 3px; }
+
+@media (prefers-reduced-motion: reduce) {
+  #hallucinations[data-mode="approach"], #hallucinations[data-mode="charge"], #computer-fear-window { animation: none; }
+  .wall-eye { animation: none; opacity: .85; }
+  .pill-prop { animation: none; }
+}

@@ -21,12 +21,14 @@ function openKeypad(target) {
 
 function closeKeypad() {
   if (!usingKeypad) return;
+  const returnToPower = keypadTarget?.type === 'power';
   usingKeypad = false;
   keypadTarget = null;
   keypad.hidden = true;
   stage.inert = false;
   stage.focus({ preventScroll: true });
   updateInteraction();
+  if (returnToPower) openPowerPanel();
 }
 
 function submitKeypad() {
@@ -34,10 +36,15 @@ function submitKeypad() {
   if (!target) return;
   if (keypadInput.value.trim().toLowerCase() !== String(target.code).toLowerCase()) {
     keypadError.textContent = '비밀번호가 맞지 않는다.';
+    playGameSound('deny');
     keypadInput.select();
     return;
   }
-  if (target.type === 'room') {
+  if (target.type !== 'power') playGameSound(INVENTORY_ITEMS[target.gives] ? 'item-get' : 'item-use');
+  if (target.type === 'power') {
+    setSolarPower(true);
+    closeKeypad();
+  } else if (target.type === 'room') {
     // 맞는 번호를 누르면 그 자리에서 문이 열린다. 다음에 층을 그릴 때는 unlockedBy를 챙긴 것으로 열린 채 그린다.
     collectedItems.add(target.unlockedBy);
     target.locked = false;

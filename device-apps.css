@@ -27,4 +27,15 @@
 #phone .building-guide { padding: 12px; font-size: 12px; }
 #phone .building-guide select { font-size: 12px; }
 #phone [data-building-here] { min-height: 44px; margin-top: 8px; }
+.solar-download-page { max-width: 640px; margin: 0 auto; padding: 24px; line-height: 1.65; overflow-wrap: anywhere; }
+.solar-download-page output { display: block; margin: 12px 0; }
+#computer .solar-download-page button { border-color: #9ab4a7; background: #dbe9e2; }
+#computer .solar-download-page button:disabled { opacity: .5; cursor: default; }
+#phone [data-phone-app][hidden] { display: none; }
+#phone-solar { padding: 8px; font-size: 12px; line-height: 1.6; }
+#phone-solar output { display: block; margin-bottom: 12px; color: #bfe7a3; }
+#phone-solar label { display: block; margin-top: 12px; }
+#phone-solar select, #phone-solar button { width: 100%; min-height: 44px; margin-top: 6px; padding: 8px; border: 1px solid #58718a; border-radius: 8px; background: #23374d; color: #e7edf3; font: 13px Arial, sans-serif; touch-action: manipulation; }
+#phone-solar button:disabled { opacity: .5; }
+#phone-solar p { overflow-wrap: anywhere; }
 @media (max-height: 480px) { #computer .device-calculator { margin-block: 4px; padding: 10px; } #computer .calculator-display { padding-block: 4px; font-size: 24px; } }

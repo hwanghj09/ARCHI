@@ -14,7 +14,7 @@ assert(html.includes('id="power-panel"') && html.includes('id="power-floor-grid"
 assert(keyboard.includes("event.code === 'KeyP'") && keyboard.includes("event.code === 'KeyF'"));
 assert(phone.includes('phoneBattery = Math.max(0') && phone.includes('world.dataset.flashlight'));
 assert(power.includes('for (let floor = 17; floor >= 1; floor -= 1)'));
-assert(power.includes('currentSceneFloor === solarPoweredFloor'));
+assert(power.includes('solarPoweredFloors.includes(currentSceneFloor)'));
 assert(scene.includes("type: 'power'") && scene.includes("name: '태양광 발전기'"));
 
 console.log('phone and rooftop power source tests passed');

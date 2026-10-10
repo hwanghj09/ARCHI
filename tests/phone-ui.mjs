@@ -33,7 +33,7 @@ try {
   assert(!/들고 이동|휴대폰 넣기/.test(await page.locator('#phone').textContent()));
   const before = (await state()).x;
   await page.keyboard.down('d'); await page.clock.runFor(300); await page.keyboard.up('d');
-  assert.equal((await state()).x, before, 'The device pauses movement');
+  assert.equal((await state()).x, before, 'Phone controls do not move the player while the world continues');
   await page.keyboard.press('Tab');
   assert.equal(await page.evaluate(() => document.activeElement.dataset.phoneApp), 'notes');
   await page.keyboard.press('Shift+Tab');
@@ -81,6 +81,19 @@ try {
   await page.keyboard.press('p');
   assert.equal(await page.evaluate(() => document.activeElement.id), 'phone-close', 'Empty battery still leaves a keyboard exit');
   await page.keyboard.press('Enter'); assert.equal((await state()).open, false);
+  await page.evaluate(() => {
+    triggerBuildingBlackout(); solarEnabled = true; solarPoweredFloors = [1]; performFloorChange('f1');
+    Object.assign(guardPatrol, { x: 3000, facing: 1, mode: 'patrol', wait: 0, lostTime: 0, captureTime: 0 });
+    Body.setPosition(body, { x: 3210, y: floorY - 81 }); Body.setVelocity(body, { x: 0, y: 0 });
+    grounded = true; phoneBattery = 100; refreshPhone();
+  });
+  await page.keyboard.press('p');
+  await page.clock.runFor(2000);
+  assert(await page.evaluate(() => playerCaught && !usingPhone), 'Robot keeps chasing and closes the phone when capturing the player');
+  assert(await page.locator('#guard-capture').isVisible());
+  assert.equal(await page.evaluate(() => document.activeElement.id), 'guard-retry');
+  await page.locator('#guard-retry').click();
+  assert(await page.evaluate(() => !playerCaught && !stage.inert && phonePanel.hidden), 'Retry restores gameplay input after capture during phone use');
   assert.deepEqual(errors, []);
   console.log('PASS: generated transparent device, native controls, modal input/focus, flashlight-only carrying, automatic stow, battery exhaustion, desktop/portrait/landscape and touch.');
 } finally { await browser.close(); }

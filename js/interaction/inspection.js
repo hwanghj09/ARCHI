@@ -18,15 +18,23 @@ function finishInspectionText() {
   inspectionHelp.textContent = 'E / Esc';
 }
 
-function advanceInspection() {
-  if (inspectionTypingTimer !== null) finishInspectionText();
+// 한 단계 뒤로: 가방에서 연 카드(returnTo: 'inventory')는 가방 목록으로 돌아가고, 나머지는 닫는다.
+function stepBackInspection() {
+  if (inspectionPanel.dataset.returnTo === 'inventory') closeInventoryCard();
   else closeInspection();
 }
 
+function advanceInspection() {
+  if (inspectionTypingTimer !== null) finishInspectionText();
+  else stepBackInspection();
+}
+
 // sheet: { surface, look, writing, caption, image }를 가진 조사 대상. 펼친 표면은 보이기만 하고, 화면 낭독기는 message를 읽는다.
+// 돌아갈 화면(returnTo)은 열 때마다 지운다. 가방의 카드처럼 필요한 쪽이 연 뒤에 다시 기록한다.
 function openInspection(name, message, sheet) {
   if (!message) return;
   usingInspection = true;
+  delete inspectionPanel.dataset.returnTo;
   const surface = hasWritingSheet(sheet) ? sheet.surface : null;
   inspectionTitle.textContent = name;
   inspectionDescription.textContent = message;
@@ -64,6 +72,7 @@ function closeInspection() {
   inspectionTypingTimer = null;
   usingInspection = false;
   inspectionPanel.hidden = true;
+  delete inspectionPanel.dataset.returnTo;
   document.getElementById('inventory-button').setAttribute('aria-expanded', 'false');
   stage.focus();
 }

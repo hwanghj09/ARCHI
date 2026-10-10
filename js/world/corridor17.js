@@ -46,6 +46,28 @@ doors.push({ name: '소화전', type: 'inspect', x: 4023, y: 248, width: 145,
   element: document.getElementById('floor17-hydrant'), container: 'hydrant',
   message: '소화전 안에 호스와 관창이 정리되어 있다. 호스 아래에 작은 열쇠가 숨겨져 있다.' });
 
+// 배경에 그려진 CCTV 아래 게시판의 위치에 조사 영역만 겹친다.
+const noticeboard = document.createElement('div');
+noticeboard.id = 'floor17-noticeboard';
+noticeboard.setAttribute('role', 'img');
+noticeboard.setAttribute('aria-label', 'CCTV 아래 게시판');
+Object.assign(noticeboard.style, { position: 'absolute', left: '1644px', top: '284px', width: '140px', height: '164px', pointerEvents: 'none' });
+world.insertBefore(noticeboard, sprite);
+doors.push({ name: 'CCTV 아래 게시판', type: 'inspect', x: 1644, y: 284, width: 140, element: noticeboard,
+  outline: [1580, 273, 135, 159],
+  surface: 'corkboard',
+  message: 'CCTV 아래 게시판에 여러 포스트잇이 붙어 있다. 회의실 예약, 분실물, 소등 안내 사이에 관리 메모가 보인다. "태양광 비상 전력 · 승인번호 1997 · 네 자리 입력 후 레버 작동".',
+  caption: '회의와 당직 메모 사이에 낡은 관리 메모가 섞여 있다.',
+  writing: [
+    { as: 'note', color: 'yellow', title: '회의실 예약', text: '내일 오전 10시\n회의 끝나면 의자 정리!' },
+    { as: 'note', color: 'pink', title: '분실물', text: '검은 우산 찾습니다.\n찾으면 관리실에 맡겨 주세요.' },
+    { as: 'note', color: 'blue', title: '퇴근 전 확인', text: '모니터 OFF\n마지막 사람은 소등' },
+    { as: 'note', color: 'yellow', title: '관리 메모', text: '태양광 비상 전력\n승인번호 1997\n네 자리 입력 후 레버 작동' },
+    { as: 'note', color: 'green', title: '당직 인수인계', text: '옥상 출입 후\n문 꼭 닫아 주세요.' },
+    { as: 'note', color: 'pink', title: '공용 냉장고', text: '금요일에 정리합니다.\n개인 음식에 이름을 써 주세요.' },
+  ],
+});
+
 for (const fixture of FLOOR17.fixtures) {
   const element = document.createElement('div');
   element.className = 'fixture phone-charger';

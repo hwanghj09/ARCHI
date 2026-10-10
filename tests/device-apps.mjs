@@ -35,7 +35,7 @@ try {
     const viewport = page.viewportSize();
     assert(box && box.width > 0 && box.height > 0);
     assert(box.x >= -1 && box.y >= -1 && box.x + box.width <= viewport.width + 1 && box.y + box.height <= viewport.height + 1,
-      `${await locator.getAttribute('id') || 'Control'} fits ${viewport.width}×${viewport.height}`);
+      `${await locator.getAttribute('id') || 'Control'} fits ${viewport.width}×${viewport.height}: ${JSON.stringify(box)}`);
   };
   const place = async x => {
     await page.evaluate(x => {
@@ -48,7 +48,7 @@ try {
   await page.keyboard.press('e');
   await finishSceneTransition(page);
   assert(await pc.isVisible());
-  assert.equal(await pc.locator('.computer-shortcuts button').count(), 5);
+  assert.equal(await pc.locator('.computer-shortcuts button').count(), 7);
   await pcApp('mail').click();
   assert.equal(await pc.locator('[data-computer-mail]').count(), 5);
   assert.equal(await pc.locator('#computer-mail-count').textContent(), '5개 메일 · 안 읽음 5개');
@@ -91,7 +91,8 @@ try {
 
   await pcApp('building').click();
   await pcGuide.locator('[data-building-floor]').selectOption('12');
-  assert.match(await pcGuide.locator('[data-building-access]').textContent(), /필요.*하차 후 게이트/);
+  assert.match(await pcGuide.locator('[data-building-access]').textContent(), /조현아 팀장 사원증 필요 \(16층 Café에서 마지막 확인\).*하차 후 게이트/,
+    'A missing card points to where it was last seen');
   const floor12 = await page.evaluate(() => {
     const scene = ALL_FLOORS.find(scene => scene.floor === 12);
     const gate = scene.barriers.find(item => item.accessGate);
@@ -111,7 +112,9 @@ try {
   await page.clock.runFor(300);
   assert(await phone.locator('#phone-notes').isVisible());
   assert.equal(await page.evaluate(() => phoneLightOn), false);
-  assert.deepEqual(await page.evaluate(() => ({ x: body.position.x, y: body.position.y })), initialPosition);
+  const notePosition = await page.evaluate(() => ({ x: body.position.x, y: body.position.y }));
+  assert.equal(notePosition.x, initialPosition.x, 'Typing in phone notes cannot move the player');
+  assert(Math.abs(notePosition.y - initialPosition.y) < 0.001, 'Phone notes tolerate only physics rounding');
   const note = await phone.locator('#phone-note').inputValue();
   assert.match(note, /p f wasd e <img src=x>/);
   await phone.locator('#phone-note-save').click();
@@ -172,15 +175,21 @@ try {
     if (viewport.width === 390) { await page.clock.runFor(100); await page.keyboard.press('e'); await finishSceneTransition(page); }
   }
 
-  await page.evaluate(() => { buildingBlackout = true; solarEnabled = false; solarPoweredFloor = null; updatePowerState(); });
+  await page.evaluate(() => { buildingBlackout = true; solarEnabled = false; solarPoweredFloors = []; updatePowerState(); });
   await page.locator('#phone-button').tap();
   await phoneApp('building').tap();
   await phoneGuide.locator('[data-building-floor]').selectOption('12');
   assert.equal(await phoneGuide.locator('[data-building-power]').getAttribute('data-powered'), 'false');
   assert.match(await phoneGuide.locator('[data-building-elevator]').textContent(), /레버/);
-  await page.evaluate(() => { solarEnabled = true; solarPoweredFloor = 12; updatePowerState(); });
+  await page.evaluate(() => { solarEnabled = true; solarPoweredFloors = [12, 7]; updatePowerState(); });
   assert.equal(await phoneGuide.locator('[data-building-power]').getAttribute('data-powered'), 'true');
   assert.match(await phoneGuide.locator('[data-building-elevator]').textContent(), /비상 전력으로 운행 가능/);
+  // Both solar floors read as powered in the guide; other floors stay dark.
+  for (const [floor, powered] of [['7', 'true'], ['13', 'false'], ['12', 'true']]) {
+    await phoneGuide.locator('[data-building-floor]').selectOption(floor);
+    assert.equal(await phoneGuide.locator('[data-building-power]').getAttribute('data-powered'), powered, `${floor}F guide power`);
+    assert.match(await phoneGuide.locator('[data-building-charger]').textContent(), powered === 'true' ? /충전 가능/ : /전력 공급 필요/);
+  }
   await closePhone();
 
   // Pick up the real badge and authenticate the real gate, then inspect their guide status.
@@ -196,6 +205,7 @@ try {
   assert.equal(await phoneGuide.locator('[data-building-floor]').inputValue(), '12');
   assert.match(await phoneGuide.locator('[data-building-current]').textContent(), /12층/);
   assert.match(await phoneGuide.locator('[data-building-access]').textContent(), /보유.*게이트/);
+  assert.doesNotMatch(await phoneGuide.locator('[data-building-access]').textContent(), /마지막 확인/, 'A held card needs no location hint');
   await closePhone();
   await place(1826);
   await page.keyboard.press('e');

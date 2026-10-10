@@ -24,16 +24,26 @@ try {
   };
   const message = () => page.locator('#inspection-description').textContent();
   const close = () => page.keyboard.press('Escape');
+  await page.evaluate(() => {
+    window.soundLog = [];
+    const original = playGameSound;
+    playGameSound = (name, options) => { soundLog.push(name); original(name, options); };
+  });
+  const sounds = () => page.evaluate(() => soundLog.splice(0).filter(name => name !== 'step'));
   assert.equal(await page.locator('#office-badge').count(), 0, 'The badge is no longer placed on the desk');
   assert(await page.evaluate(() => collectedItems.has('f17-badge')), 'Suho starts with his own badge');
   assert.equal(await page.locator('#interaction-hint').textContent(), 'E · 컴퓨터 사용');
-  assert.equal(await page.locator('#inventory-button').textContent(), '가방 (1) · I');
-  await page.keyboard.press('i');
+  assert.equal(await page.locator('#inventory-button').textContent(), '가방 (1) · Tab');
+  await page.keyboard.press('Tab');
   await page.locator('[data-item="f17-badge"]').click();
   assert.equal(await page.locator('#inspection').getAttribute('data-surface'), 'card');
   assert.match(await page.locator('#inspection-sheet img').getAttribute('src'), /jeong-suho/);
   assert.match(await message(), /늘 지니고 다니는 내 출입증.*정수호/);
   await close();
+  assert.equal(await page.locator('#inspection').getAttribute('data-surface'), 'inventory', 'Esc on a bag card steps back to the list');
+  assert(await page.locator('[data-item="f17-badge"]').evaluate(el => el === document.activeElement), 'Focus returns to the badge');
+  await close();
+  assert(await page.locator('#inspection').isHidden(), 'Esc on the list closes the bag');
   await page.evaluate(() => { performRoomChange(); performRoomChange(); });
   assert.equal(await page.locator('#office-badge').count(), 0, 'Returning to the desk does not create a pickup');
   await page.evaluate(() => { triggerBuildingBlackout(); solarEnabled = true; performFloorChange('f17'); showCabin(0); elevatorCars[0].floor = 17; refreshCabin(); });
@@ -53,7 +63,14 @@ try {
   assert.equal(await page.locator('#interaction-hint').textContent(), 'E · 출입증 태그');
   await page.keyboard.press('e'); assert.match(await message(), /출입증이 없으면/); await close();
   await page.evaluate(() => collectedItems.add('f17-badge'));
-  await page.keyboard.press('e'); assert.match(await message(), /미등록 출입증 · 인증 거부/); await close();
+  await sounds();
+  await page.keyboard.press('e');
+  // The refusal points at the valid card without solving it: whose card, and where it was last seen.
+  const rejected = await message();
+  assert.match(rejected, /미등록 출입증 · 인증 거부/);
+  assert.match(rejected, /조현아 팀장 · 16층 Café에서 마지막 확인/);
+  assert.deepEqual(await sounds(), ['deny'], 'The reader buzzes a refusal');
+  await close();
   for (const floor of [15, 14, 13, 12]) {
     for (const car of [0, 1, 2]) {
       await page.evaluate(({ floor, car }) => performFloorChange(`f${floor}`, car), { floor, car });
@@ -72,15 +89,21 @@ try {
   }
   // Acquire the real team card from its existing table interaction, then authenticate every floor separately.
   await page.evaluate(() => performFloorChange('f16-cafe', null, 'exit'));
-  await place(950); await page.keyboard.press('e'); assert.match(await message(), /조현아/); await close();
+  await place(950); await sounds(); await page.keyboard.press('e'); assert.match(await message(), /조현아/);
+  assert.equal(await page.locator('#inspection').getAttribute('data-surface'), 'card');
+  await close();
+  assert(await page.locator('#inspection').isHidden(), 'A card found on the table closes directly');
   assert(await page.evaluate(() => collectedItems.has('f16-badge')));
-  assert.equal(await page.locator('#inventory-button').textContent(), '가방 (2) · I');
+  assert.deepEqual(await sounds(), ['item-get'], 'A real bag item plays the item chime');
+  assert.equal(await page.locator('#inventory-button').textContent(), '가방 (2) · Tab');
   for (const floor of [12, 13, 14, 15]) {
-    await page.evaluate(floor => { performFloorChange(`f${floor}`); solarEnabled = true; solarPoweredFloor = floor; updatePowerState(); }, floor);
+    await page.evaluate(floor => { performFloorChange(`f${floor}`); solarEnabled = true; solarPoweredFloors = [floor]; updatePowerState(); }, floor);
     assert.equal(await page.locator('.access-gate[data-open="false"]').count(), 2, 'Other floors remain locked');
     await place(1826);
     if (floor === 12) await page.screenshot({ path: '.local/access-gate-closed.png' });
+    await sounds();
     await page.keyboard.press('e'); assert.match(await message(), /조현아 팀장 사원증 인증 완료/); await close();
+    assert.deepEqual(await sounds(), ['item-use'], 'Tagging the valid card is an item use, not a pickup');
     await page.clock.runFor(500);
     assert.equal(await page.locator('.access-gate[data-open="true"]').count(), 2);
     assert(await page.evaluate(() => currentDoors.filter(door => door.accessGate).every(door => !door.solid)));
@@ -102,6 +125,13 @@ try {
   const cardBox = await page.locator('#inspection-sheet img').boundingBox();
   assert(cardBox.width > 100 && cardBox.height > 100 && cardBox.x >= 0 && cardBox.x + cardBox.width <= 390, 'Mobile card is visible within the viewport');
   await page.screenshot({ path: '.local/suho-badge-mobile.png' });
+  await page.locator('#inspection-close').tap();
+  assert.equal(await page.locator('#inspection').getAttribute('data-surface'), 'inventory', 'Tapping close on a bag card returns to the list');
+  assert(await page.locator('[data-item="f17-badge"]').isVisible());
+  assert(await page.locator('[data-item="f17-badge"]').evaluate(el => el === document.activeElement), 'Focus returns to the tapped badge');
+  await page.screenshot({ path: '.local/inventory-return-mobile.png' });
+  await page.locator('#inspection-close').tap();
+  assert(await page.locator('#inspection').isHidden(), 'Tapping close on the list closes the bag');
   assert.deepEqual(errors, []);
   console.log('PASS: starting badge with no desk pickup, inventory/card/touch, unrestricted elevator travel, all 4 floors × 3 landings, bilateral walk/jump blocking, missing/revoked/valid badges, per-floor authentication and persistent reopening.');
 } finally { await browser.close(); }

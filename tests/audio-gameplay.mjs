@@ -57,7 +57,7 @@ try {
   });
   assert(!(await events()).includes('blackout') && !(await events()).includes('charger'), 'Repeated outages and unpowered chargers stay silent');
   await page.evaluate(() => {
-    solarEnabled = true; solarPoweredFloor = 17; updatePowerState();
+    solarEnabled = true; solarPoweredFloors = [17]; updatePowerState();
     chargePhone(currentDoors.find(door => door.phoneCharger));
     chargePhone(currentDoors.find(door => door.phoneCharger));
     togglePhoneLight();
@@ -65,7 +65,7 @@ try {
   assert.deepEqual(await events(), ['charger', 'pickup', 'phone']);
   await clear();
   await page.evaluate(() => {
-    performFloorChange('f1'); solarPoweredFloor = 1; updatePowerState();
+    performFloorChange('f1'); solarPoweredFloors = [1]; updatePowerState();
     Object.assign(guardPatrol, { x: 3000, facing: 1, wait: 0, mode: 'patrol' });
     Body.setPosition(body, { x: 3200, y: floorY - 81 }); grounded = true;
     updateGuardPatrol(16);
@@ -73,6 +73,14 @@ try {
     updateGuardPatrol(16);
   });
   assert.deepEqual(await events(), ['robot-alert', 'robot-grab']);
+  // 엘리베이터 쪽으로 놓친 뒤 걸어 돌아가는 동안은 모터 소리가 나고, 도착해서 둘러볼 때는 멈춘다.
+  const servo = robot => page.evaluate(robot => {
+    releaseGuardCapture(); Object.assign(guardPatrol, robot);
+    Body.setPosition(body, { x: 2600, y: floorY - 81 }); audioEvents.length = 0;
+    updateGameAudio(); return audioEvents.includes('robot-servo');
+  }, robot);
+  assert(await servo({ x: 3000, facing: 1, wait: 0, mode: 'return', chaseOriginX: 3400 }), 'A returning robot runs its motor');
+  assert(!(await servo({ x: 3400, facing: 1, wait: 1400, mode: 'patrol' })), 'The arrival scan is quiet');
   await page.evaluate(() => {
     releaseGuardCapture();
     elevatorCars[0].floor = 1; showCabin(0);
@@ -94,7 +102,7 @@ try {
   assert.deepEqual(await events(), [], 'Other cars arriving at the departed hall stay silent inside the cabin');
   await page.evaluate(() => {
     selectingFloor = false; cabinCarIndex = null; cabin.hidden = true; stage.inert = false;
-    performFloorChange('f6-duty', null, 'exit'); audioEvents.length = 0;
+    performFloorChange('f6-engineering', null, 'exit'); audioEvents.length = 0;
   });
   await page.clock.runFor(4800);
   assert.equal((await events()).filter(name => name === 'call-ring').length, 2, 'The duty phone rings when the puzzle starts and repeats on the game clock');
@@ -106,6 +114,35 @@ try {
   assert(await page.evaluate(() => !activeCall && collectedItems.has('f6-oncall') && [...gameAudioEffects].filter(sound => sound.name === 'call-ring').every(sound => sound.stopping)), 'Answering stops the ring and grants the clue');
   await clear(); await page.clock.runFor(3000);
   assert(!(await events()).includes('call-ring'), 'Answered calls stay silent');
+  // Item sounds: a wrong code buzzes and the right one clacks the lock open; a puzzle flag keeps the pickup thud; a device
+  // run on a required item clacks once; the fire shutter rattles instead.
+  await page.evaluate(() => {
+    performFloorChange('f1'); audioEvents.length = 0;
+    const panel = currentDoors.find(door => door.code);
+    openKeypad(panel);
+    keypadInput.value = '0000'; submitKeypad();
+    keypadInput.value = panel.code; submitKeypad();
+    closeInspection();
+  });
+  assert.deepEqual(await events(), ['deny', 'item-use'], 'Keypad refusal and opening');
+  const inspect = (id, name) => page.evaluate(({ id, name }) => {
+    closeInspection();
+    if (dynamicFloorId !== id) performFloorChange(id, null, floorById.get(id).interior ? 'exit' : null);
+    const door = currentDoors.find(entry => entry.name === name);
+    Body.setPosition(body, { x: door.x + door.width / 2, y: (door.standY ?? floorY) - 81 });
+    Body.setVelocity(body, { x: 0, y: 0 }); grounded = true;
+    audioEvents.length = 0;
+    interact();
+    if (nearbyDoor !== door) throw new Error(`Wrong interaction target: ${name}`);
+    return [...audioEvents];
+  }, { id, name });
+  assert.deepEqual(await inspect('f11-sales', '층 비상 대응함'), ['pickup'], 'A puzzle flag keeps the pickup sound');
+  assert.deepEqual(await inspect('f11', '방화셔터'), ['shutter'], 'The fire shutter rattles as it rolls up');
+  assert.deepEqual(await inspect('f11', '방화셔터'), [], 'An open shutter stays silent');
+  assert.deepEqual(await inspect('f2-harmony', '배터리 영사기'), [], 'A device missing its items stays silent');
+  await page.evaluate(() => { collectedItems.add('f2-reel'); collectedItems.add('f2-remote'); });
+  assert.deepEqual(await inspect('f2-harmony', '배터리 영사기'), ['item-use'], 'Running a device on required items is a use, not a pickup');
+  assert.deepEqual(await inspect('f2-harmony', '배터리 영사기'), [], 'A running device stays silent');
   assert.deepEqual(errors, []);
-  console.log('PASS: walking/running/landing, shutdown/flicker/outage timing, charger guards, robot alert/grab, door transitions, elevator motor/arrival/isolation and repeating/answered duty calls.');
+  console.log('PASS: walking/running/landing, shutdown/flicker/outage timing, charger guards, robot alert/grab and return motor, item/keypad/shutter sounds, door transitions, elevator motor/arrival/isolation and repeating/answered duty calls.');
 } finally { await browser.close(); }

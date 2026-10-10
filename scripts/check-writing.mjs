@@ -19,6 +19,8 @@ const page = await browser.newPage({ viewport: { width: 1280, height: 720 } });
 const errors = [];
 page.on('pageerror', error => errors.push(error.message));
 await page.goto(new URL('../index.html', import.meta.url).href);
+await page.locator('#menu-start').click();
+if (await page.locator('#menu-new-confirm').isVisible()) await page.locator('#menu-new-confirm').click();
 await page.locator('#opening-skip').click();
 await page.evaluate(() => document.fonts.load("20px 'ARCHI Hand'"));
 const { items, plain } = await page.evaluate(([floorNumber, name]) => {

@@ -4,19 +4,21 @@ const computerWindow = document.getElementById('computer-window');
 const computerNote = document.getElementById('computer-note');
 const computerSaveStatus = document.getElementById('computer-save-status');
 let computerReturnFocus = null;
+let computerSolarTask = null;
 
 function exitComputer() {
   if (transitioning || !usingComputer) return;
   transitionScene(() => {
     usingComputer = false;
     computer.hidden = true;
+    refreshSolarDownload();
     updateInteraction();
   });
 }
 
 function openComputerApp(app, documentId) {
   if (transitioning || !usingComputer) return;
-  const titles = { files: '파일', notes: '업무 메모', document: '문서', mail: '사내 메일', calculator: '계산기', building: '건물 안내' };
+  const titles = { files: '파일', notes: '업무 메모', document: '문서', mail: '사내 메일', calculator: '계산기', building: '건물 안내', browser: '블로그', transfer: '파일 전송' };
   if (!Object.hasOwn(titles, app)) return;
   const record = app === 'document' ? officeDocuments.find(item => item.id === documentId) : null;
   if (app === 'document' && !record) return;
@@ -36,10 +38,94 @@ function openComputerApp(app, documentId) {
   }
   if (app === 'mail') showComputerMailInbox();
   if (app === 'building') refreshBuildingGuides();
+  if (app === 'browser' || app === 'transfer') refreshSolarDownload();
+  if (app === 'browser') document.getElementById('computer-browser').scrollTop = 0;
   document.getElementById('computer-window-title').textContent = title;
   (app === 'notes' ? computerNote : app === 'mail' ? computerMailSearch : app === 'calculator' ?
-    document.querySelector('#computer-calculator [data-calculator-key]') : document.getElementById('computer-window-close')).focus();
+    document.querySelector('#computer-calculator [data-calculator-key]') : app === 'browser' && !document.getElementById('computer-solar-page').hidden ?
+    document.getElementById('computer-blog-list-title') : document.getElementById('computer-window-close')).focus({ preventScroll: true });
 }
+
+const computerBlogPosts = [...document.querySelectorAll('[data-blog-article]')];
+function openComputerBlogPost(id) {
+  const selected = computerBlogPosts.find(post => post.dataset.blogArticle === id);
+  if (!usingComputer || transitioning || !floorHasPower(17) || !selected) return;
+  for (const post of computerBlogPosts) post.hidden = post !== selected;
+  for (const button of document.querySelectorAll('[data-blog-post]')) {
+    if (button.dataset.blogPost === id) button.setAttribute('aria-current', 'true');
+    else button.removeAttribute('aria-current');
+  }
+  const heading = selected.querySelector('h2');
+  heading.scrollIntoView({ block: 'start' });
+  heading.focus({ preventScroll: true });
+}
+document.querySelectorAll('[data-blog-post]').forEach(button => {
+  button.addEventListener('click', () => openComputerBlogPost(button.dataset.blogPost));
+});
+document.getElementById('computer-blog-list-back').addEventListener('click', () => {
+  const heading = document.getElementById('computer-blog-list-title');
+  heading.scrollIntoView({ block: 'start' });
+  heading.focus({ preventScroll: true });
+});
+
+function refreshSolarDownload() {
+  const ready = floorHasPower(17);
+  if (computerSolarTask && (transitioning || !usingComputer || !ready ||
+      (computerSolarTask.kind === 'transfer' && (phoneDock || phoneBattery <= 0)))) {
+    clearInterval(computerSolarTask.timer);
+    computerSolarTask = null;
+  }
+  const downloaded = collectedItems.has('solar-app-downloaded');
+  const installed = collectedItems.has('solar-app-installed');
+  const task = computerSolarTask;
+  const percent = task ? Math.floor(task.elapsed / task.duration * 100) : 0;
+  const remaining = task ? Math.ceil((task.duration - task.elapsed) / 1000) : 0;
+  document.getElementById('computer-internet-status').textContent = ready ? '네이버 블로그 연결됨 · 시설관리의 기록' :
+    '17층 전력이 끊겨 와이파이에 연결할 수 없습니다. 태양광 장치에서 17층 전력을 켜 주세요.';
+  document.getElementById('computer-solar-page').hidden = !ready;
+  document.getElementById('computer-solar-download').disabled = !ready || downloaded || installed || Boolean(task);
+  document.getElementById('computer-solar-transfer').disabled = !ready || !downloaded || installed || Boolean(task) || Boolean(phoneDock) || phoneBattery <= 0;
+  for (const kind of ['download', 'transfer']) {
+    const progress = document.getElementById(`computer-solar-${kind}-progress`);
+    progress.hidden = task?.kind !== kind;
+    progress.value = percent;
+  }
+  document.getElementById('computer-solar-status').textContent = task?.kind === 'download' ? `다운로드 중 · ${percent}% · 약 ${remaining}초 남음` :
+    downloaded || installed ? '다운로드 완료. 바탕화면의 ‘파일 전송’ 앱에서 휴대폰으로 전송하세요.' : '첨부파일 다운로드에는 약 5초가 걸립니다.';
+  document.getElementById('computer-transfer-file').hidden = !downloaded && !installed;
+  document.getElementById('computer-transfer-status').textContent = installed ? '전송·설치 및 장치 등록 완료. 휴대폰(P)에서 비상 전력 제어 앱을 여세요.' :
+    task?.kind === 'transfer' ? `전송·설치 중 · ${percent}% · 약 ${remaining}초 남음` :
+    !ready ? '17층에 태양광 전력을 공급한 뒤 전송하세요.' : !downloaded ? '블로그 앱에서 태양광 제어 앱을 먼저 다운로드하세요.' :
+    phoneDock ? '충전함에 맡긴 휴대폰을 가져온 뒤 전송하세요.' : phoneBattery <= 0 ? '휴대폰을 충전한 뒤 전송하세요.' :
+    '전송·설치에는 약 8초가 걸립니다. 완료될 때까지 컴퓨터를 사용해 주세요.';
+}
+
+function startSolarFileTask(kind) {
+  const transfer = kind === 'transfer';
+  if (!usingComputer || transitioning || computerWindow.hidden || document.getElementById(`computer-${transfer ? 'transfer' : 'browser'}`).hidden ||
+      !floorHasPower(17) || (!transfer && document.getElementById('blog-post-solar').hidden) || computerSolarTask || collectedItems.has('solar-app-installed') ||
+      (transfer ? !collectedItems.has('solar-app-downloaded') || phoneDock || phoneBattery <= 0 : collectedItems.has('solar-app-downloaded'))) return;
+  const task = { kind, elapsed: 0, duration: transfer ? 8000 : 5000, started: Date.now(), timer: null };
+  computerSolarTask = task;
+  task.timer = setInterval(() => {
+    task.elapsed = Math.min(Date.now() - task.started, task.duration);
+    refreshSolarDownload();
+    if (computerSolarTask !== task || task.elapsed < task.duration) return;
+    clearInterval(task.timer);
+    computerSolarTask = null;
+    collectedItems.add(transfer ? 'solar-app-installed' : 'solar-app-downloaded');
+    if (transfer) {
+      playGameSound('phone');
+      refreshPhone();
+    }
+    refreshSolarDownload();
+    saveProgress();
+  }, 100);
+  refreshSolarDownload();
+}
+
+document.getElementById('computer-solar-download').addEventListener('click', () => startSolarFileTask('download'));
+document.getElementById('computer-solar-transfer').addEventListener('click', () => startSolarFileTask('transfer'));
 
 function closeComputerApp() {
   computerWindow.hidden = true;
@@ -96,7 +182,7 @@ const computerMailRows = [
   },
   {
     id: 'power', subject: '정전 시 태양광 비상 전력 사용 안내', sender: '시설관리팀', date: '오늘 16:40',
-    body: '정전 중에는 엘리베이터를 운행할 수 없습니다.\n\n옥상 태양광 비상 배전반의 레버를 내려 비상 전력을 켜면 엘리베이터 운행이 복구됩니다. 이후 조명을 공급할 층을 선택해 주세요.\n\n조명은 한 번에 한 층만 공급합니다. 다른 층을 선택하면 이전 층의 전력은 자동으로 차단됩니다.'
+    body: '정전 중에는 엘리베이터를 운행할 수 없습니다.\n\n옥상 태양광 비상 배전반의 레버를 내려 비상 전력을 켜면 엘리베이터 운행이 복구됩니다. 이후 조명을 공급할 층을 선택해 주세요.\n\n조명은 한 번에 두 층까지만 공급합니다. 세 번째 층을 선택하면 가장 먼저 켠 층의 전력은 자동으로 차단됩니다.'
   },
   {
     id: 'charging', subject: '휴대폰 충전 거치대 사용 방법', sender: '시설관리팀', date: '오늘 15:20',
