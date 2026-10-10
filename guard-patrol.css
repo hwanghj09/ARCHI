@@ -6,6 +6,9 @@
 /* 순찰 중에도(move/scan) 휴대폰 충전함 같은 벽 소품보다 항상 앞에 그려야 한다 — 기본 스태킹(DOM 순서)만
    쓰면 뒤늦게 추가되는 충전함 fixture가 로봇 위로 그려져서 로봇이 소품 "안으로" 들어가 보였다. */
 #dynamic-scene .fixture.guard-bot { z-index: 2; }
+/* 붙잡는 동안(grab/caught)은 두 팔이 수호의 허리를 앞에서 감싸야 하므로 수호(7)보다 위로 올린다. 포획은 그 층에 전력이
+   있을 때만 일어나서 정전 어둠 막(5)과 겹칠 일이 없다. 전체 겹침 순서는 index.html의 #darkness 주석 참고. */
+#dynamic-scene .fixture.guard-bot:is([data-patrol="grab"], [data-patrol="caught"]) { z-index: 8; }
 #player #caught-sheet { width: 400%; height: 100%; }
 #player[data-state="caught"] #caught-sheet { display: block; }
 #guard-capture { position: fixed; z-index: 12; bottom: 16px; left: 50%; transform: translateX(-50%); width: min(480px, calc(100vw - 24px)); padding: 14px 18px; background: #111b20f5; border: 2px solid #ad7666; color: #eee5d6; text-align: left; }
