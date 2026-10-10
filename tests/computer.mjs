@@ -153,7 +153,85 @@ try {
   const landscape = await app.boundingBox();
   assert(landscape.width > 200 && landscape.height > 150);
   assert.deepEqual(errors, []);
-  console.log('PASS: computer proximity, fades, nine company documents, search, filters, no badges, mobile reading, memo persistence and input isolation.');
+  await page.close();
+
+  // 17층 전력: 정전 중에는 켜지지 않고, 태양광 비상 전력을 17층에 보내면 다시 쓸 수 있다.
+  const powerPage = await browser.newPage({ viewport: { width: 1280, height: 720 } });
+  const powerErrors = [];
+  powerPage.on('pageerror', error => powerErrors.push(error.message));
+  await powerPage.clock.install();
+  await powerPage.goto(new URL('../index.html', import.meta.url).href);
+  await powerPage.locator('#menu-start').click();
+  if (await powerPage.locator('#menu-new-confirm').isVisible()) await powerPage.locator('#menu-new-confirm').click();
+  await powerPage.locator('#opening-skip').click();
+  await powerPage.clock.pauseAt(new Date(Date.now() + 1000));
+  await powerPage.clock.runFor(100);
+  const desktop = powerPage.locator('#computer');
+  const monitor = powerPage.locator('#office-computer');
+  const hintText = () => powerPage.locator('#interaction-hint').textContent();
+  const statusText = () => powerPage.locator('#interaction-status').textContent();
+  const useComputer = async () => {
+    await powerPage.keyboard.press('e');
+    await finishSceneTransition(powerPage);
+    assert(await desktop.isVisible());
+    assert.equal(await monitor.getAttribute('data-power'), 'on');
+  };
+  const leaveComputer = async () => {
+    await powerPage.keyboard.press('Escape');
+    await finishSceneTransition(powerPage);
+    assert(await desktop.isHidden());
+  };
+  const assertBlocked = async message => {
+    await powerPage.clock.runFor(50);
+    assert.equal(await hintText(), 'E · 전원 없음', `${message}: hint shows no power`);
+    await powerPage.keyboard.press('e');
+    assert.equal(await powerPage.locator('#room-transition').getAttribute('data-phase'), 'idle', `${message}: no fade starts`);
+    assert.equal(await statusText(), '전원이 들어오지 않는다. 전력을 공급해야 한다.');
+    await powerPage.clock.runFor(800);
+    assert(await desktop.isHidden(), `${message}: the computer UI stays closed`);
+    assert.equal(await powerPage.evaluate(() => usingComputer), false);
+    assert.equal(await monitor.getAttribute('data-power'), 'off', `${message}: the monitor stays dark`);
+  };
+
+  assert.equal(await monitor.getAttribute('data-power'), 'off', 'The opening leaves the computer shut down');
+  assert.equal(await hintText(), 'E · 컴퓨터 사용');
+  await useComputer();
+  await leaveComputer();
+  assert.equal(await monitor.getAttribute('data-power'), 'on', 'Leaving the desktop keeps the computer on while powered');
+  await powerPage.evaluate(() => triggerBuildingBlackout());
+  assert.equal(await monitor.getAttribute('data-power'), 'off', 'The outage switches the running computer off');
+  assert.equal(await monitor.getAttribute('aria-label'), '꺼진 컴퓨터');
+  await assertBlocked('Outage');
+  await powerPage.screenshot({ path: '.local/computer-no-power.png' });
+
+  await powerPage.evaluate(() => { powerLever.click(); powerGrid.querySelector('[data-floor="17"]').click(); });
+  assert.equal(await monitor.getAttribute('data-power'), 'off', 'Restored power does not boot the computer by itself');
+  await powerPage.clock.runFor(50);
+  assert.equal(await hintText(), 'E · 컴퓨터 사용', 'Solar power to 17F makes the computer usable again');
+  await useComputer();
+  await desktop.locator('.computer-shortcuts [data-computer-app="files"]').click();
+  await desktop.locator('[data-computer-document="controls"]').click();
+  assert.equal(await powerPage.locator('#computer-document-title').textContent(), '조작 키 안내', 'Clue documents stay readable on solar power');
+  await powerPage.keyboard.press('Escape');
+  await leaveComputer();
+
+  // 태양광이 1개 층이든 2개 층(먼저 켠 층부터 꺼짐)이든 17층 전력이 빠지도록 다른 두 층을 차례로 켠다.
+  await powerPage.evaluate(() => { powerGrid.querySelector('[data-floor="16"]').click(); powerGrid.querySelector('[data-floor="15"]').click(); });
+  assert.equal(await monitor.getAttribute('data-power'), 'off', 'Moving solar power away from 17F switches the computer off');
+  await assertBlocked('Solar on another floor');
+  await powerPage.evaluate(() => powerGrid.querySelector('[data-floor="17"]').click());
+  await powerPage.clock.runFor(50);
+  await useComputer();
+  await leaveComputer();
+  await powerPage.evaluate(() => powerLever.click());
+  await assertBlocked('Lever off');
+
+  // 컴퓨터를 켜 둔 채 저장한 정전 진행도 전력이 없으면 꺼진 상태로 이어진다.
+  await powerPage.evaluate(() => restoreProgress({ ...progressSnapshot(), computerPower: 'on', solarEnabled: false, solarPoweredFloor: null }));
+  assert.equal(await powerPage.evaluate(() => buildingBlackout && room === 'office'), true);
+  await assertBlocked('Restored unpowered save');
+  assert.deepEqual(powerErrors, []);
+  console.log('PASS: computer proximity, fades, nine company documents, search, filters, no badges, mobile reading, memo persistence, input isolation and 17F power gating.');
 } finally {
   await browser.close();
 }

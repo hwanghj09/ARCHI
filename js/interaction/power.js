@@ -45,6 +45,7 @@ function updatePowerState() {
     supply.setAttribute('aria-label', `태양광 임시 전력장치 · ${solarEnabled ? '전원 켜짐' : '전원 꺼짐'}`);
   }
   if (selectingFloor) refreshCabin();
+  refreshOfficeComputerPower();
   refreshPhone();
   if (typeof refreshBuildingGuides === 'function') refreshBuildingGuides();
   if (typeof refreshSolarDownload === 'function') refreshSolarDownload();
