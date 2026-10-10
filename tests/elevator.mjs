@@ -708,12 +708,12 @@ try {
     assert.equal(await header(), corridorHeader);
     await checkCore();
     assert.equal(await page.locator('#dynamic-scene').getAttribute('data-theme'), 'finance');
-    await checkCutawayArt('floor10-corridor.png', 5000);
+    await checkWallsV3('floor10/walls.png');
     assert.deepEqual(await page.locator('#dynamic-scene .floor-room-sign').allTextContents(),
       ['경영관리 사무실', '임원 회의실', '임원실', '화장실'], 'Rooms follow the asset, growing more closed left to right');
     assert.deepEqual(await page.locator('#dynamic-scene .room-door').evaluateAll(els => els.map(el => el.className)),
       ['room-door sprite-door', 'room-door sprite-door', 'room-door sprite-door', 'room-door metal']);
-    await checkSpriteDoors(['door-office.png', 'door-meeting.png', 'door-executive.png']);
+    await checkSpriteDoors(['door-office.png', 'door-meeting.png', 'door-executive.png'], 1280);
     const office = await roomFront(page, '경영관리 사무실');
     const meeting = await roomFront(page, '임원 회의실');
     const executive = await roomFront(page, '임원실');
@@ -723,13 +723,13 @@ try {
     assert(executive.room.x >= 4282 && executive.room.x + executive.room.width <= 4968 && executive.door.x >= 4282 &&
       executive.door.x + executive.door.width <= 4940, 'The executive office sits in the right zone');
     assert.equal(await page.locator('#dynamic-scene .floor-prop').count(), 0, 'All furniture is painted');
-    assert.equal(await spots(), 1, 'A stopped clock in the middle zone');
+    assert.equal(await spots(), 0, 'The stopped clock note in the middle zone is a wall notice, not a painted spot');
     await page.clock.runFor(100);
     const startX = await playerX();
     near(startX, 1858, 'Arrive at elevator 1');
     await walkTo(1795);
     assert.equal(await hint(), 'E · 탑승', 'The meeting room door leaves elevator 1 its whole zone');
-    await inspect(3350, 'E · 멈춘 벽시계 조사', /00:00에 멈춰/);
+    await inspect(3295, 'E · 결산 마감 안내판 조사', /00:00에 멈춰/);
     await walkTo(3084);
     assert.equal(await hint(), 'E · 비상계단 (잠김)');
     await visitRestroom('10F');
@@ -738,7 +738,7 @@ try {
     // 임원실 first: the cabinet is locked, the director's key lies on the pending document, one key turns only one lock.
     const executiveRoom = await enterThroughSpriteDoor('임원실', '10F');
     assert.equal(await worldWidth(page), 1822);
-    assert.equal(executiveRoom.exit.x, 85);
+    assert.equal(executiveRoom.exit.x, 914);
     await checkCutawayArt('floor10-executive-interior.png', 1822);
     assert.equal(await spots(), 4);
     assert.equal(await page.locator('#dynamic-scene .fixture.art-spot[data-requires="f10-key-finance|f10-key-director"]').count(), 1);
@@ -752,7 +752,7 @@ try {
 
     const officeRoom = await enterThroughSpriteDoor('경영관리 사무실', '10F');
     assert.equal(await worldWidth(page), 2678);
-    assert.equal(officeRoom.exit.x, 1125);
+    assert.equal(officeRoom.exit.x, 1531);
     await checkCutawayArt('floor10-office-interior.png', 2678);
     assert.equal(await spots(), 5);
     await inspect(302, 'E · 진열장 조사', /ARCHI 프로젝트 출범식.*B2 서버실 앞/);
@@ -765,7 +765,7 @@ try {
 
     const meetingRoom = await enterThroughSpriteDoor('임원 회의실', '10F');
     assert.equal(await worldWidth(page), 1844);
-    assert.equal(meetingRoom.exit.x, 781);
+    assert.equal(meetingRoom.exit.x, 901);
     await checkCutawayArt('floor10-meeting-interior.png', 1844);
     assert.equal(await spots(), 4);
     await inspect(169, 'E · 블랙아웃 창 조사', /자동 차광/);
@@ -797,10 +797,10 @@ try {
     assert.equal(await header(), corridorHeader);
     await checkCore();
     assert.equal(await page.locator('#dynamic-scene').getAttribute('data-theme'), 'business');
-    await checkCutawayArt('floor09-corridor.png', 5000);
+    await checkWallsV3('floor09/walls.png');
     assert.deepEqual(await page.locator('#dynamic-scene .floor-room-sign').allTextContents(),
       ['사업 업무 공간', '영업·고객 관리 구역', '프로젝트룸', '화장실'], 'Rooms follow the painted areas');
-    await checkSpriteDoors(['door-office.png', 'door-sales.png', 'door-project.png']);
+    await checkSpriteDoors(['door-office.png', 'door-sales.png', 'door-project.png'], 1280);
     const office = await roomFront(page, '사업 업무 공간');
     const sales = await roomFront(page, '영업·고객 관리 구역');
     const project = await roomFront(page, '프로젝트룸');
@@ -809,7 +809,7 @@ try {
     assert(sales.room.x + sales.room.width <= 1790 && sales.door.x + sales.door.width + 28 <= 1790, 'Both left rooms sit in the left zone');
     assert(project.room.x >= 4282 && project.room.x + project.room.width <= 4968 && project.door.x >= 4282 &&
       project.door.x + project.door.width <= 4940, '프로젝트룸 sits in the right zone');
-    assert.equal(await page.locator('#dynamic-scene .fixture.art-spot').count(), 1, 'The brochure rack in the middle zone');
+    assert.equal(await page.locator('#dynamic-scene .fixture.art-spot').count(), 0, 'The brochure notice in the middle zone is a wall notice');
     assert.equal(await page.locator('#dynamic-scene .floor-prop').count(), 1, 'A planter in the middle zone');
     await page.locator('#dynamic-scene .floor-prop img').evaluateAll(images => Promise.all(images.map(img => img.decode())));
     await assertHumanScale();
@@ -818,7 +818,7 @@ try {
     near(startX, 1858, 'Arrive at elevator 1');
     await walkTo(1795);
     assert.equal(await hint(), 'E · 탑승', 'The sales door leaves elevator 1 its whole zone');
-    await inspect(3262, 'E · 브로슈어 거치대 조사', /방문객 ARCHI/);
+    await inspect(3295, 'E · 브로슈어 안내판 조사', /방문객 ARCHI/);
     await walkTo(3084);
     assert.equal(await hint(), 'E · 비상계단 (잠김)');
     await visitRestroom('9F');
@@ -827,7 +827,7 @@ try {
     // The final deck is locked until both earlier clues are found.
     const projectRoom = await enterThroughSpriteDoor('프로젝트룸', '9F');
     assert.equal(await worldWidth(page), 1840);
-    assert.equal(projectRoom.exit.x, 1165);
+    assert.equal(projectRoom.exit.x, 915);
     await checkCutawayArt('floor09-project-interior.png', 1840);
     assert.equal(await page.locator('#dynamic-scene .fixture.art-spot').count(), 5);
     assert.deepEqual(await ready(), ['false']);
@@ -842,7 +842,7 @@ try {
     // The office PC names archi_svc but cannot say who it is yet.
     const officeRoom = await enterThroughSpriteDoor('사업 업무 공간', '9F');
     assert.equal(await worldWidth(page), 2676);
-    assert.equal(officeRoom.exit.x, 2447);
+    assert.equal(officeRoom.exit.x, 1530);
     await checkCutawayArt('floor09-office-interior.png', 2676);
     assert.equal(await page.locator('#dynamic-scene .fixture.art-spot').count(), 4);
     await inspect(172, 'E · 사업 관리 PC 조사', /누구인지 알 수 없다/);
@@ -854,7 +854,7 @@ try {
 
     const salesRoom = await enterThroughSpriteDoor('영업·고객 관리 구역', '9F');
     assert.equal(await worldWidth(page), 1846);
-    assert.equal(salesRoom.exit.x, 1352);
+    assert.equal(salesRoom.exit.x, 902);
     await checkCutawayArt('floor09-sales-interior.png', 1846);
     assert.equal(await page.locator('#dynamic-scene .fixture.art-spot').count(), 5);
     await inspect(121, 'E · 한반도 지도 조사', /한 점으로 모인다/);
@@ -1078,10 +1078,10 @@ try {
     assert.equal(await header(), corridorHeader);
     await checkCore();
     assert.equal(await page.locator('#dynamic-scene').getAttribute('data-theme'), 'qa');
-    await checkCutawayArt('floor08-corridor.png', 5000);
+    await checkWallsV3('floor08/walls.png');
     assert.deepEqual(await page.locator('#dynamic-scene .floor-room-sign').allTextContents(),
       ['QA 시험실', '제품기획실', '공용 제품 회의실', '화장실'], 'Rooms follow the painted areas');
-    await checkSpriteDoors(['door-qa.png', 'door-planning.png', 'door-meeting.png']);
+    await checkSpriteDoors(['door-qa.png', 'door-planning.png', 'door-meeting.png'], 1280);
     const qa = await roomFront(page, 'QA 시험실');
     const planning = await roomFront(page, '제품기획실');
     const meeting = await roomFront(page, '공용 제품 회의실');
@@ -1091,15 +1091,15 @@ try {
       'Both left rooms sit in the left zone');
     assert(meeting.room.x >= 4282 && meeting.room.x + meeting.room.width <= 4968 && meeting.door.x >= 4282 &&
       meeting.door.x + meeting.door.width <= 4940, 'The meeting room sits in the right zone');
-    assert.deepEqual([qa.door.width, planning.door.width, meeting.door.width], [140, 110, 120]);
-    assert.equal(await page.locator('#dynamic-scene .fixture.art-spot').count(), 1, 'The release gate light in the middle zone');
+    assert.deepEqual([qa.door.width, planning.door.width, meeting.door.width], [130, 130, 130]);
+    assert.equal(await page.locator('#dynamic-scene .fixture.art-spot').count(), 0, 'The release gate notice in the middle zone is a wall notice');
     assert.equal(await page.locator('#dynamic-scene .floor-prop').count(), 0);
     await page.clock.runFor(100);
     const startX = await playerX();
     near(startX, 1858, 'Arrive at elevator 1');
     await walkTo(1795);
     assert.equal(await hint(), 'E · 탑승', 'The planning room door leaves elevator 1 its whole zone');
-    await inspect(3308, 'E · 출시 판정 신호등 조사', /품질 게이트.*ARCHI 연동/);
+    await inspect(3295, 'E · 출시 판정 안내판 조사', /품질 게이트.*ARCHI 연동/);
     await walkTo(3084);
     assert.equal(await hint(), 'E · 비상계단 (잠김)');
     await page.keyboard.press('e');
@@ -1112,7 +1112,7 @@ try {
     // Without the order the bench refuses: the camera first (the obvious guess) and the bench alone both start over.
     const qaRoom = await enterThroughSpriteDoor('QA 시험실', '8F');
     assert.equal(await worldWidth(page), 2722);
-    assert.equal(qaRoom.exit.x, 1730);
+    assert.equal(qaRoom.exit.x, 787);
     await checkCutawayArt('floor08-qa-interior.png', 2722);
     assert.equal(await page.locator('#dynamic-scene .fixture.art-spot').count(), 5);
     await inspect(455, 'E · 결함 현황판 조사', /47장.*새벽 3시.*SYSTEM.*회의실 화이트보드/);
@@ -1123,7 +1123,7 @@ try {
 
     const meetingRoom = await enterThroughSpriteDoor('공용 제품 회의실', '8F');
     assert.equal(await worldWidth(page), 1826);
-    assert.equal(meetingRoom.exit.x, 1258);
+    assert.equal(meetingRoom.exit.x, 907);
     await checkCutawayArt('floor08-meeting-interior.png', 1826);
     assert.equal(await page.locator('#dynamic-scene .fixture.art-spot').count(), 4);
     await inspect(120, 'E · 우선순위 화이트보드 조사', /① 시각 ② 재실 인원 ③ 관찰 카메라/);
@@ -1156,7 +1156,7 @@ try {
 
     const planningRoom = await enterThroughSpriteDoor('제품기획실', '8F');
     assert.equal(await worldWidth(page), 1856);
-    assert.equal(planningRoom.exit.x, 264);
+    assert.equal(planningRoom.exit.x, 195);
     await checkCutawayArt('floor08-planning-interior.png', 1856);
     assert.equal(await page.locator('#dynamic-scene .fixture.art-spot').count(), 4);
     await inspect(970, 'E · 기획 책상 조사', /QA 의견 첨부/);

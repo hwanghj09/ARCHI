@@ -1,9 +1,10 @@
 // 9층: FLOOR9_LAYOUT(복도)과 FLOOR9_ROOMS(방 내부). 등록은 registry.js에서 한다.
 // 9층 TmaxTibero 사업본부: 사용자가 준 단면 에셋(assets/background/floor09/floor09-business.png, PROMPT.md)이 배경이다. 에셋은
-// 플레이어 162px = 175cm 기준이라 1:1로 쓰고(원본 바닥선 y=438 → 월드 y=570, top=132), build.py가 복도 1장(방 앞은 유리 너머로
-// 방 그림을 보인다), 방 내부 3장(방 그림 전체를 반복 칸으로 넓힘), 문 3장(닫힘|열림)을 만든다.
+// 플레이어 162px = 175cm 기준이라 1:1로 쓰고(원본 바닥선 y=438 → 월드 y=570, top=132), build.py가 방 내부 3장(방 그림 전체를
+// 반복 칸으로 넓힘)을 만든다. 복도 벽은 assets/background/wall 모듈로 합성한 한 장(walls-layout.json → walls.png)이고 문은
+// assets/objects/floor09/door-*.png다(archi-floor-walls, archi-floor-doors).
 // 건물 코어가 모든 층에서 같은 자리라 사업 업무 공간·영업·고객 관리 구역은 코어 왼쪽, 프로젝트룸은 화장실 오른쪽에 둔다. 복도 문은
-// 그림 속 단서 물건(감사패 진열장·지도·현황판·라이선스 대장·간트 보드)을 가리지 않는 자리(화분·기둥, 영업석, 빈 벽)에 섰다.
+// 그림 속 단서 물건(감사패 진열장·지도·현황판·라이선스 대장·간트 보드)을 가리지 않게, 안쪽 출구가 단서에서 56px 이상 떨어지는 자리에 섰다.
 // 방 안 폭은 복도 전면 폭의 약 2.68배(1000/690/680 → 2676/1846/1840). 조사 지점은 그림 속 물건 위에 투명하게 겹친 설비('art-spot').
 // 장치는 방을 건너는 단서 사슬(requires 목록 + partialMessage): 영업·고객 관리 구역 캐비닛 위 라이선스 대장의 사본(f9-approval-copy,
 // archi_svc는 ARCHI가 스스로 만든 계정)이 있어야 사업 업무 공간 PC에서 archi_svc의 새벽 내려받기 기록(f9-access-log)을 읽을 수
@@ -18,18 +19,21 @@ const floor9Spot = (name, [x0, x1], [y0, y1], extra) => ({ name, style: 'art-spo
 const floor9Door = name => `assets/objects/floor09/door-${name}.png`;
 const FLOOR9_LAYOUT = {
   header: '9F · TmaxTibero 사업본부', background: FLOOR9_BACKGROUND, theme: 'business',
-  backgroundWallsOnly: true, backgroundImage: floor9Art('corridor', 5000),
+  // 복도 벽: 사업 업무 공간 wall-glass(열린 사무실), 영업·고객 관리 구역 wall-glass-mixed, 프로젝트룸 wall-frosted. 문은 방 벽에 맞춘 유리문.
+  backgroundWallsOnly: true, backgroundImage: { src: 'assets/background/floor09/walls.png', height: 752, top: 0 },
   rooms: [
     { name: '사업 업무 공간', x: 40, width: 1000, style: 'painted', target: 'f9-office',
-      doorX: 880, doorWidth: 140, doorY: 360, doorSprite: floor9Door('office') },
+      doorX: 520, doorWidth: 240, doorY: 250, doorSprite: floor9Door('office') },
     { name: '영업·고객 관리 구역', x: 1080, width: 690, style: 'painted', target: 'f9-sales',
-      doorX: 1538, doorWidth: 110, doorY: 360, doorSprite: floor9Door('sales') },
+      doorX: 1375, doorWidth: 130, doorY: 250, doorSprite: floor9Door('sales') },
     { name: '프로젝트룸', x: 4282, width: 680, style: 'painted', target: 'f9-project',
-      doorX: 4665, doorWidth: 120, doorY: 360, doorSprite: floor9Door('project') },
+      doorX: 4577, doorWidth: 130, doorY: 250, doorSprite: floor9Door('project') },
   ],
+  // 가운데 구역의 브로슈어 거치대는 예전 복도 그림에 그려져 있었다. 흰 벽에는 같은 내용을 담은 안내판(wall-notice)으로 옮겼다.
   fixtures: [
-    floor9Spot('브로슈어 거치대', [3240, 3284], [216, 294],
-      '고객사 브로슈어가 꽂힌 거치대. 맨 앞 장: "Tibero × ARCHI 연동 시연 · 고객사 5곳 초청." 뒷면에 방문객 명부 스탬프가 찍혀 있다: "03:00 · 방문객 ARCHI · 방문 부서 프로젝트룸."'),
+    { name: '브로슈어 안내판', x: 3200, y: 270, width: 190, height: 140, style: 'wall-notice',
+      lines: ['Tibero × ARCHI', '연동 시연 안내'],
+      message: '고객사 브로슈어가 붙은 안내판. 맨 앞 장: "Tibero × ARCHI 연동 시연 · 고객사 5곳 초청." 뒷면에 방문객 명부 스탬프가 찍혀 있다: "03:00 · 방문객 ARCHI · 방문 부서 프로젝트룸."' },
   ],
   props: [
     { file: 'large-planter', size: [256, 512], worldWidth: 78, x: 3480 },

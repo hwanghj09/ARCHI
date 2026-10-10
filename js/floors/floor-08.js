@@ -1,7 +1,8 @@
 // 8층: FLOOR8_LAYOUT(복도)과 FLOOR8_ROOMS(방 내부). 등록은 registry.js에서 한다.
 // 8층 TmaxTibero QA실·제품기획실(층별 안내 그대로, qa 테마): 사용자가 준 단면 에셋(assets/background/floor08/floor08-qa-planning.png,
 // PROMPT.md)이 배경이다. 에셋은 플레이어 162px = 175cm 기준이라 1:1로 쓰고(원본 바닥선 y=438 → 월드 y=570, top=132), build.py가
-// 복도 1장(방 앞은 유리 너머로 방 그림을 보인다), 방 내부 3장(방 그림 전체를 반복 칸으로 넓힘), 문 3장(닫힘|열림)을 만든다.
+// 방 내부 3장(방 그림 전체를 반복 칸으로 넓힘)을 만든다. 복도 벽은 assets/background/wall 모듈로 합성한 한 장(walls-layout.json → walls.png)이고
+// 문은 assets/objects/floor08/door-*.png다(archi-floor-walls, archi-floor-doors).
 // 건물 코어가 모든 층에서 같은 자리라 QA 시험실·제품기획실은 코어 왼쪽, 공용 제품 회의실은 화장실 오른쪽에 둔다. 가운데 구역에는
 // 꺼진 출시 판정 신호등 하나(그림). 방 안 폭은 복도 전면 폭의 약 2.7배(1000/690/680 → 2722/1856/1826).
 // 조사 지점은 그림 속 물건 위에 투명하게 겹친 설비('art-spot').
@@ -24,18 +25,21 @@ const floor8Spot = (name, [x0, x1], [y0, y1], extra) => ({ name, style: 'art-spo
 const floor8Door = name => `assets/objects/floor08/door-${name}.png`;
 const FLOOR8_LAYOUT = {
   header: '8F · QA실 · 제품기획실', background: FLOOR8_BACKGROUND, theme: 'qa',
-  backgroundWallsOnly: true, backgroundImage: floor8Art('corridor', 5000),
+  // 복도 벽: QA 시험실 wall-concrete(불투명 흰 벽), 제품기획실 wall-glass-mixed, 공용 제품 회의실 wall-frosted. 문은 방 벽에 맞춘 문.
+  backgroundWallsOnly: true, backgroundImage: { src: 'assets/background/floor08/walls.png', height: 752, top: 0 },
   rooms: [
     { name: 'QA 시험실', x: 40, width: 1000, style: 'painted', target: 'f8-qa',
-      doorX: 620, doorWidth: 140, doorY: 360, doorSprite: floor8Door('qa') },
+      doorX: 300, doorWidth: 130, doorY: 250, doorSprite: floor8Door('qa') },
     { name: '제품기획실', x: 1080, width: 690, style: 'painted', target: 'f8-planning',
-      doorX: 1160, doorWidth: 110, doorY: 360, doorSprite: floor8Door('planning') },
+      doorX: 1135, doorWidth: 130, doorY: 250, doorSprite: floor8Door('planning') },
     { name: '공용 제품 회의실', x: 4282, width: 680, style: 'painted', target: 'f8-meeting',
-      doorX: 4700, doorWidth: 120, doorY: 360, doorSprite: floor8Door('meeting') },
+      doorX: 4577, doorWidth: 130, doorY: 250, doorSprite: floor8Door('meeting') },
   ],
+  // 가운데 구역의 출시 판정 신호등은 예전 복도 그림에 그려져 있었다. 흰 벽에는 같은 내용을 담은 안내판(wall-notice)으로 옮겼다.
   fixtures: [
-    floor8Spot('출시 판정 신호등', [3296, 3320], [250, 438],
-      '꺼진 출시 판정 신호등. 받침 라벨: "Tibero AI Edition 품질 게이트 · 판정 ARCHI 연동." 정전 직전까지 빨간 칸만 켜져 있었다고 QA 일지에 적혀 있다.'),
+    { name: '출시 판정 안내판', x: 3200, y: 270, width: 190, height: 140, style: 'wall-notice',
+      lines: ['품질 게이트', '출시 판정 · ARCHI 연동'],
+      message: '출시 판정 안내판. 아래 라벨: "Tibero AI Edition 품질 게이트 · 판정 ARCHI 연동." 판정 신호등은 정전 직전까지 빨간 칸만 켜져 있었다고 QA 일지에 적혀 있다.' },
   ],
 };
 const floor8Room = (id, name, art, width, fixtures, extra = {}) => ({ id, name, width, background: FLOOR8_BACKGROUND,

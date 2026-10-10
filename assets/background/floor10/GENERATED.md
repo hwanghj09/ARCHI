@@ -4,6 +4,22 @@
 - 배율 1:1(원본 바닥선 y=438 → 월드 y=570, `top: 132`, 높이 556).
 - `build.py`(저장소 루트에서 `python assets/background/floor10/build.py`)가 `assets/background/cutaway_kit.py`로 만든다.
 
+## 복도 벽·문 (2026-10-10 파일 정리 기준, 이 절이 최신)
+
+- 복도: `walls.png`(5000×752, top 0, 바닥선 570) = `assets/background/wall` 모듈을 `walls-layout.json`(`"modules": "../wall"`)으로 합성.
+  다시 만들기: `python assets/background/wall/compose_floor.py assets/background/floor10/walls-layout.json assets/background/floor10/walls.png`.
+- 유리 구간 뒤 그림(`behind-*.png`)은 이 층 단면 에셋 `floor10-management.png`에서 `crop_behind.py`로 자른 것(behind_floor_y 438).
+- 문: 게임 그림 `assets/objects/floor10/door-*.png`(닫힘|열림), 원본 `assets/objects/floor10/source/door-*.png`.
+  유리문은 `flush_door_base.py --no-kick` → `make_door_sprite.py`(자동문은 `--double --top 0.075`), 방 테마 문은 `flush_door_base.py` → `make_door_sprite.py`. 모두 y=250, 높이 320.
+- `build.py`는 방 내부만 만든다(복도 그림과 코드로 그린 문은 정리하면서 지웠다. 아래 표의 `floor10-corridor.png` 줄은 이전 기록).
+- 가운데 구역의 복도 그림 속 물건은 흰 벽 안내판(`wall-notice`)으로 옮겼다.
+
+| 방(월드 x·폭) | 벽 모듈 | 유리 너머(behind) | 문 |
+| --- | --- | --- | --- |
+| 경영관리 사무실 (40·1000) | wall-glass-mixed | `behind-a.png` (원본 x 330) | `door-office.png` ← 혼합 유리 자동문, doorX 520, 폭 240 |
+| 임원 회의실 (1080·690) | wall-frosted | `behind-b.png` (원본 x 1590) | `door-meeting.png` ← 불투명 유리 수동문, doorX 1375, 폭 130 |
+| 임원실 (4282·680) | wall-concrete | — | `door-executive.png` ← 2F Harmony Hall 원목문 재사용, doorX 4580, 폭 130 |
+
 | 파일 | 원본 영역 | 월드 |
 | --- | --- | --- |
 | floor10-corridor.png | 끝벽 48..78, 경영관리 사무실 앞 78..96 + 진열장~유리 칸막이 320..1300(캐비닛 셋은 뺌, 유리), 임원 회의실 앞 1590..2280(유리), 임원실 앞 원목 칸막이 2280..2304 + 2304..2896 + 책장 오른쪽 3044..3122 + 끝벽 3128..3152(유리), 나머지는 원본 슬래브·회의실 옥색 벽(1305..1320) 색·바닥 슬래브로 이은 복도 벽. 비상구 유도등(1225..1268)을 계단 문 위에, 벽시계(1108..1136)를 가운데 구역(월드 3336, y=340)에 | 0..5000 |

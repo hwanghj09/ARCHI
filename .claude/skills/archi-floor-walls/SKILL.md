@@ -84,7 +84,7 @@ wall gets a glass door of the same glass (archi-floor-doors).
    and look at the PNGs; every line's script errors must be `[]`. Then
    `python .claude/skills/archi-asset-files/scripts/used_assets.py NN` must show no MISSING.
 9. Record the modules per room and the behind crops (with source x) in the floor's `GENERATED.md`; keep `README.md`
-   and `다음작업.md` in step. No unused files left behind (archi-asset-files).
+   and the current `N차 작업.md` (archi-work-log) in step. No unused files left behind (archi-asset-files).
 
 ## Notes
 
@@ -92,4 +92,4 @@ wall gets a glass door of the same glass (archi-floor-doors).
   near ~160 in game. Do not add extra darkening or tinting per floor.
 - Room segments narrower than a module are cropped by `compose_floor.py`; very narrow rooms (< 200px) look better as
   `wall-concrete`.
-- 2F..6F use these modules now; 8F..10F still have their cutaway corridors.
+- 2F..6F and 8F..10F use these modules now.

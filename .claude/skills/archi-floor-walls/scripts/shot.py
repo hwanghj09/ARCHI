@@ -25,6 +25,11 @@ html = html.replace('<script src="js/main.js" defer></script>',
 open('shot-probe.html', 'w', encoding='utf8').write(html)
 open('shot-probe.js', 'w', encoding='utf8').write('''const [target, x] = decodeURIComponent(location.hash.slice(1)).split('@');
 const isRoom = /-/.test(target);
+// 메인 메뉴·오프닝이 화면을 덮고 있으면 장면이 보이지 않으니 걷어 낸다.
+document.body.dataset.mainMenu = 'false';
+const menu = document.getElementById('main-menu'); if (menu) menu.hidden = true;
+try { mainMenuActive = false; } catch (e) {}
+delete world.dataset.opening;
 performFloorChange(target, isRoom ? null : 0, isRoom ? 'exit' : null);
 if (x) { Body.setPosition(body, { x: Number(x), y: floorY - 81 }); cameraX = Math.max(0, Math.min(worldWidth - viewWidth, Number(x) - viewWidth / 2)); }
 updateInteraction(); render();

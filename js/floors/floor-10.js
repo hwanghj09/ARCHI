@@ -1,9 +1,10 @@
 // 10층: FLOOR10_LAYOUT(복도)과 FLOOR10_ROOMS(방 내부). 등록은 registry.js에서 한다.
 // 10층 TmaxSoft·TmaxTibero 경영관리본부(finance 테마): 사용자가 준 단면 에셋(assets/background/floor10/floor10-management.png,
 // PROMPT.md)이 배경이다. 에셋은 플레이어 162px = 175cm 기준이라 1:1로 쓰고(원본 바닥선 y=438 → 월드 y=570, top=132), build.py가
-// 복도 1장(방 앞은 유리 너머로 방 그림을 보인다), 방 내부 3장(방 그림 전체를 반복 칸으로 넓힘), 문 3장(닫힘|열림)을 만든다.
+// 방 내부 3장(방 그림 전체를 반복 칸으로 넓힘)을 만든다. 복도 벽은 assets/background/wall 모듈로 합성한 한 장(walls-layout.json → walls.png)이고
+// 문은 assets/objects/floor10/door-*.png다(archi-floor-walls, archi-floor-doors).
 // 건물 코어가 모든 층에서 같은 자리라 경영관리 사무실·임원 회의실은 코어 왼쪽, 임원실은 화장실 오른쪽에 둔다. 왼쪽에서 오른쪽으로
-// 갈수록 공간이 닫히고 조용해진다(유리 칸막이 → 원목 칸막이). 방 안 폭은 복도 전면 폭의 약 2.68배(1000/690/680 → 2678/1844/1822).
+// 갈수록 공간이 닫히고 조용해진다(혼합 유리 → 불투명 유리 → 불투명 흰 벽과 원목문). 방 안 폭은 복도 전면 폭의 약 2.68배(1000/690/680 → 2678/1844/1822).
 // 조사 지점은 그림 속 물건 위에 투명하게 겹친 설비('art-spot').
 // 장치는 이중 잠금 서류함: 임원실 서류함(그림 속 황동 열쇠 구멍 두 개)은 requires 두 개라 경영관리 사무실 재무팀장 서랍의 열쇠
 // (f10-key-finance)와 임원 책상 결재 대기 서류 위의 열쇠(f10-key-director)를 둘 다 챙겨야 열린다(하나만 있으면 partialMessage).
@@ -19,18 +20,21 @@ const floor10Spot = (name, [x0, x1], [y0, y1], extra) => ({ name, style: 'art-sp
   y: FLOOR10_ART_TOP + y0, height: y1 - y0, ...(typeof extra === 'string' ? { message: extra } : extra) });
 const FLOOR10_LAYOUT = {
   header: '10F · 경영관리본부', background: FLOOR10_BACKGROUND, theme: 'finance',
-  backgroundWallsOnly: true, backgroundImage: floor10Art('corridor', 5000),
+  // 복도 벽: 경영관리 사무실 wall-glass-mixed, 임원 회의실 wall-frosted, 임원실 wall-concrete(불투명 흰 벽). 문은 방 벽에 맞춘 문(임원실은 원목문).
+  backgroundWallsOnly: true, backgroundImage: { src: 'assets/background/floor10/walls.png', height: 752, top: 0 },
   rooms: [
     { name: '경영관리 사무실', x: 40, width: 1000, style: 'painted', target: 'f10-office',
-      doorX: 420, doorWidth: 140, doorY: 360, doorSprite: 'assets/objects/floor10/door-office.png' },
+      doorX: 520, doorWidth: 240, doorY: 250, doorSprite: 'assets/objects/floor10/door-office.png' },
     { name: '임원 회의실', x: 1080, width: 690, style: 'painted', target: 'f10-meeting',
-      doorX: 1340, doorWidth: 110, doorY: 360, doorSprite: 'assets/objects/floor10/door-meeting.png' },
+      doorX: 1375, doorWidth: 130, doorY: 250, doorSprite: 'assets/objects/floor10/door-meeting.png' },
     { name: '임원실', x: 4282, width: 680, style: 'painted', target: 'f10-executive',
-      doorX: 4300, doorWidth: 120, doorY: 360, doorSprite: 'assets/objects/floor10/door-executive.png' },
+      doorX: 4580, doorWidth: 130, doorY: 250, doorSprite: 'assets/objects/floor10/door-executive.png' },
   ],
+  // 가운데 구역의 멈춘 벽시계는 예전 복도 그림에 그려져 있었다. 흰 벽에는 같은 내용을 담은 안내판(wall-notice)으로 옮겼다.
   fixtures: [
-    floor10Spot('멈춘 벽시계', [3330, 3370], [208, 232],
-      '사무실에서 떼어 온 벽시계가 00:00에 멈춰 있다. 뒷면 스티커: "경영관리본부 · 월말 결산 마감 01:00." 마감까지 아무도 남지 않았다.'),
+    { name: '결산 마감 안내판', x: 3200, y: 270, width: 190, height: 140, style: 'wall-notice',
+      lines: ['경영관리본부', '월말 결산 마감 01:00'],
+      message: '사무실에서 떼어 온 벽시계가 안내판 옆에 00:00에 멈춰 있다. 안내판 스티커: "경영관리본부 · 월말 결산 마감 01:00." 마감까지 아무도 남지 않았다.' },
   ],
 };
 const floor10Room = (id, name, art, width, fixtures, extra = {}) => ({ id, name, width, background: FLOOR10_BACKGROUND,

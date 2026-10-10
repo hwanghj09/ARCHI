@@ -527,11 +527,11 @@
       #dynamic-scene .solid.movable.ramen-box { filter: brightness(.88) saturate(.92); }
       #dynamic-scene .solid.movable.ramen-box::before { content: ''; position: absolute; left: -5%; bottom: -5px; width: 110%; height: 22%; border-radius: 50%; background: radial-gradient(ellipse at center, #000000b3 0, #0000006b 55%, transparent 74%); filter: blur(1px); pointer-events: none; }
       #dynamic-scene .solid.movable.ramen-box::after { content: ''; position: absolute; inset: 0; background: url(assets/objects/floor16/ramen-box.png) 0 0 / 100% 100% no-repeat; pointer-events: none; }
-      /* walls-v3 흰색 키트 복도(2~6층, archi-floor-walls): 이름표는 천장 띠(y=48..96) 바로 아래, 화장실 이름표는 문 위 가운데,
+      /* walls-v3 흰색 키트 복도(2~6층·8~10층, archi-floor-walls): 이름표는 천장 띠(y=48..96) 바로 아래, 화장실 이름표는 문 위 가운데,
          화장실 문은 16층 화장실 문 그림. 흰 벽에 붙는 안내판(wall-notice)은 짙은 판에 글줄. */
-      #dynamic-scene:is([data-theme="concert"], [data-theme="gym"], [data-theme="rnd"], [data-theme="archive"], [data-theme="oncall"])[data-art="walls"] .floor-room:is(.painted, .restroom) .floor-room-sign { top: -22px; }
-      #dynamic-scene:is([data-theme="concert"], [data-theme="gym"], [data-theme="rnd"], [data-theme="archive"], [data-theme="oncall"])[data-art="walls"] .floor-room.restroom .floor-room-sign { left: 128.5px; }
-      #dynamic-scene:is([data-theme="concert"], [data-theme="gym"], [data-theme="rnd"], [data-theme="archive"], [data-theme="oncall"])[data-art="walls"] .room-door.metal { border: 0; box-shadow: none; background: #131618 url('assets/objects/floor16/restroom-door.png') 0 0 / 100% 100% no-repeat; }
+      #dynamic-scene:is([data-theme="concert"], [data-theme="gym"], [data-theme="rnd"], [data-theme="archive"], [data-theme="oncall"], [data-theme="qa"], [data-theme="business"], [data-theme="finance"])[data-art="walls"] .floor-room:is(.painted, .restroom) .floor-room-sign { top: -22px; }
+      #dynamic-scene:is([data-theme="concert"], [data-theme="gym"], [data-theme="rnd"], [data-theme="archive"], [data-theme="oncall"], [data-theme="qa"], [data-theme="business"], [data-theme="finance"])[data-art="walls"] .floor-room.restroom .floor-room-sign { left: 128.5px; }
+      #dynamic-scene:is([data-theme="concert"], [data-theme="gym"], [data-theme="rnd"], [data-theme="archive"], [data-theme="oncall"], [data-theme="qa"], [data-theme="business"], [data-theme="finance"])[data-art="walls"] .room-door.metal { border: 0; box-shadow: none; background: #131618 url('assets/objects/floor16/restroom-door.png') 0 0 / 100% 100% no-repeat; }
       #dynamic-scene .fixture.harmony-poster { background: url('assets/objects/floor02/harmony-hall-poster.png') 0 0 / 100% 100% no-repeat; }
       #dynamic-scene .fixture.wall-notice { padding: 12px 10px; border: 4px solid #3a4246; background: linear-gradient(#1d2326, #15191b); color: #c9d2d0; font: bold 12px/1.9 Arial, sans-serif; text-align: center; box-shadow: 0 3px 6px #0006; }
       #dynamic-scene .fixture.wall-notice span:first-child { margin-bottom: 6px; color: #f0c870; font-size: 14px; }
