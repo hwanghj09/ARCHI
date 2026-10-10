@@ -93,7 +93,11 @@ function updateGuardPatrol(delta) {
   } else if (delta > 0) {
     const dx = body.position.x - robot.x;
     const sameLevel = Math.abs(body.bounds.max.y - floorY) < 180;
-    const seesPlayer = sameLevel && (Math.abs(dx) < 130 || (dx * robot.facing > 0 && Math.abs(dx) < 720));
+    // 순찰 구간 밖(비상계단 왼쪽, left 미만)은 로봇의 담당 구역이 아니다 — 센서 사정거리가 거기까지
+    // 닿아도 감지하지 않는다. 그 구역은 애초에 로봇이 순찰하며 들어가지 않는 곳이라, 거기 서 있는
+    // 수호를 감지해서 쫓아오는 것은 담당 구역 밖 추격이라 부당하게 느껴진다.
+    const inBeat = body.position.x >= left;
+    const seesPlayer = sameLevel && inBeat && (Math.abs(dx) < 130 || (dx * robot.facing > 0 && Math.abs(dx) < 720));
     if ((robot.mode === 'patrol' || robot.mode === 'dock') && seesPlayer) {
       robot.mode = 'chase'; robot.lostTime = 0; robot.chaseOriginX = robot.x; robot.spottedX = body.position.x;
       playGameSound('robot-alert', { x: robot.x });
