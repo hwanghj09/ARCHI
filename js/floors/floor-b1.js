@@ -82,7 +82,13 @@ const B1_ROOMS = interiorRooms(-1, [
         message: '모니터 벽이 켜져 있다. 한 칸에 이 관제실이 비친다. 화면 속 수호가 모니터를 올려다보고 있다. 다른 칸들은 17층부터 수호가 지나온 층을 차례로 되감는다. 구석 글씨: "추적 대상 1 · 정수호". B2 칸만 "권한 없음"으로 검다.',
         surface: 'screen',
         writing: [{ text: '추적 대상 1 · 정수호', align: 'right' }, { as: 'rule' }, { as: 'field', label: 'B2', text: '권한 없음' }],
-        caption: '한 칸에 이 관제실이 비친다. 화면 속 수호가 모니터를 올려다보고 있다. 다른 칸들은 17층부터 수호가 지나온 층을 차례로 되감는다. B2 칸만 검다.' },
+        caption: '한 칸에 이 관제실이 비친다. 화면 속 수호가 모니터를 올려다보고 있다. 다른 칸들은 17층부터 수호가 지나온 층을 차례로 되감는다. B2 칸만 검다.',
+        // 그림 대기: assets/objects/b1/cctv-wall-screen.png(생성 안내는 같은 폴더의 cctv-wall-screen.md)가 들어오면 위 caption 줄을
+        // 지우고 아래 두 줄의 주석을 푼다. image가 writing보다 우선하고(writing.js), 그림에는 글자가 없어서 단서 "추적 대상 1 · 정수호"를
+        // caption으로 옮긴다. writing은 그림이 없을 때 쓰던 화면으로 남긴다. 파일 없이 주석을 풀면 조사창에 깨진 그림이 뜬다.
+        // image: 'assets/objects/b1/cctv-wall-screen.png',
+        // caption: '한 칸에 이 관제실이 비친다. 화면 속 수호가 모니터를 올려다보고 있다. 구석 글씨: "추적 대상 1 · 정수호". 다른 칸들은 17층부터 수호가 지나온 층을 되감는다. B2 칸만 검다.',
+      },
     ],
     props: [
       { file: 'bms-control-console', size: [512, 256], worldWidth: 261, x: 400, name: 'BMS 제어 콘솔',

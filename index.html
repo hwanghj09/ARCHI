@@ -368,8 +368,8 @@
       #dynamic-scene .fixture.directory-board { padding: 14px 16px; border: 6px solid #b09358; background: #100e0b; color: #d8caa8; font: 11px/1.45 Arial, sans-serif; letter-spacing: -.2px; }
       #dynamic-scene .fixture.directory-board span:nth-child(5), #dynamic-scene .fixture.directory-board span:nth-child(9), #dynamic-scene .fixture.directory-board span:nth-child(15) { color: #f6e6bc; }
       /* 1층 corridor.png에 이 안내판 금장 벽감이 이미 그려져 있어서, art 모드에서는 CSS 테두리/배경을
-         지우고 글자(span)만 그 위에 얹는다. */
-      #dynamic-scene[data-art="true"] .fixture.directory-board { border: 0; background: none; padding: 10px 14px; }
+         지우고 글자(span)만 그 위에 얹는다. 줄 묶음은 벽감 안쪽 위아래 가운데에 둔다. */
+      #dynamic-scene[data-art="true"] .fixture.directory-board { display: flex; flex-direction: column; justify-content: center; border: 0; background: none; padding: 10px 14px; }
       #dynamic-scene .fixture.speed-gates { background: linear-gradient(#5a5448, #5a5448) 0 0 / 22px 100% no-repeat, linear-gradient(#5a5448, #5a5448) 100% 0 / 22px 100% no-repeat, linear-gradient(#5a5448, #5a5448) 50% 0 / 22px 100% no-repeat, linear-gradient(transparent 30%, #8a847655 30% 40%, transparent 40%); }
       #dynamic-scene .fixture.speed-gates::before { content: ''; position: absolute; top: 8px; left: 3px; width: 16px; height: 10px; background: #3a1614; }
       /* 1층 corridor.png에 스피드 게이트가 이미 그려져 있어서, art 모드에서는 이 CSS 그림을 숨긴다.

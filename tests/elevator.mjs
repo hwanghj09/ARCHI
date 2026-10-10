@@ -1438,10 +1438,25 @@ try {
       [['fixture directory-board', '층별 안내판'], ['fixture speed-gates', '스피드 게이트'], ['fixture guard-bot', '경비 로봇'],
         ['fixture revolving-door', '정문'], ['fixture phone-charger', '비상 휴대폰 충전함 · 전력 없음']]);
     const directory = await page.locator('#dynamic-scene .fixture.directory-board span').allTextContents();
-    assert.equal(directory.length, 20, 'The directory lists 17F to B3');
-    for (const line of ['12F  TmaxSoft 기술본부 · ARCHI 개발팀', '7F  Lounge / VIP Room · AI 테스트·검증실', 'B2  AI 서버실 서버실']) {
-      assert(directory.includes(line), `The directory shows "${line}"`);
-    }
+    assert.equal(directory.length, 15, 'The directory lists 17F to B2 with minor floors grouped as "···"');
+    assert.equal(directory[0], '17F  TmaxSoft 사업테스트본부');
+    assert.equal(directory.at(-1), 'B2  AI 서버실', 'The game ends at B2, so the directory has no B3 line');
+    // The nth-child rules in index.html highlight exactly the three clue lines.
+    assert.deepEqual(await page.locator('#dynamic-scene .fixture.directory-board span').evaluateAll(spans =>
+      spans.filter(span => getComputedStyle(span).color === 'rgb(246, 230, 188)').map(span => span.textContent)),
+    ['12F  TmaxSoft 기술본부 · ARCHI 개발팀', '7F  Lounge / VIP Room · AI 테스트·검증실', 'B2  AI 서버실']);
+    // corridor.png paints the gold frame; its inner edge is x 1323..1644, y 229..505. Every line stays inside it.
+    assert.deepEqual(await page.locator('#dynamic-scene .fixture.directory-board').evaluate(board => {
+      const frame = board.getBoundingClientRect();
+      const inside = [...board.children].every(span => {
+        const range = document.createRange();
+        range.selectNodeContents(span);
+        const text = range.getBoundingClientRect();
+        return text.top >= frame.top && text.bottom <= frame.bottom && text.left >= frame.left && text.right <= frame.right;
+      });
+      return { box: ['left', 'top', 'width', 'height'].map(key => parseFloat(board.style[key])),
+        fits: inside && board.scrollHeight <= board.clientHeight && board.scrollWidth <= board.clientWidth };
+    }), { box: [1323, 229, 321, 276], fits: true }, 'The directory text sits inside the painted gold frame');
     assert.equal(await page.locator('#dynamic-scene .floor-prop').count(), 3, 'Info desk and planters');
     await page.locator('#dynamic-scene .floor-prop img').evaluateAll(images => Promise.all(images.map(img => img.decode())));
     await assertHumanScale();
