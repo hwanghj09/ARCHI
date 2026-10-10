@@ -38,7 +38,7 @@ function openPhoneApp(app) {
   phonePanel.querySelector('.phone-screen').scrollTop = 0;
   if (app === 'building') refreshBuildingGuides();
   if (app === 'solar') {
-    document.getElementById('phone-solar-floor').value = String(solarPoweredFloor || 17);
+    document.getElementById('phone-solar-floor').value = String(solarPoweredFloors[0] || 17);
     refreshSolarApp();
   }
   playGameSound('phone');

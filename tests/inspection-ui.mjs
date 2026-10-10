@@ -30,7 +30,7 @@ try {
   await page.clock.pauseAt(new Date(Date.now() + 1000));
   await page.evaluate(async () => {
     const image = new Image(); image.src = 'assets/ui/dialogue-frame.png'; await image.decode();
-    solarPoweredFloor = 16;
+    solarPoweredFloors = [16];
     performFloorChange('f16-cafe', 0, 'exit');
     Body.setPosition(body, { x: 950, y: floorY - 81 });
     Body.setVelocity(body, { x: 0, y: 0 }); grounded = true;

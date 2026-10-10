@@ -57,7 +57,7 @@ try {
   });
   assert(!(await events()).includes('blackout') && !(await events()).includes('charger'), 'Repeated outages and unpowered chargers stay silent');
   await page.evaluate(() => {
-    solarEnabled = true; solarPoweredFloor = 17; updatePowerState();
+    solarEnabled = true; solarPoweredFloors = [17]; updatePowerState();
     chargePhone(currentDoors.find(door => door.phoneCharger));
     chargePhone(currentDoors.find(door => door.phoneCharger));
     togglePhoneLight();
@@ -65,7 +65,7 @@ try {
   assert.deepEqual(await events(), ['charger', 'pickup', 'phone']);
   await clear();
   await page.evaluate(() => {
-    performFloorChange('f1'); solarPoweredFloor = 1; updatePowerState();
+    performFloorChange('f1'); solarPoweredFloors = [1]; updatePowerState();
     Object.assign(guardPatrol, { x: 3000, facing: 1, wait: 0, mode: 'patrol' });
     Body.setPosition(body, { x: 3200, y: floorY - 81 }); grounded = true;
     updateGuardPatrol(16);

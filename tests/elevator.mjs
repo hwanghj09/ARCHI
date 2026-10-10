@@ -972,7 +972,7 @@ try {
     assert(training.exit.x > 1400, 'The training room door is at the right end inside, as in the corridor');
     assert.equal(await page.locator('#dynamic-scene .floor-prop').count(), 5);
     await assertHumanScale();
-    await inspect(300, 'E · 교육 자료 보드 조사', /한 층에만/);
+    await inspect(300, 'E · 교육 자료 보드 조사', /두 층까지만/);
     await inspect(1120, 'E · 교육생 자리 조사', /1\/5/);
     await page.screenshot({ path: '.local/floor-13-training.png' });
     assert(Math.max(...roomScales) / Math.min(...roomScales) < 1.02, `Room fronts scale with their interiors: ${roomScales}`);
@@ -1904,7 +1904,7 @@ try {
     await page.keyboard.press('e');
     await page.clock.runFor(800);
     assert.match(await status(), /비상계단 문이 잠겨/);
-    await inspect(3295, 'E · 비상 전원 안내판 조사', /한 번에 한 층만/);
+    await inspect(3295, 'E · 비상 전원 안내판 조사', /한 번에 두 층까지만/);
     await visitRestroom('B1');
 
     const controlRoom = await enterRoom('방재 관제실', 'B1');
@@ -1941,7 +1941,7 @@ try {
     assert.equal(await page.locator('#dynamic-scene .floor-prop').count(), 7);
     await assertHumanScale();
     await inspect(330, 'E · 전력 분배반 조사', /B1 6% · B2 94%/);
-    await inspect(600, 'E · 태양광 수전반 조사', /한 층씩/);
+    await inspect(600, 'E · 태양광 수전반 조사', /두 층까지/);
     await inspect(900, 'E · 야간 전력 기록 조사', /서버 한 동/);
     await page.screenshot({ path: '.local/floor-b1-power.png' });
     assert(Math.max(...roomScales) / Math.min(...roomScales) < 1.02, `Room fronts scale with their interiors: ${roomScales}`);

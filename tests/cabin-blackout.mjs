@@ -41,11 +41,15 @@ try {
   assert.equal(await scene.getAttribute('data-floor'), '16');
   assert.equal(await scene.getAttribute('data-blackout'), 'true');
   assert(await page.locator('#cabin-exit').isEnabled());
-  await page.evaluate(() => { solarEnabled = true; solarPoweredFloor = 16; updatePowerState(); refreshCabin(); });
+  await page.evaluate(() => { solarEnabled = true; solarPoweredFloors = [16]; updatePowerState(); refreshCabin(); });
   assert.equal(await scene.getAttribute('data-blackout'), 'true', 'Floor-only solar power does not relight the car');
-  await page.evaluate(() => { elevatorCars[0].floor = 17; solarPoweredFloor = 17; refreshCabin(); });
+  await page.evaluate(() => { elevatorCars[0].floor = 17; solarPoweredFloors = [16, 17]; refreshCabin(); });
   assert.equal(await scene.getAttribute('data-blackout'), 'true');
+  assert.equal(await scene.getAttribute('data-hall-blackout'), 'false', 'Either of the two solar floors lights its elevator hall');
   assert.doesNotMatch(await page.locator('#cabin-doorway').evaluate(el => getComputedStyle(el).backgroundImage), /floor17-off/, 'Restored hallway uses lit art independently of cabin lighting');
+  await page.evaluate(() => { elevatorCars[0].floor = 7; refreshCabin(); });
+  assert.equal(await scene.getAttribute('data-hall-blackout'), 'true');
+  assert.match(await page.locator('#cabin-doorway').evaluate(el => getComputedStyle(el).backgroundImage), /floor7\/corridor-off/, 'An unsupplied floor keeps its dark hall art');
   await page.evaluate(() => { elevatorCars[0].floor = -1; cabinStatus.textContent = 'B1 · 문 열림'; refreshCabin(); });
   assert.equal(await scene.getAttribute('data-blackout'), 'true', 'Basement floor emergency lighting does not restore cabin mains');
   await page.setViewportSize({ width: 390, height: 844 });

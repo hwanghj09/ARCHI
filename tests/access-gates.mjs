@@ -83,7 +83,7 @@ try {
   assert(await page.evaluate(() => collectedItems.has('f16-badge')));
   assert.equal(await page.locator('#inventory-button').textContent(), '가방 (2) · I');
   for (const floor of [12, 13, 14, 15]) {
-    await page.evaluate(floor => { performFloorChange(`f${floor}`); solarEnabled = true; solarPoweredFloor = floor; updatePowerState(); }, floor);
+    await page.evaluate(floor => { performFloorChange(`f${floor}`); solarEnabled = true; solarPoweredFloors = [floor]; updatePowerState(); }, floor);
     assert.equal(await page.locator('.access-gate[data-open="false"]').count(), 2, 'Other floors remain locked');
     await place(1826);
     if (floor === 12) await page.screenshot({ path: '.local/access-gate-closed.png' });

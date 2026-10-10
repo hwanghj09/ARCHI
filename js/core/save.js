@@ -25,7 +25,7 @@ function progressSnapshot() {
   return { version: 1, savedAt: Date.now(), scene, items: [...collectedItems], clues: clueSnapshot(),
     battery: phoneBattery, sanity, light: phoneLightOn, dock: phoneDock && { ...phoneDock },
     phoneChargeAccumulator, phoneDrainAccumulator,
-    blackout: buildingBlackout || blackoutSceneActive, solarEnabled, solarPoweredFloor,
+    blackout: buildingBlackout || blackoutSceneActive, solarEnabled, solarPoweredFloors: [...solarPoweredFloors],
     lights: world.dataset.lights, computerPower: openingActive ? 'off' : officeComputer.element.dataset.power,
     elevators: elevatorCars.map(({ name, ...car }) => ({ ...car })),
     cabin: selectingFloor ? { index: cabinCarIndex, selectedFloor, autoClose: cabinAutoClose,
@@ -78,7 +78,10 @@ function restoreProgress(data) {
     restoreClues(data.clues);
     buildingBlackout = data.blackout === true;
     solarEnabled = data.solarEnabled === true;
-    solarPoweredFloor = solarEnabled && Number.isInteger(data.solarPoweredFloor) && data.solarPoweredFloor >= 1 && data.solarPoweredFloor <= 17 ? data.solarPoweredFloor : null;
+    // 한 층만 켜던 예전 저장은 숫자 solarPoweredFloor를 [숫자]로 읽는다. 켠 순서를 지키고 최근 두 층만 남긴다.
+    const solarFloors = Array.isArray(data.solarPoweredFloors) ? data.solarPoweredFloors : [data.solarPoweredFloor];
+    solarPoweredFloors = solarEnabled ?
+      [...new Set(solarFloors.filter(floor => Number.isInteger(floor) && floor >= 1 && floor <= 17))].slice(-solarFloorLimit) : [];
     world.dataset.lights = data.lights === 'off' ? 'off' : 'on';
     document.getElementById('floor17-lights').checked = world.dataset.lights === 'on';
     phoneBattery = savedNumber(data.battery, 100, 0, 100);

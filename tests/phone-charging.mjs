@@ -35,7 +35,7 @@ try {
   let stations = 0;
   for (const floor of [-2, -1, ...Array.from({ length: 17 }, (_, i) => i + 1), 18]) {
     const id = floor === 18 ? 'rooftop' : floor < 0 ? `b${-floor}` : `f${floor}`;
-    await page.evaluate(id => { solarEnabled = false; solarPoweredFloor = null; performFloorChange(id, id === 'rooftop' ? null : 0); }, id);
+    await page.evaluate(id => { solarEnabled = false; solarPoweredFloors = []; performFloorChange(id, id === 'rooftop' ? null : 0); }, id);
     const chargers = await page.evaluate(() => currentDoors.filter(door => door.phoneCharger).map(door => ({ x: door.x, width: door.width })));
     assert.equal(chargers.length, floor === 17 ? 2 : 1); stations += chargers.length;
     if (floor !== 17 && floor !== 18) assert(await page.evaluate(() => {
@@ -49,7 +49,7 @@ try {
         assert.match(await page.locator('#interaction-hint').textContent(), /전력 없음/);
         await page.keyboard.press('e'); assert.equal((await state()).dock, null);
         await page.clock.runFor(1000); assert.equal((await state()).battery, 0);
-        await page.evaluate(floor => { solarEnabled = true; solarPoweredFloor = floor === 18 ? null : floor; updatePowerState(); }, floor);
+        await page.evaluate(floor => { solarEnabled = true; solarPoweredFloors = floor === 18 ? [] : [floor]; updatePowerState(); }, floor);
       }
       await page.keyboard.press('e');
       assert.deepEqual((await state()).dock, { floor, x: point.x });
@@ -58,13 +58,13 @@ try {
       await page.clock.runFor(2100); assert.equal((await state()).battery, 4);
       await page.keyboard.press('e'); assert.equal((await state()).dock, null);
       assert.equal(await page.locator('.docked-phone:visible').count(), 0);
-      await page.evaluate(() => { solarEnabled = false; solarPoweredFloor = null; updatePowerState(); });
+      await page.evaluate(() => { solarEnabled = false; solarPoweredFloors = []; updatePowerState(); });
     }
   }
   assert.equal(stations, 21);
   console.log('PASS: all 21 stations and their floor power/door clearance.');
   // Flashlight, device UI, motion and a different charging station while the phone is left behind.
-  await page.evaluate(() => { solarEnabled = true; solarPoweredFloor = 12; performFloorChange('f12'); });
+  await page.evaluate(() => { solarEnabled = true; solarPoweredFloors = [12]; performFloorChange('f12'); });
   const at = await charger(); await place(at, 20);
   await page.keyboard.press('f'); await page.clock.runFor(300); await page.keyboard.press('e');
   assert.equal((await state()).light, false); assert.equal((await state()).held, 'false');
@@ -81,8 +81,14 @@ try {
   await page.clock.runFor(3000); assert.equal((await state()).battery, beforeAway + 6, 'Charging follows the origin floor power');
   await place(await charger()); await page.keyboard.press('e'); assert.equal((await state()).dock.floor, 12);
   // Native power controls reroute power away from the phone's floor, then restore it.
+  // A second floor (13F) joins 12F without cutting it; pressing lit 12F again turns off only 12F.
   await page.evaluate(() => openPowerPanel());
   await page.locator('#power-floor-grid button[data-floor="13"]').click(); await page.keyboard.press('Escape');
+  const shared = (await state()).battery;
+  await page.clock.runFor(3000); assert((await state()).battery > shared, 'Adding a second floor keeps 12F charging');
+  await page.evaluate(() => openPowerPanel());
+  await page.locator('#power-floor-grid button[data-floor="12"]').click(); await page.keyboard.press('Escape');
+  assert.deepEqual(await page.evaluate(() => solarPoweredFloors), [13]);
   const stopped = (await state()).battery;
   await page.clock.runFor(3000); assert.equal((await state()).battery, stopped);
   await page.evaluate(() => performFloorChange('f12')); await place(at);
@@ -110,7 +116,7 @@ try {
   await page.keyboard.press('f'); await page.clock.runFor(1100); assert.equal((await state()).battery, 99);
   await page.keyboard.press('f');
   // Shared interaction guards reject distant, airborne and modal docking.
-  await page.evaluate(() => { solarEnabled = true; solarPoweredFloor = 12; updatePowerState(); });
+  await page.evaluate(() => { solarEnabled = true; solarPoweredFloors = [12]; updatePowerState(); });
   await place(at + 90, 15); await page.keyboard.press('e'); assert.equal((await state()).dock, null);
   await place(at, 15); await page.keyboard.press('Space'); await page.clock.runFor(150);
   await page.keyboard.press('e'); assert.equal((await state()).dock, null);
@@ -128,12 +134,12 @@ try {
   await place(at, 100); await page.locator('#interact').tap(); assert.equal((await state()).dock, null);
   // Losing power before completion pauses progress and still allows partial pickup.
   await place(at, 10); await page.locator('#interact').tap(); await page.clock.runFor(2000);
-  await page.evaluate(() => { solarEnabled = false; solarPoweredFloor = null; updatePowerState(); });
+  await page.evaluate(() => { solarEnabled = false; solarPoweredFloors = []; updatePowerState(); });
   const partial = (await state()).battery; await page.clock.runFor(5000);
   assert.equal((await state()).battery, partial); await page.locator('#interact').tap();
   assert.equal((await state()).dock, null); assert.equal((await state()).battery, partial);
   // The two stations on 17F are distinct; pickup requires returning to the original one.
-  await page.evaluate(() => { solarEnabled = true; solarPoweredFloor = 17; performFloorChange('f17'); });
+  await page.evaluate(() => { solarEnabled = true; solarPoweredFloors = [17]; performFloorChange('f17'); });
   const points = await page.evaluate(() => currentDoors.filter(door => door.phoneCharger).map(door => ({ x: door.x, center: door.x + door.width / 2 })));
   await place(points[0].center, 10); await page.locator('#interact').tap();
   await place(points[1].center); await page.locator('#interact').tap();
