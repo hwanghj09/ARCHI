@@ -90,9 +90,44 @@ function refreshSolarApp() {
   document.getElementById('phone-solar-supply').textContent = solarPoweredFloors.includes(Number(document.getElementById('phone-solar-floor').value)) ? '선택 층 전력 끄기' : '선택 층 전력 공급';
 }
 
+// 콘솔 창의 '모든 층 전력 활성화'(테스트용): 켜면 건물 정전 상태를 잠시 해제해(buildingBlackout을 false로) 모든 층의 조명·컴퓨터·충전·
+// 엘리베이터·경비 로봇 등 전력이 필요한 기능을 쓴다. 끄면 켜기 전의 정전 상태로 되돌린다. 켜 있는 동안에도 실제 정전 여부는
+// realBuildingBlackout()이 기억하고, 저장·정전 컷씬·목표는 그 값을 따른다.
+let allPowerOverride = false;
+let allPowerSavedBlackout = false;
+
+function realBuildingBlackout() {
+  return allPowerOverride ? allPowerSavedBlackout : buildingBlackout;
+}
+
+function syncAllPowerButton() {
+  const button = document.getElementById('debug-all-power');
+  if (!button) return;
+  button.setAttribute('aria-pressed', String(allPowerOverride));
+  button.textContent = `모든 층 전력 활성화 · ${allPowerOverride ? 'ON' : 'OFF'}`;
+}
+
+function setAllFloorsPower(on) {
+  if (on === allPowerOverride) return;
+  allPowerOverride = on;
+  if (on) {
+    allPowerSavedBlackout = buildingBlackout;
+    buildingBlackout = false;
+  } else {
+    buildingBlackout = allPowerSavedBlackout;
+  }
+  updatePowerState();
+  syncAllPowerButton();
+}
+
 function triggerBuildingBlackout() {
-  if (buildingBlackout) return;
+  if (realBuildingBlackout()) return;
   playGameSound('blackout');
+  if (allPowerOverride) {
+    // 모든 층 전력이 켜져 있으면 정전은 기록만 해 두고, 콘솔을 끌 때 적용한다.
+    allPowerSavedBlackout = true;
+    return;
+  }
   buildingBlackout = true;
   updatePowerState();
   showStatus('갑자기 건물 전체의 불이 꺼졌다. 휴대폰(P)의 라이트를 켜 보자.', 6000);

@@ -70,6 +70,12 @@ try {
   await page.evaluate(() => { sanity = 100; guardPatrol.mode = 'chase'; bossFightActive = false; updateSanity(1000); });
   near((await state()).sanity, 90);
   await page.evaluate(() => { guardPatrol.mode = 'patrol'; });
+  // 쫓겨서는 10% 아래로 줄지 않고, 이미 10% 아래면 더 줄지 않는다.
+  await page.evaluate(() => { sanity = 12; guardPatrol.mode = 'chase'; bossFightActive = false; updateSanity(1000); });
+  assert.equal((await state()).sanity, 10, '추격 감소는 10%에서 멈춘다');
+  await page.evaluate(() => { sanity = 7; updateSanity(1000); });
+  assert.equal((await state()).sanity, 7, '10% 아래에서는 쫓겨도 더 줄지 않는다');
+  await page.evaluate(() => { guardPatrol.mode = 'patrol'; });
   await page.evaluate(() => { sanity = 100; guardPatrol.mode = 'chase'; bossFightActive = true; updateSanity(1000); });
   assert.equal((await state()).sanity, 100, '보스전 중에는 추격 감소가 없다');
   await page.evaluate(() => { guardPatrol.mode = 'patrol'; bossFightActive = false; });

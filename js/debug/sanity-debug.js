@@ -36,3 +36,14 @@ for (const [id, trigger] of [['debug-chase-hallucination', debugTriggerChaseHall
     stage.focus({ preventScroll: true }); // 버튼에 포커스가 남아 이동 키가 막히지 않게 한다
   });
 }
+
+// 모든 층 전력 활성화: 누를 때마다 켜고 끈다(power.js의 setAllFloorsPower). 컷씬·오프닝 중에는 바꾸지 않는다.
+document.getElementById('debug-all-power').addEventListener('click', () => {
+  if (!gameStarted || mainMenuActive || openingActive || blackoutSceneActive) {
+    showStatus('지금은 전력을 바꿀 수 없다.', 2000);
+  } else {
+    setAllFloorsPower(!allPowerOverride);
+    showStatus(allPowerOverride ? '모든 층 전력 활성화 ON' : '모든 층 전력 활성화 OFF · 원래 전력 상태로 돌아왔다.', 3000);
+  }
+  stage.focus({ preventScroll: true });
+});

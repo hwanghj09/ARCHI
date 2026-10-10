@@ -8,7 +8,7 @@ let blackoutCallX = 0;
 let blackoutBlocked = [];
 
 function startBlackoutScene(door) {
-  if (buildingBlackout || blackoutSceneActive) return;
+  if (realBuildingBlackout() || blackoutSceneActive) return;
   blackoutSceneActive = true;
   blackoutElapsed = 0;
   blackoutStartX = body.position.x;

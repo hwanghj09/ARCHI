@@ -33,7 +33,7 @@ function progressSnapshot() {
   return { version: 1, savedAt: Date.now(), scene, items: [...collectedItems], clues: clueSnapshot(),
     battery: phoneBattery, sanity, light: phoneLightOn, dock: phoneDock && { ...phoneDock },
     phoneChargeAccumulator, phoneDrainAccumulator,
-    blackout: buildingBlackout || blackoutSceneActive, solarEnabled, solarPoweredFloors: [...solarPoweredFloors],
+    blackout: realBuildingBlackout() || blackoutSceneActive, solarEnabled, solarPoweredFloors: [...solarPoweredFloors],
     lights: world.dataset.lights, computerPower: openingActive ? 'off' : officeComputer.element.dataset.power,
     elevators: elevatorCars.map(({ name, ...car }) => ({ ...car })),
     cabin: selectingFloor ? { index: cabinCarIndex, selectedFloor, autoClose: cabinAutoClose,
@@ -64,12 +64,12 @@ function restoreProgress(data) {
     releaseInput();
     // 재개할 때 조사·휴대폰 등의 창은 닫는다. 퍼즐 진행과 실제 게임 상태는 복원한다.
     usingPhone = usingComputer = usingKeypad = usingPowerPanel = usingInspection = selectingFloor = false;
-    transitioning = playerCaught = blackoutSceneActive = hallucinationCaught = false;
+    transitioning = playerCaught = blackoutSceneActive = storySceneActive = hallucinationCaught = false;
     openingActive = true; // 장면을 조립하는 동안 정전 컷씬과 입력이 시작되지 않게 한다.
     sceneTransition = null;
     cabinCarIndex = null;
     selectedFloor = null;
-    for (const element of [phonePanel, computer, keypad, powerPanel, inspectionPanel, cabin, guardCapturePanel, hallucinationCapturePanel, opening, blackoutScene]) element.hidden = true;
+    for (const element of [phonePanel, computer, keypad, powerPanel, inspectionPanel, cabin, guardCapturePanel, hallucinationCapturePanel, opening, blackoutScene, storyScene]) element.hidden = true;
     for (const element of document.body.children) if (element !== mainMenu) element.inert = false;
     phoneBlocked = powerBlocked = guardBlocked = hallucinationBlocked = openingBlocked = blackoutBlocked = [];
     zeroEventPhase = 'idle'; zeroEventTimer = 0; zeroEventEvasions = 0; zeroEventApproachDone = false;
@@ -86,7 +86,9 @@ function restoreProgress(data) {
     collectedItems.add('f17-badge');
     for (const item of data.items) collectedItems.add(item);
     restoreClues(data.clues);
+    allPowerOverride = false; // 불러오거나 새로 시작하면 콘솔의 전력 활성화는 꺼진다
     buildingBlackout = data.blackout === true;
+    if (typeof syncAllPowerButton === 'function') syncAllPowerButton();
     solarEnabled = data.solarEnabled === true;
     // 한 층만 켜던 예전 저장은 숫자 solarPoweredFloor를 [숫자]로 읽는다. 켠 순서를 지키고 최근 두 층만 남긴다.
     const solarFloors = Array.isArray(data.solarPoweredFloors) ? data.solarPoweredFloors : [data.solarPoweredFloor];

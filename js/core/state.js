@@ -22,6 +22,7 @@ let gameStarted = false;
 let gameVolume = .7;
 let openingActive = true;
 let blackoutSceneActive = false;
+let storySceneActive = false; // 이야기 컷씬(story-scene.js)이 진행 중
 let playerCaught = false;
 let selectingFloor = false;
 let usingComputer = false;

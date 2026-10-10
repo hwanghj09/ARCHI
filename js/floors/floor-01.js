@@ -62,20 +62,20 @@ const FLOOR1_LAYOUT = {
         'B1  시설 관리실',
         'B2  AI 서버실',
       ],
-      message: '층별 안내판이다. 12F 기술본부 · ARCHI 개발팀, 7F AI 테스트·검증실, B2 AI 서버실. 수호의 눈이 그 세 줄에서 자꾸 멈춘다.',
+      message: '층별 안내판이다. 12F 기술본부 · ARCHI 개발팀, 7F AI 테스트·검증실, B2 AI 서버실.',
       surface: 'document', look: 'sign',
       writing: [{ as: 'title', text: '층별 안내' },
         { text: '17F  TmaxSoft 사업테스트본부\n16F  The Kitchen / CU 편의점 / Café\n15F  TmaxSoft 연구본부\n14F  TmaxSoft 연구본부\n' +
           '13F  TmaxSoft 기술본부', size: 'small' },
-        { text: '12F  TmaxSoft 기술본부 · ARCHI 개발팀', size: 'small', mark: 'underline' },
+        { text: '12F  TmaxSoft 기술본부 · ARCHI 개발팀', size: 'small' },
         { text: '11F  TmaxSoft 사업본부 / 전략마케팅본부\n10F  TmaxSoft / TmaxTibero 경영관리본부\n9F  TmaxTibero 사업본부\n' +
           '8F  TmaxTibero QA실, 제품기획실', size: 'small' },
-        { as: 'page' }, { text: '7F  Lounge / VIP Room · AI 테스트·검증실', size: 'small', mark: 'underline' },
+        { as: 'page' }, { text: '7F  Lounge / VIP Room · AI 테스트·검증실', size: 'small' },
         { text: '6F  TmaxTibero 기술본부\n5F  TmaxTibero 연구본부\n4F  TmaxTibero 연구본부\n' +
           '3F  Fitness Club / ㈜하누리서비스 / 고객만족센터 / Studio\n2F  Harmony Hall / 서버실\n' +
           '1F  Harmony Hall / Vision Hall / 건강관리실 / 여성휴게실\nB1  시설 관리실', size: 'small' },
-        { text: 'B2  AI 서버실', size: 'small', mark: 'underline' }],
-      caption: '수호의 눈이 그 세 줄에서 자꾸 멈춘다.' },
+        { text: 'B2  AI 서버실', size: 'small' }],
+    },
     { name: '스피드 게이트', x: 4300, y: 470, width: 100, style: 'speed-gates', outline: [4316, 464, 179, 93],
       message: '출입증을 대자 작은 화면이 붉게 깜빡인다: "미등록 출입증." 그래도 날개는 정전 때 저절로 풀리는 방식이라 손으로 밀면 그냥 열린다.',
       surface: 'screen', look: 'lcd', writing: [{ text: '미등록 출입증.', ink: 'red', size: 'large', align: 'center' }],

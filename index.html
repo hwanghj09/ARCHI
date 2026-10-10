@@ -18,6 +18,7 @@
     <link rel="stylesheet" href="sanity.css" />
     <link rel="stylesheet" href="main-menu.css" />
     <link rel="stylesheet" href="blackout.css" />
+    <link rel="stylesheet" href="story-scene.css" />
     <link rel="stylesheet" href="device-apps.css" />
     <link rel="stylesheet" href="clues.css" />
     <link rel="preload" as="image" href="assets/objects/guard-robot/guard-capture.png" />
@@ -1015,6 +1016,7 @@
     <script src="js/elevator/cabin.js" defer></script>
     <script src="js/player/sanity.js" defer></script>
     <script src="js/scene/pushables.js" defer></script>
+    <script src="js/scene/story-scene.js" defer></script>
     <script src="js/core/loop.js" defer></script>
     <script src="js/input/input.js" defer></script>
     <script src="js/input/keyboard.js" defer></script>
@@ -1135,6 +1137,10 @@
     <section id="blackout-scene" role="dialog" aria-modal="true" aria-label="엘리베이터 앞 정전" hidden>
       <p id="blackout-caption" role="status" aria-live="polite"></p>
       <button id="blackout-skip" type="button">건너뛰기 · Esc</button>
+    </section>
+    <section id="story-scene" role="dialog" aria-modal="true" aria-label="수호의 혼잣말" hidden>
+      <p id="story-caption" role="status" aria-live="polite"></p>
+      <button id="story-skip" type="button">건너뛰기 · Esc</button>
     </section>
     <section id="phone" class="device-dialog" role="dialog" aria-modal="true" aria-labelledby="phone-title" hidden>
       <img class="phone-hardware" src="assets/ui/phone-device.png" alt="" width="887" height="1774" draggable="false" />
@@ -1258,6 +1264,7 @@
         <div id="debug-console-panel" hidden>
           <button id="debug-chase-hallucination" type="button">환각 추격 이벤트</button>
           <button id="debug-spawn-hallucination" type="button">환각 생성 이벤트</button>
+          <button id="debug-all-power" type="button" aria-pressed="false">모든 층 전력 활성화 · OFF</button>
         </div>
       </div>
     </aside>

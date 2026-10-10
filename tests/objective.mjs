@@ -69,19 +69,33 @@ try {
   await page.waitForTimeout(100);
   assert.equal(await page.evaluate(() => currentObjective.text), '정문으로 나가자.');
 
-  // 층별 안내판을 읽으면 12층 조사로 넘어간다(실제 조사 경로).
+  // 로봇 추격이 끝나고 3초 뒤 혼잣말 컷씬이 나오고, Esc로 끝내면 '정신 불안' 목표가 생긴다.
   await page.evaluate(() => {
-    solarPoweredFloors = [1]; updatePowerState();
+    collectedItems.add('f1-chase-ended'); // 추격이 끝난 것으로 치면 3초 뒤 컷씬이 시작된다
     performFloorChange('f1', 0);
-    const board = currentDoors.find(door => door.name === '층별 안내판');
-    Body.setPosition(body, { x: board.x + board.width / 2, y: floorY - 81 });
-    Body.setVelocity(body, { x: 0, y: 0 }); grounded = true;
-    cameraX = cameraTarget(); render(); updateInteraction();
   });
-  await page.keyboard.press('e');
-  await page.waitForTimeout(100);
-  assert.equal(await page.evaluate(() => currentObjective.title), '12층 조사하기');
+  await page.locator('#story-scene').waitFor({ state: 'visible' });
+  assert.equal(await page.locator('#story-caption').textContent(), '왜 경비 로봇이 나를 공격하려고 했던 거지?');
+  await page.waitForFunction(() => storyCaption.textContent.startsWith('으윽'), null, { timeout: 5000 });
+  await page.waitForFunction(() => storyCaption.textContent.startsWith('16층 편의점'), null, { timeout: 5000 });
   await page.keyboard.press('Escape');
+  assert(await page.locator('#story-scene').isHidden(), 'Esc ends the scene');
+  assert.equal(await page.evaluate(() => collectedItems.has('story-anxiety-seen')), true);
+  await waitTyped('정신 불안', '16층 편의점에서 항불안제를 찾자.');
+
+  // 항불안제를 챙기거나 사용해도 목표는 유지되고, 사용하고 4초 뒤 두 번째 컷씬이 나오고, 끝나면 '로봇의 습격! 그 이유는?' 목표가 생긴다.
+  await page.evaluate(() => collectedItems.add('f16-antianxiety'));
+  await page.waitForTimeout(500);
+  assert.equal(await page.evaluate(() => currentObjective.title), '정신 불안', '챙기기만 해서는 목표가 바뀌지 않는다');
+  await page.evaluate(() => collectedItems.add('f16-antianxiety-used'));
+  await page.waitForTimeout(500);
+  assert.equal(await page.evaluate(() => currentObjective.title), '정신 불안', '사용한 뒤 컷씬이 나오기 전까지도 목표가 유지된다');
+  await page.locator('#story-scene').waitFor({ state: 'visible', timeout: 10000 });
+  assert.equal(await page.locator('#story-caption').textContent(), '휴.. 겨우 정신을 차렸네..');
+  await page.waitForFunction(() => storyCaption.textContent.startsWith('12층 ARCHI'), null, { timeout: 12000 });
+  await page.keyboard.press('Escape');
+  assert(await page.locator('#story-scene').isHidden());
+  await waitTyped('로봇의 습격! 그 이유는?', '12층 ARCHI 개발 팀을 조사하자.');
 
   assert.equal(await titleAfter(() => collectedItems.add('goal-f12-memo')), '7층 조사하기');
   assert.equal(await titleAfter(() => collectedItems.add('goal-f7-log')), 'B2로 가는 길 찾기');

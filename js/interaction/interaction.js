@@ -30,7 +30,7 @@ function updateInteraction() {
     [...officeDoors.filter(door => door.room === room), officeComputer];
   nearbyDoor = activeDoors.find(door => grounded && Math.abs(body.bounds.max.y - floorY) < 2 &&
     Math.abs(body.position.x - door.x - door.width / 2) < door.width / 2 + 28) || null;
-  if (!buildingBlackout && room === 'corridor' && currentSceneFloor === 17 && nearbyDoor?.type === 'elevator') {
+  if (!realBuildingBlackout() && room === 'corridor' && currentSceneFloor === 17 && nearbyDoor?.type === 'elevator') {
     startBlackoutScene(nearbyDoor);
     return;
   }
