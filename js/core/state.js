@@ -27,7 +27,7 @@ let selectingFloor = false;
 let usingComputer = false;
 // 도어락 키패드(방 문·소품의 code): 열려 있는 동안 플레이어 조작을 멈춘다.
 let usingKeypad = false;
-// 휴대폰과 옥상 전력 분배 UI. 전력은 지상층 중 두 층까지 켤 수 있고, 세 번째를 켜면 먼저 켠 층이 꺼진다.
+// 휴대폰과 옥상 전력 분배 UI. 전력은 지상층 중 한 층만 켤 수 있고, 다른 층을 켜면 켜져 있던 층이 꺼진다.
 let usingPhone = false;
 let usingPowerPanel = false;
 let usingInspection = false;
@@ -38,7 +38,7 @@ let sanity = 100;
 let phoneLightOn = false;
 // 태양광 전력을 받는 지상층. 켠 순서대로 담는다(앞이 가장 먼저 켠 층).
 let solarPoweredFloors = [];
-const solarFloorLimit = 2;
+const solarFloorLimit = 1;
 let solarEnabled = false;
 let buildingBlackout = false;
 // 정신력 공포 단계(0~5, sanityTierOf 참고). CCTV·컴퓨터·이동 속도 등 여러 기능이 함께 읽는다.

@@ -74,7 +74,7 @@ function supplySolarFloor(floor) {
   const dropped = solarPoweredFloors.length >= solarFloorLimit ? solarPoweredFloors[0] : null;
   solarPoweredFloors = [...solarPoweredFloors, floor].slice(-solarFloorLimit);
   updatePowerState();
-  showStatus(`${floor}층에 태양광 비상 전력을 공급합니다.${dropped ? ` 먼저 켠 ${dropped}층은 꺼집니다.` : ''}`);
+  showStatus(`${floor}층에 태양광 비상 전력을 공급합니다.${dropped ? ` 켜져 있던 ${dropped}층은 꺼집니다.` : ''}`);
 }
 
 function refreshSolarApp() {
