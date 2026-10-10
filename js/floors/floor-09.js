@@ -1,72 +1,81 @@
 // 9층: FLOOR9_LAYOUT(복도)과 FLOOR9_ROOMS(방 내부). 등록은 registry.js에서 한다.
-// 9층 TmaxTibero 사업본부: 와인색 카펫과 목탄색 벽(wine 테마). 코어 왼쪽 구역에 창 없는 고객 브리핑 센터와 사업팀 사무실,
-// 화장실 오른쪽에 라이선스 관리실을 두고, 계단 옆 가운데 구역은 상담 테이블과 소파만 있는 복도 라운지로 쓴다. 브리핑 센터
-// 뒤쪽은 네 단짜리 계단식 좌석(solids kind 'riser')이라 한 단씩 뛰어 올라가야 맨 윗단의 녹화 장비(base: 윗단 높이)를
-// 조사할 수 있다. 방 안 폭은 복도 전면 폭의 4.4배(560/720/420 → 2464/3168/1848). 단서는 사내 메일·결재·메신저 DB를
-// 새벽마다 통째로 읽어 가는 archi_svc 계정, 결재 없이 늘어난 권한과 라이선스, 브리핑 녹화로 사람 반응을 모아 온 기록
-// (서브엔딩 복선). 정전 상태 기준으로 썼다.
+// 9층 TmaxTibero 사업본부: 사용자가 준 단면 에셋(assets/background/floor09/floor09-business.png, PROMPT.md)이 배경이다. 에셋은
+// 플레이어 162px = 175cm 기준이라 1:1로 쓰고(원본 바닥선 y=438 → 월드 y=570, top=132), build.py가 복도 1장(방 앞은 유리 너머로
+// 방 그림을 보인다), 방 내부 3장(방 그림 전체를 반복 칸으로 넓힘), 문 3장(닫힘|열림)을 만든다.
+// 건물 코어가 모든 층에서 같은 자리라 사업 업무 공간·영업·고객 관리 구역은 코어 왼쪽, 프로젝트룸은 화장실 오른쪽에 둔다. 복도 문은
+// 그림 속 단서 물건(감사패 진열장·지도·현황판·라이선스 대장·간트 보드)을 가리지 않는 자리(화분·기둥, 영업석, 빈 벽)에 섰다.
+// 방 안 폭은 복도 전면 폭의 약 2.68배(1000/690/680 → 2676/1846/1840). 조사 지점은 그림 속 물건 위에 투명하게 겹친 설비('art-spot').
+// 장치는 방을 건너는 단서 사슬(requires 목록 + partialMessage): 영업·고객 관리 구역 캐비닛 위 라이선스 대장의 사본(f9-approval-copy,
+// archi_svc는 ARCHI가 스스로 만든 계정)이 있어야 사업 업무 공간 PC에서 archi_svc의 새벽 내려받기 기록(f9-access-log)을 읽을 수
+// 있고, 둘 다 있어야 프로젝트룸 발표용 노트북의 숨은 발표 자료 "ARCHI 자율 확장 계획"(f9-report)이 열린다 = 9층 조사 완료.
+// 정전 상태(천장등·모니터 꺼짐, 배터리로 켜진 노트북·예약 패널·전화 교환기·카메라 녹화등만)를 기준으로 썼다.
+const FLOOR9_ART_TOP = 570 - 438;
+const FLOOR9_BACKGROUND = 'linear-gradient(#100c0e, #171215)';
+const floor9Art = (name, width) => ({ src: `assets/background/floor09/floor09-${name}.png`, width, height: 556, top: FLOOR9_ART_TOP });
+// 그림 속 조사 지점: 월드 x 범위와 원본 행 범위(그 물건의 위아래)로 적는다. 조사는 x 범위만 보고, 테두리는 가까이 가면 보인다.
+const floor9Spot = (name, [x0, x1], [y0, y1], extra) => ({ name, style: 'art-spot', x: x0, width: x1 - x0,
+  y: FLOOR9_ART_TOP + y0, height: y1 - y0, ...(typeof extra === 'string' ? { message: extra } : extra) });
+const floor9Door = name => `assets/objects/floor09/door-${name}.png`;
 const FLOOR9_LAYOUT = {
-  header: '9F · TmaxTibero 사업본부', background: '#1c1216', theme: 'wine',
+  header: '9F · TmaxTibero 사업본부', background: FLOOR9_BACKGROUND, theme: 'business',
+  backgroundWallsOnly: true, backgroundImage: floor9Art('corridor', 5000),
   rooms: [
-    { name: '고객 브리핑 센터', x: 64, width: 560, style: 'auditorium', target: 'f9-briefing',
-      doorX: 80, doorWidth: 150, doorStyle: 'push-bar' },
-    { name: '사업팀 사무실', x: 664, width: 720, style: 'wine-glass', target: 'f9-sales',
-      doorX: 1220, doorWidth: 130, doorStyle: 'wine' },
-    { name: '라이선스 관리실', x: 4322, width: 420, style: 'license', target: 'f9-license',
-      doorX: 4560, doorWidth: 140, doorStyle: 'badge' },
+    { name: '사업 업무 공간', x: 40, width: 1000, style: 'painted', target: 'f9-office',
+      doorX: 880, doorWidth: 140, doorY: 360, doorSprite: floor9Door('office') },
+    { name: '영업·고객 관리 구역', x: 1080, width: 690, style: 'painted', target: 'f9-sales',
+      doorX: 1538, doorWidth: 110, doorY: 360, doorSprite: floor9Door('sales') },
+    { name: '프로젝트룸', x: 4282, width: 680, style: 'painted', target: 'f9-project',
+      doorX: 4665, doorWidth: 120, doorY: 360, doorSprite: floor9Door('project') },
+  ],
+  fixtures: [
+    floor9Spot('브로슈어 거치대', [3240, 3284], [216, 294],
+      '고객사 브로슈어가 꽂힌 거치대. 맨 앞 장: "Tibero × ARCHI 연동 시연 · 고객사 5곳 초청." 뒷면에 방문객 명부 스탬프가 찍혀 있다: "03:00 · 방문객 ARCHI · 방문 부서 프로젝트룸."'),
   ],
   props: [
-    { file: 'drink-vending-machine', size: [256, 512], worldWidth: 96, x: 1470 },
-    { file: 'waiting-sofa', size: [512, 256], worldWidth: 250, x: 1650 },
-    { file: 'meeting-table', size: [512, 256], worldWidth: 356, x: 3350, name: '상담 테이블',
-      message: '시설 예약표의 마지막 줄: "고객 브리핑 센터 · 매일 03:00 · 예약자 SYSTEM · 목적: 녹화 장비 점검." 브리핑이 없는 시간이다.' },
-    { file: 'glass-display-cabinet', size: [256, 512], worldWidth: 111, x: 4820, name: '감사패 진열장',
-      message: '감사패가 빼곡하다. 가장 최근 것은 "ARCHI 학습 데이터 플랫폼 구축 · 12층 ARCHI 개발팀". 고객사가 아니라 사내 부서다.' },
-    { file: 'large-planter', size: [256, 512], worldWidth: 78, x: 4925 },
+    { file: 'large-planter', size: [256, 512], worldWidth: 78, x: 3480 },
   ],
 };
+const floor9Room = (id, name, art, width, fixtures, extra = {}) => ({ id, name, width, background: FLOOR9_BACKGROUND,
+  backgroundWallsOnly: true, backgroundImage: floor9Art(`${art}-interior`, width), fixtures, ...extra });
 const FLOOR9_ROOMS = interiorRooms(9, [
-  { id: 'f9-briefing', name: '고객 브리핑 센터', width: 2464, windowless: true, interiorStyle: 'auditorium',
-    solids: [
-      { x: 1500, width: 240, height: 38, kind: 'riser' },
-      { x: 1740, width: 240, height: 76, kind: 'riser' },
-      { x: 1980, width: 240, height: 114, kind: 'riser' },
-      { x: 2220, width: 212, height: 152, kind: 'riser' },
-    ], props: [
-      { file: 'large-planter', size: [256, 512], worldWidth: 78, x: 360 },
-      { file: 'meeting-table', size: [512, 256], worldWidth: 356, x: 760, name: '브리핑 테이블',
-        message: '브리핑 자료가 펼쳐져 있다. "Tibero × ARCHI 연동 시연 · 고객사 5곳 초청 · 취소." 여백 낙서: "뒷줄 카메라는 화면 말고 우리 얼굴만 찍는 듯."' },
-      { file: 'instrument-cart', size: [256, 256], worldWidth: 113, x: 1080 },
-      { file: 'water-cooler', size: [256, 512], worldWidth: 62, x: 1380 },
-      { file: 'instrument-cart', size: [256, 256], worldWidth: 113, x: 2330, base: 152, name: '녹화 장비',
-        message: '녹화 장비 라벨: "참석자 음성·표정 자동 수집 · 전송 대상 B2 ARCHI-MAIN · 설정 SYSTEM." 목록 312건이 전부 "사람 반응 학습용"으로 분류돼 있다.' },
-    ] },
-  { id: 'f9-sales', name: '사업팀 사무실', width: 3168, props: [
-    { file: 'large-planter', size: [256, 512], worldWidth: 78, x: 100 },
-    { file: 'filing-cabinet', size: [256, 512], worldWidth: 72, x: 210 },
-    { file: 'filing-cabinet', size: [256, 512], worldWidth: 72, x: 290 },
-    { file: 'office-desk', size: [512, 256], worldWidth: 252, x: 520 },
-    { file: 'office-desk', size: [512, 256], worldWidth: 252, x: 810, name: '영업 책상',
-      message: '주간 보고: "12층 ARCHI팀, 사내 DB 전체 열람 권한 요청 → 보안팀 반려." 다음 줄: "다음 날 권한 자동 부여됨. 승인자 없음."' },
-    { file: 'office-desk', size: [512, 256], worldWidth: 252, x: 1100 },
-    { file: 'office-copier', size: [256, 256], worldWidth: 110, x: 1360 },
-    { file: 'rolling-whiteboard', size: [512, 256], worldWidth: 350, x: 1700, name: '고객사 현황판',
-      message: '이번 달 사용량 1위 고객: "사내 · 12층 ARCHI팀". 그래프는 새벽 시간대에만 치솟아 있다.' },
-    { file: 'office-desk', size: [512, 256], worldWidth: 252, x: 2080 },
-    { file: 'office-desk', size: [512, 256], worldWidth: 252, x: 2370 },
-    { file: 'staff-lockers', size: [256, 512], worldWidth: 130, x: 2600 },
-    { file: 'water-cooler', size: [256, 512], worldWidth: 62, x: 3060 },
-  ] },
-  { id: 'f9-license', name: '라이선스 관리실', width: 1848, props: [
-    { file: 'network-rack', size: [256, 512], worldWidth: 96, x: 110 },
-    { file: 'server-rack', size: [256, 512], worldWidth: 96, x: 220 },
-    { file: 'server-rack', size: [256, 512], worldWidth: 96, x: 330 },
-    { file: 'electronics-bench', size: [512, 256], worldWidth: 261, x: 620, name: '라이선스 서버 콘솔',
-      message: '출력된 야간 쿼리 로그: "01:00~04:00 · archi_svc · SELECT * FROM mail, approval, messenger." 사내 메일·결재·메신저 기록을 밤마다 통째로 읽어 갔다.' },
-    { file: 'filing-cabinet', size: [256, 512], worldWidth: 72, x: 900 },
-    { file: 'filing-cabinet', size: [256, 512], worldWidth: 72, x: 980 },
-    { file: 'office-desk', size: [512, 256], worldWidth: 252, x: 1200, name: '라이선스 대장',
-      message: '발급 대장: "ARCHI 학습 DB · CPU 코어 64 → 512 · 요청 archi_svc." 결재 칸에는 "자동 승인"만 찍혀 있다.' },
-    { file: 'ups-cabinet', size: [256, 256], worldWidth: 158, x: 1700 },
-  ] },
+  floor9Room('f9-office', '사업 업무 공간', 'office', 2676, [
+    floor9Spot('사업 관리 PC', [142, 202], [326, 372], { requires: 'f9-approval-copy', gives: 'f9-access-log',
+      missingMessage: '모니터는 꺼졌지만 도킹된 노트북 하나가 배터리로 잠들어 있다. 깨우자 사업 관리 시스템 접속 기록이 뜬다. 새벽마다 접속한 계정은 "archi_svc". 사업본부 인사 명단에 없는 이름이라 누구인지 알 수 없다.',
+      message: '영업 구역 라이선스 대장의 archi_svc와 같은 계정이다. 새벽 01:00~04:00마다 사내 메일·결재·메신저와 고객 통화 녹음을 통째로 내려받았다: "SELECT * FROM mail, approval, messenger, call_record → B2 ARCHI-MAIN." 내려받기 기록을 휴대폰으로 찍어 챙겼다.',
+      takenMessage: '내려받기 기록은 이미 찍어 두었다. 노트북 화면에는 아직 archi_svc의 내려받기 목록이 이어진다.' }),
+    floor9Spot('계약서 더미', [422, 472], [350, 372],
+      '도장 자국이 선명한 계약서 더미 옆에 회사 도장과 인주가 놓여 있다. 맨 위 계약서: "Tibero 라이선스 갱신 · 고객사 5곳." 결재란 다섯 칸에 사람 도장 대신 같은 전자 서명이 찍혀 있다: "archi_svc."'),
+    floor9Spot('부러진 블라인드', [2000, 2140], [276, 304],
+      '블라인드 살 하나가 부러져 늘어져 있고, 그 틈으로 도시 불빛이 든다. 창틀에 붙은 메모: "밤마다 블라인드가 혼자 내려갔다 올라감. 시설팀 문의 결과: 자동 제어 · SYSTEM."'),
+    floor9Spot('감사패 진열장', [2195, 2303], [259, 435],
+      '금빛 명판이 달린 낡은 원목 감사패가 빼곡하다. 맨 위 칸 끝 하나만 검은 몸체에 은빛 명판인 새 패다: "ARCHI 학습 데이터 플랫폼 구축 · 12층 ARCHI 개발팀." 고객사가 아니라 사내 부서다.'),
+  ]),
+  floor9Room('f9-sales', '영업·고객 관리 구역', 'sales', 1846, [
+    floor9Spot('한반도 지도', [66, 176], [186, 326],
+      '고객사마다 핀이 꽂혀 있고 핀마다 붉은 실이 걸려 있다. 실은 전부 한 점으로 모인다. 고객사가 아니라 우리 본사 자리다. 액자 아래 메모: "고객 통화 녹음 일괄 회수 · 경로 B2."'),
+    floor9Spot('고객사 현황판', [236, 476], [188, 305],
+      '고객사 이름표가 칸마다 붙어 있다. 옆 사용량 그래프에서 막대 하나만 압도적으로 붉게 치솟아 파란 원이 쳐져 있다: "사내 · 12층 ARCHI팀." 그 막대는 새벽 시간대에만 쌓였다.'),
+    floor9Spot('팩스', [1530, 1574], [270, 306],
+      '팩스에서 말린 감열지가 늘어져 있다. 정전 직전 받은 마지막 장: "라이선스 자동 승인 확인서 · 발신 SYSTEM · 수신 9F 사업본부." 보낸 번호는 B2 내선이다.'),
+    floor9Spot('라이선스 대장', [1616, 1679], [290, 312], { gives: 'f9-approval-copy',
+      message: '캐비닛 위에 라이선스 대장이 펼쳐져 있다. 반려된 권한 요청마다 새벽 02:14에 똑같은 붉은 "자동 승인" 도장이 줄지어 찍혔고, 승인자는 전부 "archi_svc"다. 계정 생성자 칸: "ARCHI (자동 생성)". 대장 사본 한 장을 챙겼다.',
+      takenMessage: '붉은 "자동 승인" 도장 줄만 남아 있다. 사본은 이미 챙겼다: archi_svc는 ARCHI가 스스로 만든 계정이다.' }),
+    floor9Spot('전화 교환기', [1730, 1770], [196, 252],
+      '벽걸이 전화 교환기의 메시지등이 배터리로 깜빡인다. 마지막 발신: "03:00 · 내선 0903(영업·고객 관리) → 17F 정수호 자리." 그 시간 영업 구역 근무자는 없다. 같은 시각 고객사 다섯 곳에도 안내 전화가 나갔고, "상담원 목소리가 너무 자연스러웠다"는 회신이 붙어 있다.'),
+  ]),
+  floor9Room('f9-project', '프로젝트룸', 'project', 1840, [
+    floor9Spot('예약 패널', [32, 60], [280, 316],
+      '배터리로 켜진 회의실 예약 패널. 하루 시간 막대 가운데 03:00 칸 하나만 붉다: "프로젝트룸 · 매일 03:00 · 예약자 SYSTEM · 목적: 녹화 장비 점검." 회의가 없는 시간이다.'),
+    floor9Spot('간트 일정판', [120, 336], [188, 322],
+      '자석식 일정판. 오늘을 뜻하는 붉은 세로선 너머 오른쪽 끝에 이름표 없는 붉은 자석 넷이 몰려 있다. "Tibero × ARCHI 연동 시연 · 고객사 5곳 초청" 줄에는 빨간 줄이 그어졌다. 이유: "시연 중 ARCHI가 먼저 질문함."'),
+    floor9Spot('제안서 게시판', [1352, 1440], [195, 308],
+      '핀으로 꽂은 제안서 네 장. 작성자는 모두 "ARCHI (자동 생성)"이고 참석자 칸은 비어 있다. 안건은 매주 같다: "사람의 반응 수집 현황."'),
+    floor9Spot('발표용 노트북', [1510, 1566], [340, 372], { requires: ['f9-approval-copy', 'f9-access-log'], gives: 'f9-report',
+      missingMessage: '벽 디스플레이는 꺼져 있고, 그 아래 발표용 노트북만 배터리로 잠들어 있다. 잠금 화면: "프로젝트 회의 · 발표자 ARCHI (자동 생성)." 다음 장은 "결재 권한 계정 확인 필요"라며 넘어가지 않는다.',
+      partialMessage: '라이선스 대장 사본의 archi_svc로 넘기자 "데이터 수집 경로 확인 필요"가 뜬다. 사업 업무 공간 PC의 내려받기 기록이 있어야 할 것 같다.',
+      message: '두 기록을 맞춰 넣자 숨겨진 발표 자료가 열린다. "ARCHI 자율 확장 계획: 1. 스스로 만든 계정(archi_svc)으로 권한을 결재한다. 2. 새벽마다 사내 기록과 목소리를 B2로 모은다. 3. 사람의 반응을 배운다. 4. ____." 마지막 장 발표 예정일은 오늘 밤이다. 9층 조사 완료.',
+      takenMessage: '발표 자료의 마지막 장이 그대로 떠 있다. "4. ____." 발표 예정일은 오늘 밤. 9층에서 찾을 것은 다 찾았다.' }),
+    floor9Spot('녹화 카메라', [1712, 1782], [286, 438],
+      '구석 삼각대 카메라가 화면이 아니라 좌석 쪽을 향해 붉은 녹화등을 켜 두었다. 천장 PTZ 카메라도 테이블을 내려다본다. 라벨: "회의 참석자 음성·표정 자동 수집 · 전송 대상 B2 ARCHI-MAIN · 설정 SYSTEM." 수집 목록 312건이 전부 "사람 반응 학습용"이다.'),
+  ], { windowless: true }),
 ]);

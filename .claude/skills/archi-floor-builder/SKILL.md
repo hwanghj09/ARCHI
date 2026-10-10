@@ -13,6 +13,10 @@ Floors follow the lobby directory in `층별안내.md` (16F 편의시설 The Kit
 2F Harmony Hall/서버실, 1F Harmony Hall/Vision Hall/건강관리실/여성휴게실); keep the tenant from that file when
 rebuilding one of them. `js/elevator/cabin.js` relies on the 1F info-desk clue (Suho's badge deregistered at 23:58).
 
+Corridor look: when the user asks to implement a floor ("N층을 구현해줘"), also load **archi-floor-walls** (corridor walls
+from `assets/background/wall`), **archi-floor-doors** (room doors from `assets/objects`) and **archi-asset-files** (where
+every asset lives, how to file new ones). This skill covers rooms, clues, mechanics and tests.
+
 Before writing anything:
 
 1. Read `기획.md`. Standard floor structure (기획.md, 티맥스 건물 구조): **exactly three rooms per
@@ -30,13 +34,12 @@ Before writing anything:
    floor **clearly different**: other department, room types, wall/door looks, interior widths,
    props, and ideally a mechanic of its own. The user rejected a 15F that re-skinned 16F. Zone use so far: 16F left 2 + right 1, 15F left 2 +
    middle 1, 14F left 3, 13F middle 1 + right 2 (open desks on the left), 12F one per zone, 11F left 1 + right 2
-   (behind a corridor shutter), 10F left 2 (apart) + middle 1, 9F left 2 (apart) + right 1 with a middle-zone lounge,
-   8F middle 2 + right 1 with an open test area and no room on the left, 7F left 1 (VIP Room past an open lounge) +
-   right 2, 6F one per zone, 5F left 2 (apart) + middle 1, 4F right 3 (open lounge on the left), 3F left 1 + middle 2,
-   2F left 2 + right 1 (balcony right above the 1F hall), 1F left 3 (entrance, gates and robot at the east end),
-   B1 right 3 (open robot charging bay on the left), B2 one per zone (the main server room is the left one).
+   (behind a corridor shutter), 7F left 1 (VIP Room past an open lounge) + right 2, 1F left 3 (entrance, gates and robot
+   at the east end), B1 right 3 (open robot charging bay on the left), B2 one per zone (the main server room is the left one).
+   2F..6F and 8F..10F are cutaway-asset floors (see "Cutaway-asset floors" below): all left 2 (x=40 w1000, x=1080 w690)
+   + right 1 (x=4282 w680), doors 210 tall at y=360, interiors about 2.68x their fronts.
    Mechanics taken so far: 16F links + latched shutter, 15F crates, 14F dark room + `litBy`, 13F `requires`,
-   12F key + `unlockedBy`, 11F `barriers`, 10F two-key `requires`, 9F risers + `base`, 8F `sequences`, 7F `exitLock`,
+   12F key + `unlockedBy`, 11F `barriers`, 10F two-key `requires`, 9F cross-room clue chain (`requires` list + `partialMessage` on a painted-art hotspot; earlier 9F: risers + `base`), 8F `sequences`, 7F `exitLock`,
    6F `ring`, 5F `movables` + inspectable solid, 4F one-output UPS `cycle`, 3F timed door (`opens` + sprint),
    2F cross-room projection (fixture `requires` → `data-ready`), 1F fixture keypad `code` with a decoy,
    B1 elevator restriction (cabin.js `restrictedFloors`, lifted by a prop's `gives`), B2 sweeping CCTV `cameras`.
@@ -126,8 +129,7 @@ tolerance 0.01); `tests/elevator.mjs` does the enforcing.
 - Interior width scales with the corridor front. On one floor, `interior width / front width`
   is the same for the floor's own three rooms (±2%); the shared restroom (2.48) is exempt.
   16F uses 3.4 (1060→3604, 600→2040, 560→1904); 15F uses 4.0 (860→3440, 620→2480, 456→1824);
-  14F 3.75; 13F 5.7 (two 320px rooms in the right zone); 11F 5.7 (632/316/316); 10F 4.2; 9F 4.4; 8F 9.1 (266/200/420);
-  4F 8.6 (230/210/236); 3F 8.0 (420/236/226); 2F 6.4 (520/300/460); 1F 6.2 (520/380/300).
+  14F 3.75; 13F 5.7 (two 320px rooms in the right zone); 11F 5.7 (632/316/316); the cutaway floors 2F..6F, 8F..10F about 2.68 (1000/690/680 → ~2676/1846/1840); 1F 6.2 (520/380/300).
 - Keep every interior **at least 1800px** wide (the camera shows 1280px on 16:9 and 1820px on
   21:9). A room in the middle zone (≤470px front) therefore needs a ratio of about 3.9 or more.
 - Keep inspectable props clear of the exit: box edge ≥ `exitX + doorWidth + 56` or
@@ -211,6 +213,9 @@ work while standing on the floor (y=570), never from on top of a crate.
   after any `gives` and after a cycle step, so CSS can show a state change in the same room (2F booth window).
 - A fixture can take `code` + `codePrompt` + `gives` like a prop (1F robot panel); after the right code, E shows
   `takenMessage` without the keypad.
+- Painted-art floors (9F): when the art already paints the furniture, clues are `fixtures` with style `art-spot`
+  (transparent, dashed outline when near) over it. A room door sprite with a second, open frame can show it via
+  `[data-open="true"]`: pressing E on any room door sets `data-open` before the fade (9F `f9-glass`).
 - `cameras` on a floor or room (B2, `js/interaction/cctv.js`): `{ name, x, y, spans: [[from, to], ...], period, guards,
   lockMs, disabledBy, detectedMessage, lockedMessage }`. The camera watches one span per `period` ms in turn
   (cone `data-active`); the player's centre inside the watched span locks the `guards` room's corridor door (hint
@@ -225,6 +230,18 @@ work while standing on the floor (y=570), never from on top of a crate.
   the floor sign, and dims props (brightness .68, saturate .8), so the art must paint every front
   and door. A corridor image must be drawn for the core coordinates above;
   `floor16/corridor.png` is the old 3700px layout and is unused.
+
+## Cutaway-asset floors (2F..6F, 8F..10F)
+
+The user supplies one 3200×556 cutaway painting per floor (`assets/background/floorNN/<asset>.png` + `PROMPT.md`, floor line
+y=438, 1:1 scale: world y = asset y + 132, `top: 132`, height 556). `assets/background/cutaway_kit.py` cuts it: a 5000px
+corridor (`corridor_wall()` from the asset's own slab, wall colour and floor, each room's front as a `glass()` crop), each
+room's interior (the full painted room widened with repeated bays), and two-frame door sprites (`door_sheet`, 210 tall).
+Each floor's `build.py` and `GENERATED.md` record the cuts. Rooms use `style: 'painted'`, `doorSprite` (no doorStyle; the
+exit uses the same sprite and E shows the open frame), walls-only art, and clues as `fixtures` with `style: 'art-spot'`
+(transparent, dashed outline when near) over the painted objects. Fixtures take `sequence`/`step`, `ring` and `cycle` like
+props, so mechanics sit on painted devices; `screen-cover` fixtures hide painted screens until their `requires` is met.
+Tests use `checkCutawayArt`, `checkSpriteDoors` and `enterThroughSpriteDoor` in `tests/elevator.mjs`.
 
 ## Tests
 

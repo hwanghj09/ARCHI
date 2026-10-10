@@ -213,8 +213,8 @@
       #dynamic-scene[data-theme="support"] .room-door.classroom { background-image: url('assets/objects/floor13/training-door.png'); }
       #dynamic-scene .room-interior.monitors { background: linear-gradient(#0c0d0f 0 44px, #33363b 44px 50px, #1a1c1f 50px 420px, #282a2e 420px 424px, #151618 424px); }
       #dynamic-scene .room-interior.monitors::before { top: 70px; left: 240px; right: 560px; height: 230px; border: 6px solid #2c2f34; background: repeating-linear-gradient(90deg, transparent 0 146px, #2c2f34 146px 152px), repeating-linear-gradient(transparent 0 70px, #2c2f34 70px 76px), linear-gradient(#0a0d0f, #111618); }
-      /* 4층 TmaxTibero 연구본부(rnd): 흰 에폭시 바닥과 청회색 벽, 민트색 표지. 로그 연구실 유리벽·백업 보관실 강판과 전기 잠금 문·연구원 사무실 간유리.
-         정전이라 화면·표시등은 꺼진 색이고, 전기 잠금은 전원이 들어오면(data-unlocked) 초록불, UPS 분배기는 고른 출력 칸(data-state)에만 불이 켜진다 */
+      /* 4층 TmaxTibero 연구본부(rnd): 지금은 단면 에셋 배경(assets/background/floor04)을 쓴다. 아래 rnd 규칙 가운데 방 전면·문·실내 그림은
+         walls 모드에서 숨고, UPS 분배기 표시등(.f4-ups)만 단면 에셋 쪽 규칙이 쓴다. */
       #dynamic-scene[data-theme="rnd"] .room-interior { background: linear-gradient(#0c1112 0 44px, #34454a 44px 50px, #1b2426 50px 420px, #5f8f86 420px 422px, #172022 422px); }
       #dynamic-scene[data-theme="rnd"] .room-interior::before { border-color: #3a4c51; }
       #dynamic-scene[data-theme="rnd"] .room-interior::after { background: repeating-linear-gradient(90deg, transparent 0 200px, #3a4c51 200px 320px); }
@@ -299,6 +299,16 @@
       #dynamic-scene .fixture.booth-window { border: 8px solid #2c4044; background: linear-gradient(115deg, transparent 0 40%, #ffffff0a 40% 44%, transparent 44%), #06090a; }
       #dynamic-scene .fixture.booth-window[data-ready="true"] { background: linear-gradient(115deg, transparent 0 40%, #ffffff14 40% 44%, transparent 44%), radial-gradient(ellipse at 30% 50%, #9ab4b066 0 20%, transparent 60%), #06090a; }
       #dynamic-scene .fixture.projector { background: linear-gradient(#2a3436, #1e2729) 30px 16px / 140px 76px no-repeat, radial-gradient(circle, #0a0f10 0 14px, #3a4a4e 14px 18px, transparent 18px) 150px 26px / 44px 44px no-repeat, linear-gradient(#3a4a4e, #3a4a4e) 90px 92px / 12px 86px no-repeat, linear-gradient(#2a3436, #2a3436) 40px 178px / 120px 12px no-repeat; }
+      /* 2층 단면 에셋(assets/background/floor02): 방 문은 sprite-door(공용 규칙). 화장실 문은 16층 화장실 문 그림을 쓰고, 화장실 이름표는
+         문(x=3612..3757) 바로 위 천장 슬래브에 둔다. 스크린 덮개는 영사기가 돌기 전에만 그림 속 스크린을 가린다. */
+      /* 2층 이름표는 16층처럼 천장(월드 y=0..100)과 벽이 만나는 곳(y≈96..124)에 걸친다. 화장실 이름표는 문 바로 위 가운데. */
+      /* 단면 에셋 층의 문(room doorSprite): 닫힘|열림 두 칸 그림. 그림은 scene-builder가 inline으로 입힌다. */
+      #dynamic-scene .room-door.sprite-door { border: 0; box-shadow: none; background-color: transparent; background-size: 200% 100%; background-repeat: no-repeat; background-position: 0 0; }
+      #dynamic-scene .room-door.sprite-door::before, #dynamic-scene .room-door.sprite-door::after { content: none; }
+      #dynamic-scene .room-door.sprite-door[data-open="true"] { background-position: 100% 0; }
+      #dynamic-scene .fixture.screen-cover { pointer-events: none; background: #05090b; box-shadow: inset 0 0 0 3px #0c1416; transition: opacity .6s; }
+      #dynamic-scene .fixture.screen-cover[data-ready="true"] { opacity: 0; }
+      #dynamic-scene[data-theme="concert"][data-art="walls"] .floor-prop img { filter: brightness(.7) saturate(.8); }
       #dynamic-scene .fixture.concert-poster { padding: 20px 8px; border: 5px solid #a88a4a; background: linear-gradient(160deg, #13282c, #0a1618); color: #c8b07a; font: bold 12px Georgia, serif; text-align: center; }
       #dynamic-scene .fixture.concert-poster span:first-child { margin-bottom: 18px; font-size: 16px; letter-spacing: 1px; }
       #dynamic-scene .fixture.concert-poster span:last-child { margin-top: 30px; font-size: 11px; color: #8aa49e; }
@@ -426,6 +436,47 @@
       .solid.riser::before { content: ''; position: absolute; right: 18px; bottom: 100%; width: 150px; height: 30px; border-radius: 5px 5px 0 0; background: repeating-linear-gradient(90deg, #4a2a36 0 40px, transparent 40px 50px); }
       .room-door.push-bar { border-color: #8c5566; background: radial-gradient(circle at 25% 30%, #1a2230 0 12px, #8c5566 12px 14px, transparent 14px), radial-gradient(circle at 75% 30%, #1a2230 0 12px, #8c5566 12px 14px, transparent 14px), linear-gradient(transparent 55%, #b8a0a8 55% 58%, transparent 58%), linear-gradient(90deg, transparent 49%, #150b0f 49% 51%, transparent 51%), linear-gradient(#4a2a36, #3a2029); box-shadow: inset 0 0 0 4px #1a0d12; }
       .room-door.wine { border-color: #6a4250; background: linear-gradient(90deg, transparent 78%, #c9a9b3 78% 82%, transparent 82%), linear-gradient(105deg, #2c2433 0 30%, #201a27 30%); box-shadow: inset 0 0 0 4px #150b0f; }
+      /* 단면 에셋 층의 조사 지점(art-spot): 그림 속 물건 위에 투명하게 겹치고, 가까이 가면 점선 테두리만 보인다. */
+      #dynamic-scene .fixture.art-spot { border: 0; background: none; box-shadow: none; }
+      /* walls-v3 흰색 키트 복도(2~6층, archi-floor-walls): 이름표는 천장 띠(y=48..96) 바로 아래, 화장실 이름표는 문 위 가운데,
+         화장실 문은 16층 화장실 문 그림. 흰 벽에 붙는 안내판(wall-notice)은 짙은 판에 글줄. */
+      #dynamic-scene:is([data-theme="concert"], [data-theme="gym"], [data-theme="rnd"], [data-theme="archive"], [data-theme="oncall"])[data-art="walls"] .floor-room:is(.painted, .restroom) .floor-room-sign { top: -22px; }
+      #dynamic-scene:is([data-theme="concert"], [data-theme="gym"], [data-theme="rnd"], [data-theme="archive"], [data-theme="oncall"])[data-art="walls"] .floor-room.restroom .floor-room-sign { left: 128.5px; }
+      #dynamic-scene:is([data-theme="concert"], [data-theme="gym"], [data-theme="rnd"], [data-theme="archive"], [data-theme="oncall"])[data-art="walls"] .room-door.metal { border: 0; box-shadow: none; background: #131618 url('assets/objects/floor16/restroom-door.png') 0 0 / 100% 100% no-repeat; }
+      #dynamic-scene .fixture.harmony-poster { background: url('assets/objects/floor02/harmony-hall-poster.png') 0 0 / 100% 100% no-repeat; }
+      #dynamic-scene .fixture.wall-notice { padding: 12px 10px; border: 4px solid #3a4246; background: linear-gradient(#1d2326, #15191b); color: #c9d2d0; font: bold 12px/1.9 Arial, sans-serif; text-align: center; box-shadow: 0 3px 6px #0006; }
+      #dynamic-scene .fixture.wall-notice span:first-child { margin-bottom: 6px; color: #f0c870; font-size: 14px; }
+      #dynamic-scene .fixture.art-spot.near { outline: 2px dashed rgba(170, 205, 220, .55); outline-offset: 2px; }
+      /* 단면 에셋 층(방 style 'painted')의 복도 방 이름표는 그림의 천장 슬래브(월드 y=180..214) 위에 얹는다. */
+      #dynamic-scene[data-art="walls"] .floor-room.painted .floor-room-sign { top: 66px; }
+      /* 3F Fitness Club: 그림 속 유리 자동문 단면(유리 18px, 센서 상자 30px) 위에 그 상태를 겹친다. 닫힘 = 밝은 유리판 + 붉은 센서,
+      열림 = 유리가 빠진 어두운 틈 + 초록 센서. */
+      #dynamic-scene .barrier.f3-auto-door { background: linear-gradient(90deg, #9cc0cc66 0 2px, #2c414c99 2px calc(100% - 3px), #9cc0cc55 calc(100% - 3px)) 0 30px / 100% calc(100% - 30px) no-repeat, linear-gradient(160deg, transparent 0 40%, #d8eef41f 40% 48%, transparent 48%) 0 30px / 100% calc(100% - 30px) no-repeat; transition: background .3s; }
+      #dynamic-scene .barrier.f3-auto-door::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 30px; box-shadow: inset 0 0 0 1px #4a5258; }
+      #dynamic-scene .barrier.f3-auto-door::after { content: ''; position: absolute; top: 12px; left: 6px; width: 6px; height: 6px; border-radius: 50%; background: #e0402e; box-shadow: 0 0 6px 2px #e0402e88; }
+      #dynamic-scene .barrier.f3-auto-door[data-open="true"] { background: linear-gradient(#07090a, #0d1012) 0 30px / 100% calc(100% - 30px) no-repeat; }
+      #dynamic-scene .barrier.f3-auto-door[data-open="true"]::after { background: #4ad07a; box-shadow: 0 0 6px 2px #4ad07a88; }
+      #dynamic-scene[data-theme="gym"][data-art="walls"] .floor-prop img { filter: brightness(.7) saturate(.8); }
+      /* 5F 단면 에셋: 이동식 발판(movable f5-step)은 build.py가 그린 floor05-step.png를 배경 그림과 같은 밝기로 입히고, 가장 높은
+      서가 충돌체(solid f5-shelf)는 그림 속 서가가 보이도록 모양 없이 두되 꼭대기에 서면 점선 테두리만 보인다. */
+      #dynamic-scene[data-theme="archive"] .solid.movable.f5-step { background: url('assets/background/floor05/floor05-step.png') 0 0 / 100% 100% no-repeat; filter: brightness(.72) saturate(.85); image-rendering: pixelated; }
+      #dynamic-scene[data-theme="archive"] .solid.f5-shelf { background: none; }
+      #dynamic-scene[data-theme="archive"] .solid.f5-shelf.near { outline: 2px dashed rgba(170, 205, 220, .55); outline-offset: 2px; }
+      /* 6F 단면 에셋(assets/background/floor06): 공용 엔지니어링 구역 작업대의 당직 전화(설비 ring, art-spot duty-phone)는 그림에
+      붉은 벨 램프가 그려져 있어, 울리는 동안(data-ringing=true)에만 그 위에 붉은 빛이 깜빡이고 머리 위로 벨 표시가 뜬다. */
+      @keyframes f6-phone-ring { 0%, 49% { opacity: 1; } 50%, 100% { opacity: .35; } }
+      #dynamic-scene .fixture.duty-phone[data-ringing="true"] { border-radius: 6px; background: radial-gradient(circle at 78% 55%, #ff6a52 0 3px, #ff46327a 4px 12px, transparent 18px); box-shadow: 0 0 0 2px #ff5a4acc, 0 0 22px 8px #ff463266; animation: f6-phone-ring .5s linear infinite; }
+      #dynamic-scene .fixture.duty-phone[data-ringing="true"]::before { content: ''; position: absolute; top: -26px; left: 50%; width: 14px; height: 14px; margin-left: -7px; border-radius: 50%; background: #ff7a5e; box-shadow: 0 0 14px 4px #ff5a42; }
+      /* 4층 단면 에셋: UPS 분배기(설비 cycle)의 출력 표시등. 그림에는 셋째 등만 켜져 있어 그 등을 덮고(::before), 지금 출력 칸
+      (data-state 0·1·2 = 원본 x 616·634·652)의 등만 민트색으로 켠다(::after). 그림 밝기 필터(.72)에 맞춘 색이다. */
+      #dynamic-scene[data-theme="rnd"] .fixture.art-spot.f4-ups::before,
+      #dynamic-scene[data-theme="rnd"] .fixture.art-spot.f4-ups::after { content: ''; position: absolute; top: 9px; width: 16px; height: 16px; border-radius: 50%; pointer-events: none; }
+      #dynamic-scene[data-theme="rnd"] .fixture.art-spot.f4-ups::before { left: 40px; background: radial-gradient(circle, #1b2024 0 5px, #383f42 5.5px 8px); }
+      #dynamic-scene[data-theme="rnd"] .fixture.art-spot.f4-ups::after { left: 4px; background: radial-gradient(circle, #a8e8dc 0 4px, #6fc8b866 5px, transparent 8px); transition: left .2s; }
+      #dynamic-scene[data-theme="rnd"] .fixture.art-spot.f4-ups[data-state="1"]::after { left: 22px; }
+      #dynamic-scene[data-theme="rnd"] .fixture.art-spot.f4-ups[data-state="2"]::after { left: 40px; }
+      /* 8F QA실: 재현 절차(설비 sequence)를 끝낸 그림 속 장치 위에 작은 초록 표시등(data-done). 장치가 작아 상자 위에 띄운다. */
+      #dynamic-scene[data-theme="qa"] .fixture.art-spot[data-done="true"]::after { content: ''; position: absolute; left: 50%; top: -14px; width: 8px; height: 8px; margin-left: -4px; border-radius: 50%; background: #8fe06a; box-shadow: 0 0 8px #8fe06a; }
       .room-door.badge { border-color: #5a5a64; background: linear-gradient(90deg, transparent 80%, #a8a8b4 80% 84%, transparent 84%), linear-gradient(#2e2d35, #232228); box-shadow: inset 0 0 0 4px #141318; }
       /* B1 시설 관리실(utility 테마): 초록 에폭시 바닥과 노란 안전선, 밝은 콘크리트 벽과 천장 배관. B1·B2는 비상 발전기로 전기가
          살아 있는 층이라 천장 형광등·모니터·카드 리더가 켜진 밝은 색으로 그린다. 테마 규칙은 테두리색만 바꾼다. */

@@ -124,6 +124,8 @@ function interact() {
     // 방 안에서 복도 문으로 나오면 그 방 id를 챙긴 것으로 친다: 안쪽 걸쇠로 잠긴 방(unlockedBy: 자기 방 id)은
     // 한 번 안에서 열고 나오면 그 뒤로 복도에서도 열린다.
     if (nearbyDoor.key === 'exit') collectedItems.add(dynamicFloorId);
+    // 문이 열린 모습을 페이드 동안 보인다(열림 칸이 있는 문 스프라이트만 모양이 바뀐다, 예: 9층 유리문).
+    nearbyDoor.element.dataset.open = 'true';
     changeRoom(() => performFloorChange(target, null, arrivalKey));
     return;
   }
