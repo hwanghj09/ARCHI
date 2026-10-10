@@ -5,13 +5,13 @@
 .power-art img { display: block; width: 200%; height: 100%; max-width: none; image-rendering: pixelated; }
 #power-panel[data-enabled="true"] .power-art img { transform: translateX(-50%); }
 #power-title { position: absolute; left: 23%; top: 10.5%; width: 54%; margin: 0; color: #342e22; font-size: clamp(14px, 3.7vw, 20px); text-align: center; }
-#power-status { position: absolute; left: 19%; top: 20%; width: 54%; height: 5%; display: grid; place-items: center; font: bold clamp(11px, 3vw, 15px) monospace; color: #858f86; }
+#power-status { position: absolute; left: 19%; top: 20%; width: 54%; height: 5%; display: grid; place-items: center; font: bold clamp(10px, 2.8vw, 15px) monospace; color: #858f86; text-align: center; }
 #power-panel[data-enabled="true"] #power-status { color: #9be8cb; text-shadow: 0 0 8px #6acda177; }
 #power-panel button { font: inherit; cursor: pointer; }
 #power-panel button:focus-visible { outline: 3px solid #f2d689; outline-offset: 3px; }
 #power-lever { position: absolute; left: 14%; top: 29%; width: 24%; height: 50%; padding: 0; border: 0; background: transparent; color: #f3e5bd; touch-action: none; }
 #power-lever:hover { box-shadow: inset 0 0 0 2px #f1d58a80; }
-#power-lever-label { position: absolute; top: 103%; left: -8%; width: 116%; padding: 4px 0; font-size: clamp(9px, 2.6vw, 12px); background: #121a1d; border: 1px solid #786d52; white-space: nowrap; }
+#power-lever-label { position: absolute; top: 100.5%; left: -8%; width: 116%; padding: 2px 0; font-size: clamp(9px, 2.6vw, 12px); background: #121a1d; border: 1px solid #786d52; white-space: nowrap; }
 #power-floor-grid { position: absolute; left: 46%; top: 32.5%; width: 37%; height: 45%; display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(6, 1fr); gap: 5px; }
 #power-floor-grid button { min-width: 0; padding: 0; border: 2px solid; border-color: #8e9488 #242c2b #161d1d #626e67; border-radius: 3px; background: linear-gradient(#414b47, #242e2d); box-shadow: 0 2px 0 #070b0c; color: #d5dccb; font: bold clamp(12px, 3.4vw, 17px) monospace; }
 #power-floor-grid button:disabled { cursor: default; color: #646d69; background: #242c2b; border-color: #424c46 #1e2624 #121918 #3d4841; }
@@ -23,5 +23,7 @@
   50% { box-shadow: 0 2px 0 #070b0c, 0 0 10px 3px #f2d689aa; }
 }
 #power-note { position: absolute; left: 18%; top: 14.5%; width: 64%; margin: 0; color: #f2d689; text-align: center; font-size: clamp(10px, 3vw, 14px); font-weight: bold; white-space: nowrap; }
-#power-help { position: absolute; left: 22%; top: 85.3%; width: 56%; height: 3.4%; margin: 0; display: grid; align-content: center; color: #393126; text-align: center; font-size: clamp(7px, 2.1vw, 10px); line-height: 1.05; white-space: nowrap; }
+#power-help { position: absolute; left: 22%; top: 83.4%; width: 56%; height: 4.5%; margin: 0; display: grid; align-content: center; color: #393126; text-align: center; font-size: clamp(7px, 2.1vw, 10px); line-height: 1.05; white-space: nowrap; }
 #power-close { position: absolute; left: 38%; top: 93%; width: 24%; min-height: 32px; padding: 5px; border: 1px solid #7f8e84; border-radius: 2px; background: #18211f; color: #e7e3d2; font-size: 12px !important; }
+/* 패널이 열린 동안에도 '먼저 켠 층은 꺼집니다' 같은 안내가 어두운 막 아래에 묻히지 않게 상태 문구를 패널(z-index 8) 위로 올린다. */
+body:has(#power-panel:not([hidden])) #interaction-status { z-index: 9; color: #f3e6c4; }

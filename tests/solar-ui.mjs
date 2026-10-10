@@ -5,8 +5,10 @@ import { chromium } from 'playwright';
 await mkdir('.local', { recursive: true });
 const browser = await chromium.launch();
 try {
-  for (const width of [1280, 390]) {
-    const page = await browser.newPage({ viewport: { width, height: width === 390 ? 844 : 720 }, hasTouch: width === 390 });
+  // 360 is the narrowest common phone width; the two-floor status must still fit there.
+  for (const [width, height] of [[1280, 720], [390, 844], [360, 740]]) {
+    const mobile = width < 768;
+    const page = await browser.newPage({ viewport: { width, height }, hasTouch: mobile });
     const errors = [];
     page.on('pageerror', error => errors.push(error.message));
     await page.goto(new URL('../index.html', import.meta.url).href);
@@ -52,7 +54,7 @@ try {
     }, source);
     assert.deepEqual(bounds, { size: [768, 512], corners: [0, 0], scale: 2 });
     await page.screenshot({ path: `.local/solar-panel-off-${width}.png` });
-    if (width === 390) await lever.tap();
+    if (mobile) await lever.tap();
     else {
       const box = await lever.boundingBox();
       await page.mouse.move(box.x + box.width / 2, box.y + 30); await page.mouse.down();
@@ -64,8 +66,11 @@ try {
     assert.equal(await page.locator('.solar-supply').getAttribute('data-active'), 'true');
     assert(await page.locator('.power-art img').evaluate(img => Math.abs(new DOMMatrix(getComputedStyle(img).transform).m41 + img.clientWidth / 2) < 1));
     assert(await floor(1).evaluate(el => el.classList.contains('suggested') && getComputedStyle(el).animationName === 'power-suggest-pulse'), '1F pulses as the first suggestion');
-    await floor(12).focus(); await page.keyboard.press('Enter');
-    assert.deepEqual(await state(), { on: true, floors: [12] });
+    // Holding Enter sends repeated keydowns; a floor toggles on every press, so only the first one counts.
+    await floor(12).focus();
+    for (let i = 0; i < 4; i += 1) await page.keyboard.down('Enter');
+    await page.keyboard.up('Enter');
+    assert.deepEqual(await state(), { on: true, floors: [12] }, 'Holding Enter presses a floor once');
     await status('12F 전력 공급 중 (1/2)');
     // Two floors stay lit together, in the order they were turned on.
     await floor(7).click();
@@ -83,6 +88,8 @@ try {
     await pressed([7, 1], [12]);
     assert(await floor(1).evaluate(el => !el.classList.contains('suggested') && !el.hasAttribute('aria-label')));
     assert.match(await page.locator('#interaction-status').textContent(), /1층.*먼저 켠 12층은 꺼집니다/);
+    assert(await page.evaluate(() => Number(getComputedStyle(document.getElementById('interaction-status')).zIndex) >
+      Number(getComputedStyle(document.getElementById('power-panel')).zIndex)), 'The drop notice shows above the open panel');
     // Pressing a lit floor turns off only that floor.
     await floor(7).click();
     assert.deepEqual(await state(), { on: true, floors: [1] }, 'Clicking a powered floor turns only it off');
@@ -96,11 +103,16 @@ try {
       return r.width >= 30 && r.height >= 30 && r.left >= 0 && r.right <= innerWidth && r.top >= 0 && r.bottom <= innerHeight;
     }));
     assert(layout, 'Every control fits the viewport and remains touchable');
+    // The plate's light face is rows 427-449 and columns 82-303 of each 384x512 half of panel-off-on.png.
     assert(await page.locator('#power-help').evaluate(el => {
       const range = document.createRange(); range.selectNodeContents(el);
-      const box = el.getBoundingClientRect(); const lines = [...range.getClientRects()].filter(line => line.width > 0);
-      return el.textContent.includes('최대 두 층') && lines.length >= 2 && lines.every(line => line.left >= box.left - 1 && line.right <= box.right + 1);
-    }), 'Both help steps, including the two-floor limit, fit on the painted plate');
+      const cabinet = el.parentElement.getBoundingClientRect(); const lines = [...range.getClientRects()].filter(line => line.width > 0);
+      const face = { left: cabinet.left + cabinet.width * 82 / 384, right: cabinet.left + cabinet.width * 304 / 384,
+        top: cabinet.top + cabinet.height * 427 / 512, bottom: cabinet.top + cabinet.height * 450 / 512 };
+      const label = document.getElementById('power-lever-label').getBoundingClientRect();
+      return el.textContent.includes('최대 두 층') && lines.length >= 2 && lines.every(line => line.left >= face.left && line.right <= face.right &&
+        line.top >= face.top && line.bottom <= face.bottom && (line.top >= label.bottom || line.left >= label.right));
+    }), 'Both help steps, including the two-floor limit, sit on the painted plate face clear of the lever label');
     await page.keyboard.press('Escape');
     assert.equal(await page.locator('#stage').evaluate(el => el.inert), false);
     await page.keyboard.press('e');
