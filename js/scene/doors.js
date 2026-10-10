@@ -19,6 +19,7 @@ function addRoomDoor(door, parent = dynamicScene) {
 
 function setDoorOpen(door, open) {
   door.element.dataset.open = String(open);
+  if (door.light) door.light.dataset.open = String(open);
   door.element.setAttribute('aria-label', `${door.name} 문 ${open ? '열림' : '닫힘'}`);
 }
 

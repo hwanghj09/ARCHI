@@ -27,7 +27,21 @@
 #cabin-exit:focus-visible { outline: 2px solid #f4ce72; outline-offset: 3px; }
 #cabin-status { position: absolute; left: 68%; top: 86%; width: 23%; margin: 0; padding: 8px; color: #f1f1e5; background: #111719e8; text-align: center; font: 14px/1.5 Arial, sans-serif; overflow-wrap: anywhere; }
 /* Leave only enough emergency light on the controls to choose a floor and exit. */
-#cabin-scene[data-blackout="true"]::after { content: ''; position: absolute; inset: 0; z-index: 1; pointer-events: none; background: linear-gradient(90deg, #000d 0 65%, #0007 70% 89%, #000d 94%); }
+#cabin-scene[data-blackout="true"]::after { content: ''; position: absolute; inset: 0; z-index: 1; pointer-events: none; background: linear-gradient(90deg, #0007 0 65%, #0002 70% 89%, #0007 94%); }
+/* 객실 조명이 열린 문틈으로 새어 나가 문 밖 복도가 보인다: 문이 열린 만큼(--door-open) 문틈 쪽 어둠 막을 걷어 내고, 바닥 쪽에 은은한 빛을 더한다. */
+#cabin-scene[data-blackout="true"]::after {
+  -webkit-mask-image: radial-gradient(ellipse 23% 46% at 45% 58%, rgb(0 0 0 / calc(1 - var(--door-open, 0) * .9)) 0, rgb(0 0 0 / calc(1 - var(--door-open, 0) * .7)) 55%, #000 100%);
+  mask-image: radial-gradient(ellipse 23% 46% at 45% 58%, rgb(0 0 0 / calc(1 - var(--door-open, 0) * .9)) 0, rgb(0 0 0 / calc(1 - var(--door-open, 0) * .7)) 55%, #000 100%);
+}
+/* 천장 조명(그림 속 x 29~61%, y 2~6%)이 켜져 빛나고 아래로 빛이 퍼진다. 문 밖으로 새는 빛은 문이 열린 만큼(--door-open) 더해진다. */
+#cabin-scene[data-blackout="true"]::before { content: ''; position: absolute; inset: 0; z-index: 2; pointer-events: none; mix-blend-mode: screen;
+  background:
+    radial-gradient(ellipse 17.5% 3.4% at 45.2% 3.9%, #ffffff 0, #fffffff0 50%, transparent 100%),
+    radial-gradient(ellipse 26% 9% at 45.2% 4%, #ffffff70 0, transparent 100%),
+    radial-gradient(ellipse 36% 62% at 45.2% 3%, #ffffff48 0, #ffffff20 42%, transparent 100%),
+    radial-gradient(ellipse 20% 12% at 45% 84%, rgb(255 255 255 / calc(var(--door-open, 0) * .35)) 0, transparent 100%),
+    radial-gradient(ellipse 22% 40% at 45% 52%, rgb(255 255 255 / calc(var(--door-open, 0) * .14)) 0, transparent 100%); }
+#cabin-scene[data-blackout="true"][data-powered="false"]::before { display: none; }
 #cabin-scene[data-blackout="true"] :is(.cabin-hit, #cabin-display, #cabin-exit, #cabin-status) { z-index: 2; }
 #cabin-scene[data-blackout="true"] #cabin-display { color: #77967c; background: #050807; }
 #cabin-scene[data-blackout="true"] #cabin-status { color: #aebbb2; background: #080d0bf2; }

@@ -17,22 +17,58 @@ function addElevatorPanels(door) {
   const panels = document.createElement('div');
   panels.className = 'elevator-panels';
   door.element.append(panels);
+  const glow = document.createElement('div');
+  glow.className = 'elevator-glow';
+  door.element.append(glow);
+  // 열린 문으로 새는 객실 조명: 어둠 막(z 5) 위에 그려 어두운 곳에서도 문 주변을 밝힌다. 열림·전력은 setDoorOpen과 updateFloorIndicator가 맞춘다.
+  const spreadW = door.width * 2.6;
+  const top = door.y - door.width * 0.25;
+  door.light = document.createElement('div');
+  door.light.className = 'elevator-light';
+  door.light.dataset.open = door.element.dataset.open;
+  Object.assign(door.light.style, {
+    left: `${door.x + door.width / 2 - spreadW / 2}px`, top: `${top}px`, width: `${spreadW}px`, height: `${floorY - top}px`,
+  });
+  door.element.before(door.light); // 문(열리면 어둠 막 위로 올라옴)보다 아래에 둬서 빛이 문 밖으로만 번지게 한다.
 }
 
 function updateFloorIndicator(door) {
   const car = elevatorCars[door.carIndex];
   const label = floorShortLabel(car.floor);
   const powered = elevatorHasPower();
+  door.indicator.dataset.powered = String(powered);
+  door.element.dataset.lit = String(powered);
+  if (door.light) door.light.dataset.powered = String(powered);
   door.indicator.textContent = `${car.travelling && powered ? (car.destination > car.floor ? '↑ ' : '↓ ') : ''}${label}`;
   door.indicator.setAttribute('aria-label', `${door.name} ${label}${!powered ? ' 전력 없음' : car.travelling ? ' 이동 중' : ''}`);
+}
+
+// 열린 엘리베이터가 어둠 막(#darkness)에 내는 구멍: 문이 열리고 전력이 있으면 그 둘레의 어둠이 걷혀 주변 배경이 보인다.
+// 값은 차량별 CSS 변수(--e0x … --e2k)로 넘기고, 모양은 index.html의 #darkness mask가 그린다. 켜지고 꺼질 때는 부드럽게 변한다.
+const elevatorGlowAmount = [0, 0, 0];
+const darknessLayer = document.getElementById('darkness');
+function updateElevatorGlow(index, door) {
+  const lit = !!door && door.element.dataset.open === 'true' && elevatorHasPower() && door.element.offsetParent !== null;
+  elevatorGlowAmount[index] += ((lit ? 1 : 0) - elevatorGlowAmount[index]) * 0.06;
+  if (elevatorGlowAmount[index] < 0.005) elevatorGlowAmount[index] = 0;
+  const style = darknessLayer.style;
+  style.setProperty(`--e${index}k`, elevatorGlowAmount[index].toFixed(3));
+  if (!door) return;
+  const height = door.height ?? floorY - door.y;
+  style.setProperty(`--e${index}x`, `${door.x + door.width / 2}px`);
+  style.setProperty(`--e${index}y`, `${door.y + height * 0.5}px`);
+  style.setProperty(`--e${index}w`, `${door.width * 2.4}px`);
+  style.setProperty(`--e${index}h`, `${height * 0.95}px`);
 }
 
 function refreshSceneElevatorDoors() {
   elevatorCars.forEach((car, index) => {
     const door = currentDoors.find(candidate => candidate.type === 'elevator' && candidate.carIndex === index);
-    if (!door) return;
-    setDoorOpen(door, car.open && car.floor === currentSceneFloor);
-    updateFloorIndicator(door);
+    if (door) {
+      setDoorOpen(door, car.open && car.floor === currentSceneFloor);
+      updateFloorIndicator(door);
+    }
+    updateElevatorGlow(index, door);
   });
 }
 
