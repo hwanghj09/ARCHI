@@ -55,8 +55,9 @@ function updateOpening(elapsed) {
       openingCaption.textContent = '늦었네. 이제 퇴근하자.';
     }
   }
-  // Step away from the background chair into the gameplay floor plane while rising.
-  const rise = Math.max(0, Math.min(1, (openingElapsed - 3450) / 650));
+  // Step away from the background chair into the gameplay floor plane while rising,
+  // arriving as frame 4 ends so the idle pose never slides.
+  const rise = Math.max(0, Math.min(1, (openingElapsed - 3450) / 350));
   Body.setPosition(body, { x: 590 + 66 * rise, y: floorY - 107 + 26 * rise });
   cameraX += (cameraTarget() - cameraX) * .13;
 }

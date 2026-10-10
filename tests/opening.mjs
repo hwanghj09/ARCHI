@@ -78,7 +78,7 @@ try {
       callback(time);
       const visible = [...sprite.querySelectorAll('img')].filter(img => getComputedStyle(img).display !== 'none');
       openingPaints.push({ elapsed: openingElapsed, active: openingActive, visible: visible.map(img => img.id).join(),
-        cell: Math.round(-new DOMMatrix(getComputedStyle(openingSheet).transform).m41 / 192) });
+        cell: Math.round(-new DOMMatrix(getComputedStyle(openingSheet).transform).m41 / 192), x: body.position.x, feet: body.bounds.max.y });
     });
   });
   for (const [at, phase, frame, power] of [[1750, 'shutdown', 1, 'shutting-down'], [2700, 'off', 2, 'off'],
@@ -118,6 +118,8 @@ try {
   assert(paints.every(paint => paint.visible === (paint.active && paint.elapsed < 3800 ? 'opening-sheet' : 'idle-sprite')),
     'No painted frame flashes another sheet between rising, standing and gameplay');
   assert(paints.every(paint => paint.visible !== 'opening-sheet' || paint.cell < 5), 'The walking cell is never painted');
+  assert(paints.filter(paint => paint.active && paint.elapsed >= 3800)
+    .every(paint => Math.abs(paint.x - 656) < .01 && Math.abs(paint.feet - 570) < .01), 'The idle pose appears in place and never slides');
   assert(await page.locator('#opening').isHidden());
   assert(await chair.isHidden(), 'Chair foreground is hidden after the opening');
   assert(await page.locator('#darkness').isHidden(), 'Shutting down the computer does not turn off the room lights');
