@@ -215,7 +215,8 @@ try {
   await powerPage.keyboard.press('Escape');
   await leaveComputer();
 
-  await powerPage.evaluate(() => powerGrid.querySelector('[data-floor="16"]').click());
+  // 태양광이 1개 층이든 2개 층(먼저 켠 층부터 꺼짐)이든 17층 전력이 빠지도록 다른 두 층을 차례로 켠다.
+  await powerPage.evaluate(() => { powerGrid.querySelector('[data-floor="16"]').click(); powerGrid.querySelector('[data-floor="15"]').click(); });
   assert.equal(await monitor.getAttribute('data-power'), 'off', 'Moving solar power away from 17F switches the computer off');
   await assertBlocked('Solar on another floor');
   await powerPage.evaluate(() => powerGrid.querySelector('[data-floor="17"]').click());
