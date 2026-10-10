@@ -2,7 +2,7 @@
 // 1층 로비(층별 안내: Harmony Hall / Vision Hall / 건강관리실 / 여성휴게실): 밝은 트래버틴 바닥과 황동 테(atrium 테마).
 // 정문은 동쪽 끝(화장실 오른쪽 구역)의 회전문이고, 그 앞에 정전으로 날개가 풀린 스피드 게이트와 충전 도크의 경비 로봇 R-01이 선다.
 // 방 셋은 모두 엘리베이터 왼쪽 서쪽 날개에 벽을 맞대고 선다(왼쪽 3): Harmony Hall 1층 객석, Vision Hall, 건강관리실.
-// 1번 엘리베이터 앞에 층별 안내판(17F~B3), 비상계단 옆 가운데 구역에 안내 데스크가 있다. 여성휴게실은 건강관리실 안쪽의 잠긴 문이다.
+// 1번 엘리베이터 앞에 층별 안내판(17F~B2), 비상계단 옆 가운데 구역에 안내 데스크가 있다. 여성휴게실은 건강관리실 안쪽의 잠긴 문이다.
 // 방 안 폭은 복도 전면 폭의 6.2배(520/380/300 → 3224/2356/1860).
 // 장치는 경비 로봇 정비 패널의 네 자리 번호(설비 fixture의 code): 패널 스티커는 "정비 코드 = 제작일(월일)"이라 Vision Hall 진열장의
 // 제작일(11월 7일, 1107)을 넣게 만들지만 옛 번호다. 건강관리실 점검표가 로비 배치(9월 14일) 때 배치일로 바꿨다고 알려 주어 0914가
@@ -38,13 +38,12 @@ const FLOOR1_LAYOUT = {
       doorX: 1023, doorWidth: 99, doorStyle: 'clinic-door', doorOutline: [1030, 302, 106, 254] },
   ],
   fixtures: [
-    // 실측: corridor.png에 이미 금장 테두리 벽감이 그려져 있다(x≈1325~1650, y≈195~500, 안쪽 높이 약
-    // 305px) — CSS 테두리/배경은 art 모드에서 지우고 그 위에 글자만 얹는다. 좌표는 실제 벽감에 맞췄지만,
-    // 20줄 전부는 실제 벽감 높이(약 305px)에 안 들어가서, 덜 중요한 층은 "···"로 묶어 16줄로 줄였다
-    // (단서로 이어지는 12F·7F·B2 세 줄과 위아래 끝 층은 그대로 유지). 높이는 그림 속 벽감 테두리 실측값
-    // 305로 정확히 맞춰서, 글자가 테두리 안쪽에만 들어가고 테두리 밖 맨벽까지 안 내려가게 했다. 강조 줄
-    // CSS(index.html의 nth-child)도 이 배열의 새 줄 번호(5/9/15번째)에 맞춰 고쳤다.
-    { name: '층별 안내판', x: 1325, y: 195, width: 325, height: 305, style: 'directory-board',
+    // 실측: corridor.png에 이미 금장 테두리 벽감이 그려져 있다(바깥 x≈1320~1646, y≈225~509, 안쪽
+    // x≈1323~1644, y≈229~505, 안쪽 높이 약 276px). CSS 테두리/배경은 art 모드에서 지우고 그 위에 글자만
+    // 얹는다. 좌표는 벽감 안쪽에 맞췄다. 층 전부는 안쪽 높이(약 276px)에 안 들어가서, 덜 중요한 층은 "···"로
+    // 묶어 15줄로 줄였다(단서로 이어지는 12F·7F·B2 세 줄과 위아래 끝 층은 그대로 유지). 게임의 맨 아래층은
+    // B2라서 B3 줄은 뺐다. 강조 줄 CSS(index.html의 nth-child)는 이 배열의 줄 번호(5/9/15번째)에 맞춘다.
+    { name: '층별 안내판', x: 1323, y: 229, width: 321, height: 276, style: 'directory-board',
       lines: [
         '17F  TmaxSoft 사업테스트본부',
         '16F  The Kitchen / CU 편의점 / Café',
@@ -60,8 +59,7 @@ const FLOOR1_LAYOUT = {
         '2F  Harmony Hall / 서버실',
         '1F  Harmony Hall / Vision Hall / 건강관리실 / 여성휴게실',
         'B1  AI 서버실',
-        'B2  AI 서버실 서버실',
-        'B3  주차장 / 전기실 / 기계실',
+        'B2  AI 서버실',
       ],
       message: '층별 안내판이다. 12F 기술본부 · ARCHI 개발팀, 7F AI 테스트·검증실, B2 AI 서버실. 수호의 눈이 그 세 줄에서 자꾸 멈춘다.',
       surface: 'document', look: 'sign',
@@ -75,7 +73,7 @@ const FLOOR1_LAYOUT = {
         { text: '6F  TmaxTibero 기술본부\n5F  TmaxTibero 연구본부\n4F  TmaxTibero 연구본부\n' +
           '3F  Fitness Club / ㈜하누리서비스 / 고객만족센터 / Studio\n2F  Harmony Hall / 서버실\n' +
           '1F  Harmony Hall / Vision Hall / 건강관리실 / 여성휴게실\nB1  AI 서버실', size: 'small' },
-        { text: 'B2  AI 서버실 서버실', size: 'small', mark: 'underline' }, { text: 'B3  주차장 / 전기실 / 기계실', size: 'small' }],
+        { text: 'B2  AI 서버실', size: 'small', mark: 'underline' }],
       caption: '수호의 눈이 그 세 줄에서 자꾸 멈춘다.' },
     { name: '스피드 게이트', x: 4300, y: 470, width: 100, style: 'speed-gates', outline: [4316, 464, 179, 93],
       message: '출입증을 대자 작은 화면이 붉게 깜빡인다: "미등록 출입증." 그래도 날개는 정전 때 저절로 풀리는 방식이라 손으로 밀면 그냥 열린다.',
