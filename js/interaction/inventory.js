@@ -4,8 +4,8 @@ const INVENTORY_ITEMS = {
   'f17-badge': { name: '수호의 출입증', description: '늘 지니고 다니는 내 출입증. ARCHI · 정수호 · 개발팀.', image: 'assets/objects/id-cards/jeong-suho.png' },
   'f16-badge': { name: '조현아 팀장 사원증', description: '16층 카페에서 챙긴 사원증. 12~15층의 인증 게이트에서 사용할 수 있다.', image: 'assets/objects/id-cards/jo-hyeon-a.png',
     hint: '16층 Café에서 마지막 확인' },
-  'f16-antianxiety': { name: '항불안제', description: '16층 CU 편의점 선반의 약품 칸에서 챙긴 항불안제. 먹으면 불안이 조금 가라앉을 것 같다.', image: 'assets/objects/items/antianxiety.png',
-    usedFlag: 'f16-antianxiety-used', use: { label: '사용하기', sanity: antianxietyRestore } },
+  'f16-antianxiety': { name: '항불안제', description: '16층 CU 편의점 선반의 약품 칸에서 챙긴 항불안제. 먹으면 불안이 조금 가라앉을 것 같다.', image: 'assets/objects/items/antianxiety-v2.png',
+    usedFlag: 'f16-antianxiety-used', use: { label: '사용하기', sanity: antianxietyRestore, animation: 'antianxiety' } },
   'rooftop-key': { name: '낡은 열쇠', description: '옥상문을 열 수 있을 것만 같다… 조금 더럽다.' },
 };
 // 가방에 들어 있는 물건: 챙겼고 아직 쓰지 않은 것(usedFlag가 있는 물건은 쓰면 가방에서 사라진다. 챙김 표시는 그대로 두어 선반에 다시 나타나지 않는다).
@@ -114,7 +114,7 @@ function toggleInventory() {
     inventoryButton.focus();
     return;
   }
-  if (transitioning || selectingFloor || usingComputer || usingKeypad || usingPhone || usingPowerPanel || usingInspection) return;
+  if (itemUseTime > 0 || transitioning || selectingFloor || usingComputer || usingKeypad || usingPhone || usingPowerPanel || usingInspection) return;
   showInventoryList();
 }
 
@@ -153,10 +153,12 @@ function showInventoryList(focusItem) {
 
 inventoryButton.addEventListener('click', toggleInventory);
 
-// 가방의 물건 사용: 정신력을 올리고 가방에서 없앤 뒤 목록으로 돌아간다.
+// 가방의 물건 사용: 효과/사용 플래그는 즉시 저장 가능한 상태로 만들고, 복용 동작은 닫힌 가방 밖에서 보여 준다.
 function useInventoryItem(id) {
   const item = INVENTORY_ITEMS[id];
-  if (!item?.use || !collectedItems.has(id) || collectedItems.has(item.usedFlag)) return;
+  if (!item?.use || !collectedItems.has(id) || collectedItems.has(item.usedFlag) || itemUseTime > 0 ||
+      mainMenuActive || openingActive || blackoutSceneActive || playerCaught || hallucinationCaught || transitioning || selectingFloor) return;
+  if (item.use.animation && !startItemUseAnimation()) return;
   collectedItems.add(item.usedFlag);
   if (item.use.sanity) {
     sanity = Math.min(100, sanity + item.use.sanity);
@@ -164,6 +166,8 @@ function useInventoryItem(id) {
   }
   playGameSound('item-use');
   refreshInventoryCount();
-  showInventoryList();
+  if (item.use.animation) closeInspection();
+  else showInventoryList();
   showStatus(`${item.name}를 사용했다. 정신력이 조금 돌아왔다.`, 3000);
 }
+

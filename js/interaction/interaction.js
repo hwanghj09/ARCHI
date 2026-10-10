@@ -2,7 +2,7 @@
 let nearbyDoor = null;
 
 function updateInteraction() {
-  if (openingActive || blackoutSceneActive || playerCaught || hallucinationCaught) { hint.hidden = true; return; }
+  if (itemUseTime > 0 || openingActive || blackoutSceneActive || playerCaught || hallucinationCaught) { hint.hidden = true; return; }
   if (room === 'dynamic') {
     // 전력이 들어온 채 감지했던 자리로 걸어 돌아가는('return') 로봇은 감지를 끈 채 움직이고 있어 바로 옆까지
     // 갈 수 있다. 정비 패널은 멈춘 로봇의 보조 배터리 화면이므로 그동안은 조사 대상에서 뺀다.
@@ -65,7 +65,7 @@ function doorHintText(door) {
 }
 
 function interact() {
-  if (openingActive || blackoutSceneActive || playerCaught || hallucinationCaught || transitioning || selectingFloor || usingComputer || usingKeypad || usingPhone || usingPowerPanel || usingInspection) return;
+  if (itemUseTime > 0 || openingActive || blackoutSceneActive || playerCaught || hallucinationCaught || transitioning || selectingFloor || usingComputer || usingKeypad || usingPhone || usingPowerPanel || usingInspection) return;
   updateInteraction();
   if (blackoutSceneActive) return;
   if (!nearbyDoor) return;
@@ -252,3 +252,4 @@ function interact() {
   showStatus(`${nearbyDoor.name} 문을 ${open ? '열었습니다' : '닫았습니다'}.`);
   updateInteraction();
 }
+

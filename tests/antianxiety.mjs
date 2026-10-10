@@ -72,8 +72,24 @@ try {
   assert.equal(await page.evaluate(() => sanity), 90, '항불안제를 쓰면 정신력이 50 오른다');
   assert.equal(await page.locator('[data-item="f16-antianxiety"]').count(), 0, 'The used pill leaves the bag');
   assert.equal(await page.evaluate(() => collectedItems.has('f16-antianxiety')), true, 'The pickup mark stays so the shelf stays empty');
+  assert(await page.locator('#inspection').isHidden(), 'The bag closes so the animation is visible');
+  assert.equal(await page.locator('#player').getAttribute('data-state'), 'consume');
+  assert(await page.locator('#antianxiety-sheet').isVisible());
+  assert.deepEqual(await page.locator('#antianxiety-sheet').evaluate(image => [image.naturalWidth, image.naturalHeight]), [1536, 256]);
+  const consumeX = await page.evaluate(() => body.position.x);
+  await page.keyboard.down('ArrowRight');
+  await page.clock.runFor(500);
+  assert(Math.abs(await page.evaluate(() => body.position.x) - consumeX) < 1, 'Consumption blocks movement');
+  assert.equal(await page.locator('#player').getAttribute('data-frame'), '2');
+  await page.keyboard.up('ArrowRight');
+  await page.clock.runFor(1050);
+  assert.equal(await page.locator('#player').getAttribute('data-state'), 'idle');
+  await page.evaluate(() => useInventoryItem('f16-antianxiety'));
+  assert.equal(await page.evaluate(() => itemUseTime), 0, 'A used item cannot restart the animation');
+
   assert.deepEqual(errors, []);
   console.log('antianxiety: ok');
 } finally {
   await browser.close();
 }
+

@@ -61,6 +61,7 @@ function saveProgress() {
 function restoreProgress(data) {
   restoringProgress = true;
   try {
+    itemUseTime = 0;
     releaseInput();
     // 재개할 때 조사·휴대폰 등의 창은 닫는다. 퍼즐 진행과 실제 게임 상태는 복원한다.
     usingPhone = usingComputer = usingKeypad = usingPowerPanel = usingInspection = selectingFloor = false;
@@ -205,3 +206,4 @@ function startNewGame() {
 setInterval(saveProgress, 2000);
 window.addEventListener('pagehide', saveProgress);
 document.addEventListener('visibilitychange', () => { if (document.hidden) saveProgress(); });
+

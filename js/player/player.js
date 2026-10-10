@@ -10,6 +10,25 @@ const phoneAwaySheet = document.getElementById('phone-away-sheet');
 const phoneWalkSheet = document.getElementById('phone-walk-sheet');
 const phoneRunSheet = document.getElementById('phone-run-sheet');
 const caughtSheet = document.getElementById('caught-sheet');
+const antianxietySheet = document.getElementById('antianxiety-sheet');
+const itemUseFrameDurations = [220, 220, 200, 280, 300, 280];
+const itemUseDuration = itemUseFrameDurations.reduce((total, duration) => total + duration, 0);
+let itemUseTime = 0;
+
+function startItemUseAnimation() {
+  if (antianxietySheet.naturalWidth !== 1536 || antianxietySheet.naturalHeight !== 256) {
+    showStatus('복용 동작을 불러오는 중입니다. 잠시 후 다시 사용해 주세요.');
+    return false;
+  }
+  releaseInput();
+  phoneAwayTime = 0;
+  itemUseTime = itemUseDuration;
+  world.dataset.flashlight = 'off';
+  Body.setVelocity(body, { x: 0, y: body.velocity.y });
+  animate(0);
+  return true;
+}
+
 let phoneTime = 0;
 let phoneAwayTime = 0;
 
@@ -39,11 +58,32 @@ function showIdleFrame(index) {
 
 function animate(distance, sprinting = false, elapsed = 0) {
   if (openingActive || blackoutSceneActive) return;
+  if ((playerCaught || hallucinationCaught) && itemUseTime > 0) {
+    itemUseTime = 0;
+    refreshPhone();
+  }
   if (playerCaught) {
     const frame = guardPatrol.captureTime < 640 ? 0 : 1 + Math.floor((guardPatrol.captureTime - 640) / 240) % 3;
     sprite.dataset.state = 'caught'; sprite.dataset.frame = frame;
     caughtSheet.style.transform = `translateX(${-frame * 25}%)`;
     return;
+  }
+  if (itemUseTime > 0) {
+    itemUseTime = Math.max(0, itemUseTime - elapsed);
+    if (itemUseTime > 0) {
+      let time = itemUseDuration - itemUseTime;
+      let index = 0;
+      while (index < itemUseFrameDurations.length - 1 && time >= itemUseFrameDurations[index]) {
+        time -= itemUseFrameDurations[index++];
+      }
+      sprite.dataset.state = 'consume';
+      sprite.dataset.frame = index;
+      sprite.dataset.phoneHeld = 'false';
+      antianxietySheet.style.transform = `translateX(${-index * 100 / 6}%)`;
+      return;
+    }
+    idleTime = 0;
+    refreshPhone();
   }
   const running = grounded && sprinting && distance > .1 && runSheet.naturalWidth === 256 * runFrames && runSheet.naturalHeight === 256;
   const walking = grounded && walkReady && distance > .1 && !running;
@@ -81,3 +121,4 @@ function animate(distance, sprinting = false, elapsed = 0) {
   if (state === 'phone-light') phoneLightSheet.style.transform = `translateX(${-index * 25}%)`;
   if (state === 'phone-away') phoneAwaySheet.style.transform = `translateX(${-index * 50}%)`;
 }
+

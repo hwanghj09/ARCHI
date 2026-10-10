@@ -24,6 +24,7 @@ window.addEventListener('keydown', event => {
     else if (event.code !== 'Tab' && !(event.target.id === 'opening-skip' && ['Enter', 'Space'].includes(event.code))) event.preventDefault();
     return;
   }
+  if (itemUseTime > 0 && event.code !== 'Escape') { event.preventDefault(); return; }
   if (transitioning) { event.preventDefault(); return; }
   if (event.code === 'Tab' && !event.shiftKey && !event.repeat && !selectingFloor && !usingComputer && !usingKeypad &&
       !usingPhone && !usingPowerPanel && !usingInspection) {
@@ -123,3 +124,4 @@ window.addEventListener('keydown', event => {
   } else keys.add(event.code);
 });
 window.addEventListener('keyup', event => keys.delete(event.code));
+

@@ -42,7 +42,8 @@ function update() {
   const directions = [...keys].map(key => movementKeys[key]).concat([...pointers.values()]);
   if (pulseTime > 0) directions.push(pulseDirection);
   pulseTime = Math.max(0, pulseTime - step);
-  const direction = Number(directions.includes(1)) - Number(directions.includes(-1));
+  const direction = itemUseTime > 0 ? 0 : Number(directions.includes(1)) - Number(directions.includes(-1));
+  if (itemUseTime > 0) jumpQueued = false;
   const sprinting = !phoneLightOn && [...runKeys].some(key => keys.has(key));
   interactionTime = direction || jumpQueued ? 0 : Math.max(0, interactionTime - step);
   if (direction) facing = direction;
@@ -93,3 +94,4 @@ function frame(time) {
   previousTime = document.hidden ? null : time;
   requestAnimationFrame(frame);
 }
+

@@ -107,7 +107,7 @@ function refreshPhone() {
   document.getElementById('phone-light-state').textContent = phoneLightOn ? '켜짐' : '꺼짐';
   document.getElementById('phone-help').textContent = percent === 0 ? '배터리가 소진되었습니다. 전력이 공급되는 충전함 앞에서 E로 휴대폰을 맡기세요.' :
     phoneLightOn ? '앞을 비추고 있습니다. 화면을 닫고 이동하세요.' : '플래시를 켜면 앞을 비추며 걸을 수 있습니다.';
-  world.dataset.flashlight = phoneLightOn ? 'on' : 'off';
+  world.dataset.flashlight = phoneLightOn && itemUseTime <= 0 ? 'on' : 'off';
   phoneButton.dataset.docked = String(Boolean(phoneDock));
   phoneButton.dataset.charge = phoneDock ? `${phoneDockLocation()} · ${percent}% · ${phoneChargeState()}` : '';
   phoneButton.setAttribute('aria-label', phoneDock ? `${phoneButton.dataset.charge} · 충전함에서 휴대폰 가져오기` : '휴대폰 열기');
@@ -116,7 +116,7 @@ function refreshPhone() {
 }
 
 function togglePhone() {
-  if (playerCaught || hallucinationCaught || blackoutSceneActive) return;
+  if (itemUseTime > 0 || playerCaught || hallucinationCaught || blackoutSceneActive) return;
   if (usingPhone) return closePhone();
   if (phoneDock) return showStatus(`${phoneDockLocation()} 충전함에 휴대폰을 두었다. 그 충전함 앞에서 E로 가져오자.`, 4000);
   usingPhone = true;
@@ -146,7 +146,7 @@ function closePhone() {
 }
 
 function togglePhoneLight() {
-  if (playerCaught || hallucinationCaught || blackoutSceneActive) return;
+  if (itemUseTime > 0 || playerCaught || hallucinationCaught || blackoutSceneActive) return;
   if (phoneDock) return showStatus(`${phoneDockLocation()} 충전함에 휴대폰을 두어 플래시를 사용할 수 없다.`, 4000);
   if (!phoneLightOn && phoneBattery <= 0) return showStatus('휴대폰 배터리가 없습니다.');
   phoneLightOn = !phoneLightOn;
@@ -242,3 +242,4 @@ phonePanel.addEventListener('keydown', event => {
   }
 });
 loadPhoneNote();
+
