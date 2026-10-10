@@ -12,7 +12,7 @@ try {
   await page.goto(new URL('../index.html', import.meta.url).href);
   await page.locator('#menu-start').click();
   if (await page.locator('#menu-new-confirm').isVisible()) await page.locator('#menu-new-confirm').click();
-  assert.equal(await page.locator('#sanity-meter').getAttribute('aria-valuenow'), '100');
+  assert.equal(await page.locator('#sanity-meter').getAttribute('aria-valuenow'), '35', '새 게임은 정신력 35%로 시작한다');
   assert(await page.locator('#sanity-hud').isHidden(), 'Opening hides the gameplay meter');
   await page.locator('#opening-skip').click();
   await page.clock.pauseAt(new Date('2026-10-04T00:01:00Z'));
@@ -20,6 +20,7 @@ try {
   const state = () => page.evaluate(() => ({ sanity, exposure: sanityExposure(), fearTier, hallucinating: !hallucinations.hidden,
     mode: hallucinationMode, battery: phoneBattery, caught: playerCaught, hallucinationCaught, x: body.position.x }));
   const near = (actual, expected) => assert(Math.abs(actual - expected) < .08, `${actual} ≈ ${expected}`);
+  await page.evaluate(() => { sanity = 100; });
   await page.clock.runFor(2000); assert.equal((await state()).sanity, 100, '밝은 곳에서는 정신력이 100을 넘지 않는다');
   await page.evaluate(() => triggerBuildingBlackout());
   assert.equal((await state()).exposure, 'dark');
@@ -68,6 +69,12 @@ try {
   // ---- 경비 로봇에게 쫓기는 동안의 급격한 감소(보스전 예외) ----
   await page.evaluate(() => { sanity = 100; guardPatrol.mode = 'chase'; bossFightActive = false; updateSanity(1000); });
   near((await state()).sanity, 90);
+  await page.evaluate(() => { guardPatrol.mode = 'patrol'; });
+  // 쫓겨서는 10% 아래로 줄지 않고, 이미 10% 아래면 더 줄지 않는다.
+  await page.evaluate(() => { sanity = 12; guardPatrol.mode = 'chase'; bossFightActive = false; updateSanity(1000); });
+  assert.equal((await state()).sanity, 10, '추격 감소는 10%에서 멈춘다');
+  await page.evaluate(() => { sanity = 7; updateSanity(1000); });
+  assert.equal((await state()).sanity, 7, '10% 아래에서는 쫓겨도 더 줄지 않는다');
   await page.evaluate(() => { guardPatrol.mode = 'patrol'; });
   await page.evaluate(() => { sanity = 100; guardPatrol.mode = 'chase'; bossFightActive = true; updateSanity(1000); });
   assert.equal((await state()).sanity, 100, '보스전 중에는 추격 감소가 없다');

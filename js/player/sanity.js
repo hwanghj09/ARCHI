@@ -298,7 +298,9 @@ function updateSanity(elapsed) {
   const chasing = guardPatrol.mode === 'chase' && !bossFightActive;
   if (!paused) {
     const rate = chasing ? -sanityChaseDrainPerSecond : exposure === 'dark' ? -sanityDarkDrainPerSecond : 0;
-    sanity = Math.max(0, Math.min(100, sanity + rate * elapsed / 1000));
+    // 쫓기는 동안의 감소는 10%에서 멈춘다(이미 10% 아래면 쫓겨서는 더 줄지 않는다).
+    const lowest = chasing ? Math.min(sanity, sanityChaseFloor) : 0;
+    sanity = Math.max(lowest, Math.min(100, sanity + rate * elapsed / 1000));
   }
   const tier = sanityTierOf(sanity);
   if (tier !== fearTier) { fearTier = tier; document.body.dataset.fearTier = String(fearTier); }

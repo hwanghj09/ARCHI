@@ -10,6 +10,7 @@ function update() {
   updateSanity(step);
   if (openingActive) { updateOpening(step); return; }
   if (blackoutSceneActive) { updateBlackoutScene(step); return; }
+  if (storySceneActive) { updateStoryScene(step); return; }
   if (playerCaught) {
     updateGuardPatrol(step);
     animate(0, false, step);
@@ -46,7 +47,8 @@ function update() {
   interactionTime = direction || jumpQueued ? 0 : Math.max(0, interactionTime - step);
   if (direction) facing = direction;
   const paceFactor = sanitySpeedFactor();
-  Body.setVelocity(body, { x: direction * (sprinting ? runSpeed : speed) * paceFactor / 60, y: jumpQueued && grounded ? -10.8 : body.velocity.y });
+  const walkX = pushPushables(direction, direction * (sprinting ? runSpeed : speed) * paceFactor / 60);
+  Body.setVelocity(body, { x: walkX, y: jumpQueued && grounded ? -10.8 : body.velocity.y });
   jumpQueued = false;
   const oldX = body.position.x;
   const wasGrounded = grounded;
@@ -68,6 +70,7 @@ function update() {
   if (!wasGrounded && grounded && fallingSpeed > 3) playGameSound('step', { landing: true, x: body.position.x });
   animate(moved, sprinting, step);
   updateGuardPatrol(step);
+  checkStoryScenes(step);
   updateElevators();
   updateInteraction();
   updateCall();

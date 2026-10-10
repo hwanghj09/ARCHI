@@ -120,6 +120,7 @@ function updateGuardPatrol(delta) {
         // 순간이동으로 자리를 되돌리지 않는다 — 'return' 모드로 넘어가 감지했던 자리까지 순찰 속도로
         // 직접 걸어서 돌아가고(아래 return 처리), 도착하면 그제서야 patrol로 돌아간다.
         robot.mode = 'return'; robot.wait = 0; robot.lostTime = 0;
+        collectedItems.add('f1-chase-ended'); // 추격이 끝났다: 3초 뒤 혼잣말 컷씬(story-scene.js)
         showStatus('엘리베이터 쪽으로 피하자 경비 로봇이 감지했던 자리로 돌아가기 시작했다.', 2400);
         if (robot.firstEncounter) {
           robot.firstEncounter = false;
@@ -130,6 +131,7 @@ function updateGuardPatrol(delta) {
         robot.lostTime = sameLevel && Math.abs(dx) < 600 ? 0 : robot.lostTime + delta;
         if (robot.lostTime >= 1800) {
           robot.mode = 'patrol'; robot.wait = 0;
+          collectedItems.add('f1-chase-ended');
           if (robot.firstEncounter) {
             robot.firstEncounter = false;
             showStatus('직원증을 소지하고있지만 로봇은 멈추지 않았다 — 이건 단순 정전이 아니다.', 4200);

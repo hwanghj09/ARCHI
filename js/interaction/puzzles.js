@@ -89,6 +89,7 @@ function refreshReady() {
   for (const element of dynamicScene.querySelectorAll('[data-requires]')) {
     element.dataset.ready = String(element.dataset.requires.split('|').every(item => collectedItems.has(item)));
   }
+  for (const element of dynamicScene.querySelectorAll('[data-hidden-by]')) element.hidden = collectedItems.has(element.dataset.hiddenBy);
   for (const element of dynamicScene.querySelectorAll('[data-sprite-frames]')) {
     const frame = element.dataset.stateBy ? Number(collectedItems.has(element.dataset.stateBy)) :
       element.dataset.poweredSprite ? Number(world.dataset.powered === 'true') : Number(element.dataset.spriteFrame);

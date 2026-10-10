@@ -4,12 +4,16 @@ const INVENTORY_ITEMS = {
   'f17-badge': { name: '수호의 출입증', description: '늘 지니고 다니는 내 출입증. ARCHI · 정수호 · 개발팀.', image: 'assets/objects/id-cards/jeong-suho.png' },
   'f16-badge': { name: '조현아 팀장 사원증', description: '16층 카페에서 챙긴 사원증. 12~15층의 인증 게이트에서 사용할 수 있다.', image: 'assets/objects/id-cards/jo-hyeon-a.png',
     hint: '16층 Café에서 마지막 확인' },
+  'f16-antianxiety': { name: '항불안제', description: '16층 CU 편의점 선반의 약품 칸에서 챙긴 항불안제. 먹으면 불안이 조금 가라앉을 것 같다.', image: 'assets/objects/items/antianxiety.png',
+    usedFlag: 'f16-antianxiety-used', use: { label: '사용하기', sanity: antianxietyRestore } },
   'rooftop-key': { name: '낡은 열쇠', description: '옥상문을 열 수 있을 것만 같다… 조금 더럽다.' },
 };
+// 가방에 들어 있는 물건: 챙겼고 아직 쓰지 않은 것(usedFlag가 있는 물건은 쓰면 가방에서 사라진다. 챙김 표시는 그대로 두어 선반에 다시 나타나지 않는다).
+const ownedInventoryIds = () => Object.keys(INVENTORY_ITEMS).filter(id => collectedItems.has(id) && !collectedItems.has(INVENTORY_ITEMS[id].usedFlag));
 const inventoryButton = document.getElementById('inventory-button');
 
 function refreshInventoryCount() {
-  const count = Object.keys(INVENTORY_ITEMS).filter(id => collectedItems.has(id)).length;
+  const count = ownedInventoryIds().length;
   inventoryButton.textContent = count ? `가방 (${count}) · Tab` : '가방 · Tab';
 }
 
@@ -116,7 +120,7 @@ function toggleInventory() {
 
 // focusItem: 목록을 연 뒤 포커스를 줄 물건(카드를 보고 돌아올 때).
 function showInventoryList(focusItem) {
-  const items = Object.keys(INVENTORY_ITEMS).filter(id => collectedItems.has(id));
+  const items = ownedInventoryIds();
   const content = writingNode('div', 'item-panel inventory-content');
   const grid = writingNode('div', 'inventory-grid');
   const description = writingNode('p', 'item-description', items.length ? '물건에 마우스를 올리거나 눌러서 살펴보세요.' : '가방이 비어 있다.');
@@ -131,6 +135,12 @@ function showInventoryList(focusItem) {
       if (!item.image) return describe();
       openInspection(item.name, item.description, { surface: 'card', image: item.image, caption: item.description });
       inspectionPanel.dataset.returnTo = 'inventory';
+      // 쓸 수 있는 물건(항불안제)은 카드 아래에 사용하기 버튼이 뜬다.
+      if (item.use) {
+        inspectionUse.textContent = item.use.label;
+        inspectionUse.hidden = false;
+        inspectionUse.onclick = () => useInventoryItem(id);
+      }
       inventoryCardItem = id;
     });
     grid.append(button);
@@ -142,3 +152,18 @@ function showInventoryList(focusItem) {
 }
 
 inventoryButton.addEventListener('click', toggleInventory);
+
+// 가방의 물건 사용: 정신력을 올리고 가방에서 없앤 뒤 목록으로 돌아간다.
+function useInventoryItem(id) {
+  const item = INVENTORY_ITEMS[id];
+  if (!item?.use || !collectedItems.has(id) || collectedItems.has(item.usedFlag)) return;
+  collectedItems.add(item.usedFlag);
+  if (item.use.sanity) {
+    sanity = Math.min(100, sanity + item.use.sanity);
+    refreshSanity();
+  }
+  playGameSound('item-use');
+  refreshInventoryCount();
+  showInventoryList();
+  showStatus(`${item.name}를 사용했다. 정신력이 조금 돌아왔다.`, 3000);
+}

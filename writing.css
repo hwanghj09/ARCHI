@@ -48,7 +48,7 @@
 @media (max-height: 480px) {
   #inspection[data-surface] .inspection-heading { min-height: 30px; padding-right: 150px; }
   #inspection[data-surface] .dialog-actions { position: absolute; top: 0; right: 4px; margin: 0; }
-  #inspection[data-surface] #inspection-close { min-height: 30px; padding: 3px 10px; }
+  #inspection[data-surface] :is(#inspection-close, #inspection-use) { min-height: 30px; padding: 3px 10px; }
   #inspection[data-surface] .writing-sheet { --hand-size: clamp(16px, 2.3cqw, 21px); --frame: 8px; padding-bottom: 8px; }
   #inspection[data-surface] .writing-board { min-height: 0; padding: 10px 18px; }
   #inspection[data-surface] .writing-caption { margin-top: 8px; padding: 6px 12px; font-size: 13px; line-height: 1.55; }
@@ -601,3 +601,4 @@
   #inspection[data-surface] .writing-card img { height: calc(100dvh - 140px); }
   #inspection[data-surface] .writing-label-stack { padding: 10px 0; }
 }
+.writing-card img[src*="antianxiety"] { image-rendering: pixelated; }

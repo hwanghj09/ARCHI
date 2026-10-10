@@ -68,12 +68,6 @@ const FLOOR16_ROOMS = interiorRooms(16, [
     backgroundImage: { src: 'assets/background/floor16/amenity-cu-interior.png', height: 793 * 570 / 602, top: 0 },
     links: [{ target: 'f16-kitchen', x: 56, width: 110, style: 'backdoor' }], props: [
     { file: 'instrument-cart', size: [256, 256], worldWidth: 113, x: 290 },
-    { file: 'food-refrigerator', size: [256, 512], worldWidth: 96, x: 470, name: '냉장 쇼케이스',
-      message: '냉장 쇼케이스 불이 꺼져 있다. 삼각김밥마다 "새벽 전원 차단 · 폐기" 스티커가 붙어 있다. 오늘만의 일이 아닌 것 같다.',
-      surface: 'label', look: 'sticker', writing: [{ text: '새벽 전원 차단', align: 'center' }, { text: '폐기', size: 'large', ink: 'red', align: 'center' }],
-      caption: '냉장 쇼케이스 불이 꺼져 있다. 삼각김밥마다 붙어 있다. 오늘만의 일이 아닌 것 같다.' },
-    { file: 'food-refrigerator', size: [256, 512], worldWidth: 96, x: 600 },
-    { file: 'drink-vending-machine', size: [256, 512], worldWidth: 96, x: 760 },
     { file: 'food-checkout', size: [512, 256], worldWidth: 312, x: 1150, name: '계산대',
       message: 'POS 화면은 꺼져 있다. 계산대에 영수증 한 장이 걸려 있다: "23:47 · 컵라면 1 · 삼각김밥 1 · 사원증 결제 · 17층 정수호". 아까 야근하다 사 간 야식이다.',
       surface: 'receipt', writing: [{ as: 'title', text: 'CU' }, { as: 'rule' }, '23:47', { as: 'field', label: '컵라면', text: '1' },
@@ -85,6 +79,22 @@ const FLOOR16_ROOMS = interiorRooms(16, [
       message: '셔터 제어 기록: "23:59 · 셔터 하강 · 명령 SYSTEM". 무인 운영 중에는 셔터를 내리지 않는다고 적혀 있다. 아래의 수동 레버를 당기면 안에서 셔터를 올릴 수 있다.',
       surface: 'screen', look: 'lcd', writing: [{ as: 'title', text: '셔터 제어 기록' }, '23:59  셔터 하강', { as: 'field', label: '명령', text: 'SYSTEM' }],
       caption: '무인 운영 중에는 셔터를 내리지 않는다고 적혀 있다. 아래의 수동 레버를 당기면 안에서 셔터를 올릴 수 있다.' },
+  ],
+  // 밀 수 있는 진라면 박스(js/scene/pushables.js): 플레이어 허리 높이(90px)이고, 옆에서 막힌 채 걸으면 플레이어 이동 속도의 절반으로
+  // 밀린다. 왼쪽은 처음 자리(중심 415)보다 더 밀리지 않고, 오른쪽은 계산대 왼쪽 끝(1150 - 312 / 2 + 312 * .0156 ≈ 999)에 박스
+  // 오른쪽 끝(중심 + 71)이 맞닿는 자리(중심 928)에서 멈춘다. 그 상태에서 박스 위에 서야 선반 항불안제에 손이 닿는다.
+  movables: [{ kind: 'ramen-box', name: '진라면 박스', x: 344, width: 142, height: 90,
+    pushable: { factor: .5, minX: 415, maxX: 928 } }],
+  // 상단 선반 약품 칸의 항불안제(위치는 선반 그림 속 컵라면 칸 위). condition(박스를 오른쪽 끝까지 밀고 그 위에 서기)을 채우기 전에는
+  // 손이 닿지 않아 챙길 수 없고, 챙기면(gives) 선반에서 사라지고 가방에 들어간다(INVENTORY_ITEMS).
+  fixtures: [
+    { name: '항불안제', style: 'pill-item', x: 880, y: 246, width: 48, height: 45,
+      standYs: [floorY, floorY - 90], condition: () => playerOnPushableAtMax('진라면 박스'),
+      gives: 'f16-antianxiety', hideWhenTaken: true,
+      surface: 'card', image: 'assets/objects/items/antianxiety.png',
+      message: '박스 위에 올라서니 손이 닿는다. 선반 위의 항불안제 한 통을 꺼냈다. 챙겼다.',
+      missingMessage: '선반 위쪽에 항불안제 한 통이 놓여 있다. 너무 높아서 손이 닿지 않는다.',
+      takenMessage: '약품 칸은 비어 있다. 항불안제는 이미 챙겼다.' },
   ] },
   { id: 'f16-cafe', name: 'Café', width: 1904,
     backgroundWallsOnly: true,

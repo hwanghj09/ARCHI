@@ -18,6 +18,7 @@
     <link rel="stylesheet" href="sanity.css" />
     <link rel="stylesheet" href="main-menu.css" />
     <link rel="stylesheet" href="blackout.css" />
+    <link rel="stylesheet" href="story-scene.css" />
     <link rel="stylesheet" href="device-apps.css" />
     <link rel="stylesheet" href="clues.css" />
     <link rel="preload" as="image" href="assets/objects/guard-robot/guard-capture.png" />
@@ -37,14 +38,15 @@
       /* 배경 그림은 층별로 꺼진 그림(-off.png)으로 바뀌어서 이미 어둡게 보이는데, 엘리베이터·문·로봇·소품
          같은 DOM 스프라이트는 애초에 "켜진" 모습 하나로만 그려져 있어서 정전 중에도 그대로 환하게
          보였다. 그 층 전력이 없을 때는 이 스프라이트들도 함께 어둡게 보정한다. */
-      #world[data-powered="false"] .door,
-      #world[data-powered="false"] .room-door,
-      #world[data-powered="false"] .fixture,
-      #world[data-powered="false"] .floor-prop { filter: brightness(.45) saturate(.6); }
+      /* 옥상(18)은 야외라 건물 전력과 무관하게 야경 빛을 받으므로 어둡게 하지 않는다. */
+      #world[data-powered="false"]:not([data-floor="18"]) .door,
+      #world[data-powered="false"]:not([data-floor="18"]) .room-door,
+      #world[data-powered="false"]:not([data-floor="18"]) .fixture,
+      #world[data-powered="false"]:not([data-floor="18"]) .floor-prop { filter: brightness(.45) saturate(.6); }
       /* 열린 엘리베이터 둘레는 어둠이 걷힌다(구멍 3개 = 차량 3대, js/elevator/elevators.js가 --eNx/y/w/h/k를 채움). 구멍끼리는 intersect로 곱해진다. */
-      #darkness { mask-image: radial-gradient(ellipse var(--e0w, 1px) var(--e0h, 1px) at var(--e0x, 0px) var(--e0y, 0px), rgb(0 0 0 / calc(1 - var(--e0k, 0) * .85)) 0, rgb(0 0 0 / calc(1 - var(--e0k, 0) * .6)) 40%, rgb(0 0 0 / calc(1 - var(--e0k, 0) * .2)) 70%, #000 100%), radial-gradient(ellipse var(--e1w, 1px) var(--e1h, 1px) at var(--e1x, 0px) var(--e1y, 0px), rgb(0 0 0 / calc(1 - var(--e1k, 0) * .85)) 0, rgb(0 0 0 / calc(1 - var(--e1k, 0) * .6)) 40%, rgb(0 0 0 / calc(1 - var(--e1k, 0) * .2)) 70%, #000 100%), radial-gradient(ellipse var(--e2w, 1px) var(--e2h, 1px) at var(--e2x, 0px) var(--e2y, 0px), rgb(0 0 0 / calc(1 - var(--e2k, 0) * .85)) 0, rgb(0 0 0 / calc(1 - var(--e2k, 0) * .6)) 40%, rgb(0 0 0 / calc(1 - var(--e2k, 0) * .2)) 70%, #000 100%); mask-composite: intersect, intersect; }
+      #darkness { mask-image: radial-gradient(ellipse var(--e0w, 1px) var(--e0h, 1px) at var(--e0x, 0px) var(--e0y, 0px), rgb(0 0 0 / calc(1 - var(--e0k, 0) * .92)) 0, rgb(0 0 0 / calc(1 - var(--e0k, 0) * .85)) 50%, rgb(0 0 0 / calc(1 - var(--e0k, 0) * .4)) 75%, #000 100%), radial-gradient(ellipse var(--e1w, 1px) var(--e1h, 1px) at var(--e1x, 0px) var(--e1y, 0px), rgb(0 0 0 / calc(1 - var(--e1k, 0) * .92)) 0, rgb(0 0 0 / calc(1 - var(--e1k, 0) * .85)) 50%, rgb(0 0 0 / calc(1 - var(--e1k, 0) * .4)) 75%, #000 100%), radial-gradient(ellipse var(--e2w, 1px) var(--e2h, 1px) at var(--e2x, 0px) var(--e2y, 0px), rgb(0 0 0 / calc(1 - var(--e2k, 0) * .92)) 0, rgb(0 0 0 / calc(1 - var(--e2k, 0) * .85)) 50%, rgb(0 0 0 / calc(1 - var(--e2k, 0) * .4)) 75%, #000 100%); mask-composite: intersect, intersect; }
       #world[data-flashlight="on"] #darkness {
-        mask-image: radial-gradient(ellipse var(--e0w, 1px) var(--e0h, 1px) at var(--e0x, 0px) var(--e0y, 0px), rgb(0 0 0 / calc(1 - var(--e0k, 0) * .85)) 0, rgb(0 0 0 / calc(1 - var(--e0k, 0) * .6)) 40%, rgb(0 0 0 / calc(1 - var(--e0k, 0) * .2)) 70%, #000 100%), radial-gradient(ellipse var(--e1w, 1px) var(--e1h, 1px) at var(--e1x, 0px) var(--e1y, 0px), rgb(0 0 0 / calc(1 - var(--e1k, 0) * .85)) 0, rgb(0 0 0 / calc(1 - var(--e1k, 0) * .6)) 40%, rgb(0 0 0 / calc(1 - var(--e1k, 0) * .2)) 70%, #000 100%), radial-gradient(ellipse var(--e2w, 1px) var(--e2h, 1px) at var(--e2x, 0px) var(--e2y, 0px), rgb(0 0 0 / calc(1 - var(--e2k, 0) * .85)) 0, rgb(0 0 0 / calc(1 - var(--e2k, 0) * .6)) 40%, rgb(0 0 0 / calc(1 - var(--e2k, 0) * .2)) 70%, #000 100%), radial-gradient(ellipse 390px 210px at var(--beam-x) var(--beam-y), #0000 0 35px, #0004 180px, #000 390px), conic-gradient(from var(--beam-angle) at var(--beam-x) var(--beam-y), #0000 0deg 44deg, #000 48deg 356deg, #0000 360deg);
+        mask-image: radial-gradient(ellipse var(--e0w, 1px) var(--e0h, 1px) at var(--e0x, 0px) var(--e0y, 0px), rgb(0 0 0 / calc(1 - var(--e0k, 0) * .92)) 0, rgb(0 0 0 / calc(1 - var(--e0k, 0) * .85)) 50%, rgb(0 0 0 / calc(1 - var(--e0k, 0) * .4)) 75%, #000 100%), radial-gradient(ellipse var(--e1w, 1px) var(--e1h, 1px) at var(--e1x, 0px) var(--e1y, 0px), rgb(0 0 0 / calc(1 - var(--e1k, 0) * .92)) 0, rgb(0 0 0 / calc(1 - var(--e1k, 0) * .85)) 50%, rgb(0 0 0 / calc(1 - var(--e1k, 0) * .4)) 75%, #000 100%), radial-gradient(ellipse var(--e2w, 1px) var(--e2h, 1px) at var(--e2x, 0px) var(--e2y, 0px), rgb(0 0 0 / calc(1 - var(--e2k, 0) * .92)) 0, rgb(0 0 0 / calc(1 - var(--e2k, 0) * .85)) 50%, rgb(0 0 0 / calc(1 - var(--e2k, 0) * .4)) 75%, #000 100%), radial-gradient(ellipse 390px 210px at var(--beam-x) var(--beam-y), #0000 0 35px, #0004 180px, #000 390px), conic-gradient(from var(--beam-angle) at var(--beam-x) var(--beam-y), #0000 0deg 44deg, #000 48deg 356deg, #0000 360deg);
         mask-composite: intersect, intersect, intersect, add;
       }
       #flashlight-beam { display: none; position: absolute; z-index: 3; left: var(--beam-x); top: calc(var(--beam-y) - 170px); width: 390px; height: 340px; transform: scaleX(var(--beam-facing)); transform-origin: 0 50%; clip-path: polygon(0 50%, 100% 0, 100% 100%); background: linear-gradient(90deg, #fff4bb24, #fff4bb00); pointer-events: none; }
@@ -520,6 +522,12 @@
       .room-door.wine { border-color: #6a4250; background: linear-gradient(90deg, transparent 78%, #c9a9b3 78% 82%, transparent 82%), linear-gradient(105deg, #2c2433 0 30%, #201a27 30%); box-shadow: inset 0 0 0 4px #150b0f; }
       /* 단면 에셋 층의 조사 지점(art-spot): 그림 속 물건 위에 투명하게 겹치고, 가까이 가면 점선 테두리만 보인다. */
       #dynamic-scene .fixture.art-spot { border: 0; background: none; box-shadow: none; }
+      #dynamic-scene .fixture.pill-item { background: url(assets/objects/items/antianxiety.png) center / contain no-repeat; image-rendering: pixelated; filter: drop-shadow(0 0 6px #7fd0ff99); }
+      #dynamic-scene .fixture[hidden] { display: none; }
+      /* 16F CU 진라면 박스(movable ramen-box, 밀 수 있는 정적 충돌체): 바닥에 붙어 보이도록 아래에 접지 그림자를 깔고, 어두운 장면에 맞게 살짝 눌러 준다. */
+      #dynamic-scene .solid.movable.ramen-box { filter: brightness(.88) saturate(.92); }
+      #dynamic-scene .solid.movable.ramen-box::before { content: ''; position: absolute; left: -5%; bottom: -5px; width: 110%; height: 22%; border-radius: 50%; background: radial-gradient(ellipse at center, #000000b3 0, #0000006b 55%, transparent 74%); filter: blur(1px); pointer-events: none; }
+      #dynamic-scene .solid.movable.ramen-box::after { content: ''; position: absolute; inset: 0; background: url(assets/objects/floor16/ramen-box.png) 0 0 / 100% 100% no-repeat; pointer-events: none; }
       /* walls-v3 흰색 키트 복도(2~6층, archi-floor-walls): 이름표는 천장 띠(y=48..96) 바로 아래, 화장실 이름표는 문 위 가운데,
          화장실 문은 16층 화장실 문 그림. 흰 벽에 붙는 안내판(wall-notice)은 짙은 판에 글줄. */
       #dynamic-scene:is([data-theme="concert"], [data-theme="gym"], [data-theme="rnd"], [data-theme="archive"], [data-theme="oncall"])[data-art="walls"] .floor-room:is(.painted, .restroom) .floor-room-sign { top: -22px; }
@@ -834,21 +842,20 @@
       /* 층 표시등과 열린 문 조명은 어둠 막(5)과 같은 층에서 DOM 순서로 위에 올려, 어두운 곳에서도 빛나 보이게 한다. */
       .elevator-indicator { position: absolute; z-index: 5; transform: translateX(-50%); width: 86px; height: 26px; border: 0; background: #081013; color: #c8ffe4; font: bold 19px/26px monospace; text-align: center; text-shadow: 0 0 3px #b8ffdc, 0 0 8px #7fe8b8, 0 0 18px #4fc791; pointer-events: none; }
       .elevator-indicator[data-powered="false"] { color: #3d5a4d; text-shadow: none; }
-      .elevator-light { position: absolute; z-index: 5; opacity: 0; mix-blend-mode: screen; pointer-events: none; transition: opacity .9s ease;
+      .elevator-light { position: absolute; z-index: 5; opacity: var(--k, 0); mix-blend-mode: screen; pointer-events: none;
         background: radial-gradient(ellipse 50% 58% at 50% 48%, #ffffff80 0, #ffffff40 34%, #ffffff18 58%, transparent 80%),
                     radial-gradient(ellipse 46% 14% at 50% 100%, #ffffff70 0, transparent 100%); }
       /* 열린 객실 안쪽: 천장 조명 두 줄이 빛나고 그 빛이 벽·바닥으로 내려앉는다(문 요소 안이라 문 밖으로는 번지지 않는다). */
-      .elevator-glow { position: absolute; inset: 0; opacity: 0; mix-blend-mode: screen; pointer-events: none; transition: opacity .9s ease;
+      .elevator-glow { position: absolute; inset: 0; opacity: var(--k, 0); mix-blend-mode: screen; pointer-events: none;
         background:
           linear-gradient(90deg, transparent 33%, #fffffff0 38% 62%, transparent 67%) 0 11% / 100% 1.6% no-repeat,
           linear-gradient(90deg, transparent 36%, #ffffffe0 41% 59%, transparent 64%) 0 16% / 100% 1.3% no-repeat,
           radial-gradient(ellipse 34% 7% at 50% 13%, #ffffff90 0, transparent 100%),
           radial-gradient(ellipse 36% 62% at 50% 12%, #ffffff55 0, #ffffff24 45%, transparent 100%),
           radial-gradient(ellipse 30% 6% at 50% 94%, #ffffff50 0, transparent 100%); }
-      #world .door.elevator[data-open="true"][data-lit="true"] .elevator-glow { opacity: 1; }
       /* 불 켜진 객실의 열린 문: 어둠 막 위로 올려 엘리베이터 내부가 어둠 속에서도 보이게 한다(정전 어둡힘 필터도 해제). */
-      #world .door.elevator[data-open="true"][data-lit="true"] { z-index: 5; filter: none; }
-      .elevator-light[data-open="true"]:not([data-powered="false"]) { opacity: 1; }
+      /* 정전 중 문 어둡힘은 문이 열린 만큼(--k) 풀린다. 열린 문을 어둠 막 위로 올리지 않고 막의 구멍(#darkness mask)으로 드러내서, 닫힐 때 깜빡이지 않는다. */
+      #world[data-powered="false"] .door.elevator { filter: brightness(calc(.45 + .55 * var(--k, 0))) saturate(calc(.6 + .4 * var(--k, 0))); }
       #world[data-room="office"] .elevator-light { display: none; }
       /* 근접 테두리: 가까운 상호작용 대상 하나를 감싸는 한 장(js/interaction/outline.js가 대상의 보이는 상자에 맞춘다). */
       #interaction-outline { position: absolute; z-index: 4; outline: 2px solid #96b7aa; pointer-events: none; }
@@ -931,8 +938,10 @@
       #inspection-text { min-height: 3.6em; overflow-y: auto; word-break: keep-all; overflow-wrap: anywhere; margin: 0; font-size: 17px; line-height: 1.8; white-space: pre-line; }
       #inspection .dialog-actions { flex-shrink: 0; align-items: center; margin-top: 12px; }
       #inspection .inspection-help { color: #9ca8a5; font-size: 12px; }
-      #inspection-close { min-height: 36px; padding: 6px 12px; border-color: #64756a; background: #192421; font-size: 13px; }
-      #inspection-close:focus-visible, #inspection-text:focus-visible { outline: 2px solid #dec898; outline-offset: 3px; }
+      #inspection-close, #inspection-use { min-height: 36px; padding: 6px 12px; border-color: #64756a; background: #192421; font-size: 13px; }
+      #inspection-use { border-color: #8fbda3; color: #e6f0e3; }
+      #inspection-use[hidden] { display: none; }
+      #inspection-close:focus-visible, #inspection-use:focus-visible, #inspection-text:focus-visible { outline: 2px solid #dec898; outline-offset: 3px; }
       @media (max-width: 600px), (max-height: 480px) {
         #inspection { bottom: max(88px, calc(env(safe-area-inset-bottom) + 76px)); max-height: calc(100dvh - 108px); padding: 10px 8px 6px; border-width: 16px; border-image-width: 16px; }
         #inspection .inspection-heading { margin-bottom: 8px; gap: 10px; }
@@ -1006,6 +1015,8 @@
     <script src="js/computer/computer.js" defer></script>
     <script src="js/elevator/cabin.js" defer></script>
     <script src="js/player/sanity.js" defer></script>
+    <script src="js/scene/pushables.js" defer></script>
+    <script src="js/scene/story-scene.js" defer></script>
     <script src="js/core/loop.js" defer></script>
     <script src="js/input/input.js" defer></script>
     <script src="js/input/keyboard.js" defer></script>
@@ -1127,6 +1138,10 @@
       <p id="blackout-caption" role="status" aria-live="polite"></p>
       <button id="blackout-skip" type="button">건너뛰기 · Esc</button>
     </section>
+    <section id="story-scene" role="dialog" aria-modal="true" aria-label="수호의 혼잣말" hidden>
+      <p id="story-caption" role="status" aria-live="polite"></p>
+      <button id="story-skip" type="button">건너뛰기 · Esc</button>
+    </section>
     <section id="phone" class="device-dialog" role="dialog" aria-modal="true" aria-labelledby="phone-title" hidden>
       <img class="phone-hardware" src="assets/ui/phone-device.png" alt="" width="887" height="1774" draggable="false" />
       <div class="phone-screen">
@@ -1230,7 +1245,7 @@
       <div id="inspection-sheet" aria-hidden="true" hidden></div>
       <p id="inspection-text" tabindex="0"></p>
       <span id="inspection-description" hidden></span>
-      <div class="dialog-actions"><span class="inspection-help">E / Esc</span><button id="inspection-close" type="button">닫기 ▾</button></div>
+      <div class="dialog-actions"><span class="inspection-help">E / Esc</span><button id="inspection-use" type="button" hidden>사용하기</button><button id="inspection-close" type="button">닫기 ▾</button></div>
     </section>
     <aside id="sanity-hud" aria-label="정신력 상태">
       <div class="sanity-heading"><span>정신력</span><output id="sanity-value">100%</output></div>
@@ -1248,6 +1263,7 @@
         <div id="debug-console-panel" hidden>
           <button id="debug-chase-hallucination" type="button">환각 추격 이벤트</button>
           <button id="debug-spawn-hallucination" type="button">환각 생성 이벤트</button>
+          <button id="debug-all-power" type="button" aria-pressed="false">모든 층 전력 활성화 · OFF</button>
         </div>
       </div>
     </aside>
