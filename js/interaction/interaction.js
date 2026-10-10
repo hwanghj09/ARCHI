@@ -2,7 +2,7 @@
 let nearbyDoor = null;
 
 function updateInteraction() {
-  if (openingActive || blackoutSceneActive || playerCaught) { hint.hidden = true; return; }
+  if (openingActive || blackoutSceneActive || playerCaught || hallucinationCaught) { hint.hidden = true; return; }
   if (room === 'dynamic') {
     // 전력이 들어온 채 감지했던 자리로 걸어 돌아가는('return') 로봇은 감지를 끈 채 움직이고 있어 바로 옆까지
     // 갈 수 있다. 정비 패널은 멈춘 로봇의 보조 배터리 화면이므로 그동안은 조사 대상에서 뺀다.
@@ -62,7 +62,8 @@ function doorHintText(door) {
 }
 
 function interact() {
-  if (openingActive || blackoutSceneActive || playerCaught || transitioning || selectingFloor || usingComputer || usingKeypad || usingPhone || usingPowerPanel || usingInspection) return;
+  if (openingActive || blackoutSceneActive || playerCaught || hallucinationCaught || transitioning || selectingFloor || usingComputer || usingKeypad || usingPhone || usingPowerPanel || usingInspection) return;
+  if (tryPickUpAnxietyPill()) return;
   updateInteraction();
   if (blackoutSceneActive) return;
   if (!nearbyDoor) return;
@@ -144,13 +145,19 @@ function interact() {
     // 글이 적힌 소품은 지금 보이는 문구에 맞는 표면을 펼친다(message는 소품, takenMessage·missingMessage는 그 sheet).
     openInspection(nearbyDoor.name, inspectionMessage, writingSheetFor(nearbyDoor, inspectionMessage));
     if (missing) return;
-    if (!unreadable) recordClue(nearbyDoor);
+    if (!unreadable) { recordClue(nearbyDoor); noteObjectiveRead(nearbyDoor); }
     const alreadyCollected = gives && collectedItems.has(gives);
     if (gives) {
       collectedItems.add(gives);
       // 처음 챙길 때의 효과음: requires를 써서 움직인 설비(인증 게이트·2층 영사기)는 사용음, 가방에 들어가는 소지품
       // (INVENTORY_ITEMS)은 획득음, 그 밖의 단서·진행은 pickup이다. sound가 있는 설비(11층 방화셔터)는 그 소리를 낸다.
       if (!alreadyCollected) playGameSound(nearbyDoor.sound || (required.length ? 'item-use' : INVENTORY_ITEMS[gives] ? 'item-get' : 'pickup'));
+      // 항불안제 같은 정신력 회복 소품(restoresSanity): 처음 챙길 때만 정신력을 올리고, 다 먹었으니 모습을 감춘다.
+      if (!alreadyCollected && nearbyDoor.restoresSanity) {
+        sanity = Math.min(100, sanity + nearbyDoor.restoresSanity);
+        refreshSanity();
+        nearbyDoor.element.hidden = true;
+      }
     }
     if (gives) refreshReady();
     if (gives) refreshInventoryCount();

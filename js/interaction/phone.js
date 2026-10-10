@@ -116,7 +116,7 @@ function refreshPhone() {
 }
 
 function togglePhone() {
-  if (playerCaught || blackoutSceneActive) return;
+  if (playerCaught || hallucinationCaught || blackoutSceneActive) return;
   if (usingPhone) return closePhone();
   if (phoneDock) return showStatus(`${phoneDockLocation()} 충전함에 휴대폰을 두었다. 그 충전함 앞에서 E로 가져오자.`, 4000);
   usingPhone = true;
@@ -146,7 +146,7 @@ function closePhone() {
 }
 
 function togglePhoneLight() {
-  if (playerCaught || blackoutSceneActive) return;
+  if (playerCaught || hallucinationCaught || blackoutSceneActive) return;
   if (phoneDock) return showStatus(`${phoneDockLocation()} 충전함에 휴대폰을 두어 플래시를 사용할 수 없다.`, 4000);
   if (!phoneLightOn && phoneBattery <= 0) return showStatus('휴대폰 배터리가 없습니다.');
   phoneLightOn = !phoneLightOn;

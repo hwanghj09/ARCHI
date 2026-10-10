@@ -24,6 +24,10 @@ function buildCameras(config, doorList) {
     element.setAttribute('role', 'img');
     element.setAttribute('aria-label', `${camera.name}${off ? ' · 꺼짐' : ''}`);
     Object.assign(element.style, { left: `${camera.x - 22}px`, top: `${camera.y}px` });
+    // 정신력 20% 미만일 때 덧씌우는 붉은 눈(기존 감지 LED ::after와 겹치지 않게 별도 요소를 쓴다).
+    const fearEye = document.createElement('span');
+    fearEye.className = 'cctv-fear-eye';
+    element.append(fearEye);
     dynamicScene.append(element);
     if (off) continue;
     const door = doorList.find(entry => entry.type === 'room' && entry.target === camera.guards);
@@ -63,5 +67,7 @@ function updateCameras() {
       camera.element.dataset.alert = alert;
       for (const cone of camera.cones) cone.dataset.alert = alert;
     }
+    const fear = String(fearTier >= 4);
+    if (camera.element.dataset.fear !== fear) camera.element.dataset.fear = fear;
   }
 }

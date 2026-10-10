@@ -38,7 +38,7 @@ function gameAudioBuffer(name) {
   const durations = { step: .2, door: .65, 'elevator-door': 1.05, 'elevator-arrive': 1.05,
     'elevator-alarm': .95, blackout: 1.5, 'robot-servo': .48, 'robot-alert': .6,
     'robot-grab': .65, 'call-ring': .85, phone: .14, charger: .24, pickup: .22, 'item-get': .5, 'item-use': .3, deny: .46,
-    shutter: 1.35, switch: .12, ui: .09 };
+    shutter: 1.35, switch: .12, ui: .09, 'zero-rush': .9 };
   const loop = ['office', 'dark', 'wind', 'motor'].includes(name);
   const duration = loop ? 8 : durations[name];
   if (!duration) return null;
@@ -80,6 +80,7 @@ function gameAudioBuffer(name) {
         (.2 * soft + .06 * sin(420, t)) * Math.exp(-((t * 22) % 1) * 4.5) * (.75 + .25 * sin(2.3, t)) * gate(t, .1, 1) + (.2 * sin(70, t) + .16 * soft) * hit(t, 1.15, 26); break;
       case 'switch': sample = (.28 * soft + .1 * sin(210, t)) * hit(t, .008, 48); break;
       case 'ui': sample = .09 * sin(720 - 900 * t, t) * Math.sin(Math.PI * t / duration) * Math.exp(-25 * t); break;
+      case 'zero-rush': sample = .55 * noise * hit(t, 0, 7) + .4 * sin(Math.max(140, 1500 - 1700 * t), t) * hit(t, 0, 3) + .32 * low * hit(t, .05, 4.5); break;
       case 'office': sample = .6 * low + .09 * sin(62.5, t) + .025 * sin(125, t); break;
       case 'dark': sample = .46 * low + .065 * sin(37.5, t) * (1 + .18 * sin(.125, t)); break;
       case 'wind': sample = .95 * low * (.65 + .2 * sin(.25, t) + .12 * sin(.625, t)); break;
@@ -117,7 +118,8 @@ function playGameSound(name, options = {}) {
   const gain = gameAudioContext.createGain();
   source.buffer = buffer;
   source.playbackRate.value = name === 'step' ? .94 + Math.random() * .12 : 1;
-  gain.gain.value = (name === 'step' ? (options.landing ? .65 : options.running ? .6 : .42) : name === 'blackout' ? .7 : name === 'robot-servo' ? .35 : .6) * (1 - distance / 800);
+  gain.gain.value = (name === 'step' ? (options.landing ? .65 : options.running ? .6 : .42) : name === 'blackout' ? .7 :
+    name === 'robot-servo' ? .35 : name === 'zero-rush' ? .85 : .6) * (1 - distance / 800);
   source.connect(gain).connect(gameAudioMaster);
   const effect = { source, gain, name, stopping: false };
   gameAudioEffects.add(effect);
