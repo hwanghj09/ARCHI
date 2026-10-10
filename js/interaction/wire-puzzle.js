@@ -7,11 +7,14 @@ const WIRE_COLORS = [
   { id: 'blue', label: '파랑', hex: '#3a7ad8' },
   { id: 'green', label: '초록', hex: '#3fae5c' },
 ];
+// wire-cable.png는 빨강 한 장만 있다(assets/ui/wire-puzzle/CABLE-PROMPT.md) — 나머지 색은 그 빨강의
+// 실측 색상각(≈4°) 기준 상대 회전각만큼 CSS hue-rotate()로 우려낸다. 소켓 색(WIRE_COLORS의 hex)과
+// 어울리도록 그 색들의 HSL 색상각 차이로 계산했다.
+const WIRE_HUE_ROTATE = { red: 0, yellow: 40, blue: 212, green: 132 };
 const wirePanel = document.getElementById('wire-panel');
 const wireBoard = document.getElementById('wire-board');
 const wireLeft = document.getElementById('wire-left');
 const wireRight = document.getElementById('wire-right');
-const wireSvg = document.getElementById('wire-svg');
 const wireStatus = document.getElementById('wire-status');
 let wireBlocked = [];
 let wireOnSolved = null;
@@ -53,10 +56,12 @@ function openWirePanel(onSolved) {
   wireConnected = new Set();
   wireArmed = null;
   wireDrag = null;
-  wireStatus.textContent = '';
+  // 그림의 아래쪽 명판 한 줄(#wire-status)이 안내문과 진행 상황을 함께 보여준다 — 첫 연결부터는
+  // attemptConnection()이 이 자리를 덮어쓴다.
+  wireStatus.textContent = '왼쪽 전선 끝을 당기거나 클릭해 같은 색 오른쪽 단자에 연결하자.';
   buildWireColumn(wireLeft, 'left', shuffledWireColors());
   buildWireColumn(wireRight, 'right', shuffledWireColors());
-  wireSvg.replaceChildren();
+  for (const cable of wireBoard.querySelectorAll('.wire-cable')) cable.remove();
   wirePanel.hidden = false;
   releaseInput();
   wireBlocked = [...document.body.children].filter(element => element !== wirePanel && element.tagName !== 'SCRIPT' && !element.inert);
@@ -75,22 +80,28 @@ function closeWirePanel() {
   openPowerPanel();
 }
 
-function drawWireLine(id, from, to, color) {
-  let line = wireSvg.querySelector(`[data-wire="${id}"]`);
-  if (!line) {
-    line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-    line.dataset.wire = id;
-    line.setAttribute('stroke', color);
-    line.setAttribute('stroke-width', '5');
-    line.setAttribute('stroke-linecap', 'round');
-    wireSvg.append(line);
+// 두 점을 실제 전선 그림(wire-cable.png, 가로로 반복되는 타일)으로 잇는다. 왼쪽 몇 번째 줄이
+// 오른쪽 몇 번째 줄과 이어질지 매번 랜덤이라 선의 길이·각도가 매번 달라지므로, 고정된 그림 한
+// 장 대신 두 점 사이 거리만큼 가로로 늘어나는 띠(div, background-repeat: repeat-x)를 그 각도로
+// 돌려서 쓴다(assets/ui/wire-puzzle/CABLE-PROMPT.md 참고).
+function drawWireLine(id, from, to, colorId) {
+  let cable = wireBoard.querySelector(`.wire-cable[data-wire="${id}"]`);
+  if (!cable) {
+    cable = document.createElement('div');
+    cable.className = 'wire-cable';
+    cable.dataset.wire = id;
+    wireBoard.append(cable);
   }
-  line.setAttribute('x1', from.x); line.setAttribute('y1', from.y);
-  line.setAttribute('x2', to.x); line.setAttribute('y2', to.y);
+  const dx = to.x - from.x, dy = to.y - from.y;
+  cable.style.width = `${Math.hypot(dx, dy)}px`;
+  cable.style.left = `${from.x}px`;
+  cable.style.top = `${from.y}px`;
+  cable.style.transform = `rotate(${Math.atan2(dy, dx) * 180 / Math.PI}deg)`;
+  cable.style.filter = `hue-rotate(${WIRE_HUE_ROTATE[colorId] ?? 0}deg)`;
 }
 
 function removeWireLine(id) {
-  wireSvg.querySelector(`[data-wire="${id}"]`)?.remove();
+  wireBoard.querySelector(`.wire-cable[data-wire="${id}"]`)?.remove();
 }
 
 function setArmed(button) {
@@ -109,7 +120,7 @@ function attemptConnection(leftButton, rightButton) {
   const color = WIRE_COLORS.find(entry => entry.id === leftButton.dataset.color);
   leftButton.disabled = true; rightButton.disabled = true;
   leftButton.classList.add('connected'); rightButton.classList.add('connected');
-  drawWireLine(color.id, wirePlugCenter(leftButton), wirePlugCenter(rightButton), color.hex);
+  drawWireLine(color.id, wirePlugCenter(leftButton), wirePlugCenter(rightButton), color.id);
   wireConnected.add(color.id);
   playGameSound('item-use');
   wireStatus.textContent = `${color.label} 전선을 연결했다.`;
@@ -135,9 +146,8 @@ wireLeft.addEventListener('pointermove', event => {
   if (!wireDrag.moved) setArmed(null); // a real drag starts: leave the click-to-arm flow
   wireDrag.moved = true;
   const boardRect = wireBoard.getBoundingClientRect();
-  const color = WIRE_COLORS.find(entry => entry.id === wireDrag.button.dataset.color);
   drawWireLine('drag', wirePlugCenter(wireDrag.button),
-    { x: event.clientX - boardRect.left, y: event.clientY - boardRect.top }, color.hex);
+    { x: event.clientX - boardRect.left, y: event.clientY - boardRect.top }, wireDrag.button.dataset.color);
 });
 function endWireDrag(event) {
   if (!wireDrag || event.pointerId !== wireDrag.pointerId) return;

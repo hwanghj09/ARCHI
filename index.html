@@ -1228,12 +1228,11 @@
         <button id="power-close" type="button">닫기 · Esc</button>
       </div>
     </section>
-    <section id="wire-panel" role="dialog" aria-modal="true" aria-labelledby="wire-title" aria-describedby="wire-help" hidden>
+    <section id="wire-panel" role="dialog" aria-modal="true" aria-labelledby="wire-title" aria-describedby="wire-status" hidden>
       <div class="wire-box">
-        <h2 id="wire-title">배전반 내부 — 끊어진 전선</h2>
-        <p id="wire-help">비밀번호는 맞았지만 과부하로 전선 다발이 끊어졌다. 왼쪽 전선을 당겨서 같은 색 오른쪽 단자에 연결하자.</p>
+        <div class="wire-art" aria-hidden="true"><img src="assets/ui/wire-puzzle/wire-panel.png" alt="" /></div>
+        <h2 id="wire-title">배전반 내부</h2>
         <div id="wire-board">
-          <svg id="wire-svg" aria-hidden="true"></svg>
           <div id="wire-left" class="wire-column" aria-label="왼쪽 전선 끝"></div>
           <div id="wire-right" class="wire-column" aria-label="오른쪽 단자"></div>
         </div>
