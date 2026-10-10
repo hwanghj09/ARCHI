@@ -137,9 +137,11 @@ function interact() {
     // condition: 물건이 아닌 현재 상태(16층 박스를 끝까지 밀고 그 위에 서기)로 정하는 조건. 못 채우면 물건 하나가 모자란 것과 같다.
     const lacking = required.filter(item => !collectedItems.has(item)).length + (nearbyDoor.condition && !nearbyDoor.condition() ? 1 : 0);
     if (nearbyDoor.accessGate && lacking && collectedItems.has('f17-badge')) {
-      // 거부 화면은 유효한 사원증의 주인과 마지막으로 확인된 곳(16층 카페)까지만 알려 준다.
+      // 거부 화면은 미등록 출입증이라는 사실만 알려 준다(유효한 사원증의 단서는 휴대폰 건물 안내 앱이 따로 준다).
       playGameSound('deny');
-      openInspection(nearbyDoor.name, '정수호의 출입증을 태그했다. "미등록 출입증 · 인증 거부". 칸막이가 열리지 않는다. 리더 화면에 야간 출입 권한자가 떠 있다: "조현아 팀장 · 16층 Café에서 마지막 확인". 다른 유효한 사원증이 필요하다.');
+      openInspection(nearbyDoor.name, '정수호의 출입증을 태그했다. "미등록 출입증입니다, 팀장 이상의 직급이 요구됩니다." 칸막이가 열리지 않았다.');
+      // 로봇의 습격! 그 이유는? 목표 도중이면 이 조사창을 닫은 뒤 세 번째 컷씬(story-scene.js)이 이어진다.
+      if (currentObjective?.title === '로봇의 습격! 그 이유는?') collectedItems.add('story-gate-tagged');
       return;
     }
     const missing = !unreadable && lacking && nearbyDoor.missingMessage &&

@@ -65,10 +65,9 @@ try {
   await page.evaluate(() => collectedItems.add('f17-badge'));
   await sounds();
   await page.keyboard.press('e');
-  // The refusal points at the valid card without solving it: whose card, and where it was last seen.
+  // The refusal only says the card is unregistered; the building guide app gives the hint about the valid card.
   const rejected = await message();
-  assert.match(rejected, /미등록 출입증 · 인증 거부/);
-  assert.match(rejected, /조현아 팀장 · 16층 Café에서 마지막 확인/);
+  assert.match(rejected, /"미등록 출입증입니다, 팀장 이상의 직급이 요구됩니다." 칸막이가 열리지 않았다/);
   assert.deepEqual(await sounds(), ['deny'], 'The reader buzzes a refusal');
   await close();
   for (const floor of [15, 14, 13, 12]) {

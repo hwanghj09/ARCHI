@@ -24,6 +24,13 @@ const STORY_SCENES = [
       '그 로봇은 ARCHI 개발 팀에서 만든 로봇이였나?',
       '12층 ARCHI 개발 팀을 조사해보자.'],
   },
+  { // 로봇의 습격! 그 이유는? 목표 도중 12~15층 게이트에 출입증을 태우고, 그 조사창을 닫은 직후.
+    flag: 'story-badge-seen', delay: 300, ready: () => collectedItems.has('story-gate-tagged'),
+    lines: ['아 맞다 나 일용직이였지',
+      '일용직한테 야근시키는 이 @#$% 회사... 떄려치던가 해야지..',
+      '그러고보니 내 옆자리 사원의 직급이 팀장이였던거로 아는데..',
+      '잠깐 빌리지 뭐'],
+  },
 ];
 
 let storyDelayScene = null;

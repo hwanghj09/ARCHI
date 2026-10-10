@@ -16,6 +16,7 @@ const OBJECTIVES = [
   { when: () => collectedItems.has('goal-f7-log') && collectedItems.has('b1-elevator'), title: 'B2 서버실 조사하기', text: 'B2 ARCHI 메인 서버실로 내려가 진짜 목적을 확인하자.' },
   { when: () => collectedItems.has('goal-f7-log'), title: 'B2로 가는 길 찾기', text: '모든 로그가 B2를 가리킨다. B1에서 B2 운행 제한을 풀자.' },
   { when: () => collectedItems.has('goal-f12-memo'), title: '7층 조사하기', text: '옥상에서 7층에 전력을 공급하고 AI 테스트·검증실의 백업 로그를 찾자.' },
+  { when: () => collectedItems.has('story-badge-seen'), title: '출입증 쌔비기', text: '옆자리 직원의 자리를 조사하자.' },
   { when: () => collectedItems.has('story-robot-seen'), title: '로봇의 습격! 그 이유는?', text: '12층 ARCHI 개발 팀을 조사하자.' },
   { when: () => collectedItems.has('story-anxiety-seen') && !collectedItems.has('story-robot-seen'), title: '정신 불안', text: '16층 편의점에서 항불안제를 찾자.' },
   { when: () => solarEnabled && collectedItems.has('f1-reached'), title: '퇴근하기', text: '정문으로 나가자.' },

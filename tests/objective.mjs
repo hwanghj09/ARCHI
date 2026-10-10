@@ -97,6 +97,14 @@ try {
   assert(await page.locator('#story-scene').isHidden());
   await waitTyped('로봇의 습격! 그 이유는?', '12층 ARCHI 개발 팀을 조사하자.');
 
+  // 로봇의 습격! 그 이유는? 목표 도중 게이트에 출입증을 태우면(조사창을 닫은 뒤) 세 번째 컷씬이 나오고, 끝나면 '출입증 쌔비기' 목표가 생긴다.
+  await page.evaluate(() => collectedItems.add('story-gate-tagged'));
+  await page.locator('#story-scene').waitFor({ state: 'visible', timeout: 10000 });
+  assert.equal(await page.locator('#story-caption').textContent(), '아 맞다 나 일용직이였지');
+  await page.waitForFunction(() => storyCaption.textContent === '잠깐 빌리지 뭐', null, { timeout: 12000 });
+  await page.keyboard.press('Escape');
+  await waitTyped('출입증 쌔비기', '옆자리 직원의 자리를 조사하자.');
+
   assert.equal(await titleAfter(() => collectedItems.add('goal-f12-memo')), '7층 조사하기');
   assert.equal(await titleAfter(() => collectedItems.add('goal-f7-log')), 'B2로 가는 길 찾기');
   assert.equal(await titleAfter(() => collectedItems.add('b1-elevator')), 'B2 서버실 조사하기');
