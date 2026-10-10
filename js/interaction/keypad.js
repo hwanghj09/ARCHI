@@ -40,10 +40,8 @@ function submitKeypad() {
     return;
   }
   if (target.type === 'power') {
-    solarEnabled = true;
-    playGameSound('switch');
+    setSolarPower(true);
     closeKeypad();
-    showStatus('태양광 비상 전력 ON · 엘리베이터 운행이 복구됐다. 먼저 1층부터 가 보자.', 6000);
   } else if (target.type === 'room') {
     // 맞는 번호를 누르면 그 자리에서 문이 열린다. 다음에 층을 그릴 때는 unlockedBy를 챙긴 것으로 열린 채 그린다.
     collectedItems.add(target.unlockedBy);

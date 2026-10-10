@@ -4,6 +4,7 @@ const computerWindow = document.getElementById('computer-window');
 const computerNote = document.getElementById('computer-note');
 const computerSaveStatus = document.getElementById('computer-save-status');
 let computerReturnFocus = null;
+let computerInternetConnected = false;
 
 function exitComputer() {
   if (transitioning || !usingComputer) return;
@@ -16,7 +17,7 @@ function exitComputer() {
 
 function openComputerApp(app, documentId) {
   if (transitioning || !usingComputer) return;
-  const titles = { files: '파일', notes: '업무 메모', document: '문서', mail: '사내 메일', calculator: '계산기', building: '건물 안내' };
+  const titles = { files: '파일', notes: '업무 메모', document: '문서', mail: '사내 메일', calculator: '계산기', building: '건물 안내', browser: '인터넷' };
   if (!Object.hasOwn(titles, app)) return;
   const record = app === 'document' ? officeDocuments.find(item => item.id === documentId) : null;
   if (app === 'document' && !record) return;
@@ -36,10 +37,51 @@ function openComputerApp(app, documentId) {
   }
   if (app === 'mail') showComputerMailInbox();
   if (app === 'building') refreshBuildingGuides();
+  if (app === 'browser') {
+    computerInternetConnected = false;
+    refreshSolarDownload();
+  }
   document.getElementById('computer-window-title').textContent = title;
   (app === 'notes' ? computerNote : app === 'mail' ? computerMailSearch : app === 'calculator' ?
     document.querySelector('#computer-calculator [data-calculator-key]') : document.getElementById('computer-window-close')).focus();
 }
+
+function refreshSolarDownload() {
+  const ready = solarEnabled && floorHasPower(17);
+  const connected = ready && computerInternetConnected;
+  const downloaded = collectedItems.has('solar-app-downloaded');
+  const installed = collectedItems.has('solar-app-installed');
+  document.getElementById('computer-internet-connect').disabled = !ready || connected;
+  document.getElementById('computer-internet-status').textContent = !ready ? '태양광 장치에서 17층 전력을 켜면 인터넷과 장치 등록을 사용할 수 있습니다.' :
+    connected ? '인터넷 연결됨 · 시설관리 다운로드 페이지' : '인터넷에 접속해 비상 전력 제어 앱을 다운로드하세요.';
+  document.getElementById('computer-solar-page').hidden = !connected;
+  document.getElementById('computer-solar-download').disabled = !connected || downloaded || installed;
+  document.getElementById('computer-solar-transfer').disabled = !connected || !downloaded || installed || Boolean(phoneDock) || phoneBattery <= 0;
+  document.getElementById('computer-solar-status').textContent = installed ? '전송·설치 및 장치 등록 완료. 휴대폰(P)에서 비상 전력 제어 앱을 여세요.' :
+    phoneDock ? '충전함에 맡긴 휴대폰을 가져온 뒤 전송하세요.' : phoneBattery <= 0 ? '휴대폰을 충전한 뒤 전송하세요.' :
+    downloaded ? '다운로드 완료. 휴대폰으로 전송해 설치하세요.' : '휴대폰용 앱을 다운로드할 수 있습니다.';
+}
+
+document.getElementById('computer-internet-connect').addEventListener('click', () => {
+  if (!usingComputer || !solarEnabled || !floorHasPower(17)) return;
+  computerInternetConnected = true;
+  refreshSolarDownload();
+});
+document.getElementById('computer-solar-download').addEventListener('click', () => {
+  if (!usingComputer || !computerInternetConnected || !solarEnabled || !floorHasPower(17) || collectedItems.has('solar-app-downloaded')) return;
+  collectedItems.add('solar-app-downloaded');
+  refreshSolarDownload();
+  saveProgress();
+});
+document.getElementById('computer-solar-transfer').addEventListener('click', () => {
+  if (!usingComputer || !computerInternetConnected || !solarEnabled || !floorHasPower(17) || phoneDock || phoneBattery <= 0 ||
+      !collectedItems.has('solar-app-downloaded') || collectedItems.has('solar-app-installed')) return;
+  collectedItems.add('solar-app-installed');
+  playGameSound('phone');
+  refreshSolarDownload();
+  refreshPhone();
+  saveProgress();
+});
 
 function closeComputerApp() {
   computerWindow.hidden = true;

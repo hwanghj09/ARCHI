@@ -38,6 +38,37 @@ function updatePowerState() {
   if (selectingFloor) refreshCabin();
   refreshPhone();
   if (typeof refreshBuildingGuides === 'function') refreshBuildingGuides();
+  if (typeof refreshSolarDownload === 'function') refreshSolarDownload();
+}
+
+function setSolarPower(enabled) {
+  if (solarEnabled !== enabled) playGameSound('switch');
+  solarEnabled = enabled;
+  if (!enabled) solarPoweredFloor = null;
+  updatePowerState();
+  showStatus(enabled ? '태양광 비상 전력 ON · 엘리베이터 운행이 복구됐다. 17층 전력을 켜고 작업용 컴퓨터로 돌아가자.' :
+    '태양광 비상 전력 OFF · 정전 상태에서는 엘리베이터가 멈춘다.', 6000);
+}
+
+function supplySolarFloor(floor) {
+  if (!solarEnabled || !Number.isInteger(floor) || floor < 1 || floor > 17) return;
+  if (solarPoweredFloor !== floor) playGameSound('switch');
+  solarPoweredFloor = floor;
+  powerGrid.querySelector(`[data-floor="${floor}"]`).classList.remove('suggested');
+  updatePowerState();
+  showStatus(`${floor}층에 태양광 비상 전력을 공급합니다.`);
+}
+
+function refreshSolarApp() {
+  const available = collectedItems.has('solar-app-installed') && phoneBattery > 0 && !phoneDock;
+  document.getElementById('phone-solar-status').textContent = !available ? '휴대폰을 사용할 수 없습니다.' :
+    !solarEnabled ? '장치 연결됨 · 비상 전력 꺼짐' : solarPoweredFloor ? `장치 연결됨 · ${solarPoweredFloor}층 전력 공급 중` : '장치 연결됨 · 공급 층을 선택하세요.';
+  const toggle = document.getElementById('phone-solar-toggle');
+  toggle.disabled = !available;
+  toggle.textContent = solarEnabled ? '비상 전력 끄기' : '비상 전력 켜기';
+  toggle.setAttribute('aria-pressed', String(solarEnabled));
+  document.getElementById('phone-solar-supply').disabled = !available || !solarEnabled;
+  document.getElementById('phone-solar-floor').disabled = !available || !solarEnabled;
 }
 
 function triggerBuildingBlackout() {
@@ -71,20 +102,27 @@ for (let floor = 17; floor >= 1; floor -= 1) {
   button.type = 'button';
   button.dataset.floor = String(floor);
   button.textContent = `${floor}F`;
-  if (floor === 1) {
+  if (floor === 17) {
     button.classList.add('suggested');
-    button.setAttribute('aria-label', '1F · 먼저 가보기를 추천합니다');
+    button.setAttribute('aria-label', '17F · 작업용 컴퓨터 전력 복구');
   }
   button.addEventListener('click', () => {
-    if (!solarEnabled) return;
-    if (solarPoweredFloor !== floor) playGameSound('switch');
-    solarPoweredFloor = floor;
-    button.classList.remove('suggested');
-    updatePowerState();
-    showStatus(`${floor}층에 태양광 비상 전력을 공급합니다.`);
+    supplySolarFloor(floor);
   });
   powerGrid.append(button);
+  document.getElementById('phone-solar-floor').add(new Option(`${floor}층`, String(floor)));
 }
+
+document.getElementById('phone-solar-toggle').addEventListener('click', () => {
+  if (!usingPhone || currentPhoneApp !== 'solar' || !collectedItems.has('solar-app-installed') || phoneBattery <= 0 || phoneDock) return;
+  setSolarPower(!solarEnabled);
+  saveProgress();
+});
+document.getElementById('phone-solar-supply').addEventListener('click', () => {
+  if (!usingPhone || currentPhoneApp !== 'solar' || !collectedItems.has('solar-app-installed') || phoneBattery <= 0 || phoneDock) return;
+  supplySolarFloor(Number(document.getElementById('phone-solar-floor').value));
+  saveProgress();
+});
 
 let leverStartY = null;
 let leverDrag = 0;
@@ -98,11 +136,7 @@ powerLever.addEventListener('click', () => {
       codePrompt: '4자리 비밀번호를 입력하세요. 관리 메모는 17층 CCTV 아래 게시판에 붙어 있다.' });
     return;
   }
-  solarEnabled = false;
-  playGameSound('switch');
-  solarPoweredFloor = null;
-  updatePowerState();
-  showStatus('태양광 비상 전력 OFF · 정전 상태에서는 엘리베이터가 멈춘다.', 6000);
+  setSolarPower(false);
 });
 // Dragging down operates the same native button as click, touch and keyboard.
 powerLever.addEventListener('pointerdown', event => {
