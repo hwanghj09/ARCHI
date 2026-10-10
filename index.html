@@ -925,6 +925,7 @@
     <script src="js/input/keyboard.js" defer></script>
     <script src="js/input/touch.js" defer></script>
     <script src="js/debug/floor-select.js" defer></script>
+    <script src="js/debug/sanity-debug.js" defer></script>
     <script src="js/scene/opening.js" defer></script>
     <script src="js/scene/blackout.js" defer></script>
     <script src="js/core/save.js" defer></script>
@@ -944,6 +945,7 @@
         <img id="office-background" src="assets/background/floor17/office-interior-aligned.png" alt="" width="2196" height="724" draggable="false" />
         <div id="office-computer" role="img" aria-label="켜진 컴퓨터" data-power="on"></div>
         <div id="dynamic-scene" aria-hidden="true"></div>
+        <div id="anxiety-pill" class="pill-prop" role="img" aria-label="반짝이는 항불안제" hidden></div>
         <div id="interaction-outline" hidden></div>
         <div id="interaction-hint" hidden></div>
         <div id="player" role="img" aria-label="정수호" data-state="idle" data-frame="0">
@@ -1128,10 +1130,24 @@
         <span id="sanity-fill" aria-hidden="true"></span>
       </div>
       <span id="sanity-state" aria-live="polite">안정</span>
+      <form id="debug-sanity" aria-label="테스트용 정신력 조정">
+        <label for="debug-sanity-range">TEST 정신력</label>
+        <input id="debug-sanity-range" type="range" min="0" max="100" value="100" />
+        <input id="debug-sanity-number" type="number" min="0" max="100" value="100" />
+      </form>
     </aside>
+    <div id="fear-overlay" aria-hidden="true"></div>
+    <div id="fear-overlay-red" aria-hidden="true"></div>
+    <div id="blink-flash" aria-hidden="true" data-active="false"></div>
+    <div id="wall-eyes" aria-hidden="true"></div>
     <div id="hallucinations" aria-hidden="true" hidden>
       <img id="hallucination-shadow" src="assets/player/jeong-suho.png" alt="" width="256" height="256" draggable="false" hidden />
     </div>
+    <section id="hallucination-caught" role="dialog" aria-modal="true" aria-labelledby="hallucination-caught-title" hidden>
+      <h2 id="hallucination-caught-title">환각에게 삼켜졌다</h2>
+      <p>정신을 차려 보니 아직 같은 자리다. 정신력을 조금 되찾았다.</p>
+      <button id="hallucination-retry" type="button">다시 정신 차리기</button>
+    </section>
     <button id="game-menu-button" type="button">메뉴 · Esc</button>
     <button id="inventory-button" type="button" aria-controls="inspection" aria-expanded="false">가방 · I</button>
     <form id="debug-floor" aria-label="테스트용 층 이동">
@@ -1142,6 +1158,10 @@
     <div id="room-transition" aria-hidden="true" data-phase="idle"></div>
     <div id="computer" role="dialog" aria-modal="true" aria-label="17층 사무실 컴퓨터" tabindex="-1" hidden>
       <img id="computer-wallpaper" src="assets/ui/computer/wallpaper.png" alt="" draggable="false" />
+      <div id="computer-fear-window" class="computer-fear-window" aria-hidden="true">
+        <div class="computer-fear-titlebar">SYSTEM</div>
+        <img class="computer-fear-still" alt="" draggable="false" />
+      </div>
       <div class="computer-shortcuts">
         <button type="button" data-computer-app="files"><span class="app-art" data-app-icon="files" aria-hidden="true"></span><span>파일</span></button>
         <button type="button" data-computer-app="notes"><span class="app-art" data-app-icon="notes" aria-hidden="true"></span><span>업무 메모</span></button>

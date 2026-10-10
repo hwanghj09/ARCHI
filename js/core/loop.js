@@ -16,6 +16,11 @@ function update() {
     cameraX += (cameraTarget() - cameraX) * .13;
     return;
   }
+  if (hallucinationCaught) {
+    animate(0, false, step);
+    cameraX += (cameraTarget() - cameraX) * .13;
+    return;
+  }
   if (transitioning) {
     updateSceneTransition();
     updateElevators();
@@ -40,7 +45,8 @@ function update() {
   const sprinting = !phoneLightOn && [...runKeys].some(key => keys.has(key));
   interactionTime = direction || jumpQueued ? 0 : Math.max(0, interactionTime - step);
   if (direction) facing = direction;
-  Body.setVelocity(body, { x: direction * (sprinting ? runSpeed : speed) / 60, y: jumpQueued && grounded ? -10.8 : body.velocity.y });
+  const paceFactor = sanitySpeedFactor();
+  Body.setVelocity(body, { x: direction * (sprinting ? runSpeed : speed) * paceFactor / 60, y: jumpQueued && grounded ? -10.8 : body.velocity.y });
   jumpQueued = false;
   const oldX = body.position.x;
   const wasGrounded = grounded;

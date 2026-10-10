@@ -2,7 +2,7 @@
 let nearbyDoor = null;
 
 function updateInteraction() {
-  if (openingActive || blackoutSceneActive || playerCaught) { hint.hidden = true; return; }
+  if (openingActive || blackoutSceneActive || playerCaught || hallucinationCaught) { hint.hidden = true; return; }
   if (room === 'dynamic') {
     const candidates = [...(guardPatrol.door ? [guardPatrol.door] : []),
       ...currentDoors.filter(door => door.accessGate && door.solid), ...currentDoors.filter(door => door.phoneCharger),
@@ -59,7 +59,8 @@ function doorHintText(door) {
 }
 
 function interact() {
-  if (openingActive || blackoutSceneActive || playerCaught || transitioning || selectingFloor || usingComputer || usingKeypad || usingPhone || usingPowerPanel || usingInspection) return;
+  if (openingActive || blackoutSceneActive || playerCaught || hallucinationCaught || transitioning || selectingFloor || usingComputer || usingKeypad || usingPhone || usingPowerPanel || usingInspection) return;
+  if (tryPickUpAnxietyPill()) return;
   updateInteraction();
   if (blackoutSceneActive) return;
   if (!nearbyDoor) return;
@@ -142,6 +143,12 @@ function interact() {
     if (gives) {
       collectedItems.add(gives);
       if (!alreadyCollected) playGameSound('pickup');
+      // 항불안제 같은 정신력 회복 소품(restoresSanity): 처음 챙길 때만 정신력을 올리고, 다 먹었으니 모습을 감춘다.
+      if (!alreadyCollected && nearbyDoor.restoresSanity) {
+        sanity = Math.min(100, sanity + nearbyDoor.restoresSanity);
+        refreshSanity();
+        nearbyDoor.element.hidden = true;
+      }
     }
     if (gives) refreshReady();
     if (gives) refreshInventoryCount();

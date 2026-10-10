@@ -225,6 +225,7 @@ function buildDynamicScene(config) {
     // cycle: 조사할 때마다 출력 칸이 바뀌는 선택기(4층 UPS). 지금 칸 번호를 data-state로 그린다.
     if (prop.cycle) element.dataset.state = String(cycleState(prop.cycle));
     doorList.push({ name: prop.name, type: 'inspect', message: prop.message, gives: prop.gives,
+      restoresSanity: prop.restoresSanity,
       takenMessage: prop.takenMessage, darkMessage: prop.darkMessage, requires: prop.requires,
       missingMessage: prop.missingMessage, partialMessage: prop.partialMessage, element, standY: floorY - base,
       code: prop.code, codePrompt: prop.codePrompt, cycle: prop.cycle, opens: prop.opens,

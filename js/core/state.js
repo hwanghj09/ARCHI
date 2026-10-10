@@ -39,3 +39,9 @@ let phoneLightOn = false;
 let solarPoweredFloor = null;
 let solarEnabled = false;
 let buildingBlackout = false;
+// 정신력 공포 단계(0~5, sanityTierOf 참고). CCTV·컴퓨터·이동 속도 등 여러 기능이 함께 읽는다.
+let fearTier = 0;
+// B2 최종 추격(미구현)에서 켤 플래그. 켜져 있는 동안은 경비 로봇에게 쫓겨도 정신력이 10%/초로 줄지 않는다.
+let bossFightActive = false;
+// 정신력 0% 이벤트의 마지막 단계: 환각에게 잡아먹혀 게임 오버 연출 중이다.
+let hallucinationCaught = false;
