@@ -40,9 +40,11 @@
       #world[data-powered="false"] .room-door,
       #world[data-powered="false"] .fixture,
       #world[data-powered="false"] .floor-prop { filter: brightness(.45) saturate(.6); }
+      /* 열린 엘리베이터 둘레는 어둠이 걷힌다(구멍 3개 = 차량 3대, js/elevator/elevators.js가 --eNx/y/w/h/k를 채움). 구멍끼리는 intersect로 곱해진다. */
+      #darkness { mask-image: radial-gradient(ellipse var(--e0w, 1px) var(--e0h, 1px) at var(--e0x, 0px) var(--e0y, 0px), rgb(0 0 0 / calc(1 - var(--e0k, 0) * .85)) 0, rgb(0 0 0 / calc(1 - var(--e0k, 0) * .6)) 40%, rgb(0 0 0 / calc(1 - var(--e0k, 0) * .2)) 70%, #000 100%), radial-gradient(ellipse var(--e1w, 1px) var(--e1h, 1px) at var(--e1x, 0px) var(--e1y, 0px), rgb(0 0 0 / calc(1 - var(--e1k, 0) * .85)) 0, rgb(0 0 0 / calc(1 - var(--e1k, 0) * .6)) 40%, rgb(0 0 0 / calc(1 - var(--e1k, 0) * .2)) 70%, #000 100%), radial-gradient(ellipse var(--e2w, 1px) var(--e2h, 1px) at var(--e2x, 0px) var(--e2y, 0px), rgb(0 0 0 / calc(1 - var(--e2k, 0) * .85)) 0, rgb(0 0 0 / calc(1 - var(--e2k, 0) * .6)) 40%, rgb(0 0 0 / calc(1 - var(--e2k, 0) * .2)) 70%, #000 100%); mask-composite: intersect, intersect; }
       #world[data-flashlight="on"] #darkness {
-        mask-image: radial-gradient(ellipse 390px 210px at var(--beam-x) var(--beam-y), #0000 0 35px, #0004 180px, #000 390px), conic-gradient(from var(--beam-angle) at var(--beam-x) var(--beam-y), #0000 0deg 44deg, #000 48deg 356deg, #0000 360deg);
-        mask-composite: add;
+        mask-image: radial-gradient(ellipse var(--e0w, 1px) var(--e0h, 1px) at var(--e0x, 0px) var(--e0y, 0px), rgb(0 0 0 / calc(1 - var(--e0k, 0) * .85)) 0, rgb(0 0 0 / calc(1 - var(--e0k, 0) * .6)) 40%, rgb(0 0 0 / calc(1 - var(--e0k, 0) * .2)) 70%, #000 100%), radial-gradient(ellipse var(--e1w, 1px) var(--e1h, 1px) at var(--e1x, 0px) var(--e1y, 0px), rgb(0 0 0 / calc(1 - var(--e1k, 0) * .85)) 0, rgb(0 0 0 / calc(1 - var(--e1k, 0) * .6)) 40%, rgb(0 0 0 / calc(1 - var(--e1k, 0) * .2)) 70%, #000 100%), radial-gradient(ellipse var(--e2w, 1px) var(--e2h, 1px) at var(--e2x, 0px) var(--e2y, 0px), rgb(0 0 0 / calc(1 - var(--e2k, 0) * .85)) 0, rgb(0 0 0 / calc(1 - var(--e2k, 0) * .6)) 40%, rgb(0 0 0 / calc(1 - var(--e2k, 0) * .2)) 70%, #000 100%), radial-gradient(ellipse 390px 210px at var(--beam-x) var(--beam-y), #0000 0 35px, #0004 180px, #000 390px), conic-gradient(from var(--beam-angle) at var(--beam-x) var(--beam-y), #0000 0deg 44deg, #000 48deg 356deg, #0000 360deg);
+        mask-composite: intersect, intersect, intersect, add;
       }
       #flashlight-beam { display: none; position: absolute; z-index: 3; left: var(--beam-x); top: calc(var(--beam-y) - 170px); width: 390px; height: 340px; transform: scaleX(var(--beam-facing)); transform-origin: 0 50%; clip-path: polygon(0 50%, 100% 0, 100% 100%); background: linear-gradient(90deg, #fff4bb24, #fff4bb00); pointer-events: none; }
       /* 빛 색은 어둠 막이 보일 때만 깐다. 빛(3)은 배경 위에 있어서 밝은 장면에서 켜면 노란 쐐기가 그대로 드러나므로,
@@ -815,7 +817,8 @@
       #world[data-room="dynamic"] > .solid,
       #world[data-room="dynamic"] > .door,
       #world[data-room="dynamic"] > .office-door,
-      #world[data-room="dynamic"] > .elevator-indicator { display: none; }
+      #world[data-room="dynamic"] > .elevator-indicator,
+      #world[data-room="dynamic"] > .elevator-light { display: none; }
       .office-door { position: absolute; pointer-events: none; }
       .door { position: absolute; z-index: 1; overflow: hidden; pointer-events: none; image-rendering: pixelated; }
       .door img { display: block; width: 200%; height: 100%; max-width: none; }
@@ -827,7 +830,25 @@
       .elevator-panels::after { clip-path: inset(6.5% 12% 4.5% 50%); }
       .elevator[data-open="true"] .elevator-panels::before { transform: translateX(-38%); }
       .elevator[data-open="true"] .elevator-panels::after { transform: translateX(38%); }
-      .elevator-indicator { position: absolute; transform: translateX(-50%); width: 86px; height: 26px; border: 2px solid #293b40; background: #081013; color: #9fd5ba; font: bold 19px/22px monospace; text-align: center; text-shadow: 0 0 5px #578873; pointer-events: none; }
+      /* 층 표시등과 열린 문 조명은 어둠 막(5)과 같은 층에서 DOM 순서로 위에 올려, 어두운 곳에서도 빛나 보이게 한다. */
+      .elevator-indicator { position: absolute; z-index: 5; transform: translateX(-50%); width: 86px; height: 26px; border: 0; background: #081013; color: #c8ffe4; font: bold 19px/26px monospace; text-align: center; text-shadow: 0 0 3px #b8ffdc, 0 0 8px #7fe8b8, 0 0 18px #4fc791; pointer-events: none; }
+      .elevator-indicator[data-powered="false"] { color: #3d5a4d; text-shadow: none; }
+      .elevator-light { position: absolute; z-index: 5; opacity: 0; mix-blend-mode: screen; pointer-events: none; transition: opacity .9s ease;
+        background: radial-gradient(ellipse 50% 58% at 50% 48%, #ffffff80 0, #ffffff40 34%, #ffffff18 58%, transparent 80%),
+                    radial-gradient(ellipse 46% 14% at 50% 100%, #ffffff70 0, transparent 100%); }
+      /* 열린 객실 안쪽: 천장 조명 두 줄이 빛나고 그 빛이 벽·바닥으로 내려앉는다(문 요소 안이라 문 밖으로는 번지지 않는다). */
+      .elevator-glow { position: absolute; inset: 0; opacity: 0; mix-blend-mode: screen; pointer-events: none; transition: opacity .9s ease;
+        background:
+          linear-gradient(90deg, transparent 33%, #fffffff0 38% 62%, transparent 67%) 0 11% / 100% 1.6% no-repeat,
+          linear-gradient(90deg, transparent 36%, #ffffffe0 41% 59%, transparent 64%) 0 16% / 100% 1.3% no-repeat,
+          radial-gradient(ellipse 34% 7% at 50% 13%, #ffffff90 0, transparent 100%),
+          radial-gradient(ellipse 36% 62% at 50% 12%, #ffffff55 0, #ffffff24 45%, transparent 100%),
+          radial-gradient(ellipse 30% 6% at 50% 94%, #ffffff50 0, transparent 100%); }
+      #world .door.elevator[data-open="true"][data-lit="true"] .elevator-glow { opacity: 1; }
+      /* 불 켜진 객실의 열린 문: 어둠 막 위로 올려 엘리베이터 내부가 어둠 속에서도 보이게 한다(정전 어둡힘 필터도 해제). */
+      #world .door.elevator[data-open="true"][data-lit="true"] { z-index: 5; filter: none; }
+      .elevator-light[data-open="true"]:not([data-powered="false"]) { opacity: 1; }
+      #world[data-room="office"] .elevator-light { display: none; }
       /* 근접 테두리: 가까운 상호작용 대상 하나를 감싸는 한 장(js/interaction/outline.js가 대상의 보이는 상자에 맞춘다). */
       #interaction-outline { position: absolute; z-index: 4; outline: 2px solid #96b7aa; pointer-events: none; }
       #interaction-hint { position: absolute; z-index: 8; transform: translateX(-50%); padding: 6px 10px; background: #101b20; border: 1px solid #96b7aa; pointer-events: none; white-space: nowrap; }
@@ -1166,7 +1187,7 @@
             <label for="phone-solar-floor">공급 대상</label>
             <select id="phone-solar-floor" aria-label="전력을 공급할 층"></select>
             <button id="phone-solar-supply" type="button">비상 전력 공급</button>
-            <p>최대 두 층까지 함께 공급합니다. 세 번째 층을 켜면 먼저 켠 층이 꺼지고, 켜진 층을 다시 선택하면 그 층만 꺼집니다.</p>
+            <p>한 번에 한 층만 공급합니다. 다른 층을 켜면 켜져 있던 층이 꺼지고, 켜진 층을 다시 선택하면 그 층이 꺼집니다.</p>
             <p>등록된 장치의 대기 통신으로 전원이 꺼져 있어도 다시 켤 수 있습니다.</p>
           </div>
         </section>
@@ -1186,7 +1207,7 @@
         <button id="power-lever" type="button" aria-pressed="false" aria-label="레버 내리기 · 비상 전력 켜기"><span id="power-lever-label">OFF · 내려서 켜기</span></button>
         <div id="power-floor-grid" role="group" aria-label="전력 공급층 선택"></div>
         <p id="power-note">B1 · B2 지하층은 별도 비상 발전기로 이미 전력 공급 중</p>
-        <p id="power-help">① 레버 승인 · 엘리베이터 운행 복구<br />② 조명 공급층 선택 · 최대 두 층</p>
+        <p id="power-help">① 레버 승인 · 엘리베이터 운행 복구<br />② 조명 공급층 선택 · 한 번에 한 층</p>
         <button id="power-close" type="button">닫기 · Esc</button>
       </div>
     </section>
@@ -1324,8 +1345,9 @@
         <div id="computer-browser" class="computer-content" hidden>
           <div class="naver-blog">
             <div class="blog-browser-bar"><span aria-hidden="true">▣</span><span>blog.naver.com / 시설관리의 기록</span></div>
-            <div class="blog-service-bar"><strong><span>NAVER</span> blog</strong><span>시설관리 노트</span></div>
+            <div class="blog-service-bar"><strong><span>NAVER</span> blog</strong><span>시설관리의 기록</span></div>
             <div class="blog-cover"><p>ARCHI BUILDING</p><h2>시설관리의 기록</h2><p>건물의 하루를 기록합니다.</p></div>
+            <div class="blog-menu"><strong>블로그</strong><span>시설 점검과 일상 이야기</span></div>
             <div class="blog-connection">
               <output id="computer-internet-status" role="status" aria-live="polite"></output>
             </div>
@@ -1333,17 +1355,47 @@
               <aside class="blog-profile" aria-label="블로그 작성자">
                 <div class="blog-avatar" aria-hidden="true">A</div>
                 <strong>ARCHI 시설관리팀</strong><p>안녕하세요.<br>시설 점검과 비상 전력<br>사용법을 공유합니다.</p>
-                <span>시설관리 · 17F</span>
+                <span>archi_facility<br>시설관리 · 17F</span>
+                <div class="blog-categories"><strong>카테고리</strong><p>전체보기 (5)<br>시설 점검 (2)<br>사용 안내 (2)<br>일상 기록 (1)</p></div>
+                <p class="blog-visitors">TODAY 12 · TOTAL 1,248</p>
               </aside>
-              <article class="blog-post" aria-labelledby="solar-blog-title">
+              <div class="blog-main">
+                <section class="blog-post-list" aria-labelledby="computer-blog-list-title">
+                  <h2 id="computer-blog-list-title" tabindex="-1">전체보기 <span>5개의 글</span></h2>
+                  <div class="blog-list-columns"><span>글 제목</span><span>작성일</span></div>
+                  <button type="button" data-blog-post="night" aria-current="true"><span>야간 점검을 마치고, 오늘의 기록</span><time datetime="2026-10-09">2026. 10. 9.</time></button>
+                  <button type="button" data-blog-post="charging"><span>휴대폰 충전함 이용 안내</span><time datetime="2026-10-08">2026. 10. 8.</time></button>
+                  <button type="button" data-blog-post="solar"><span>정전 대비 전력 조종 앱 공유 <small>첨부파일 1</small></span><time datetime="2026-10-07">2026. 10. 7.</time></button>
+                  <button type="button" data-blog-post="stairs"><span>비상계단 문 점검 기록</span><time datetime="2026-10-06">2026. 10. 6.</time></button>
+                  <button type="button" data-blog-post="rooftop"><span>옥상 태양광 장치 점검 메모</span><time datetime="2026-10-05">2026. 10. 5.</time></button>
+                  <p class="blog-list-page">1</p>
+                </section>
+                <article class="blog-post" data-blog-article="night" aria-labelledby="blog-night-title">
+                  <p class="blog-category">일상 기록</p>
+                  <h2 id="blog-night-title" tabindex="-1">야간 점검을 마치고, 오늘의 기록</h2>
+                  <p class="blog-post-meta">ARCHI 시설관리팀 · 2026. 10. 9. 18:30</p>
+                  <p>낮에는 바쁘게 오가는 사람들로 가득한 건물인데, 퇴근 시간이 지나면 복도가 조용해집니다. 오늘도 사무실 조명과 공용 설비를 확인하고 점검을 마쳤습니다.</p>
+                  <p>작업용 컴퓨터의 전원과 와이파이는 정상입니다. 필요한 사용 안내는 이 블로그에 정리해 두었으니, 글 목록에서 찾아보세요.</p>
+                  <p>정전에 대비한 전력 조종 앱도 앞선 글에 올려 두었습니다. 시간이 있을 때 미리 받아 두면 좋겠습니다.</p>
+                  <p class="blog-post-footer">#시설관리 #야간점검 #일상기록</p>
+                </article>
+                <article class="blog-post" data-blog-article="charging" aria-labelledby="blog-charging-title" hidden>
+                  <p class="blog-category">사용 안내</p>
+                  <h2 id="blog-charging-title" tabindex="-1">휴대폰 충전함 이용 안내</h2>
+                  <p class="blog-post-meta">ARCHI 시설관리팀 · 2026. 10. 8. 09:20</p>
+                  <p>배터리가 부족하면 전력이 공급되는 충전함에 휴대폰을 맡겨 주세요. 충전함에 맡겨 둔 동안에는 휴대폰 앱과 플래시를 사용할 수 없습니다.</p>
+                  <p>컴퓨터에서 파일을 전송하려면 휴대폰을 먼저 찾아와야 합니다. 충전이 끝난 뒤 휴대폰을 가져오는 것도 잊지 마세요.</p>
+                  <p class="blog-post-footer">#충전함 #휴대폰 #사용안내</p>
+                </article>
+              <article id="blog-post-solar" class="blog-post" data-blog-article="solar" aria-labelledby="solar-blog-title" hidden>
                 <p class="blog-category">비상 전력 / 사용 안내</p>
                 <h2 id="solar-blog-title" tabindex="-1">정전 때 쓰는 태양광 제어 앱<br>다운로드 및 설치 방법</h2>
-                <p class="blog-post-meta">ARCHI 시설관리팀 · 첨부파일 1개</p>
+                <p class="blog-post-meta">ARCHI 시설관리팀 · 2026. 10. 7. 14:10 · 첨부파일 1개</p>
                 <p>매번 옥상까지 올라가기 번거로워서 휴대폰용 제어 앱을 올려 둡니다. 아래 첨부파일을 받아 휴대폰에 설치하면 옥상 태양광 임시 전력 장치를 원격으로 사용할 수 있어요.</p>
                 <h3>먼저 확인해 주세요</h3>
-                <p>옥상 배전반에서 비상 전력을 켜고 17층에 전력을 공급한 뒤, 사무실 컴퓨터로 접속하세요. 휴대폰을 충전함에 맡겨 두었다면 먼저 찾아와 주세요.</p>
+                <p>컴퓨터와 와이파이는 17층에 전력이 공급되는 동안 사용할 수 있습니다. 정전 전에는 미리 받아 둘 수 있고, 정전 뒤에는 옥상 배전반에서 비상 전력을 켜고 17층에 전력을 공급해 주세요. 휴대폰을 충전함에 맡겨 두었다면 먼저 찾아와 주세요.</p>
                 <h3>앱으로 할 수 있는 일</h3>
-                <ul><li>비상 전력 장치 켜기 / 끄기</li><li>전력을 공급할 층 선택하기</li><li>현재 공급 중인 층 확인하기 · 최대 두 층</li></ul>
+                <ul><li>비상 전력 장치 켜기 / 끄기</li><li>전력을 공급할 층 선택하기</li><li>현재 공급 중인 층 확인하기 · 한 번에 한 층</li></ul>
                 <h3>다운로드 및 설치</h3>
                 <ol><li>아래 첨부파일을 컴퓨터에 내려받고 다운로드가 끝날 때까지 기다리세요.</li><li>바탕화면의 ‘파일 전송’ 앱에서 ‘휴대폰으로 전송·설치’를 누르고 완료될 때까지 기다리세요.</li><li>휴대폰(P)의 ‘비상 전력 제어’ 앱을 열어 사용하세요.</li></ol>
                 <div class="blog-attachment">
@@ -1355,6 +1407,24 @@
                 <output id="computer-solar-status" class="blog-install-status" role="status" aria-live="polite"></output>
                 <p class="blog-post-footer">#태양광 #비상전력 #ARCHI #시설관리</p>
               </article>
+                <article class="blog-post" data-blog-article="stairs" aria-labelledby="blog-stairs-title" hidden>
+                  <p class="blog-category">시설 점검</p>
+                  <h2 id="blog-stairs-title" tabindex="-1">비상계단 문 점검 기록</h2>
+                  <p class="blog-post-meta">ARCHI 시설관리팀 · 2026. 10. 6. 16:40</p>
+                  <p>공용 복도의 비상계단 문과 출입 장치를 확인했습니다. 문 앞에 물건을 쌓아 두지 말아 주세요.</p>
+                  <p>전력이 끊기면 출입 장치와 엘리베이터 이용에 제한이 생길 수 있습니다. 이동하기 전 전력 상태와 안내를 확인해 주세요.</p>
+                  <p class="blog-post-footer">#시설점검 #비상계단 #출입문</p>
+                </article>
+                <article class="blog-post" data-blog-article="rooftop" aria-labelledby="blog-rooftop-title" hidden>
+                  <p class="blog-category">시설 점검</p>
+                  <h2 id="blog-rooftop-title" tabindex="-1">옥상 태양광 장치 점검 메모</h2>
+                  <p class="blog-post-meta">ARCHI 시설관리팀 · 2026. 10. 5. 11:00</p>
+                  <p>옥상에 있는 태양광 임시 전력 장치의 외관과 배전반을 점검했습니다. 정전 때 지상층에 비상 전력을 공급하는 장치입니다.</p>
+                  <p>조명을 공급할 수 있는 층은 한 번에 두 곳입니다. 다른 층을 추가하면 먼저 공급하던 층의 전력이 끊길 수 있으니, 이동하기 전에 공급 대상을 확인해 주세요.</p>
+                  <p class="blog-post-footer">#옥상 #태양광 #점검메모</p>
+                </article>
+                <button id="computer-blog-list-back" type="button">목록으로</button>
+              </div>
             </div>
           </div>
         </div>

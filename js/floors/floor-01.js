@@ -81,8 +81,10 @@ const FLOOR1_LAYOUT = {
       surface: 'screen', look: 'lcd', writing: [{ text: '미등록 출입증.', ink: 'red', size: 'large', align: 'center' }],
       caption: '출입증을 대자 작은 화면이 깜빡인다. 그래도 날개는 정전 때 저절로 풀리는 방식이라 손으로 밀면 그냥 열린다.' },
     // 배경에 그려진 로봇은 빈 도크 패치로 가리고, 이동 스프라이트와 조사 범위를 함께 갱신한다.
+    // 순찰 서쪽 경계(3040)는 비상계단(BUILDING_CORE.stairs, 보정 후 2895~3040) 동쪽 끝 — 로비 동쪽
+    // 구역(스피드 게이트·정문)만 돌고 비상계단을 넘어 엘리베이터·방 쪽으로는 가지 않는다.
     { name: '경비 로봇', x: 4495, y: 440, width: 70, style: 'guard-bot', lines: ['R-01'], outline: [4531, 406, 55, 151],
-      patrol: { left: 1510, right: 4540, speed: 80, pause: 1400 },
+      patrol: { left: 3040, right: 4540, speed: 80, pause: 1400 },
       code: '0914', gives: 'f1-robot-log',
       codePrompt: '보조 배터리로 정비 패널이 희미하게 켜져 있다. 네 자리 번호. 패널 스티커: "정비 코드 = 제작일(월일)."',
       message: '정비 패널이 열린다. 마지막 기록: "23:58 모드 변경 · 순찰 → 차단 · 명령 SYSTEM. 차단 대상: 미등록 출입증 1명(17F 정수호). 최우선 방어 구역: B2 서버실. 대기 중 · 로비 전력이 돌아오면 기동."',

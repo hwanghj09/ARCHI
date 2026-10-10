@@ -39,14 +39,37 @@ function openComputerApp(app, documentId) {
   if (app === 'mail') showComputerMailInbox();
   if (app === 'building') refreshBuildingGuides();
   if (app === 'browser' || app === 'transfer') refreshSolarDownload();
+  if (app === 'browser') document.getElementById('computer-browser').scrollTop = 0;
   document.getElementById('computer-window-title').textContent = title;
   (app === 'notes' ? computerNote : app === 'mail' ? computerMailSearch : app === 'calculator' ?
     document.querySelector('#computer-calculator [data-calculator-key]') : app === 'browser' && !document.getElementById('computer-solar-page').hidden ?
-    document.getElementById('solar-blog-title') : document.getElementById('computer-window-close')).focus({ preventScroll: true });
+    document.getElementById('computer-blog-list-title') : document.getElementById('computer-window-close')).focus({ preventScroll: true });
 }
 
+const computerBlogPosts = [...document.querySelectorAll('[data-blog-article]')];
+function openComputerBlogPost(id) {
+  const selected = computerBlogPosts.find(post => post.dataset.blogArticle === id);
+  if (!usingComputer || transitioning || !floorHasPower(17) || !selected) return;
+  for (const post of computerBlogPosts) post.hidden = post !== selected;
+  for (const button of document.querySelectorAll('[data-blog-post]')) {
+    if (button.dataset.blogPost === id) button.setAttribute('aria-current', 'true');
+    else button.removeAttribute('aria-current');
+  }
+  const heading = selected.querySelector('h2');
+  heading.scrollIntoView({ block: 'start' });
+  heading.focus({ preventScroll: true });
+}
+document.querySelectorAll('[data-blog-post]').forEach(button => {
+  button.addEventListener('click', () => openComputerBlogPost(button.dataset.blogPost));
+});
+document.getElementById('computer-blog-list-back').addEventListener('click', () => {
+  const heading = document.getElementById('computer-blog-list-title');
+  heading.scrollIntoView({ block: 'start' });
+  heading.focus({ preventScroll: true });
+});
+
 function refreshSolarDownload() {
-  const ready = solarEnabled && floorHasPower(17);
+  const ready = floorHasPower(17);
   if (computerSolarTask && (transitioning || !usingComputer || !ready ||
       (computerSolarTask.kind === 'transfer' && (phoneDock || phoneBattery <= 0)))) {
     clearInterval(computerSolarTask.timer);
@@ -58,7 +81,7 @@ function refreshSolarDownload() {
   const percent = task ? Math.floor(task.elapsed / task.duration * 100) : 0;
   const remaining = task ? Math.ceil((task.duration - task.elapsed) / 1000) : 0;
   document.getElementById('computer-internet-status').textContent = ready ? '네이버 블로그 연결됨 · 시설관리의 기록' :
-    '태양광 장치에서 17층 전력을 켜면 블로그를 사용할 수 있습니다.';
+    '17층 전력이 끊겨 와이파이에 연결할 수 없습니다. 태양광 장치에서 17층 전력을 켜 주세요.';
   document.getElementById('computer-solar-page').hidden = !ready;
   document.getElementById('computer-solar-download').disabled = !ready || downloaded || installed || Boolean(task);
   document.getElementById('computer-solar-transfer').disabled = !ready || !downloaded || installed || Boolean(task) || Boolean(phoneDock) || phoneBattery <= 0;
@@ -80,7 +103,7 @@ function refreshSolarDownload() {
 function startSolarFileTask(kind) {
   const transfer = kind === 'transfer';
   if (!usingComputer || transitioning || computerWindow.hidden || document.getElementById(`computer-${transfer ? 'transfer' : 'browser'}`).hidden ||
-      !solarEnabled || !floorHasPower(17) || computerSolarTask || collectedItems.has('solar-app-installed') ||
+      !floorHasPower(17) || (!transfer && document.getElementById('blog-post-solar').hidden) || computerSolarTask || collectedItems.has('solar-app-installed') ||
       (transfer ? !collectedItems.has('solar-app-downloaded') || phoneDock || phoneBattery <= 0 : collectedItems.has('solar-app-downloaded'))) return;
   const task = { kind, elapsed: 0, duration: transfer ? 8000 : 5000, started: Date.now(), timer: null };
   computerSolarTask = task;
@@ -159,7 +182,7 @@ const computerMailRows = [
   },
   {
     id: 'power', subject: '정전 시 태양광 비상 전력 사용 안내', sender: '시설관리팀', date: '오늘 16:40',
-    body: '정전 중에는 엘리베이터를 운행할 수 없습니다.\n\n옥상 태양광 비상 배전반의 레버를 내려 비상 전력을 켜면 엘리베이터 운행이 복구됩니다. 이후 조명을 공급할 층을 선택해 주세요.\n\n조명은 한 번에 두 층까지만 공급합니다. 세 번째 층을 선택하면 가장 먼저 켠 층의 전력은 자동으로 차단됩니다.'
+    body: '정전 중에는 엘리베이터를 운행할 수 없습니다.\n\n옥상 태양광 비상 배전반의 레버를 내려 비상 전력을 켜면 엘리베이터 운행이 복구됩니다. 이후 조명을 공급할 층을 선택해 주세요.\n\n조명은 한 번에 한 층만 공급합니다. 다른 층을 선택하면 켜져 있던 층의 전력은 자동으로 차단됩니다.'
   },
   {
     id: 'charging', subject: '휴대폰 충전 거치대 사용 방법', sender: '시설관리팀', date: '오늘 15:20',
