@@ -39,7 +39,7 @@ try {
   assert(await page.locator('#power-floor-grid button').first().isDisabled());
   // Keyboard operation of the real lever restores transport without selecting a lighting floor.
   await page.locator('#power-lever').focus(); await page.keyboard.press('Enter');
-  assert(await page.evaluate(() => solarEnabled && solarPoweredFloor === null && elevatorHasPower()));
+  assert(await page.evaluate(() => solarEnabled && !solarPoweredFloors.length && elevatorHasPower()));
   assert.match(await page.locator('#power-help').textContent(), /엘리베이터 운행 복구/);
   await page.keyboard.press('Escape'); await walkTo(200); await page.keyboard.press('e');
   await finishSceneTransition(page);
@@ -86,9 +86,9 @@ try {
   await page.locator('#power-lever').tap();
   assert(await page.evaluate(() => elevatorHasPower()));
   await page.locator('#power-floor-grid [data-floor="12"]').tap();
-  assert(await page.evaluate(() => solarPoweredFloor === 12 && elevatorHasPower()));
+  assert(await page.evaluate(() => solarPoweredFloors.join() === '12' && elevatorHasPower()));
   await page.locator('#power-lever').tap();
-  assert(await page.evaluate(() => !solarEnabled && solarPoweredFloor === null && !elevatorHasPower()));
+  assert(await page.evaluate(() => !solarEnabled && !solarPoweredFloors.length && !elevatorHasPower()));
   assert.deepEqual(errors, []);
   console.log('PASS: outage blocks all calls, full key→roof→lever→return→call→ride route, no lighting-floor dependency, three-car pause/resume, safe stationary exit, keyboard/touch lever and floor selection.');
 } finally { await browser.close(); }

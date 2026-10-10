@@ -213,7 +213,7 @@ try {
   }
 
   // 16층 카페 테이블은 조현아 팀장의 사원증을 그림 그대로 보여 준다.
-  await page.evaluate(() => { solarPoweredFloor = 16; });
+  await page.evaluate(() => { solarPoweredFloors = [16]; });
   const table = await inspectAt('f16-cafe', '카페 테이블');
   assert.equal(table.surface, 'card');
   assert.equal(await page.locator('#inspection-sheet .writing-card img').getAttribute('src'), 'assets/objects/id-cards/jo-hyeon-a.png');

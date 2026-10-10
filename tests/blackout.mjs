@@ -58,7 +58,7 @@ try {
     assert.match(await page.locator('#interaction-status').textContent(), /옥상.*태양광 비상 전력/);
     await page.evaluate(() => { performRoomChange(); });
     assert.equal((await state()).lights, 'off', 'Office remains dark on return');
-    await page.evaluate(() => { solarEnabled = true; solarPoweredFloor = 17; updatePowerState(); performRoomChange(); });
+    await page.evaluate(() => { solarEnabled = true; solarPoweredFloors = [17]; updatePowerState(); performRoomChange(); });
     await page.keyboard.press('e');
     assert.deepEqual(await state(), { blackout: true, powered: 'true', lights: 'on', called: true });
     assert(await page.locator('#darkness').isHidden(), 'Returning to the elevator does not repeat the outage after restoration');

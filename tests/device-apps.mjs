@@ -172,15 +172,21 @@ try {
     if (viewport.width === 390) { await page.clock.runFor(100); await page.keyboard.press('e'); await finishSceneTransition(page); }
   }
 
-  await page.evaluate(() => { buildingBlackout = true; solarEnabled = false; solarPoweredFloor = null; updatePowerState(); });
+  await page.evaluate(() => { buildingBlackout = true; solarEnabled = false; solarPoweredFloors = []; updatePowerState(); });
   await page.locator('#phone-button').tap();
   await phoneApp('building').tap();
   await phoneGuide.locator('[data-building-floor]').selectOption('12');
   assert.equal(await phoneGuide.locator('[data-building-power]').getAttribute('data-powered'), 'false');
   assert.match(await phoneGuide.locator('[data-building-elevator]').textContent(), /레버/);
-  await page.evaluate(() => { solarEnabled = true; solarPoweredFloor = 12; updatePowerState(); });
+  await page.evaluate(() => { solarEnabled = true; solarPoweredFloors = [12, 7]; updatePowerState(); });
   assert.equal(await phoneGuide.locator('[data-building-power]').getAttribute('data-powered'), 'true');
   assert.match(await phoneGuide.locator('[data-building-elevator]').textContent(), /비상 전력으로 운행 가능/);
+  // Both solar floors read as powered in the guide; other floors stay dark.
+  for (const [floor, powered] of [['7', 'true'], ['13', 'false'], ['12', 'true']]) {
+    await phoneGuide.locator('[data-building-floor]').selectOption(floor);
+    assert.equal(await phoneGuide.locator('[data-building-power]').getAttribute('data-powered'), powered, `${floor}F guide power`);
+    assert.match(await phoneGuide.locator('[data-building-charger]').textContent(), powered === 'true' ? /충전 가능/ : /전력 공급 필요/);
+  }
   await closePhone();
 
   // Pick up the real badge and authenticate the real gate, then inspect their guide status.

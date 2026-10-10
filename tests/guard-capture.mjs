@@ -14,13 +14,13 @@ try {
   if (await page.locator('#menu-new-confirm').isVisible()) await page.locator('#menu-new-confirm').click();
   await page.locator('#opening-skip').click();
   await page.clock.pauseAt(new Date('2026-10-03T00:01:00Z'));
-  await page.evaluate(() => { triggerBuildingBlackout(); solarEnabled = true; solarPoweredFloor = 1; performFloorChange('f1'); });
+  await page.evaluate(() => { triggerBuildingBlackout(); solarEnabled = true; solarPoweredFloors = [1]; performFloorChange('f1'); });
   const state = () => page.evaluate(() => ({ caught: playerCaught, mode: guardPatrol.mode, x: guardPatrol.x,
     playerX: body.position.x, time: guardPatrol.captureTime, frame: guardPatrol.door.element.dataset.frame }));
   const arrange = (x = 3210, facing = 1) => page.evaluate(([x, direction]) => {
     if (playerCaught) releaseGuardCapture();
     Object.assign(guardPatrol, { x: 3000, facing: direction, mode: 'patrol', wait: 0, lostTime: 0, captureTime: 0 });
-    solarPoweredFloor = 1; updatePowerState();
+    solarPoweredFloors = [1]; updatePowerState();
     Body.setPosition(body, { x, y: floorY - 81 }); Body.setVelocity(body, { x: 0, y: 0 });
     grounded = true; updateInteraction(); cameraX = cameraTarget(); render();
   }, [x, facing]);
@@ -94,7 +94,7 @@ try {
   await page.locator('#guard-retry').click(); assert.equal((await state()).caught, false);
   await arrange(); await page.clock.runFor(600);
   assert.equal((await state()).mode, 'grab', 'Cut power while the arms are still unfolding');
-  await page.evaluate(() => { solarPoweredFloor = 2; updatePowerState(); });
+  await page.evaluate(() => { solarPoweredFloors = [2]; updatePowerState(); });
   assert.equal((await state()).caught, false); assert.equal((await state()).frame, '7');
   assert(await page.locator('#guard-capture').isHidden()); assert.equal(await page.locator('#stage').evaluate(el => el.inert), false);
   await page.keyboard.down('d'); await page.clock.runFor(150); await page.keyboard.up('d');

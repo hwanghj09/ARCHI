@@ -97,7 +97,7 @@ function refreshCabin() {
   cabinScene.dataset.floor = car.floor;
   // The cabin uses the building circuit; restoring one floor does not relight a moving car.
   cabinScene.dataset.blackout = String(buildingBlackout);
-  cabinScene.dataset.hallBlackout = String(buildingBlackout && car.floor > 0 && car.floor !== solarPoweredFloor);
+  cabinScene.dataset.hallBlackout = String(buildingBlackout && car.floor > 0 && !solarPoweredFloors.includes(car.floor));
   cabinOpen.disabled = car.travelling;
   cabinClose.disabled = !powered || car.travelling;
   cabinExit.disabled = car.travelling || cabinScene.dataset.door !== 'open';

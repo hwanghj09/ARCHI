@@ -43,7 +43,7 @@ try {
   const stopped = await state(); await page.clock.runFor(2000); assert.deepEqual(await state(), stopped);
   await page.locator('#dynamic-scene img').evaluateAll(imgs => Promise.all(imgs.map(img => img.decode())));
   await page.screenshot({ path: '.local/guard-off.png' });
-  await page.evaluate(() => { solarEnabled = true; solarPoweredFloor = 1; updatePowerState(); });
+  await page.evaluate(() => { solarEnabled = true; solarPoweredFloors = [1]; updatePowerState(); });
   const before = await state(); await page.clock.runFor(1000);
   assert(Math.abs(before.x - (await state()).x - 80) < 3, 'Powered patrol rolls at 80 pixels per second');
   const usedFrames = new Set();
@@ -60,10 +60,10 @@ try {
   assert.deepEqual([...scanFrames].sort(), ['4', '5', '6']);
   await page.clock.runFor(400); assert.equal((await state()).facing, 1);
   assert((await state()).x > 1510, 'Endpoint scan finishes by turning around');
-  await page.evaluate(() => { solarPoweredFloor = 2; updatePowerState(); });
+  await page.evaluate(() => { solarPoweredFloors = [2]; updatePowerState(); });
   const unpowered = await state(); await page.clock.runFor(1000); assert.deepEqual(await state(), unpowered);
   assert.equal(unpowered.frame, '7');
-  await page.evaluate(() => { solarPoweredFloor = 1; updatePowerState(); togglePhone(); });
+  await page.evaluate(() => { solarPoweredFloors = [1]; updatePowerState(); togglePhone(); });
   const paused = await state(); await page.clock.runFor(1000); assert.deepEqual(await state(), paused, 'Modal pauses patrol');
   await page.keyboard.press('Escape');
   await page.evaluate(() => performFloorChange('f1-vision', 0, 'exit'));
@@ -73,7 +73,7 @@ try {
   assert.equal((await state()).x, away, 'Returning keeps patrol progress without duplicating the robot');
   assert.equal(await robot.count(), 1); assert.equal(await page.locator('.robot-dock-patch').count(), 1);
   await page.evaluate(() => {
-    solarPoweredFloor = 2; updatePowerState();
+    solarPoweredFloors = [2]; updatePowerState();
     Body.setPosition(body, { x: guardPatrol.x, y: floorY - 81 }); grounded = true; updateInteraction();
     cameraX = cameraTarget(); render();
   });
@@ -88,7 +88,7 @@ try {
   await page.setViewportSize({ width: 390, height: 844 }); await page.clock.runFor(100);
   await page.screenshot({ path: '.local/guard-mobile.png' });
   await page.evaluate(() => {
-    solarPoweredFloor = 1; updatePowerState();
+    solarPoweredFloors = [1]; updatePowerState();
     guardPatrol.x = 4538; guardPatrol.facing = 1; guardPatrol.wait = 0; guardPatrol.mode = 'patrol';
     Body.setPosition(body, { x: 1500, y: floorY - 81 });
   });
