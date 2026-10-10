@@ -13,6 +13,25 @@ try {
     await page.locator('#menu-start').click();
     if (await page.locator('#menu-new-confirm').isVisible()) await page.locator('#menu-new-confirm').click();
     await page.locator('#opening-skip').click();
+    // The painted board below the CCTV opens through the real corridor interaction.
+    await page.evaluate(() => {
+      triggerBuildingBlackout();
+      performFloorChange('f17', null);
+      Body.setPosition(body, { x: 1714, y: floorY - 81 }); grounded = true; updateInteraction(); render();
+    });
+    assert.equal(await page.locator('#interaction-hint').textContent(), 'E · CCTV 아래 게시판 조사');
+    if (width === 390) await page.locator('#interact').tap();
+    else await page.keyboard.press('e');
+    assert.equal(await page.locator('#inspection').getAttribute('data-surface'), 'corkboard');
+    assert.equal(await page.locator('#inspection-sheet .writing-note').count(), 6);
+    assert.match(await page.locator('#inspection-sheet .writing-note').nth(3).textContent(), /태양광.*1997/s);
+    assert.match(await page.locator('#inspection-description').textContent(), /1997/);
+    assert(await page.locator('.writing-note').evaluateAll(notes => notes.every(note => {
+      const box = note.getBoundingClientRect();
+      return box.left >= 0 && box.right <= innerWidth;
+    })), 'Post-it notes fit desktop and mobile');
+    await page.screenshot({ path: `.local/solar-hint-board-${width}.png` });
+    await page.keyboard.press('Escape');
     await page.evaluate(() => {
       triggerBuildingBlackout(); performFloorChange('rooftop', null);
       Body.setPosition(body, { x: 900, y: floorY - 81 }); grounded = true; updateInteraction(); render();
@@ -43,7 +62,23 @@ try {
       await page.mouse.move(box.x + box.width / 2, box.y + 30); await page.mouse.down();
       await page.mouse.move(box.x + box.width / 2, box.y + box.height - 30, { steps: 12 }); await page.mouse.up();
     }
-    assert.deepEqual(await state(), { on: true, floor: null }, 'Lowering the lever enables selection without choosing a floor');
+    assert(await page.locator('#keypad').isVisible());
+    assert.deepEqual(await state(), { on: false, floor: null }, 'Lowering the lever requires approval');
+    assert.equal(await page.locator('#keypad-input').getAttribute('maxlength'), '4');
+    await page.locator('#keypad-input').fill('199'); await page.locator('#keypad-submit').click();
+    assert.deepEqual(await state(), { on: false, floor: null }, 'Partial code cannot enable power');
+    await page.locator('#keypad-input').fill('1234'); await page.locator('#keypad-submit').click();
+    assert.match(await page.locator('#keypad-error').textContent(), /맞지/);
+    assert.deepEqual(await state(), { on: false, floor: null }, 'Wrong code cannot enable power');
+    await page.keyboard.press('Escape');
+    assert(await page.locator('#power-panel').isVisible());
+    assert(await page.locator('#keypad').isHidden());
+    assert.deepEqual(await state(), { on: false, floor: null }, 'Cancellation leaves power off');
+    await lever.click();
+    assert.equal(await page.locator('#keypad-input').inputValue(), '', 'Retry clears the previous code');
+    await page.locator('#keypad-input').fill('1997'); await page.keyboard.press('Enter');
+    assert(await page.locator('#power-panel').isVisible());
+    assert.deepEqual(await state(), { on: true, floor: null }, 'Only 1997 enables selection without choosing a floor');
     assert(await floor(17).isEnabled());
     assert.equal(await page.locator('.solar-supply').getAttribute('data-active'), 'true');
     assert(await page.locator('.power-art img').evaluate(img => Math.abs(new DOMMatrix(getComputedStyle(img).transform).m41 + img.clientWidth / 2) < 1));
@@ -77,10 +112,14 @@ try {
     assert(await page.locator('#power-close').evaluate(el => el === document.activeElement), 'Tab skips disabled floors');
     await page.keyboard.press('Enter');
     assert(await page.locator('#power-panel').isHidden());
+    await page.keyboard.press('e'); await lever.click();
+    assert(await page.locator('#keypad').isVisible(), 'Every OFF→ON attempt needs a password');
+    await page.locator('#keypad-cancel').click();
+    await page.locator('#power-close').click();
     await page.evaluate(() => performFloorChange('f16'));
     assert.equal(await page.locator('#world').getAttribute('data-powered'), 'false');
     assert.deepEqual(errors, []);
     await page.close();
   }
-  console.log('PASS: sprite dimensions/alpha, OFF gate, downward drag, touch, keyboard, one-floor output, persistence, OFF reset, scene synchronization and mobile.');
+  console.log('PASS: CCTV board with six Post-its, 1997 approval, partial/wrong code and cancellation, repeat activation, drag/touch/keyboard, floor supply, persistence, OFF reset and mobile.');
 } finally { await browser.close(); }

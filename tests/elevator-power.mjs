@@ -39,6 +39,9 @@ try {
   assert(await page.locator('#power-floor-grid button').first().isDisabled());
   // Keyboard operation of the real lever restores transport without selecting a lighting floor.
   await page.locator('#power-lever').focus(); await page.keyboard.press('Enter');
+  assert(await page.locator('#keypad').isVisible());
+  assert.equal(await page.evaluate(() => elevatorHasPower()), false);
+  await page.locator('#keypad-input').fill('1997'); await page.keyboard.press('Enter');
   assert(await page.evaluate(() => solarEnabled && solarPoweredFloor === null && elevatorHasPower()));
   assert.match(await page.locator('#power-help').textContent(), /엘리베이터 운행 복구/);
   await page.keyboard.press('Escape'); await walkTo(200); await page.keyboard.press('e');
@@ -68,7 +71,7 @@ try {
   assert.match(await page.locator('#cabin-status').textContent(), /전력이 없어/);
   assert.equal(await page.locator('#elevator-cabin').getAttribute('data-moving'), 'false');
   assert(await page.locator('#cabin-exit').isDisabled(), 'Cannot exit a paused occupied car');
-  await page.locator('#power-lever').dispatchEvent('click'); await page.clock.runFor(3000);
+  await page.evaluate(() => { solarEnabled = true; updatePowerState(); }); await page.clock.runFor(3000);
   assert.equal(await page.evaluate(() => elevatorCars[0].floor), 15);
   assert(await page.locator('#cabin-exit').isEnabled());
   await page.locator('#cabin-exit').click(); await finishSceneTransition(page);
@@ -84,6 +87,7 @@ try {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.evaluate(() => openPowerPanel());
   await page.locator('#power-lever').tap();
+  await page.locator('#keypad-input').fill('1997'); await page.locator('#keypad-submit').tap();
   assert(await page.evaluate(() => elevatorHasPower()));
   await page.locator('#power-floor-grid [data-floor="12"]').tap();
   assert(await page.evaluate(() => solarPoweredFloor === 12 && elevatorHasPower()));

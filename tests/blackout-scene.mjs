@@ -63,7 +63,7 @@ try {
   assert.equal((await state()).active, false); assert.equal((await state()).inert, false);
   assert.equal((await state()).lights, 'off'); assert(await page.locator('#blackout-scene').isHidden());
   await page.keyboard.press('e'); assert.equal((await state()).called, false);
-  await page.locator('#power-lever').dispatchEvent('click');
+  await page.evaluate(() => { solarEnabled = true; updatePowerState(); });
   await page.keyboard.press('e'); assert.equal((await state()).called, true);
   await page.evaluate(() => { solarPoweredFloor = 17; updatePowerState(); updateInteraction(); });
   assert.equal((await state()).active, false); assert.equal((await state()).lights, 'on');

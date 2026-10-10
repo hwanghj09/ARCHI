@@ -19,7 +19,7 @@ try {
   await reachInitialCorridor(page);
   // This suite checks powered movement; outage and recovery have their own regression routes.
   await page.evaluate(() => triggerBuildingBlackout());
-  await page.locator('#power-lever').dispatchEvent('click');
+  await page.evaluate(() => { solarEnabled = true; updatePowerState(); });
   await page.locator('#power-floor-grid [data-floor="17"]').dispatchEvent('click');
   const state = () => page.locator('#player').evaluate(el => {
     const player = new DOMMatrix(getComputedStyle(el).transform);

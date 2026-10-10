@@ -47,6 +47,8 @@
       #office-background { display: none; position: absolute; pointer-events: none; user-select: none; image-rendering: pixelated; }
       #world[data-room="office"] #office-background { display: block; }
       #world[data-room="office"] #background,
+      #world[data-room="office"] #floor17-noticeboard,
+      #world[data-room="dynamic"] #floor17-noticeboard,
       #world[data-room="office"] .solid,
       #world[data-room="office"] .door,
       #world[data-room="office"] .elevator-indicator,
@@ -1057,6 +1059,7 @@
             <button type="button" data-phone-app="notes"><span class="phone-app-icon app-art" data-app-icon="notes" aria-hidden="true"></span><span>메모</span></button>
             <button type="button" data-phone-app="calculator"><span class="phone-app-icon app-art" data-app-icon="calculator" aria-hidden="true"></span><span>계산기</span></button>
             <button type="button" data-phone-app="building"><span class="phone-app-icon app-art" data-app-icon="building" aria-hidden="true"></span><span>시설 안내</span></button>
+            <button type="button" data-phone-app="solar" hidden><span class="phone-app-icon app-art" data-app-icon="flashlight" aria-hidden="true"></span><span>비상 전력 제어</span></button>
           </div>
         </div>
         <section id="phone-app-window" aria-labelledby="phone-app-title" hidden>
@@ -1094,6 +1097,16 @@
               <p data-building-charger></p><p data-building-elevator></p>
             </div>
           </div>
+          <div id="phone-solar" data-phone-view="solar" hidden>
+            <p class="solar-device-name">옥상 · 태양광 임시 전력 장치</p>
+            <output id="phone-solar-status" role="status" aria-live="polite"></output>
+            <button id="phone-solar-toggle" type="button" aria-pressed="false">비상 전력 켜기</button>
+            <label for="phone-solar-floor">공급 대상</label>
+            <select id="phone-solar-floor" aria-label="전력을 공급할 층"></select>
+            <button id="phone-solar-supply" type="button">비상 전력 공급</button>
+            <p>한 번에 한 층만 공급합니다. 다른 층을 선택하면 이전 층은 꺼집니다.</p>
+            <p>등록된 장치의 대기 통신으로 전원이 꺼져 있어도 다시 켤 수 있습니다.</p>
+          </div>
         </section>
         <div class="phone-navigation"><span>P · 닫기 / Esc · 뒤로</span><button id="phone-close" type="button" aria-label="휴대폰 화면 닫기"><span aria-hidden="true"></span></button></div>
       </div>
@@ -1111,7 +1124,7 @@
         <button id="power-lever" type="button" aria-pressed="false" aria-label="레버 내리기 · 비상 전력 켜기"><span id="power-lever-label">OFF · 내려서 켜기</span></button>
         <div id="power-floor-grid" role="group" aria-label="전력 공급층 선택"></div>
         <p id="power-note">B1 · B2 지하층은 별도 비상 발전기로 이미 전력 공급 중</p>
-        <p id="power-help">① 레버 내리기 · 엘리베이터 운행 복구 → ② 조명 공급층 선택 · 한 층만 공급</p>
+        <p id="power-help">① 레버 내리기 · 4자리 비밀번호 승인 · 엘리베이터 운행 복구 → ② 조명 공급층 선택 · 한 층만 공급</p>
         <button id="power-close" type="button">닫기 · Esc</button>
       </div>
     </section>
@@ -1148,6 +1161,7 @@
         <button type="button" data-computer-app="mail"><span class="app-art" data-app-icon="mail" aria-hidden="true"></span><span>사내 메일</span></button>
         <button type="button" data-computer-app="calculator"><span class="app-art" data-app-icon="calculator" aria-hidden="true"></span><span>계산기</span></button>
         <button type="button" data-computer-app="building"><span class="app-art" data-app-icon="building" aria-hidden="true"></span><span>시설 안내</span></button>
+        <button type="button" data-computer-app="browser"><span class="app-art" data-app-icon="files" aria-hidden="true"></span><span>인터넷</span></button>
       </div>
       <section id="computer-window" aria-labelledby="computer-window-title" hidden>
         <div class="computer-titlebar">
@@ -1212,6 +1226,21 @@
             <p data-building-power></p><p data-building-access></p>
             <ul data-building-rooms></ul>
             <p data-building-charger></p><p data-building-elevator></p>
+          </div>
+        </div>
+        <div id="computer-browser" class="computer-content" hidden>
+          <div class="solar-download-page">
+            <p class="computer-path">ARCHI 시설관리 / 비상 전력 제어</p>
+            <button id="computer-internet-connect" type="button">인터넷 접속</button>
+            <output id="computer-internet-status" role="status" aria-live="polite"></output>
+            <article id="computer-solar-page" hidden>
+              <h2>비상 전력 제어</h2>
+              <p>휴대폰으로 옥상 태양광 임시 전력 장치의 전원을 켜거나 끄고, 전력을 공급할 층을 선택하세요.</p>
+              <ol><li>휴대폰용 앱을 다운로드하세요.</li><li>휴대폰으로 전송하면 앱 설치와 장치 등록이 완료됩니다.</li></ol>
+              <button id="computer-solar-download" type="button">휴대폰용 앱 다운로드</button>
+              <button id="computer-solar-transfer" type="button" disabled>휴대폰으로 전송·설치</button>
+              <output id="computer-solar-status" role="status" aria-live="polite"></output>
+            </article>
           </div>
         </div>
       </section>

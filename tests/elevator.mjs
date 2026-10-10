@@ -28,7 +28,7 @@ try {
   // The first call position now plays the outage scene before allowing a real call.
   if (await page.locator('#blackout-scene').isVisible()) await page.clock.runFor(5000);
   // Rooftop power recovery is exercised by elevator-power.mjs; this suite checks the powered floor routes.
-  await page.locator('#power-lever').dispatchEvent('click');
+  await page.evaluate(() => { solarEnabled = true; updatePowerState(); });
   await page.keyboard.press('e');
   await page.clock.runFor(19400);
   await page.keyboard.press('e');

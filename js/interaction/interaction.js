@@ -39,7 +39,7 @@ function updateInteraction() {
 }
 
 function doorHintText(door) {
-  if (door.type === 'computer') return 'E · 컴퓨터 사용';
+  if (door.type === 'computer') return floorHasPower(17) ? 'E · 컴퓨터 사용' : 'E · 컴퓨터 전력 없음';
   if (door.type === 'power') return 'E · 태양광 전력 제어';
   if (door.phoneCharger) return phoneChargerHint(door);
   if (door.accessGate) return door.element.dataset.open === 'true' ? '인증 완료 · 통과 가능' : 'E · 출입증 태그';
@@ -64,6 +64,7 @@ function interact() {
   if (blackoutSceneActive) return;
   if (!nearbyDoor) return;
   if (nearbyDoor.type === 'computer') {
+    if (!floorHasPower(17)) return showStatus('컴퓨터가 꺼져 있다. 태양광 장치에서 17층에 전력을 공급하자.', 5000);
     computerReturnFocus = document.activeElement;
     transitionScene(() => {
       setOfficeComputerPower('on');

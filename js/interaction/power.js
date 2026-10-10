@@ -92,12 +92,17 @@ powerLever.addEventListener('click', () => {
   const wrongDirection = Math.abs(leverDrag) >= 24 && (leverDrag > 0) === solarEnabled;
   leverDrag = 0;
   if (wrongDirection) return;
-  solarEnabled = !solarEnabled;
+  if (!solarEnabled) {
+    closePowerPanel();
+    openKeypad({ type: 'power', name: '태양광 비상 전력 승인', code: '1997',
+      codePrompt: '4자리 비밀번호를 입력하세요. 관리 메모는 17층 CCTV 아래 게시판에 붙어 있다.' });
+    return;
+  }
+  solarEnabled = false;
   playGameSound('switch');
-  if (!solarEnabled) solarPoweredFloor = null;
+  solarPoweredFloor = null;
   updatePowerState();
-  showStatus(solarEnabled ? '태양광 비상 전력 ON · 엘리베이터 운행이 복구됐다. 먼저 1층부터 가 보자.' :
-    '태양광 비상 전력 OFF · 정전 상태에서는 엘리베이터가 멈춘다.', 6000);
+  showStatus('태양광 비상 전력 OFF · 정전 상태에서는 엘리베이터가 멈춘다.', 6000);
 });
 // Dragging down operates the same native button as click, touch and keyboard.
 powerLever.addEventListener('pointerdown', event => {

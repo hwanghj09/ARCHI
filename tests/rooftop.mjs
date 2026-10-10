@@ -62,7 +62,41 @@ try {
   assert(await supply.evaluate(el => Math.abs(parseFloat(el.style.top) + 691 * el.clientWidth / 887 - 570) < 1),
     'Solar device rests on the roof floor');
   await page.screenshot({ path: '.local/rooftop-desktop.png' });
-  await hold('d', 3400);
+  const manual = page.locator('#dynamic-scene .fixture[aria-label="태양광 작업 설명서"]');
+  assert.equal(await manual.count(), 1);
+  assert(await manual.isVisible());
+  assert(await manual.evaluate(el => parseFloat(el.style.left) + el.clientWidth < 720), 'Manual sits beside the solar device');
+  await hold('d', 2000);
+  assert.equal(await page.locator('#interaction-hint').textContent(), 'E · 태양광 작업 설명서 조사');
+  await page.keyboard.press('e');
+  assert.equal(await page.locator('#inspection').getAttribute('data-surface'), 'document');
+  const manualLines = [
+    '태양광 임시 전력 장치 — 비상 운용 안내',
+    '① 축전지 잔량을 확인하십시오.',
+    '② 공급 대상을 선택하십시오.',
+    '③ ‘비상 전력 공급’ 버튼을 누르십시오.',
+    '비상 전력은 지정된 조명, 작업용 컴퓨터 및 통신 장비에 우선 공급됩니다.',
+    '전용 앱을 설치하면 휴대폰으로 전력 공급 상태를 확인하고 원격으로 제어할 수 있습니다.',
+    '앱 다운로드 및 장치 등록에는 작업용 컴퓨터를 이용하십시오.',
+  ];
+  assert.deepEqual(await page.locator('#inspection-sheet .writing-item').allTextContents(), manualLines);
+  assert.equal(await page.locator('#inspection-description').textContent(), manualLines[0] + '\n\n' +
+    manualLines.slice(1, 4).join('\n') + '\n\n' + manualLines[4] + '\n\n' + manualLines.slice(5).join('\n'));
+  assert.equal(await page.locator('#inspection-sheet [data-bold="true"]').textContent(), manualLines[5]);
+  await page.screenshot({ path: '.local/solar-manual-desktop.png' });
+  await page.setViewportSize({ width: 390, height: 844 });
+  const mobileLayout = await page.locator('#inspection').evaluate(panel => {
+    const bounds = panel.getBoundingClientRect();
+    const close = document.getElementById('inspection-close').getBoundingClientRect();
+    const sheet = document.getElementById('inspection-sheet');
+    return bounds.left >= 0 && bounds.right <= innerWidth && bounds.top >= 0 && bounds.bottom <= innerHeight &&
+      close.bottom <= bounds.bottom && sheet.scrollWidth <= sheet.clientWidth + 1;
+  });
+  assert(mobileLayout, 'Manual and close button fit mobile without horizontal scrolling');
+  await page.screenshot({ path: '.local/solar-manual-mobile.png' });
+  await page.keyboard.press('Escape');
+  assert(await page.locator('#inspection').isHidden());
+  await hold('d', 1400);
   await page.setViewportSize({ width: 390, height: 844 });
   await page.clock.runFor(100);
   await page.screenshot({ path: '.local/solar-supply-mobile.png' });
@@ -90,10 +124,12 @@ try {
   assert(Math.abs((await state()).x - 2946) < 1, 'Return to the 17F stair door');
   assert.equal(await page.locator('#dynamic-scene .door').count(), 0);
   assert.equal(await supply.count(), 0, 'Device is removed when leaving the roof');
+  assert.equal(await manual.count(), 0, 'Manual is removed when leaving the roof');
   await page.locator('#interact').click();
   await arrived('dynamic');
   assert.equal(await page.locator('#dynamic-scene .door').count(), 1, 'Reentry does not duplicate doors');
   assert.equal(await supply.count(), 1, 'Reentry creates exactly one device');
+  assert.equal(await manual.count(), 1, 'Reentry creates exactly one manual');
   await page.locator('#interact').click();
   await arrived('corridor');
   assert.deepEqual(errors, []);
