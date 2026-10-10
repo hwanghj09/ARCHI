@@ -43,6 +43,7 @@ try {
     return ['sanity-hud', 'game-menu-button'].every(id => layer > Number(getComputedStyle(document.getElementById(id)).zIndex));
   }), 'Gameplay HUD and menu stay behind the inspection content');
   await page.keyboard.press('Escape');
+  assert(await page.locator('#inspection').isHidden(), 'Esc closes a card found in the world instead of opening the bag');
   await page.keyboard.press('e');
   assert(await page.locator('#inspection-sheet').isHidden(), 'Reinspection uses the plain dialogue');
   await page.keyboard.press('e');

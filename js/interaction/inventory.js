@@ -87,13 +87,31 @@ function openRooftopLock() {
   openItemPanel('옥상 비상문', description.textContent, 'rooftop-lock', content);
 }
 
+// 가방에서 크게 본 물건. 조사창의 returnTo가 'inventory'일 때만 쓴다.
+let inventoryCardItem = null;
+
+// 가방 목록이나 가방에서 연 카드가 떠 있는가.
+function inventoryShown() {
+  return usingInspection && (inspectionPanel.dataset.surface === 'inventory' || inspectionPanel.dataset.returnTo === 'inventory');
+}
+
+// 가방에서 연 카드를 닫으면 목록으로 돌아가 방금 본 물건에 포커스를 돌려준다.
+function closeInventoryCard() {
+  showInventoryList(inventoryCardItem);
+}
+
 function toggleInventory() {
-  if (usingInspection && inspectionPanel.dataset.surface === 'inventory') {
+  if (inventoryShown()) {
     closeInspection();
     inventoryButton.focus();
     return;
   }
   if (transitioning || selectingFloor || usingComputer || usingKeypad || usingPhone || usingPowerPanel || usingInspection) return;
+  showInventoryList();
+}
+
+// focusItem: 목록을 연 뒤 포커스를 줄 물건(카드를 보고 돌아올 때).
+function showInventoryList(focusItem) {
   const items = Object.keys(INVENTORY_ITEMS).filter(id => collectedItems.has(id));
   const content = writingNode('div', 'item-panel inventory-content');
   const grid = writingNode('div', 'inventory-grid');
@@ -106,14 +124,17 @@ function toggleInventory() {
     for (const event of ['pointerenter', 'focus']) button.addEventListener(event, describe);
     button.addEventListener('click', () => {
       const item = INVENTORY_ITEMS[id];
-      if (item.image) openInspection(item.name, item.description, { surface: 'card', image: item.image, caption: item.description });
-      else describe();
+      if (!item.image) return describe();
+      openInspection(item.name, item.description, { surface: 'card', image: item.image, caption: item.description });
+      inspectionPanel.dataset.returnTo = 'inventory';
+      inventoryCardItem = id;
     });
     grid.append(button);
   }
   content.append(grid, description);
   openItemPanel('가방', '챙긴 물건을 확인한다. 옥상 비상문 앞에서 조사한 뒤 열쇠 사용하기를 누르면 잠금을 해제한다.', 'inventory', content);
   inventoryButton.setAttribute('aria-expanded', 'true');
+  if (focusItem) grid.querySelector(`[data-item="${focusItem}"]`)?.focus();
 }
 
 inventoryButton.addEventListener('click', toggleInventory);

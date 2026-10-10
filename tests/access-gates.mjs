@@ -34,6 +34,10 @@ try {
   assert.match(await page.locator('#inspection-sheet img').getAttribute('src'), /jeong-suho/);
   assert.match(await message(), /늘 지니고 다니는 내 출입증.*정수호/);
   await close();
+  assert.equal(await page.locator('#inspection').getAttribute('data-surface'), 'inventory', 'Esc on a bag card steps back to the list');
+  assert(await page.locator('[data-item="f17-badge"]').evaluate(el => el === document.activeElement), 'Focus returns to the badge');
+  await close();
+  assert(await page.locator('#inspection').isHidden(), 'Esc on the list closes the bag');
   await page.evaluate(() => { performRoomChange(); performRoomChange(); });
   assert.equal(await page.locator('#office-badge').count(), 0, 'Returning to the desk does not create a pickup');
   await page.evaluate(() => { triggerBuildingBlackout(); solarEnabled = true; performFloorChange('f17'); showCabin(0); elevatorCars[0].floor = 17; refreshCabin(); });
@@ -72,7 +76,10 @@ try {
   }
   // Acquire the real team card from its existing table interaction, then authenticate every floor separately.
   await page.evaluate(() => performFloorChange('f16-cafe', null, 'exit'));
-  await place(950); await page.keyboard.press('e'); assert.match(await message(), /조현아/); await close();
+  await place(950); await page.keyboard.press('e'); assert.match(await message(), /조현아/);
+  assert.equal(await page.locator('#inspection').getAttribute('data-surface'), 'card');
+  await close();
+  assert(await page.locator('#inspection').isHidden(), 'A card found on the table closes directly');
   assert(await page.evaluate(() => collectedItems.has('f16-badge')));
   assert.equal(await page.locator('#inventory-button').textContent(), '가방 (2) · I');
   for (const floor of [12, 13, 14, 15]) {
@@ -102,6 +109,13 @@ try {
   const cardBox = await page.locator('#inspection-sheet img').boundingBox();
   assert(cardBox.width > 100 && cardBox.height > 100 && cardBox.x >= 0 && cardBox.x + cardBox.width <= 390, 'Mobile card is visible within the viewport');
   await page.screenshot({ path: '.local/suho-badge-mobile.png' });
+  await page.locator('#inspection-close').tap();
+  assert.equal(await page.locator('#inspection').getAttribute('data-surface'), 'inventory', 'Tapping close on a bag card returns to the list');
+  assert(await page.locator('[data-item="f17-badge"]').isVisible());
+  assert(await page.locator('[data-item="f17-badge"]').evaluate(el => el === document.activeElement), 'Focus returns to the tapped badge');
+  await page.screenshot({ path: '.local/inventory-return-mobile.png' });
+  await page.locator('#inspection-close').tap();
+  assert(await page.locator('#inspection').isHidden(), 'Tapping close on the list closes the bag');
   assert.deepEqual(errors, []);
   console.log('PASS: starting badge with no desk pickup, inventory/card/touch, unrestricted elevator travel, all 4 floors × 3 landings, bilateral walk/jump blocking, missing/revoked/valid badges, per-floor authentication and persistent reopening.');
 } finally { await browser.close(); }

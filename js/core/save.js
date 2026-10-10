@@ -66,6 +66,8 @@ function restoreProgress(data) {
     phoneBlocked = powerBlocked = guardBlocked = openingBlocked = blackoutBlocked = [];
     clearInterval(inspectionTypingTimer);
     inspectionTypingTimer = null;
+    delete inspectionPanel.dataset.returnTo;
+    inventoryButton.setAttribute('aria-expanded', 'false');
     roomTransition.classList.remove('visible');
     roomTransition.dataset.phase = 'idle';
     for (const key of ['opening', 'blackoutScene', 'powerFlicker']) delete world.dataset[key];
