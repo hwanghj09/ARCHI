@@ -73,6 +73,14 @@ try {
     updateGuardPatrol(16);
   });
   assert.deepEqual(await events(), ['robot-alert', 'robot-grab']);
+  // 엘리베이터 쪽으로 놓친 뒤 걸어 돌아가는 동안은 모터 소리가 나고, 도착해서 둘러볼 때는 멈춘다.
+  const servo = robot => page.evaluate(robot => {
+    releaseGuardCapture(); Object.assign(guardPatrol, robot);
+    Body.setPosition(body, { x: 2600, y: floorY - 81 }); audioEvents.length = 0;
+    updateGameAudio(); return audioEvents.includes('robot-servo');
+  }, robot);
+  assert(await servo({ x: 3000, facing: 1, wait: 0, mode: 'return', chaseOriginX: 3400 }), 'A returning robot runs its motor');
+  assert(!(await servo({ x: 3400, facing: 1, wait: 1400, mode: 'patrol' })), 'The arrival scan is quiet');
   await page.evaluate(() => {
     releaseGuardCapture();
     elevatorCars[0].floor = 1; showCabin(0);
@@ -107,5 +115,5 @@ try {
   await clear(); await page.clock.runFor(3000);
   assert(!(await events()).includes('call-ring'), 'Answered calls stay silent');
   assert.deepEqual(errors, []);
-  console.log('PASS: walking/running/landing, shutdown/flicker/outage timing, charger guards, robot alert/grab, door transitions, elevator motor/arrival/isolation and repeating/answered duty calls.');
+  console.log('PASS: walking/running/landing, shutdown/flicker/outage timing, charger guards, robot alert/grab and return motor, door transitions, elevator motor/arrival/isolation and repeating/answered duty calls.');
 } finally { await browser.close(); }
