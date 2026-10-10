@@ -65,4 +65,8 @@ B2·B1·1~17층 총 19개 층을 엘리베이터로 연결했습니다. 옥상�
 물리 엔진은 [Matter.js 0.20.0](https://github.com/liabru/matter-js/tree/0.20.0)입니다.
 오프라인 실행을 위해 배포본을 `assets/vendor/`에 포함했으며 MIT 라이선스를 함께 보관합니다.
 
+태양광 승인 후에는 17층을 켜고 작업용 컴퓨터의 인터넷 앱에서 연결 → 다운로드 → 휴대폰 전송·설치를 진행할 수 있습니다. 설치된 비상 전력 제어 앱은 옥상 패널과 같은 두 층 공급 규칙을 사용하며, 설치 상태와 공급 순서는 진행 저장에 남습니다. 방전되거나 충전함에 맡긴 휴대폰으로는 제어할 수 없습니다.
+
+메뉴의 전체화면 버튼으로 들어가면 [Keyboard Lock](https://developer.chrome.com/docs/capabilities/web-apis/keyboard-lock)을 지원하고 허용한 브라우저에서 짧은 Esc는 게임 메뉴에 전달되고, 길게 누르면 전체화면을 해제합니다. 잠금을 지원하지 않거나 권한이 거부되면 브라우저의 기본 Esc 동작을 유지합니다.
+
 검증: `npm ci` 후 `npx playwright install chromium`, `npm test`.

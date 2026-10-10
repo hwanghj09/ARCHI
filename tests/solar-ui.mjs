@@ -99,7 +99,7 @@ try {
     assert(await floor(17).isEnabled());
     assert.equal(await page.locator('.solar-supply').getAttribute('data-active'), 'true');
     assert(await page.locator('.power-art img').evaluate(img => Math.abs(new DOMMatrix(getComputedStyle(img).transform).m41 + img.clientWidth / 2) < 1));
-    assert(await floor(1).evaluate(el => el.classList.contains('suggested') && getComputedStyle(el).animationName === 'power-suggest-pulse'), '1F pulses as the first suggestion');
+    assert(await floor(17).evaluate(el => el.classList.contains('suggested') && getComputedStyle(el).animationName === 'power-suggest-pulse'), '17F pulses for computer power restoration');
     // Holding Enter sends repeated keydowns; a floor toggles on every press, so only the first one counts.
     await floor(12).focus();
     for (let i = 0; i < 4; i += 1) await page.keyboard.down('Enter');

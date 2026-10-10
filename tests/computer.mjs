@@ -204,7 +204,11 @@ try {
   await assertBlocked('Outage');
   await powerPage.screenshot({ path: '.local/computer-no-power.png' });
 
-  await powerPage.evaluate(() => { powerLever.click(); powerGrid.querySelector('[data-floor="17"]').click(); });
+  await powerPage.evaluate(() => { openPowerPanel(); powerLever.click(); });
+  await powerPage.locator('#keypad-input').fill('1997');
+  await powerPage.keyboard.press('Enter');
+  await powerPage.locator('#power-floor-grid [data-floor="17"]').click();
+  await powerPage.keyboard.press('Escape');
   assert.equal(await monitor.getAttribute('data-power'), 'off', 'Restored power does not boot the computer by itself');
   await powerPage.clock.runFor(50);
   assert.equal(await hintText(), 'E · 컴퓨터 사용', 'Solar power to 17F makes the computer usable again');
@@ -227,7 +231,7 @@ try {
   await assertBlocked('Lever off');
 
   // 컴퓨터를 켜 둔 채 저장한 정전 진행도 전력이 없으면 꺼진 상태로 이어진다.
-  await powerPage.evaluate(() => restoreProgress({ ...progressSnapshot(), computerPower: 'on', solarEnabled: false, solarPoweredFloor: null }));
+  await powerPage.evaluate(() => restoreProgress({ ...progressSnapshot(), computerPower: 'on', solarEnabled: false, solarPoweredFloors: [] }));
   assert.equal(await powerPage.evaluate(() => buildingBlackout && room === 'office'), true);
   await assertBlocked('Restored unpowered save');
   assert.deepEqual(powerErrors, []);

@@ -10,6 +10,16 @@ try {
   page.on('pageerror', error => errors.push(error.message));
   await page.clock.install({ time: new Date('2026-10-04T00:00:00Z') });
   const url = new URL('../index.html', import.meta.url).href;
+  await page.addInitScript(() => {
+    window.keyboardLockCalls = [];
+    Object.defineProperty(navigator, 'keyboard', { configurable: true, value: {
+      lock: async keys => {
+        keyboardLockCalls.push(keys);
+        if (window.rejectKeyboardLock) throw new Error('Permission denied');
+      },
+      unlock: () => keyboardLockCalls.push('unlock'),
+    } });
+  });
   await page.goto(url);
   await page.clock.pauseAt(new Date('2026-10-04T00:01:00Z'));
   assert(await page.locator('#main-menu').isVisible());
@@ -40,6 +50,19 @@ try {
     await page.locator('#menu-fullscreen').click();
     await page.waitForFunction(() => Boolean(document.fullscreenElement));
     assert.match(await page.locator('#menu-fullscreen').textContent(), /해제/);
+    assert.deepEqual(await page.evaluate(() => keyboardLockCalls), [['Escape']]);
+    await page.locator('#menu-fullscreen').click();
+    await page.waitForFunction(() => !document.fullscreenElement);
+    assert.deepEqual(await page.evaluate(() => keyboardLockCalls), [['Escape'], 'unlock']);
+    await page.evaluate(() => { window.rejectKeyboardLock = true; });
+    await page.locator('#menu-fullscreen').click();
+    await page.waitForFunction(() => keyboardLockCalls.length === 3);
+    assert(await page.evaluate(() => Boolean(document.fullscreenElement)), 'Denied keyboard lock keeps fullscreen available');
+    await page.locator('#menu-fullscreen').click();
+    await page.waitForFunction(() => !document.fullscreenElement);
+    await page.evaluate(() => { Object.defineProperty(navigator, 'keyboard', { value: undefined }); });
+    await page.locator('#menu-fullscreen').click();
+    await page.waitForFunction(() => Boolean(document.fullscreenElement));
     await page.locator('#menu-fullscreen').click();
     await page.waitForFunction(() => !document.fullscreenElement);
   }

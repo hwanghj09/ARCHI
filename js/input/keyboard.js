@@ -35,6 +35,9 @@ window.addEventListener('keydown', event => {
     }
     // 앱에서 글을 쓰거나 층을 고를 때 P/F와 방향키도 해당 입력으로 전달한다.
     if (event.target.closest('textarea, input, select')) return;
+    if (event.repeat && ['Enter', 'Space'].includes(event.code) && event.target.closest('#phone button')) {
+      event.preventDefault(); return;
+    }
     if (event.code === 'Tab' || (['Enter', 'Space'].includes(event.code) && event.target.closest('#phone button'))) return;
     if (event.code === 'KeyP' && !event.repeat) closePhone();
     if (event.code === 'KeyF' && !event.repeat) togglePhoneLight();

@@ -94,7 +94,7 @@ try {
 
   await visit('f16-cafe'); await checkFrame('음성 주문 키오스크', 0);
   await page.evaluate(() => {
-    powerLever.click();
+    setSolarPower(true);
     powerGrid.querySelector('[data-floor="16"]').click();
   });
   await checkFrame('음성 주문 키오스크', 1);

@@ -29,7 +29,7 @@ try {
   assert(await check(true), 'Flashlight does not turn background lamps on');
   await mkdir('.local', { recursive: true });
   await page.screenshot({ path: '.local/background-office-off.png' });
-  await page.evaluate(() => { powerLever.click(); powerGrid.querySelector('[data-floor="17"]').click(); });
+  await page.evaluate(() => { setSolarPower(true); powerGrid.querySelector('[data-floor="17"]').click(); });
   await decode(); assert(await check(false));
   const before = await page.locator('#office-background').boundingBox();
   await page.screenshot({ path: '.local/background-office-on.png' });
@@ -52,7 +52,7 @@ try {
     assert(await check(floor > 0), `${id}: power state on entry, including shared restrooms`);
     if (floor > 0) {
       const [second, third] = [17, 16, 15].filter(other => other !== floor);
-      await page.evaluate(floor => { powerLever.click(); powerGrid.querySelector(`[data-floor="${floor}"]`).click(); }, floor);
+      await page.evaluate(floor => { setSolarPower(true); powerGrid.querySelector(`[data-floor="${floor}"]`).click(); }, floor);
       await decode(); assert(await check(false), `${id}: power restored`);
       await page.evaluate(other => powerGrid.querySelector(`[data-floor="${other}"]`).click(), second);
       await decode(); assert(await check(false), `${id}: a second floor keeps this floor lit`);
@@ -65,7 +65,7 @@ try {
   // pressing a lit floor turns off only that floor, and the lever clears every floor.
   const press = number => page.evaluate(number => powerGrid.querySelector(`[data-floor="${number}"]`).click(), number);
   const supply = () => page.evaluate(() => ({ floors: [...solarPoweredFloors], f12: floorHasPower(12), f7: floorHasPower(7) }));
-  await page.evaluate(() => { performFloorChange('f7'); powerLever.click(); });
+  await page.evaluate(() => { performFloorChange('f7'); setSolarPower(true); });
   assert(await page.locator('img[data-lit-src]').count() > 0, '7F corridor uses switchable painted backgrounds');
   await press(12); await decode(); assert(await check(true), '7F stays dark while only 12F is supplied');
   await press(7); await decode(); assert(await check(false));
