@@ -1,9 +1,10 @@
 // R-01 keeps its position when the player leaves the lobby. Patrol uses the game's paused clock.
 // mode 'dock': 아직 플레이어를 한 번도 감지하지 못한 초기 상태 — 도크에 가만히 서 있고 순찰하지 않는다.
 // 플레이어가 가까이 와서 처음 감지되면 그제서야 추적하고, 그 뒤로는(추적이 끝나면) 'patrol'로 넘어가
-// 평소처럼 구간을 오간다.
+// 평소처럼 구간을 오간다. mode 'return': 엘리베이터 쪽으로 놓친 뒤 감지했던 자리(chaseOriginX)로 걸어 돌아가는 중.
+// spottedX는 감지 순간 수호가 서 있던 자리다.
 const guardPatrol = { x: 4530, facing: -1, wait: 0, elapsed: 0, mode: 'dock',
-  lostTime: 0, captureTime: 0, door: null, image: null, chaseOriginX: null, firstEncounter: true };
+  lostTime: 0, captureTime: 0, door: null, image: null, chaseOriginX: null, spottedX: null, firstEncounter: true };
 const guardCapturePanel = document.getElementById('guard-capture');
 let guardBlocked = [];
 
@@ -93,22 +94,22 @@ function updateGuardPatrol(delta) {
     const sameLevel = Math.abs(body.bounds.max.y - floorY) < 180;
     const seesPlayer = sameLevel && (Math.abs(dx) < 65 || (dx * robot.facing > 0 && Math.abs(dx) < 360));
     if ((robot.mode === 'patrol' || robot.mode === 'dock') && seesPlayer) {
-      robot.mode = 'chase'; robot.lostTime = 0; robot.chaseOriginX = robot.x;
+      robot.mode = 'chase'; robot.lostTime = 0; robot.chaseOriginX = robot.x; robot.spottedX = body.position.x;
       playGameSound('robot-alert', { x: robot.x });
       showStatus('경비 로봇이 수호를 감지했다. 거리를 벌려야 한다.', 2400);
     }
     if (robot.mode === 'chase') {
       // 엘리베이터 근처는 로봇의 경계 구역 밖이다 — 쫓기다가 거기 도착하면 쫓던 걸 그만두고 감지했던
-      // 자리로 돌아간다. 로봇의 순찰 구간이 엘리베이터 앞을 지나가므로, 감지되자마자(아직 도망치지도
-      // 않았는데) 그 자리가 우연히 엘리베이터 근처라서 바로 취소되는 걸 막으려고 실제로 감지 지점에서
-      // 꽤 멀어졌을 때만(200px) 이 탈출을 인정한다.
-      const fledFar = Math.abs(body.position.x - robot.chaseOriginX) > 200;
+      // 자리로 돌아간다('return'). 로봇의 순찰 구간이 엘리베이터 앞을 지나가므로, 감지되자마자(아직 도망치지도
+      // 않았는데) 그 자리가 우연히 엘리베이터 근처라서 바로 취소되는 걸 막으려고 수호가 감지된 자리에서
+      // 실제로 꽤 멀리(200px) 달아났을 때만 이 탈출을 인정한다. 로봇 위치로 재면 엘리베이터 앞에 서 있다가
+      // 멀리서 감지된 경우 감지와 탈출이 매 프레임 되풀이되어 로봇이 제자리에 멈춘다.
+      const fledFar = Math.abs(body.position.x - robot.spottedX) > 200;
       const nearElevator = fledFar && currentDoors.some(otherDoor => otherDoor.type === 'elevator' &&
         Math.abs(body.position.x - (otherDoor.x + otherDoor.width / 2)) < otherDoor.width / 2 + 60);
       if (nearElevator) {
-        robot.mode = 'patrol'; robot.wait = 0; robot.lostTime = 0;
-        if (robot.chaseOriginX !== null) robot.x = robot.chaseOriginX;
-        showStatus('엘리베이터 쪽으로 피하자 경비 로봇이 감지했던 자리로 돌아갔다.', 2400);
+        robot.mode = 'return'; robot.wait = 0; robot.lostTime = 0;
+        showStatus('엘리베이터 쪽으로 피하자 경비 로봇이 감지했던 자리로 돌아가기 시작했다.', 2400);
         if (robot.firstEncounter) {
           robot.firstEncounter = false;
           setTimeout(() => showStatus('직원증을 소지하고있지만 로봇은 멈추지 않았다 — 이건 단순 정전이 아니다.', 4200), 2400);
@@ -134,7 +135,17 @@ function updateGuardPatrol(delta) {
       }
     }
   }
-  if (powered && !playerCaught && robot.mode === 'patrol') {
+  if (powered && !playerCaught && robot.mode === 'return') {
+    // 순간이동하지 않고 순찰 속도로 감지했던 자리까지 걸어 돌아간다. 목적지는 순찰 구간 안으로 묶어서
+    // 쫓아온 길만 되짚고 벽이나 구간 밖으로 나가지 않는다. 돌아가는 동안에는 감지하지 않고(위 감지는
+    // patrol/dock만), 도착하면 그 자리에서 한 번 둘러본 뒤 순찰을 이어 간다.
+    const home = Math.max(left, Math.min(right, robot.chaseOriginX ?? robot.x));
+    if (robot.x !== home) robot.facing = home > robot.x ? 1 : -1;
+    const stride = speed * delta / 1000;
+    robot.x = Math.abs(home - robot.x) <= stride ? home : robot.x + robot.facing * stride;
+    robot.elapsed += delta;
+    if (robot.x === home) { robot.mode = 'patrol'; robot.wait = pause; }
+  } else if (powered && !playerCaught && robot.mode === 'patrol') {
     if (robot.wait > 0) {
       robot.wait = Math.max(0, robot.wait - delta);
       if (robot.wait === 0) robot.facing *= -1;
@@ -147,7 +158,8 @@ function updateGuardPatrol(delta) {
       if (robot.x === left || robot.x === right) robot.wait = pause;
     }
   }
-  const attack = powered && robot.mode !== 'patrol' && robot.mode !== 'dock';
+  // 돌아가는 중('return')은 붙잡기 시트가 아니라 순찰 시트의 바퀴 프레임으로 걷는다.
+  const attack = powered && !['patrol', 'dock', 'return'].includes(robot.mode);
   const frame = !powered ? 7 : robot.mode === 'chase' ? Math.floor(robot.elapsed / 120) % 2 :
     playerCaught ? 2 + Math.min(5, Math.floor(robot.captureTime / 160)) :
     robot.mode === 'dock' ? 4 :

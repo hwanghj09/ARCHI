@@ -99,6 +99,11 @@ try {
   assert(await page.evaluate(() => buildingBlackout && !blackoutSceneActive));
   await page.evaluate(() => { performFloorChange('f1'); catchPlayer(); }); await reloadContinue();
   assert(await page.evaluate(() => !playerCaught && guardPatrol.mode === 'patrol' && currentSceneFloor === 1));
+  // 감지했던 자리로 걸어 돌아가는 도중에 저장해도 그 자리에서 순찰로 이어 간다.
+  await page.evaluate(() => Object.assign(guardPatrol, { x: 3200, facing: 1, wait: 0, mode: 'return', chaseOriginX: 3600 }));
+  await reloadContinue();
+  const resumedGuard = await page.evaluate(() => ({ mode: guardPatrol.mode, x: guardPatrol.x, facing: guardPatrol.facing }));
+  assert(resumedGuard.mode === 'patrol' && resumedGuard.facing === 1 && Math.abs(resumedGuard.x - 3200) < 5, JSON.stringify(resumedGuard));
   // Browser hiding flushes the newest values, without waiting for the two-second autosave.
   await page.evaluate(() => {
     sanity = 37;
