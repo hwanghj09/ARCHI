@@ -151,6 +151,8 @@ powerLever.addEventListener('click', () => {
   leverDrag = 0;
   if (wrongDirection) return;
   if (!solarEnabled) {
+    // 비밀번호(와 전선 복구)는 처음 한 번만 — 그 뒤로는 레버만 내리면 바로 켜진다.
+    if (collectedItems.has('roof-wires-fixed')) { setSolarPower(true); return; }
     closePowerPanel();
     openKeypad({ type: 'power', name: '태양광 비상 전력 승인', code: '1997',
       codePrompt: '4자리 비밀번호를 입력하세요. 관리 메모는 17층 CCTV 아래 게시판에 붙어 있다.' });

@@ -216,9 +216,11 @@ try {
   await assertBlocked('Outage');
   await powerPage.screenshot({ path: '.local/computer-no-power.png' });
 
+  // The password and its post-success wire puzzle are covered in tests/solar-ui.mjs; pre-fix the
+  // wiring here so the lever alone goes straight to power-on, which is what this computer-power
+  // test actually cares about.
+  await powerPage.evaluate(() => collectedItems.add('roof-wires-fixed'));
   await powerPage.evaluate(() => { openPowerPanel(); powerLever.click(); });
-  await powerPage.locator('#keypad-input').fill('1997');
-  await powerPage.keyboard.press('Enter');
   await powerPage.locator('#power-floor-grid [data-floor="17"]').click();
   await powerPage.keyboard.press('Escape');
   assert.equal(await monitor.getAttribute('data-power'), 'off', 'Restored power does not boot the computer by itself');
