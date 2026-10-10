@@ -25,14 +25,69 @@ try {
   await page.keyboard.press('i');
   assert.equal(await page.locator('.inventory-item').count(), 1);
   assert(await page.locator('[data-item="f17-badge"]').isVisible(), 'The starting inventory contains Suho’s badge');
+  // A card opened from the bag steps back to the list (close button, E, Esc); I closes the whole bag.
+  const panel = () => page.evaluate(() => ({ open: usingInspection && !inspectionPanel.hidden, surface: !inspectionPanel.hidden && inspectionPanel.dataset.surface || null,
+    returnTo: inspectionPanel.dataset.returnTo || null, expanded: inventoryButton.getAttribute('aria-expanded'),
+    focus: document.activeElement.dataset.item || document.activeElement.id }));
+  const bagCard = { open: true, surface: 'card', returnTo: 'inventory', expanded: 'true', focus: 'inspection-close' };
+  const bagList = item => ({ open: true, surface: 'inventory', returnTo: null, expanded: 'true', focus: item });
+  const bagClosed = { open: false, surface: null, returnTo: null, expanded: 'false', focus: 'inventory-button' };
+  const badge = page.locator('[data-item="f17-badge"]');
+  await badge.click();
+  assert.deepEqual(await panel(), bagCard, 'Clicking a badge opens its card over the bag');
+  assert.match(await page.locator('#inspection-sheet img').getAttribute('src'), /jeong-suho/);
+  await page.locator('#inspection-close').click();
+  assert.deepEqual(await panel(), bagList('f17-badge'), 'The close button returns to the list with focus on the item');
+  assert.match(await page.locator('#item-description').textContent(), /늘 지니고 다니는 내 출입증/);
+  await page.keyboard.press('Enter');
+  assert.deepEqual(await panel(), bagCard, 'Enter on the focused item reopens its card');
+  await page.keyboard.press('e');
+  assert.deepEqual(await panel(), bagList('f17-badge'), 'E returns to the list');
+  // Holding Enter on the card's close button returns to the list once instead of flipping between card and list.
+  await page.keyboard.press('Enter');
+  for (let i = 0; i < 4; i++) {
+    await page.keyboard.down('Enter');
+    assert.deepEqual(await panel(), bagList('f17-badge'), 'Auto-repeated Enter does not reopen the card');
+  }
+  await page.keyboard.up('Enter');
+  await page.keyboard.press('Enter');
+  await page.keyboard.press('Escape');
+  assert.deepEqual(await panel(), bagList('f17-badge'), 'Esc on the card steps back to the list');
+  await page.keyboard.press('Escape');
+  assert.deepEqual(await panel(), { open: false, surface: null, returnTo: null, expanded: 'false', focus: 'stage' }, 'Esc on the list closes the bag');
   await page.keyboard.press('i');
+  await badge.click();
+  await page.keyboard.press('i');
+  assert.deepEqual(await panel(), bagClosed, 'I on a bag card closes the whole bag');
+  await page.keyboard.press('i');
+  assert.deepEqual(await panel(), bagList('inspection-close'), 'I reopens the bag at the list');
+  await page.keyboard.press('i');
+  assert.deepEqual(await panel(), bagClosed, 'I on the plain list closes the bag');
+  await page.locator('#inventory-button').click();
+  assert.deepEqual(await panel(), bagList('inspection-close'), 'The bag button opens the list');
+  await page.locator('#inventory-button').click();
+  assert.deepEqual(await panel(), bagClosed, 'The bag button closes the plain list');
+  await page.keyboard.press('i');
+  await badge.click();
+  await page.locator('#inventory-button').click();
+  assert.equal((await panel()).open, false, 'The bag button also closes the bag from a card');
+  await page.keyboard.press('i');
+  await badge.click();
+  await page.keyboard.press('d');
+  assert.equal((await panel()).returnTo, null, 'Walking away from a bag card closes it without a return marker');
   assert(await page.locator('#inspection').isHidden());
+  await approach('hydrant');
+  await page.keyboard.press('e');
+  assert.equal((await panel()).surface, 'hydrant');
+  await page.keyboard.press('e');
+  assert(await page.locator('#inspection').isHidden(), 'A later non-bag inspection closes instead of reopening the bag');
   await approach('stairs');
   await page.keyboard.press('e');
   assert.match(await page.locator('#inspection-description').textContent(), /잠겨.*열쇠/);
   await page.clock.runFor(900);
   assert.equal(await page.evaluate(() => currentSceneFloor), 17);
   await page.keyboard.press('Escape');
+  assert(await page.locator('#inspection').isHidden(), 'Esc closes a plain inspection');
   await approach('hydrant');
   await page.keyboard.press('e');
   assert.equal(await ownsKey(), false, 'Opening the cabinet does not collect the key');
@@ -133,6 +188,29 @@ try {
     usingComputer = false;
     return event.defaultPrevented;
   }), false, 'Inventory shortcut must not swallow typing in the computer');
+  // A card opened outside the bag (the café table) still closes directly, and I leaves it alone.
+  await page.evaluate(() => {
+    const table = floorById.get('f16-cafe').props.find(prop => prop.gives === 'f16-badge');
+    openInspection(table.name, table.message, table);
+  });
+  assert.equal((await panel()).surface, 'card');
+  await page.keyboard.press('i');
+  assert.deepEqual(await panel(), { open: true, surface: 'card', returnTo: null, expanded: 'false', focus: 'inspection-close' }, 'I ignores a card opened outside the bag');
+  await page.keyboard.press('e');
+  assert(await page.locator('#inspection').isHidden(), 'A non-bag card closes with E');
+  // Returning from the second badge restores focus to that badge, not the first item.
+  await page.evaluate(() => { collectedItems.add('f16-badge'); refreshInventoryCount(); });
+  await page.keyboard.press('i');
+  await page.locator('[data-item="f16-badge"]').click();
+  assert.match(await page.locator('#inspection-sheet img').getAttribute('src'), /jo-hyeon-a/);
+  await page.keyboard.press('Escape');
+  assert.deepEqual(await panel(), bagList('f16-badge'));
+  // The key has no card art: clicking it only describes it and keeps the list open.
+  await page.locator('[data-item="rooftop-key"]').click();
+  assert.deepEqual(await panel(), bagList('rooftop-key'));
+  assert.match(await page.locator('#item-description').textContent(), /옥상문.*더럽다/);
+  await page.keyboard.press('Escape');
+  assert(await page.locator('#inspection').isHidden());
   assert.deepEqual(errors, []);
   console.log('PASS: locked rooftop, explicit key pickup, no duplicates, inventory descriptions, keyboard/mobile layout, modal guards and rooftop round trip.');
 } finally {
