@@ -7,7 +7,7 @@
 - `assets/player/jeong-suho-caught-source.png`: original 1254×1254 RGBA, 2×2.
 - `assets/player/jeong-suho-caught.png`: 1024×256 RGBA, four horizontal **256×256** cells. Startled pose and three struggling poses; soles y=237, rendered in the existing 192px player cell.
 - Reproduce mechanical extraction with `scripts/prepare-guard-capture.ps1`. It preserves generated alpha and uses nearest-neighbor scaling.
-- Runtime: forward sensor 360px, close proximity 65px, immediate chase at 270px/s on detection, lost target 1800ms beyond 600px, grounded capture within 84px. Hold begins at 800ms; retry appears at 1100ms. Suho starts struggling when claws close at 640ms. Power loss releases Suho. Retry preserves collected clues and battery.
+- Runtime: forward sensor 720px, close proximity 130px, both void west of the stairs (outside R-01's patrol beat, left=3040 — never detects there regardless of distance) and while walking back to its detection point after an elevator escape (that window ends only once it resumes patrol), immediate chase at 270px/s on detection, lost target 1800ms beyond 600px, grounded capture within 84px. Hold begins at 800ms; retry appears at 1100ms. Suho starts struggling when claws close at 640ms. Power loss releases Suho. Retry preserves collected clues and battery.
 - Tests: `node tests/guard-capture.mjs`, `node tests/guard-patrol.mjs`, `node tests/guard-regression.mjs`. Full validation scope: `docs/GUARD-ROBOT-QA.md`.
 
 ## Robot animation prompt

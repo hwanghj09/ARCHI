@@ -93,7 +93,11 @@ function updateGuardPatrol(delta) {
   } else if (delta > 0) {
     const dx = body.position.x - robot.x;
     const sameLevel = Math.abs(body.bounds.max.y - floorY) < 180;
-    const seesPlayer = sameLevel && (Math.abs(dx) < 65 || (dx * robot.facing > 0 && Math.abs(dx) < 360));
+    // 순찰 구간 밖(비상계단 왼쪽, left 미만)은 로봇의 담당 구역이 아니다 — 센서 사정거리가 거기까지
+    // 닿아도 감지하지 않는다. 그 구역은 애초에 로봇이 순찰하며 들어가지 않는 곳이라, 거기 서 있는
+    // 수호를 감지해서 쫓아오는 것은 담당 구역 밖 추격이라 부당하게 느껴진다.
+    const inBeat = body.position.x >= left;
+    const seesPlayer = sameLevel && inBeat && (Math.abs(dx) < 130 || (dx * robot.facing > 0 && Math.abs(dx) < 720));
     if ((robot.mode === 'patrol' || robot.mode === 'dock') && seesPlayer) {
       robot.mode = 'chase'; robot.lostTime = 0; robot.chaseOriginX = robot.x; robot.spottedX = body.position.x;
       playGameSound('robot-alert', { x: robot.x });
@@ -109,6 +113,8 @@ function updateGuardPatrol(delta) {
       const nearElevator = fledFar && currentDoors.some(otherDoor => otherDoor.type === 'elevator' &&
         Math.abs(body.position.x - (otherDoor.x + otherDoor.width / 2)) < otherDoor.width / 2 + 60);
       if (nearElevator) {
+        // 순간이동으로 자리를 되돌리지 않는다 — 'return' 모드로 넘어가 감지했던 자리까지 순찰 속도로
+        // 직접 걸어서 돌아가고(아래 return 처리), 도착하면 그제서야 patrol로 돌아간다.
         robot.mode = 'return'; robot.wait = 0; robot.lostTime = 0;
         showStatus('엘리베이터 쪽으로 피하자 경비 로봇이 감지했던 자리로 돌아가기 시작했다.', 2400);
         if (robot.firstEncounter) {

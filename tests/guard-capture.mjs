@@ -49,7 +49,7 @@ try {
     if (width === 384) assert(atlas.cells.every(cell => cell.redMonitor > 60 && cell.ivoryShell > 500), 'Only the inset monitor turns red; the head casing stays ivory in every pose');
   }
   await arrange(2800); await page.clock.runFor(300); assert.equal((await state()).mode, 'patrol', 'No detection behind the sensor at a distance');
-  await arrange(3420); await page.clock.runFor(200); assert.equal((await state()).mode, 'patrol', 'No detection outside sensor range');
+  await arrange(3800); await page.clock.runFor(200); assert.equal((await state()).mode, 'patrol', 'No detection outside sensor range');
   await arrange(); await page.clock.runFor(34);
   assert.equal((await state()).mode, 'chase', 'Detection starts chasing immediately'); assert((await state()).x > 3000);
   const chaseFrames = new Set();
@@ -91,7 +91,10 @@ try {
   await page.locator('#guard-retry').focus(); await page.keyboard.press('Enter');
   assert.equal((await state()).caught, false); assert((await state()).playerX < 2000);
   assert(await page.evaluate(() => collectedItems.has('f16-badge') && phoneBattery === 73 && !stage.inert));
-  await arrange(2790, -1); await page.clock.runFor(2300);
+  // x=2790 is west of R-01's stairs-beat (left=3040), so it no longer self-detects from 'patrol' there;
+  // force 'chase' directly since this exercises the mirrored left-facing capture, not detection.
+  await arrange(2790, -1); await page.evaluate(() => { guardPatrol.mode = 'chase'; });
+  await page.clock.runFor(2300);
   assert.equal((await state()).caught, true);
   await page.setViewportSize({ width: 390, height: 844 }); await page.clock.runFor(100);
   await page.screenshot({ path: '.local/guard-caught-left-mobile.png' });
