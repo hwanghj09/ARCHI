@@ -24,22 +24,55 @@ try {
   assert.equal(await page.locator('[data-computer-app="browser"]').textContent(), '블로그');
   assert.equal(await page.locator('#computer-window-title').textContent(), '블로그');
   assert.equal(await page.locator('#computer-internet-connect').count(), 0, 'The blog needs no connect button');
-  assert(await page.locator('#computer-solar-page').isHidden());
+  assert.equal(await page.evaluate(() => buildingBlackout), false);
+  assert.equal(await page.evaluate(() => solarEnabled), false);
+  assert(await page.locator('#computer-solar-page').isVisible(), 'Normal mains power connects the blog without enabling solar');
+  assert.match(await page.locator('#computer-internet-status').textContent(), /연결됨/);
+  assert.equal(await page.locator('[data-blog-post]').count(), 5);
+  assert.equal(await page.locator('[data-blog-post]').nth(2).getAttribute('data-blog-post'), 'solar', 'The power app is between other posts');
+  assert(await page.locator('[data-blog-article="night"]').isVisible());
+  assert(await page.locator('#blog-post-solar').isHidden());
+  await page.screenshot({ path: '.local/blog-home.png' });
   await page.locator('#computer-solar-download').dispatchEvent('click');
-  assert.equal(await page.evaluate(() => collectedItems.has('solar-app-downloaded')), false);
+  assert.equal(await page.evaluate(() => computerSolarTask), null, 'An unopened attachment cannot download');
+  for (const id of ['charging', 'stairs', 'rooftop', 'night', 'solar']) {
+    await page.locator(`[data-blog-post="${id}"]`).click();
+    assert.equal(await page.locator('[data-blog-article]:visible').count(), 1);
+    assert(await page.locator(`[data-blog-article="${id}"]`).isVisible());
+    assert.equal(await page.locator(`[data-blog-post="${id}"]`).getAttribute('aria-current'), 'true');
+    assert(await page.locator(`[data-blog-article="${id}"] h2`).evaluate(el => el === document.activeElement));
+    await page.locator('#computer-blog-list-back').click();
+    assert(await page.locator('#computer-blog-list-title').evaluate(el => el === document.activeElement));
+  }
+  await page.locator('#computer-solar-download').click();
+  await page.clock.runFor(1000);
+  assert.equal(await page.locator('#computer-solar-download-progress').evaluate(el => el.value), 20, 'Downloading works before the blackout');
+  await page.evaluate(() => { buildingBlackout = true; updatePowerState(); });
+  assert(await page.locator('#computer-solar-page').isHidden());
+  assert.match(await page.locator('#computer-internet-status').textContent(), /전력이 끊겨/);
+  assert.equal(await page.evaluate(() => computerSolarTask), null);
+  await page.locator('#computer-solar-download').dispatchEvent('click');
+  assert.equal(await page.evaluate(() => collectedItems.has('solar-app-downloaded')), false, 'A real blackout blocks downloads');
   await page.evaluate(() => { solarEnabled = true; solarPoweredFloors = [17]; updatePowerState(); });
   assert(await page.locator('#computer-solar-page').isVisible(), 'Restoring power opens the blog automatically');
   await page.locator('[data-computer-app="browser"]').click();
   assert.match(await page.locator('.blog-service-bar').textContent(), /NAVER.*blog/);
   assert.match(await page.locator('#solar-blog-title').textContent(), /태양광.*다운로드/);
   assert.match(await page.locator('.blog-attachment').textContent(), /ARCHI_태양광_제어앱\.apk/);
-  assert(await page.locator('#solar-blog-title').evaluate(el => el === document.activeElement), 'Opening the blog focuses the post');
+  assert(await page.locator('#computer-blog-list-title').evaluate(el => el === document.activeElement), 'Opening the blog focuses the list');
   assert.equal(await page.locator('#computer-browser #computer-solar-transfer').count(), 0, 'Transfer is in its own app');
   for (const [width, height] of [[1280, 720], [390, 844], [844, 390], [568, 320]]) {
     await page.setViewportSize({ width, height });
     assert(await page.locator('#computer-browser').evaluate(el => el.scrollWidth <= el.clientWidth + 1), 'The blog does not overflow horizontally');
     await page.locator('#computer-browser').evaluate(el => { el.scrollTop = 0; });
     await page.screenshot({ path: `.local/solar-blog-home-${width}.png` });
+    await page.locator('.blog-post-list').scrollIntoViewIfNeeded();
+    await page.screenshot({ path: `.local/blog-post-list-${width}.png` });
+    await page.locator('[data-blog-post="night"]').click();
+    assert(await page.locator('[data-blog-article="night"]').isVisible());
+    await page.locator('#computer-blog-list-back').click();
+    await page.locator('[data-blog-post="solar"]').click();
+    assert(await page.locator('#blog-post-solar').isVisible(), 'Post selection works on desktop, portrait and short landscape screens');
     await page.locator('#computer-solar-download').scrollIntoViewIfNeeded();
     const download = await page.locator('#computer-solar-download').boundingBox();
     assert(download.width >= 44 && download.height >= 44 && download.x >= 0 && download.x + download.width <= width,
@@ -76,6 +109,8 @@ try {
   assert.equal(await page.evaluate(() => collectedItems.has('solar-app-downloaded')), true, 'Download completes after five seconds while switching apps');
   assert((await page.evaluate(() => progressSnapshot())).items.includes('solar-app-downloaded'));
   await page.locator('[data-computer-app="transfer"]').click();
+  await page.evaluate(() => { buildingBlackout = false; solarEnabled = false; updatePowerState(); });
+  assert(await page.locator('#computer-solar-transfer').isEnabled(), 'Normal mains power also permits transfers without solar');
   await page.evaluate(() => { phoneBattery = 0; refreshSolarDownload(); });
   assert(await page.locator('#computer-solar-transfer').isDisabled());
   await page.locator('#computer-solar-transfer').dispatchEvent('click');
@@ -125,6 +160,7 @@ try {
   await page.keyboard.press('Escape');
   await page.keyboard.press('Escape');
   await finishSceneTransition(page);
+  await page.evaluate(() => { buildingBlackout = true; solarEnabled = true; solarPoweredFloors = [17]; updatePowerState(); });
   await page.keyboard.press('p');
   await page.locator('[data-phone-app="solar"]').click();
   const supply = async floor => {
@@ -160,5 +196,5 @@ try {
   assert.deepEqual(await floors(), [17]);
   assert.equal(await page.evaluate(() => collectedItems.has('solar-app-installed')), true);
   assert.deepEqual(errors, []);
-  console.log('PASS: automatic blog, separate transfer app, timed progress, duplicate guards, interrupted download/transfer, responsive layouts, remote power and saved installation.');
+  console.log('PASS: normal-power connectivity, blackout/recovery, five readable blog posts with the solar attachment between them, timed download/transfer, interrupted tasks, responsive layouts, remote power and saved installation.');
 } finally { await browser.close(); }

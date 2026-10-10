@@ -1318,8 +1318,9 @@
         <div id="computer-browser" class="computer-content" hidden>
           <div class="naver-blog">
             <div class="blog-browser-bar"><span aria-hidden="true">▣</span><span>blog.naver.com / 시설관리의 기록</span></div>
-            <div class="blog-service-bar"><strong><span>NAVER</span> blog</strong><span>시설관리 노트</span></div>
+            <div class="blog-service-bar"><strong><span>NAVER</span> blog</strong><span>시설관리의 기록</span></div>
             <div class="blog-cover"><p>ARCHI BUILDING</p><h2>시설관리의 기록</h2><p>건물의 하루를 기록합니다.</p></div>
+            <div class="blog-menu"><strong>블로그</strong><span>시설 점검과 일상 이야기</span></div>
             <div class="blog-connection">
               <output id="computer-internet-status" role="status" aria-live="polite"></output>
             </div>
@@ -1327,15 +1328,45 @@
               <aside class="blog-profile" aria-label="블로그 작성자">
                 <div class="blog-avatar" aria-hidden="true">A</div>
                 <strong>ARCHI 시설관리팀</strong><p>안녕하세요.<br>시설 점검과 비상 전력<br>사용법을 공유합니다.</p>
-                <span>시설관리 · 17F</span>
+                <span>archi_facility<br>시설관리 · 17F</span>
+                <div class="blog-categories"><strong>카테고리</strong><p>전체보기 (5)<br>시설 점검 (2)<br>사용 안내 (2)<br>일상 기록 (1)</p></div>
+                <p class="blog-visitors">TODAY 12 · TOTAL 1,248</p>
               </aside>
-              <article class="blog-post" aria-labelledby="solar-blog-title">
+              <div class="blog-main">
+                <section class="blog-post-list" aria-labelledby="computer-blog-list-title">
+                  <h2 id="computer-blog-list-title" tabindex="-1">전체보기 <span>5개의 글</span></h2>
+                  <div class="blog-list-columns"><span>글 제목</span><span>작성일</span></div>
+                  <button type="button" data-blog-post="night" aria-current="true"><span>야간 점검을 마치고, 오늘의 기록</span><time datetime="2026-10-09">2026. 10. 9.</time></button>
+                  <button type="button" data-blog-post="charging"><span>휴대폰 충전함 이용 안내</span><time datetime="2026-10-08">2026. 10. 8.</time></button>
+                  <button type="button" data-blog-post="solar"><span>정전 대비 전력 조종 앱 공유 <small>첨부파일 1</small></span><time datetime="2026-10-07">2026. 10. 7.</time></button>
+                  <button type="button" data-blog-post="stairs"><span>비상계단 문 점검 기록</span><time datetime="2026-10-06">2026. 10. 6.</time></button>
+                  <button type="button" data-blog-post="rooftop"><span>옥상 태양광 장치 점검 메모</span><time datetime="2026-10-05">2026. 10. 5.</time></button>
+                  <p class="blog-list-page">1</p>
+                </section>
+                <article class="blog-post" data-blog-article="night" aria-labelledby="blog-night-title">
+                  <p class="blog-category">일상 기록</p>
+                  <h2 id="blog-night-title" tabindex="-1">야간 점검을 마치고, 오늘의 기록</h2>
+                  <p class="blog-post-meta">ARCHI 시설관리팀 · 2026. 10. 9. 18:30</p>
+                  <p>낮에는 바쁘게 오가는 사람들로 가득한 건물인데, 퇴근 시간이 지나면 복도가 조용해집니다. 오늘도 사무실 조명과 공용 설비를 확인하고 점검을 마쳤습니다.</p>
+                  <p>작업용 컴퓨터의 전원과 와이파이는 정상입니다. 필요한 사용 안내는 이 블로그에 정리해 두었으니, 글 목록에서 찾아보세요.</p>
+                  <p>정전에 대비한 전력 조종 앱도 앞선 글에 올려 두었습니다. 시간이 있을 때 미리 받아 두면 좋겠습니다.</p>
+                  <p class="blog-post-footer">#시설관리 #야간점검 #일상기록</p>
+                </article>
+                <article class="blog-post" data-blog-article="charging" aria-labelledby="blog-charging-title" hidden>
+                  <p class="blog-category">사용 안내</p>
+                  <h2 id="blog-charging-title" tabindex="-1">휴대폰 충전함 이용 안내</h2>
+                  <p class="blog-post-meta">ARCHI 시설관리팀 · 2026. 10. 8. 09:20</p>
+                  <p>배터리가 부족하면 전력이 공급되는 충전함에 휴대폰을 맡겨 주세요. 충전함에 맡겨 둔 동안에는 휴대폰 앱과 플래시를 사용할 수 없습니다.</p>
+                  <p>컴퓨터에서 파일을 전송하려면 휴대폰을 먼저 찾아와야 합니다. 충전이 끝난 뒤 휴대폰을 가져오는 것도 잊지 마세요.</p>
+                  <p class="blog-post-footer">#충전함 #휴대폰 #사용안내</p>
+                </article>
+              <article id="blog-post-solar" class="blog-post" data-blog-article="solar" aria-labelledby="solar-blog-title" hidden>
                 <p class="blog-category">비상 전력 / 사용 안내</p>
                 <h2 id="solar-blog-title" tabindex="-1">정전 때 쓰는 태양광 제어 앱<br>다운로드 및 설치 방법</h2>
-                <p class="blog-post-meta">ARCHI 시설관리팀 · 첨부파일 1개</p>
+                <p class="blog-post-meta">ARCHI 시설관리팀 · 2026. 10. 7. 14:10 · 첨부파일 1개</p>
                 <p>매번 옥상까지 올라가기 번거로워서 휴대폰용 제어 앱을 올려 둡니다. 아래 첨부파일을 받아 휴대폰에 설치하면 옥상 태양광 임시 전력 장치를 원격으로 사용할 수 있어요.</p>
                 <h3>먼저 확인해 주세요</h3>
-                <p>옥상 배전반에서 비상 전력을 켜고 17층에 전력을 공급한 뒤, 사무실 컴퓨터로 접속하세요. 휴대폰을 충전함에 맡겨 두었다면 먼저 찾아와 주세요.</p>
+                <p>컴퓨터와 와이파이는 17층에 전력이 공급되는 동안 사용할 수 있습니다. 정전 전에는 미리 받아 둘 수 있고, 정전 뒤에는 옥상 배전반에서 비상 전력을 켜고 17층에 전력을 공급해 주세요. 휴대폰을 충전함에 맡겨 두었다면 먼저 찾아와 주세요.</p>
                 <h3>앱으로 할 수 있는 일</h3>
                 <ul><li>비상 전력 장치 켜기 / 끄기</li><li>전력을 공급할 층 선택하기</li><li>현재 공급 중인 층 확인하기 · 최대 두 층</li></ul>
                 <h3>다운로드 및 설치</h3>
@@ -1349,6 +1380,24 @@
                 <output id="computer-solar-status" class="blog-install-status" role="status" aria-live="polite"></output>
                 <p class="blog-post-footer">#태양광 #비상전력 #ARCHI #시설관리</p>
               </article>
+                <article class="blog-post" data-blog-article="stairs" aria-labelledby="blog-stairs-title" hidden>
+                  <p class="blog-category">시설 점검</p>
+                  <h2 id="blog-stairs-title" tabindex="-1">비상계단 문 점검 기록</h2>
+                  <p class="blog-post-meta">ARCHI 시설관리팀 · 2026. 10. 6. 16:40</p>
+                  <p>공용 복도의 비상계단 문과 출입 장치를 확인했습니다. 문 앞에 물건을 쌓아 두지 말아 주세요.</p>
+                  <p>전력이 끊기면 출입 장치와 엘리베이터 이용에 제한이 생길 수 있습니다. 이동하기 전 전력 상태와 안내를 확인해 주세요.</p>
+                  <p class="blog-post-footer">#시설점검 #비상계단 #출입문</p>
+                </article>
+                <article class="blog-post" data-blog-article="rooftop" aria-labelledby="blog-rooftop-title" hidden>
+                  <p class="blog-category">시설 점검</p>
+                  <h2 id="blog-rooftop-title" tabindex="-1">옥상 태양광 장치 점검 메모</h2>
+                  <p class="blog-post-meta">ARCHI 시설관리팀 · 2026. 10. 5. 11:00</p>
+                  <p>옥상에 있는 태양광 임시 전력 장치의 외관과 배전반을 점검했습니다. 정전 때 지상층에 비상 전력을 공급하는 장치입니다.</p>
+                  <p>조명을 공급할 수 있는 층은 한 번에 두 곳입니다. 다른 층을 추가하면 먼저 공급하던 층의 전력이 끊길 수 있으니, 이동하기 전에 공급 대상을 확인해 주세요.</p>
+                  <p class="blog-post-footer">#옥상 #태양광 #점검메모</p>
+                </article>
+                <button id="computer-blog-list-back" type="button">목록으로</button>
+              </div>
             </div>
           </div>
         </div>
