@@ -48,8 +48,12 @@ window.addEventListener('keydown', event => {
     return;
   }
   if (usingInspection) {
-    // 조사창 안의 실제 물건 버튼은 Enter/Space로도 누를 수 있다.
-    if ((event.code === 'Enter' || event.code === 'Space') && event.target.closest('button')) return;
+    // 조사창 안의 실제 물건 버튼은 Enter/Space로도 누를 수 있다. 누르고 있을 때의 반복 입력은 막는다
+    // (가방 카드의 닫기가 포커스를 물건으로 옮기므로, 반복되면 카드와 목록을 오간다).
+    if ((event.code === 'Enter' || event.code === 'Space') && event.target.closest('button')) {
+      if (event.repeat) event.preventDefault();
+      return;
+    }
     // Esc는 한 단계 뒤로 간다(가방에서 연 카드 → 가방 목록 → 닫기).
     if (event.code === 'Escape' || event.code === 'KeyE') {
       if (!event.repeat) {

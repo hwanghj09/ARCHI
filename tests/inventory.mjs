@@ -31,6 +31,7 @@ try {
     focus: document.activeElement.dataset.item || document.activeElement.id }));
   const bagCard = { open: true, surface: 'card', returnTo: 'inventory', expanded: 'true', focus: 'inspection-close' };
   const bagList = item => ({ open: true, surface: 'inventory', returnTo: null, expanded: 'true', focus: item });
+  const bagClosed = { open: false, surface: null, returnTo: null, expanded: 'false', focus: 'inventory-button' };
   const badge = page.locator('[data-item="f17-badge"]');
   await badge.click();
   assert.deepEqual(await panel(), bagCard, 'Clicking a badge opens its card over the bag');
@@ -42,6 +43,13 @@ try {
   assert.deepEqual(await panel(), bagCard, 'Enter on the focused item reopens its card');
   await page.keyboard.press('e');
   assert.deepEqual(await panel(), bagList('f17-badge'), 'E returns to the list');
+  // Holding Enter on the card's close button returns to the list once instead of flipping between card and list.
+  await page.keyboard.press('Enter');
+  for (let i = 0; i < 4; i++) {
+    await page.keyboard.down('Enter');
+    assert.deepEqual(await panel(), bagList('f17-badge'), 'Auto-repeated Enter does not reopen the card');
+  }
+  await page.keyboard.up('Enter');
   await page.keyboard.press('Enter');
   await page.keyboard.press('Escape');
   assert.deepEqual(await panel(), bagList('f17-badge'), 'Esc on the card steps back to the list');
@@ -50,9 +58,16 @@ try {
   await page.keyboard.press('i');
   await badge.click();
   await page.keyboard.press('i');
-  assert.deepEqual(await panel(), { open: false, surface: null, returnTo: null, expanded: 'false', focus: 'inventory-button' }, 'I on a bag card closes the whole bag');
+  assert.deepEqual(await panel(), bagClosed, 'I on a bag card closes the whole bag');
   await page.keyboard.press('i');
   assert.deepEqual(await panel(), bagList('inspection-close'), 'I reopens the bag at the list');
+  await page.keyboard.press('i');
+  assert.deepEqual(await panel(), bagClosed, 'I on the plain list closes the bag');
+  await page.locator('#inventory-button').click();
+  assert.deepEqual(await panel(), bagList('inspection-close'), 'The bag button opens the list');
+  await page.locator('#inventory-button').click();
+  assert.deepEqual(await panel(), bagClosed, 'The bag button closes the plain list');
+  await page.keyboard.press('i');
   await badge.click();
   await page.locator('#inventory-button').click();
   assert.equal((await panel()).open, false, 'The bag button also closes the bag from a card');
