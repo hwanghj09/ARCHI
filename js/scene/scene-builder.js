@@ -185,8 +185,11 @@ function buildDynamicScene(config) {
     const sequence = fixture.sequence && config.sequences.find(entry => entry.id === fixture.sequence);
     if (sequence && collectedItems.has(sequence.gives)) element.dataset.done = 'true';
     if (fixture.cycle) element.dataset.state = String(cycleState(fixture.cycle));
-    doorList.push({ ...fixture, type: 'inspect', element, sequence: sequence && { ...sequence, step: fixture.step },
-      ring: fixture.ring && !collectedItems.has(fixture.gives) ? { ...fixture.ring, elapsed: 0, state: 'waiting' } : null });
+    const fixtureDoor = { ...fixture, type: 'inspect', element, sequence: sequence && { ...sequence, step: fixture.step },
+      ring: fixture.ring && !collectedItems.has(fixture.gives) ? { ...fixture.ring, elapsed: 0, state: 'waiting' } : null };
+    // 패널 위 설명서는 겹치는 발전기보다 먼저 조사할 수 있어야 한다.
+    if (config.id === 'rooftop' && fixture.style === 'power-notice') doorList.unshift(fixtureDoor);
+    else doorList.push(fixtureDoor);
   }
   refreshReady();
   const isFloor = config.id !== 'rooftop' && !config.interior;

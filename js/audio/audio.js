@@ -157,7 +157,7 @@ function updateGameAudio() {
   const moving = selectingFloor && cabinCarIndex !== null && elevatorCars[cabinCarIndex].travelling && elevatorHasPower();
   const wanted = new Map([[background, roof ? .23 : lit ? .18 : .14]]);
   if (moving) wanted.set('motor', .25);
-  if (!selectingFloor && !openingActive && !blackoutSceneActive && !usingComputer && !usingKeypad && !usingPhone && !usingPowerPanel && !usingInspection && !transitioning && !playerCaught && guardPatrol.door && lit && (guardPatrol.mode === 'chase' || !guardPatrol.wait)) {
+  if (!selectingFloor && !openingActive && !blackoutSceneActive && !usingComputer && !usingKeypad && !usingPowerPanel && !usingInspection && !transitioning && !playerCaught && guardPatrol.door && lit && (guardPatrol.mode === 'chase' || !guardPatrol.wait)) {
     playGameSound('robot-servo', { x: guardPatrol.x });
   }
   for (const [name, sound] of gameAudioAmbience) {

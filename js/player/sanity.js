@@ -291,7 +291,7 @@ function updateBlink(elapsed, fsmPaused) {
 function updateSanity(elapsed) {
   // 컷씬·장면 전환·포획과 문서를 읽는 동안은 공포 진행을 멈춘다.
   const paused = openingActive || blackoutSceneActive || playerCaught || hallucinationCaught || transitioning ||
-    usingComputer || usingKeypad || usingPhone || usingPowerPanel || usingInspection;
+    usingComputer || usingKeypad || usingPowerPanel || usingInspection;
   const fsmPaused = paused || selectingFloor;
   const exposure = sanityExposure();
   const chasing = guardPatrol.mode === 'chase' && !bossFightActive;

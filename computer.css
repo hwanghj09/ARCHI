@@ -7,16 +7,58 @@
 #computer button:hover { background: #dbe9e2; border-color: #9ab4a7; }
 #computer :is(button, textarea, input, select, [tabindex]):focus-visible { outline: 3px solid #bf6329; outline-offset: -3px; }
 #computer button img { width: 24px; height: 24px; flex-shrink: 0; pointer-events: none; }
-.computer-shortcuts { position: absolute; top: 24px; bottom: 84px; left: 24px; width: 108px; display: grid; align-content: start; gap: 16px; overflow: auto; }
-#computer .computer-shortcuts button { width: 96px; height: 96px; flex-direction: column; gap: 8px; color: white; text-shadow: 0 1px 3px #000; }
+.computer-shortcuts { position: absolute; top: 24px; bottom: 84px; left: 24px; right: 24px; display: flex; flex-flow: column wrap; align-content: flex-start; gap: 16px; }
+#computer .computer-shortcuts button { width: 96px; height: 96px; flex-shrink: 0; flex-direction: column; gap: 8px; color: white; text-shadow: 0 1px 3px #000; }
 #computer .computer-shortcuts button:hover { background: #162f37b3; }
 #computer .computer-shortcuts .app-art { width: 56px; height: 56px; }
-#computer-window { position: absolute; inset: 48px 40px 88px 152px; max-width: 1000px; margin-inline: auto; display: flex; flex-direction: column; overflow: hidden; border: 1px solid #657b71; border-radius: 6px; background: #f5f7f6; box-shadow: 0 12px 44px #102d3459; }
+#computer-window { position: absolute; inset: 48px 40px 88px 256px; max-width: 1000px; margin-inline: auto; display: flex; flex-direction: column; overflow: hidden; border: 1px solid #657b71; border-radius: 6px; background: #f5f7f6; box-shadow: 0 12px 44px #102d3459; }
 .computer-titlebar, .computer-toolbar { display: flex; align-items: center; gap: 12px; min-height: 48px; padding: 0 8px 0 16px; border-bottom: 1px solid #c9d0cc; flex-shrink: 0; }
 .computer-titlebar { background: #e7eeea; }
 .computer-titlebar strong { flex: 1; min-width: 0; overflow-wrap: anywhere; font-size: 14px; }
 #computer #computer-window-close:hover { background: #eac8c3; border-color: #bb756b; }
 .computer-content { flex: 1; min-height: 0; overflow: auto; }
+.naver-blog { min-height: 100%; background: #f4f6f5; color: #222; font-family: Arial, 'Malgun Gothic', sans-serif; }
+.blog-browser-bar { display: flex; align-items: center; gap: 10px; min-height: 40px; padding: 8px 16px; background: #e9eeeb; color: #68756d; font-size: 12px; overflow-wrap: anywhere; }
+.blog-service-bar { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 24px; border-bottom: 1px solid #e5e9e6; background: white; color: #718078; font-size: 12px; }
+.blog-service-bar strong { color: #03c75a; font-size: 22px; font-weight: 500; }
+.blog-service-bar strong span { font-weight: 900; letter-spacing: -1px; }
+.blog-cover { padding: 32px 24px; background: #e5f4e9; text-align: center; }
+.blog-cover h2 { margin: 8px 0; color: #244d35; font-size: 30px; letter-spacing: -1px; }
+.blog-cover p { margin: 0; color: #61786a; font-size: 12px; letter-spacing: 1px; }
+.blog-connection { display: flex; align-items: center; flex-wrap: wrap; gap: 8px 16px; padding: 12px 24px; border-bottom: 1px solid #e2e8e3; background: white; }
+.blog-connection output { flex: 1; min-width: 180px; color: #68756d; font-size: 12px; line-height: 1.6; }
+.blog-layout { display: grid; grid-template-columns: 160px minmax(0, 1fr); gap: 24px; max-width: 920px; padding: 28px 24px; margin: auto; }
+.blog-profile { align-self: start; font-size: 12px; line-height: 1.8; color: #6e7b73; }
+.blog-avatar { display: grid; place-items: center; width: 64px; height: 64px; margin-bottom: 14px; border-radius: 50%; background: #315a41; color: white; font-size: 28px; }
+.blog-profile strong { color: #34463b; }
+.blog-profile > span { display: block; padding-top: 12px; border-top: 1px solid #d9e1db; font-size: 11px; }
+.blog-post { min-width: 0; padding: 28px; border: 1px solid #e2e7e3; background: white; line-height: 1.9; overflow-wrap: anywhere; }
+.blog-post .blog-category { margin: 0 0 8px; color: #168743; font-size: 12px; }
+.blog-post h2 { margin: 0 0 12px; font-size: 24px; line-height: 1.5; font-weight: 600; letter-spacing: -.7px; }
+.blog-post .blog-post-meta { margin: 0 0 28px; padding-bottom: 20px; border-bottom: 1px solid #eef1ef; color: #88938c; font-size: 11px; }
+.blog-post h3 { margin: 26px 0 8px; font-size: 15px; }
+.blog-post :is(ul, ol) { padding-left: 22px; }
+.blog-attachment { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; padding: 16px; margin-top: 20px; border: 1px solid #d7e6dc; border-radius: 4px; background: #f6fbf8; }
+.blog-file-icon { color: #03a94c; font-size: 28px; }
+.blog-attachment > div { flex: 1; min-width: 0; }
+.blog-attachment strong, .blog-attachment > div span { display: block; }
+.blog-attachment strong { font-size: 13px; }
+.blog-attachment > div span { color: #849188; font-size: 11px; }
+#computer #computer-solar-download { border: 1px solid #b8d8c3; background: white; color: #14873f; font-size: 12px; }
+.solar-file-progress { display: block; width: 100%; height: 16px; margin-top: 16px; accent-color: #03a94c; }
+#computer .naver-blog button:disabled { opacity: .5; cursor: default; }
+.blog-install-status { display: block; margin-top: 12px; color: #64766a; font-size: 12px; }
+.blog-post .blog-post-footer { margin: 28px 0 0; padding-top: 18px; border-top: 1px solid #eef1ef; color: #678873; font-size: 12px; }
+@media (max-width: 800px) {
+  .blog-layout { grid-template-columns: minmax(0, 1fr); gap: 16px; padding: 16px; }
+  .blog-profile { display: grid; grid-template-columns: 44px minmax(0, 1fr); column-gap: 12px; align-items: center; }
+  .blog-avatar { grid-row: span 2; width: 44px; height: 44px; margin: 0; font-size: 22px; }
+  .blog-profile p { margin: 0; }
+  .blog-profile p br { display: none; }
+  .blog-profile > span { display: none; }
+  .blog-post { padding: 20px; }
+  .blog-post h2 { font-size: 20px; }
+}
 #computer-files { padding: 16px; }
 .computer-path { margin: 0 0 20px; color: #596960; font-size: 13px; }
 #computer-files button { display: flex; justify-content: flex-start; width: 100%; min-height: 60px; border-bottom: 1px solid #dfe5e1; border-radius: 0; text-align: left; }
@@ -71,10 +113,10 @@
 .computer-taskbar > span { margin-left: auto; font-size: 12px; color: #596960; white-space: nowrap; }
 .computer-taskbar button { flex-shrink: 0; }
 @media (max-width: 600px) {
-  .computer-shortcuts { top: 12px; bottom: auto; left: 12px; width: calc(100% - 24px); gap: 8px; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .computer-shortcuts { top: 12px; bottom: auto; left: 12px; right: 12px; display: grid; gap: 8px; grid-template-columns: repeat(3, minmax(0, 1fr)); }
   #computer .computer-shortcuts button { width: 100%; height: 72px; gap: 4px; }
   #computer .computer-shortcuts .app-art { width: 42px; height: 42px; }
-  #computer-window { inset: 176px 8px 76px; }
+  #computer-window { inset: 256px 8px 76px; }
   #computer-note { padding: 16px; }
   #computer-file-list button { flex-wrap: wrap; gap: 8px; padding-block: 12px; }
   .computer-file-metadata { width: 100%; padding-left: 32px; text-align: left; white-space: normal; }
@@ -93,7 +135,7 @@
 }
 @media (max-height: 480px) {
   #computer-window { inset: 8px 8px 76px 116px; }
-  .computer-shortcuts { top: 8px; bottom: 76px; left: 8px; width: 104px; gap: 4px; grid-template-columns: 96px; }
-  #computer .computer-shortcuts button { height: 64px; gap: 2px; }
+  .computer-shortcuts { top: 8px; bottom: 76px; left: 8px; right: 8px; display: flex; gap: 4px; }
+  #computer .computer-shortcuts button { width: 96px; height: 64px; gap: 2px; }
   #computer .computer-shortcuts .app-art { width: 38px; height: 38px; }
 }

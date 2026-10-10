@@ -34,15 +34,15 @@ try {
   await page.keyboard.press('f');
   await page.keyboard.press('p');
   const reading = (await state()).sanity;
-  await page.clock.runFor(5000); near((await state()).sanity, reading);
+  await page.clock.runFor(5000); near((await state()).sanity, reading - 5 / 3);
   await page.keyboard.press('Escape');
   await page.evaluate(() => openInspection('메모', '읽는 동안에는 정신력이 줄지 않는다.'));
-  await page.clock.runFor(4000); near((await state()).sanity, reading);
+  await page.clock.runFor(4000); near((await state()).sanity, reading - 5 / 3);
   await page.keyboard.press('Escape');
   await page.evaluate(() => { solarEnabled = true; solarPoweredFloors = [17]; updatePowerState(); });
-  await page.clock.runFor(2500); assert.equal((await state()).sanity, reading, '밝은 곳에서는 더 이상 회복되지 않는다');
+  await page.clock.runFor(2500); near((await state()).sanity, reading - 5 / 3); // 밝은 곳에서는 더 이상 회복되지 않는다
   await page.getByRole('checkbox', { name: '17층 조명' }).uncheck();
-  await page.clock.runFor(3000); near((await state()).sanity, reading - 1);
+  await page.clock.runFor(3000); near((await state()).sanity, reading - 5 / 3 - 1);
   await page.evaluate(() => {
     phoneBattery = 1; phoneLightOn = true; phoneDrainAccumulator = 0; refreshPhone();
   });
