@@ -10,7 +10,7 @@ const inventoryButton = document.getElementById('inventory-button');
 
 function refreshInventoryCount() {
   const count = Object.keys(INVENTORY_ITEMS).filter(id => collectedItems.has(id)).length;
-  inventoryButton.textContent = count ? `가방 (${count}) · I` : '가방 · I';
+  inventoryButton.textContent = count ? `가방 (${count}) · Tab` : '가방 · Tab';
 }
 
 function itemButton(id) {

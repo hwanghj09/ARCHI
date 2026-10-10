@@ -31,7 +31,7 @@
          어둠 막보다 아래에 있는 것은 문·로봇까지 모두 시야 원과 플래시 원뿔 안에서만 보인다. 힌트는 어둠 속에서도 읽히고
          낮은 물건의 힌트가 수호의 머리 높이에 떠도 가려지지 않도록 맨 위에 둔다. */
       #darkness { display: none; position: absolute; inset: 0; z-index: 5; pointer-events: none; background: radial-gradient(circle at var(--sight-x, 640px) var(--sight-y, 489px), #00000018 0 46px, #000000f0 90px, #000 125px); }
-      #world[data-blackout="true"] #darkness { display: block; }
+      #world[data-blackout="true"] #darkness { display: block; background: radial-gradient(circle at var(--sight-x, 640px) var(--sight-y, 489px), #00000018 0 65px, #000000f0 126px, #000 175px); }
       /* 배경 그림은 층별로 꺼진 그림(-off.png)으로 바뀌어서 이미 어둡게 보이는데, 엘리베이터·문·로봇·소품
          같은 DOM 스프라이트는 애초에 "켜진" 모습 하나로만 그려져 있어서 정전 중에도 그대로 환하게
          보였다. 그 층 전력이 없을 때는 이 스프라이트들도 함께 어둡게 보정한다. */
@@ -1019,7 +1019,7 @@
             <div><dt>Space · W · ↑</dt><dd>점프</dd></div>
             <div><dt>E</dt><dd>상호작용 · 물건 조사</dd></div>
             <div><dt>P / F</dt><dd>휴대폰 / 플래시</dd></div>
-            <div><dt>I / Esc</dt><dd>가방 / 창 닫기</dd></div>
+            <div><dt>Tab / Esc</dt><dd>가방 / 창 닫기</dd></div>
           </dl>
           <p class="menu-note">터치 화면에서는 화면 아래 버튼을 사용하세요.<br />어둠 속에서는 정신력이 줄어듭니다. 빛을 찾으세요.</p>
         </div>
@@ -1157,7 +1157,7 @@
       <img id="hallucination-shadow" src="assets/player/jeong-suho.png" alt="" width="256" height="256" draggable="false" hidden />
     </div>
     <button id="game-menu-button" type="button">메뉴 · Esc</button>
-    <button id="inventory-button" type="button" aria-controls="inspection" aria-expanded="false">가방 · I</button>
+    <button id="inventory-button" type="button" aria-controls="inspection" aria-expanded="false">가방 · Tab</button>
     <form id="debug-floor" aria-label="테스트용 층 이동">
       <label for="debug-floor-select">TEST 층 이동</label>
       <select id="debug-floor-select"></select>

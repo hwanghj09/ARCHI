@@ -33,8 +33,8 @@ try {
   assert.equal(await page.locator('#office-badge').count(), 0, 'The badge is no longer placed on the desk');
   assert(await page.evaluate(() => collectedItems.has('f17-badge')), 'Suho starts with his own badge');
   assert.equal(await page.locator('#interaction-hint').textContent(), 'E · 컴퓨터 사용');
-  assert.equal(await page.locator('#inventory-button').textContent(), '가방 (1) · I');
-  await page.keyboard.press('i');
+  assert.equal(await page.locator('#inventory-button').textContent(), '가방 (1) · Tab');
+  await page.keyboard.press('Tab');
   await page.locator('[data-item="f17-badge"]').click();
   assert.equal(await page.locator('#inspection').getAttribute('data-surface'), 'card');
   assert.match(await page.locator('#inspection-sheet img').getAttribute('src'), /jeong-suho/);
@@ -95,7 +95,7 @@ try {
   assert(await page.locator('#inspection').isHidden(), 'A card found on the table closes directly');
   assert(await page.evaluate(() => collectedItems.has('f16-badge')));
   assert.deepEqual(await sounds(), ['item-get'], 'A real bag item plays the item chime');
-  assert.equal(await page.locator('#inventory-button').textContent(), '가방 (2) · I');
+  assert.equal(await page.locator('#inventory-button').textContent(), '가방 (2) · Tab');
   for (const floor of [12, 13, 14, 15]) {
     await page.evaluate(floor => { performFloorChange(`f${floor}`); solarEnabled = true; solarPoweredFloors = [floor]; updatePowerState(); }, floor);
     assert.equal(await page.locator('.access-gate[data-open="false"]').count(), 2, 'Other floors remain locked');

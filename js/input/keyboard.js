@@ -16,8 +16,8 @@ window.addEventListener('keydown', event => {
     return;
   }
   if (transitioning) { event.preventDefault(); return; }
-  if (event.code === 'KeyI' && !event.repeat && !selectingFloor && !usingComputer && !usingKeypad &&
-      !usingPhone && !usingPowerPanel && (!usingInspection || inventoryShown())) {
+  if (event.code === 'Tab' && !event.shiftKey && !event.repeat && !selectingFloor && !usingComputer && !usingKeypad &&
+      !usingPhone && !usingPowerPanel && !usingInspection) {
     event.preventDefault();
     toggleInventory();
     return;

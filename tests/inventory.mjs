@@ -28,10 +28,10 @@ try {
     playGameSound = (name, options) => { soundLog.push(name); original(name, options); };
   });
   const sounds = () => page.evaluate(() => soundLog.splice(0).filter(name => name !== 'step'));
-  await page.keyboard.press('i');
+  await page.keyboard.press('Tab');
   assert.equal(await page.locator('.inventory-item').count(), 1);
   assert(await page.locator('[data-item="f17-badge"]').isVisible(), 'The starting inventory contains Suho’s badge');
-  // A card opened from the bag steps back to the list (close button, E, Esc); I closes the whole bag.
+  // Tab opens the bag and navigates its items; the bag button closes the whole bag.
   const panel = () => page.evaluate(() => ({ open: usingInspection && !inspectionPanel.hidden, surface: !inspectionPanel.hidden && inspectionPanel.dataset.surface || null,
     returnTo: inspectionPanel.dataset.returnTo || null, expanded: inventoryButton.getAttribute('aria-expanded'),
     focus: document.activeElement.dataset.item || document.activeElement.id }));
@@ -61,23 +61,28 @@ try {
   assert.deepEqual(await panel(), bagList('f17-badge'), 'Esc on the card steps back to the list');
   await page.keyboard.press('Escape');
   assert.deepEqual(await panel(), { open: false, surface: null, returnTo: null, expanded: 'false', focus: 'stage' }, 'Esc on the list closes the bag');
-  await page.keyboard.press('i');
+  await page.keyboard.press('Tab');
   await badge.click();
-  await page.keyboard.press('i');
-  assert.deepEqual(await panel(), bagClosed, 'I on a bag card closes the whole bag');
-  await page.keyboard.press('i');
-  assert.deepEqual(await panel(), bagList('inspection-close'), 'I reopens the bag at the list');
-  await page.keyboard.press('i');
-  assert.deepEqual(await panel(), bagClosed, 'I on the plain list closes the bag');
+  await page.keyboard.press('Tab');
+  assert.equal((await panel()).open, true, 'Tab on a bag card keeps it open for keyboard navigation');
+  await page.locator('#inventory-button').click();
+  assert.deepEqual(await panel(), bagClosed, 'The bag button closes the whole bag');
+  await page.keyboard.press('Tab');
+  assert.deepEqual(await panel(), bagList('inspection-close'), 'Tab reopens the bag at the list');
+  await page.keyboard.press('Tab');
+  assert.deepEqual(await panel(), bagList('f17-badge'), 'Tab selects the first bag item');
+  await page.keyboard.press('Shift+Tab');
+  assert.deepEqual(await panel(), bagList('inspection-close'), 'Shift+Tab returns to the close button');
+  await page.locator('#inventory-button').click();
   await page.locator('#inventory-button').click();
   assert.deepEqual(await panel(), bagList('inspection-close'), 'The bag button opens the list');
   await page.locator('#inventory-button').click();
   assert.deepEqual(await panel(), bagClosed, 'The bag button closes the plain list');
-  await page.keyboard.press('i');
+  await page.keyboard.press('Tab');
   await badge.click();
   await page.locator('#inventory-button').click();
   assert.equal((await panel()).open, false, 'The bag button also closes the bag from a card');
-  await page.keyboard.press('i');
+  await page.keyboard.press('Tab');
   await badge.click();
   await page.keyboard.press('d');
   assert.equal((await panel()).returnTo, null, 'Walking away from a bag card closes it without a return marker');
@@ -190,29 +195,29 @@ try {
   await page.clock.runFor(1000);
   assert.equal(await page.evaluate(() => currentSceneFloor), 18, 'Unlocked rooftop no longer asks to use the key');
   await page.evaluate(() => { usingPhone = true; });
-  await page.keyboard.press('i');
+  await page.keyboard.press('Tab');
   assert(await page.locator('#inspection').isHidden(), 'Inventory cannot overlap another modal');
   await page.evaluate(() => { usingPhone = false; });
   assert.equal(await page.evaluate(() => {
     usingComputer = true;
-    const event = new KeyboardEvent('keydown', { code: 'KeyI', key: 'i', cancelable: true });
+    const event = new KeyboardEvent('keydown', { code: 'Tab', key: 'Tab', cancelable: true });
     window.dispatchEvent(event);
     usingComputer = false;
     return event.defaultPrevented;
   }), false, 'Inventory shortcut must not swallow typing in the computer');
-  // A card opened outside the bag (the café table) still closes directly, and I leaves it alone.
+  // A card opened outside the bag (the café table) still closes directly, and Tab leaves it open.
   await page.evaluate(() => {
     const table = floorById.get('f16-cafe').props.find(prop => prop.gives === 'f16-badge');
     openInspection(table.name, table.message, table);
   });
   assert.equal((await panel()).surface, 'card');
-  await page.keyboard.press('i');
-  assert.deepEqual(await panel(), { open: true, surface: 'card', returnTo: null, expanded: 'false', focus: 'inspection-close' }, 'I ignores a card opened outside the bag');
+  await page.keyboard.press('Tab');
+  assert.deepEqual(await panel(), { open: true, surface: 'card', returnTo: null, expanded: 'false', focus: 'inspection-close' }, 'Tab keeps a card opened outside the bag open');
   await page.keyboard.press('e');
   assert(await page.locator('#inspection').isHidden(), 'A non-bag card closes with E');
   // Returning from the second badge restores focus to that badge, not the first item.
   await page.evaluate(() => { collectedItems.add('f16-badge'); refreshInventoryCount(); });
-  await page.keyboard.press('i');
+  await page.keyboard.press('Tab');
   await page.locator('[data-item="f16-badge"]').click();
   assert.match(await page.locator('#inspection-sheet img').getAttribute('src'), /jo-hyeon-a/);
   await page.keyboard.press('Escape');

@@ -22,6 +22,10 @@ try {
       Body.setPosition(body, { x: 1714, y: floorY - 81 }); grounded = true; updateInteraction(); render();
     });
     assert.equal(await page.locator('#interaction-hint').textContent(), 'E · CCTV 아래 게시판 조사');
+    assert.deepEqual(await page.locator('#interaction-outline').evaluate(element =>
+      ['left', 'top', 'width', 'height'].map(key => parseFloat(element.style[key]))), [1580, 273, 135, 159],
+    'The board outline follows the painted frame at desktop and mobile scales');
+    assert(await page.locator('#interaction-outline').isVisible());
     if (width === 390) await page.locator('#interact').tap();
     else await page.keyboard.press('e');
     assert.equal(await page.locator('#inspection').getAttribute('data-surface'), 'corkboard');

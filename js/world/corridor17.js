@@ -54,6 +54,7 @@ noticeboard.setAttribute('aria-label', 'CCTV 아래 게시판');
 Object.assign(noticeboard.style, { position: 'absolute', left: '1644px', top: '284px', width: '140px', height: '164px', pointerEvents: 'none' });
 world.insertBefore(noticeboard, sprite);
 doors.push({ name: 'CCTV 아래 게시판', type: 'inspect', x: 1644, y: 284, width: 140, element: noticeboard,
+  outline: [1580, 273, 135, 159],
   surface: 'corkboard',
   message: 'CCTV 아래 게시판에 여러 포스트잇이 붙어 있다. 회의실 예약, 분실물, 소등 안내 사이에 관리 메모가 보인다. "태양광 비상 전력 · 승인번호 1997 · 네 자리 입력 후 레버 작동".',
   caption: '회의와 당직 메모 사이에 낡은 관리 메모가 섞여 있다.',
