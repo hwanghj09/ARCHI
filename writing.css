@@ -79,9 +79,13 @@
 .writing-item { margin: 0; }
 .writing-art { display: block; width: auto; max-width: 100%; height: auto; max-height: 65dvh; object-fit: contain; margin: auto; }
 /* 완성 그림 아래 caption이 있으면 제목·닫기·caption 세 줄 몫(210px)을 빼고 그림을 줄여 스크롤 없이 한 화면에 담는다.
-   가로로 낮은 화면(높이 480px 이하)은 그림을 줄이지 않고 스크롤로 caption을 본다. */
+   가로로 낮은 화면(높이 480px 이하)은 닫기가 제목 줄로 올라가고 caption이 넓어서 제목 줄과 caption 두 줄 몫(110px)만 뺀다.
+   그림에 글자가 없으면 단서가 caption에만 있어서, 스크롤해야 보이는 자리에 두지 않는다. */
 @media (min-height: 481px) {
   #inspection[data-surface] .writing-sheet:has(> .writing-caption) > .writing-art { max-height: min(65dvh, calc(100dvh - var(--inspection-top) - var(--inspection-bottom) - 210px)); }
+}
+@media (max-height: 480px) {
+  #inspection[data-surface] .writing-sheet:has(> .writing-caption) > .writing-art { max-height: min(65dvh, calc(100dvh - var(--inspection-top) - var(--inspection-bottom) - 110px)); }
 }
 .writing-image { display: block; width: auto; max-width: 100%; height: auto; max-height: 160px; object-fit: contain; margin: .5em auto; }
 .writing-main, .writing-pinned { position: relative; z-index: 1; min-width: 0; }

@@ -261,12 +261,10 @@ try {
       return box.width > 0 && box.left >= sheet.left && box.right <= sheet.right + 1 && box.top >= sheet.top - 1 &&
         box.bottom <= sheet.bottom + 1 && panel.bottom <= controls.top + 0.5 && Math.abs(box.width / box.height - 16 / 9) < 0.02;
     }), `${view}: the CCTV artwork fits uncropped above the controls`);
-    // 데스크톱과 모바일 세로에서는 그림과 caption이 스크롤 없이 한 화면에 들어간다(가로로 낮은 화면은 스크롤 허용).
-    if (view !== 'landscape') {
-      assert(await page.locator('#inspection-sheet').evaluate(sheet => sheet.scrollHeight <= sheet.clientHeight + 1),
-        `${view}: the CCTV artwork and its caption fit without scrolling`);
-    }
-    if (view === 'mobile') await page.screenshot({ path: '.local/writing-cctv-art-mobile.png' });
+    // 그림에는 글자가 없어서 단서는 caption에만 있다. 어느 화면에서도 그림과 caption이 스크롤 없이 한 화면에 들어간다.
+    assert(await page.locator('#inspection-sheet').evaluate(sheet => sheet.scrollHeight <= sheet.clientHeight + 1),
+      `${view}: the CCTV artwork and its caption fit without scrolling`);
+    if (view !== 'desktop') await page.screenshot({ path: `.local/writing-cctv-art-${view}.png` });
   }
   await page.evaluate(saved => {
     const wall = floorById.get('b1-control').fixtures.find(fixture => fixture.name === 'CCTV 모니터 벽');
