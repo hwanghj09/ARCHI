@@ -44,21 +44,31 @@ function updateFloorIndicator(door) {
 }
 
 // 열린 엘리베이터가 어둠 막(#darkness)에 내는 구멍: 문이 열리고 전력이 있으면 그 둘레의 어둠이 걷혀 주변 배경이 보인다.
-// 값은 차량별 CSS 변수(--e0x … --e2k)로 넘기고, 모양은 index.html의 #darkness mask가 그린다. 켜지고 꺼질 때는 부드럽게 변한다.
+// 값은 차량별 CSS 변수(--e0x … --e2k)로 넘기고, 모양은 index.html의 #darkness mask가 그린다.
+// 밝기(--k)는 문짝이 움직이는 시간(elevatorDoorMs, index.html의 .elevator-panels transition)에 맞춰 0↔1로 변해서,
+// 문이 열리는 만큼 빛이 늘고 닫히는 만큼 줄어든다. 문 요소·바깥 조명(.elevator-light)·객실 조명(.elevator-glow)이 같은 값을 쓴다.
+const elevatorDoorMs = 1400;
+const elevatorGlowProgress = [0, 0, 0];
 const elevatorGlowAmount = [0, 0, 0];
 const darknessLayer = document.getElementById('darkness');
 function updateElevatorGlow(index, door) {
   const lit = !!door && door.element.dataset.open === 'true' && elevatorHasPower() && door.element.offsetParent !== null;
-  elevatorGlowAmount[index] += ((lit ? 1 : 0) - elevatorGlowAmount[index]) * 0.06;
-  if (elevatorGlowAmount[index] < 0.005) elevatorGlowAmount[index] = 0;
+  const progress = Math.max(0, Math.min(1, elevatorGlowProgress[index] + (lit ? 1 : -1) * step / elevatorDoorMs));
+  elevatorGlowProgress[index] = progress;
+  elevatorGlowAmount[index] = progress * progress * (3 - 2 * progress);
+  const amount = elevatorGlowAmount[index].toFixed(3);
   const style = darknessLayer.style;
-  style.setProperty(`--e${index}k`, elevatorGlowAmount[index].toFixed(3));
+  style.setProperty(`--e${index}k`, amount);
+  if (door) {
+    door.element.style.setProperty('--k', amount);
+    door.light?.style.setProperty('--k', amount);
+  }
   if (!door) return;
   const height = door.height ?? floorY - door.y;
   style.setProperty(`--e${index}x`, `${door.x + door.width / 2}px`);
   style.setProperty(`--e${index}y`, `${door.y + height * 0.5}px`);
   style.setProperty(`--e${index}w`, `${door.width * 2.4}px`);
-  style.setProperty(`--e${index}h`, `${height * 0.95}px`);
+  style.setProperty(`--e${index}h`, `${height * 1.1}px`);
 }
 
 function refreshSceneElevatorDoors() {
@@ -72,7 +82,40 @@ function refreshSceneElevatorDoors() {
   });
 }
 
+// 탑승자 없이 층에 서 있는 차량은 문이 열린 채로 두지 않고 일정 시간 뒤 스스로 닫는다. 전력이 끊기면 문은 그대로 열려 있다.
+const elevatorAutoCloseMs = 6000;
+const elevatorOpenTime = elevatorCars.map(() => 0);
+
+function autoCloseElevators() {
+  elevatorCars.forEach((car, index) => {
+    if (!car.open || car.rider || car.travelling || !elevatorHasPower()) {
+      elevatorOpenTime[index] = 0;
+      return;
+    }
+    elevatorOpenTime[index] += step;
+    if (elevatorOpenTime[index] < elevatorAutoCloseMs) return;
+    elevatorOpenTime[index] = 0;
+    car.open = false;
+    if (car.floor === currentSceneFloor) {
+      const door = currentDoors.find(candidate => candidate.type === 'elevator' && candidate.carIndex === index);
+      if (door) playGameSound('elevator-door', { x: door.x + door.width / 2 });
+    }
+  });
+}
+
+// 닫혀 있는 엘리베이터를 타려고 하면 문이 먼저 열리고(elevatorDoorMs 직전까지) 그 뒤에 내부 화면으로 들어간다.
+let elevatorEntering = null;
+
 function updateElevators() {
+  autoCloseElevators();
+  if (elevatorEntering) {
+    elevatorEntering.remaining -= step;
+    if (elevatorEntering.remaining <= 0) {
+      const { carIndex } = elevatorEntering;
+      elevatorEntering = null;
+      if (elevatorCars[carIndex].floor === currentSceneFloor && !transitioning) enterCabin(carIndex);
+    }
+  }
   for (const car of elevatorCars) {
     // 전력 차단 시 호출·탑승 운행 모두 같은 위치와 경과 시간에서 멈춘다. 복구하면 이어서 운행한다.
     if (!elevatorHasPower() || !car.travelling) continue;

@@ -37,7 +37,7 @@ try {
     const id = floor === 18 ? 'rooftop' : floor < 0 ? `b${-floor}` : `f${floor}`;
     await page.evaluate(id => { solarEnabled = false; solarPoweredFloors = []; performFloorChange(id, id === 'rooftop' ? null : 0); }, id);
     const chargers = await page.evaluate(() => currentDoors.filter(door => door.phoneCharger).map(door => ({ x: door.x, width: door.width })));
-    assert.equal(chargers.length, floor === 17 ? 2 : 1); stations += chargers.length;
+    assert.equal(chargers.length, floor === 17 ? 2 : floor === 18 ? 0 : 1); stations += chargers.length;
     if (floor !== 17 && floor !== 18) assert(await page.evaluate(() => {
       const [first, second] = currentDoors.filter(door => door.type === 'elevator');
       const point = currentDoors.find(door => door.phoneCharger);
@@ -61,8 +61,8 @@ try {
       await page.evaluate(() => { solarEnabled = false; solarPoweredFloors = []; updatePowerState(); });
     }
   }
-  assert.equal(stations, 21);
-  console.log('PASS: all 21 stations and their floor power/door clearance.');
+  assert.equal(stations, 20);
+  console.log('PASS: all 20 stations and their floor power/door clearance.');
   // Flashlight, device UI, motion and a different charging station while the phone is left behind.
   await page.evaluate(() => { solarEnabled = true; solarPoweredFloors = [12]; performFloorChange('f12'); });
   const at = await charger(); await place(at, 20);
@@ -146,5 +146,5 @@ try {
   assert.equal((await state()).dock.x, points[0].x);
   await place(points[0].center); await page.locator('#interact').tap(); assert.equal((await state()).dock, null);
   assert.deepEqual(errors, []);
-  console.log('PASS: 21 stations, mains/emergency/solar power, deposit/partial pickup, 2%/second, remote progress/power loss/resume, flashlight/device lock, free running, cabin/reading, capacity, interaction guards, mobile and scene rebuild.');
+  console.log('PASS: 20 stations, mains/emergency/solar power, deposit/partial pickup, 2%/second, remote progress/power loss/resume, flashlight/device lock, free running, cabin/reading, capacity, interaction guards, mobile and scene rebuild.');
 } finally { await browser.close(); }

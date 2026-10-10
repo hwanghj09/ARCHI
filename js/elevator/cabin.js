@@ -58,14 +58,24 @@ panelFloors.forEach((floor, index) => {
 });
 
 function enterCabin(carIndex) {
-  if (transitioning) return;
+  if (transitioning || elevatorEntering) return;
   const art = document.getElementById('cabin-art');
   if (!art.complete || !art.naturalWidth) {
     showStatus('엘리베이터 내부 이미지를 불러오지 못했습니다. 다시 시도해 주세요.');
     return;
   }
   cabinReturnFocus = document.activeElement;
-  if (!elevatorCars[carIndex].open) playGameSound('elevator-door');
+  const car = elevatorCars[carIndex];
+  // 닫혀 있으면 문이 열리는 동안 기다렸다가 탄다(전력이 없어 문이 못 열릴 때는 바로 들어간다).
+  if (!car.open && elevatorHasPower()) {
+    car.open = true;
+    elevatorOpenTime[carIndex] = 0;
+    playGameSound('elevator-door');
+    refreshSceneElevatorDoors();
+    elevatorEntering = { carIndex, remaining: 1200 };
+    return;
+  }
+  if (!car.open) playGameSound('elevator-door');
   transitionScene(() => showCabin(carIndex));
 }
 
