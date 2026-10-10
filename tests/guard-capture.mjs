@@ -55,6 +55,9 @@ try {
   const chaseFrames = new Set();
   for (let i = 0; i < 6; i++) { chaseFrames.add((await state()).frame); await page.clock.runFor(34); }
   assert.deepEqual([...chaseFrames].sort(), ['0', '1'], 'Red-monitor chase animates its wheels');
+  // 쫓는 동안은 수호가 로봇 앞에 서고, 붙잡는 동안은 두 팔이 수호의 허리를 앞에서 감싼다.
+  const robotOverPlayer = () => page.evaluate(() => Number(getComputedStyle(guardPatrol.door.element).zIndex) > Number(getComputedStyle(sprite).zIndex));
+  assert.equal(await robotOverPlayer(), false, 'The chasing robot passes behind the player');
   await page.screenshot({ path: '.local/guard-detected.png' });
   // Sprinting is faster than the robot and can break contact.
   await page.keyboard.down('Shift'); await page.keyboard.down('d'); await page.clock.runFor(1200);
@@ -68,11 +71,13 @@ try {
   await arrange(); await page.evaluate(() => { collectedItems.add('f16-badge'); phoneBattery = 73; });
   await page.clock.runFor(600);
   assert.equal((await state()).caught, true); assert.equal((await state()).mode, 'grab');
+  assert(await robotOverPlayer(), 'Grabbing arms are drawn in front of the player');
   await page.screenshot({ path: '.local/guard-arms-out.png' });
   const armFrames = new Set();
   for (let i = 0; i < 36; i++) { armFrames.add((await state()).frame); await page.clock.runFor(32); }
   assert.deepEqual([...armFrames].sort(), ['2', '3', '4', '5', '6', '7'], 'Both arms unfold, extend, close and hold through all six poses');
   assert.equal((await state()).mode, 'caught'); assert.equal((await state()).frame, '7');
+  assert(await robotOverPlayer(), 'The robot keeps holding the player from the front');
   assert.equal(await page.locator('#player').getAttribute('data-state'), 'caught');
   assert(await page.locator('#guard-capture').isVisible());
   const pinned = (await state()).playerX;

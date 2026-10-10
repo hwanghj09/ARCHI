@@ -43,6 +43,30 @@ try {
   const stopped = await state(); await page.clock.runFor(2000); assert.deepEqual(await state(), stopped);
   await page.locator('#dynamic-scene img').evaluateAll(imgs => Promise.all(imgs.map(img => img.decode())));
   await page.screenshot({ path: '.local/guard-off.png' });
+  // 정전 중에는 경비 로봇도 배경처럼 어둠 막 아래에 있어서, 시야 원 밖에서는 보이지 않는다.
+  const robotPixel = async () => {
+    const clip = await page.evaluate(() => {
+      const rect = world.getBoundingClientRect();
+      return { x: Math.round(rect.left + guardPatrol.x * scale), y: Math.round(rect.top + (floorY - 60) * scale), width: 1, height: 1 };
+    });
+    const shot = await page.screenshot({ clip });
+    return page.evaluate(async src => {
+      const img = new Image(); img.src = src; await img.decode();
+      const canvas = document.createElement('canvas'); canvas.width = canvas.height = 1;
+      const ctx = canvas.getContext('2d'); ctx.drawImage(img, 0, 0);
+      const [r, g, b] = ctx.getImageData(0, 0, 1, 1).data;
+      return r + g + b;
+    }, `data:image/png;base64,${shot.toString('base64')}`);
+  };
+  const setVisibility = (selector, value) => page.locator(selector).evaluate((el, value) => { el.style.visibility = value; }, value);
+  const darkRobot = await robotPixel();
+  await setVisibility('#darkness', 'hidden');
+  const bareRobot = await robotPixel();
+  await setVisibility('.fixture.guard-bot', 'hidden');
+  const bareWall = await robotPixel();
+  await setVisibility('.fixture.guard-bot', ''); await setVisibility('#darkness', '');
+  assert(Math.abs(bareRobot - bareWall) > 20, `The sample point is on the robot casing: ${bareRobot} vs wall ${bareWall}`);
+  assert(darkRobot <= 3, `The unpowered robot outside the sight circle stays in the dark: ${darkRobot}`);
   await page.evaluate(() => { solarEnabled = true; solarPoweredFloor = 1; updatePowerState(); });
   const before = await state(); await page.clock.runFor(1000);
   assert(Math.abs(before.x - (await state()).x - 80) < 3, 'Powered patrol rolls at 80 pixels per second');
