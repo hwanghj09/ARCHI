@@ -9,8 +9,11 @@ function updateInteraction() {
     const returningRobot = world.dataset.powered === 'true' && guardPatrol.mode === 'return' ? guardPatrol.door : null;
     const candidates = [...(guardPatrol.door ? [guardPatrol.door] : []),
       ...currentDoors.filter(door => door.accessGate && door.solid), ...currentDoors.filter(door => door.phoneCharger),
-      ...currentDoors.filter(door => !door.accessGate && !door.phoneCharger)].filter(door => door !== returningRobot);
-    nearbyDoor = candidates.find(door => grounded && Math.abs(body.bounds.max.y - (door.standY ?? floorY)) < 2 &&
+      ...currentDoors.filter(door => !door.accessGate && !door.phoneCharger)]
+      // hideWhenTaken 설비(16층 항불안제)는 챙기고 나면 사라지므로 더는 조사 대상이 아니다.
+      .filter(door => door !== returningRobot && !(door.hideWhenTaken && collectedItems.has(door.gives)));
+    // standYs: 설비를 조사할 수 있는 발 높이가 여럿일 때(16층 선반: 바닥에서, 또는 진라면 박스 위에서) 쓴다.
+    nearbyDoor = candidates.find(door => grounded && [].concat(door.standYs ?? door.standY ?? floorY).some(y => Math.abs(body.bounds.max.y - y) < 2) &&
       Math.abs(body.position.x - door.x - door.width / 2) < door.width / 2 + 28) || null;
     for (const door of currentDoors) door.element.classList.toggle('near', door === nearbyDoor);
     updateOutline();
@@ -131,7 +134,8 @@ function interact() {
     // requires는 물건 하나 또는 목록이다(10층 이중 잠금 서류함). 일부만 챙겼으면 partialMessage를 보이고, 다 챙기기 전에는
     // 그 소품의 gives도 주지 않는다.
     const required = [].concat(nearbyDoor.requires || []);
-    const lacking = required.filter(item => !collectedItems.has(item)).length;
+    // condition: 물건이 아닌 현재 상태(16층 박스를 끝까지 밀고 그 위에 서기)로 정하는 조건. 못 채우면 물건 하나가 모자란 것과 같다.
+    const lacking = required.filter(item => !collectedItems.has(item)).length + (nearbyDoor.condition && !nearbyDoor.condition() ? 1 : 0);
     if (nearbyDoor.accessGate && lacking && collectedItems.has('f17-badge')) {
       // 거부 화면은 유효한 사원증의 주인과 마지막으로 확인된 곳(16층 카페)까지만 알려 준다.
       playGameSound('deny');

@@ -59,9 +59,9 @@ function buildDynamicScene(config) {
       width: `${movable.width}px`, height: `${movable.height}px` });
     dynamicScene.append(element);
     const part = Bodies.rectangle(movable.x + movable.width / 2, floorY - movable.height / 2, movable.width, movable.height,
-      { inertia: Infinity, friction: .9, frictionStatic: 1, frictionAir: .25, restitution: 0 });
+      movable.pushable ? { isStatic: true } : { inertia: Infinity, friction: .9, frictionStatic: 1, frictionAir: .25, restitution: 0 });
     bodies.push(part);
-    moving.push({ body: part, element, width: movable.width, height: movable.height });
+    moving.push({ body: part, element, width: movable.width, height: movable.height, name: movable.name, pushable: movable.pushable });
   }
   // 통로를 막는 장애물(barriers, 예: 11층 방화셔터)은 충돌체이면서 조사할 수 있다. requires 물건을 챙긴 뒤 조사하면
   // gives를 챙기며 걷히고, 그 뒤로 층을 다시 그릴 때는 충돌체 없이 걷힌 모양(data-open)으로 그린다. sound가 있으면 걷힐 때
@@ -170,6 +170,7 @@ function buildDynamicScene(config) {
     const element = document.createElement('div');
     element.className = `fixture ${fixture.style || ''}`.trim();
     if (fixture.requires) element.dataset.requires = [].concat(fixture.requires).join('|');
+    if (fixture.hideWhenTaken && fixture.gives) element.dataset.hiddenBy = fixture.gives;
     element.setAttribute('role', 'img');
     element.setAttribute('aria-label', fixture.name);
     Object.assign(element.style, { left: `${fixture.x}px`, top: `${fixture.y}px`, width: `${fixture.width}px`,

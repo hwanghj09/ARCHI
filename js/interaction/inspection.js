@@ -6,6 +6,7 @@ const inspectionTitle = document.getElementById('inspection-title');
 const inspectionSheet = document.getElementById('inspection-sheet');
 const inspectionText = document.getElementById('inspection-text');
 const inspectionClose = document.getElementById('inspection-close');
+const inspectionUse = document.getElementById('inspection-use'); // 가방에서 연 사용 가능한 물건(항불안제)에만 보인다
 const inspectionDescription = document.getElementById('inspection-description');
 const inspectionHelp = inspectionPanel.querySelector('.inspection-help');
 let inspectionTypingTimer = null;
@@ -35,6 +36,7 @@ function openInspection(name, message, sheet) {
   if (!message) return;
   usingInspection = true;
   delete inspectionPanel.dataset.returnTo;
+  inspectionUse.hidden = true;
   const surface = hasWritingSheet(sheet) ? sheet.surface : null;
   inspectionTitle.textContent = name;
   inspectionDescription.textContent = message;
@@ -73,6 +75,7 @@ function closeInspection() {
   usingInspection = false;
   inspectionPanel.hidden = true;
   delete inspectionPanel.dataset.returnTo;
+  inspectionUse.hidden = true;
   document.getElementById('inventory-button').setAttribute('aria-expanded', 'false');
   stage.focus();
 }
@@ -92,7 +95,7 @@ inspectionPanel.addEventListener('keydown', event => {
   }
   if (event.key !== 'Tab') return;
   event.preventDefault();
-  const focusable = [...inspectionPanel.querySelectorAll('button:not(:disabled), [tabindex="0"]')];
+  const focusable = [...inspectionPanel.querySelectorAll('button:not(:disabled), [tabindex="0"]')].filter(element => !element.hidden);
   const index = focusable.indexOf(document.activeElement);
   focusable[(index + (event.shiftKey ? -1 : 1) + focusable.length) % focusable.length].focus();
 });

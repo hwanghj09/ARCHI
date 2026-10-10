@@ -181,7 +181,7 @@ function restoreProgress(data) {
 }
 
 function startNewGame() {
-  restoreProgress({ version: 1, scene: { id: 'office', x: 656, y: floorY - 81, facing: 1 }, items: [] });
+  restoreProgress({ version: 1, scene: { id: 'office', x: 656, y: floorY - 81, facing: 1 }, items: [], sanity: newGameSanity });
   try {
     localStorage.removeItem('archi.office17.note');
     localStorage.removeItem('archi.phone.note');

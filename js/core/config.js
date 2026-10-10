@@ -25,6 +25,8 @@ const step = 1000 / 60;
 // 쫓기는 동안(경비 로봇 추적)은 훨씬 빠르게 줄어든다 — 보스전(bossFightActive)은 예외.
 const sanityDarkDrainPerSecond = 1 / 3;
 const sanityChaseDrainPerSecond = 10;
+const newGameSanity = 35; // 새 게임을 시작할 때의 정신력
+const antianxietyRestore = 50; // 항불안제를 사용했을 때의 정신력 회복량
 // 50/40/30/20/10% 미만 구간의 공포 연출 단계(1~5). sanityTierOf()가 이 경계로 계산한다.
 const sanityTierThresholds = [50, 40, 30, 20, 10];
 const sanitySlowSpeedFactor = .92; // 30% 미만 이동 속도
