@@ -91,8 +91,11 @@ function updateGuardPatrol(delta) {
   } else if (delta > 0) {
     const dx = body.position.x - robot.x;
     const sameLevel = Math.abs(body.bounds.max.y - floorY) < 180;
-    const seesPlayer = sameLevel && (Math.abs(dx) < 65 || (dx * robot.facing > 0 && Math.abs(dx) < 360));
-    if ((robot.mode === 'patrol' || robot.mode === 'dock') && seesPlayer) {
+    // 'return'(쫓다가 놓치고 복귀하는 중)은 경계가 느슨해진 상태라 전방 탐색 범위만 절반으로 좁아진다.
+    // 바로 뒤 근접 감지(130px)는 거리와 무관하게 평소와 같이 유지해, 등 뒤까지 바짝 붙어도 놓치지 않는다.
+    const forwardSensor = robot.mode === 'return' ? 360 : 720;
+    const seesPlayer = sameLevel && (Math.abs(dx) < 130 || (dx * robot.facing > 0 && Math.abs(dx) < forwardSensor));
+    if ((robot.mode === 'patrol' || robot.mode === 'dock' || robot.mode === 'return') && seesPlayer) {
       robot.mode = 'chase'; robot.lostTime = 0; robot.chaseOriginX = robot.x;
       playGameSound('robot-alert', { x: robot.x });
       showStatus('경비 로봇이 수호를 감지했다. 거리를 벌려야 한다.', 2400);
@@ -106,9 +109,10 @@ function updateGuardPatrol(delta) {
       const nearElevator = fledFar && currentDoors.some(otherDoor => otherDoor.type === 'elevator' &&
         Math.abs(body.position.x - (otherDoor.x + otherDoor.width / 2)) < otherDoor.width / 2 + 60);
       if (nearElevator) {
-        robot.mode = 'patrol'; robot.wait = 0; robot.lostTime = 0;
-        if (robot.chaseOriginX !== null) robot.x = robot.chaseOriginX;
-        showStatus('엘리베이터 쪽으로 피하자 경비 로봇이 감지했던 자리로 돌아갔다.', 2400);
+        // 순간이동으로 자리를 되돌리지 않는다 — 'return' 모드로 넘어가 감지했던 자리까지 추적 속도로
+        // 직접 걸어서 돌아가고, 도착하면(아래 return 처리) 그제서야 patrol로 돌아간다.
+        robot.mode = 'return'; robot.wait = 0; robot.lostTime = 0;
+        showStatus('엘리베이터 쪽으로 피하자 경비 로봇이 감지했던 자리로 돌아간다.', 2400);
         if (robot.firstEncounter) {
           robot.firstEncounter = false;
           setTimeout(() => showStatus('직원증을 소지하고있지만 로봇은 멈추지 않았다 — 이건 단순 정전이 아니다.', 4200), 2400);
@@ -132,6 +136,14 @@ function updateGuardPatrol(delta) {
           if (grounded && Math.abs(body.bounds.max.y - floorY) < 3 && Math.abs(body.position.x - robot.x) <= 84) catchPlayer();
         }
       }
+    } else if (robot.mode === 'return') {
+      const toOrigin = robot.chaseOriginX - robot.x;
+      if (Math.abs(toOrigin) < 1) { robot.x = robot.chaseOriginX; robot.mode = 'patrol'; robot.wait = 0; }
+      else {
+        robot.facing = toOrigin > 0 ? 1 : -1;
+        robot.x += robot.facing * Math.min(Math.abs(toOrigin), 270 * delta / 1000);
+        robot.elapsed += delta;
+      }
     }
   }
   if (powered && !playerCaught && robot.mode === 'patrol') {
@@ -148,7 +160,7 @@ function updateGuardPatrol(delta) {
     }
   }
   const attack = powered && robot.mode !== 'patrol' && robot.mode !== 'dock';
-  const frame = !powered ? 7 : robot.mode === 'chase' ? Math.floor(robot.elapsed / 120) % 2 :
+  const frame = !powered ? 7 : (robot.mode === 'chase' || robot.mode === 'return') ? Math.floor(robot.elapsed / 120) % 2 :
     playerCaught ? 2 + Math.min(5, Math.floor(robot.captureTime / 160)) :
     robot.mode === 'dock' ? 4 :
     robot.wait > 0 ? 4 + Math.min(2, Math.floor((pause - robot.wait) / (pause / 3))) : Math.floor(robot.elapsed / 120) % 4;

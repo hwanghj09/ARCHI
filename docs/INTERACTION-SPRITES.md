@@ -38,7 +38,7 @@
 
 ## 경비 로봇 순찰
 
-`assets/objects/guard-robot/guard-patrol.png`: 2048×256 투명 PNG, 가로 256×256 셀 8개. 0~3은 바퀴 회전, 4~6은 정지 탐색, 7은 전원 OFF다. 셀의 바퀴 바닥 y=237, 게임 표시 160×160으로 로봇 높이는 약 120px이다. 1층 R-01이 전력 공급 시 x=1510~4540 구간을 80px/s로 왕복하고 끝에서 1.4초 탐색한 뒤 돌아선다. 정전·조작창·장면 전환 동안 멈추고 재방문 시 위치를 유지한다. 실제 생성 프롬프트는 `assets/objects/guard-robot/PATROL-PROMPT.md`, 검증은 `node tests/guard-patrol.mjs`.
+`assets/objects/guard-robot/guard-patrol.png`: 2048×256 투명 PNG, 가로 256×256 셀 8개. 0~3은 바퀴 회전, 4~6은 정지 탐색, 7은 전원 OFF다. 셀의 바퀴 바닥 y=237, 게임 표시 160×160으로 로봇 높이는 약 120px이다. 1층 R-01이 전력 공급 시 x=3040~4540 구간(비상계단 앞~정문)을 80px/s로 왕복하고 끝에서 1.4초 탐색한 뒤 돌아선다. 정전·조작창·장면 전환 동안 멈추고 재방문 시 위치를 유지한다. 실제 생성 프롬프트는 `assets/objects/guard-robot/PATROL-PROMPT.md`, 검증은 `node tests/guard-patrol.mjs`.
 
 ### 감지·추적·붙잡기
 

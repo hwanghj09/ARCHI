@@ -43,13 +43,13 @@ try {
     await reset();
     const cases = await page.evaluate(() => {
       const results = [];
-      for (const facing of [-1, 1]) for (const dx of [-65, -64, 0, 64, 65, 359, 360, 361]) {
+      for (const facing of [-1, 1]) for (const dx of [-130, -129, 0, 129, 130, 719, 720, 721]) {
         for (const height of [0, 179, 180, 181]) {
           Object.assign(guardPatrol, { x: 3000, facing, mode: 'patrol', wait: 0, lostTime: 0 });
           Body.setPosition(body, { x: 3000 + dx * facing, y: floorY - 81 - height });
           grounded = false; updateGuardPatrol(1);
           results.push({ facing, dx, height, actual: guardPatrol.mode,
-            expected: height < 180 && (Math.abs(dx) < 65 || dx > 0 && dx < 360) ? 'chase' : 'patrol' });
+            expected: height < 180 && (Math.abs(dx) < 130 || dx > 0 && dx < 720) ? 'chase' : 'patrol' });
         }
       }
       return results;
@@ -174,7 +174,7 @@ try {
         sprites: document.querySelectorAll('.guard-robot-sprite').length };
     });
     assert(patrol.turns >= 14, JSON.stringify(patrol));
-    assert.equal(patrol.min, 1510); assert.equal(patrol.max, 4540);
+    assert.equal(patrol.min, 3040); assert.equal(patrol.max, 4540);
     assert.equal(patrol.mode, 'patrol'); assert.equal(patrol.sprites, 1);
   });
   await check('No script or network errors', async () => assert.deepEqual(errors, []));

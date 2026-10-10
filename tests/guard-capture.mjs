@@ -49,7 +49,7 @@ try {
     if (width === 384) assert(atlas.cells.every(cell => cell.redMonitor > 60 && cell.ivoryShell > 500), 'Only the inset monitor turns red; the head casing stays ivory in every pose');
   }
   await arrange(2800); await page.clock.runFor(300); assert.equal((await state()).mode, 'patrol', 'No detection behind the sensor at a distance');
-  await arrange(3420); await page.clock.runFor(200); assert.equal((await state()).mode, 'patrol', 'No detection outside sensor range');
+  await arrange(3800); await page.clock.runFor(200); assert.equal((await state()).mode, 'patrol', 'No detection outside sensor range');
   await arrange(); await page.clock.runFor(34);
   assert.equal((await state()).mode, 'chase', 'Detection starts chasing immediately'); assert((await state()).x > 3000);
   const chaseFrames = new Set();

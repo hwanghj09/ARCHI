@@ -52,14 +52,14 @@ try {
   await page.evaluate(() => { Body.setPosition(body, { x: guardPatrol.x - 180, y: floorY - 81 }); cameraX = cameraTarget(); render(); });
   await page.screenshot({ path: '.local/guard-patrol-left.png' });
   // Keep the real simulation clock; only place it close to the endpoint to shorten the trip.
-  await page.evaluate(() => { guardPatrol.x = 1512; });
+  await page.evaluate(() => { guardPatrol.x = 3042; });
   await page.clock.runFor(100); assert.equal((await state()).phase, 'scan');
-  assert.equal((await state()).x, 1510);
+  assert.equal((await state()).x, 3040);
   const scanFrames = new Set();
   for (let i = 0; i < 12; i++) { scanFrames.add((await state()).frame); await page.clock.runFor(100); }
   assert.deepEqual([...scanFrames].sort(), ['4', '5', '6']);
   await page.clock.runFor(400); assert.equal((await state()).facing, 1);
-  assert((await state()).x > 1510, 'Endpoint scan finishes by turning around');
+  assert((await state()).x > 3040, 'Endpoint scan finishes by turning around');
   await page.evaluate(() => { solarPoweredFloor = 2; updatePowerState(); });
   const unpowered = await state(); await page.clock.runFor(1000); assert.deepEqual(await state(), unpowered);
   assert.equal(unpowered.frame, '7');
