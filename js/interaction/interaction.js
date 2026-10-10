@@ -128,7 +128,9 @@ function interact() {
     const required = [].concat(nearbyDoor.requires || []);
     const lacking = required.filter(item => !collectedItems.has(item)).length;
     if (nearbyDoor.accessGate && lacking && collectedItems.has('f17-badge')) {
-      openInspection(nearbyDoor.name, '정수호의 출입증을 태그했다. "미등록 출입증 · 인증 거부". 칸막이가 열리지 않는다. 다른 유효한 사원증이 필요하다.');
+      // 거부 화면은 유효한 사원증의 주인과 마지막으로 확인된 곳(16층 카페)까지만 알려 준다.
+      playGameSound('deny');
+      openInspection(nearbyDoor.name, '정수호의 출입증을 태그했다. "미등록 출입증 · 인증 거부". 칸막이가 열리지 않는다. 리더 화면에 야간 출입 권한자가 떠 있다: "조현아 팀장 · 16층 Café에서 마지막 확인". 다른 유효한 사원증이 필요하다.');
       return;
     }
     const missing = !unreadable && lacking && nearbyDoor.missingMessage &&
@@ -141,7 +143,9 @@ function interact() {
     const alreadyCollected = gives && collectedItems.has(gives);
     if (gives) {
       collectedItems.add(gives);
-      if (!alreadyCollected) playGameSound('pickup');
+      // 처음 챙길 때의 효과음: requires를 써서 움직인 설비(인증 게이트·2층 영사기)는 사용음, 가방에 들어가는 소지품
+      // (INVENTORY_ITEMS)은 획득음, 그 밖의 단서·진행은 pickup이다. sound가 있는 설비(11층 방화셔터)는 그 소리를 낸다.
+      if (!alreadyCollected) playGameSound(nearbyDoor.sound || (required.length ? 'item-use' : INVENTORY_ITEMS[gives] ? 'item-get' : 'pickup'));
     }
     if (gives) refreshReady();
     if (gives) refreshInventoryCount();
@@ -163,12 +167,19 @@ function interact() {
     return;
   }
   if (nearbyDoor.type === 'room') {
-    const { target, arrivalKey } = nearbyDoor;
+    const { target, arrivalKey, raiseMessage } = nearbyDoor;
     // 방 안에서 복도 문으로 나오면 그 방 id를 챙긴 것으로 친다: 안쪽 걸쇠로 잠긴 방(unlockedBy: 자기 방 id)은
     // 한 번 안에서 열고 나오면 그 뒤로 복도에서도 열린다.
+    // 안에서 처음 올리는 셔터(raiseMessage, 16층 CU)는 연출을 시작할 때 기록해 도중에 저장·종료돼도 열린 채 남는다.
+    // 레버 문구와 셔터 소리를 내며 복도로 넘어가고, 복도에서 셔터가 말려 올라간다. 두 번째부터는 보통 문이다.
+    const raising = nearbyDoor.key === 'exit' && raiseMessage && !collectedItems.has(dynamicFloorId);
     if (nearbyDoor.key === 'exit') collectedItems.add(dynamicFloorId);
-    playGameSound('door');
-    changeRoom(() => performFloorChange(target, null, arrivalKey));
+    if (raising) showStatus(raiseMessage, 4000);
+    playGameSound(raising ? 'shutter' : 'door');
+    changeRoom(() => {
+      performFloorChange(target, null, arrivalKey);
+      if (raising) raiseShutter(currentDoors.find(door => door.key === arrivalKey), raiseMessage);
+    });
     return;
   }
   if (nearbyDoor.type === 'stairs') {

@@ -34,9 +34,12 @@ function submitKeypad() {
   if (!target) return;
   if (keypadInput.value.trim().toLowerCase() !== String(target.code).toLowerCase()) {
     keypadError.textContent = '비밀번호가 맞지 않는다.';
+    playGameSound('deny');
     keypadInput.select();
     return;
   }
+  // 맞는 번호는 도어락이 풀리는 철컥·삑 소리다. 가방에 들어가는 소지품을 꺼내면 획득음이다.
+  playGameSound(INVENTORY_ITEMS[target.gives] ? 'item-get' : 'item-use');
   if (target.type === 'room') {
     // 맞는 번호를 누르면 그 자리에서 문이 열린다. 다음에 층을 그릴 때는 unlockedBy를 챙긴 것으로 열린 채 그린다.
     collectedItems.add(target.unlockedBy);

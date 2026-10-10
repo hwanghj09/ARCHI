@@ -24,6 +24,12 @@ try {
   };
   const message = () => page.locator('#inspection-description').textContent();
   const close = () => page.keyboard.press('Escape');
+  await page.evaluate(() => {
+    window.soundLog = [];
+    const original = playGameSound;
+    playGameSound = (name, options) => { soundLog.push(name); original(name, options); };
+  });
+  const sounds = () => page.evaluate(() => soundLog.splice(0).filter(name => name !== 'step'));
   assert.equal(await page.locator('#office-badge').count(), 0, 'The badge is no longer placed on the desk');
   assert(await page.evaluate(() => collectedItems.has('f17-badge')), 'Suho starts with his own badge');
   assert.equal(await page.locator('#interaction-hint').textContent(), 'E · 컴퓨터 사용');
@@ -53,7 +59,14 @@ try {
   assert.equal(await page.locator('#interaction-hint').textContent(), 'E · 출입증 태그');
   await page.keyboard.press('e'); assert.match(await message(), /출입증이 없으면/); await close();
   await page.evaluate(() => collectedItems.add('f17-badge'));
-  await page.keyboard.press('e'); assert.match(await message(), /미등록 출입증 · 인증 거부/); await close();
+  await sounds();
+  await page.keyboard.press('e');
+  // The refusal points at the valid card without solving it: whose card, and where it was last seen.
+  const rejected = await message();
+  assert.match(rejected, /미등록 출입증 · 인증 거부/);
+  assert.match(rejected, /조현아 팀장 · 16층 Café에서 마지막 확인/);
+  assert.deepEqual(await sounds(), ['deny'], 'The reader buzzes a refusal');
+  await close();
   for (const floor of [15, 14, 13, 12]) {
     for (const car of [0, 1, 2]) {
       await page.evaluate(({ floor, car }) => performFloorChange(`f${floor}`, car), { floor, car });
@@ -72,15 +85,18 @@ try {
   }
   // Acquire the real team card from its existing table interaction, then authenticate every floor separately.
   await page.evaluate(() => performFloorChange('f16-cafe', null, 'exit'));
-  await place(950); await page.keyboard.press('e'); assert.match(await message(), /조현아/); await close();
+  await place(950); await sounds(); await page.keyboard.press('e'); assert.match(await message(), /조현아/); await close();
   assert(await page.evaluate(() => collectedItems.has('f16-badge')));
+  assert.deepEqual(await sounds(), ['item-get'], 'A real bag item plays the item chime');
   assert.equal(await page.locator('#inventory-button').textContent(), '가방 (2) · I');
   for (const floor of [12, 13, 14, 15]) {
     await page.evaluate(floor => { performFloorChange(`f${floor}`); solarEnabled = true; solarPoweredFloor = floor; updatePowerState(); }, floor);
     assert.equal(await page.locator('.access-gate[data-open="false"]').count(), 2, 'Other floors remain locked');
     await place(1826);
     if (floor === 12) await page.screenshot({ path: '.local/access-gate-closed.png' });
+    await sounds();
     await page.keyboard.press('e'); assert.match(await message(), /조현아 팀장 사원증 인증 완료/); await close();
+    assert.deepEqual(await sounds(), ['item-use'], 'Tagging the valid card is an item use, not a pickup');
     await page.clock.runFor(500);
     assert.equal(await page.locator('.access-gate[data-open="true"]').count(), 2);
     assert(await page.evaluate(() => currentDoors.filter(door => door.accessGate).every(door => !door.solid)));

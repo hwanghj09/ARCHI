@@ -49,14 +49,20 @@ try {
 
   const buffers = await page.evaluate(() => {
     const names = ['step', 'door', 'elevator-door', 'elevator-arrive', 'elevator-alarm', 'blackout',
-      'robot-servo', 'robot-alert', 'robot-grab', 'phone', 'charger', 'pickup', 'switch', 'ui', 'call-ring', 'office', 'dark', 'wind', 'motor'];
+      'robot-servo', 'robot-alert', 'robot-grab', 'phone', 'charger', 'pickup', 'item-get', 'item-use', 'deny', 'shutter',
+      'switch', 'ui', 'call-ring', 'office', 'dark', 'wind', 'motor'];
     return names.map(name => {
       const buffer = gameAudioBuffer(name);
       const samples = buffer.getChannelData(0);
-      let peak = 0, energy = 0, finite = true;
-      for (const sample of samples) { finite &&= Number.isFinite(sample); peak = Math.max(peak, Math.abs(sample)); energy += sample * sample; }
+      let peak = 0, energy = 0, finite = true, crossings = 0;
+      for (let i = 0; i < samples.length; i++) {
+        const sample = samples[i];
+        finite &&= Number.isFinite(sample); peak = Math.max(peak, Math.abs(sample)); energy += sample * sample;
+        if (i && (samples[i - 1] < 0) !== (sample < 0)) crossings++;
+      }
       const loop = ['office', 'dark', 'wind', 'motor'].includes(name);
       return { name, finite, peak, rms: Math.sqrt(energy / samples.length), cached: buffer === gameAudioBuffer(name),
+        duration: buffer.duration, crossRate: crossings / 2 / buffer.duration,
         seam: loop ? Math.abs(samples.at(-1) - samples[Math.round(buffer.sampleRate * .1)]) : null };
     });
   });
@@ -65,6 +71,13 @@ try {
     assert(buffer.peak > 0 && buffer.peak < .8 && buffer.rms > .003, `${buffer.name}: audible signal with headroom`);
     if (buffer.seam !== null) assert(buffer.seam < .03, `${buffer.name}: smooth repeat boundary`);
   }
+  // Item sounds are distinct: a bright chime for bag items, a short clack-beep for using one, a low buzzer for refusals,
+  // and a rolling shutter of about a second.
+  const sound = name => buffers.find(buffer => buffer.name === name);
+  assert(sound('item-get').crossRate > 3 * sound('deny').crossRate, 'The item chime is far brighter than the refusal buzzer');
+  assert(sound('deny').crossRate < 400, 'The refusal buzzer stays low');
+  assert(sound('item-use').duration < .4 && sound('item-get').duration < .6, 'Item get/use sounds stay short');
+  assert(sound('shutter').duration >= .9 && sound('shutter').duration <= 1.5, 'The shutter rolls for about a second');
   assert.equal(await page.evaluate(() => gameAudioBuffer('unknown')), null);
 
   // Some headless Windows hosts have no output device and leave the live audio clock at zero.
@@ -116,7 +129,7 @@ try {
   await checkVolume(0);
   if (liveAudio) { await page.waitForTimeout(220); assert((await signal()).rms < .00001, 'Muting silences the real-time shared output'); }
   const mutedSources = await page.evaluate(() => gameAudioEffects.size);
-  await page.evaluate(() => playGameSound('blackout'));
+  await page.evaluate(() => { for (const name of ['blackout', 'item-get', 'item-use', 'deny', 'shutter']) playGameSound(name); });
   assert.equal(await page.evaluate(() => gameAudioEffects.size), mutedSources, 'Muted triggers do not queue sources');
   await page.evaluate(() => { gameVolume = .5; refreshGameAudioVolume(); });
   await checkVolume(.5);

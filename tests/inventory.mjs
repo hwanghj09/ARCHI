@@ -22,6 +22,12 @@ try {
     cameraX = cameraTarget(); render(); updateInteraction();
   }, type);
   const ownsKey = () => page.evaluate(() => collectedItems.has('rooftop-key'));
+  await page.evaluate(() => {
+    window.soundLog = [];
+    const original = playGameSound;
+    playGameSound = (name, options) => { soundLog.push(name); original(name, options); };
+  });
+  const sounds = () => page.evaluate(() => soundLog.splice(0).filter(name => name !== 'step'));
   await page.keyboard.press('i');
   assert.equal(await page.locator('.inventory-item').count(), 1);
   assert(await page.locator('[data-item="f17-badge"]').isVisible(), 'The starting inventory contains Suho’s badge');
@@ -64,8 +70,10 @@ try {
   await page.locator('#inspection-close').focus();
   await page.keyboard.press('Tab');
   assert(await key.evaluate(el => el === document.activeElement), 'Focus trap reaches the key');
+  await sounds();
   await page.keyboard.press('Space');
   assert.equal(await ownsKey(), true, 'Keyboard activation collects the key');
+  assert.deepEqual(await sounds(), ['item-get'], 'Picking up the key plays the item chime');
   assert.equal(await key.count(), 0);
   await page.keyboard.press('Escape');
   await page.keyboard.press('e');
@@ -112,14 +120,18 @@ try {
   await page.locator('#inspection-close').focus();
   await page.keyboard.press('Tab');
   assert(await useKey.evaluate(button => button === document.activeElement));
+  await sounds();
   await page.keyboard.press('Enter');
+  assert.deepEqual(await sounds(), ['item-use', 'door'], 'Using the key clacks the lock before the door opens');
   await page.clock.runFor(1000);
   assert.equal(await page.evaluate(() => currentSceneFloor), 18);
   await page.keyboard.press('e');
   await page.clock.runFor(1000);
   assert.equal(await page.evaluate(() => currentSceneFloor), 17);
   assert.equal(await ownsKey(), true, 'Round trip keeps the key');
+  await sounds();
   await page.keyboard.press('e');
+  assert.deepEqual(await sounds(), ['door'], 'An unlocked rooftop door needs no key sound');
   await page.clock.runFor(1000);
   assert.equal(await page.evaluate(() => currentSceneFloor), 18, 'Unlocked rooftop no longer asks to use the key');
   await page.evaluate(() => { usingPhone = true; });
@@ -134,7 +146,7 @@ try {
     return event.defaultPrevented;
   }), false, 'Inventory shortcut must not swallow typing in the computer');
   assert.deepEqual(errors, []);
-  console.log('PASS: locked rooftop, explicit key pickup, no duplicates, inventory descriptions, keyboard/mobile layout, modal guards and rooftop round trip.');
+  console.log('PASS: locked rooftop, explicit key pickup, no duplicates, item get/use sounds, inventory descriptions, keyboard/mobile layout, modal guards and rooftop round trip.');
 } finally {
   await browser.close();
 }

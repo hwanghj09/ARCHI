@@ -106,6 +106,35 @@ try {
   assert(await page.evaluate(() => !activeCall && collectedItems.has('f6-oncall') && [...gameAudioEffects].filter(sound => sound.name === 'call-ring').every(sound => sound.stopping)), 'Answering stops the ring and grants the clue');
   await clear(); await page.clock.runFor(3000);
   assert(!(await events()).includes('call-ring'), 'Answered calls stay silent');
+  // Item sounds: a wrong code buzzes and the right one clacks the lock open; a puzzle flag keeps the pickup thud; a device
+  // run on a required item clacks once; the fire shutter rattles instead.
+  await page.evaluate(() => {
+    performFloorChange('f1'); audioEvents.length = 0;
+    const panel = currentDoors.find(door => door.code);
+    openKeypad(panel);
+    keypadInput.value = '0000'; submitKeypad();
+    keypadInput.value = panel.code; submitKeypad();
+    closeInspection();
+  });
+  assert.deepEqual(await events(), ['deny', 'item-use'], 'Keypad refusal and opening');
+  const inspect = (id, name) => page.evaluate(({ id, name }) => {
+    closeInspection();
+    if (dynamicFloorId !== id) performFloorChange(id, null, floorById.get(id).interior ? 'exit' : null);
+    const door = currentDoors.find(entry => entry.name === name);
+    Body.setPosition(body, { x: door.x + door.width / 2, y: (door.standY ?? floorY) - 81 });
+    Body.setVelocity(body, { x: 0, y: 0 }); grounded = true;
+    audioEvents.length = 0;
+    interact();
+    if (nearbyDoor !== door) throw new Error(`Wrong interaction target: ${name}`);
+    return [...audioEvents];
+  }, { id, name });
+  assert.deepEqual(await inspect('f11-sales', '층 비상 대응함'), ['pickup'], 'A puzzle flag keeps the pickup sound');
+  assert.deepEqual(await inspect('f11', '방화셔터'), ['shutter'], 'The fire shutter rattles as it rolls up');
+  assert.deepEqual(await inspect('f11', '방화셔터'), [], 'An open shutter stays silent');
+  assert.deepEqual(await inspect('f2-booth', '영사기'), [], 'A device missing its item stays silent');
+  await page.evaluate(() => collectedItems.add('f2-reel'));
+  assert.deepEqual(await inspect('f2-booth', '영사기'), ['item-use'], 'Running a device on a required item is a use, not a pickup');
+  assert.deepEqual(await inspect('f2-booth', '영사기'), [], 'A running device stays silent');
   assert.deepEqual(errors, []);
-  console.log('PASS: walking/running/landing, shutdown/flicker/outage timing, charger guards, robot alert/grab, door transitions, elevator motor/arrival/isolation and repeating/answered duty calls.');
+  console.log('PASS: walking/running/landing, shutdown/flicker/outage timing, charger guards, robot alert/grab, door transitions, elevator motor/arrival/isolation, repeating/answered duty calls and item/keypad/shutter sounds.');
 } finally { await browser.close(); }

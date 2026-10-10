@@ -91,7 +91,8 @@ try {
 
   await pcApp('building').click();
   await pcGuide.locator('[data-building-floor]').selectOption('12');
-  assert.match(await pcGuide.locator('[data-building-access]').textContent(), /필요.*하차 후 게이트/);
+  assert.match(await pcGuide.locator('[data-building-access]').textContent(), /조현아 팀장 사원증 필요 \(16층 Café에서 마지막 확인\).*하차 후 게이트/,
+    'A missing card points to where it was last seen');
   const floor12 = await page.evaluate(() => {
     const scene = ALL_FLOORS.find(scene => scene.floor === 12);
     const gate = scene.barriers.find(item => item.accessGate);
@@ -196,6 +197,7 @@ try {
   assert.equal(await phoneGuide.locator('[data-building-floor]').inputValue(), '12');
   assert.match(await phoneGuide.locator('[data-building-current]').textContent(), /12층/);
   assert.match(await phoneGuide.locator('[data-building-access]').textContent(), /보유.*게이트/);
+  assert.doesNotMatch(await phoneGuide.locator('[data-building-access]').textContent(), /마지막 확인/, 'A held card needs no location hint');
   await closePhone();
   await place(1826);
   await page.keyboard.press('e');
