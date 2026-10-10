@@ -28,6 +28,15 @@ function checkWalkSheet() {
 walkSheet.addEventListener('load', checkWalkSheet);
 checkWalkSheet();
 
+// The original 2x2 sheet has uneven cells: align each hip and sole at the walking scale.
+// The opening reuses this for its final standing pose.
+function showIdleFrame(index) {
+  const hip = [325, 925, 325, 925][index];
+  const sole = [619, 619, 1234, 1235][index];
+  idleSheet.style.transform = `translate(${96 - hip * .285}px, ${178 - sole * .285}px)`;
+  idleSheet.style.clipPath = `inset(${index < 2 ? 0 : 50}% ${index % 2 ? 0 : 50}% ${index < 2 ? 50 : 0}% ${index % 2 ? 50 : 0}%)`;
+}
+
 function animate(distance, sprinting = false, elapsed = 0) {
   if (openingActive || blackoutSceneActive) return;
   if (playerCaught) {
@@ -61,13 +70,7 @@ function animate(distance, sprinting = false, elapsed = 0) {
     const src = `assets/player/jeong-suho-phone-${motion}-${light}.png`;
     if (sheet.getAttribute('src') !== src) sheet.setAttribute('src', src);
   }
-  if (state === 'idle') {
-    // The original 2x2 sheet has uneven cells: align each hip and sole at the walking scale.
-    const hip = [325, 925, 325, 925][index];
-    const sole = [619, 619, 1234, 1235][index];
-    idleSheet.style.transform = `translate(${96 - hip * .285}px, ${178 - sole * .285}px)`;
-    idleSheet.style.clipPath = `inset(${index < 2 ? 0 : 50}% ${index % 2 ? 0 : 50}% ${index < 2 ? 50 : 0}% ${index % 2 ? 50 : 0}%)`;
-  }
+  if (state === 'idle') showIdleFrame(index);
   if (state === 'walk') (holdingPhone ? phoneWalkSheet : walkSheet).style.transform = `translateX(${-index * 100 / walkFrames}%)`;
   if (state === 'run') (holdingPhone ? phoneRunSheet : runSheet).style.transform = `translateX(${-index * 100 / runFrames}%)`;
   // Reuse the airborne run poses so a lit phone never disappears during a jump.

@@ -70,8 +70,19 @@ try {
   assert.equal((await status()).phone, false); assert.equal((await status()).computer, false);
   await page.keyboard.up('d');
   await page.screenshot({ path: '.local/opening-01-back.png' });
+  // Record every painted frame so a one-frame flash of another sheet cannot slip between checks.
+  await page.evaluate(() => {
+    window.openingPaints = [];
+    const raf = window.requestAnimationFrame;
+    window.requestAnimationFrame = callback => raf(time => {
+      callback(time);
+      const visible = [...sprite.querySelectorAll('img')].filter(img => getComputedStyle(img).display !== 'none');
+      openingPaints.push({ elapsed: openingElapsed, active: openingActive, visible: visible.map(img => img.id).join(),
+        cell: Math.round(-new DOMMatrix(getComputedStyle(openingSheet).transform).m41 / 192), x: body.position.x, feet: body.bounds.max.y });
+    });
+  });
   for (const [at, phase, frame, power] of [[1750, 'shutdown', 1, 'shutting-down'], [2700, 'off', 2, 'off'],
-    [3275, 'turn', 3, 'off'], [3600, 'rising', 4, 'off'], [4400, 'standing', 5, 'off']]) {
+    [3275, 'turn', 3, 'off'], [3600, 'rising', 4, 'off']]) {
     await page.clock.runFor(Math.max(0, at - await page.evaluate(() => openingElapsed)) + 34);
     const current = await status();
     assert.equal(current.phase, phase); assert.equal(current.frame, frame); assert.equal(current.power, power);
@@ -80,11 +91,35 @@ try {
       Math.abs(new DOMMatrix(getComputedStyle(img).transform).m41 + frame * 192) < .01, frame));
     await page.screenshot({ path: `.local/opening-${phase}.png` });
   }
+  // The sheet's last cell is mid-stride, so once up he stands in the gameplay idle pose.
+  const pose = () => page.evaluate(() => {
+    const idle = getComputedStyle(document.getElementById('idle-sprite'));
+    return { state: sprite.dataset.state, frame: sprite.dataset.frame, transform: idle.transform, clip: idle.clipPath,
+      visible: [...sprite.querySelectorAll('img')].filter(img => getComputedStyle(img).display !== 'none').map(img => img.id).join() };
+  });
+  await page.clock.runFor(4400 - await page.evaluate(() => openingElapsed));
+  const standing = await status();
+  assert.equal(standing.phase, 'standing'); assert.equal(standing.power, 'off'); assert.equal(standing.facing, 1);
+  assert(Math.abs(standing.x - 656) < 1 && Math.abs(standing.feet - 570) < 1, 'He stands where gameplay starts');
+  assert(await chair.isHidden());
+  assert.equal(await page.locator('#opening-caption').textContent(), '늦었네. 이제 퇴근하자.');
+  const standingPose = await pose();
+  assert.deepEqual([standingPose.state, standingPose.frame, standingPose.visible], ['idle', '0', 'idle-sprite'],
+    'Standing uses the idle sprite, not the walking cell of the opening sheet');
+  await page.screenshot({ path: '.local/opening-standing.png' });
   await page.clock.runFor(1400);
   const completed = await status();
   assert.equal(completed.active, false); assert.equal(completed.blocked, false); assert.equal(completed.power, 'off');
   assert.equal(completed.facing, 1); assert.equal(completed.grounded, true);
   assert(Math.abs(completed.x - 656) < 1 && Math.abs(completed.feet - 570) < 1, 'Handoff lands at the existing gameplay position');
+  assert.deepEqual(await pose(), standingPose, 'Gameplay keeps the same idle frame and alignment after the handoff');
+  const paints = await page.evaluate(() => openingPaints);
+  assert(paints.some(paint => paint.active && paint.elapsed >= 3800) && paints.some(paint => !paint.active));
+  assert(paints.every(paint => paint.visible === (paint.active && paint.elapsed < 3800 ? 'opening-sheet' : 'idle-sprite')),
+    'No painted frame flashes another sheet between rising, standing and gameplay');
+  assert(paints.every(paint => paint.visible !== 'opening-sheet' || paint.cell < 5), 'The walking cell is never painted');
+  assert(paints.filter(paint => paint.active && paint.elapsed >= 3800)
+    .every(paint => Math.abs(paint.x - 656) < .01 && Math.abs(paint.feet - 570) < .01), 'The idle pose appears in place and never slides');
   assert(await page.locator('#opening').isHidden());
   assert(await chair.isHidden(), 'Chair foreground is hidden after the opening');
   assert(await page.locator('#darkness').isHidden(), 'Shutting down the computer does not turn off the room lights');
@@ -98,6 +133,7 @@ try {
   await page.keyboard.press('Escape');
   assert.equal((await status()).active, false); assert.equal((await status()).power, 'off');
   assert.equal((await status()).x, 656, 'Skip uses the same completed state');
+  assert.deepEqual(await pose(), standingPose, 'Skip lands in the same idle pose');
   assert(await chair.isHidden(), 'Skipping clears the chair foreground');
   await page.keyboard.press('e'); await page.clock.runFor(800);
   assert.equal((await status()).computer, true); assert.equal((await status()).power, 'on', 'Computer can be powered back on for documents');
@@ -119,5 +155,5 @@ try {
   await page.waitForFunction(() => !openingActive, null, { polling: 50 });
   assert.equal((await status()).blocked, false, 'Missing artwork cannot trap gameplay');
   assert.deepEqual(errors, []);
-  console.log('PASS: chair foreground occlusion, rear seated poses, shutdown, right turn, rise, handoff, input lock, skip, office re-entry, computer restart, mobile and missing-art recovery.');
+  console.log('PASS: chair foreground occlusion, rear seated poses, shutdown, right turn, rise, idle standing pose without flashes, handoff, input lock, skip, office re-entry, computer restart, mobile and missing-art recovery.');
 } finally { await browser.close(); }
