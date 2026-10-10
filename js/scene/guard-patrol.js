@@ -1,7 +1,8 @@
 // R-01 keeps its position when the player leaves the lobby. Patrol uses the game's paused clock.
 // mode 'dock': 아직 플레이어를 한 번도 감지하지 못한 초기 상태 — 도크에 가만히 서 있고 순찰하지 않는다.
 // 플레이어가 가까이 와서 처음 감지되면 그제서야 추적하고, 그 뒤로는(추적이 끝나면) 'patrol'로 넘어가
-// 평소처럼 구간을 오간다. mode 'return': 엘리베이터 쪽으로 놓친 뒤 감지했던 자리(chaseOriginX)로 걸어 돌아가는 중.
+// 평소처럼 구간을 오간다. mode 'return': 엘리베이터 쪽으로 놓친 뒤 감지했던 자리(chaseOriginX)로 걸어 돌아가는
+// 중 — 무적 상태는 아니라서 걷는 도중에도 평소처럼 다시 감지되면 'chase'로 돌아간다.
 // spottedX는 감지 순간 수호가 서 있던 자리다.
 const guardPatrol = { x: 4530, facing: -1, wait: 0, elapsed: 0, mode: 'dock',
   lostTime: 0, captureTime: 0, door: null, image: null, chaseOriginX: null, spottedX: null, firstEncounter: true };
@@ -100,7 +101,8 @@ function updateGuardPatrol(delta) {
     // 눈앞의 수호를 못 알아보면 그게 더 이상하다.
     const inBeat = body.position.x >= left;
     const seesPlayer = sameLevel && (Math.abs(dx) < 130 || (inBeat && dx * robot.facing > 0 && Math.abs(dx) < 720));
-    if ((robot.mode === 'patrol' || robot.mode === 'dock') && seesPlayer) {
+    // 'return'(복귀 이동 중)도 patrol/dock과 똑같이 감지된다 — 복귀 중이라고 무적은 아니다.
+    if ((robot.mode === 'patrol' || robot.mode === 'dock' || robot.mode === 'return') && seesPlayer) {
       robot.mode = 'chase'; robot.lostTime = 0; robot.chaseOriginX = robot.x; robot.spottedX = body.position.x;
       playGameSound('robot-alert', { x: robot.x });
       showStatus('경비 로봇이 수호를 감지했다. 거리를 벌려야 한다.', 2400);
@@ -146,8 +148,9 @@ function updateGuardPatrol(delta) {
   }
   if (powered && !playerCaught && robot.mode === 'return') {
     // 순간이동하지 않고 순찰 속도로 감지했던 자리까지 걸어 돌아간다. 목적지는 순찰 구간 안으로 묶어서
-    // 쫓아온 길만 되짚고 벽이나 구간 밖으로 나가지 않는다. 돌아가는 동안에는 감지하지 않고(위 감지는
-    // patrol/dock만), 도착하면 그 자리에서 한 번 둘러본 뒤 순찰을 이어 간다.
+    // 쫓아온 길만 되짚고 벽이나 구간 밖으로 나가지 않는다. 돌아가는 중에도 평소와 같은 조건으로
+    // 다시 감지될 수 있고(위 if), 그러면 이 블록에 닿기 전에 이미 'chase'로 바뀌어 있다. 끝까지
+    // 돌아가면 그 자리에서 한 번 둘러본 뒤 순찰을 이어 간다.
     const home = Math.max(left, Math.min(right, robot.chaseOriginX ?? robot.x));
     if (robot.x !== home) robot.facing = home > robot.x ? 1 : -1;
     const stride = speed * delta / 1000;

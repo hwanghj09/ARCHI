@@ -167,20 +167,18 @@ try {
     assert.deepEqual(panel, { near: null, hintShown: false, usingKeypad: false, keypadHidden: true, mode: 'return' }, JSON.stringify(panel));
     const trip = await page.evaluate(() => {
       const dt = 1000 / 60, { left, right, speed } = guardPatrol.door.patrol;
+      // Far from the whole beat, so this walk is undisturbed and only its own mechanics are observed
+      // (returning is not immunity — a nearby player re-detects it, checked separately below).
+      Body.setPosition(body, { x: 2000, y: floorY - 81 }); grounded = true;
       const start = guardPatrol.x, result = { maxStep: 0, backward: 0, frames: 0, min: Infinity, max: -Infinity,
-        srcs: new Set(), phases: new Set(), cells: new Set(), modes: new Set(), caught: false, robotHint: false };
+        srcs: new Set(), phases: new Set(), cells: new Set(), modes: new Set(), caught: false };
       while (guardPatrol.mode === 'return' && result.frames++ < 2000) {
-        // 돌아가는 로봇 바로 앞(65px 안)에 서 있어도 다시 감지하거나 붙잡지 않는다.
-        Body.setPosition(body, { x: guardPatrol.x + 40, y: floorY - 81 }); grounded = true;
         const before = guardPatrol.x; updateGuardPatrol(dt);
         result.maxStep = Math.max(result.maxStep, Math.abs(guardPatrol.x - before));
         if (guardPatrol.x < before) result.backward++;
         result.min = Math.min(result.min, guardPatrol.x); result.max = Math.max(result.max, guardPatrol.x);
         result.srcs.add(guardPatrol.image.getAttribute('src')); result.phases.add(guardPatrol.door.element.dataset.patrol);
-        if (guardPatrol.mode === 'return') {
-          result.cells.add(guardPatrol.door.element.dataset.frame);
-          updateInteraction(); result.robotHint ||= nearbyDoor === guardPatrol.door;
-        }
+        if (guardPatrol.mode === 'return') result.cells.add(guardPatrol.door.element.dataset.frame);
         result.modes.add(guardPatrol.mode); result.caught ||= playerCaught;
       }
       return { ...result, srcs: [...result.srcs], phases: [...result.phases], cells: [...result.cells].sort(), modes: [...result.modes],
@@ -191,9 +189,8 @@ try {
     assert.equal(trip.backward, 0, 'Walks steadily toward the detection point');
     assert(trip.frames >= Math.floor((trip.origin - trip.start) / trip.limit), `Takes the whole walk: ${trip.frames} frames`);
     assert(trip.min >= trip.left && trip.max <= trip.right, 'Stays inside the patrol bounds');
-    assert.equal(trip.caught, false); assert.deepEqual(trip.modes, ['return', 'patrol'], 'No detection while returning');
-    assert.equal(trip.robotHint, false, 'The maintenance panel is never offered on the powered, returning robot');
-    assert.deepEqual(trip.srcs, ['assets/objects/guard-robot/guard-patrol.png'], 'Never shows the capture sprite while returning');
+    assert.equal(trip.caught, false); assert.deepEqual(trip.modes, ['return', 'patrol'], 'Undisturbed, the walk finishes on its own');
+    assert.deepEqual(trip.srcs, ['assets/objects/guard-robot/guard-patrol.png'], 'Walking back uses the patrol sheet, not the capture sheet');
     assert.deepEqual(trip.cells, ['0', '1', '2', '3'], 'Returning animates the patrol wheel frames');
     assert.equal(trip.x, trip.origin); assert.equal(trip.mode, 'patrol'); assert.equal(trip.wait, trip.pause);
     assert.equal(trip.facing, 1); assert.equal((await sprite()).phase, 'scan', 'Arrival scans before patrolling on');
@@ -212,6 +209,17 @@ try {
     assert(Math.abs(resumed.scanned - resumed.frames) <= 1, `Scans for the patrol pause: ${JSON.stringify(resumed)}`);
     assert(Math.abs(resumed.walked - resumed.expected) < 2, `Patrol resumes at patrol speed: ${JSON.stringify(resumed)}`);
     assert.equal(resumed.mode, 'chase', 'Detection is back once the robot is on patrol again');
+  });
+  await check('Returning is not immunity: standing right next to it re-detects it mid-walk', async () => {
+    await reset({ playerX: 3200, robot: { x: 3400, facing: -1, firstEncounter: false } });
+    const escape = await escapeToElevator();
+    assert.equal(escape.mode, 'return', JSON.stringify(escape));
+    const reacquired = await page.evaluate(() => {
+      Body.setPosition(body, { x: guardPatrol.x + 40, y: floorY - 81 }); grounded = true;
+      updateGuardPatrol(1000 / 60);
+      return { mode: guardPatrol.mode, x: guardPatrol.x, playerX: body.position.x };
+    });
+    assert.equal(reacquired.mode, 'chase', `Close range beats the return state: ${JSON.stringify(reacquired)}`);
   });
   await check('A player already waiting at the elevator is chased, not re-spotted every frame', async () => {
     // 1번 엘리베이터 앞에서 359px 떨어진 로봇에게 보이면, 달아나기 전이므로 탈출로 치지 않는다. 엘리베이터
