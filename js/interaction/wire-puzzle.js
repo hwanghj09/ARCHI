@@ -66,6 +66,7 @@ function openWirePanel(onSolved) {
 }
 
 function closeWirePanel() {
+  if (wirePanel.hidden) return;
   wirePanel.hidden = true;
   for (const element of wireBlocked) element.inert = false;
   wireBlocked = [];
@@ -113,9 +114,11 @@ function attemptConnection(leftButton, rightButton) {
   playGameSound('item-use');
   wireStatus.textContent = `${color.label} 전선을 연결했다.`;
   if (wireConnected.size === WIRE_COLORS.length) {
-    wireStatus.textContent = '전선을 모두 다시 연결했다.';
+    // 지연 없이 바로 닫는다 — 잠깐이라도 열어 두면 그 틈에 Esc를 눌러 이 닫기와 타이머로 예약된 닫기가
+    // 겹쳐서(이중 close) 입력이 먹통되는 경합이 생겼었다.
     const solved = wireOnSolved;
-    setTimeout(() => { closeWirePanel(); solved?.(); }, 700);
+    closeWirePanel();
+    solved?.();
   }
   return true;
 }

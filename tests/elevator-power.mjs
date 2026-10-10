@@ -37,14 +37,12 @@ try {
   await walkTo(900); await page.keyboard.press('e');
   assert(await page.locator('#power-panel').isVisible());
   assert(await page.locator('#power-floor-grid button').first().isDisabled());
-  // The post-password wire puzzle is covered in tests/solar-ui.mjs; this test is about elevator
-  // power, not wiring, so pre-fix it and keep the correct code going straight to power-on.
+  assert.equal(await page.evaluate(() => elevatorHasPower()), false);
+  // The password and its post-success wire puzzle are covered in tests/solar-ui.mjs; this test is
+  // about elevator power, so pre-fix the wiring and let the real lever alone turn power on.
   await page.evaluate(() => collectedItems.add('roof-wires-fixed'));
   // Keyboard operation of the real lever restores transport without selecting a lighting floor.
   await page.locator('#power-lever').focus(); await page.keyboard.press('Enter');
-  assert(await page.locator('#keypad').isVisible());
-  assert.equal(await page.evaluate(() => elevatorHasPower()), false);
-  await page.locator('#keypad-input').fill('1997'); await page.keyboard.press('Enter');
   assert(await page.evaluate(() => solarEnabled && !solarPoweredFloors.length && elevatorHasPower()));
   assert.match(await page.locator('#power-help').textContent(), /엘리베이터 운행 복구/);
   await page.keyboard.press('Escape'); await walkTo(200); await page.keyboard.press('e');
@@ -89,8 +87,8 @@ try {
   await page.locator('#cabin-exit').click(); await finishSceneTransition(page);
   await page.setViewportSize({ width: 390, height: 844 });
   await page.evaluate(() => openPowerPanel());
+  // The wiring is already fixed, so a touch tap on the lever alone restores power (no password).
   await page.locator('#power-lever').tap();
-  await page.locator('#keypad-input').fill('1997'); await page.locator('#keypad-submit').tap();
   assert(await page.evaluate(() => elevatorHasPower()));
   await page.locator('#power-floor-grid [data-floor="12"]').tap();
   assert(await page.evaluate(() => solarPoweredFloors.join() === '12' && elevatorHasPower()));

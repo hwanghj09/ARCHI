@@ -185,9 +185,13 @@ try {
     assert(await page.locator('#power-close').evaluate(el => el === document.activeElement), 'Tab skips disabled floors');
     await page.keyboard.press('Enter');
     assert(await page.locator('#power-panel').isHidden());
+    // The wiring is already fixed (from earlier in this run), so the lever alone turns it back on —
+    // the password is only ever needed once per save.
     await page.keyboard.press('e'); await lever.click();
-    assert(await page.locator('#keypad').isVisible(), 'Every OFF→ON attempt needs a password');
-    await page.locator('#keypad-cancel').click();
+    assert(await page.locator('#keypad').isHidden(), 'Fixed wiring skips the password entirely');
+    assert.deepEqual(await state(), { on: true, floors: [] }, 'The lever alone re-enables power once fixed');
+    await lever.click();
+    assert.deepEqual(await state(), { on: false, floors: [] });
     await page.locator('#power-close').click();
     await page.evaluate(() => performFloorChange('f16'));
     assert.equal(await page.locator('#world').getAttribute('data-powered'), 'false');
