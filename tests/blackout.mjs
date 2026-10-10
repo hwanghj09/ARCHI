@@ -33,6 +33,10 @@ try {
     await page.clock.runFor(34);
     assert.equal((await state()).blackout, false, 'Corridor stays lit until the call position');
     await page.screenshot({ path: `.local/blackout-corridor-lit-${viewport.width}.png` });
+    // 밝은 복도에서는 플래시를 켜도 노란 빛 쐐기를 그림 위에 깔지 않는다(빛 색은 어둠 막이 있을 때만).
+    await page.evaluate(() => { phoneLightOn = true; refreshPhone(); });
+    assert(await page.locator('#flashlight-beam').isHidden(), 'A flashlight in the lit corridor adds no beam tint over the art');
+    await page.evaluate(() => { phoneLightOn = false; refreshPhone(); });
     await page.keyboard.press('Space'); await page.keyboard.down('d');
     await page.clock.runFor(200); await page.keyboard.up('d');
     assert.equal((await state()).blackout, false, 'Only standing in the call range triggers the outage');
@@ -55,14 +59,14 @@ try {
     await page.screenshot({ path: `.local/blackout-elevator-${viewport.width}.png` });
     if (viewport.width === 1280) {
       // 정전 중에는 엘리베이터 문도 배경처럼 어둠 막 아래에 깔리고, 플래시 빛은 문 위에 겹쳐 문 경계에서 끊기지 않는다.
-      const layers = await page.evaluate(() => [doors[0].element, ...['flashlight-beam', 'darkness', 'interaction-hint', 'player']
+      const layers = await page.evaluate(() => [doors[0].element, ...['flashlight-beam', 'darkness', 'player', 'interaction-hint']
         .map(id => document.getElementById(id))].map(el => el.parentElement === world && Number(getComputedStyle(el).zIndex)));
-      assert(layers.every((z, i) => z !== false && (i === 0 || z > layers[i - 1])), `Door < beam < darkness < hint < player in #world: ${layers}`);
+      assert(layers.every((z, i) => z !== false && (i === 0 || z > layers[i - 1])), `Door < beam < darkness < player < hint in #world: ${layers}`);
       const saved = await page.evaluate(() => ({ x: body.position.x, y: body.position.y, cameraX }));
       const place = (x, light) => page.evaluate(([x, light]) => {
         releaseInput(); facing = 1; phoneLightOn = light;
         Body.setPosition(body, { x, y: floorY - 81 }); Body.setVelocity(body, { x: 0, y: 0 });
-        grounded = true; animate(0); refreshPhone(); cameraX = x - 500; render();
+        grounded = true; animate(0); refreshPhone(); cameraX = x - 500; updateInteraction(); render();
         return parseFloat(world.style.getPropertyValue('--beam-y'));
       }, [x, light]);
       const pixel = async (x, y) => {
