@@ -37,6 +37,9 @@ try {
   await walkTo(900); await page.keyboard.press('e');
   assert(await page.locator('#power-panel').isVisible());
   assert(await page.locator('#power-floor-grid button').first().isDisabled());
+  // The post-password wire puzzle is covered in tests/solar-ui.mjs; this test is about elevator
+  // power, not wiring, so pre-fix it and keep the correct code going straight to power-on.
+  await page.evaluate(() => collectedItems.add('roof-wires-fixed'));
   // Keyboard operation of the real lever restores transport without selecting a lighting floor.
   await page.locator('#power-lever').focus(); await page.keyboard.press('Enter');
   assert(await page.locator('#keypad').isVisible());

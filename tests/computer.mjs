@@ -216,6 +216,9 @@ try {
   await assertBlocked('Outage');
   await powerPage.screenshot({ path: '.local/computer-no-power.png' });
 
+  // The post-password wire puzzle is covered in tests/solar-ui.mjs; pre-fix it here so the correct
+  // code goes straight to power-on, which is what this computer-power test actually cares about.
+  await powerPage.evaluate(() => collectedItems.add('roof-wires-fixed'));
   await powerPage.evaluate(() => { openPowerPanel(); powerLever.click(); });
   await powerPage.locator('#keypad-input').fill('1997');
   await powerPage.keyboard.press('Enter');

@@ -98,8 +98,20 @@ try {
     await lever.click();
     assert.equal(await page.locator('#keypad-input').inputValue(), '', 'Retry clears the previous code');
     await page.locator('#keypad-input').fill('1997'); await page.keyboard.press('Enter');
+    assert(await page.locator('#wire-panel').isVisible(), 'The first success blows the wiring instead of turning power on');
+    assert.deepEqual(await state(), { on: false, floors: [] }, 'Power stays off until the wires are reconnected');
+    // 색만 보고 고르는 퍼즐이라 왼쪽 전선마다 같은 색 오른쪽 단자를 찾아 순서대로 클릭한다(순서는 상관없다).
+    // element.click()은 detail: 0인 클릭을 내보내 코드의 키보드 선택 경로(마우스 드래그와 겹치지 않는 쪽)를 탄다.
+    await page.evaluate(() => {
+      for (const left of document.querySelectorAll('#wire-left button')) {
+        left.click();
+        document.querySelector(`#wire-right button[data-color="${left.dataset.color}"]`).click();
+      }
+    });
+    await page.waitForSelector('#wire-panel', { state: 'hidden' });
+    assert(await page.evaluate(() => collectedItems.has('roof-wires-fixed')), 'Solving the wires is remembered');
     assert(await page.locator('#power-panel').isVisible());
-    assert.deepEqual(await state(), { on: true, floors: [] }, 'Only 1997 enables selection without choosing a floor');
+    assert.deepEqual(await state(), { on: true, floors: [] }, 'Fixed wiring then enables selection without choosing a floor');
     assert(await floor(17).isEnabled());
     assert.equal(await page.locator('.solar-supply').getAttribute('data-active'), 'true');
     assert(await page.locator('.power-art img').evaluate(img => Math.abs(new DOMMatrix(getComputedStyle(img).transform).m41 + img.clientWidth / 2) < 1));

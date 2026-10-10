@@ -42,8 +42,23 @@ function submitKeypad() {
   }
   if (target.type !== 'power') playGameSound(INVENTORY_ITEMS[target.gives] ? 'item-get' : 'item-use');
   if (target.type === 'power') {
-    setSolarPower(true);
-    closeKeypad();
+    if (collectedItems.has('roof-wires-fixed')) {
+      setSolarPower(true);
+      closeKeypad();
+    } else {
+      // 비밀번호는 맞았지만 레버를 당기자마자 과부하로 전선이 끊어진다 — 첫 성공 때만 전선 퍼즐을 풀어야 실제로 켜진다.
+      // keypadTarget을 먼저 비워서 closeKeypad()가 전력 패널로 돌아가지 않게 한다 — 전력 패널이 전선 패널 밑에
+      // 열린 채로 남아 있으면(둘 다 '열린 모달'로 겹침) 이 게임의 입력 라우팅이 한 번에 모달 하나만 가정하고
+      // 있어서 전선 패널 쪽 클릭·드래그가 안 먹는다. 전선 패널을 닫을 때(closeWirePanel) 전력 패널로 돌아간다.
+      keypadTarget = null;
+      closeKeypad();
+      showStatus('비밀번호는 맞았다. 그런데 레버를 당기자마자 과부하로 제어반 안의 전선 다발이 끊어져 나간다.', 4200);
+      openWirePanel(() => {
+        collectedItems.add('roof-wires-fixed');
+        setSolarPower(true);
+        showStatus('전선을 다시 연결했다. 태양광 비상 전력이 켜진다.', 4200);
+      });
+    }
   } else if (target.type === 'room') {
     // 맞는 번호를 누르면 그 자리에서 문이 열린다. 다음에 층을 그릴 때는 unlockedBy를 챙긴 것으로 열린 채 그린다.
     collectedItems.add(target.unlockedBy);

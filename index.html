@@ -12,6 +12,7 @@
     <link rel="stylesheet" href="access.css" />
     <link rel="stylesheet" href="opening.css" />
     <link rel="stylesheet" href="power.css" />
+    <link rel="stylesheet" href="wire-puzzle.css" />
     <link rel="stylesheet" href="guard-patrol.css" />
     <link rel="stylesheet" href="phone.css" />
     <link rel="stylesheet" href="sanity.css" />
@@ -991,6 +992,7 @@
     <script src="js/interaction/puzzles.js" defer></script>
     <script src="js/interaction/cctv.js" defer></script>
     <script src="js/interaction/keypad.js" defer></script>
+    <script src="js/interaction/wire-puzzle.js" defer></script>
     <script src="js/interaction/outline.js" defer></script>
     <script src="js/interaction/interaction.js" defer></script>
     <script src="js/interaction/phone.js" defer></script>
@@ -1209,6 +1211,19 @@
         <p id="power-note">B1 · B2 지하층은 별도 비상 발전기로 이미 전력 공급 중</p>
         <p id="power-help">① 레버 승인 · 엘리베이터 운행 복구<br />② 조명 공급층 선택 · 한 번에 한 층</p>
         <button id="power-close" type="button">닫기 · Esc</button>
+      </div>
+    </section>
+    <section id="wire-panel" role="dialog" aria-modal="true" aria-labelledby="wire-title" aria-describedby="wire-help" hidden>
+      <div class="wire-box">
+        <h2 id="wire-title">배전반 내부 — 끊어진 전선</h2>
+        <p id="wire-help">비밀번호는 맞았지만 과부하로 전선 다발이 끊어졌다. 왼쪽 전선을 당겨서 같은 색 오른쪽 단자에 연결하자.</p>
+        <div id="wire-board">
+          <svg id="wire-svg" aria-hidden="true"></svg>
+          <div id="wire-left" class="wire-column" aria-label="왼쪽 전선 끝"></div>
+          <div id="wire-right" class="wire-column" aria-label="오른쪽 단자"></div>
+        </div>
+        <p id="wire-status" role="status" aria-live="polite"></p>
+        <button id="wire-cancel" type="button">나중에 · Esc</button>
       </div>
     </section>
     <section id="inspection" class="device-dialog" role="dialog" aria-modal="true" aria-labelledby="inspection-title" aria-describedby="inspection-description" hidden>
