@@ -138,7 +138,7 @@ function interact() {
     // 글이 적힌 소품은 지금 보이는 문구에 맞는 표면을 펼친다(message는 소품, takenMessage·missingMessage는 그 sheet).
     openInspection(nearbyDoor.name, inspectionMessage, writingSheetFor(nearbyDoor, inspectionMessage));
     if (missing) return;
-    if (!unreadable) recordClue(nearbyDoor);
+    if (!unreadable) { recordClue(nearbyDoor); noteObjectiveRead(nearbyDoor); }
     const alreadyCollected = gives && collectedItems.has(gives);
     if (gives) {
       collectedItems.add(gives);

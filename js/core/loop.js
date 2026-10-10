@@ -85,6 +85,7 @@ function frame(time) {
       accumulator -= step;
     }
     render();
+    refreshObjective();
   }
   previousTime = document.hidden ? null : time;
   requestAnimationFrame(frame);

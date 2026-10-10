@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="computer.css" />
     <link rel="stylesheet" href="writing.css" />
     <link rel="stylesheet" href="inventory.css" />
+    <link rel="stylesheet" href="objective.css" />
     <link rel="stylesheet" href="access.css" />
     <link rel="stylesheet" href="opening.css" />
     <link rel="stylesheet" href="power.css" />
@@ -915,6 +916,7 @@
     <script src="js/interaction/power.js" defer></script>
     <script src="js/interaction/inspection.js" defer></script>
     <script src="js/interaction/inventory.js" defer></script>
+    <script src="js/ui/objective.js" defer></script>
     <script src="js/ui/device-apps.js" defer></script>
     <script src="js/computer/documents.js" defer></script>
     <script src="js/computer/computer.js" defer></script>
@@ -1150,6 +1152,11 @@
     </section>
     <button id="game-menu-button" type="button">메뉴 · Esc</button>
     <button id="inventory-button" type="button" aria-controls="inspection" aria-expanded="false">가방 · I</button>
+    <section id="objective" aria-labelledby="objective-heading" aria-live="polite">
+      <h2 id="objective-heading">목표</h2>
+      <strong id="objective-title"></strong>
+      <p id="objective-text"></p>
+    </section>
     <form id="debug-floor" aria-label="테스트용 층 이동">
       <label for="debug-floor-select">TEST 층 이동</label>
       <select id="debug-floor-select"></select>
