@@ -164,9 +164,8 @@ try {
     await restroomProps.evaluateAll(images => Promise.all(images.map(image => image.decode())));
     const exit = await exitDoor(page);
     assert.deepEqual([exit.y, exit.width], [210, front.door.width], 'Restroom exit is the same door');
-    if (short === '1F') assert.equal(exit.x, 334, 'The lobby restroom uses its authored exit offset');
-    else if (short === '12F') assert.equal(exit.x, 185, 'The shared restroom background keeps its exit clear of the sinks');
-    else assertMirroredDoor(front.room, front.door, 1800, exit, `${short} restroom`);
+    assert.equal(exit.x, 185, 'The shared restroom background keeps its exit clear of the sinks');
+    assert(await page.locator('#dynamic-scene .room-door.restroom-exit').isVisible(), 'The interior exit is visible even if the corridor door is part of its background');
     await page.clock.runFor(100);
     await walkTo(exit.x + exit.width / 2);
     assert.equal(await hint(), 'E · 복도로 나가기');

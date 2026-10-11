@@ -25,8 +25,6 @@ const FLOOR1_LAYOUT = {
   // 기본 CSS 금속문(.metal)이 겹쳐 그려지지 않게 한다.
   // doorOutline(방 문)·outline(설비): 판정은 그대로 두고 근접 테두리만 corridor.png 속 문·사물 상자에 맞춘다(실측).
   restroomOverride: { doorX: 3733, doorWidth: 158, doorStyle: 'art-door', doorOutline: [3727, 292, 171, 266] },
-  // 자동 계산되는 화장실 출구 스폰 위치(524)에서 실측 기준 총 190px 왼쪽으로.
-  restroomExitX: 334,
   rooms: [
     // 문 좌표는 설계값이 아니라 assets/background/floor1/corridor.png(실제 그림)에서 육안 실측한 값이다.
     // GENERATED.md의 "문 좌표 보정" 절 참고.

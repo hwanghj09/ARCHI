@@ -19,6 +19,11 @@ Create ONE new game background, a right-side extension of this Korean office cor
 
 ## 화장실 최종 프롬프트
 
+공통 화장실 내부 출구는 `restroomInterior`의 `exitX: 185`, `exitStyle: 'restroom-exit'`로 정한다.
+모든 층(B2~17F)이 같은 배경을 사용하므로, 복도 그림에 맞춘 문 위치나 `art-door` 숨김 스타일은 내부에
+전파하지 않는다. 문 그림은 `assets/objects/floor16/restroom-door.png`를 재사용하고, 문 크기와 복귀 위치는
+각 층 복도 문을 따른다. `tests/restrooms.mjs`가 19개 층의 출입·문 표시·설비 간격과 모바일 조작을 검증한다.
+
 ```text
 Create one new ARCHI game background for an enterable office restroom, reference image STYLE ONLY. Detailed crisp muted anime-inspired PIXEL ART matching dark blue gray Korean office night atmosphere. WIDE horizontal canvas 1800x720 (2.5:1). Flat orthographic front elevation for 2D side-scroller, no vanishing point. Straight walk contact baseline at y570/720 (79.17%), below is dark solid floor cutaway. Leftmost wall x0..300 is blank tile reserved for game-rendered EXIT door (DO NOT DRAW a door there). Rest of wall: three porcelain washbasins below a long mirror x420..850, soap dispensers, paper towel dispenser; two toilet stalls x1030..1580 with modest partitions and one open stall clearly revealing a white toilet; small wall waste bin at far right. Clean slightly worn gray-green rectangular wall tiles, muted overhead fluorescent illumination, pipe vents at ceiling, dark nonreflective floor cross-section below y570. Fixtures stay against back wall above the walkway, empty foreground for moving player. Realistic fixture proportions matching reference doors scale (door ~320px high). No people, no blood, no labels, no UI, no border, no watermark, no exterior windows, no perspective corridor. Bathroom interior visible in one continuous side elevation.
 ```

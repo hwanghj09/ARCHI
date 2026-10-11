@@ -119,7 +119,7 @@ function buildDynamicScene(config) {
     backdrop.className = ['room-interior', config.windowless && 'windowless', config.interiorStyle].filter(Boolean).join(' ');
     // 방 벽 그림은 상자·계단식 좌석·장애물보다 뒤에 깐다(바닥과 끝벽보다는 앞). 그래야 넘어갈 것이 보인다.
     dynamicScene.insertBefore(backdrop, dynamicScene.querySelector('.solid:not(.floor):not(.boundary), .barrier'));
-    // 출구는 복도에서 들어온 그 문이다: 크기와 모양이 같고, 위치는 문 양옆 벽 비율을 따른다.
+    // 출구는 복도 문 크기·모양·벽 비율을 따른다. 공통 내부 그림은 exitX/exitStyle로 그림에 맞춘다.
     const parent = floorById.get(config.parent);
     // inner 방(inner: true)은 복도 쪽 전면이 없어 출구도 없고, 옆방과의 연결문(links)으로만 드나든다.
     const outside = parent.rooms.find(entry => entry.target === config.id);
@@ -130,7 +130,7 @@ function buildDynamicScene(config) {
       const lock = config.exitLock;
       doorList.push(addRoomDoor({ name: '복도', type: 'room', hint: 'E · 복도로 나가기', target: config.parent,
         arrivalKey: `room:${config.id}`, key: 'exit', x: config.exitX ?? exitDoorX(outside, config.width, doorWidth),
-        y: outside.doorY ?? parent.roomDoorY ?? 250, width: doorWidth, style: outside.doorStyle, sprite: outside.doorSprite,
+        y: outside.doorY ?? parent.roomDoorY ?? 250, width: doorWidth, style: config.exitStyle ?? outside.doorStyle, sprite: outside.doorSprite,
         unlocked: collectedItems.has(outside.unlockedBy), raiseMessage: outside.raiseMessage,
         locked: Boolean(lock) && !collectedItems.has(lock.until), lockedUntil: lock?.until, message: lock?.message,
         surface: lock?.surface, look: lock?.look, writing: lock?.writing, caption: lock?.caption, image: lock?.image,

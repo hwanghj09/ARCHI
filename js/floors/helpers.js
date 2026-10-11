@@ -11,7 +11,8 @@ const interiorRooms = (floor, rooms) => rooms.map(entry => ({ ...entry, floor, i
 // 거울은 판정을 가운데 세면대 앞에 두고 테두리(outline)만 거울 전체에 맞추고, 화장실 칸은 문이 열린 첫 칸이다
 // (판정은 변기 앞, 테두리는 칸 전체. 칸 앞의 미끄럼 주의 표지와 판정이 겹치지 않게 오른쪽으로 비켜 둔다).
 // 비상 호출 버튼은 닫힌 칸 문의 표시등 패널이다.
-const restroomInterior = { name: '화장실', width: 1800, windowless: true,
+// 복도에 그려진 문 위치·숨김 스타일은 공통 내부 배경의 출구에 적용하지 않는다.
+const restroomInterior = { name: '화장실', width: 1800, windowless: true, exitX: 185, exitStyle: 'restroom-exit',
   backgroundImage: { src: 'assets/background/floor17/restroom.png', height: 824.84, top: 0 },
   fixtures: [
     { name: '세면대 거울', x: 520, y: 250, width: 260, height: 180, outline: [411, 216, 503, 183],

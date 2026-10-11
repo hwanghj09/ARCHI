@@ -15,8 +15,6 @@ const FLOOR12_LAYOUT = {
   stairsOffset: -125,
   // 복도 그림 속 화장실 벽감(x≈3688~3805)에 맞춘다. metal 스타일에 공용 화장실 문 그림을 입힌다.
   restroomOverride: { doorX: 3688, doorWidth: 117 },
-  // 공통 화장실 배경의 출구용 빈 벽에 둔다. 복도 문 보정값을 그대로 비례 계산하면 거울·세면대를 가린다.
-  restroomExitX: 185,
   rooms: [
     // 문 좌표는 CSS 임시 그림이 아니라 assets/background/floor12/corridor.png(실제 손그림)에서 육안 실측한 값이다.
     // GENERATED.md의 "문 좌표 보정(2026-09-28)" 절 참고 — 그림 속 문 위치가 애초 설계 좌표와 상당히 달랐다.

@@ -26,10 +26,7 @@ const FLOORS = FLOOR_NUMBERS.map(floor => {
     rooms: [...(layout.rooms || []), { name: '화장실', target: `${floorId(floor)}-restroom`, ...BUILDING_CORE.restroom, ...(layout.restroomOverride || {}) }],
     width: BUILDING_CORE.width };
 });
-// restroomExitX: 층 레이아웃에 있으면, 자동 계산되는 화장실 출구 스폰 위치를 그 값으로 덮어쓴다
-// (다른 층은 그대로 자동 계산).
-const RESTROOMS = FLOOR_NUMBERS.flatMap(floor => interiorRooms(floor, [{ id: `${floorId(floor)}-restroom`, ...restroomInterior,
-  ...(FLOOR_LAYOUTS[floor]?.restroomExitX !== undefined ? { exitX: FLOOR_LAYOUTS[floor].restroomExitX } : {}) }]));
+const RESTROOMS = FLOOR_NUMBERS.flatMap(floor => interiorRooms(floor, [{ id: `${floorId(floor)}-restroom`, ...restroomInterior }]));
 const ALL_FLOORS = [FLOOR17, ...FLOORS];
 const ROOFTOP = { id: 'rooftop', floor: 18, label: '옥상', header: 'RF · 옥상', aria: '옥상', width: 2400, background: '#11191d',
   fixtures: [

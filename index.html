@@ -436,6 +436,7 @@
          모습으로 그려져 있으니 CSS 문(기본 door 배경 포함)은 항상 완전히 숨긴다. .metal처럼 art 모드에서도
          다시 그려지는 스타일과 달리, 그림이 있는 층에서 화장실 문 같은 공용 문에 겹쳐 그려지는 걸 막는다. */
       #dynamic-scene .room-door.art-door { border: 0; background: none; box-shadow: none; }
+      #dynamic-scene .room-door.restroom-exit { border: 0; box-shadow: none; background: #131618 url('assets/objects/floor16/restroom-door.png') 0 0 / 100% 100% no-repeat; image-rendering: pixelated; }
       #dynamic-scene[data-theme="lab"] .room-door.metal { border: 0; box-shadow: none; background: #131618 url('assets/objects/floor16/restroom-door.png') 0 0 / 100% 100% no-repeat; image-rendering: pixelated; }
       #dynamic-scene[data-art="true"] .floor-number-sign { top: 282px; }
       #dynamic-scene[data-art="true"] .floor-prop img { filter: brightness(.68) saturate(.8); }
