@@ -50,6 +50,9 @@
         mask-composite: intersect, intersect, intersect, add;
       }
       #flashlight-beam { display: none; position: absolute; z-index: 3; left: var(--beam-x); top: calc(var(--beam-y) - 170px); width: 390px; height: 340px; transform: scaleX(var(--beam-facing)); transform-origin: 0 50%; clip-path: polygon(0 50%, 100% 0, 100% 100%); background: linear-gradient(90deg, #fff4bb24, #fff4bb00); pointer-events: none; }
+      /* 작은 광원은 밝은 곳에서도 켜짐을 알아볼 수 있도록 수호 위에 표시한다. */
+      #flashlight-glow { display: none; position: absolute; z-index: 7; left: var(--beam-x); top: var(--beam-y); width: 32px; height: 32px; transform: translate(-50%, -50%); border-radius: 50%; background: radial-gradient(circle, #fff 0 3px, #fff5cce6 4px, #ffe99b70 8px, #ffe99b00 16px); pointer-events: none; }
+      #world[data-flashlight="on"]:not([data-opening], [data-blackout-scene]) #flashlight-glow { display: block; }
       /* 빛 색은 어둠 막이 보일 때만 깐다. 빛(3)은 배경 위에 있어서 밝은 장면에서 켜면 노란 쐐기가 그대로 드러나므로,
          조건은 #darkness를 보이게·숨기게 하는 규칙(정전, 17층 소등, 어두운 방 / 오프닝, 방 조명)과 맞추고 정전 컷씬(blackout.css)도 뺀다. */
       #world[data-flashlight="on"]:is([data-blackout="true"], [data-lights="off"][data-floor="17"], [data-dark="true"][data-room="dynamic"]):not([data-opening], [data-blackout-scene], [data-local-light="true"][data-room="dynamic"]) #flashlight-beam { display: block; }
@@ -1036,6 +1039,7 @@
       <div id="world" data-room="office" data-floor="17" data-lights="on" data-opening="loading">
         <div id="darkness" aria-hidden="true"></div>
         <div id="flashlight-beam" aria-hidden="true"></div>
+        <div id="flashlight-glow" aria-hidden="true"></div>
         <div id="background" aria-hidden="true"></div>
         <div id="floor17-extension">
           <img src="assets/background/floor17/service-corridor.png" alt="" draggable="false" />
@@ -1070,7 +1074,7 @@
         <button type="button" data-direction="1" aria-label="오른쪽 이동" title="오른쪽 이동 (D / →)">→</button>
         <button id="interact" type="button" aria-label="상호작용" title="상호작용 (E)">E</button>
         <button id="jump" type="button" aria-label="점프" title="점프 (Space / W / ↑)">↑</button>
-        <button id="phone-button" type="button" aria-label="휴대폰" title="휴대폰 (P)">▣</button>
+        <button id="phone-button" type="button" aria-label="휴대폰" title="휴대폰 (P)">▣<span id="phone-flash-state" aria-hidden="true">플래시 꺼짐</span></button>
       </nav>
       <div id="interaction-status" role="status" aria-live="polite"></div>
     </main>

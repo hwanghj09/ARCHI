@@ -108,9 +108,13 @@ function refreshPhone() {
   document.getElementById('phone-help').textContent = percent === 0 ? '배터리가 소진되었습니다. 전력이 공급되는 충전함 앞에서 E로 휴대폰을 맡기세요.' :
     phoneLightOn ? '앞을 비추고 있습니다. 화면을 닫고 이동하세요.' : '플래시를 켜면 앞을 비추며 걸을 수 있습니다.';
   world.dataset.flashlight = phoneLightOn && itemUseTime <= 0 ? 'on' : 'off';
+  phoneButton.dataset.flashlight = phoneLightOn ? 'on' : 'off';
+  const flashState = `플래시 ${phoneLightOn ? '켜짐' : '꺼짐'}`;
+  document.getElementById('phone-flash-state').textContent = flashState;
+  document.getElementById('phone-flash-state').hidden = Boolean(phoneDock);
   phoneButton.dataset.docked = String(Boolean(phoneDock));
   phoneButton.dataset.charge = phoneDock ? `${phoneDockLocation()} · ${percent}% · ${phoneChargeState()}` : '';
-  phoneButton.setAttribute('aria-label', phoneDock ? `${phoneButton.dataset.charge} · 충전함에서 휴대폰 가져오기` : '휴대폰 열기');
+  phoneButton.setAttribute('aria-label', phoneDock ? `${phoneButton.dataset.charge} · 충전함에서 휴대폰 가져오기` : `휴대폰 열기 · ${flashState}`);
   refreshPhoneChargers();
   if (typeof refreshSolarApp === 'function') refreshSolarApp();
 }

@@ -69,5 +69,9 @@
 #world:not([data-room="corridor"]) > .phone-charger[data-fixed] { display: none; }
 .phone-charger[data-powered="false"]::before { background: #111719; border-color: #566260; }
 .phone-charger .docked-phone { position: absolute; left: 50%; top: 7px; width: 22px; height: 44px; transform: translateX(-50%); image-rendering: pixelated; }
+#phone-button { position: relative; }
+#phone-flash-state { position: absolute; right: 0; bottom: calc(100% + 6px); padding: 4px 6px; border: 1px solid #6b6d70; border-radius: 4px; background: #252629; color: #c9cdd1; font: 11px/1.4 Arial, sans-serif; white-space: nowrap; pointer-events: none; }
+#phone-button[data-flashlight="on"] { border-color: #ffe99b; color: #ffe99b; }
+#phone-button[data-flashlight="on"] #phone-flash-state { border-color: #ffe99b; background: #fff5cc; color: #30260b; }
 #phone-button[data-docked="true"] { color: #879292; }
 #phone-button[data-docked="true"]::after { content: attr(data-charge); position: fixed; right: max(24px, env(safe-area-inset-right)); bottom: 88px; max-width: calc(100vw - 48px); padding: 6px 9px; border: 1px solid #758a78; background: #101c20ed; color: #dbe5d8; font: 11px/1.5 Arial, sans-serif; pointer-events: none; }
