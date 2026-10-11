@@ -113,7 +113,7 @@ try {
   // 진행도는 자동 저장으로 이어진다.
   await page.evaluate(() => saveProgress());
   await page.reload();
-  await page.locator('#menu-start').click();
+  await page.locator('#menu-continue').click();
   await page.waitForTimeout(200);
   assert.equal(await page.evaluate(() => currentObjective?.title), 'ARCHI 멈추기');
   assert.deepEqual(errors, []);

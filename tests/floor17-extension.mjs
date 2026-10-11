@@ -30,7 +30,7 @@ try {
     await page.keyboard.up(key);
     await page.clock.runFor(100);
     if (!wasDark && await page.evaluate(() => buildingBlackout || blackoutSceneActive)) {
-      if (await page.locator('#blackout-scene').isVisible()) await page.clock.runFor(8500);
+      if (await page.locator('#blackout-scene').isVisible()) await page.clock.runFor(5000);
       await walkTo(x);
     }
   };

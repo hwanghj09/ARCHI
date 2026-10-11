@@ -52,10 +52,7 @@ function updateOpening(elapsed) {
       showIdleFrame(0);
       sprite.dataset.state = 'idle';
       sprite.dataset.frame = '0';
-      openingCaption.textContent = '종료했는데… ‘외부 연결 시도’라고?';
-      if (!collectedItems.has('first-night-monitor')) {
-        startFirstNightCue('monitor', 2600, '종료한 모니터에 ARCHK의 ‘외부 연결 시도’가 떠올랐다.', 'night-static', 656);
-      }
+      openingCaption.textContent = '늦었네. 이제 퇴근하자.';
     }
   }
   // Step away from the background chair into the gameplay floor plane while rising,
@@ -80,7 +77,7 @@ function finishOpening() {
   updateInteraction();
   render();
   stage.focus({ preventScroll: true });
-  showStatus('마지막 모니터를 껐다. 복도로 나가자.', 3000);
+  showStatus('퇴근할 시간이다. 복도로 나가자.', 3000);
 }
 
 document.getElementById('opening-skip').addEventListener('click', finishOpening);

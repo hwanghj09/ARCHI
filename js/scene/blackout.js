@@ -13,10 +13,6 @@ function startBlackoutScene(door) {
   blackoutElapsed = 0;
   blackoutStartX = body.position.x;
   blackoutCallX = door.x + door.width - 18;
-  const terminal = document.getElementById('blackout-terminal');
-  terminal.style.left = `${door.x + door.width / 2}px`;
-  terminal.style.top = `${door.y - 32}px`;
-  clearFirstNightCue();
   blackoutScene.hidden = false;
   blackoutBlocked = [...document.body.children].filter(el => el !== blackoutScene && el.tagName !== 'SCRIPT' && !el.inert);
   for (const el of blackoutBlocked) el.inert = true;
@@ -34,16 +30,13 @@ function startBlackoutScene(door) {
 
 function updateBlackoutScene(elapsed) {
   blackoutElapsed += elapsed;
-  if (blackoutElapsed >= 8200) return finishBlackoutScene();
+  if (blackoutElapsed >= 4800) return finishBlackoutScene();
   const time = blackoutElapsed;
-  const phase = time < 1000 ? 'approach' : time < 2900 ? 'reach' : time < 4800 ? 'shock' : time < 6300 ? 'listen' : 'identified';
+  const phase = time < 1000 ? 'approach' : time < 2900 ? 'reach' : 'shock';
   if (world.dataset.blackoutScene !== phase) {
     world.dataset.blackoutScene = phase;
     blackoutCaption.textContent = phase === 'approach' ? '엘리베이터만 타면…' :
-      phase === 'reach' ? '호출 버튼에서 응답이 없다.' : phase === 'shock' ? '환풍기 소리까지 끊겼다.' :
-      phase === 'listen' ? '엘리베이터 잠금장치가 차례로 작동했다. 호출을 받아들이지 않는다.' : '표시등에 내 이름이 떴다. 건물이 내 위치를 알고 있다.';
-    if (phase === 'listen') playGameSound('night-lock', { pan: .6 });
-    if (phase === 'identified') playGameSound('night-static');
+      phase === 'reach' ? '호출 버튼에 손을 뻗었다.' : '…뭐야?! 불이 왜…';
   }
   const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
   const dim = !reducedMotion && ((time >= 1500 && time < 1780) || (time >= 2250 && time < 2560));
@@ -68,7 +61,7 @@ function updateBlackoutScene(elapsed) {
     sprite.dataset.frame = phase === 'reach' ? String(frame) : '0';
     blackoutCallSheet.style.transform = `translateX(${-frame * 50}%)`;
     caughtSheet.style.transform = 'translateX(0)';
-    if (phase !== 'reach') x -= 24 * Math.min(1, (time - 2900) / 320);
+    if (phase === 'shock') x -= 24 * Math.min(1, (time - 2900) / 320);
   }
   Body.setPosition(body, { x, y: floorY - 81 });
   cameraX += (cameraTarget() - cameraX) * .13;
@@ -82,8 +75,6 @@ function finishBlackoutScene() {
   blackoutScene.hidden = true;
   delete world.dataset.blackoutScene;
   delete world.dataset.powerFlicker;
-  stopGameSound('night-lock');
-  stopGameSound('night-static');
   refreshBackgroundPower();
   for (const el of blackoutBlocked) el.inert = false;
   blackoutBlocked = [];

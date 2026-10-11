@@ -50,8 +50,7 @@ try {
   const buffers = await page.evaluate(() => {
     const names = ['step', 'door', 'elevator-door', 'elevator-arrive', 'elevator-alarm', 'blackout',
       'robot-servo', 'robot-alert', 'robot-grab', 'phone', 'charger', 'pickup', 'item-get', 'item-use', 'deny', 'shutter',
-      'switch', 'ui', 'call-ring', 'office', 'dark', 'wind', 'motor', 'night-room', 'night-static',
-      'night-latch', 'night-relay', 'night-track', 'night-lock'];
+      'switch', 'ui', 'call-ring', 'office', 'dark', 'wind', 'motor'];
     return names.map(name => {
       const buffer = gameAudioBuffer(name);
       const samples = buffer.getChannelData(0);
@@ -61,7 +60,7 @@ try {
         finite &&= Number.isFinite(sample); peak = Math.max(peak, Math.abs(sample)); energy += sample * sample;
         if (i && (samples[i - 1] < 0) !== (sample < 0)) crossings++;
       }
-      const loop = ['office', 'dark', 'wind', 'motor', 'night-room'].includes(name);
+      const loop = ['office', 'dark', 'wind', 'motor'].includes(name);
       return { name, finite, peak, rms: Math.sqrt(energy / samples.length), cached: buffer === gameAudioBuffer(name),
         duration: buffer.duration, crossRate: crossings / 2 / buffer.duration,
         seam: loop ? Math.abs(samples.at(-1) - samples[Math.round(buffer.sampleRate * .1)]) : null };

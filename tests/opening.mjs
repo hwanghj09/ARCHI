@@ -102,7 +102,7 @@ try {
   assert.equal(standing.phase, 'standing'); assert.equal(standing.power, 'off'); assert.equal(standing.facing, 1);
   assert(Math.abs(standing.x - 656) < 1 && Math.abs(standing.feet - 570) < 1, 'He stands where gameplay starts');
   assert(await chair.isHidden());
-  assert.equal(await page.locator('#opening-caption').textContent(), '종료했는데… ‘외부 연결 시도’라고?');
+  assert.equal(await page.locator('#opening-caption').textContent(), '늦었네. 이제 퇴근하자.');
   const standingPose = await pose();
   assert.deepEqual([standingPose.state, standingPose.frame, standingPose.visible], ['idle', '0', 'idle-sprite'],
     'Standing uses the idle sprite, not the walking cell of the opening sheet');

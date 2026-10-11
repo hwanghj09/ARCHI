@@ -59,7 +59,7 @@ try {
   await page.screenshot({ path: '.local/blackout-startled.png' });
   await page.setViewportSize({ width: 390, height: 844 });
   await page.screenshot({ path: '.local/blackout-startled-mobile.png' });
-  await advance(8300);
+  await advance(4900);
   assert.equal((await state()).active, false); assert.equal((await state()).inert, false);
   assert.equal((await state()).lights, 'off'); assert(await page.locator('#blackout-scene').isHidden());
   await page.keyboard.press('e'); assert.equal((await state()).called, false);
@@ -68,12 +68,11 @@ try {
   await page.evaluate(() => { solarPoweredFloors = [17]; updatePowerState(); updateInteraction(); });
   assert.equal((await state()).active, false); assert.equal((await state()).lights, 'on');
   // Skip each stage on different cars and approach directions; it must always finish in darkness.
-  for (const [index, side, time] of [[0, -1, 200], [1, 1, 1600], [2, -1, 3200], [0, -1, 5000], [1, 1, 6600]]) {
+  for (const [index, side, time] of [[0, -1, 200], [1, 1, 1600], [2, -1, 3200]]) {
     await reset(index, side); await advance(time);
     await page.locator('#blackout-skip').tap();
     assert.equal((await state()).active, false); assert.equal((await state()).blackout, true);
     assert.equal((await state()).inert, false); assert.equal((await state()).lights, 'off');
-    assert(await page.locator('#blackout-terminal').isHidden(), 'Skipping also clears the name signal');
   }
   await reset(); await page.keyboard.press('Escape'); assert.equal((await state()).active, false);
   await reset(); await page.evaluate(() => performFloorChange('f16'));
