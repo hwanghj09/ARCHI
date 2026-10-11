@@ -74,7 +74,7 @@ try {
   await finishSceneTransition(page);
   for (const viewport of [{ width: 1280, height: 720 }, { width: 390, height: 844 }, { width: 568, height: 320 }]) {
     await page.setViewportSize(viewport);
-    for (const name of apps.slice(0, 5)) {
+    for (const name of ['files', 'notes', 'calculator']) {
       const shortcut = pc.locator(`.computer-shortcuts [data-computer-app="${name}"]`);
       await shortcut.tap();
       assert(await pc.locator(`#computer-${name}`).isVisible(), `Painted ${name} shortcut still opens its app`);

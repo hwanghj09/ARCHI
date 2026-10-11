@@ -196,7 +196,6 @@ function startNewGame() {
   phoneNote.value = ''; savedPhoneNote = '';
   phoneNoteStatus.textContent = '필요한 단서를 적고 저장하세요.';
   showPhoneNoteTab('memo');
-  computerMailRead.clear(); showComputerMailInbox();
   openingActive = true;
   openingElapsed = 0; openingReady = false;
   world.dataset.opening = 'loading';

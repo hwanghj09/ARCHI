@@ -1,10 +1,17 @@
 .app-art { display: inline-block; width: 28px; height: 28px; flex-shrink: 0; background: url('../assets/ui/apps/app-icons.png') 0% 49% / 600% 200% no-repeat; image-rendering: pixelated; pointer-events: none; }
 .phone-app-icon.app-art { width: 44px; height: 44px; }
 .app-art[data-app-icon="notes"] { background-position-x: 20%; }
-.app-art[data-app-icon="mail"] { background-position-x: 40%; }
 .app-art[data-app-icon="calculator"] { background-position-x: 60%; }
 .app-art[data-app-icon="building"] { background-position-x: 80%; }
 .app-art[data-app-icon="flashlight"] { background-position-x: 100%; }
+/* 컴퓨터 전용 앱은 같은 둥근 타일 형태의 픽셀 SVG를 쓴다. */
+.app-art:is([data-app-icon="terminal"], [data-app-icon="paint"], [data-app-icon="minesweeper"], [data-app-icon="snake"], [data-app-icon="browser"], [data-app-icon="transfer"]) { background-position: center; background-size: contain; }
+.app-art[data-app-icon="terminal"] { background-image: url('../assets/ui/apps/terminal.svg'); }
+.app-art[data-app-icon="paint"] { background-image: url('../assets/ui/apps/paint.svg'); }
+.app-art[data-app-icon="minesweeper"] { background-image: url('../assets/ui/apps/minesweeper.svg'); }
+.app-art[data-app-icon="snake"] { background-image: url('../assets/ui/apps/snake.svg'); }
+.app-art[data-app-icon="browser"] { background-image: url('../assets/ui/apps/browser.svg'); }
+.app-art[data-app-icon="transfer"] { background-image: url('../assets/ui/apps/transfer.svg'); }
 .device-calculator { width: min(100%, 360px); margin: 16px auto; padding: 16px; border-radius: 12px; background: #233246; color: #eef3f8; }
 [data-calculator-history] { display: block; min-height: 20px; overflow-wrap: anywhere; color: #b2c5d2; text-align: right; font: 12px/1.5 Arial, sans-serif; }
 .calculator-display { display: block; width: 100%; padding: 10px 2px 18px; overflow-wrap: anywhere; color: #f4f9fc; text-align: right; font: 32px/1.2 Arial, sans-serif; font-variant-numeric: tabular-nums; }

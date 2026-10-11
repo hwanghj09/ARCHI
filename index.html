@@ -87,6 +87,9 @@
     <script src="js/computer/usb-connection.js" defer></script>
     <script src="js/computer/computer.js" defer></script>
     <script src="js/computer/desktop.js" defer></script>
+    <script src="js/computer/terminal.js" defer></script>
+    <script src="js/computer/paint.js" defer></script>
+    <script src="js/computer/games.js" defer></script>
     <script src="js/elevator/cabin.js" defer></script>
     <script src="js/player/sanity.js" defer></script>
     <script src="js/scene/pushables.js" defer></script>
@@ -374,13 +377,16 @@
       <div class="computer-shortcuts">
         <button type="button" data-computer-app="files"><span class="app-art" data-app-icon="files" aria-hidden="true"></span><span>파일 탐색기</span></button>
         <button type="button" data-computer-app="notes"><span class="app-art" data-app-icon="notes" aria-hidden="true"></span><span>메모장</span></button>
-        <button type="button" data-computer-app="mail"><span class="app-art" data-app-icon="mail" aria-hidden="true"></span><span>사내 메일</span></button>
         <button type="button" data-computer-app="calculator"><span class="app-art" data-app-icon="calculator" aria-hidden="true"></span><span>계산기</span></button>
-        <button type="button" data-computer-app="building"><span class="app-art" data-app-icon="building" aria-hidden="true"></span><span>시설 안내</span></button>
-        <button type="button" data-computer-app="browser"><span class="app-art" data-app-icon="notes" aria-hidden="true"></span><span>블로그</span></button>
-        <button type="button" data-computer-app="transfer"><span class="app-art" data-app-icon="files" aria-hidden="true"></span><span>파일 전송</span></button>
+        <button type="button" data-computer-app="browser"><span class="app-art" data-app-icon="browser" aria-hidden="true"></span><span>블로그</span></button>
+        <button type="button" data-computer-app="transfer"><span class="app-art" data-app-icon="transfer" aria-hidden="true"></span><span>파일 전송</span></button>
+        <button type="button" data-computer-app="terminal"><span class="app-art" data-app-icon="terminal" aria-hidden="true"></span><span>터미널</span></button>
+        <button type="button" data-computer-app="paint"><span class="app-art" data-app-icon="paint" aria-hidden="true"></span><span>그림판</span></button>
+        <button type="button" data-computer-app="minesweeper"><span class="app-art" data-app-icon="minesweeper" aria-hidden="true"></span><span>지뢰 찾기</span></button>
+        <button type="button" data-computer-app="snake"><span class="app-art" data-app-icon="snake" aria-hidden="true"></span><span>스네이크</span></button>
       </div>
       <div id="computer-window" hidden>
+        <div id="computer-snap-preview" aria-hidden="true" hidden></div>
         <template id="computer-window-frame">
           <section class="computer-app-window" role="region" hidden>
             <div class="computer-titlebar">
@@ -425,33 +431,11 @@
             </article>
           </div>
         </div>
-        <div id="computer-mail" class="computer-content" hidden>
-          <p class="computer-path">ARCHI MAIL / 정수호 / 받은 메일함</p>
-          <label class="computer-mail-search">메일 검색<input id="computer-mail-search" type="search" aria-label="메일 검색" placeholder="제목, 보낸 사람, 본문" /></label>
-          <output id="computer-mail-count" role="status" aria-live="polite"></output>
-          <div id="computer-mail-list"></div>
-          <p id="computer-mail-empty" hidden>일치하는 메일이 없습니다.</p>
-          <article id="computer-mail-reader" hidden>
-            <button id="computer-mail-back" type="button">‹ 받은 메일함</button>
-            <h2 id="computer-mail-subject"></h2><p id="computer-mail-meta"></p><div id="computer-mail-body"></div>
-          </article>
-        </div>
         <div id="computer-calculator" class="computer-content" hidden>
           <div class="device-calculator" data-device-calculator aria-label="컴퓨터 계산기">
             <small data-calculator-history aria-hidden="true"></small>
             <output class="calculator-display" data-calculator-display aria-label="계산 결과" aria-live="polite">0</output>
             <div class="calculator-keys"></div>
-          </div>
-        </div>
-        <div id="computer-building" class="computer-content" hidden>
-          <div class="building-guide" data-building-guide>
-            <p data-building-current></p>
-            <label>층 선택<select data-building-floor aria-label="안내할 층"></select></label>
-            <button type="button" data-building-here>현재 층</button>
-            <h3 data-building-title></h3>
-            <p data-building-power></p><p data-building-access></p>
-            <ul data-building-rooms></ul>
-            <p data-building-charger></p><p data-building-elevator></p>
           </div>
         </div>
         <div id="computer-browser" class="computer-content" hidden>
@@ -545,6 +529,44 @@
             <output id="computer-transfer-status" role="status" aria-live="polite"></output>
           </div>
         </div>
+        <div id="computer-terminal" class="computer-content" hidden>
+          <div id="computer-terminal-output" role="log" aria-label="터미널 출력"></div>
+          <form id="computer-terminal-form"><label id="computer-terminal-prompt" for="computer-terminal-input">C:\Users\정수호&gt;</label><input id="computer-terminal-input" autocomplete="off" autocapitalize="off" spellcheck="false" enterkeyhint="send" /></form>
+        </div>
+        <div id="computer-paint" class="computer-content" hidden>
+          <div class="paint-toolbar" role="toolbar" aria-label="그리기 도구">
+            <div id="computer-paint-colors" class="paint-colors"></div>
+            <label>굵기<input id="computer-paint-size" type="range" min="2" max="32" value="6" /></label>
+            <button id="computer-paint-eraser" type="button" aria-pressed="false">지우개</button>
+            <button id="computer-paint-clear" type="button">새로 만들기</button>
+          </div>
+          <div class="paint-surface"><canvas id="computer-paint-canvas" width="960" height="600" tabindex="0" aria-label="그림판 캔버스 · 끌어서 그리기"></canvas></div>
+        </div>
+        <div id="computer-minesweeper" class="computer-content" hidden>
+          <div class="mine-game">
+            <div class="mine-bar">
+              <output id="computer-mine-count" aria-label="남은 지뢰">010</output>
+              <button id="computer-mine-reset" type="button" aria-label="새 게임" title="새 게임">🙂</button>
+              <output id="computer-mine-time" aria-label="경과 시간(초)">000</output>
+            </div>
+            <div id="computer-mine-board" role="group" aria-label="지뢰 찾기 판 · 오른쪽 클릭으로 깃발"></div>
+            <label class="mine-flag-mode"><input id="computer-mine-flag" type="checkbox" /> 깃발 꽂기 모드</label>
+            <p id="computer-mine-status" role="status" aria-live="polite"></p>
+          </div>
+        </div>
+        <div id="computer-snake" class="computer-content" hidden>
+          <div class="snake-game">
+            <p class="snake-score"><span>점수 <output id="computer-snake-score">0</output></span><span>최고 <output id="computer-snake-best">0</output></span></p>
+            <canvas id="computer-snake-board" width="320" height="320" tabindex="0" aria-label="스네이크 게임판 · 방향키나 WASD로 이동, 스페이스로 일시정지"></canvas>
+            <p id="computer-snake-status" role="status" aria-live="polite"></p>
+            <div class="snake-pad">
+              <button type="button" data-snake-dir="up" aria-label="위">▲</button>
+              <button type="button" data-snake-dir="left" aria-label="왼쪽">◀</button>
+              <button type="button" data-snake-dir="down" aria-label="아래">▼</button>
+              <button type="button" data-snake-dir="right" aria-label="오른쪽">▶</button>
+            </div>
+          </div>
+        </div>
       </div>
       <section id="computer-start-menu" aria-label="시작 메뉴" hidden>
         <input id="computer-start-search" type="search" aria-label="앱 및 문서 검색" placeholder="앱 및 문서 검색" autocomplete="off" />
@@ -555,6 +577,7 @@
       </section>
       <div id="computer-context-menu" role="menu" aria-label="바탕화면 메뉴" hidden>
         <button id="computer-context-open" type="button" role="menuitem">열기</button>
+        <button id="computer-context-terminal" type="button" role="menuitem">터미널에서 열기</button>
         <button id="computer-context-refresh" type="button" role="menuitem">새로 고침</button>
         <button id="computer-context-sort" type="button" role="menuitem">이름순 정렬</button>
       </div>

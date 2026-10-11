@@ -2,12 +2,15 @@
 const COMPUTER_APPS = {
   files: { title: '파일 탐색기', icon: 'files' },
   notes: { title: '메모장', icon: 'notes', width: 660 },
-  mail: { title: '사내 메일', icon: 'mail' },
   calculator: { title: '계산기', icon: 'calculator', width: 380, height: 510 },
-  building: { title: '시설 안내', icon: 'building' },
-  browser: { title: '블로그', icon: 'building', width: 950, height: 580 },
-  transfer: { title: '파일 전송', icon: 'files', width: 570, height: 390 },
-  document: { title: '문서', icon: 'notes' }
+  browser: { title: '블로그', icon: 'browser', width: 950, height: 580 },
+  transfer: { title: '파일 전송', icon: 'transfer', width: 570, height: 390 },
+  // pinned: false는 실행 중일 때만 작업표시줄에 나온다. reset은 닫힌 앱을 새로 열 때 처음 상태로 되돌린다.
+  terminal: { title: '터미널', icon: 'terminal', width: 720, height: 440, pinned: false, focus: '#computer-terminal-input' },
+  paint: { title: '그림판', icon: 'paint', width: 780, height: 560, pinned: false, focus: '#computer-paint-canvas' },
+  minesweeper: { title: '지뢰 찾기', icon: 'minesweeper', width: 380, height: 520, pinned: false, focus: '#computer-mine-board button' },
+  snake: { title: '스네이크', icon: 'snake', width: 420, height: 600, pinned: false, focus: '#computer-snake-board' },
+  document: { title: '문서', icon: 'notes', pinned: false }
 };
 const computerWindows = new Map();
 const computerStartMenu = document.getElementById('computer-start-menu');
@@ -20,6 +23,8 @@ let computerWindowDrag = null;
 let computerContextApp = null;
 let computerDesktopHidden = [];
 let computerRecentDocuments = [];
+let computerMetaAlone = false;
+const computerSnapPreview = document.getElementById('computer-snap-preview');
 
 for (const [app, config] of Object.entries(COMPUTER_APPS)) {
   const element = document.getElementById('computer-window-frame').content.firstElementChild.cloneNode(true);
@@ -45,9 +50,9 @@ for (const [app, config] of Object.entries(COMPUTER_APPS)) {
   icon.dataset.appIcon = config.icon;
   icon.setAttribute('aria-hidden', 'true');
   taskButton.append(icon);
-  taskButton.hidden = app === 'document';
+  taskButton.hidden = config.pinned === false;
   document.getElementById('computer-taskbar-windows').append(taskButton);
-  const state = { app, element, view, taskButton, open: false, minimized: false, maximized: false, normal: null };
+  const state = { app, element, view, taskButton, open: false, minimized: false, maximized: false, snap: null, normal: null };
   computerWindows.set(app, state);
   taskButton.addEventListener('click', () => {
     if (computerActiveWindow === state && !state.minimized) minimizeComputerWindow(state);
@@ -77,7 +82,7 @@ function refreshComputerWindows() {
     state.taskButton.dataset.running = String(state.open);
     state.taskButton.dataset.active = String(state === computerActiveWindow && !state.minimized);
     state.taskButton.setAttribute('aria-pressed', state.taskButton.dataset.active);
-    state.taskButton.hidden = state.app === 'document' && !state.open;
+    state.taskButton.hidden = COMPUTER_APPS[state.app].pinned === false && !state.open;
     state.element.dataset.active = state.taskButton.dataset.active;
   }
 }
@@ -97,6 +102,13 @@ function activateComputerWindow(state) {
   refreshComputerWindows();
 }
 
+// 화면 가장자리로 끌면 왼쪽·오른쪽 절반(snap) 또는 전체(max)로 맞춘다.
+function computerSnapRect(zone, bounds) {
+  const half = Math.round(bounds.width / 2);
+  return zone === 'max' ? { x: 0, y: 0, width: bounds.width, height: bounds.height } :
+    { x: zone === 'right' ? half : 0, y: 0, width: zone === 'right' ? bounds.width - half : half, height: bounds.height };
+}
+
 function layoutComputerWindow(state) {
   const bounds = computerWindow.getBoundingClientRect();
   if (!bounds.width || !bounds.height || !state.normal) return;
@@ -105,9 +117,12 @@ function layoutComputerWindow(state) {
   rect.height = Math.max(Math.min(210, bounds.height), Math.min(bounds.height, rect.height));
   rect.x = Math.max(0, Math.min(bounds.width - rect.width, rect.x));
   rect.y = Math.max(0, Math.min(bounds.height - rect.height, rect.y));
-  const visible = state.maximized ? { x: 0, y: 0, width: bounds.width, height: bounds.height } : rect;
+  const zone = state.maximized ? 'max' : state.snap;
+  const visible = zone ? computerSnapRect(zone, bounds) : rect;
   Object.assign(state.element.style, { left: `${visible.x}px`, top: `${visible.y}px`, width: `${visible.width}px`, height: `${visible.height}px` });
   state.element.dataset.maximized = String(state.maximized);
+  if (state.snap && !state.maximized) state.element.dataset.snap = state.snap;
+  else delete state.element.dataset.snap;
   const maximize = state.element.querySelector('[data-window-maximize]');
   maximize.setAttribute('aria-label', state.maximized ? '이전 크기로 복원' : '최대화');
   maximize.title = maximize.getAttribute('aria-label');
@@ -169,8 +184,36 @@ function closeComputerWindow(state) {
 function maximizeComputerWindow(state) {
   cancelComputerWindowDrag();
   state.maximized = !state.maximized;
+  state.snap = null;
   layoutComputerWindow(state);
   activateComputerWindow(state);
+}
+
+// Win+방향키: ←/→ 절반, ↑ 최대화, ↓ 복원 후 최소화.
+function snapComputerWindow(state, key) {
+  cancelComputerWindowDrag();
+  if (key === 'ArrowDown') {
+    if (!state.maximized && !state.snap) { minimizeComputerWindow(state); return; }
+    state.maximized = false;
+    state.snap = null;
+  } else {
+    state.maximized = key === 'ArrowUp';
+    state.snap = key === 'ArrowUp' ? null : key === 'ArrowLeft' ? 'left' : 'right';
+  }
+  layoutComputerWindow(state);
+  activateComputerWindow(state);
+}
+
+function computerSnapZone(event) {
+  const bounds = computerWindow.getBoundingClientRect();
+  return event.clientY <= bounds.top + 12 ? 'max' : event.clientX <= bounds.left + 8 ? 'left' : event.clientX >= bounds.right - 8 ? 'right' : null;
+}
+
+function showComputerSnapPreview(zone) {
+  computerSnapPreview.hidden = !zone;
+  if (!zone) return;
+  const rect = computerSnapRect(zone, computerWindow.getBoundingClientRect());
+  Object.assign(computerSnapPreview.style, { left: `${rect.x}px`, top: `${rect.y}px`, width: `${rect.width}px`, height: `${rect.height}px`, zIndex: String(computerWindowOrder) });
 }
 
 function beginComputerWindowDrag(event, state) {
@@ -189,14 +232,19 @@ function moveComputerWindowDrag(event) {
   if (!drag.moved && Math.hypot(dx, dy) < 4) return;
   drag.moved = true;
   const state = drag.state, bounds = computerWindow.getBoundingClientRect();
-  if (state.maximized) {
+  if (state.maximized || state.snap) {
     if (drag.edge) return;
     state.maximized = false;
+    state.snap = null;
     drag.rect.x = event.clientX - bounds.left - drag.rect.width * drag.grab - dx;
     drag.rect.y = event.clientY - bounds.top - 18 - dy;
   }
   const rect = { ...drag.rect };
-  if (!drag.edge) { rect.x += dx; rect.y += dy; }
+  if (!drag.edge) {
+    rect.x += dx; rect.y += dy;
+    drag.zone = computerSnapZone(event);
+    showComputerSnapPreview(drag.zone);
+  }
   else {
     const minWidth = Math.min(320, bounds.width), minHeight = Math.min(210, bounds.height);
     if (drag.edge.includes('e')) rect.width = Math.max(minWidth, Math.min(bounds.width - rect.x, rect.width + dx));
@@ -211,7 +259,8 @@ function moveComputerWindowDrag(event) {
 function endComputerWindowDrag(event) {
   const drag = computerWindowDrag;
   if (!drag || drag.id !== event.pointerId) return;
-  if (drag.moved && !drag.edge && event.clientY <= computerWindow.getBoundingClientRect().top + 12) drag.state.maximized = true;
+  if (drag.moved && drag.zone === 'max') drag.state.maximized = true;
+  else if (drag.moved && drag.zone) drag.state.snap = drag.zone;
   layoutComputerWindow(drag.state);
   cancelComputerWindowDrag();
 }
@@ -219,6 +268,7 @@ function endComputerWindowDrag(event) {
 function cancelComputerWindowDrag() {
   const drag = computerWindowDrag;
   computerWindowDrag = null;
+  computerSnapPreview.hidden = true;
   if (drag?.handle.hasPointerCapture(drag.id)) drag.handle.releasePointerCapture(drag.id);
 }
 window.addEventListener('blur', cancelComputerWindowDrag);
@@ -297,6 +347,7 @@ computer.addEventListener('contextmenu', event => {
   computerContextMenu.querySelector('button:not([hidden])').focus();
 });
 document.getElementById('computer-context-open').addEventListener('click', () => openComputerApp(computerContextApp));
+document.getElementById('computer-context-terminal').addEventListener('click', () => openComputerApp('terminal'));
 document.getElementById('computer-context-refresh').addEventListener('click', () => { computerContextMenu.hidden = true; computer.focus(); });
 document.getElementById('computer-context-sort').addEventListener('click', () => {
   const shortcuts = computer.querySelector('.computer-shortcuts');
@@ -314,6 +365,16 @@ function showComputerDesktop() {
 }
 document.getElementById('computer-show-desktop').addEventListener('click', showComputerDesktop);
 computer.addEventListener('keydown', event => {
+  // Windows 키 단독은 시작 메뉴, 조합은 바탕 화면(D)·파일 탐색기(E)·터미널(R)·창 맞춤(방향키).
+  if (event.key === 'Meta') { if (!event.repeat) computerMetaAlone = true; }
+  else if (event.metaKey) {
+    computerMetaAlone = false;
+    const key = event.key.length === 1 ? event.key.toLowerCase() : event.key;
+    const action = { d: showComputerDesktop, e: () => openComputerApp('files'), r: () => openComputerApp('terminal') }[key];
+    if (action) { event.preventDefault(); action(); }
+    // 글 입력 중의 Cmd+방향키(macOS 줄 이동)는 그대로 둔다.
+    else if (key.startsWith('Arrow') && computerActiveWindow && !event.target.closest('input, textarea')) { event.preventDefault(); snapComputerWindow(computerActiveWindow, key); }
+  }
   if (event.key === 'Escape' && (!computerStartMenu.hidden || !computerContextMenu.hidden)) {
     event.preventDefault(); event.stopPropagation(); closeComputerStartMenu(); computerContextMenu.hidden = true; computerStartButton.focus();
   }
@@ -327,6 +388,10 @@ computer.addEventListener('keydown', event => {
   }
   if (event.ctrlKey && event.key.toLowerCase() === 's' && computerActiveWindow?.app === 'notes') { event.preventDefault(); document.getElementById('computer-save').click(); }
 });
+computer.addEventListener('keyup', event => {
+  if (event.key === 'Meta' && computerMetaAlone) toggleComputerStartMenu();
+  computerMetaAlone = false;
+});
 function resetComputerDesktop() {
   cancelComputerWindowDrag();
   closeComputerStartMenu();
@@ -336,7 +401,7 @@ function resetComputerDesktop() {
   computerWindowOrder = 0;
   for (const state of computerWindows.values()) {
     state.open = state.minimized = state.maximized = false;
-    state.normal = null;
+    state.snap = state.normal = null;
     state.element.hidden = state.view.hidden = true;
   }
   refreshComputerWindows();

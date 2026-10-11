@@ -22,7 +22,6 @@ try {
   const phoneApp = name => phone.locator(`[data-phone-app="${name}"]`);
   const pcCalc = pc.locator('[data-device-calculator]');
   const phoneCalc = phone.locator('[data-device-calculator]');
-  const pcGuide = pc.locator('[data-building-guide]');
   const phoneGuide = phone.locator('[data-building-guide]');
   const key = (calculator, value) => calculator.locator(`[data-calculator-key="${value}"]`);
   const display = calculator => calculator.locator('[data-calculator-display]').textContent();
@@ -48,22 +47,8 @@ try {
   await page.keyboard.press('e');
   await finishSceneTransition(page);
   assert(await pc.isVisible());
-  assert.equal(await pc.locator('.computer-shortcuts button').count(), 7);
-  await pcApp('mail').click();
-  assert.equal(await pc.locator('[data-computer-mail]').count(), 5);
-  assert.equal(await pc.locator('#computer-mail-count').textContent(), '5개 메일 · 안 읽음 5개');
-  await pc.locator('#computer-mail-search').fill('시설관리팀');
-  assert.equal(await pc.locator('[data-computer-mail]:visible').count(), 2);
-  await pc.locator('[data-computer-mail="power"]').click();
-  assert.match(await pc.locator('#computer-mail-subject').textContent(), /태양광/);
-  assert.match(await pc.locator('#computer-mail-body').textContent(), /레버.*엘리베이터/s);
-  assert.equal(await pc.locator('#computer-mail-count').textContent(), '2개 메일 · 안 읽음 1개');
-  await pc.locator('#computer-mail-back').click();
-  assert.equal(await pc.locator('[data-computer-mail="power"]').getAttribute('data-read'), 'true');
-  await pc.locator('#computer-mail-search').fill('없는메일123 <script>');
-  assert(await pc.locator('#computer-mail-empty').isVisible());
-  assert.equal(await pc.locator('[data-computer-mail]:visible').count(), 0);
-  await pc.locator('#computer-mail-search').fill('');
+  assert.equal(await pc.locator('.computer-shortcuts button').count(), 9);
+  assert.equal(await pc.locator('#computer-mail, #computer-building, [data-computer-app="mail"], [data-computer-app="building"]').count(), 0, 'Mail and building guide are phone-only now');
 
   await pcApp('calculator').click();
   await page.keyboard.type('12.5+7.5=');
@@ -89,20 +74,23 @@ try {
   await page.evaluate(() => openComputerApp('missing-app'));
   assert(await pc.locator('#computer-calculator').isVisible(), 'Unknown app leaves the active window intact');
 
-  await pcApp('building').click();
-  await pcGuide.locator('[data-building-floor]').selectOption('12');
-  assert.match(await pcGuide.locator('[data-building-access]').textContent(), /조현아 팀장 사원증 필요 \(16층 Café에서 마지막 확인\).*하차 후 게이트/,
+  await pc.locator('#computer-exit').click();
+  await finishSceneTransition(page);
+
+  await page.keyboard.press('p');
+  await phoneApp('building').click();
+  await phoneGuide.locator('[data-building-floor]').selectOption('12');
+  assert.match(await phoneGuide.locator('[data-building-access]').textContent(), /조현아 팀장 사원증 필요 \(16층 Café에서 마지막 확인\).*하차 후 게이트/,
     'A missing card points to where it was last seen');
   const floor12 = await page.evaluate(() => {
     const scene = ALL_FLOORS.find(scene => scene.floor === 12);
     const gate = scene.barriers.find(item => item.accessGate);
     return { powered: floorHasPower(12), badge: INVENTORY_ITEMS[gate.requires].name, chargerCount: scene.fixtures.filter(item => item.phoneCharger).length };
   });
-  assert.equal(await pcGuide.locator('[data-building-power]').getAttribute('data-powered'), String(floor12.powered));
-  assert((await pcGuide.locator('[data-building-access]').textContent()).includes(floor12.badge));
-  assert.match(await pcGuide.locator('[data-building-charger]').textContent(), new RegExp(`충전함 ${floor12.chargerCount}곳`));
-  await pc.locator('#computer-exit').click();
-  await finishSceneTransition(page);
+  assert.equal(await phoneGuide.locator('[data-building-power]').getAttribute('data-powered'), String(floor12.powered));
+  assert((await phoneGuide.locator('[data-building-access]').textContent()).includes(floor12.badge));
+  assert.match(await phoneGuide.locator('[data-building-charger]').textContent(), new RegExp(`충전함 ${floor12.chargerCount}곳`));
+  await closePhone();
 
   await page.keyboard.press('p');
   await phoneApp('notes').click();
@@ -147,7 +135,7 @@ try {
   assert(await pc.isVisible(), 'The continued game can reopen the nearby computer');
   for (const viewport of [{ width: 390, height: 844 }, { width: 568, height: 320 }]) {
     await page.setViewportSize(viewport);
-    for (const name of ['files', 'notes', 'mail', 'calculator', 'building']) {
+    for (const name of ['files', 'notes', 'calculator', 'terminal', 'paint', 'minesweeper', 'snake']) {
       await pc.locator('#computer-start-button').tap();
       await pc.locator(`[data-start-app="${name}"]`).tap();
       assert(await pc.locator(`#computer-${name}`).isVisible());
@@ -253,7 +241,7 @@ try {
   await phoneApp('notes').tap();
   assert.equal(await phone.locator('#phone-note').inputValue(), draft, 'Failed save never discards the in-memory draft');
   assert.deepEqual(errors, []);
-  console.log('PASS: five usable computer apps, mail search/read/back, shared calculators and error recovery, phone typing isolation/note save/continue/new-game/failure, actual floor power/badges/gates, mobile/landscape touch and scroll, battery/dock restrictions.');
+  console.log('PASS: nine computer apps without PC mail/building guide, shared calculators and error recovery, phone typing isolation/note save/continue/new-game/failure, actual floor power/badges/gates in the phone guide, PC app fit, mobile/landscape touch and scroll, battery/dock restrictions.');
 } finally {
   await browser.close();
 }

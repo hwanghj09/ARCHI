@@ -36,7 +36,9 @@
 .computer-resize-ne, .computer-resize-nw, .computer-resize-se, .computer-resize-sw { width: 12px; height: 12px; }
 .computer-resize-ne { right: 0; top: 0; cursor: nesw-resize; } .computer-resize-sw { left: 0; bottom: 0; cursor: nesw-resize; }
 .computer-resize-nw { left: 0; top: 0; cursor: nwse-resize; } .computer-resize-se { right: 0; bottom: 0; cursor: nwse-resize; }
-[data-maximized="true"] .computer-resize { display: none; }
+[data-maximized="true"] .computer-resize, [data-snap] .computer-resize { display: none; }
+.computer-app-window[data-snap] { border-radius: 0; }
+#computer-snap-preview { position: absolute; border: 1px solid #ffffffb3; border-radius: 8px; background: #dbe9f84d; backdrop-filter: blur(12px); box-shadow: 0 8px 28px #0003; pointer-events: none; transition: left .12s, top .12s, width .12s, height .12s; }
 .computer-toolbar { display: flex; align-items: center; gap: 12px; min-height: 48px; border-bottom: 1px solid #e3e5e8; flex-shrink: 0; background: #fafbfc; }
 .computer-content { flex: 1; min-height: 0; overflow: auto; }
 .naver-blog { min-height: 100%; background: #f4f6f5; color: #222; font-family: Arial, 'Malgun Gothic', sans-serif; }
@@ -115,21 +117,7 @@
 .computer-file-description small { color: #596960; font-size: 12px; line-height: 1.5; }
 .computer-file-metadata { font-size: 11px; line-height: 1.8; color: #596960; white-space: pre-line; text-align: right; }
 #computer-files-empty { padding: 24px 0; color: #596960; }
-#computer-mail { padding: 16px; background: white; }
-.computer-mail-search { display: grid; gap: 6px; color: #596960; font-size: 12px; }
-#computer-mail-search { width: 100%; min-width: 0; height: 40px; padding: 8px; border: 1px solid #aebbb3; border-radius: 3px; background: white; color: #252b29; font: 14px Arial, sans-serif; }
-#computer-mail-count { display: block; margin: 16px 0 4px; color: #596960; font-size: 12px; }
-#computer-mail-list button { display: grid; justify-items: start; justify-content: stretch; width: 100%; gap: 6px; min-height: 88px; padding: 14px 10px; border-bottom: 1px solid #dfe5e1; border-radius: 0; text-align: left; overflow-wrap: anywhere; }
-#computer-mail-list strong { font-size: 14px; font-weight: 600; }
-#computer-mail-list button[data-read="true"] strong { font-weight: 400; }
-#computer-mail-list span, .computer-mail-read { font-size: 12px; color: #596960; }
-#computer-mail-list button[data-read="false"] .computer-mail-read { color: #27644b; font-weight: 600; }
-#computer-mail-empty { padding: 24px 0; color: #596960; }
-#computer-mail-reader { margin-top: 16px; overflow-wrap: anywhere; }
-#computer-mail-subject { margin: 20px 0 12px; font-size: 22px; line-height: 1.45; }
-#computer-mail-meta { padding-bottom: 16px; border-bottom: 1px solid #dfe5e1; color: #596960; font-size: 12px; line-height: 1.6; }
-#computer-mail-body { margin-block: 20px; white-space: pre-wrap; font: 15px/1.9 Arial, sans-serif; }
-#computer-calculator, #computer-building { padding: 24px; }
+#computer-calculator { padding: 24px; }
 #computer-notes, #computer-document { display: flex; flex-direction: column; }
 .computer-toolbar { padding: 4px 12px; }
 #computer-save-status { color: #596960; font-size: 12px; }
@@ -195,7 +183,7 @@
   .company-document { padding: 20px 16px; }
   #computer-document-title { font-size: 20px; }
   .company-document :is(th, td) { padding: 6px; }
-  #computer-calculator, #computer-building { padding: 16px; }
+  #computer-calculator { padding: 16px; }
 }
 
 @media (max-height: 480px) {
@@ -208,3 +196,48 @@
 :is(#computer-solar-status, #computer-transfer-status):empty { display: none; }
 
 #computer-files button[data-selected="true"] { background: #e5f1ff; border-color: #99c7ef; }
+
+#computer-terminal { padding: 12px 14px; background: #0c0f14; color: #d7dde6; font: 14px/1.55 Consolas, "Cascadia Mono", "D2Coding", monospace; cursor: text; }
+#computer-terminal-output div { min-height: 1.55em; white-space: pre-wrap; overflow-wrap: anywhere; }
+#computer-terminal-form { display: flex; align-items: baseline; }
+#computer-terminal-prompt { white-space: pre; }
+#computer-terminal-input { flex: 1; min-width: 0; padding: 0; border: 0; background: transparent; color: inherit; font: inherit; caret-color: #7ee08f; }
+#computer #computer-terminal-input:focus-visible { outline: none; }
+
+#computer-paint { display: flex; flex-direction: column; background: #e9eef4; }
+.paint-toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px; padding: 8px 12px; border-bottom: 1px solid #d5dbe3; background: #f6f8fb; font-size: 12px; }
+.paint-colors { display: flex; flex-wrap: wrap; gap: 4px; }
+#computer .paint-colors button { width: 32px; height: 32px; min-width: 32px; min-height: 32px; padding: 0; border: 2px solid #fff; border-radius: 50%; box-shadow: 0 0 0 1px #9aa5b3; }
+#computer .paint-colors button[aria-pressed="true"] { box-shadow: 0 0 0 3px #0067c0; }
+.paint-toolbar label { display: flex; align-items: center; gap: 8px; }
+#computer .paint-toolbar > button { min-height: 36px; border-color: #c9d1db; background: #fff; font-size: 12px; }
+#computer #computer-paint-eraser[aria-pressed="true"] { border-color: #0067c0; background: #dbeafb; }
+.paint-surface { flex: 1; min-height: 0; overflow: auto; padding: 16px; }
+#computer-paint-canvas { display: block; width: 100%; max-width: 960px; height: auto; margin: auto; background: #fff; box-shadow: 0 1px 4px #0003; touch-action: none; cursor: crosshair; }
+
+#computer-minesweeper { padding: 16px; background: #eef1f5; }
+.mine-game { display: grid; justify-items: center; gap: 12px; }
+.mine-bar { display: flex; align-items: center; justify-content: space-between; width: 100%; max-width: 346px; padding: 6px 8px; border: 3px inset #d5dae0; background: #c9ced6; }
+.mine-bar output { min-width: 56px; padding: 3px 6px; background: #1a0d0d; color: #ff4b3a; font: bold 22px/1 Consolas, monospace; text-align: center; letter-spacing: 1px; }
+#computer #computer-mine-reset { width: 44px; height: 44px; padding: 0; border: 3px outset #eef0f3; border-radius: 0; background: #c9ced6; font-size: 22px; }
+#computer-mine-board { display: grid; grid-template-columns: repeat(9, 36px); grid-auto-rows: 36px; gap: 1px; border: 3px inset #d5dae0; background: #9aa2ad; }
+#computer #computer-mine-board button { min-width: 0; min-height: 0; padding: 0; border: 3px outset #f2f4f6; border-radius: 0; background: #c9ced6; font: bold 17px Arial, sans-serif; }
+#computer #computer-mine-board button[data-open="true"] { border: 0; background: #e2e6eb; }
+#computer-mine-board [data-count="1"] { color: #1f4fd1; } #computer-mine-board [data-count="2"] { color: #1c7c2c; }
+#computer-mine-board [data-count="3"] { color: #d42a2a; } #computer-mine-board [data-count="4"] { color: #1b2a7a; }
+#computer-mine-board [data-count="5"] { color: #7a1b1b; } #computer-mine-board [data-count="6"] { color: #13807f; }
+#computer-mine-board [data-count="7"] { color: #111; } #computer-mine-board [data-count="8"] { color: #666; }
+.mine-flag-mode { display: flex; align-items: center; gap: 8px; min-height: 32px; font-size: 13px; }
+.mine-flag-mode input { width: 20px; height: 20px; }
+#computer-mine-status, #computer-snake-status { min-height: 1.5em; margin: 0; font-size: 13px; text-align: center; }
+
+#computer-snake { padding: 16px; background: #0f2016; color: #dff5d0; }
+.snake-game { display: grid; justify-items: center; gap: 10px; width: min(100%, 320px); margin: auto; }
+.snake-score { display: flex; justify-content: space-between; width: 100%; margin: 0; font-size: 13px; }
+.snake-score output { margin-left: 4px; font: bold 18px Consolas, monospace; }
+#computer-snake-board { width: 100%; aspect-ratio: 1; border: 2px solid #3d6b4a; border-radius: 4px; image-rendering: pixelated; }
+.snake-pad { display: grid; grid-template-columns: repeat(3, 52px); grid-template-areas: ". up ." "left down right"; gap: 6px; }
+.snake-pad [data-snake-dir="up"] { grid-area: up; } .snake-pad [data-snake-dir="down"] { grid-area: down; }
+.snake-pad [data-snake-dir="left"] { grid-area: left; } .snake-pad [data-snake-dir="right"] { grid-area: right; }
+#computer .snake-pad button { border: 1px solid #3d6b4a; background: #1d3a26; color: #dff5d0; }
+#computer .snake-pad button:hover { border-color: #5d9a6c; background: #29513a; }
