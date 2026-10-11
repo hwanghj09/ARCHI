@@ -67,14 +67,15 @@ function restoreProgress(data) {
     releaseInput();
     // 재개할 때 조사·휴대폰 등의 창은 닫는다. 퍼즐 진행과 실제 게임 상태는 복원한다.
     usingPhone = usingComputer = usingKeypad = usingPowerPanel = usingInspection = selectingFloor = false;
-    transitioning = playerCaught = blackoutSceneActive = storySceneActive = hallucinationCaught = false;
+    transitioning = playerCaught = blackoutSceneActive = storySceneActive = hallucinationCaught = cctvSceneActive = false;
+    cameraZoom = 1; cameraShake.x = cameraShake.y = 0; cctvRevealWall = null; cctvFirstViewOpen = false;
     openingActive = true; // 장면을 조립하는 동안 정전 컷씬과 입력이 시작되지 않게 한다.
     sceneTransition = null;
     cabinCarIndex = null;
     selectedFloor = null;
-    for (const element of [phonePanel, computer, keypad, powerPanel, inspectionPanel, cabin, guardCapturePanel, hallucinationCapturePanel, opening, blackoutScene, storyScene]) element.hidden = true;
+    for (const element of [phonePanel, computer, keypad, powerPanel, inspectionPanel, cabin, guardCapturePanel, hallucinationCapturePanel, opening, blackoutScene, storyScene, cctvScene]) element.hidden = true;
     for (const element of document.body.children) if (element !== mainMenu) element.inert = false;
-    phoneBlocked = powerBlocked = guardBlocked = hallucinationBlocked = openingBlocked = blackoutBlocked = [];
+    phoneBlocked = powerBlocked = guardBlocked = hallucinationBlocked = openingBlocked = blackoutBlocked = cctvBlocked = [];
     zeroEventPhase = 'idle'; zeroEventTimer = 0; zeroEventEvasions = 0; zeroEventApproachDone = false;
     endHallucinationSighting();
     clearInterval(inspectionTypingTimer);
@@ -83,7 +84,7 @@ function restoreProgress(data) {
     inventoryButton.setAttribute('aria-expanded', 'false');
     roomTransition.classList.remove('visible');
     roomTransition.dataset.phase = 'idle';
-    for (const key of ['opening', 'blackoutScene', 'powerFlicker']) delete world.dataset[key];
+    for (const key of ['opening', 'blackoutScene', 'powerFlicker', 'cctvScene']) delete world.dataset[key];
     collectedItems.clear();
     // 자신의 출입증은 기본 소지품이며, 이전 저장에도 진행 상황을 유지한 채 추가한다.
     collectedItems.add('f17-badge');

@@ -37,7 +37,8 @@
 .menu-floor-mark > small { margin-top: 20px; font-size: 9px; letter-spacing: .16em; }
 .menu-footer { display: flex; justify-content: space-between; gap: 16px; margin: 0 36px; padding: 18px 0 24px; border-top: 1px solid #708e7729; color: #738479; font-size: 10px; letter-spacing: .08em; }
 body[data-main-menu] :is(header, nav, #debug-floor, #inventory-button, #sanity-hud, #interaction-hint, #interaction-status, #interaction-outline) { visibility: hidden; }
-#world { filter: brightness(var(--scene-brightness, 1)); }
+/* 화면 밝기 설정에 방 설정의 brightness(--room-brightness, floor-change.js)를 곱한다. */
+#world { filter: brightness(calc(var(--scene-brightness, 1) * var(--room-brightness, 1))); }
 #main-menu[data-has-save="true"] #menu-start { background: #0e171bc4; color: #e3e8e2; border-color: #57665f; font-weight: normal; }
 #main-menu[data-has-save="true"] #menu-start > span:last-child { color: #73877b; font-size: 10px; }
 #main-menu[data-has-save="true"] #menu-start:hover { border-color: #c5d1c4; background: #24322b; }

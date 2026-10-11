@@ -2,6 +2,10 @@
 let scale = 1;
 let viewWidth = 0;
 let cameraX = 0;
+// 컷씬 카메라(cctv-event.js): cameraFocus 지점을 중심으로 cameraZoom배 확대하고, cameraShake만큼 화면 좌표로 흔든다.
+let cameraZoom = 1;
+const cameraFocus = { x: 0, y: 0 };
+const cameraShake = { x: 0, y: 0 };
 // Phone LED coordinates in the 256px animation cells, rendered at 75% scale.
 const walkPhoneLamps = [[168, 66], [170, 67], [162, 68], [166, 65], [165, 67], [164, 67]];
 const runPhoneLamps = [[195, 75], [201, 72], [201, 66], [212, 70], [204, 71], [202, 69], [204, 66], [202, 78]];
@@ -27,6 +31,8 @@ function render() {
     part.element.style.left = `${part.body.position.x - part.width / 2}px`;
     part.element.style.top = `${part.body.position.y - part.height / 2}px`;
   }
-  world.style.transform = `translate(${-cameraX * scale}px, ${stage.clientHeight - worldHeight * scale}px) scale(${scale})`;
+  const zoomed = cameraZoom - 1;
+  world.style.transform = `translate(${-cameraX * scale - cameraFocus.x * scale * zoomed + cameraShake.x}px, ` +
+    `${stage.clientHeight - worldHeight * scale - cameraFocus.y * scale * zoomed + cameraShake.y}px) scale(${scale * cameraZoom})`;
   renderHallucination();
 }

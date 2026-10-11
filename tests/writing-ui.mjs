@@ -222,57 +222,36 @@ try {
   assert.equal(await page.locator('#inspection-sheet .writing-card img').getAttribute('src'), 'assets/objects/id-cards/jo-hyeon-a.png');
   await page.screenshot({ path: '.local/writing-card.png' });
 
-  // B1 CCTV 모니터 벽: 그림(cctv-wall-screen.png)이 없으면 LCD 글자 화면이다. 그림은 같은 조사 경로에서 글자 대신 보이고,
-  // 단서 글씨는 caption으로 옮긴다. 그림이 아직 없으면 같은 1536x864 비율의 임시 그림으로 배치를 확인한다.
-  const cctvSaved = await page.evaluate(() => {
-    const wall = floorById.get('b1-control').fixtures.find(fixture => fixture.name === 'CCTV 모니터 벽');
-    return { image: wall.image ?? null, caption: wall.caption };
-  });
+  // B1 CCTV 모니터 벽: 설비의 fullImage(cctv-wall.png)가 있으면 조사창은 글자 화면이나 image(cctv-wall-screen.png) 대신
+  // CCTV 그림을 화면 전체에 띄운다(js/scene/cctv-event.js의 openFullImage). image와 caption은 글자 화면용 데이터로 남겨 둔다.
+  // 첫 입장 컷씬과 처음 볼 때의 연출(잡음·소등 컷씬)은 tests/cctv-scene.mjs가 맡으므로, 여기서는 이미 본 상태로 배치만 확인한다.
   const cctvCaption = '한 칸에 이 관제실이 비친다. 화면 속 수호가 모니터를 올려다보고 있다. 구석 글씨: "추적 대상 1 · 정수호". 다른 칸들은 17층부터 수호가 지나온 층을 되감는다. B2 칸만 검다.';
   assert(await readFile('js/floors/floor-b1.js', 'utf8').then(source => source.includes(`caption: '${cctvCaption}'`)), 'floor-b1.js keeps the caption for the artwork');
-  if (!cctvSaved.image) {
-    const cctv = await inspectAt('b1-control', 'CCTV 모니터 벽');
-    assert.equal(cctv.surface, 'screen');
-    assert(cctv.lines.includes('추적 대상 1 · 정수호'), 'The LCD writing shows the clue while the artwork is missing');
-    assert.equal(await page.locator('#inspection-sheet .writing-art').count(), 0, 'No broken image while the artwork is missing');
-    await page.screenshot({ path: '.local/writing-cctv-lcd.png' });
-    const placeholder = await page.evaluate(() => {
-      const canvas = Object.assign(document.createElement('canvas'), { width: 1536, height: 864 });
-      const context = canvas.getContext('2d');
-      context.fillStyle = '#1d2a28'; context.fillRect(0, 0, 1536, 864);
-      context.fillStyle = '#000'; context.fillRect(1152, 576, 384, 288);
-      return canvas.toDataURL();
-    });
-    await page.evaluate(([src, caption]) => {
-      Object.assign(floorById.get('b1-control').fixtures.find(fixture => fixture.name === 'CCTV 모니터 벽'), { image: src, caption });
-    }, [placeholder, cctvCaption]);
-  }
+  const cctvSeenBefore = await page.evaluate(() => ['b1-cctv-live', 'b1-cctv-seen', 'b1-lights-out'].filter(item => collectedItems.has(item)));
+  await page.evaluate(() => { for (const item of ['b1-cctv-live', 'b1-cctv-seen', 'b1-lights-out']) collectedItems.add(item); });
   for (const [view, width, height] of views) {
     await page.setViewportSize({ width, height });
-    await inspectAt('b1-control', 'CCTV 모니터 벽');
-    const art = page.locator('#inspection-sheet .writing-art');
+    const cctv = await inspectAt('b1-control', 'CCTV 모니터 벽');
+    assert.equal(cctv.surface, 'full-image', `${view}: the CCTV wall opens its picture full screen`);
+    assert.match(cctv.text, /구석 글씨: "추적 대상 1 · 정수호"/);
+    const art = page.locator('#inspection-sheet .full-image img');
     await art.evaluate(image => image.decode());
-    assert.equal(await page.locator('#inspection-sheet .writing-screen').count(), 0, `${view}: the artwork replaces the LCD writing`);
-    assert.match(await page.locator('#inspection-sheet .writing-caption').textContent(), /구석 글씨: "추적 대상 1 · 정수호"/);
+    assert.equal(await art.getAttribute('src'), 'assets/objects/b1/cctv-wall.png');
+    assert.equal(await page.locator('#inspection-sheet .writing-art').count(), 0, `${view}: the full-screen picture replaces the sheet artwork`);
+    // 전체 화면 보기는 하단 조작 버튼까지 덮는다. 그림은 화면 안에 3:2 그대로 잘리지 않고 들어간다.
     assert(await art.evaluate(image => {
-      const sheet = document.getElementById('inspection-sheet').getBoundingClientRect();
-      const panel = document.getElementById('inspection').getBoundingClientRect();
-      const controls = document.querySelector('nav').getBoundingClientRect();
       const box = image.getBoundingClientRect();
-      return box.width > 0 && box.left >= sheet.left && box.right <= sheet.right + 1 && box.top >= sheet.top - 1 &&
-        box.bottom <= sheet.bottom + 1 && panel.bottom <= controls.top + 0.5 && Math.abs(box.width / box.height - 16 / 9) < 0.02;
-    }), `${view}: the CCTV artwork fits uncropped above the controls`);
-    // 그림에는 글자가 없어서 단서는 caption에만 있다. 어느 화면에서도 그림과 caption이 스크롤 없이 한 화면에 들어간다.
+      return box.width > 0 && box.left >= -1 && box.right <= innerWidth + 1 && box.top >= -1 && box.bottom <= innerHeight + 1 &&
+        Math.abs(box.width / box.height - 3 / 2) < 0.02;
+    }), `${view}: the CCTV picture fits uncropped in the viewport`);
     assert(await page.locator('#inspection-sheet').evaluate(sheet => sheet.scrollHeight <= sheet.clientHeight + 1),
-      `${view}: the CCTV artwork and its caption fit without scrolling`);
+      `${view}: the CCTV picture fits without scrolling`);
     if (view !== 'desktop') await page.screenshot({ path: `.local/writing-cctv-art-${view}.png` });
   }
-  await page.evaluate(saved => {
-    const wall = floorById.get('b1-control').fixtures.find(fixture => fixture.name === 'CCTV 모니터 벽');
-    if (saved.image) wall.image = saved.image;
-    else delete wall.image;
-    wall.caption = saved.caption;
-  }, cctvSaved);
+  await page.evaluate(seen => {
+    closeInspection();
+    for (const item of ['b1-cctv-live', 'b1-cctv-seen', 'b1-lights-out']) if (!seen.includes(item)) collectedItems.delete(item);
+  }, cctvSeenBefore);
   await page.setViewportSize({ width: 1280, height: 720 });
 
   // 글이 없는 일반 소품은 다시 하단 대화창으로 돌아온다.

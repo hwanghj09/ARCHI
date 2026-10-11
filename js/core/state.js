@@ -23,6 +23,8 @@ let gameVolume = .7;
 let openingActive = true;
 let blackoutSceneActive = false;
 let storySceneActive = false; // 이야기 컷씬(story-scene.js)이 진행 중
+// B1 방재 관제실 첫 입장 컷씬(js/scene/cctv-event.js).
+let cctvSceneActive = false;
 let playerCaught = false;
 let selectingFloor = false;
 let usingComputer = false;

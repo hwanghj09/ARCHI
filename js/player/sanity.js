@@ -184,7 +184,7 @@ function startAmbientSighting() {
 
 // 콘솔 창 버튼용. 컷씬·전환·포획·창이 열려 있는 동안은 정신력 진행처럼 실행하지 않는다.
 function hallucinationEventBlocked() {
-  return !gameStarted || mainMenuActive || openingActive || blackoutSceneActive || playerCaught || hallucinationCaught ||
+  return !gameStarted || mainMenuActive || openingActive || blackoutSceneActive || cctvSceneActive || playerCaught || hallucinationCaught ||
     transitioning || selectingFloor || usingComputer || usingKeypad || usingPhone || usingPowerPanel || usingInspection;
 }
 
@@ -291,7 +291,7 @@ function updateBlink(elapsed, fsmPaused) {
 
 function updateSanity(elapsed) {
   // 컷씬·장면 전환·포획과 문서를 읽는 동안은 공포 진행을 멈춘다.
-  const paused = openingActive || blackoutSceneActive || playerCaught || hallucinationCaught || transitioning ||
+  const paused = openingActive || blackoutSceneActive || cctvSceneActive || playerCaught || hallucinationCaught || transitioning ||
     usingComputer || usingKeypad || usingPowerPanel || usingInspection;
   const fsmPaused = paused || selectingFloor;
   const exposure = sanityExposure();

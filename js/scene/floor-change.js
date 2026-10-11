@@ -27,6 +27,8 @@ function performRoomChange() {
 
 function performFloorChange(destId, carIndex = 0, arrivalKey = null) {
   if (blackoutSceneActive) finishBlackoutScene();
+  if (cctvSceneActive) finishCctvScene();
+  cameraZoom = 1;
   if (playerCaught) releaseGuardCapture();
   guardPatrol.mode = 'patrol'; guardPatrol.lostTime = 0;
   guardPatrol.door = null;
@@ -76,6 +78,11 @@ function performFloorChange(destId, carIndex = 0, arrivalKey = null) {
   facing = dest.interior && arrivalDoor.x < worldWidth / 2 ? 1 : -1;
   // 어두운 방은 litBy 물건(예: 켜 둔 배터리 조명)을 챙긴 뒤로는 밝다.
   world.dataset.dark = String(Boolean(dest.dark) && !collectedItems.has(dest.litBy));
+  // alarmBy 물건을 챙긴 방(B1 방재 관제실: CCTV를 본 뒤)은 붉고 어두운 조명이다(cctv-event.js).
+  refreshRoomAlarm(dest);
+  prepareCctvScene(destId);
+  // brightness: 그 방만 어둡게(1보다 작게) 보이는 배율(B1 방재 관제실). 메뉴의 화면 밝기에 곱한다(main-menu.css의 #world).
+  world.style.setProperty('--room-brightness', String(dest.brightness ?? 1));
   animate(0);
   cameraX = cameraTarget();
   stage.setAttribute('aria-label', `ARCHI ${dest.aria} 사이드뷰 스테이지`);

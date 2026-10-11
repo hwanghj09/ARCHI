@@ -78,6 +78,8 @@ function closeInspection() {
   inspectionUse.hidden = true;
   document.getElementById('inventory-button').setAttribute('aria-expanded', 'false');
   stage.focus();
+  // B1 CCTV를 처음 전체 화면으로 본 뒤라면, 돌아온 방의 모니터 벽이 지직거리며 바뀐다(cctv-event.js).
+  if (cctvRevealWall) revealCctvWall();
 }
 
 const INSPECTION_SCROLL_KEYS = { PageDown: 0.8, PageUp: -0.8, End: Infinity, Home: -Infinity };

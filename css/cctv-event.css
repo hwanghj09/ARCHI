@@ -1,0 +1,158 @@
+/* B1 방재 관제실 CCTV 컷씬(js/scene/cctv-event.js)과 모니터 벽, 전체 화면 CCTV 보기. */
+/* 컷씬 화면은 원래 밝기 그대로 두고(가장자리를 어둡게 하지 않는다) 레터박스·자막·건너뛰기만 얹는다. */
+#cctv-scene { position: fixed; inset: 0; z-index: 20; pointer-events: none; color: #e3ebe4; }
+#cctv-scene[hidden] { display: none; }
+#cctv-scene::before, #cctv-scene::after { content: ''; position: absolute; left: 0; right: 0; height: clamp(30px, 7vh, 64px); background: #050708; }
+#cctv-scene::before { top: 0; }
+#cctv-scene::after { bottom: 0; }
+#cctv-rec { position: absolute; z-index: 1; top: clamp(8px, 2vh, 20px); left: max(20px, env(safe-area-inset-left)); margin: 0;
+  color: #ff5a4a; font: bold 14px/1 monospace; letter-spacing: 2px; }
+#cctv-caption { position: absolute; left: 0; right: 0; bottom: max(92px, 14vh); width: min(944px, calc(100% - 40px)); margin: 0 auto;
+  font-size: clamp(15px, 2vw, 19px); line-height: 1.7; text-shadow: 0 2px 6px #000, 0 0 14px #000; }
+#cctv-skip { position: absolute; z-index: 1; right: max(20px, env(safe-area-inset-right)); bottom: max(10px, env(safe-area-inset-bottom));
+  min-height: 44px; padding: 8px 14px; border: 1px solid #677174; border-radius: 4px; background: #101719; color: #dce2df;
+  cursor: pointer; pointer-events: auto; font: inherit; }
+#cctv-skip:focus-visible { outline: 2px solid #e1cf9b; outline-offset: 3px; }
+body:has(#world[data-cctv-scene]) :is(header, nav, #debug-floor, #inventory-button, #game-menu-button, #sanity-hud, #objective, #wall-eyes, #interaction-hint, #interaction-status, #interaction-outline) { visibility: hidden; }
+/* 소등 뒤 붉은 비상등 조명(data-alarm)일 때만 화면이 조금 더 어둡다(메뉴의 화면 밝기 설정에 곱한다, main-menu.css의 #world).
+   불이 나가기 전까지는 원래 푸른 조명과 밝기 그대로다. */
+#world[data-alarm="true"] { filter: brightness(calc(var(--scene-brightness, 1) * .4)); }
+
+/* 화면 전체를 고르게 덮는 어둠: 첫 컷씬에서 화면이 꺼지며 흔들리는 동안과 소등 컷씬에서 불이 나간 동안. data-tint="red"면 첫 컷씬에서 화면이 꺼지는
+   순간 번쩍이는 새빨간 빛이다. */
+#cctv-dim { position: absolute; inset: 0; background: #000; opacity: 0; }
+#cctv-dim[data-tint="red"] { background: #e0001c; }
+
+/* 잡음 결(SVG 난류 잡음): --cctv-noise는 아주 어두운 회녹색 점(벽이 바뀔 때), --cctv-snow는 중간 회색 점(신호 없는 화면, 너무 어둡지도 하얗지도 않게).
+   --cctv-cells-*: CCTV 그림(1536×1024) 속 아홉 화면 칸만 남기는 마스크. 칸은 열 x 10~508 / 520~1017 / 1029~1525,
+   행 y 7~317 / 329~650 / 661~956(px)이고, 마스크 크기 = 칸 너비·높이 / 그림 크기, 위치 = 칸 left / (그림 - 칸)이다.
+   열: 32.42% @ .96%, 32.36% @ 50.04%, 32.29% @ 98.94%. 행: 30.27% @ .98%, 31.35% @ 46.8%, 28.81% @ 90.67%. */
+:root {
+  --cctv-noise: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .06 0 0 0 0 .07 0 0 0 0 .065 1.9 0 0 0 -.55'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  --cctv-snow: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .36 0 0 0 0 .38 0 0 0 0 .37 2.2 0 0 0 -.6'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  --cctv-cells-image: linear-gradient(#000 0 0), linear-gradient(#000 0 0), linear-gradient(#000 0 0), linear-gradient(#000 0 0),
+    linear-gradient(#000 0 0), linear-gradient(#000 0 0), linear-gradient(#000 0 0), linear-gradient(#000 0 0), linear-gradient(#000 0 0);
+  --cctv-cells-size: 32.42% 30.27%, 32.36% 30.27%, 32.29% 30.27%, 32.42% 31.35%, 32.36% 31.35%, 32.29% 31.35%,
+    32.42% 28.81%, 32.36% 28.81%, 32.29% 28.81%;
+  --cctv-cells-position: .96% .98%, 50.04% .98%, 98.94% .98%, .96% 46.8%, 50.04% 46.8%, 98.94% 46.8%,
+    .96% 90.67%, 50.04% 90.67%, 98.94% 90.67%;
+}
+
+/* 모니터 벽: CCTV 에셋(assets/objects/b1/cctv-wall.png, 1536×1024)을 처음부터 그대로 깔고(벽 419×279 = 3:2), 꺼진 화면은 그 위를
+   검은 막(::before)으로 덮어 표현한다. 막 아래로 베젤과 화면 윤곽이 희미하게 비친다. ::after는 주사선이다.
+   data-live: false(꺼짐) → true(첫 컷씬에서 아홉 칸이 잡음으로 켜짐, CCTV를 보기 전까지) → all(CCTV를 켜서 본 뒤 전부 켜짐).
+   data-signal: on(첫 컷씬에서 잡음이 밝게 지지직거림) → collapse(브라운관처럼 칸마다 새빨간 가로 실선으로 납작해지며 꺼짐) → 없음(조금
+   어두워진 회색 잡음, CCTV를 보기 전까지 남는다). */
+#dynamic-scene .fixture.cctv-wall { background: #050708 url('../assets/objects/b1/cctv-wall.png') center / 100% 100% no-repeat;
+  box-shadow: 0 6px 18px #0008; }
+#dynamic-scene .fixture.cctv-wall::before { content: ''; position: absolute; inset: 0; background: #040607; opacity: .9; }
+#dynamic-scene .fixture.cctv-wall[data-live="all"]::before { opacity: 0; }
+#dynamic-scene .fixture.cctv-wall::after { content: ''; position: absolute; inset: 0; background: repeating-linear-gradient(#0000 0 2px, #0003 2px 3px); }
+/* CCTV를 보기 전까지 화면 칸에는 칸마다 신호 없는 잡음만 흐른다(베젤은 그대로 보인다). 첫 컷씬에서 켜져 있는 동안
+   (data-signal="on")만 밝고, 신호가 끊긴 뒤로는 조금 어둡게(opacity .5) 남는다. */
+#dynamic-scene .fixture.cctv-wall[data-live="true"]::after { z-index: 1; opacity: .5;
+  background: var(--cctv-snow) 0 0 / 50px 50px, repeating-linear-gradient(#0000 0 2px, #0006 2px 3px), #141616;
+  mask-image: var(--cctv-cells-image); mask-size: var(--cctv-cells-size); mask-position: var(--cctv-cells-position); mask-repeat: no-repeat; }
+#dynamic-scene .fixture.cctv-wall[data-signal="on"]::after { opacity: 1; }
+/* 신호가 끊기는 순간: 칸마다 화면이 새빨갛게 질리며 세로로 납작해져 가로 실선이 되었다가 사라진다(브라운관이 꺼지듯). 실선 높이는
+   그림의 0.6%, 위치는 칸 가운데를 지키도록 (칸 가운데 - 0.3%) / 0.994로 잡았다: 행 15.61%, 47.79%, 79.13%. */
+#dynamic-scene .fixture.cctv-wall[data-signal="collapse"]::after { z-index: 1; opacity: 0; background: #ff1428;
+  mask-image: var(--cctv-cells-image); mask-size: var(--cctv-cells-size); mask-position: var(--cctv-cells-position); mask-repeat: no-repeat; }
+/* 소등 컷씬에서 벽이 바뀔 때(data-glitch)는 칸마다 어두운 잡음이 끼고, 그림도 깜빡이며 가로로 찢기고 밀린다(cctv-glitch). */
+#dynamic-scene .fixture.cctv-wall[data-glitch="true"]::after { z-index: 1; opacity: .85;
+  background: var(--cctv-noise) 0 0 / 60px 60px, repeating-linear-gradient(#0000 0 2px, #000a 2px 4px), #020303;
+  mask-image: var(--cctv-cells-image); mask-size: var(--cctv-cells-size); mask-position: var(--cctv-cells-position); mask-repeat: no-repeat; }
+
+/* 소등 뒤 붉은 비상등 아래에서는 모니터 벽 뒤로 붉은 빛이 번지고 천천히 숨 쉬듯 밝아졌다 어두워진다. */
+#world[data-alarm="true"] #dynamic-scene .fixture.cctv-wall {
+  box-shadow: 0 6px 18px #0008, 0 0 60px 14px #b3122466, 0 0 170px 60px #7a0b1838; }
+@media (prefers-reduced-motion: no-preference) {
+  #dynamic-scene .fixture.cctv-wall::after { animation: cctv-hum 3.2s steps(1) infinite; }
+  #dynamic-scene .fixture.cctv-wall[data-live="true"]::after { animation: cctv-jitter .16s steps(1) infinite; }
+  #dynamic-scene .fixture.cctv-wall[data-signal="collapse"]::after { animation: cctv-crt-off .7s linear both; }
+  #dynamic-scene .fixture.cctv-wall[data-glitch="true"]::after { animation: cctv-screen-static .24s steps(1) infinite; }
+  #cctv-rec { animation: cctv-rec 1s steps(1) infinite; }
+  #inspection[data-surface="full-image"] .full-image img { animation: cctv-view-open .45s ease-out both; }
+  #world[data-alarm="true"] #dynamic-scene .fixture.cctv-wall { animation: cctv-red-pulse 4.5s ease-in-out infinite; }
+  #dynamic-scene .fixture.cctv-wall[data-glitch="true"] { animation: cctv-glitch 1.4s steps(1) both; }
+  /* CCTV를 처음 켜면 칸마다 잡음이 덮고 있다가 2.8초에 걸쳐 지지직거리며 걷히고, 칸마다 옅게 남는다. */
+  #inspection[data-surface="full-image"] .full-image-static { animation: cctv-reveal 2.8s steps(1) both, cctv-jitter .16s steps(1) infinite; }
+}
+/* 0.7초: 새빨갛게 질린 화면(0~15%) → 세로로 납작해짐(~55%) → 가는 실선이 잠깐 떠 있음(~75%) → 사라짐. */
+@keyframes cctv-crt-off {
+  0%, 15% { opacity: 1; filter: brightness(1.4); }
+  55%, 75% { opacity: 1; filter: brightness(1.8);
+    mask-size: 32.42% .6%, 32.36% .6%, 32.29% .6%, 32.42% .6%, 32.36% .6%, 32.29% .6%, 32.42% .6%, 32.36% .6%, 32.29% .6%;
+    mask-position: .96% 15.61%, 50.04% 15.61%, 98.94% 15.61%, .96% 47.79%, 50.04% 47.79%, 98.94% 47.79%, .96% 79.13%, 50.04% 79.13%, 98.94% 79.13%; }
+  100% { opacity: 0; filter: brightness(1.8);
+    mask-size: 32.42% .6%, 32.36% .6%, 32.29% .6%, 32.42% .6%, 32.36% .6%, 32.29% .6%, 32.42% .6%, 32.36% .6%, 32.29% .6%;
+    mask-position: .96% 15.61%, 50.04% 15.61%, 98.94% 15.61%, .96% 47.79%, 50.04% 47.79%, 98.94% 47.79%, .96% 79.13%, 50.04% 79.13%, 98.94% 79.13%; }
+}
+@keyframes cctv-jitter { 0% { background-position: 0 0, 0 0, 0 0; } 25% { background-position: 23px 41px, 0 1px, 0 0; }
+  50% { background-position: 47px 9px, 0 3px, 0 0; } 75% { background-position: 11px 29px, 0 2px, 0 0; } }
+@keyframes cctv-screen-static { 0% { opacity: .85; background-position: 0 0, 0 0, 0 0; } 25% { opacity: .55; background-position: 23px 41px, 0 1px, 0 0; }
+  50% { opacity: .9; background-position: 47px 9px, 0 3px, 0 0; } 75% { opacity: .65; background-position: 11px 29px, 0 2px, 0 0; } }
+@keyframes cctv-reveal { 0%, 20% { opacity: 1; } 25% { opacity: .6; } 30% { opacity: .95; } 38% { opacity: .5; } 45% { opacity: .8; }
+  55% { opacity: .35; } 63% { opacity: .55; } 75% { opacity: .2; } 85% { opacity: .3; } 92%, 100% { opacity: .12; } }
+@keyframes cctv-red-pulse { 50% { box-shadow: 0 6px 18px #0008, 0 0 80px 22px #c4142a80, 0 0 220px 80px #8a0d1c44; } }
+@keyframes cctv-glitch {
+  0% { filter: brightness(2.2) contrast(.5); transform: none; clip-path: none; }
+  12% { filter: brightness(.4); transform: translateX(-6px); clip-path: inset(18% 0 52% 0); }
+  20% { filter: brightness(1.5) hue-rotate(-30deg) saturate(2.2); transform: translateX(8px); clip-path: inset(0 0 30% 0); }
+  30% { filter: brightness(.2); transform: none; clip-path: inset(60% 0 8% 0); }
+  42% { filter: contrast(1.8) saturate(.3); transform: translateX(-3px) skewX(-4deg); clip-path: inset(0 0 0 0); }
+  55% { filter: brightness(1.8); transform: translateX(5px); clip-path: inset(35% 0 40% 0); }
+  64% { filter: none; transform: translateX(-2px); clip-path: none; }
+  78% { filter: brightness(.6); transform: none; }
+  86%, 100% { filter: none; transform: none; clip-path: none; }
+}
+@keyframes cctv-hum { 0%, 100% { opacity: 1; } 47% { opacity: .82; } 49% { opacity: 1; } 83% { opacity: .9; } }
+@keyframes cctv-rec { 50% { opacity: 0; } }
+@keyframes cctv-view-open { 0% { opacity: 0; filter: brightness(3) contrast(.4); } 30% { opacity: 1; filter: brightness(1.6); }
+  100% { filter: brightness(var(--full-image-brightness)); } }
+
+/* 전체 화면 CCTV 보기: 조사창(#inspection)을 화면 가득 펼친다. 그림이 위 칸을 다 쓰고, 제목·조사 문구·닫기는 아래 한 줄에 둔다.
+   그림은 3:2 틀(.full-image-frame)에 담아 칸 안에서 비율대로 가장 크게 띄우고, 처음 켤 때의 잡음(.full-image-static)도 같은 틀에
+   겹쳐 그림 속 아홉 화면 칸(--cctv-cells-*)에 정확히 맞춘다. */
+#inspection[data-surface="full-image"] { --inspection-top: 0px; --inspection-bottom: 0px; width: 100vw; height: 100dvh;
+  max-height: 100dvh; padding: max(8px, env(safe-area-inset-top)) 16px max(8px, env(safe-area-inset-bottom)); box-shadow: none;
+  /* 푸른 CCTV 화면 뒤로 어두운 붉은 빛이 깔린다(원형으로 모으지 않고 위아래로만 짙기가 바뀐다). */
+  background: linear-gradient(#1a0408, #2e070e 45%, #0a0204); }
+#inspection[data-surface="full-image"]:not([hidden]) { display: grid; grid-template: minmax(0, 1fr) auto / auto minmax(0, 1fr) auto; gap: 8px 18px; align-items: center; }
+#inspection[data-surface="full-image"] :is(#inspection-sheet, .full-image) { display: contents; }
+#inspection[data-surface="full-image"] .full-image-stage { grid-area: 1 / 1 / 2 / 4; align-self: stretch; min-height: 0;
+  container-type: size; display: grid; place-items: center; }
+#inspection[data-surface="full-image"] .full-image-frame { position: relative; width: min(100cqw, 150cqh); aspect-ratio: 3 / 2; }
+#inspection[data-surface="full-image"] .full-image img { --full-image-brightness: calc(var(--scene-brightness, 1) * .82);
+  display: block; width: 100%; height: 100%; filter: brightness(var(--full-image-brightness)); }
+#inspection[data-surface="full-image"] .full-image-static { position: absolute; inset: 0; pointer-events: none; opacity: 0;
+  background: var(--cctv-snow) 0 0 / 90px 90px, repeating-linear-gradient(#0000 0 2px, #0006 2px 4px), #141616;
+  mask-image: var(--cctv-cells-image); mask-size: var(--cctv-cells-size); mask-position: var(--cctv-cells-position); mask-repeat: no-repeat; }
+#inspection[data-surface="full-image"] .inspection-heading { grid-area: 2 / 1; margin: 0; padding: 0; }
+#inspection[data-surface="full-image"] .full-image-caption { grid-area: 2 / 2; margin: 0; color: #d8e0da; font-size: 14px; line-height: 1.55; text-shadow: 0 1px 2px #000; }
+#inspection[data-surface="full-image"] .dialog-actions { grid-area: 2 / 3; margin: 0; }
+@media (max-width: 600px) {
+  #inspection[data-surface="full-image"]:not([hidden]) { grid-template: minmax(0, 1fr) auto auto / minmax(0, 1fr) auto; }
+  #inspection[data-surface="full-image"] .full-image-stage { grid-area: 1 / 1 / 2 / 3; }
+  #inspection[data-surface="full-image"] .dialog-actions { grid-area: 2 / 2; }
+  #inspection[data-surface="full-image"] .full-image-caption { grid-area: 3 / 1 / 4 / 3; font-size: 13px; }
+}
+@media (max-height: 480px) {
+  #inspection[data-surface="full-image"] .full-image-caption { font-size: 12px; line-height: 1.45; }
+}
+
+/* CCTV를 본 뒤의 관제실 조명(#room-alarm, 방 설정 alarmBy): 배경 그림은 그대로 두고 화면 위에 곱하기로 붉고 어두운 빛을 덮는다.
+   수호(z 3)와 모니터 벽도 같은 빛을 받도록 그 위(z 4)에 두고, 방 전체에 고르게 비춘다. ::after는
+   이따금 조명이 꺼졌다 켜지는 검은 막이다. 힌트와 테두리는 그 위로 올린다. */
+#room-alarm { display: none; position: absolute; inset: 0; z-index: 4; pointer-events: none; mix-blend-mode: multiply;
+  background: #b8606a; }
+#room-alarm::after { content: ''; position: absolute; inset: 0; background: #000; opacity: 0; }
+#world[data-alarm="true"] #room-alarm { display: block; }
+#world[data-alarm="true"] :is(#interaction-hint, #interaction-outline) { z-index: 5; }
+@media (prefers-reduced-motion: no-preference) {
+  #world[data-alarm="true"] #room-alarm { animation: alarm-breathe 4s ease-in-out infinite alternate; }
+  #world[data-alarm="true"] #room-alarm::after { animation: alarm-flicker 6.5s 1.3s steps(1) infinite; }
+}
+@keyframes alarm-breathe { to { filter: brightness(.9); } }
+@keyframes alarm-flicker { 0%, 58% { opacity: 0; } 59% { opacity: .6; } 60% { opacity: 0; } 61%, 64% { opacity: .7; } 65%, 82% { opacity: 0; }
+  83% { opacity: .45; } 84%, 100% { opacity: 0; } }
