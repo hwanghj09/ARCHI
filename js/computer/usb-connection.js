@@ -90,8 +90,8 @@ function refreshComputerUsb() {
   computerUsbBoard.dataset.armed = String(computerUsbArmed);
   computerUsbPhone.disabled = computerUsbPlug.disabled = computerUsbPort.disabled = !available || computerUsbConnected;
   computerUsbPlug.setAttribute('aria-pressed', String(computerUsbArmed || computerUsbConnected));
-  computerUsbStatus.textContent = computerUsbConnected ? 'USB 연결됨 · 정수호의 휴대폰' :
-    !available ? '컴퓨터 전력과 휴대폰 소지·배터리를 확인하세요.' : computerUsbArmed ? '휴대폰 아래 USB-C 포트를 선택하세요.' : '휴대폰이나 단자를 움직여 아래 USB-C 포트에 연결하세요.';
+  computerUsbStatus.textContent = computerUsbConnected ? 'USB 연결됨' :
+    !available ? '전력 또는 휴대폰 배터리 부족' : computerUsbArmed ? '휴대폰 아래 포트를 선택하세요.' : '';
   drawComputerUsb();
 }
 
@@ -129,7 +129,7 @@ for (const [kind, element] of [['phone', computerUsbPhone], ['plug', computerUsb
     cancelComputerUsbDrag();
     if (!moved) { if (kind === 'plug') computerUsbArmed = !computerUsbArmed; refreshComputerUsb(); return; }
     if (computerUsbGeometry.aligned) connectComputerUsb();
-    else { refreshComputerUsb(); computerUsbStatus.textContent = '휴대폰 아래 포트와 단자의 금속 끝을 맞춰 주세요.'; }
+    else { refreshComputerUsb(); computerUsbStatus.textContent = '단자 끝을 포트에 맞춰 주세요.'; }
   });
   for (const event of ['pointercancel', 'lostpointercapture']) element.addEventListener(event, () => {
     if (computerUsbDrag?.element === element) cancelComputerUsbDrag();

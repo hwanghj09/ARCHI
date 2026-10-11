@@ -160,3 +160,5 @@
   #computer .computer-shortcuts button { width: 96px; height: 64px; gap: 2px; }
   #computer .computer-shortcuts .app-art { width: 38px; height: 38px; }
 }
+
+:is(#computer-solar-status, #computer-transfer-status):empty { display: none; }

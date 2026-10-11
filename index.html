@@ -151,7 +151,6 @@
       <div class="menu-topline"><span>ARCHI</span><span>17F <i></i> 00:00</span></div>
       <div class="menu-content">
         <div id="menu-home" class="menu-view">
-          <p class="menu-eyebrow">야근이 끝난 뒤</p>
           <h1 class="menu-title">ARCHI</h1>
           <p class="menu-story">퇴근할 시간이다.<br />아직, 건물은 잠들지 않았다.</p>
           <div class="menu-actions">
@@ -164,7 +163,7 @@
         </div>
         <div id="menu-settings" class="menu-view" hidden>
           <button class="menu-back" type="button">← 메인으로</button>
-          <p class="menu-eyebrow">환경 설정</p><h2>설정</h2>
+          <h2>설정</h2>
           <label class="menu-setting" for="menu-volume"><span>전체 음량 <output id="menu-volume-value" for="menu-volume">70%</output></span><input id="menu-volume" type="range" min="0" max="100" value="70" /></label>
           <label class="menu-setting" for="menu-brightness"><span>화면 밝기 <output id="menu-brightness-value" for="menu-brightness">100%</output></span><input id="menu-brightness" type="range" min="75" max="125" value="100" /></label>
           <button id="menu-fullscreen" class="menu-screen-button" type="button">전체화면으로 전환 ↗</button>
@@ -172,7 +171,7 @@
         </div>
         <div id="menu-controls" class="menu-view" hidden>
           <button class="menu-back" type="button">← 메인으로</button>
-          <p class="menu-eyebrow">처음이라면</p><h2>조작 방법</h2>
+          <h2>조작 방법</h2>
           <dl class="menu-key-list">
             <div><dt>A / D · ← / →</dt><dd>이동</dd></div>
             <div><dt>Shift</dt><dd>달리기</dd></div>
@@ -184,13 +183,12 @@
           <p class="menu-note">터치 화면에서는 화면 아래 버튼을 사용하세요.<br />어둠 속에서는 정신력이 줄어듭니다. 빛을 찾으세요.</p>
         </div>
         <div id="menu-new-game" class="menu-view" hidden>
-          <p class="menu-eyebrow">새로운 퇴근길</p><h2>새 게임</h2>
+          <h2>새 게임</h2>
           <p class="menu-story">새 게임을 시작하면 기존 진행 상황이 덮어써집니다.<br />처음부터 시작하시겠습니까?</p>
           <div class="menu-actions"><button id="menu-new-confirm" class="menu-primary" type="button">새 게임 시작</button><button class="menu-back" type="button">취소</button></div>
         </div>
       </div>
       <div class="menu-floor-mark" aria-hidden="true"><span>17</span><small>FLOOR / AFTER HOURS</small></div>
-      <footer class="menu-footer"><span>2D 공포 탐험 게임</span><span>ARCHI · 야근이 끝난 뒤</span></footer>
     </section>
     <section id="opening" role="region" aria-label="퇴근 오프닝 컷씬" hidden>
       <p id="opening-label">17F · 야근이 끝난 뒤</p>
@@ -228,7 +226,7 @@
             <span class="app-art" data-app-icon="flashlight" aria-hidden="true"></span>
             <span>플래시</span><small id="phone-light-state">꺼짐</small>
           </button>
-          <p id="phone-help" aria-live="polite">플래시를 켜면 앞을 비추며 걸을 수 있습니다.</p>
+          <p id="phone-help" aria-live="polite"></p>
           <p class="phone-section-label">앱</p>
           <div id="phone-app-grid">
             <button type="button" data-phone-app="notes"><span class="phone-app-icon app-art" data-app-icon="notes" aria-hidden="true"></span><span>메모</span></button>
@@ -246,11 +244,11 @@
             </div>
             <div id="phone-memo-pane" role="tabpanel" aria-labelledby="phone-tab-memo">
               <label for="phone-note">개인 메모</label>
-              <textarea id="phone-note" maxlength="4000" aria-label="개인 메모 내용" placeholder="찾은 단서나 비밀번호를 기록하세요." spellcheck="false"></textarea>
+              <textarea id="phone-note" maxlength="4000" aria-label="개인 메모 내용" placeholder="메모" spellcheck="false"></textarea>
               <button id="phone-note-save" type="button">저장</button><output id="phone-note-status" role="status" aria-live="polite">저장됨</output>
             </div>
             <div id="phone-clue-pane" role="tabpanel" aria-labelledby="phone-tab-clues" hidden>
-              <p id="phone-clue-empty">조사한 단서가 층 이름과 함께 여기에 자동으로 기록됩니다.</p>
+              <p id="phone-clue-empty">기록된 단서 없음</p>
               <ol id="phone-clue-list" aria-label="기록된 단서"></ol>
             </div>
           </div>
@@ -279,8 +277,7 @@
             <label for="phone-solar-floor">공급 대상</label>
             <select id="phone-solar-floor" aria-label="전력을 공급할 층"></select>
             <button id="phone-solar-supply" type="button">비상 전력 공급</button>
-            <p>한 번에 한 층만 공급합니다. 다른 층을 켜면 켜져 있던 층이 꺼지고, 켜진 층을 다시 선택하면 그 층이 꺼집니다.</p>
-            <p>등록된 장치의 대기 통신으로 전원이 꺼져 있어도 다시 켤 수 있습니다.</p>
+            <p>한 층만 공급 · 다시 선택하면 해제</p>
           </div>
         </section>
         <div class="phone-navigation"><span>P · 닫기 / Esc · 뒤로</span><button id="phone-close" type="button" aria-label="휴대폰 화면 닫기"><span aria-hidden="true"></span></button></div>
@@ -298,8 +295,8 @@
         <output id="power-status" aria-live="polite">비상 전력 꺼짐</output>
         <button id="power-lever" type="button" aria-pressed="false" aria-label="레버 내리기 · 비상 전력 켜기"><span id="power-lever-label">OFF · 내려서 켜기</span></button>
         <div id="power-floor-grid" role="group" aria-label="전력 공급층 선택"></div>
-        <p id="power-note">B1 · B2 지하층은 별도 비상 발전기로 이미 전력 공급 중</p>
-        <p id="power-help">① 레버 승인 · 엘리베이터 운행 복구<br />② 조명 공급층 선택 · 한 번에 한 층</p>
+        <p id="power-note">B1 · B2 별도 전력</p>
+        <p id="power-help">레버: 엘리베이터 복구 · 층 버튼: 조명</p>
         <button id="power-close" type="button">닫기 · Esc</button>
       </div>
     </section>
@@ -357,7 +354,7 @@
     <button id="game-menu-button" type="button">메뉴 · Esc</button>
     <button id="inventory-button" type="button" aria-controls="inspection" aria-expanded="false">가방 · Tab</button>
     <section id="objective" aria-labelledby="objective-heading" aria-live="polite">
-      <h2 id="objective-heading">목표</h2>
+      <h2 id="objective-heading" hidden>목표</h2>
       <strong id="objective-title"></strong>
       <p id="objective-text"></p>
     </section>
@@ -496,13 +493,9 @@
                 <p class="blog-category">비상 전력 / 사용 안내</p>
                 <h2 id="solar-blog-title" tabindex="-1">정전 때 쓰는 태양광 제어 앱<br>다운로드 및 설치 방법</h2>
                 <p class="blog-post-meta">ARCHI 시설관리팀 · 2026. 10. 7. 14:10 · 첨부파일 1개</p>
-                <p>매번 옥상까지 올라가기 번거로워서 휴대폰용 제어 앱을 올려 둡니다. 아래 첨부파일을 받아 휴대폰에 설치하면 옥상 태양광 임시 전력 장치를 원격으로 사용할 수 있어요.</p>
-                <h3>먼저 확인해 주세요</h3>
-                <p>컴퓨터와 와이파이는 17층에 전력이 공급되는 동안 사용할 수 있습니다. 정전 전에는 미리 받아 둘 수 있고, 정전 뒤에는 옥상 배전반에서 비상 전력을 켜고 17층에 전력을 공급해 주세요. 휴대폰을 충전함에 맡겨 두었다면 먼저 찾아와 주세요.</p>
-                <h3>앱으로 할 수 있는 일</h3>
-                <ul><li>비상 전력 장치 켜기 / 끄기</li><li>전력을 공급할 층 선택하기</li><li>현재 공급 중인 층 확인하기 · 한 번에 한 층</li></ul>
-                <h3>다운로드 및 설치</h3>
-                <ol><li>아래 첨부파일을 컴퓨터에 내려받고 다운로드가 끝날 때까지 기다리세요.</li><li>바탕화면의 ‘파일 전송’ 앱에서 ‘휴대폰으로 전송·설치’를 누르고 완료될 때까지 기다리세요.</li><li>휴대폰(P)의 ‘비상 전력 제어’ 앱을 열어 사용하세요.</li></ol>
+                <p>휴대폰에서 옥상 비상 전력을 제어하는 앱입니다. 한 번에 한 층에 전력을 공급할 수 있습니다.</p>
+                <p>17층 전력과 휴대폰 배터리가 필요합니다.</p>
+                <ol><li>첨부파일 다운로드</li><li>‘파일 전송’에서 휴대폰 연결 후 설치</li><li>휴대폰의 ‘비상 전력 제어’ 실행</li></ol>
                 <div class="blog-attachment">
                   <span class="blog-file-icon" aria-hidden="true">↓</span>
                   <div><strong>ARCHI_태양광_제어앱.apk</strong><span>휴대폰용 · 비상 전력 제어</span></div>
@@ -535,14 +528,11 @@
         </div>
         <div id="computer-transfer" class="computer-content" hidden>
           <div class="solar-download-page">
-            <h2>휴대폰 파일 전송</h2>
-            <p>컴퓨터에 다운로드한 앱을 휴대폰으로 전송하고 설치합니다.</p>
-            <button id="computer-usb-open" type="button">휴대폰 연결하기</button>
+            <button id="computer-usb-open" type="button">휴대폰 연결</button>
             <p id="computer-transfer-file" hidden><strong>ARCHI_태양광_제어앱.apk</strong><br>내 컴퓨터 → 정수호의 휴대폰</p>
             <button id="computer-solar-transfer" type="button" disabled>휴대폰으로 전송·설치</button>
             <progress id="computer-solar-transfer-progress" class="solar-file-progress" max="100" value="0" aria-label="휴대폰 전송·설치 진행률" hidden></progress>
             <output id="computer-transfer-status" role="status" aria-live="polite"></output>
-            <p>전력이 끊기거나 컴퓨터 사용을 종료하면 진행 중인 작업이 취소됩니다. 휴대폰을 소지하고 배터리가 남아 있어야 전송할 수 있습니다.</p>
           </div>
         </div>
       </section>
@@ -560,7 +550,7 @@
     <div id="computer-usb-panel" role="dialog" aria-modal="true" aria-labelledby="computer-usb-title" hidden>
       <section class="usb-desk">
         <h2 id="computer-usb-title">휴대폰 USB 연결</h2>
-        <p id="computer-usb-instructions">휴대폰이나 케이블 단자를 움직여 휴대폰 아래 USB-C 포트에 연결하세요.</p>
+        <p id="computer-usb-instructions">휴대폰이나 단자를 끌어 연결하세요.</p>
         <div id="computer-usb-board" data-connected="false" aria-label="탁자 위 휴대폰과 USB-C 단자">
           <div id="computer-usb-cable" aria-hidden="true"></div>
           <div class="usb-phone">
@@ -569,8 +559,8 @@
           </div>
           <button id="computer-usb-plug" type="button" aria-label="USB-C 케이블 단자 · 끌어서 이동" aria-pressed="false" aria-describedby="computer-usb-instructions"><img id="computer-usb-plug-art" src="assets/ui/usb-connection/plug.png" alt="" draggable="false" /></button>
         </div>
-        <output id="computer-usb-status" role="status" aria-live="polite">USB 연결 안 됨</output>
-        <button id="computer-usb-close" type="button">컴퓨터로 돌아가기 · Esc</button>
+        <output id="computer-usb-status" role="status" aria-live="polite"></output>
+        <button id="computer-usb-close" type="button">돌아가기</button>
       </section>
     </div>
     <div id="elevator-cabin" role="dialog" aria-modal="true" aria-label="엘리베이터 내부" tabindex="-1" hidden>

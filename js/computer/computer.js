@@ -80,29 +80,28 @@ function refreshSolarDownload() {
   const installed = collectedItems.has('solar-app-installed');
   const task = computerSolarTask;
   const percent = task ? Math.floor(task.elapsed / task.duration * 100) : 0;
-  const remaining = task ? Math.ceil((task.duration - task.elapsed) / 1000) : 0;
-  document.getElementById('computer-internet-status').textContent = ready ? '네이버 블로그 연결됨 · 시설관리의 기록' :
-    '17층 전력이 끊겨 와이파이에 연결할 수 없습니다. 태양광 장치에서 17층 전력을 켜 주세요.';
+  document.getElementById('computer-internet-status').textContent = ready ? '연결됨' :
+    '17층 전력이 끊겨 연결할 수 없습니다.';
   document.getElementById('computer-solar-page').hidden = !ready;
   document.getElementById('computer-solar-download').disabled = !ready || downloaded || installed || Boolean(task);
   document.getElementById('computer-solar-transfer').disabled = !ready || !downloaded || installed || Boolean(task) || !computerUsbConnected;
   const connectButton = document.getElementById('computer-usb-open');
   connectButton.disabled = !computerUsbAvailable() || computerUsbConnected;
-  connectButton.textContent = computerUsbConnected ? 'USB 연결됨 · 정수호의 휴대폰' : '휴대폰 연결하기';
+  connectButton.textContent = computerUsbConnected ? 'USB 연결됨' : '휴대폰 연결';
   for (const kind of ['download', 'transfer']) {
     const progress = document.getElementById(`computer-solar-${kind}-progress`);
     progress.hidden = task?.kind !== kind;
     progress.value = percent;
   }
-  document.getElementById('computer-solar-status').textContent = task?.kind === 'download' ? `다운로드 중 · ${percent}% · 약 ${remaining}초 남음` :
-    downloaded || installed ? '다운로드 완료. 바탕화면의 ‘파일 전송’ 앱에서 휴대폰으로 전송하세요.' : '첨부파일 다운로드에는 약 5초가 걸립니다.';
+  document.getElementById('computer-solar-status').textContent = task?.kind === 'download' ? `다운로드 ${percent}%` :
+    downloaded || installed ? '다운로드 완료 · 파일 전송 앱에서 설치' : '';
   document.getElementById('computer-transfer-file').hidden = !downloaded && !installed;
-  document.getElementById('computer-transfer-status').textContent = installed ? '전송·설치 및 장치 등록 완료. 휴대폰(P)에서 비상 전력 제어 앱을 여세요.' :
-    task?.kind === 'transfer' ? `전송·설치 중 · ${percent}% · 약 ${remaining}초 남음` :
-    !ready ? '17층에 태양광 전력을 공급한 뒤 전송하세요.' : !downloaded ? '블로그 앱에서 태양광 제어 앱을 먼저 다운로드하세요.' :
-    phoneDock ? '충전함에 맡긴 휴대폰을 가져온 뒤 전송하세요.' : phoneBattery <= 0 ? '휴대폰을 충전한 뒤 전송하세요.' :
-    !computerUsbConnected ? '‘휴대폰 연결하기’를 눌러 책상 위 케이블을 연결하세요.' :
-    '전송·설치에는 약 8초가 걸립니다. 완료될 때까지 컴퓨터를 사용해 주세요.';
+  document.getElementById('computer-transfer-status').textContent = installed ? '등록 완료 · 휴대폰에서 전력 제어 가능' :
+    task?.kind === 'transfer' ? `설치 ${percent}%` :
+    !ready ? '17층 전력 필요' : !downloaded ? '블로그에서 앱 다운로드 필요' :
+    phoneDock ? '충전함에서 휴대폰을 가져오세요.' : phoneBattery <= 0 ? '휴대폰 충전 필요' :
+    !computerUsbConnected ? '휴대폰 연결 필요' :
+    '';
 }
 
 function startSolarFileTask(kind) {

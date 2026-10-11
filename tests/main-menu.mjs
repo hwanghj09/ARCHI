@@ -49,10 +49,13 @@ try {
   if (await page.locator('#menu-fullscreen').isEnabled()) {
     await page.locator('#menu-fullscreen').click();
     await page.waitForFunction(() => Boolean(document.fullscreenElement));
+    // 정지된 테스트 시계에서 fullscreenchange가 전달될 프레임을 진행한다.
+    await page.clock.runFor(100);
     assert.match(await page.locator('#menu-fullscreen').textContent(), /해제/);
     assert.deepEqual(await page.evaluate(() => keyboardLockCalls), [['Escape']]);
     await page.locator('#menu-fullscreen').click();
     await page.waitForFunction(() => !document.fullscreenElement);
+    await page.clock.runFor(100);
     assert.deepEqual(await page.evaluate(() => keyboardLockCalls), [['Escape'], 'unlock']);
     await page.evaluate(() => { window.rejectKeyboardLock = true; });
     await page.locator('#menu-fullscreen').click();
@@ -60,11 +63,14 @@ try {
     assert(await page.evaluate(() => Boolean(document.fullscreenElement)), 'Denied keyboard lock keeps fullscreen available');
     await page.locator('#menu-fullscreen').click();
     await page.waitForFunction(() => !document.fullscreenElement);
+    await page.clock.runFor(100);
     await page.evaluate(() => { Object.defineProperty(navigator, 'keyboard', { value: undefined }); });
     await page.locator('#menu-fullscreen').click();
     await page.waitForFunction(() => Boolean(document.fullscreenElement));
+    await page.clock.runFor(100);
     await page.locator('#menu-fullscreen').click();
     await page.waitForFunction(() => !document.fullscreenElement);
+    await page.clock.runFor(100);
   }
   await page.keyboard.press('Escape');
   assert(await page.locator('#menu-settings-button').evaluate(el => el === document.activeElement));

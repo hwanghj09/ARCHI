@@ -20,3 +20,5 @@
   #inspection[data-surface="hydrant"] .item-panel { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; align-items: center; padding: 4px 12px; }
   #inspection[data-surface="hydrant"] .item-description { margin: 0; }
 }
+
+.item-description:empty { display: none; }

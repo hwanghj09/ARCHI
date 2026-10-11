@@ -16,7 +16,7 @@ let phoneBlocked = [];
 function loadPhoneNote() {
   try {
     savedPhoneNote = (localStorage.getItem('archi.phone.note') || '').slice(0, 4000);
-    phoneNoteStatus.textContent = savedPhoneNote ? '저장한 메모를 불러왔습니다.' : '필요한 단서를 적고 저장하세요.';
+    phoneNoteStatus.textContent = savedPhoneNote ? '저장됨' : '';
   } catch {
     phoneNoteStatus.textContent = '저장소에 접근할 수 없습니다. 메모는 이 화면에 남아 있습니다.';
     return;
@@ -105,8 +105,7 @@ function refreshPhone() {
   phoneLightButton.setAttribute('aria-pressed', String(phoneLightOn));
   phoneLightButton.setAttribute('aria-label', phoneLightOn ? '플래시 끄기' : '플래시 켜기');
   document.getElementById('phone-light-state').textContent = phoneLightOn ? '켜짐' : '꺼짐';
-  document.getElementById('phone-help').textContent = percent === 0 ? '배터리가 소진되었습니다. 전력이 공급되는 충전함 앞에서 E로 휴대폰을 맡기세요.' :
-    phoneLightOn ? '앞을 비추고 있습니다. 화면을 닫고 이동하세요.' : '플래시를 켜면 앞을 비추며 걸을 수 있습니다.';
+  document.getElementById('phone-help').textContent = percent === 0 ? '배터리 없음 · 충전함에서 충전하세요.' : '';
   world.dataset.flashlight = phoneLightOn && itemUseTime <= 0 ? 'on' : 'off';
   phoneButton.dataset.flashlight = phoneLightOn ? 'on' : 'off';
   const flashState = `플래시 ${phoneLightOn ? '켜짐' : '꺼짐'}`;
@@ -158,7 +157,6 @@ function togglePhoneLight() {
   phoneAwayTime = !phoneLightOn && !usingPhone ? 360 : 0;
   if (usingPhone || Math.abs(body.velocity.x) < .01) animate(0);
   refreshPhone();
-  showStatus(`휴대폰 라이트를 ${phoneLightOn ? '켰습니다' : '껐습니다'}.`);
 }
 
 function chargePhone(door) {

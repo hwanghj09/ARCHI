@@ -123,7 +123,7 @@ function showInventoryList(focusItem) {
   const items = ownedInventoryIds();
   const content = writingNode('div', 'item-panel inventory-content');
   const grid = writingNode('div', 'inventory-grid');
-  const description = writingNode('p', 'item-description', items.length ? '물건에 마우스를 올리거나 눌러서 살펴보세요.' : '가방이 비어 있다.');
+  const description = writingNode('p', 'item-description', items.length ? '' : '가방이 비어 있다.');
   description.id = 'item-description';
   description.setAttribute('role', 'status');
   for (const id of items) {

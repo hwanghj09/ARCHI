@@ -75,3 +75,5 @@
 #phone-button[data-flashlight="on"] #phone-flash-state { border-color: #ffe99b; background: #fff5cc; color: #30260b; }
 #phone-button[data-docked="true"] { color: #879292; }
 #phone-button[data-docked="true"]::after { content: attr(data-charge); position: fixed; right: max(24px, env(safe-area-inset-right)); bottom: 88px; max-width: calc(100vw - 48px); padding: 6px 9px; border: 1px solid #758a78; background: #101c20ed; color: #dbe5d8; font: 11px/1.5 Arial, sans-serif; pointer-events: none; }
+
+#phone-help:empty, #phone-note-status:empty { display: none; }
