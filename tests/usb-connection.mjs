@@ -1,7 +1,12 @@
 import assert from 'node:assert/strict';
 import { chromium } from 'playwright';
+import sharp from 'sharp';
 import { finishSceneTransition } from './scene-transition.mjs';
 
+for (const [file, width, height, alpha] of [['phone', 512, 1024, true], ['plug', 128, 320, true], ['cord', 40, 40, true], ['desk', 1536, 1024, false]]) {
+  const meta = await sharp(new URL(`../assets/ui/usb-connection/${file}.png`, import.meta.url).pathname).metadata();
+  assert.deepEqual([meta.width, meta.height, meta.hasAlpha], [width, height, alpha], `${file} sprite format`);
+}
 const browser = await chromium.launch();
 try {
   for (const [width, height, touch] of [[1280, 720, false], [390, 844, true], [844, 390, true], [568, 320, false]]) {
@@ -28,38 +33,63 @@ try {
     assert(await page.locator('.usb-desk').evaluate(el => el.scrollWidth <= el.clientWidth + 1));
     await page.locator('#computer-usb-port').click();
     assert.equal(await page.evaluate(() => computerUsbConnected), false, 'The port alone does not connect');
-    await page.locator('#computer-usb-plug').scrollIntoViewIfNeeded();
     const center = async selector => {
       const box = await page.locator(selector).boundingBox();
       return { x: box.x + box.width / 2, y: box.y + box.height / 2 };
     };
-    let from = await center('#computer-usb-plug');
+    const drag = async (from, to, beforeRelease = () => {}) => {
+      if (touch) {
+        const cdp = await page.context().newCDPSession(page);
+        await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [from] });
+        await cdp.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [to] });
+        await beforeRelease();
+        await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
+        await cdp.detach();
+      } else {
+        await page.mouse.move(from.x, from.y); await page.mouse.down();
+        await page.mouse.move(to.x, to.y, { steps: 8 });
+        await beforeRelease();
+        await page.mouse.up();
+      }
+    };
+    await page.locator('#computer-usb-phone-art').evaluate(img => img.decode());
+    await page.locator('#computer-usb-plug-art').evaluate(img => img.decode());
+    const phoneVisible = async () => {
+      const phone = await page.locator('#computer-usb-phone').boundingBox();
+      const board = await page.locator('#computer-usb-board').boundingBox();
+      assert(phone.x >= board.x && phone.y >= board.y && phone.x + phone.width <= board.x + board.width + 1 && phone.y + phone.height <= board.y + board.height + 1, 'The entire phone stays on the tabletop');
+    };
+    await phoneVisible();
+    await page.screenshot({ path: `.local/usb-table-${width}.png` });
+    await drag(await center('#computer-usb-phone'), { x: -100, y: -100 });
+    await phoneVisible();
+    assert.equal(await page.evaluate(() => computerUsbConnected), false, 'Moving the phone to the edge does not connect');
+    await page.locator('#computer-usb-close').click();
+    await page.locator('#computer-usb-open').click();
+    // Move the phone onto the stationary connector, preserving the pointer grab offset.
+    let from = await center('#computer-usb-phone');
+    let geometry = await page.evaluate(() => computerUsbGeometry);
+    await drag(from, { x: from.x + geometry.plug.x - geometry.port.x, y: from.y + geometry.plug.y - geometry.port.y }, async () => {
+      await phoneVisible();
+      assert.equal(await page.evaluate(() => computerUsbConnected), false, 'Insertion happens on release');
+      assert.equal(await page.locator('#computer-usb-board').getAttribute('data-aligned'), 'true');
+    });
+    assert.equal(await page.evaluate(() => computerUsbConnected), true, 'The phone can be dragged onto the cable');
+    await page.evaluate(() => { computerUsbConnected = false; refreshSolarDownload(); });
+    await page.locator('#computer-usb-open').click();
     const board = await page.locator('#computer-usb-board').boundingBox();
-    await page.mouse.move(from.x, from.y); await page.mouse.down();
-    await page.mouse.move(board.x + 15, board.y + 25, { steps: 4 }); await page.mouse.up();
-    assert.equal(await page.evaluate(() => computerUsbConnected), false, 'A wrong drop returns the loose cable');
+    await drag(await center('#computer-usb-plug'), { x: board.x + 30, y: board.y + 30 });
+    assert.equal(await page.evaluate(() => computerUsbConnected), false, 'A wrong drop keeps the cable loose');
     assert(await page.locator('#computer-solar-transfer').isDisabled());
-    await page.locator('#computer-usb-plug').scrollIntoViewIfNeeded();
     from = await center('#computer-usb-plug');
-    const to = await center('#computer-usb-port');
-    assert(from.x >= 0 && to.x >= 0 && from.y > 0 && to.y > 0 && from.y < height && to.y < height);
-    const path = await page.locator('#computer-usb-cable').getAttribute('d');
-    if (touch) {
-      const cdp = await page.context().newCDPSession(page);
-      await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x: from.x, y: from.y }] });
-      await cdp.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [{ x: to.x, y: to.y }] });
-      assert.notEqual(await page.locator('#computer-usb-cable').getAttribute('d'), path, 'The cable follows a real touch drag');
+    geometry = await page.evaluate(() => computerUsbGeometry);
+    const cord = await page.locator('#computer-usb-cable').getAttribute('style');
+    await drag(from, { x: from.x + geometry.port.x - geometry.plug.x, y: from.y + geometry.port.y - geometry.plug.y }, async () => {
+      assert.notEqual(await page.locator('#computer-usb-cable').getAttribute('style'), cord, 'The sprite cable follows the connector');
       assert.equal(await page.evaluate(() => computerUsbConnected), false);
+      await phoneVisible();
       await page.screenshot({ path: `.local/usb-physical-${width}.png` });
-      await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
-    } else {
-      await page.mouse.move(from.x, from.y); await page.mouse.down();
-      await page.mouse.move(to.x, to.y, { steps: 8 });
-      assert.notEqual(await page.locator('#computer-usb-cable').getAttribute('d'), path, 'The cable follows the mouse');
-      assert.equal(await page.evaluate(() => computerUsbConnected), false);
-      await page.screenshot({ path: `.local/usb-physical-${width}.png` });
-      await page.mouse.up();
-    }
+    });
     assert.equal(await page.evaluate(() => computerUsbConnected), true);
     assert(await page.locator('#computer-usb-panel').isHidden(), 'Successful insertion returns to the desktop');
     assert(await page.locator('#computer').isVisible());
@@ -99,5 +129,5 @@ try {
     assert.deepEqual(errors, []);
     await page.close();
   }
-  console.log('PASS: separate physical view, mouse/touch insertion, wrong drops, transfer gate, 8-second transfer timing, power/battery/dock guards, Escape, keyboard, restore cleanup and four viewport sizes.');
+  console.log('PASS: tabletop sprites, mouse/touch dragging of phone and connector, full phone containment, wrong drops, transfer gate, power/battery/dock guards, Escape, keyboard, restore cleanup and four viewport sizes.');
 } finally { await browser.close(); }

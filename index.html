@@ -560,12 +560,14 @@
     <div id="computer-usb-panel" role="dialog" aria-modal="true" aria-labelledby="computer-usb-title" hidden>
       <section class="usb-desk">
         <h2 id="computer-usb-title">휴대폰 USB 연결</h2>
-        <p id="computer-usb-instructions">책상 위 USB-C 케이블의 끝을 휴대폰 아래 포트까지 끌어 연결하세요.</p>
-        <div id="computer-usb-board" data-connected="false" aria-label="책상 위 컴퓨터와 휴대폰">
-          <div class="usb-computer" aria-hidden="true"><span>작업용 컴퓨터</span><i id="computer-usb-socket"></i></div>
-          <svg class="usb-cable" aria-hidden="true"><path id="computer-usb-cable"></path></svg>
-          <div class="usb-phone"><span aria-hidden="true">정수호의<br>휴대폰</span><button id="computer-usb-port" type="button" aria-label="휴대폰 USB-C 포트" aria-describedby="computer-usb-instructions"></button></div>
-          <button id="computer-usb-plug" type="button" aria-label="컴퓨터 USB-C 케이블 단자" aria-pressed="false" aria-describedby="computer-usb-instructions"><span aria-hidden="true"></span></button>
+        <p id="computer-usb-instructions">휴대폰이나 케이블 단자를 움직여 휴대폰 아래 USB-C 포트에 연결하세요.</p>
+        <div id="computer-usb-board" data-connected="false" aria-label="탁자 위 휴대폰과 USB-C 단자">
+          <div id="computer-usb-cable" aria-hidden="true"></div>
+          <div class="usb-phone">
+            <button id="computer-usb-phone" type="button" aria-label="정수호의 휴대폰 · 끌어서 이동" aria-describedby="computer-usb-instructions"><img id="computer-usb-phone-art" src="assets/ui/usb-connection/phone.png" alt="" draggable="false" /></button>
+            <button id="computer-usb-port" type="button" aria-label="휴대폰 USB-C 포트" aria-describedby="computer-usb-instructions"></button>
+          </div>
+          <button id="computer-usb-plug" type="button" aria-label="USB-C 케이블 단자 · 끌어서 이동" aria-pressed="false" aria-describedby="computer-usb-instructions"><img id="computer-usb-plug-art" src="assets/ui/usb-connection/plug.png" alt="" draggable="false" /></button>
         </div>
         <output id="computer-usb-status" role="status" aria-live="polite">USB 연결 안 됨</output>
         <button id="computer-usb-close" type="button">컴퓨터로 돌아가기 · Esc</button>

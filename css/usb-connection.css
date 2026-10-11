@@ -1,32 +1,21 @@
-#computer-usb-panel { position: fixed; inset: 0; z-index: 14; display: grid; place-items: center; overflow: auto; padding: 12px; background: #07110b99; color: #e0e8e2; font: 14px Arial, sans-serif; }
+#computer-usb-panel { position: fixed; inset: 0; z-index: 14; overflow: hidden; color: #eee8dc; font: 14px Arial, sans-serif; background: #888c90 url('../assets/ui/usb-connection/desk.png') center / cover no-repeat; }
 #computer-usb-panel[hidden] { display: none; }
-.usb-desk { width: min(720px, 100%); max-height: calc(100dvh - 24px); overflow: auto; padding: 22px; border: 1px solid #788b7e; border-radius: 8px; background: #28362e; box-shadow: 0 12px 44px #0008; }
-.usb-desk h2 { margin: 0 0 12px; font-size: 20px; }
-#computer-usb-panel button { display: inline-flex; align-items: center; justify-content: center; min-width: 44px; min-height: 44px; border: 1px solid #94a99b; border-radius: 4px; background: #364a3d; color: inherit; font: inherit; cursor: pointer; }
-#computer-usb-panel button:focus-visible { outline: 3px solid #e3b574; outline-offset: -3px; }
-#computer-usb-close { padding: 8px 14px; }
-#computer-usb-instructions { font-size: 13px; line-height: 1.7; }
-#computer-usb-board { position: relative; height: 250px; width: 100%; max-width: 640px; overflow: hidden; border: 1px solid #afbdb5; border-radius: 8px; background: linear-gradient(115deg, #5a655e, #3a463e); user-select: none; }
-.usb-computer { position: absolute; left: 8%; top: 50px; width: 28%; height: 95px; border: 7px solid #37433f; border-bottom-width: 12px; border-radius: 5px; background: #193e35; color: #d5eadf; text-align: center; font-size: 12px; }
-.usb-computer > span { display: block; padding-top: 25px; }
-.usb-computer::before { content: ''; position: absolute; top: 88px; left: 44%; width: 12%; height: 22px; background: #46534c; }
-.usb-computer::after { content: ''; position: absolute; top: 108px; left: 22%; width: 56%; height: 7px; border-radius: 4px; background: #46534c; }
-#computer-usb-socket { position: absolute; right: -5px; bottom: -11px; width: 12px; height: 6px; border: 1px solid #a7b3aa; border-radius: 3px; background: #111c17; }
-.usb-cable { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; }
-.usb-cable path { fill: none; stroke: #19201b; stroke-width: 6; stroke-linecap: round; }
-.usb-phone { position: absolute; left: 80%; top: 22px; transform: translateX(-50%); width: 76px; height: 160px; border: 5px solid #2c3531; border-radius: 12px; background: linear-gradient(#243c35, #192e27); color: #d7e5db; text-align: center; }
-.usb-phone > span { display: block; margin-top: 50px; font-size: 11px; line-height: 1.7; }
-.usb-phone::before { content: ''; position: absolute; top: 4px; left: 28px; width: 10px; height: 3px; border-radius: 2px; background: #0b1711; }
-#computer-usb-panel #computer-usb-port { position: absolute; left: 50%; bottom: -27px; transform: translateX(-50%); width: 52px; height: 44px; padding: 0; border: 0; background: transparent; border-radius: 6px; z-index: 2; }
-#computer-usb-port::before { content: ''; width: 24px; height: 8px; border: 2px solid #839a8b; border-radius: 6px; background: #070e0a; }
-#computer-usb-board[data-armed="true"] #computer-usb-port { outline: 2px dashed #a96527; outline-offset: -2px; background: #e6b36733; }
-#computer-usb-panel #computer-usb-plug { position: absolute; z-index: 3; transform: translate(-50%, -50%); width: 44px; height: 56px; padding: 0; border-color: transparent; background: transparent; touch-action: none; cursor: grab; border-radius: 8px; }
-#computer-usb-panel #computer-usb-plug:active { cursor: grabbing; }
-#computer-usb-plug > span { position: relative; display: block; width: 24px; height: 30px; border: 2px solid #1b251f; border-radius: 5px; background: linear-gradient(90deg, #4a5d50, #7c8e81 45%, #46594c); }
-#computer-usb-plug > span::before { content: ''; position: absolute; width: 18px; height: 12px; left: 1px; top: -12px; border: 2px solid #838c85; border-radius: 5px 5px 2px 2px; background: linear-gradient(90deg, #a4afa7, #e3e8e4, #929e95); }
-#computer-usb-plug > span::after { content: ''; position: absolute; left: 8px; bottom: -9px; width: 4px; height: 9px; background: #303b35; }
-#computer-usb-board[data-connected="true"] .usb-phone { box-shadow: 0 0 0 2px #729c83; }
-#computer-usb-panel #computer-usb-board[data-connected="true"] #computer-usb-plug { background: transparent; border-color: transparent; cursor: default; }
-#computer-usb-status { display: block; margin: 10px 0; min-height: 22px; color: #ccdcd0; font-size: 13px; }
+.usb-desk { display: grid; grid-template-rows: auto auto minmax(0, 1fr) auto auto; width: 100%; height: 100%; padding: clamp(12px, 3vw, 32px); background: linear-gradient(#0e1117a8, transparent 26%, transparent 76%, #0e1117b8); }
+.usb-desk h2 { margin: 0; font-size: 20px; font-weight: 500; letter-spacing: .06em; text-shadow: 0 2px 8px #000; }
+#computer-usb-instructions { margin: 8px 0; font-size: 13px; line-height: 1.6; color: #d6d0c3; text-shadow: 0 2px 6px #000; }
+#computer-usb-panel button { min-width: 44px; min-height: 44px; color: inherit; font: inherit; cursor: pointer; }
+#computer-usb-panel button:focus-visible { outline: 2px solid #e4c590; outline-offset: 3px; }
+#computer-usb-board { position: relative; width: 100%; min-height: 0; overflow: visible; user-select: none; }
+.usb-phone { position: absolute; transform: translate(-50%, -50%); z-index: 2; }
+#computer-usb-panel #computer-usb-phone { display: block; width: 100%; height: 100%; padding: 0; border: 0; background: transparent; touch-action: none; cursor: grab; }
+#computer-usb-phone-art { display: block; width: 100%; height: 100%; pointer-events: none; filter: drop-shadow(4px 9px 7px #0009); }
+#computer-usb-panel #computer-usb-port { position: absolute; left: 50%; bottom: -20px; transform: translateX(-50%); width: 44px; height: 40px; padding: 0; border: 0; border-radius: 50%; background: transparent; }
+#computer-usb-board:is([data-armed="true"], [data-aligned="true"]) #computer-usb-port { box-shadow: 0 0 15px #ddc89980; outline: 1px solid #ddc89999; }
+#computer-usb-panel #computer-usb-plug { position: absolute; z-index: 3; transform: translateX(-50%); padding: 0; border: 0; background: transparent; touch-action: none; cursor: grab; }
+#computer-usb-plug-art { position: absolute; left: 50%; transform: translateX(-50%); pointer-events: none; filter: drop-shadow(3px 5px 3px #0008); }
+#computer-usb-panel :is(#computer-usb-phone, #computer-usb-plug):active { cursor: grabbing; }
+#computer-usb-cable { position: absolute; z-index: 1; background: url('../assets/ui/usb-connection/cord.png') center top / 100% auto repeat-y; filter: drop-shadow(3px 4px 3px #0007); pointer-events: none; }
+#computer-usb-status { position: relative; z-index: 4; margin: 6px 0 10px; min-height: 22px; color: #d6d0c3; font-size: 13px; text-shadow: 0 2px 6px #000; }
+#computer-usb-close { position: relative; z-index: 4; justify-self: start; padding: 8px 14px; border: 1px solid #bfb49d66; border-radius: 4px; background: #1a1c20b3; }
 #computer-usb-board[data-available="false"] { opacity: .5; }
-#computer-usb-panel :is(#computer-usb-port, #computer-usb-plug):disabled { opacity: 1; }
+@media (max-height: 480px) { .usb-desk { padding: 10px 16px; } .usb-desk h2 { font-size: 16px; } #computer-usb-instructions { margin: 4px 0; } #computer-usb-status { position: relative; z-index: 4; margin: 4px 0; } }

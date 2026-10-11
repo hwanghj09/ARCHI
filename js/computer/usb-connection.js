@@ -1,6 +1,7 @@
 // 케이블은 컴퓨터를 사용하는 동안만 연결된다. 앱 설치 기록과 달리 저장하지 않는다.
 const computerUsbBoard = document.getElementById('computer-usb-board');
 const computerUsbPanel = document.getElementById('computer-usb-panel');
+const computerUsbPhone = document.getElementById('computer-usb-phone');
 const computerUsbPlug = document.getElementById('computer-usb-plug');
 const computerUsbPort = document.getElementById('computer-usb-port');
 const computerUsbStatus = document.getElementById('computer-usb-status');
@@ -8,9 +9,12 @@ let computerUsbConnected = false;
 let computerUsbArmed = false;
 let computerUsbDrag = null;
 let computerUsbBlocked = [];
+let computerUsbPositions = { phone: { x: .4, y: .42 }, plug: { x: .62, y: .84 } };
+let computerUsbGeometry = null;
 
 function openComputerUsbConnection() {
   if (!computerUsbAvailable() || computerUsbConnected || !computerUsbPanel.hidden) return;
+  computerUsbPositions = { phone: { x: .4, y: .42 }, plug: { x: .62, y: .84 } };
   computer.hidden = true;
   computerUsbPanel.hidden = false;
   computerUsbBlocked = [...document.body.children].filter(element => element !== computerUsbPanel && element.tagName !== 'SCRIPT' && !element.inert);
@@ -37,26 +41,40 @@ function computerUsbAvailable() {
   return usingComputer && !transitioning && floorHasPower(17) && !phoneDock && phoneBattery > 0;
 }
 
-function computerUsbPoint(element) {
-  const rect = element.getBoundingClientRect(), board = computerUsbBoard.getBoundingClientRect();
-  return { x: rect.left + rect.width / 2 - board.left, y: rect.top + rect.height / 2 - board.top };
-}
-
 function drawComputerUsb() {
   if (!computerUsbBoard.getClientRects().length) return;
-  const board = computerUsbBoard.getBoundingClientRect();
-  const port = computerUsbPoint(computerUsbPort);
-  const point = computerUsbDrag?.point || (computerUsbConnected ? { x: port.x, y: port.y + 16 } : { x: board.width * .48, y: 198 });
-  computerUsbPlug.style.left = `${point.x}px`;
-  computerUsbPlug.style.top = `${point.y}px`;
-  const from = computerUsbPoint(document.getElementById('computer-usb-socket'));
-  document.getElementById('computer-usb-cable').setAttribute('d', `M ${from.x} ${from.y} C ${from.x} 235, ${point.x} 235, ${point.x} ${point.y + 20}`);
+  const { width, height, top } = computerUsbBoard.getBoundingClientRect();
+  const phoneArt = document.getElementById('computer-usb-phone-art');
+  const plugArt = document.getElementById('computer-usb-plug-art');
+  const phoneHeight = Math.min(440, height * .7, width * .9 / .5);
+  const phoneWidth = phoneHeight * (phoneArt.naturalWidth / phoneArt.naturalHeight || .5);
+  const plugHeight = phoneHeight * .22;
+  const plugWidth = plugHeight * (plugArt.naturalWidth / plugArt.naturalHeight || .5);
+  const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
+  const phone = computerUsbPositions.phone, plug = computerUsbPositions.plug;
+  phone.x = clamp(phone.x * width, phoneWidth / 2 + 8, width - phoneWidth / 2 - 8) / width;
+  phone.y = clamp(phone.y * height, phoneHeight / 2 + 8, height - phoneHeight / 2 - 8) / height;
+  plug.x = clamp(plug.x * width, Math.max(22, plugWidth / 2) + 8, width - Math.max(22, plugWidth / 2) - 8) / width;
+  plug.y = clamp(plug.y * height, 8, height - plugHeight - 8) / height;
+  Object.assign(computerUsbPhone.parentElement.style, { left: `${phone.x * width}px`, top: `${phone.y * height}px`, width: `${phoneWidth}px`, height: `${phoneHeight}px` });
+  // 스프라이트 아래 중앙의 실제 소켓과 금속 단자 끝을 맞춘다.
+  Object.assign(computerUsbPort.style, { top: `${phoneHeight * .985 - 22}px`, bottom: 'auto', height: '44px' });
+  const port = { x: phone.x * width, y: phone.y * height + phoneHeight * .485 };
+  const tip = { x: plug.x * width, y: plug.y * height };
+  const hitWidth = Math.max(44, plugWidth + 12), hitHeight = Math.max(44, plugHeight);
+  Object.assign(computerUsbPlug.style, { left: `${tip.x}px`, top: `${tip.y}px`, width: `${hitWidth}px`, height: `${hitHeight}px` });
+  Object.assign(plugArt.style, { top: '0px', width: `${plugWidth}px`, height: `${plugHeight}px` });
+  const cordWidth = plugWidth * .3, cordTop = tip.y + plugHeight - 1;
+  Object.assign(document.getElementById('computer-usb-cable').style, { left: `${tip.x - cordWidth / 2}px`, top: `${cordTop}px`, width: `${cordWidth}px`, height: `${window.innerHeight - top - cordTop}px` });
+  const aligned = Math.abs(tip.x - port.x) <= 14 && Math.abs(tip.y - port.y) <= 14;
+  computerUsbGeometry = { phone: { x: phone.x * width, y: phone.y * height }, plug: tip, port, aligned };
+  computerUsbBoard.dataset.aligned = String(aligned);
 }
 
 function cancelComputerUsbDrag() {
   const drag = computerUsbDrag;
   computerUsbDrag = null;
-  if (drag && computerUsbPlug.hasPointerCapture(drag.id)) computerUsbPlug.releasePointerCapture(drag.id);
+  if (drag && drag.element.hasPointerCapture(drag.id)) drag.element.releasePointerCapture(drag.id);
   drawComputerUsb();
 }
 
@@ -70,10 +88,10 @@ function refreshComputerUsb() {
   computerUsbBoard.dataset.available = String(available);
   computerUsbBoard.dataset.connected = String(computerUsbConnected);
   computerUsbBoard.dataset.armed = String(computerUsbArmed);
-  computerUsbPlug.disabled = computerUsbPort.disabled = !available || computerUsbConnected;
+  computerUsbPhone.disabled = computerUsbPlug.disabled = computerUsbPort.disabled = !available || computerUsbConnected;
   computerUsbPlug.setAttribute('aria-pressed', String(computerUsbArmed || computerUsbConnected));
   computerUsbStatus.textContent = computerUsbConnected ? 'USB 연결됨 · 정수호의 휴대폰' :
-    !available ? '컴퓨터 전력과 휴대폰 소지·배터리를 확인하세요.' : computerUsbArmed ? '휴대폰 아래 USB-C 포트를 선택하세요.' : 'USB 연결 안 됨 · 단자를 포트까지 끌어 주세요.';
+    !available ? '컴퓨터 전력과 휴대폰 소지·배터리를 확인하세요.' : computerUsbArmed ? '휴대폰 아래 USB-C 포트를 선택하세요.' : '휴대폰이나 단자를 움직여 아래 USB-C 포트에 연결하세요.';
   drawComputerUsb();
 }
 
@@ -85,33 +103,48 @@ function connectComputerUsb() {
   closeComputerUsbConnection();
 }
 
-computerUsbPlug.addEventListener('pointerdown', event => {
-  if (event.button !== 0 || computerUsbPanel.hidden || !computerUsbAvailable() || computerUsbConnected) return;
-  event.preventDefault();
-  computerUsbPlug.focus({ preventScroll: true });
-  computerUsbDrag = { id: event.pointerId, startX: event.clientX, startY: event.clientY, moved: false };
-  computerUsbPlug.setPointerCapture(event.pointerId);
-});
-computerUsbPlug.addEventListener('pointermove', event => {
-  if (!computerUsbDrag || computerUsbDrag.id !== event.pointerId) return;
-  if (Math.hypot(event.clientX - computerUsbDrag.startX, event.clientY - computerUsbDrag.startY) < 4 && !computerUsbDrag.moved) return;
-  computerUsbDrag.moved = true;
-  computerUsbArmed = false;
-  computerUsbBoard.dataset.armed = 'false';
-  const board = computerUsbBoard.getBoundingClientRect();
-  computerUsbDrag.point = { x: Math.max(22, Math.min(board.width - 22, event.clientX - board.left)), y: Math.max(28, Math.min(board.height - 28, event.clientY - board.top)) };
-  drawComputerUsb();
-});
-computerUsbPlug.addEventListener('pointerup', event => {
-  if (!computerUsbDrag || computerUsbDrag.id !== event.pointerId) return;
-  const moved = computerUsbDrag.moved;
-  const port = computerUsbPort.getBoundingClientRect();
-  cancelComputerUsbDrag();
-  if (!moved) { computerUsbArmed = !computerUsbArmed; refreshComputerUsb(); return; }
-  if (event.clientX >= port.left && event.clientX <= port.right && event.clientY >= port.top && event.clientY <= port.bottom) connectComputerUsb();
-  else { refreshComputerUsb(); computerUsbStatus.textContent = '포트에 닿지 않았습니다. 단자를 다시 연결하세요.'; }
-});
-for (const event of ['pointercancel', 'lostpointercapture']) computerUsbPlug.addEventListener(event, cancelComputerUsbDrag);
+for (const [kind, element] of [['phone', computerUsbPhone], ['plug', computerUsbPlug]]) {
+  element.addEventListener('pointerdown', event => {
+    if (event.button !== 0 || computerUsbDrag || computerUsbPanel.hidden || !computerUsbAvailable() || computerUsbConnected) return;
+    event.preventDefault();
+    element.focus({ preventScroll: true });
+    const board = computerUsbBoard.getBoundingClientRect(), point = computerUsbGeometry[kind];
+    computerUsbDrag = { id: event.pointerId, element, kind, startX: event.clientX, startY: event.clientY, offsetX: event.clientX - board.left - point.x, offsetY: event.clientY - board.top - point.y, moved: false };
+    element.setPointerCapture(event.pointerId);
+  });
+  element.addEventListener('pointermove', event => {
+    const drag = computerUsbDrag;
+    if (!drag || drag.id !== event.pointerId) return;
+    if (Math.hypot(event.clientX - drag.startX, event.clientY - drag.startY) < 4 && !drag.moved) return;
+    drag.moved = true;
+    computerUsbArmed = false;
+    computerUsbBoard.dataset.armed = 'false';
+    const board = computerUsbBoard.getBoundingClientRect();
+    computerUsbPositions[kind] = { x: (event.clientX - board.left - drag.offsetX) / board.width, y: (event.clientY - board.top - drag.offsetY) / board.height };
+    drawComputerUsb();
+  });
+  element.addEventListener('pointerup', event => {
+    if (!computerUsbDrag || computerUsbDrag.id !== event.pointerId) return;
+    const moved = computerUsbDrag.moved;
+    cancelComputerUsbDrag();
+    if (!moved) { if (kind === 'plug') computerUsbArmed = !computerUsbArmed; refreshComputerUsb(); return; }
+    if (computerUsbGeometry.aligned) connectComputerUsb();
+    else { refreshComputerUsb(); computerUsbStatus.textContent = '휴대폰 아래 포트와 단자의 금속 끝을 맞춰 주세요.'; }
+  });
+  for (const event of ['pointercancel', 'lostpointercapture']) element.addEventListener(event, () => {
+    if (computerUsbDrag?.element === element) cancelComputerUsbDrag();
+  });
+  element.addEventListener('keydown', event => {
+    const moves = { ArrowLeft: [-12, 0], ArrowRight: [12, 0], ArrowUp: [0, -12], ArrowDown: [0, 12] };
+    if (!moves[event.key]) return;
+    event.preventDefault();
+    const board = computerUsbBoard.getBoundingClientRect();
+    computerUsbPositions[kind].x += moves[event.key][0] / board.width;
+    computerUsbPositions[kind].y += moves[event.key][1] / board.height;
+    drawComputerUsb();
+    if (computerUsbGeometry.aligned) connectComputerUsb();
+  });
+}
 computerUsbPlug.addEventListener('click', event => {
   if (event.detail !== 0 || computerUsbPlug.disabled) return;
   computerUsbArmed = !computerUsbArmed;
@@ -120,6 +153,7 @@ computerUsbPlug.addEventListener('click', event => {
 computerUsbPort.addEventListener('click', () => { if (computerUsbArmed) connectComputerUsb(); });
 window.addEventListener('blur', cancelComputerUsbDrag);
 new ResizeObserver(drawComputerUsb).observe(computerUsbBoard);
+for (const img of computerUsbBoard.querySelectorAll('img')) img.addEventListener('load', drawComputerUsb);
 document.getElementById('computer-usb-open').addEventListener('click', openComputerUsbConnection);
 document.getElementById('computer-usb-close').addEventListener('click', closeComputerUsbConnection);
 computerUsbPanel.addEventListener('keydown', event => {
