@@ -165,6 +165,7 @@ try {
     const exit = await exitDoor(page);
     assert.deepEqual([exit.y, exit.width], [210, front.door.width], 'Restroom exit is the same door');
     if (short === '1F') assert.equal(exit.x, 334, 'The lobby restroom uses its authored exit offset');
+    else if (short === '12F') assert.equal(exit.x, 185, 'The shared restroom background keeps its exit clear of the sinks');
     else assertMirroredDoor(front.room, front.door, 1800, exit, `${short} restroom`);
     await page.clock.runFor(100);
     await walkTo(exit.x + exit.width / 2);

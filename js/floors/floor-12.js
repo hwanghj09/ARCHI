@@ -13,12 +13,10 @@ const FLOOR12_LAYOUT = {
   elevatorWidthDeltas: [-20, -20, -20],
   // 비상계단 문 왼쪽으로 총 125px.
   stairsOffset: -125,
-  // 화장실: corridor.png 속 문 자리가 BUILDING_CORE.restroom(x=3612,width=145)과 전혀 다른 자리
-  // (실측 x≈3688~3805)라서 좌표만 보정했다. 그 자리에 그려진 건 손잡이·창문도 없는 밋밋한 벽감이라
-  // (17층처럼 손잡이·유리창이 그려진 완성된 문이 아님) art-door로 CSS 문을 껐더니 문이 아예 안
-  // 보였다 — doorStyle은 기본값(metal)을 그대로 써서 CSS 금속문(손잡이·프레임)이 그 자리 위에
-  // 그려지게 한다.
+  // 복도 그림 속 화장실 벽감(x≈3688~3805)에 맞춘다. metal 스타일에 공용 화장실 문 그림을 입힌다.
   restroomOverride: { doorX: 3688, doorWidth: 117 },
+  // 공통 화장실 배경의 출구용 빈 벽에 둔다. 복도 문 보정값을 그대로 비례 계산하면 거울·세면대를 가린다.
+  restroomExitX: 185,
   rooms: [
     // 문 좌표는 CSS 임시 그림이 아니라 assets/background/floor12/corridor.png(실제 손그림)에서 육안 실측한 값이다.
     // GENERATED.md의 "문 좌표 보정(2026-09-28)" 절 참고 — 그림 속 문 위치가 애초 설계 좌표와 상당히 달랐다.
