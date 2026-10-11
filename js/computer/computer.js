@@ -11,6 +11,7 @@ function exitComputer() {
   transitionScene(() => {
     usingComputer = false;
     computer.hidden = true;
+    resetComputerDesktop();
     refreshSolarDownload();
     updateInteraction();
   });
@@ -18,17 +19,15 @@ function exitComputer() {
 
 function openComputerApp(app, documentId) {
   if (transitioning || !usingComputer) return;
-  const titles = { files: '파일', notes: '업무 메모', document: '문서', mail: '사내 메일', calculator: '계산기', building: '건물 안내', browser: '블로그', transfer: '파일 전송' };
-  if (!Object.hasOwn(titles, app)) return;
+  if (!computerWindows.has(app)) return;
   const record = app === 'document' ? officeDocuments.find(item => item.id === documentId) : null;
   if (app === 'document' && !record) return;
-  computerWindow.hidden = false;
-  for (const view of Object.keys(titles)) {
-    document.getElementById(`computer-${view}`).hidden = view !== app;
-  }
-  let title = titles[app];
+  const state = computerWindows.get(app);
+  const wasClosed = !state.open;
+  const title = record ? record.title : COMPUTER_APPS[app].title;
+  showComputerWindow(state, title);
   if (app === 'document') {
-    title = record.title;
+    computerRecentDocuments = [record.id, ...computerRecentDocuments.filter(id => id !== record.id)];
     document.getElementById('computer-document-title').textContent = title;
     document.getElementById('computer-document-code').textContent = `${record.code} / REV ${record.revision}`;
     document.getElementById('computer-document-meta').textContent = `${record.category} · ${record.owner} · ${record.updated} · ${record.status}`;
@@ -36,11 +35,10 @@ function openComputerApp(app, documentId) {
     document.getElementById('computer-document-body').innerHTML = record.body;
     document.getElementById('computer-document-scroll').scrollTop = 0;
   }
-  if (app === 'mail') showComputerMailInbox();
+  if (app === 'mail' && wasClosed) showComputerMailInbox();
   if (app === 'building') refreshBuildingGuides();
   refreshSolarDownload();
-  if (app === 'browser') document.getElementById('computer-browser').scrollTop = 0;
-  document.getElementById('computer-window-title').textContent = title;
+  if (app === 'browser' && wasClosed) document.getElementById('computer-browser').scrollTop = 0;
   (app === 'notes' ? computerNote : app === 'mail' ? computerMailSearch : app === 'calculator' ?
     document.querySelector('#computer-calculator [data-calculator-key]') : app === 'browser' && !document.getElementById('computer-solar-page').hidden ?
     document.getElementById('computer-blog-list-title') : document.getElementById('computer-window-close')).focus({ preventScroll: true });
@@ -132,9 +130,7 @@ document.getElementById('computer-solar-download').addEventListener('click', () 
 document.getElementById('computer-solar-transfer').addEventListener('click', () => startSolarFileTask('transfer'));
 
 function closeComputerApp() {
-  computerWindow.hidden = true;
-  refreshSolarDownload();
-  computer.querySelector('button').focus();
+  if (computerActiveWindow) closeComputerWindow(computerActiveWindow);
 }
 
 const fileSearch = document.getElementById('computer-search');
@@ -157,7 +153,11 @@ const fileRows = officeDocuments.map(record => {
   metadata.className = 'computer-file-metadata';
   metadata.textContent = `${record.category} · ${record.owner}\n${record.updated} · ${record.status}`;
   button.append(icon, description, metadata);
-  button.addEventListener('click', () => openComputerApp('document', record.id));
+  button.addEventListener('click', event => {
+    for (const row of fileRows) row.button.dataset.selected = String(row.button === button);
+    if (event.detail === 0 || event.pointerType === 'touch') openComputerApp('document', record.id);
+  });
+  button.addEventListener('dblclick', () => openComputerApp('document', record.id));
   document.getElementById('computer-file-list').append(button);
   return { record, button };
 });
@@ -254,10 +254,6 @@ document.getElementById('computer-mail-back').addEventListener('click', () => {
 });
 showComputerMailInbox();
 
-computer.querySelectorAll('[data-computer-app]').forEach(button => {
-  button.addEventListener('click', () => openComputerApp(button.dataset.computerApp));
-});
-document.getElementById('computer-window-close').addEventListener('click', closeComputerApp);
 document.getElementById('computer-exit').addEventListener('click', exitComputer);
 try {
   computerNote.value = localStorage.getItem('archi.office17.note') || '';
@@ -274,9 +270,10 @@ document.getElementById('computer-save').addEventListener('click', () => {
   }
 });
 computer.addEventListener('keydown', event => {
-  if (event.code !== 'Tab') return;
-  const enabled = [...computer.querySelectorAll('button, input, select, textarea, [tabindex="0"]')].filter(el => !el.closest('[hidden]'));
+  if (event.code !== 'Tab' || event.altKey || event.ctrlKey || event.metaKey) return;
+  const scope = !computerStartMenu.hidden ? computerStartMenu : computer;
+  const enabled = [...scope.querySelectorAll('button, input, select, textarea, [tabindex="0"]')].filter(el => !el.disabled && el.getClientRects().length);
   const index = enabled.indexOf(document.activeElement);
-  if (event.shiftKey && index <= 0) { event.preventDefault(); enabled.at(-1).focus(); }
-  else if (!event.shiftKey && (index === -1 || index === enabled.length - 1)) { event.preventDefault(); enabled[0].focus(); }
+  if (event.shiftKey && index <= 0) { event.preventDefault(); enabled.at(-1)?.focus(); }
+  else if (!event.shiftKey && (index === -1 || index === enabled.length - 1)) { event.preventDefault(); enabled[0]?.focus(); }
 });

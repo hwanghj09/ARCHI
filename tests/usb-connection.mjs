@@ -21,7 +21,7 @@ try {
     await page.keyboard.press('e');
     await finishSceneTransition(page);
     await page.evaluate(() => { collectedItems.add('solar-app-downloaded'); refreshSolarDownload(); });
-    await page.locator('[data-computer-app="transfer"]').click();
+    await page.locator('[data-computer-task-app="transfer"]').click();
     assert(await page.locator('#computer-solar-transfer').isDisabled());
     await page.locator('#computer-solar-transfer').dispatchEvent('click');
     assert.equal(await page.evaluate(() => computerSolarTask), null, 'No transfer before physical connection');

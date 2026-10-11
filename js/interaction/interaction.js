@@ -77,7 +77,7 @@ function interact() {
       setOfficeComputerPower('on');
       usingComputer = true;
       computer.hidden = false;
-      computerWindow.hidden = true;
+      resetComputerDesktop();
       hint.hidden = true;
     });
     return;

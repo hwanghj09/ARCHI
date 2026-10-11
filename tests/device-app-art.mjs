@@ -80,9 +80,9 @@ try {
       assert(await pc.locator(`#computer-${name}`).isVisible(), `Painted ${name} shortcut still opens its app`);
       await checkIcon(shortcut.locator('.app-art'));
       await pc.locator('#computer-window-close').tap();
-      await checkIcon(pc.locator(`.computer-taskbar [data-computer-app="${name}"] .app-art`));
+      await checkIcon(pc.locator(`.computer-taskbar [data-computer-task-app="${name}"] .app-art`));
     }
-    await pc.locator('.computer-taskbar [data-computer-app="calculator"]').tap();
+    await pc.locator('.computer-taskbar [data-computer-task-app="calculator"]').tap();
     assert(await pc.locator('#computer-calculator').isVisible(), 'Painted taskbar icons keep their click targets');
     await pc.locator('#computer-window-close').tap();
     if (viewport.width === 1280) {

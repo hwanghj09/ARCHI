@@ -86,6 +86,7 @@
     <script src="js/computer/documents.js" defer></script>
     <script src="js/computer/usb-connection.js" defer></script>
     <script src="js/computer/computer.js" defer></script>
+    <script src="js/computer/desktop.js" defer></script>
     <script src="js/elevator/cabin.js" defer></script>
     <script src="js/player/sanity.js" defer></script>
     <script src="js/scene/pushables.js" defer></script>
@@ -371,19 +372,28 @@
         <img class="computer-fear-still" alt="" draggable="false" />
       </div>
       <div class="computer-shortcuts">
-        <button type="button" data-computer-app="files"><span class="app-art" data-app-icon="files" aria-hidden="true"></span><span>파일</span></button>
-        <button type="button" data-computer-app="notes"><span class="app-art" data-app-icon="notes" aria-hidden="true"></span><span>업무 메모</span></button>
+        <button type="button" data-computer-app="files"><span class="app-art" data-app-icon="files" aria-hidden="true"></span><span>파일 탐색기</span></button>
+        <button type="button" data-computer-app="notes"><span class="app-art" data-app-icon="notes" aria-hidden="true"></span><span>메모장</span></button>
         <button type="button" data-computer-app="mail"><span class="app-art" data-app-icon="mail" aria-hidden="true"></span><span>사내 메일</span></button>
         <button type="button" data-computer-app="calculator"><span class="app-art" data-app-icon="calculator" aria-hidden="true"></span><span>계산기</span></button>
         <button type="button" data-computer-app="building"><span class="app-art" data-app-icon="building" aria-hidden="true"></span><span>시설 안내</span></button>
         <button type="button" data-computer-app="browser"><span class="app-art" data-app-icon="notes" aria-hidden="true"></span><span>블로그</span></button>
         <button type="button" data-computer-app="transfer"><span class="app-art" data-app-icon="files" aria-hidden="true"></span><span>파일 전송</span></button>
       </div>
-      <section id="computer-window" aria-labelledby="computer-window-title" hidden>
-        <div class="computer-titlebar">
-          <strong id="computer-window-title">파일</strong>
-          <button id="computer-window-close" type="button" aria-label="창 닫기" title="창 닫기"><img src="assets/vendor/lucide/x.svg" alt="" /></button>
-        </div>
+      <div id="computer-window" hidden>
+        <template id="computer-window-frame">
+          <section class="computer-app-window" role="region" hidden>
+            <div class="computer-titlebar">
+              <span class="app-art" data-window-icon aria-hidden="true"></span>
+              <strong data-window-title></strong>
+              <div class="computer-window-actions">
+                <button type="button" data-window-minimize aria-label="최소화" title="최소화"><span class="window-minimize" aria-hidden="true"></span></button>
+                <button type="button" data-window-maximize aria-label="최대화" title="최대화"><span class="window-maximize" aria-hidden="true"></span></button>
+                <button type="button" data-window-close aria-label="창 닫기" title="닫기"><img src="assets/vendor/lucide/x.svg" alt="" /></button>
+              </div>
+            </div>
+          </section>
+        </template>
         <div id="computer-files" class="computer-content" hidden>
           <p class="computer-path">내 컴퓨터 / 사내 공유 / ARCHI</p>
           <div class="computer-file-filters">
@@ -393,7 +403,7 @@
           <p id="computer-file-count" role="status" aria-live="polite"></p>
           <div id="computer-file-list"></div>
           <p id="computer-files-empty" hidden>일치하는 문서가 없습니다.</p>
-          <button type="button" data-computer-app="notes"><span class="app-art" data-app-icon="notes" aria-hidden="true"></span><span>업무 메모</span></button>
+          <button type="button" data-computer-app="notes"><span class="app-art" data-app-icon="notes" aria-hidden="true"></span><span>메모장</span></button>
         </div>
         <div id="computer-notes" class="computer-content" hidden>
           <div class="computer-toolbar">
@@ -535,16 +545,26 @@
             <output id="computer-transfer-status" role="status" aria-live="polite"></output>
           </div>
         </div>
+      </div>
+      <section id="computer-start-menu" aria-label="시작 메뉴" hidden>
+        <input id="computer-start-search" type="search" aria-label="앱 및 문서 검색" placeholder="앱 및 문서 검색" autocomplete="off" />
+        <h2>고정됨</h2><div id="computer-start-apps"></div>
+        <h2 id="computer-recent-title">최근 문서</h2><div id="computer-start-documents"></div>
+        <p id="computer-start-empty" hidden>검색 결과 없음</p>
+        <footer><span class="computer-user-avatar" aria-hidden="true">수</span><span>정수호</span><button id="computer-start-exit" type="button" aria-label="컴퓨터 사용 종료" title="컴퓨터 사용 종료"><img src="assets/vendor/lucide/log-out.svg" alt="" /></button></footer>
       </section>
+      <div id="computer-context-menu" role="menu" aria-label="바탕화면 메뉴" hidden>
+        <button id="computer-context-open" type="button" role="menuitem">열기</button>
+        <button id="computer-context-refresh" type="button" role="menuitem">새로 고침</button>
+        <button id="computer-context-sort" type="button" role="menuitem">이름순 정렬</button>
+      </div>
       <div class="computer-taskbar">
-        <strong>ARCHI</strong>
-        <button type="button" data-computer-app="files" aria-label="파일" title="파일"><span class="app-art" data-app-icon="files" aria-hidden="true"></span></button>
-        <button type="button" data-computer-app="notes" aria-label="업무 메모" title="업무 메모"><span class="app-art" data-app-icon="notes" aria-hidden="true"></span></button>
-        <button type="button" data-computer-app="mail" aria-label="사내 메일" title="사내 메일"><span class="app-art" data-app-icon="mail" aria-hidden="true"></span></button>
-        <button type="button" data-computer-app="calculator" aria-label="계산기" title="계산기"><span class="app-art" data-app-icon="calculator" aria-hidden="true"></span></button>
-        <button type="button" data-computer-app="building" aria-label="시설 안내" title="시설 안내"><span class="app-art" data-app-icon="building" aria-hidden="true"></span></button>
-        <span>17F · PC-01</span>
-        <button id="computer-exit" type="button" aria-label="컴퓨터 사용 종료" title="컴퓨터 사용 종료"><img src="assets/vendor/lucide/log-out.svg" alt="" /></button>
+        <div class="computer-taskbar-apps">
+          <button id="computer-start-button" type="button" aria-label="시작" title="시작" aria-expanded="false" aria-controls="computer-start-menu"><span class="windows-mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span></button>
+          <div id="computer-taskbar-windows"></div>
+        </div>
+        <div class="computer-tray"><span class="computer-network" title="사내 네트워크">◉</span><time id="computer-clock"></time><button id="computer-exit" type="button" aria-label="컴퓨터 사용 종료" title="컴퓨터 사용 종료"><img src="assets/vendor/lucide/log-out.svg" alt="" /></button></div>
+        <button id="computer-show-desktop" type="button" aria-label="바탕 화면 보기" title="바탕 화면 보기"></button>
       </div>
     </div>
     <div id="computer-usb-panel" role="dialog" aria-modal="true" aria-labelledby="computer-usb-title" hidden>

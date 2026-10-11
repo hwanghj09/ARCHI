@@ -18,7 +18,7 @@ try {
 
   const pc = page.locator('#computer');
   const phone = page.locator('#phone');
-  const pcApp = name => pc.locator(`.computer-shortcuts [data-computer-app="${name}"]`);
+  const pcApp = name => pc.locator(`.computer-taskbar [data-computer-task-app="${name}"]`);
   const phoneApp = name => phone.locator(`[data-phone-app="${name}"]`);
   const pcCalc = pc.locator('[data-device-calculator]');
   const phoneCalc = phone.locator('[data-device-calculator]');
@@ -148,13 +148,14 @@ try {
   for (const viewport of [{ width: 390, height: 844 }, { width: 568, height: 320 }]) {
     await page.setViewportSize(viewport);
     for (const name of ['files', 'notes', 'mail', 'calculator', 'building']) {
-      await pcApp(name).tap();
+      await pc.locator('#computer-start-button').tap();
+      await pc.locator(`[data-start-app="${name}"]`).tap();
       assert(await pc.locator(`#computer-${name}`).isVisible());
-      await boundsFit(pc.locator('#computer-window'));
+      await boundsFit(pc.locator('.computer-app-window[data-active="true"]'));
       assert(await pc.locator(`#computer-${name}`).evaluate(element => element.scrollWidth <= element.clientWidth + 1), `${name} fits device width`);
       await pc.locator('#computer-window-close').tap();
     }
-    for (const button of await pc.locator('.computer-taskbar button').all()) await boundsFit(button);
+    for (const button of await pc.locator('.computer-taskbar button').all()) { if (await button.isVisible()) { await button.scrollIntoViewIfNeeded(); await boundsFit(button); } }
     await pc.locator('#computer-exit').tap();
     await finishSceneTransition(page);
     await page.locator('#phone-button').tap();

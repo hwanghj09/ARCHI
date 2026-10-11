@@ -5,6 +5,7 @@ import { finishSceneTransition } from './scene-transition.mjs';
 const browser = await chromium.launch();
 try {
   const page = await browser.newPage({ viewport: { width: 1280, height: 720 } });
+  const openApp = async name => { await page.locator('#computer-start-button').click(); await page.locator(`[data-start-app="${name}"]`).click(); };
   const errors = [];
   const connectUsb = async () => {
     await page.locator('#computer-usb-open').click();
@@ -28,8 +29,8 @@ try {
   await page.keyboard.press('Escape');
   await page.keyboard.press('e');
   await finishSceneTransition(page);
-  await page.locator('[data-computer-app="browser"]').click();
-  assert.equal(await page.locator('[data-computer-app="browser"]').textContent(), '블로그');
+  await openApp('browser');
+  assert.equal(await page.locator('[data-computer-task-app="browser"]').getAttribute('aria-label'), '블로그');
   assert.equal(await page.locator('#computer-window-title').textContent(), '블로그');
   assert.equal(await page.locator('#computer-internet-connect').count(), 0, 'The blog needs no connect button');
   assert.equal(await page.evaluate(() => buildingBlackout), false);
@@ -63,7 +64,7 @@ try {
   assert.equal(await page.evaluate(() => collectedItems.has('solar-app-downloaded')), false, 'A real blackout blocks downloads');
   await page.evaluate(() => { solarEnabled = true; solarPoweredFloors = [17]; updatePowerState(); });
   assert(await page.locator('#computer-solar-page').isVisible(), 'Restoring power opens the blog automatically');
-  await page.locator('[data-computer-app="browser"]').click();
+  await openApp('browser');
   assert.match(await page.locator('.blog-service-bar').textContent(), /NAVER.*blog/);
   assert.match(await page.locator('#solar-blog-title').textContent(), /태양광.*다운로드/);
   assert.match(await page.locator('.blog-attachment').textContent(), /ARCHI_태양광_제어앱\.apk/);
@@ -88,13 +89,13 @@ try {
     await page.screenshot({ path: `.local/solar-blog-${width}.png` });
   }
   await page.setViewportSize({ width: 1280, height: 720 });
-  await page.locator('[data-computer-app="transfer"]').click();
+  await openApp('transfer');
   assert(await page.locator('#computer-transfer').isVisible());
   assert.equal(await page.locator('#computer-window-title').textContent(), '파일 전송');
   assert(await page.locator('#computer-solar-transfer').isDisabled());
   await page.locator('#computer-solar-transfer').dispatchEvent('click');
   assert.equal(await page.evaluate(() => computerSolarTask), null, 'A missing download cannot be transferred');
-  await page.locator('[data-computer-app="browser"]').click();
+  await openApp('browser');
   await page.locator('#computer-solar-download').click();
   assert.equal(await page.evaluate(() => collectedItems.has('solar-app-downloaded')), false, 'Download is not instant');
   assert(await page.locator('#computer-solar-download').isDisabled());
@@ -110,13 +111,13 @@ try {
   assert.equal(await page.evaluate(() => computerSolarTask), null);
   await page.evaluate(() => { solarEnabled = true; updatePowerState(); });
   await page.locator('#computer-solar-download').click();
-  await page.locator('.computer-shortcuts [data-computer-app="files"]').click();
+  await openApp('files');
   await page.clock.runFor(4900);
   assert.equal(await page.evaluate(() => collectedItems.has('solar-app-downloaded')), false);
   await page.clock.runFor(100);
   assert.equal(await page.evaluate(() => collectedItems.has('solar-app-downloaded')), true, 'Download completes after five seconds while switching apps');
   assert((await page.evaluate(() => progressSnapshot())).items.includes('solar-app-downloaded'));
-  await page.locator('[data-computer-app="transfer"]').click();
+  await openApp('transfer');
   await page.evaluate(() => { buildingBlackout = false; solarEnabled = false; updatePowerState(); });
   assert(await page.locator('#computer-solar-transfer').isDisabled(), 'A downloaded file still needs a USB connection');
   await page.locator('#computer-solar-transfer').dispatchEvent('click');
@@ -162,7 +163,7 @@ try {
   assert.equal(await page.evaluate(() => collectedItems.has('solar-app-installed')), false, 'Leaving just before completion cancels the transfer during the exit fade');
   await page.keyboard.press('e');
   await finishSceneTransition(page);
-  await page.locator('[data-computer-app="transfer"]').click();
+  await openApp('transfer');
   await connectUsb();
   await page.locator('#computer-solar-transfer').click();
   await page.clock.runFor(7900);
