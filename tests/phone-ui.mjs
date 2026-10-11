@@ -40,7 +40,7 @@ try {
   assert.equal(await page.evaluate(() => document.activeElement.id), 'phone-light');
   await page.locator('#phone-close').focus();
   await page.keyboard.press('Tab');
-  assert.equal(await page.evaluate(() => document.activeElement.id), 'phone-light', 'Tab stays inside the phone');
+  assert.equal(await page.evaluate(() => document.activeElement.id), 'phone-quick-open', 'Tab wraps to the status bar and stays inside the phone');
   await page.locator('#phone-close').focus();
   await page.keyboard.press('Enter');
   assert.equal((await state()).state, 'phone-away');

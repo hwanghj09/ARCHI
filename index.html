@@ -229,27 +229,56 @@
       <button id="cctv-skip" type="button">건너뛰기 · Esc</button>
     </section>
     <section id="phone" class="device-dialog" role="dialog" aria-modal="true" aria-labelledby="phone-title" hidden>
-      <img class="phone-hardware" src="assets/ui/phone-device.png" alt="" width="887" height="1774" draggable="false" />
-      <div class="phone-screen">
-        <div class="phone-statusbar"><span>00:00</span><span class="phone-charge"><output id="phone-battery" aria-label="배터리 잔량">100%</output><span id="phone-battery-track" aria-hidden="true"><span id="phone-battery-fill"></span></span></span></div>
-        <div class="phone-owner"><span class="phone-clock" aria-hidden="true">00:00</span><h2 id="phone-title">수호의 휴대폰</h2></div>
-        <div class="phone-controls">
-          <p class="phone-section-label">빠른 설정</p>
-          <button id="phone-light" type="button" aria-pressed="false" aria-label="플래시 켜기">
-            <span class="app-art" data-app-icon="flashlight" aria-hidden="true"></span>
-            <span>플래시</span><small id="phone-light-state">꺼짐</small>
+      <img class="phone-hardware" src="assets/ui/phone-device.svg" alt="" width="887" height="1774" draggable="false" />
+      <svg width="0" height="0" aria-hidden="true" style="position:absolute">
+        <symbol id="phone-i-wifi" viewBox="0 0 24 24"><path d="M12 20h.01M2 8.82a15 15 0 0 1 20 0M5 12.86a10 10 0 0 1 14 0M8.5 16.43a5 5 0 0 1 7 0"/></symbol>
+        <symbol id="phone-i-signal" viewBox="0 0 24 24"><path d="M3 20v-3M8 20v-6M13 20v-10M18 20V5" stroke-width="3.2"/></symbol>
+        <symbol id="phone-i-bluetooth" viewBox="0 0 24 24"><path d="m7 7 10 10-5 5V2l5 5L7 17"/></symbol>
+        <symbol id="phone-i-plane" viewBox="0 0 24 24"><path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z"/></symbol>
+        <symbol id="phone-i-sound" viewBox="0 0 24 24"><path d="M11 4.7a.7.7 0 0 0-1.2-.5L6.4 7.6A1.4 1.4 0 0 1 5.4 8H3a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h2.4a1.4 1.4 0 0 1 1 .4l3.4 3.4a.7.7 0 0 0 1.2-.5zM16 9a5 5 0 0 1 0 6M19.4 18.4a9 9 0 0 0 0-12.8"/></symbol>
+        <symbol id="phone-i-mute" viewBox="0 0 24 24"><path d="M11 4.7a.7.7 0 0 0-1.2-.5L6.4 7.6A1.4 1.4 0 0 1 5.4 8H3a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h2.4a1.4 1.4 0 0 1 1 .4l3.4 3.4a.7.7 0 0 0 1.2-.5zM22 9l-6 6M16 9l6 6"/></symbol>
+        <symbol id="phone-i-moon" viewBox="0 0 24 24"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></symbol>
+        <symbol id="phone-i-flash" viewBox="0 0 24 24"><path d="M18 6c0 2-2 2-2 4v10a2 2 0 0 1-2 2h-4a2 2 0 0 1-2-2V10c0-2-2-2-2-4V2h12zM6 6h12M12 12v.01"/></symbol>
+        <symbol id="phone-i-back" viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></symbol>
+      </svg>
+      <div class="phone-screen" data-screen="home">
+        <div class="phone-statusbar">
+          <button id="phone-quick-open" type="button" aria-label="빠른 설정 열기 · 아래로 쓸기" aria-expanded="false" aria-controls="phone-quick-panel">
+            <span class="phone-status-time">00:00</span>
+            <span class="phone-status-icons" aria-hidden="true">
+              <svg class="phone-glyph phone-status-mute"><use href="#phone-i-mute"/></svg>
+              <svg class="phone-glyph phone-status-moon"><use href="#phone-i-moon"/></svg>
+              <svg class="phone-glyph phone-status-bluetooth"><use href="#phone-i-bluetooth"/></svg>
+              <svg class="phone-glyph phone-status-plane"><use href="#phone-i-plane"/></svg>
+              <svg class="phone-glyph phone-status-wifi"><use href="#phone-i-wifi"/></svg>
+              <svg class="phone-glyph phone-status-signal"><use href="#phone-i-signal"/></svg>
+            </span>
+            <span class="phone-charge"><output id="phone-battery" aria-label="배터리 잔량">100%</output><span id="phone-battery-track" aria-hidden="true"><span id="phone-battery-fill"></span></span></span>
           </button>
-          <p id="phone-help" aria-live="polite"></p>
-          <p class="phone-section-label">앱</p>
-          <div id="phone-app-grid">
-            <button type="button" data-phone-app="notes"><span class="phone-app-icon app-art" data-app-icon="notes" aria-hidden="true"></span><span>메모</span></button>
-            <button type="button" data-phone-app="calculator"><span class="phone-app-icon app-art" data-app-icon="calculator" aria-hidden="true"></span><span>계산기</span></button>
-            <button type="button" data-phone-app="building"><span class="phone-app-icon app-art" data-app-icon="building" aria-hidden="true"></span><span>시설 안내</span></button>
-            <button type="button" data-phone-app="solar" hidden><span class="phone-app-icon app-art" data-app-icon="flashlight" aria-hidden="true"></span><span>비상 전력 제어</span></button>
+        </div>
+        <div id="phone-home">
+          <div class="phone-owner"><span class="phone-clock" aria-hidden="true">00:00</span><h2 id="phone-title">수호의 휴대폰</h2></div>
+          <div class="phone-controls">
+            <button id="phone-light" type="button" aria-pressed="false" aria-label="플래시 켜기">
+              <span class="app-art" data-app-icon="flashlight" aria-hidden="true"></span>
+              <span>손전등</span><small id="phone-light-state">꺼짐</small>
+            </button>
+            <p id="phone-help" aria-live="polite"></p>
+            <div id="phone-app-grid">
+              <button type="button" data-phone-app="notes"><span class="phone-app-icon app-art" data-app-icon="notes" aria-hidden="true"></span><span>메모</span></button>
+              <button type="button" data-phone-app="calculator"><span class="phone-app-icon app-art" data-app-icon="calculator" aria-hidden="true"></span><span>계산기</span></button>
+              <button type="button" data-phone-app="building"><span class="phone-app-icon app-art" data-app-icon="building" aria-hidden="true"></span><span>시설 안내</span></button>
+              <button type="button" data-phone-app="solar" hidden><span class="phone-app-icon app-art" data-app-icon="flashlight" aria-hidden="true"></span><span>비상 전력 제어</span></button>
+            </div>
           </div>
         </div>
+        <section id="phone-recents" aria-label="최근 앱" hidden>
+          <div id="phone-recent-list"></div>
+          <p id="phone-recent-empty">최근 사용한 앱이 없습니다.</p>
+          <button id="phone-recent-clear" type="button">모두 닫기</button>
+        </section>
         <section id="phone-app-window" aria-labelledby="phone-app-title" hidden>
-          <header><button id="phone-app-back" type="button" aria-label="휴대폰 홈으로">‹ 홈</button><h3 id="phone-app-title">메모</h3></header>
+          <header><button id="phone-app-back" type="button" aria-label="휴대폰 홈으로"><svg class="phone-glyph"><use href="#phone-i-back"/></svg></button><h3 id="phone-app-title">메모</h3></header>
           <div id="phone-notes" data-phone-view="notes" hidden>
             <div class="phone-note-tabs" role="tablist" aria-label="메모 종류">
               <button id="phone-tab-memo" type="button" role="tab" aria-selected="true" aria-controls="phone-memo-pane">메모</button>
@@ -293,8 +322,28 @@
             <p>한 층만 공급 · 다시 선택하면 해제</p>
           </div>
         </section>
-        <div class="phone-navigation"><span>P · 닫기 / Esc · 뒤로</span><button id="phone-close" type="button" aria-label="휴대폰 화면 닫기"><span aria-hidden="true"></span></button></div>
+        <section id="phone-quick-panel" aria-label="빠른 설정 창" hidden>
+          <div class="phone-quick-head"><strong class="phone-quick-time">00:00</strong><span>수호의 휴대폰</span></div>
+          <div class="phone-quick-tiles">
+            <button id="phone-qs-light" type="button" aria-pressed="false"><span class="phone-tile-icon" aria-hidden="true"><svg class="phone-glyph"><use href="#phone-i-flash"/></svg></span><span>손전등</span></button>
+            <button type="button" data-quick-toggle="wifi" aria-pressed="true"><span class="phone-tile-icon" aria-hidden="true"><svg class="phone-glyph"><use href="#phone-i-wifi"/></svg></span><span>Wi-Fi</span></button>
+            <button type="button" data-quick-toggle="sound" aria-pressed="true"><span class="phone-tile-icon" aria-hidden="true"><svg class="phone-glyph phone-tile-sound"><use href="#phone-i-sound"/></svg><svg class="phone-glyph phone-tile-mute"><use href="#phone-i-mute"/></svg></span><span data-sound-label>소리</span></button>
+            <button type="button" data-quick-toggle="bluetooth" aria-pressed="false"><span class="phone-tile-icon" aria-hidden="true"><svg class="phone-glyph"><use href="#phone-i-bluetooth"/></svg></span><span>블루투스</span></button>
+            <button type="button" data-quick-toggle="plane" aria-pressed="false"><span class="phone-tile-icon" aria-hidden="true"><svg class="phone-glyph"><use href="#phone-i-plane"/></svg></span><span>비행기 탑승 모드</span></button>
+            <button type="button" data-quick-toggle="moon" aria-pressed="false"><span class="phone-tile-icon" aria-hidden="true"><svg class="phone-glyph"><use href="#phone-i-moon"/></svg></span><span>방해 금지</span></button>
+          </div>
+          <label class="phone-brightness">밝기<input id="phone-brightness" type="range" min="30" max="100" value="100" /></label>
+          <p class="phone-quick-empty">알림 없음</p>
+          <button id="phone-quick-close" type="button" aria-label="빠른 설정 닫기"><span aria-hidden="true"></span></button>
+        </section>
+        <div class="phone-navigation" role="navigation" aria-label="탐색 버튼">
+          <button id="phone-nav-recents" type="button" aria-label="최근 앱"><span class="phone-nav-recents" aria-hidden="true"><i></i><i></i><i></i></span></button>
+          <button id="phone-nav-home" type="button" aria-label="홈"><span class="phone-nav-home" aria-hidden="true"></span></button>
+          <button id="phone-nav-back" type="button" aria-label="뒤로"><svg class="phone-glyph" aria-hidden="true"><use href="#phone-i-back"/></svg></button>
+        </div>
       </div>
+      <span class="phone-camera" aria-hidden="true"></span>
+      <button id="phone-close" type="button" aria-label="측면 버튼 · 화면 끄고 휴대폰 넣기" title="화면 끄기 · P"></button>
     </section>
     <section id="guard-capture" role="dialog" aria-modal="true" aria-labelledby="guard-capture-title" hidden>
       <h2 id="guard-capture-title">로봇에게 붙잡혔다</h2>

@@ -1,65 +1,134 @@
-#phone.device-dialog { z-index: 12; width: min(350px, calc(100vw - 16px), calc((100dvh - 16px) / 2)); aspect-ratio: 1 / 2; padding: 0; border: 0; border-radius: 0; background: transparent; box-shadow: none; filter: drop-shadow(0 16px 28px #000b); }
+/* 수호의 휴대폰: 안드로이드 One UI(다크 모드) 방식. 본체는 phone-device.svg(1:2), 화면은 그 안 x 42~838 / y 46~1728(887×1774 기준)이다. */
+#phone.device-dialog { --oneui-accent: #3e91ff; --oneui-surface: #1c1c1f; --oneui-surface-2: #2a2b2f; --oneui-text: #f6f6f8; --oneui-sub: #a2a3a9; --phone-nav: 44px;
+  z-index: 12; width: min(350px, calc(100vw - 16px), calc((100dvh - 16px) / 2)); aspect-ratio: 1 / 2; padding: 0; border: 0; border-radius: 0; background: transparent; box-shadow: none; filter: drop-shadow(0 16px 28px #000b);
+  --phone-font: "SamsungOne", "Samsung Sans", "Noto Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif; font-family: var(--phone-font); }
 .phone-hardware { display: block; width: 100%; height: 100%; pointer-events: none; user-select: none; }
-.phone-screen { position: absolute; left: 12.5%; right: 12.5%; top: 9.1%; bottom: 9.1%; display: flex; flex-direction: column; overflow: auto; scrollbar-width: none; border-radius: 7% / 3%; padding: 18px 16px 0; color: #f3f7fb; background: linear-gradient(#06111c00, #06111c26), url('../assets/ui/apps/phone-wallpaper.png') center / cover; }
-.phone-statusbar { display: flex; flex-shrink: 0; justify-content: space-between; align-items: center; gap: 8px; color: #fff; font-size: 11px; font-weight: 600; }
-.phone-charge { display: flex; align-items: center; gap: 6px; }
-#phone #phone-battery-track { display: inline-block; width: 23px; height: 10px; margin: 0; padding: 1px; border: 1px solid #81919e; border-radius: 3px; }
-#phone #phone-battery-fill { border-radius: 1px; }
-.phone-owner { flex-shrink: 0; margin: 20px 0 18px; text-align: center; }
-.phone-controls { flex: 1; min-height: 0; overflow-y: auto; scrollbar-width: thin; }
-.phone-clock { font-size: 54px; font-weight: 300; letter-spacing: -3px; font-variant-numeric: tabular-nums; }
-#phone #phone-title { margin: 6px 0 0; color: #a6b4c2; font-size: 12px; font-weight: 400; }
-.phone-section-label { margin: 0 0 12px; color: #a6b4c2; font-size: 12px; }
-#phone #phone-light { display: grid; grid-template-columns: 36px 1fr; align-items: center; column-gap: 12px; width: 100%; min-height: 70px; padding: 12px; border: 1px solid #eff7ff40; border-radius: 22px; background: #1a2b4380; backdrop-filter: blur(12px); color: #eef3f8; text-align: left; font: 15px Arial, sans-serif; touch-action: manipulation; }
-#phone-light .app-art { grid-row: span 2; width: 36px; height: 36px; }
-#phone-light small { color: #a6b4c2; font-size: 12px; }
-#phone #phone-light[aria-pressed="true"] { background: #dce8ed; border-color: #f4ffff; color: #172c3d; box-shadow: 0 0 28px #bce8ff18; }
-#phone-light[aria-pressed="true"] small { color: #385b70; }
-#phone button:disabled { opacity: .5; cursor: not-allowed; }
-#phone-help { margin: 10px 2px; color: #9babbc; font-size: 12px; line-height: 1.7; word-break: keep-all; }
-#phone-app-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; margin: 16px 0 4px; }
-#phone [data-phone-app] { display: flex; flex-direction: column; align-items: center; gap: 6px; min-height: 64px; min-width: 44px; padding: 4px 0; border: 0; border-radius: 12px; background: transparent; color: #e7edf3; font: 11px/1.3 Arial, sans-serif; touch-action: manipulation; }
-#phone [data-phone-app] > span:last-child, .phone-navigation > span { color: #f3f7fb; text-shadow: 0 1px 3px #001025; }
-.phone-app-icon { width: 44px; height: 44px; }
-#phone-app-window:not([hidden]) { display: flex; flex: 1; min-height: 0; flex-direction: column; gap: 12px; padding-top: 12px; }
-#phone-app-window > header { position: static; inset: auto; display: flex; flex-shrink: 0; align-items: center; justify-content: flex-start; gap: 10px; pointer-events: auto; }
-#phone-app-title { margin: 0; font: 600 17px/1.3 Arial, sans-serif; }
-#phone #phone-app-back, #phone #phone-note-save { min-height: 44px; padding: 8px 12px; border: 1px solid #58718a; border-radius: 12px; background: #23374d; color: #e7edf3; font: 13px Arial, sans-serif; touch-action: manipulation; }
-#phone #phone-app-back { min-width: 44px; flex-shrink: 0; }
-#phone [data-phone-view] { flex: 1; min-height: 0; overflow-y: auto; scrollbar-width: thin; }
+.phone-screen { position: absolute; left: 4.74%; right: 5.52%; top: 2.59%; bottom: 2.59%; display: flex; flex-direction: column; overflow: hidden; border-radius: 10% / 4.8%;
+  color: var(--oneui-text); background: linear-gradient(#0000 55%, #000a), url('../assets/ui/apps/phone-wallpaper.png') center / cover; filter: brightness(var(--phone-brightness, 1)); }
+.phone-screen:is([data-screen="app"], [data-screen="recents"]) { background: #000; }
+.phone-camera { position: absolute; z-index: 3; left: 48.2%; top: 3.6%; width: 2.9%; aspect-ratio: 1; border-radius: 50%; background: radial-gradient(circle at 38% 35%, #34404f, #07080a 55%); box-shadow: 0 0 0 1.5px #000; pointer-events: none; }
+#phone :is(button, input, textarea, select):focus-visible { outline: 2px solid #8ec0ff; outline-offset: 2px; }
+#phone button:disabled { opacity: .45; cursor: not-allowed; }
+#phone :is(#phone-home, #phone-recents, [data-phone-view])[hidden] { display: none; }
+.phone-glyph { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+/* 상태 표시줄: 시계 · 상태 아이콘 · 배터리. 누르거나 아래로 쓸면 빠른 설정이 열린다. */
+.phone-statusbar { flex-shrink: 0; touch-action: none; }
+#phone #phone-quick-open { display: flex; align-items: center; gap: 6px; width: 100%; min-height: 30px; padding: 6px 18px 2px 22px; border: 0; border-radius: 0; background: transparent; color: #fff; font: 600 11px/1 var(--phone-font); }
+.phone-status-time { margin-right: auto; font-variant-numeric: tabular-nums; }
+.phone-status-icons { display: flex; align-items: center; gap: 3px; }
+.phone-status-icons .phone-glyph { width: 12px; height: 12px; stroke-width: 2.4; }
+.phone-status-mute, .phone-status-moon, .phone-status-bluetooth, .phone-status-plane { display: none; }
+#phone[data-sound="false"] .phone-status-mute, #phone[data-moon="true"] .phone-status-moon, #phone[data-bluetooth="true"] .phone-status-bluetooth, #phone[data-plane="true"] .phone-status-plane { display: block; }
+#phone[data-wifi="false"] .phone-status-wifi, #phone[data-plane="true"] .phone-status-signal { display: none; }
+.phone-charge { display: flex; align-items: center; gap: 3px; }
+#phone #phone-battery { font: inherit; }
+#phone #phone-battery-track { display: inline-block; width: 20px; height: 10px; margin: 0; padding: 1px; border: 1.5px solid #ffffffb3; border-radius: 3px; background: transparent; }
+#phone #phone-battery-fill { height: 100%; border-radius: 1px; background: #fff; }
+#phone[data-battery-low="true"] #phone-battery-fill { background: #ff5b4f; }
+
+/* 홈 화면: 시계 위젯, 손전등 위젯, 아래쪽 앱 독. */
+#phone-home { display: flex; flex: 1; min-height: 0; flex-direction: column; overflow-y: auto; scrollbar-width: none; padding: 0 14px 8px; }
+.phone-owner { flex-shrink: 0; margin: 26px 6px 22px; touch-action: none; }
+.phone-clock { display: block; font-size: 58px; font-weight: 300; line-height: 1; letter-spacing: -2px; font-variant-numeric: tabular-nums; text-shadow: 0 2px 10px #0006; }
+#phone #phone-title { margin: 8px 0 0; color: #e6e9ee; font-size: 13px; font-weight: 500; text-shadow: 0 1px 4px #0008; }
+.phone-controls { display: flex; flex: 1; flex-direction: column; min-height: 0; }
+#phone #phone-light { display: grid; grid-template-columns: 40px 1fr; align-items: center; column-gap: 12px; width: 100%; min-height: 68px; padding: 12px 14px; border: 0; border-radius: 26px; background: #16171bc4; backdrop-filter: blur(14px); color: var(--oneui-text); text-align: left; font: 500 15px/1.3 var(--phone-font); touch-action: manipulation; }
+#phone-light .app-art { grid-row: span 2; width: 40px; height: 40px; }
+#phone-light small { color: var(--oneui-sub); font-size: 12px; }
+#phone #phone-light[aria-pressed="true"] { box-shadow: inset 0 0 0 1.5px #ffd34d88; }
+#phone #phone-light[aria-pressed="true"] .app-art { filter: drop-shadow(0 0 7px #ffd34d); }
+#phone #phone-light[aria-pressed="true"] small { color: #ffd34d; }
+#phone-help { margin: 10px 4px 0; color: #ffd0c8; font-size: 12px; line-height: 1.6; text-shadow: 0 1px 3px #000; word-break: keep-all; }
+#phone-app-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 4px; margin-top: auto; padding: 10px 4px 6px; border-radius: 26px; background: #ffffff14; backdrop-filter: blur(10px); }
+#phone [data-phone-app] { display: flex; flex-direction: column; align-items: center; gap: 6px; min-height: 64px; min-width: 44px; padding: 2px 0; border: 0; border-radius: 14px; background: transparent; color: #fff; font: 11px/1.25 var(--phone-font); text-shadow: 0 1px 3px #000c; word-break: keep-all; touch-action: manipulation; }
+#phone [data-phone-app]:hover { background: #ffffff14; }
+.phone-app-icon { width: 46px; height: 46px; }
+
+/* 최근 앱: 쓰던 앱 카드 목록과 모두 닫기. */
+#phone-recents:not([hidden]) { display: flex; flex: 1; min-height: 0; flex-direction: column; align-items: center; gap: 12px; padding: 14px 0 12px; }
+#phone-recent-list { display: flex; flex: 1; align-self: stretch; min-height: 0; gap: 12px; overflow-x: auto; padding: 0 18px; scroll-snap-type: x mandatory; scrollbar-width: none; }
+#phone #phone-recent-list button { display: flex; flex: 0 0 72%; flex-direction: column; align-items: center; justify-content: center; gap: 12px; min-height: 0; scroll-snap-align: center; border: 1px solid #ffffff1a; border-radius: 26px; background: linear-gradient(#26272c, #121215); color: var(--oneui-text); font: 600 14px var(--phone-font); }
+#phone #phone-recent-list .phone-app-icon { width: 64px; height: 64px; }
+#phone-recent-empty { margin: auto; color: var(--oneui-sub); font-size: 13px; }
+#phone #phone-recent-clear { min-height: 40px; padding: 8px 20px; border: 0; border-radius: 20px; background: var(--oneui-surface-2); color: var(--oneui-text); font: 600 13px var(--phone-font); }
+
+/* 앱 화면: One UI 앱처럼 불투명 검은 바탕, 뒤로 화살표와 큰 제목. */
+#phone-app-window:not([hidden]) { display: flex; flex: 1; min-height: 0; flex-direction: column; gap: 10px; padding: 6px 14px 0; }
+@media (prefers-reduced-motion: no-preference) {
+  #phone-app-window:not([hidden]), #phone-recents:not([hidden]) { animation: phone-app-in .18s ease-out; }
+  #phone-quick-panel:not([hidden]) { animation: phone-quick-in .2s ease-out; }
+}
+@keyframes phone-app-in { from { opacity: 0; } }
+@keyframes phone-quick-in { from { opacity: 0; transform: translateY(-30px); } }
+#phone-app-window > header { position: static; inset: auto; display: flex; flex-shrink: 0; align-items: center; justify-content: flex-start; gap: 4px; margin: 6px 0 4px; pointer-events: auto; }
+#phone #phone-app-back { display: grid; place-items: center; width: 44px; height: 44px; min-height: 44px; padding: 0; border: 0; border-radius: 50%; background: transparent; color: var(--oneui-text); }
+#phone #phone-app-back:hover { background: #ffffff14; }
+#phone-app-title { margin: 0; font: 700 21px/1.25 var(--phone-font); }
+#phone [data-phone-view] { flex: 1; min-height: 0; overflow-y: auto; scrollbar-width: none; padding-bottom: 10px; }
 #phone-notes:not([hidden]) { display: flex; flex-direction: column; gap: 10px; }
-#phone-note { flex: 1; min-height: 80px; width: 100%; box-sizing: border-box; padding: 12px; resize: none; border: 1px solid #536778; border-radius: 12px; background: #111d2c; color: #e7edf3; font: 14px/1.6 Arial, sans-serif; }
-#phone-note-status { display: block; color: #adbdcc; font: 11px/1.5 Arial, sans-serif; }
-.phone-navigation { flex-shrink: 0; margin-top: auto; padding-top: 12px; text-align: center; color: #81919e; font-size: 10px; }
-#phone #phone-close { display: flex; align-items: center; justify-content: center; width: 100%; min-height: 44px; padding: 0; border: 0; border-radius: 14px; background: transparent; }
-#phone-close span { width: 42%; height: 4px; border-radius: 4px; background: #c5d1dc; }
-#phone :is(button, input, textarea, select):focus-visible { outline: 2px solid #f7d79b; outline-offset: 3px; }
-#phone :is(.phone-owner, .phone-controls, [data-phone-view])[hidden] { display: none; }
+#phone-note { flex: 1; min-height: 80px; width: 100%; box-sizing: border-box; padding: 14px; resize: none; border: 0; border-radius: 20px; background: var(--oneui-surface); color: var(--oneui-text); font: 14px/1.6 var(--phone-font); }
+#phone #phone-note-save { min-height: 44px; padding: 8px 12px; border: 0; border-radius: 22px; background: var(--oneui-accent); color: #fff; font: 600 14px var(--phone-font); touch-action: manipulation; }
+#phone-note-status { display: block; color: var(--oneui-sub); font-size: 11px; line-height: 1.5; }
+
+/* 빠른 설정 창: 상태 표시줄에서 내려오는 타일·밝기 막대. 아래 탐색 버튼은 위에 남는다. */
+#phone-quick-panel:not([hidden]) { position: absolute; z-index: 5; inset: 0 0 var(--phone-nav); display: flex; flex-direction: column; gap: 14px; padding: 20px 14px 8px; overflow-y: auto; scrollbar-width: none; background: #0d0e11ed; backdrop-filter: blur(18px); touch-action: none; }
+.phone-quick-head { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; padding: 0 6px; }
+.phone-quick-head strong { font-size: 26px; font-weight: 400; font-variant-numeric: tabular-nums; }
+.phone-quick-head span { color: var(--oneui-sub); font-size: 12px; }
+.phone-quick-tiles { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px 2px; padding: 14px 6px; border-radius: 26px; background: var(--oneui-surface); }
+#phone .phone-quick-tiles button { display: flex; flex-direction: column; align-items: center; gap: 6px; min-width: 0; min-height: 44px; padding: 0; border: 0; background: transparent; color: var(--oneui-text); font: 10px/1.25 var(--phone-font); word-break: keep-all; }
+.phone-tile-icon { display: grid; place-items: center; width: 44px; height: 44px; border-radius: 50%; background: var(--oneui-surface-2); color: #d8d9de; }
+#phone .phone-quick-tiles button[aria-pressed="true"] .phone-tile-icon { background: var(--oneui-accent); color: #fff; }
+.phone-tile-mute, #phone [data-quick-toggle="sound"][aria-pressed="false"] .phone-tile-sound { display: none; }
+#phone [data-quick-toggle="sound"][aria-pressed="false"] .phone-tile-mute { display: block; }
+.phone-brightness { display: grid; grid-template-columns: auto 1fr; align-items: center; gap: 12px; min-height: 44px; padding: 4px 16px; border-radius: 22px; background: var(--oneui-surface); color: var(--oneui-sub); font-size: 12px; }
+#phone-brightness { width: 100%; min-width: 0; accent-color: var(--oneui-accent); touch-action: auto; }
+.phone-quick-empty { margin: 4px 0 0; color: var(--oneui-sub); font-size: 12px; text-align: center; }
+#phone #phone-quick-close { display: flex; align-items: center; justify-content: center; flex-shrink: 0; width: 100%; min-height: 32px; margin-top: auto; padding: 0; border: 0; background: transparent; }
+#phone-quick-close span { width: 36px; height: 4px; border-radius: 2px; background: #ffffff80; }
+
+/* 하단 탐색 버튼(최근 앱 · 홈 · 뒤로)과 본체 오른쪽 측면 버튼(화면 끄기 = 휴대폰 닫기). */
+.phone-navigation { position: relative; z-index: 6; display: grid; flex-shrink: 0; grid-template-columns: repeat(3, 1fr); height: var(--phone-nav); }
+.phone-screen:is([data-screen="app"], [data-screen="recents"]) .phone-navigation { background: #000; }
+#phone .phone-navigation button { display: grid; place-items: center; min-width: 44px; min-height: 44px; padding: 0; border: 0; border-radius: 0; background: transparent; color: #eceef1; }
+#phone .phone-navigation button:hover { background: #ffffff10; }
+.phone-nav-recents { display: flex; gap: 3px; }
+.phone-nav-recents i { width: 2px; height: 13px; border-radius: 1px; background: currentColor; }
+.phone-nav-home { width: 15px; height: 15px; border: 2px solid currentColor; border-radius: 6px; }
+#phone #phone-close { position: absolute; z-index: 4; right: 0; top: 32%; width: max(16px, 4.6%); height: max(44px, 7%); min-height: 44px; padding: 0; border: 0; border-radius: 0 6px 6px 0; background: transparent; cursor: pointer; }
+#phone #phone-close:hover { background: linear-gradient(90deg, #0000, #ffffff30); }
+
 @media (max-height: 580px) {
-  .phone-screen { padding: 10px 8px 0; }
-  .phone-owner { margin: 12px 0; }
-  .phone-clock { font-size: 30px; letter-spacing: -1px; }
-  #phone #phone-light { min-height: 70px; padding: 10px; gap: 4px; font-size: 13px; border-radius: 14px; }
-  #phone-help { margin: 8px 0; min-height: 0; font-size: 11px; }
-  .phone-navigation { padding-top: 4px; }
-  #phone-app-window:not([hidden]) { gap: 6px; padding-top: 6px; }
-  #phone-app-title { font-size: 14px; }
+  .phone-owner { margin: 12px 4px; }
+  .phone-clock { font-size: 34px; letter-spacing: -1px; }
+  #phone #phone-light { min-height: 56px; padding: 8px 10px; border-radius: 20px; font-size: 13px; }
+  #phone-app-grid { padding: 6px 2px 4px; border-radius: 18px; }
+  #phone [data-phone-app] { gap: 3px; font-size: 10px; }
+  .phone-app-icon { width: 38px; height: 38px; }
+  #phone-app-title { font-size: 16px; }
+  .phone-quick-tiles { gap: 8px 2px; padding: 10px 4px; }
 }
 @media (max-height: 380px) {
-  .phone-owner, .phone-section-label, #phone-help, .phone-navigation > span { display: none; }
-  .phone-controls { margin-top: 8px; }
-  #phone-app-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 4px; margin-top: 8px; }
-  #phone [data-phone-app] { gap: 3px; font-size: 10px; }
-  #phone-app-window > header { gap: 6px; }
-  #phone #phone-app-back { padding: 6px; }
+  .phone-owner, #phone-help { display: none; }
+  #phone #phone-quick-open { padding: 3px 8px 1px 10px; font-size: 8px; min-height: 22px; }
+  .phone-status-icons { display: none; }
+  #phone-home { padding: 4px 6px 4px; }
+  #phone #phone-light { grid-template-columns: 26px 1fr; column-gap: 6px; padding: 6px 8px; border-radius: 14px; font-size: 11px; }
+  #phone-light .app-art { width: 26px; height: 26px; }
+  #phone-app-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); margin-top: 6px; }
+  #phone [data-phone-app] { min-height: 56px; }
+  .phone-app-icon { width: 32px; height: 32px; }
+  #phone-app-window:not([hidden]) { gap: 4px; padding: 2px 6px 0; }
+  #phone-app-window > header { margin: 0; }
+  #phone-app-title { font-size: 13px; }
   #phone-note { padding: 8px; font-size: 12px; }
   #phone-notes:not([hidden]) { gap: 6px; }
   #phone #phone-calculator .device-calculator { padding: 2px; }
   #phone #phone-calculator .calculator-keys { grid-template-columns: repeat(2, minmax(44px, 1fr)); }
-  .phone-statusbar { font-size: 9px; gap: 2px; }
-  .phone-charge { gap: 2px; }
-  #phone #phone-light { grid-template-columns: 26px 1fr; padding: 8px; }
-  #phone-light .app-art { width: 26px; height: 26px; }
+  #phone .phone-navigation .phone-glyph { width: 14px; height: 14px; }
+  .phone-quick-tiles { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .phone-quick-head, .phone-quick-empty { display: none; }
 }
 /* 충전함은 기존 벽면 설비와 같은 CSS 픽셀 스타일이며, 문·통로와 충돌하지 않는다. */
 .phone-charger { position: absolute; padding: 48px 1px 0; border: 3px solid #7a8c8d; background: linear-gradient(90deg, #17272d, #304349 48%, #17272d); box-shadow: inset 2px 0 #c4cebd55, 3px 3px #0b171d; pointer-events: none; }

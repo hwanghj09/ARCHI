@@ -45,7 +45,7 @@ window.addEventListener('keydown', event => {
   if (usingPhone) {
     if (event.code === 'Escape') {
       event.preventDefault();
-      if (!event.repeat) { if (phoneAppWindow.hidden) closePhone(); else closePhoneApp(); }
+      if (!event.repeat) phoneBack();
       return;
     }
     // 앱에서 글을 쓰거나 층을 고를 때 P/F와 방향키도 해당 입력으로 전달한다.

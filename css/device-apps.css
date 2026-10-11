@@ -16,9 +16,9 @@
 [data-calculator-history] { display: block; min-height: 20px; overflow-wrap: anywhere; color: #b2c5d2; text-align: right; font: 12px/1.5 Arial, sans-serif; }
 .calculator-display { display: block; width: 100%; padding: 10px 2px 18px; overflow-wrap: anywhere; color: #f4f9fc; text-align: right; font: 32px/1.2 Arial, sans-serif; font-variant-numeric: tabular-nums; }
 .calculator-keys { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; }
-#computer .calculator-keys button, #phone .calculator-keys button { min-width: 0; min-height: 48px; padding: 8px 0; border: 1px solid #52627a; border-radius: 8px; background: #334459; color: #f4f9fc; font: 20px Arial, sans-serif; touch-action: manipulation; }
-#computer .calculator-keys button:nth-child(4n), #phone .calculator-keys button:nth-child(4n) { background: #a9d3c1; color: #132b26; border-color: #bfe7d7; }
-#computer .calculator-keys button:hover, #phone .calculator-keys button:hover { filter: brightness(1.15); }
+#computer .calculator-keys button { min-width: 0; min-height: 48px; padding: 8px 0; border: 1px solid #52627a; border-radius: 8px; background: #334459; color: #f4f9fc; font: 20px Arial, sans-serif; touch-action: manipulation; }
+#computer .calculator-keys button:nth-child(4n) { background: #a9d3c1; color: #132b26; border-color: #bfe7d7; }
+#computer .calculator-keys button:hover { filter: brightness(1.15); }
 .building-guide { max-width: 640px; margin: 0 auto; padding: 24px; line-height: 1.65; overflow-wrap: anywhere; }
 .building-guide label { display: block; font-size: 12px; }
 .building-guide select { display: block; width: 100%; min-height: 44px; margin-top: 6px; padding: 8px; border: 1px solid #9cafae; border-radius: 6px; background: #fff; color: #203a36; font: 14px Arial, sans-serif; }
@@ -27,22 +27,32 @@
 [data-building-power] { padding: 8px 12px; border-radius: 6px; background: #eadedb; color: #6d342a; font-weight: bold; }
 [data-building-power][data-powered="true"] { background: #d3e6d9; color: #285239; }
 .building-guide ul { padding-left: 20px; }
-#phone .device-calculator { margin: 0; padding: 10px; border-radius: 0; }
-#phone .calculator-display { padding-bottom: 12px; font-size: 24px; }
-#phone .calculator-keys { gap: 4px; }
-#phone .calculator-keys button { min-height: 44px; font-size: 17px; }
-#phone .building-guide { padding: 12px; font-size: 12px; }
-#phone .building-guide select { font-size: 12px; }
-#phone [data-building-here] { min-height: 44px; margin-top: 8px; }
 .solar-download-page { max-width: 640px; margin: 0 auto; padding: 24px; line-height: 1.65; overflow-wrap: anywhere; }
 .solar-download-page output { display: block; margin: 12px 0; }
 #computer .solar-download-page button { border-color: #9ab4a7; background: #dbe9e2; }
 #computer .solar-download-page button:disabled { opacity: .5; cursor: default; }
 #phone [data-phone-app][hidden] { display: none; }
-#phone-solar { padding: 8px; font-size: 12px; line-height: 1.6; }
-#phone-solar output { display: block; margin-bottom: 12px; color: #bfe7a3; }
-#phone-solar label { display: block; margin-top: 12px; }
-#phone-solar select, #phone-solar button { width: 100%; min-height: 44px; margin-top: 6px; padding: 8px; border: 1px solid #58718a; border-radius: 8px; background: #23374d; color: #e7edf3; font: 13px Arial, sans-serif; touch-action: manipulation; }
-#phone-solar button:disabled { opacity: .5; }
-#phone-solar p { overflow-wrap: anywhere; }
 @media (max-height: 480px) { #computer .device-calculator { margin-block: 4px; padding: 10px; } #computer .calculator-display { padding-block: 4px; font-size: 24px; } }
+/* 휴대폰 앱(One UI 다크): 둥근 계산기 키, 어두운 카드와 알약 버튼. */
+#phone .device-calculator { width: 100%; margin: 0; padding: 0 2px; border-radius: 0; background: transparent; }
+#phone [data-calculator-history] { padding: 0 6px; color: var(--oneui-sub); font: 13px/1.5 var(--phone-font); }
+#phone .calculator-display { padding: 10px 6px 18px; color: var(--oneui-text); font: 300 40px/1.1 var(--phone-font); }
+#phone .calculator-keys { gap: 8px; }
+#phone .calculator-keys button { aspect-ratio: 1; min-width: 0; min-height: 44px; padding: 0; border: 0; border-radius: 50%; background: var(--oneui-surface-2); color: var(--oneui-text); font: 21px var(--phone-font); touch-action: manipulation; }
+#phone .calculator-keys button:hover { filter: brightness(1.2); }
+#phone .calculator-keys :is([data-calculator-key="⌫"], [data-calculator-key="%"], [data-calculator-key="÷"], [data-calculator-key="×"], [data-calculator-key="−"], [data-calculator-key="+"]) { color: #6fd38a; }
+#phone .calculator-keys [data-calculator-key="AC"] { color: #ff6b5b; }
+#phone .calculator-keys [data-calculator-key="="] { background: #2ea84d; color: #fff; }
+#phone .building-guide { padding: 0 2px 8px; font-size: 13px; }
+#phone .building-guide select { min-height: 44px; border: 0; border-radius: 14px; background: var(--oneui-surface); color: var(--oneui-text); font: 13px var(--phone-font); }
+#phone .building-guide [data-building-here] { min-height: 40px; margin-top: 8px; padding: 6px 16px; border: 0; border-radius: 20px; background: var(--oneui-surface-2); color: var(--oneui-text); }
+#phone .building-guide [data-building-power] { border-radius: 14px; background: #3a201d; color: #ffb4a8; }
+#phone .building-guide [data-building-power][data-powered="true"] { background: #1d3527; color: #9fe0b0; }
+#phone-solar { padding: 0 2px 8px; font-size: 13px; line-height: 1.6; }
+#phone-solar .solar-device-name { margin: 0 4px 10px; color: var(--oneui-sub); }
+#phone-solar output { display: block; margin-bottom: 12px; padding: 12px 14px; border-radius: 18px; background: var(--oneui-surface); color: #9fe0b0; }
+#phone-solar label { display: block; margin: 12px 4px 0; color: var(--oneui-sub); }
+#phone #phone-solar :is(select, button) { width: 100%; min-height: 44px; margin-top: 6px; padding: 8px 14px; border: 0; border-radius: 22px; background: var(--oneui-surface-2); color: var(--oneui-text); font: 14px var(--phone-font); touch-action: manipulation; }
+#phone #phone-solar :is(#phone-solar-supply, #phone-solar-toggle[aria-pressed="true"]) { background: var(--oneui-accent); color: #fff; }
+#phone-solar button:disabled { opacity: .45; }
+#phone-solar p { overflow-wrap: anywhere; }

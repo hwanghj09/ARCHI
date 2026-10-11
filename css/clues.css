@@ -1,14 +1,14 @@
 /* 휴대폰 메모의 메모 / 단서 탭과 자동 기록된 단서 목록 */
-.phone-note-tabs { display: grid; grid-template-columns: 1fr 1fr; flex-shrink: 0; gap: 4px; padding: 3px; border-radius: 12px; background: #111d2c; }
-#phone .phone-note-tabs button { min-height: 36px; padding: 6px 8px; border: 0; border-radius: 9px; background: transparent; color: #adbdcc; font: 600 13px Arial, sans-serif; cursor: pointer; }
-#phone .phone-note-tabs button[aria-selected="true"] { background: #23374d; color: #f3f7fb; }
+.phone-note-tabs { display: grid; grid-template-columns: 1fr 1fr; flex-shrink: 0; gap: 4px; padding: 3px; border-radius: 22px; background: var(--oneui-surface, #1c1c1f); }
+#phone .phone-note-tabs button { min-height: 36px; padding: 6px 8px; border: 0; border-radius: 19px; background: transparent; color: var(--oneui-sub, #a2a3a9); font: 600 13px var(--phone-font, sans-serif); cursor: pointer; }
+#phone .phone-note-tabs button[aria-selected="true"] { background: #3a3b41; color: #f6f6f8; }
 #phone-clue-count:not(:empty) { display: inline-block; min-width: 18px; margin-left: 4px; padding: 0 5px; border-radius: 9px; background: #f7d79b; color: #172c3d; font-size: 11px; line-height: 18px; }
 #phone-memo-pane:not([hidden]), #phone-clue-pane:not([hidden]) { display: flex; flex: 1; min-height: 0; flex-direction: column; gap: 10px; }
 #phone-clue-pane { overflow-y: auto; scrollbar-width: thin; }
-#phone-clue-empty { margin: 8px 2px; color: #9babbc; font: 12px/1.7 Arial, sans-serif; word-break: keep-all; }
+#phone-clue-empty { margin: 8px 2px; color: var(--oneui-sub, #a2a3a9); font: 12px/1.7 var(--phone-font, sans-serif); word-break: keep-all; }
 #phone-clue-list { display: flex; flex-direction: column; gap: 8px; margin: 0; padding: 0; list-style: none; }
-#phone-clue-list li { padding: 10px 12px; border: 1px solid #536778; border-radius: 12px; background: #111d2c; }
-.phone-clue-place { display: block; margin-bottom: 4px; color: #f7d79b; font: 600 11px/1.4 Arial, sans-serif; }
-#phone-clue-list p { margin: 0; color: #e7edf3; font: 13px/1.6 Arial, sans-serif; word-break: keep-all; }
+#phone-clue-list li { padding: 12px 14px; border-radius: 18px; background: var(--oneui-surface, #1c1c1f); }
+.phone-clue-place { display: block; margin-bottom: 4px; color: #f7d79b; font: 600 11px/1.4 var(--phone-font, sans-serif); }
+#phone-clue-list p { margin: 0; color: #e7edf3; font: 13px/1.6 var(--phone-font, sans-serif); word-break: keep-all; }
 /* "단서 기록됨"은 조사 창이 열린 채 뜨므로, 그동안만 상태 문구를 조사 창(z-index 12)과 그 어두운 막 위로 올린다. */
 body:has(#inspection:not([hidden])) #interaction-status { z-index: 13; color: #f3e6c4; }
