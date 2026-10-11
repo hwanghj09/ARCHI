@@ -16,6 +16,7 @@ try {
   await page.locator('#menu-start').click();
   if (await page.locator('#menu-new-confirm').isVisible()) await page.locator('#menu-new-confirm').click();
   await page.locator('#opening-skip').click();
+  await page.evaluate(() => { sanity = 100; updateSanity(0); });
   const scenes = await page.evaluate(() => [...floorById.keys()]);
   const images = new Set();
   for (const id of scenes) {

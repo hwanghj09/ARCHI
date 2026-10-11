@@ -73,11 +73,11 @@ try {
   const [ex, ey, ew, eh] = bin.element;
   assert(ox > ex && oy >= ey && ox + ow < ex + ew && oy + oh <= ey + eh && ow < ew, `The bin outline ${bin.outline} sits inside its canvas ${bin.element}`);
 
-  // Art doors and fixtures use the measured box from the floor data; the hit range does not move.
+  // Art doors and fixtures use measured boxes; relocated exits move the highlight with the painted door.
   assert.deepEqual((await stand('f1', 'Harmony Hall')).outline, [204, 261, 237, 296]);
   const robot = await stand('f1', '경비 로봇');
   assert.deepEqual(robot.outline, await page.evaluate(() => [guardPatrol.x - 39, floorY - 124, 78, 124]));
-  assert.deepEqual((await stand('f1-harmony', '복도')).outline, [1220, 257, 265, 311]);
+  assert.deepEqual((await stand('f1-harmony', '복도')).outline, [903, 257, 265, 311]);
   // Without an outline the element box is used.
   const elevator = await stand('f5', '1번 엘리베이터');
   assert.deepEqual(elevator.outline, elevator.element);

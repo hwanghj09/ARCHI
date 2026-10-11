@@ -26,7 +26,11 @@ const FLOORS = FLOOR_NUMBERS.map(floor => {
     rooms: [...(layout.rooms || []), { name: '화장실', target: `${floorId(floor)}-restroom`, ...BUILDING_CORE.restroom, ...(layout.restroomOverride || {}) }],
     width: BUILDING_CORE.width };
 });
-const RESTROOMS = FLOOR_NUMBERS.flatMap(floor => interiorRooms(floor, [{ id: `${floorId(floor)}-restroom`, ...restroomInterior }]));
+const RESTROOMS = FLOORS.flatMap(config => {
+  const id = `${config.id}-restroom`;
+  const front = config.rooms.find(room => room.target === id);
+  return interiorRooms(config.floor, [{ id, ...restroomForFront(front) }]);
+});
 const ALL_FLOORS = [FLOOR17, ...FLOORS];
 const ROOFTOP = { id: 'rooftop', floor: 18, label: '옥상', header: 'RF · 옥상', aria: '옥상', width: 2400, background: '#11191d',
   fixtures: [

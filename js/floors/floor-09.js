@@ -23,7 +23,7 @@ const FLOOR9_LAYOUT = {
     { name: '사업 업무 공간', x: 40, width: 1000, style: 'painted', target: 'f9-office',
       doorX: 880, doorWidth: 140, doorY: 360, doorSprite: floor9Door('office') },
     { name: '영업·고객 관리 구역', x: 1080, width: 690, style: 'painted', target: 'f9-sales',
-      doorX: 1538, doorWidth: 110, doorY: 360, doorSprite: floor9Door('sales') },
+      doorX: 1364, doorWidth: 110, doorY: 360, doorSprite: floor9Door('sales') },
     { name: '프로젝트룸', x: 4282, width: 680, style: 'painted', target: 'f9-project',
       doorX: 4665, doorWidth: 120, doorY: 360, doorSprite: floor9Door('project') },
   ],

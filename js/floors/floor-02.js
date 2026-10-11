@@ -37,7 +37,7 @@ const FLOOR2_LAYOUT = {
     { name: 'Harmony Hall', x: 40, width: 1000, style: 'painted', target: 'f2-harmony',
       ...floor2Door('harmony', 723) },
     { name: '직원 휴게실', x: 1080, width: 690, style: 'painted', target: 'f2-lounge',
-      ...floor2Door('lounge', 1375) },
+      ...floor2Door('lounge', 1544) },
     { name: '서버실', x: 4282, width: 680, style: 'painted', target: 'f2-server',
       ...floor2Door('server', 4385) },
   ],

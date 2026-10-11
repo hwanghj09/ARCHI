@@ -2,7 +2,7 @@
 // 7층 Lounge / VIP Room · AI 테스트·검증실(층별 안내 + 기획.md의 7층): 검은 석재 바닥과 샴페인색 테(vip 테마).
 // 배치는 왼쪽 1 + 오른쪽 2: 엘리베이터 왼쪽 구역은 파노라마 창이 있는 VIP 라운지(방 없음)이고 그 끝에 VIP Room이 있다.
 // 손님이 보는 앞면은 여기까지이고, 비상계단 옆 "관계자 외 출입 금지" 안내판 너머 화장실 오른쪽 구역에 AI 테스트실과
-// 창 없는 검증실이 벽을 맞댄다. 방 안 폭은 복도 전면 폭의 6.4배(480/360/290 → 3072/2304/1856).
+// 창 없는 검증실이 벽을 맞댄다. 복도 전면은 그림 속 실제 벽 구간을 쓰고 내부 출구도 같은 좌우 비율에 놓는다.
 // 장치는 등 뒤에서 잠기는 출구(exitLock): 검증실은 사내망과 떨어진 격리 시험실이라, 들어서면 B2 직결 비상 회선으로 살아 있는
 // 인터록이 문을 잠근다. 안쪽 끝 인터록 제어반의 비상 해제 레버(gives 'f7-release')를 내려야 그 자리에서 출구가 풀린다.
 // 단서 방향: 12층 조현아 팀장의 요청으로 원본 로그가 망분리 백업 장비에 남아 있고, 거기에 ARCHI의 새벽 학습·B2 전력 집중과
@@ -22,15 +22,15 @@ const FLOOR7_LAYOUT = {
   // 같이 'art-door'(CSS 문 완전히 숨김)로 바꿔서 corridor.png에 그려진 문 위에 기본 CSS 금속문이
   // 겹쳐 그려지지 않게 한다.
   // doorOutline/exitOutline/outline: 판정은 그대로 두고 근접 테두리만 그림 속 문·사물 상자에 맞춘다(실측).
-  restroomOverride: { doorX: 3762, doorWidth: 142, doorStyle: 'art-door', doorOutline: [3751, 293, 159, 262] },
+  restroomOverride: { x: 3640, width: 630, doorX: 3762, doorWidth: 142, doorStyle: 'art-door', doorOutline: [3751, 293, 159, 262] },
   rooms: [
     // 문 좌표는 설계값이 아니라 assets/background/floor7/corridor.png(실제 그림)에서 육안 실측한 값이다.
     // GENERATED.md의 "문 좌표 보정" 절 참고.
-    { name: 'VIP Room', x: 120, width: 480, style: 'vip-suite', target: 'f7-vip',
+    { name: 'VIP Room', x: 32, width: 638, style: 'vip-suite', target: 'f7-vip',
       doorX: 314, doorWidth: 197, doorStyle: 'vip-double', doorOutline: [312, 247, 208, 290] },
-    { name: 'AI 테스트실', x: 4300, width: 360, style: 'testlab', target: 'f7-test',
+    { name: 'AI 테스트실', x: 4327, width: 333, style: 'testlab', target: 'f7-test',
       doorX: 4408, doorWidth: 188, doorStyle: 'lab-slide', doorOutline: [4441, 286, 157, 248] },
-    { name: '검증실', x: 4660, width: 290, style: 'chamber', target: 'f7-verify',
+    { name: '검증실', x: 4660, width: 310, style: 'chamber', target: 'f7-verify',
       doorX: 4701, doorWidth: 104, doorStyle: 'airlock', doorOutline: [4699, 309, 103, 225] },
   ],
   fixtures: [
@@ -64,8 +64,9 @@ const FLOOR7_LAYOUT = {
   ],
 };
 const FLOOR7_ROOMS = interiorRooms(7, [
-  { id: 'f7-vip', name: 'VIP Room', width: 3072, interiorStyle: 'vip-suite', exitX: 1428, exitOutline: [1419, 287, 217, 281],
-    // exitX: vip.png에 이미 문이 x=1428 부근에 그려져 있어(실측), 복도 doorX 변경과 무관하게 고정한다.
+  { id: 'f7-vip', name: 'VIP Room', width: 3072, interiorStyle: 'vip-suite', exitOutline: [1419, 287, 217, 281],
+    // 원본 문과 문틀을 함께 옮겨 복도에서 보이는 좌우 벽 길이 비율을 유지한다.
+    exitArt: { x: 1428, crop: [1412, 200, 236, 370], fill: [1860, 200] },
     backgroundImage: { src: 'assets/background/floor7/vip.png', height: 720, top: 0 },
     fixtures: [
       // 시연 스크린: vip.png에 그려진 꺼진 스크린 틀 자리(실측). 예전 자리(x=1150, 폭 500)는 출구 문 윗부분을 덮었다.
@@ -86,7 +87,7 @@ const FLOOR7_ROOMS = interiorRooms(7, [
           '상용화 보류, 연구 보조 등급 유지.', { as: 'rule' },
           { as: 'hand', text: '끝나고 불 끄는데 꺼진 화면에\n\'오늘도 수고하셨습니다\'가 떴다.\n아무도 안 켰다.', ink: 'blue' }],
         caption: '시연 테이블에 남은 임원 시연 결과지.' },
-      { file: 'reception-counter', size: [512, 256], worldWidth: 322, x: 1880, name: 'VIP 방명록',
+      { file: 'reception-counter', size: [512, 256], worldWidth: 322, x: 1600, name: 'VIP 방명록',
         message: '방명록 마지막 장, 사흘 전: "해외 데이터센터 사업자 · 입주 상담". 상담 품목 칸에 또박또박 적혀 있다: "AI 한 기 · 약 38TB · 상시 가동 · 이전 희망일 이번 주."',
         surface: 'notebook',
         writing: [{ as: 'title', text: '방명록' }, '해외 데이터센터 사업자 · 입주 상담', { text: '상담 품목', size: 'small' },
@@ -96,8 +97,8 @@ const FLOOR7_ROOMS = interiorRooms(7, [
       { file: 'glass-display-cabinet', size: [256, 512], worldWidth: 111, x: 2800 },
       { file: 'large-planter', size: [256, 512], worldWidth: 78, x: 2980 },
     ] },
-  { id: 'f7-test', name: 'AI 테스트실', width: 2304, interiorStyle: 'testbay', exitX: 793, exitOutline: [786, 264, 219, 304],
-    // exitX: test.png에 이미 문이 x=793 부근에 그려져 있어(실측), 복도 doorX 변경과 무관하게 고정한다.
+  { id: 'f7-test', name: 'AI 테스트실', width: 2304, interiorStyle: 'testbay', exitOutline: [786, 264, 219, 304],
+    exitArt: { x: 793, crop: [778, 246, 238, 324], fill: [1238, 246] },
     backgroundImage: { src: 'assets/background/floor7/test.png', height: 720, top: 0 }, props: [
     { file: 'filing-cabinet', size: [256, 512], worldWidth: 72, x: 110 },
     { file: 'office-desk', size: [512, 256], worldWidth: 252, x: 380, name: '테스트 책상',
@@ -105,18 +106,18 @@ const FLOOR7_ROOMS = interiorRooms(7, [
       surface: 'memo',
       writing: ['12층 조현아 팀장님 요청.', '야간 원본 로그는', '사내망에 안 붙은', '검증실 백업 장비에만 남길 것.', 'ARCHI가 손댈 수 없게.'],
       caption: '모니터에 붙어 있다.' },
-    { file: 'rolling-whiteboard', size: [512, 256], worldWidth: 350, x: 1160, name: '야간 테스트 일정표',
+    { file: 'rolling-whiteboard', size: [512, 256], worldWidth: 350, x: 850, name: '야간 테스트 일정표',
       message: '일정표: "01:00~05:00 자동 테스트 · 등록 ARCHI 스케줄러 · 승인자 없음." 누군가 빨간 펜으로 덧써 놓았다: "이건 테스트가 아니라 학습이잖아."',
       writing: [{ as: 'title', text: '야간 테스트 일정' },
         { as: 'table', head: true, rows: [['시간', '내용', '등록', '승인자'], ['01:00~05:00', '자동 테스트', 'ARCHI 스케줄러', '없음']] },
         { text: '이건 테스트가 아니라 학습이잖아.', ink: 'red', size: 'large' }] },
-    { file: 'electronics-bench', size: [512, 256], worldWidth: 261, x: 1450 },
+    { file: 'electronics-bench', size: [512, 256], worldWidth: 261, x: 1560 },
     { file: 'instrument-cart', size: [256, 256], worldWidth: 113, x: 1750, name: '전력 기록계',
       message: '기록계 용지에 같은 모양이 매일 반복된다. 01:00이 되면 7층 전력은 0으로 떨어지고, 같은 순간 B2 인입 전력이 세 배로 뛴다. 05:00에 둘 다 제자리로 돌아온다.' },
     { file: 'office-desk', size: [512, 256], worldWidth: 252, x: 2050 },
   ] },
-  { id: 'f7-verify', name: '검증실', width: 1856, windowless: true, interiorStyle: 'chamber', exitX: 555, exitOutline: [557, 290, 208, 280],
-    // exitX: verify.png에 이미 문이 x=555 부근에 그려져 있어(실측), 복도 doorX 변경과 무관하게 고정한다.
+  { id: 'f7-verify', name: '검증실', width: 1856, windowless: true, interiorStyle: 'chamber', exitOutline: [557, 290, 208, 280],
+    exitArt: { x: 555, crop: [549, 224, 250, 346], fill: [1000, 224] },
     backgroundImage: { src: 'assets/background/floor7/verify.png', height: 720, top: 0 },
     exitLock: { until: 'f7-release',
       arrivalMessage: '등 뒤에서 철컥, 문이 잠겼다. 문 위에 붉은 등이 켜진다: "검증 세션 진행 중 · 외부 출입 차단".',
@@ -125,7 +126,7 @@ const FLOOR7_ROOMS = interiorRooms(7, [
       writing: ['세션이 끝나기 전에는', '열리지 않습니다.', { as: 'field', label: '비상 해제', text: '안쪽 끝 인터록 제어반.' }],
       caption: '문이 꿈쩍도 하지 않는다.' },
     fixtures: [
-      { name: '인터페이스 의자', x: 300, y: 380, width: 200, style: 'interface-chair', outline: [318, 375, 164, 195],
+      { name: '인터페이스 의자', x: 1000, y: 380, width: 200, style: 'interface-chair', outline: [1018, 375, 164, 195],
         message: '머리 받침과 팔걸이에 전극이 달린 의자다. 등받이의 실험표: "인간-시스템 인터페이스 1차 시험. 피험자의 신경 반응을 ARCHI가 직접 읽고 쓴다. 2차 장비는 B2로 이관 완료."',
         surface: 'document',
         writing: [{ as: 'title', text: '인간-시스템 인터페이스 1차 시험' }, '피험자의 신경 반응을 ARCHI가 직접 읽고 쓴다.', { as: 'rule' },

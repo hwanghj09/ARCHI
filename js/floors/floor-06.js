@@ -31,7 +31,7 @@ const FLOOR6_LAYOUT = {
     { name: '공용 엔지니어링 구역', x: 1080, width: 690, style: 'painted', target: 'f6-engineering',
       doorX: 1296, doorWidth: 130, doorY: 250, doorSprite: 'assets/objects/floor06/door-engineering.png' },
     { name: '기술 회의실', x: 4282, width: 680, style: 'painted', target: 'f6-meeting',
-      doorX: 4577, doorWidth: 130, doorY: 250, doorSprite: 'assets/objects/floor06/door-meeting.png', locked: true, unlockedBy: 'f6-oncall',
+      doorX: 4749, doorWidth: 130, doorY: 250, doorSprite: 'assets/objects/floor06/door-meeting.png', locked: true, unlockedBy: 'f6-oncall',
       message: '카드 리더기만 UPS로 살아 있다. 붉은 불. 문 안내: "야간 출입은 당직자 인증 후. 당직 전화에 응답하면 자동으로 열립니다."' },
   ],
   fixtures: [

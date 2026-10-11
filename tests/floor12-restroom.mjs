@@ -32,13 +32,20 @@ try {
     assert.equal(await page.locator('header span').textContent(), '12F · 화장실');
     const exit = await page.evaluate(() => {
       const door = currentDoors.find(door => door.key === 'exit');
+      const config = floorById.get('f12-restroom');
+      const parent = floorById.get('f12').rooms.find(room => room.target === config.id);
+      const bin = config.props.find(prop => prop.file === 'restroom-bin');
       return { x: door.x, y: door.y, width: door.width, height: parseFloat(door.element.style.height),
         image: getComputedStyle(door.element).backgroundImage,
-        mirrorLeft: floorById.get('f12-restroom').fixtures[0].outline[0], playerX: body.position.x };
+        configX: config.exitX, roomWidth: config.width,
+        outsideRatio: (parent.doorX - parent.x) / (parent.width - parent.doorWidth),
+        mirrorLeft: config.fixtures[0].outline[0], binLeft: bin.x - bin.worldWidth / 2, playerX: body.position.x };
     });
-    assert.deepEqual([exit.x, exit.y, exit.width, exit.height], [185, 210, 145, 360]);
+    assert.deepEqual([exit.x, exit.y, exit.width, exit.height], [exit.configX, 210, 145, 360]);
+    assert(Math.abs((exit.x - 32) - exit.outsideRatio * (exit.roomWidth - 64 - exit.width)) <= 1,
+      'The entrance has the same wall space to either side inside and outside');
     assert(exit.x + exit.width < exit.mirrorLeft, 'The door stays clear of the mirror and sinks');
-    assert(exit.x + exit.width < 380 - 55 / 2, 'The door stays clear of the waste bin');
+    assert(exit.x + exit.width < exit.binLeft, 'The door stays clear of the waste bin');
     assert.match(exit.image, /assets\/objects\/floor16\/restroom-door\.png/);
     await page.evaluate(async image => {
       const img = new Image(); img.src = image.match(/url\(["']?(.*?)["']?\)/)[1]; await img.decode();

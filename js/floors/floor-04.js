@@ -31,7 +31,7 @@ const FLOOR4_LAYOUT = {
     { name: '개발자 업무 구역', x: 1080, width: 690, style: 'painted', target: 'f4-dev',
       doorX: 1135, doorWidth: 130, doorY: 250, doorSprite: 'assets/objects/floor04/door-dev.png' },
     { name: '연구 회의실', x: 4282, width: 680, style: 'painted', target: 'f4-meeting',
-      doorX: 4610, doorWidth: 130, doorY: 250, doorSprite: 'assets/objects/floor04/door-meeting.png',
+      doorX: 4716, doorWidth: 130, doorY: 250, doorSprite: 'assets/objects/floor04/door-meeting.png',
       locked: true, unlockedBy: 'f4-ups=회의실 도어락',
       message: '연구 회의실 카드 리더 전기 잠금(fail-secure)이다. 전원이 없으면 잠긴 채로 버틴다. 문틀 라벨: "전원 · 연구개발 업무 공간 UPS 둘째 출력."' },
   ],

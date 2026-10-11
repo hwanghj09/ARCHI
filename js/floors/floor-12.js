@@ -2,7 +2,7 @@
 // 12층 기술본부 ARCHI 개발팀(층별안내.md의 TmaxSoft 기술본부 층, 기획.md의 ARCHI 개발팀).
 // 흑연색 연구소 마감(lab 테마). 방을 코어 세 구역에 하나씩 둔다: 왼쪽 개발실(가운데 자동문),
 // 계단과 화장실 사이 모델 평가실(창 없는 보안문 방), 오른쪽 팀장실(블라인드). 팀장실은 잠겨 있고
-// 개발실 책상 서랍의 보조키(gives)를 얻으면 열린다(unlockedBy). 방 안 폭은 복도 전면 폭의 4.1배(800/440/520 → 3280/1804/2132).
+// 개발실 책상 서랍의 보조키(gives)를 얻으면 열린다(unlockedBy). 전면 구획은 복도 그림의 유리벽·기둥을 따른다.
 // 단서는 낮 3~5%·밤 80~90% 성능 기록과 7층 원본 로그 백업 메모. 정전 상태(PC 꺼짐)를 기준으로 썼다.
 const FLOOR12_LAYOUT = {
   header: '12F · 기술본부 ARCHI 개발팀', background: '#15171b', theme: 'lab',
@@ -14,16 +14,16 @@ const FLOOR12_LAYOUT = {
   // 비상계단 문 왼쪽으로 총 125px.
   stairsOffset: -125,
   // 복도 그림 속 화장실 벽감(x≈3688~3805)에 맞춘다. metal 스타일에 공용 화장실 문 그림을 입힌다.
-  restroomOverride: { doorX: 3688, doorWidth: 117 },
+  restroomOverride: { x: 3592, width: 401, doorX: 3688, doorWidth: 117 },
   rooms: [
     // 문 좌표는 CSS 임시 그림이 아니라 assets/background/floor12/corridor.png(실제 손그림)에서 육안 실측한 값이다.
     // GENERATED.md의 "문 좌표 보정(2026-09-28)" 절 참고 — 그림 속 문 위치가 애초 설계 좌표와 상당히 달랐다.
-    { name: '개발실', x: 64, width: 800, style: 'frosted', target: 'f12-dev',
+    { name: '개발실', x: 48, width: 1070, style: 'frosted', target: 'f12-dev',
       // doorOutline/exitOutline: 판정은 그대로 두고 근접 테두리만 그림 속 양쪽 미닫이문 전체에 맞춘다(실측).
       doorX: 708, doorWidth: 132, doorStyle: 'slide', doorOutline: [707, 250, 209, 318] },
-    { name: '모델 평가실', x: 3100, width: 440, style: 'lab', target: 'f12-eval',
+    { name: '모델 평가실', x: 2960, width: 543, style: 'lab', target: 'f12-eval',
       doorX: 3020, doorWidth: 140, doorY: 314, doorStyle: 'security' },
-    { name: '팀장실', x: 4330, width: 520, style: 'blinds', target: 'f12-lead',
+    { name: '팀장실', x: 4070, width: 723, style: 'blinds', target: 'f12-lead',
       doorX: 4508, doorWidth: 137, doorY: 298, doorStyle: 'blinds', locked: true, unlockedBy: 'f12-lead-key',
       message: '팀장실 문이 잠겨 있다. 카드키가 아니라 열쇠 구멍이 있는 문이다.' },
   ],
@@ -36,8 +36,10 @@ const FLOOR12_LAYOUT = {
   ],
 };
 const FLOOR12_ROOMS = interiorRooms(12, [
-  { id: 'f12-dev', name: '개발실', width: 3280, exitX: 1550, exitOutline: [1502, 277, 233, 291],
-    // exitX: office.png에 이미 문이 x=1550 부근에 그려져 있어(실측), 복도 doorX 변경과 무관하게 고정한다.
+  { id: 'f12-dev', name: '개발실', width: 3280, exitOutline: [1502, 277, 233, 291],
+    exitArt: { x: 1550, crop: [1490, 210, 257, 360], fill: [200, 210] },
+    // 이동한 문 뒤의 대형 화면을 벽 조각으로 비워 잘린 화면이 남지 않게 한다.
+    artPatches: [1870, 2000, 2130].map(x => ({ box: [x, 210, 130, 360], from: [1770, 210] })),
     backgroundImage: { src: 'assets/background/floor12/office.png', height: 720, top: 0 }, props: [
     { file: 'large-planter', size: [256, 512], worldWidth: 78, x: 100 },
     { file: 'filing-cabinet', size: [256, 512], worldWidth: 72, x: 220 },
@@ -49,11 +51,11 @@ const FLOOR12_ROOMS = interiorRooms(12, [
       caption: '모니터가 꺼져 있다. 정전이라 PC를 켤 수 없다. 모니터 옆 포스트잇.' },
     { file: 'office-desk', size: [512, 256], worldWidth: 252, x: 1120 },
     { file: 'office-copier', size: [256, 256], worldWidth: 110, x: 1400 },
-    { file: 'rolling-whiteboard', size: [512, 256], worldWidth: 350, x: 1990, name: '화이트보드',
+    { file: 'rolling-whiteboard', size: [512, 256], worldWidth: 350, x: 1960, name: '화이트보드',
       message: '주간 성능 평가: 월 4.2% · 화 3.8% · 수 4.5% · 목 3.1%. 아래에 "목표 30% · 원인 불명 · 모델 구조 재검토".',
       writing: [{ as: 'title', text: '주간 성능 평가' }, '월 4.2%   화 3.8%', '수 4.5%   목 3.1%',
         { text: '목표 30%', ink: 'red', mark: 'circle' }, { text: '원인 불명 · 모델 구조 재검토', ink: 'blue' }] },
-    { file: 'office-desk', size: [512, 256], worldWidth: 252, x: 2400 },
+    { file: 'office-desk', size: [512, 256], worldWidth: 252, x: 1640 },
     { file: 'office-desk', size: [512, 256], worldWidth: 252, x: 2700 },
     { file: 'office-desk', size: [512, 256], worldWidth: 252, x: 3000, name: '책상 서랍', gives: 'f12-lead-key',
       message: '맨 아래 서랍에 "팀장실 보조키" 꼬리표가 달린 열쇠가 있다. 챙겼다.',
@@ -61,11 +63,11 @@ const FLOOR12_ROOMS = interiorRooms(12, [
       takenMessage: '서랍은 비어 있다. 팀장실 보조키는 이미 챙겼다.' },
     { file: 'water-cooler', size: [256, 512], worldWidth: 62, x: 3200 },
   ] },
-  { id: 'f12-eval', name: '모델 평가실', width: 1804, windowless: true, exitX: 344, exitOutline: [335, 312, 174, 256],
-    // exitX: eval.png에 이미 문이 x=344 부근에 그려져 있어(실측), 복도 doorX 변경과 무관하게 고정한다.
+  { id: 'f12-eval', name: '모델 평가실', width: 1804, windowless: true, exitOutline: [335, 312, 174, 256],
+    exitArt: { x: 344, crop: [327, 210, 226, 360], fill: [1120, 210] },
     backgroundImage: { src: 'assets/background/floor12/eval.png', height: 720, top: 0 }, props: [
-    { file: 'server-rack', size: [256, 512], worldWidth: 96, x: 110 },
-    { file: 'network-rack', size: [256, 512], worldWidth: 96, x: 230, name: '네트워크 랙',
+    { file: 'server-rack', size: [256, 512], worldWidth: 96, x: 100 },
+    { file: 'network-rack', size: [256, 512], worldWidth: 96, x: 200, name: '네트워크 랙',
       message: '정전인데 스위치 한 대의 포트 표시등만 깜빡인다. 케이블 라벨: "B2 직결 · UPS".',
       surface: 'label', writing: ['B2 직결 · UPS'], caption: '정전인데 스위치 한 대의 포트 표시등만 깜빡인다. 케이블 라벨.' },
     { file: 'electronics-bench', size: [512, 256], worldWidth: 261, x: 760, name: '평가 벤치',
@@ -79,8 +81,8 @@ const FLOOR12_ROOMS = interiorRooms(12, [
     { file: 'server-cooling-unit', size: [256, 512], worldWidth: 96, x: 1460 },
     { file: 'ups-cabinet', size: [256, 256], worldWidth: 158, x: 1660 },
   ] },
-  { id: 'f12-lead', name: '팀장실', width: 2132, exitX: 1863, exitOutline: [1815, 290, 180, 278],
-    // exitX: lead.png에 이미 문이 x=1863 부근에 그려져 있어(실측), 복도 doorX 변경과 무관하게 고정한다.
+  { id: 'f12-lead', name: '팀장실', width: 2132, exitOutline: [1815, 290, 180, 278],
+    exitArt: { x: 1863, crop: [1800, 200, 210, 370], fill: [30, 200] },
     backgroundImage: { src: 'assets/background/floor12/lead.png', height: 720, top: 0 }, props: [
     { file: 'large-planter', size: [256, 512], worldWidth: 78, x: 100 },
     { file: 'glass-display-cabinet', size: [256, 512], worldWidth: 111, x: 280, name: '진열장',
@@ -91,7 +93,7 @@ const FLOOR12_ROOMS = interiorRooms(12, [
     { file: 'filing-cabinet', size: [256, 512], worldWidth: 72, x: 450 },
     { file: 'filing-cabinet', size: [256, 512], worldWidth: 72, x: 530 },
     { file: 'waiting-sofa', size: [512, 256], worldWidth: 250, x: 860 },
-    { file: 'office-desk', size: [512, 256], worldWidth: 252, x: 1360, name: '팀장 책상',
+    { file: 'office-desk', size: [512, 256], worldWidth: 252, x: 1240, name: '팀장 책상',
       message: '결재함 맨 위의 개발자 메모: "야간 성능 이상과 관련된 원본 로그는 변조 가능성이 있음. 7층 AI 테스트·검증실 장비에 별도 백업함."',
       surface: 'memo', look: 'slip', writing: ['야간 성능 이상과', '관련된 원본 로그는', '변조 가능성이 있음.', '7층 AI 테스트·검증실', '장비에 별도 백업함.'],
       caption: '결재함 맨 위의 개발자 메모.' },

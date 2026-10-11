@@ -1,5 +1,5 @@
 // 층 데이터 도우미: 층 id·이름·짧은 표기, 방 내부 기본값, 모든 층 공통 화장실 내부.
-// 방이 있는 층의 방 내부: 17층 사무실처럼 별도 장면(2400px)이며 왼쪽 문으로 복도에 돌아간다.
+// 방이 있는 층의 방 내부는 17층 사무실처럼 별도 장면이며 출입문으로 복도에 돌아간다.
 // 소품은 충돌 없이 배치하고 message가 있는 것만 조사할 수 있다. 원본 캔버스/앵커는 floor-kit/manifest.json 기준.
 const floorId = floor => floor < 0 ? `b${-floor}` : `f${floor}`;
 const floorName = floor => floor < 0 ? `지하 ${-floor}층` : `${floor}층`;
@@ -11,7 +11,7 @@ const interiorRooms = (floor, rooms) => rooms.map(entry => ({ ...entry, floor, i
 // 거울은 판정을 가운데 세면대 앞에 두고 테두리(outline)만 거울 전체에 맞추고, 화장실 칸은 문이 열린 첫 칸이다
 // (판정은 변기 앞, 테두리는 칸 전체. 칸 앞의 미끄럼 주의 표지와 판정이 겹치지 않게 오른쪽으로 비켜 둔다).
 // 비상 호출 버튼은 닫힌 칸 문의 표시등 패널이다.
-// 복도 문 보정값과 무관하게 공통 내부 그림의 출구 위치·폭을 유지한다.
+// 그림과 설비의 비율은 유지하고, 복도 입구가 오른쪽에 있는 층은 왼쪽 벽을 더 이어 붙인다.
 const restroomInterior = { name: '화장실', width: 1800, windowless: true, exitX: 185, exitWidth: 145, exitStyle: 'restroom-exit',
   backgroundImage: { src: 'assets/background/floor17/restroom.png', height: 824.84, top: 0 },
   fixtures: [
@@ -30,6 +30,19 @@ const restroomInterior = { name: '화장실', width: 1800, windowless: true, exi
     { file: 'wet-floor-sign', size: [256, 256], worldWidth: 72, x: 1130, name: '미끄럼 주의 표지',
       message: '세면대와 칸막이 사이에 미끄럼 주의 표지가 세워져 있다. 바닥은 이미 말라 있다.' },
   ] };
+
+function restroomForFront(front) {
+  const ratio = (front.doorX - front.x) / (front.width - front.doorWidth);
+  const padding = Math.round((ratio * (restroomInterior.width - 64 - restroomInterior.exitWidth) -
+    (restroomInterior.exitX - 32)) / (1 - ratio));
+  if (!padding) return restroomInterior;
+  return { ...restroomInterior, width: restroomInterior.width + padding,
+    exitX: restroomInterior.exitX + padding, leftWallExtension: padding,
+    backgroundImage: { ...restroomInterior.backgroundImage, width: restroomInterior.width, left: padding },
+    props: restroomInterior.props.map(prop => ({ ...prop, x: prop.x + padding })),
+    fixtures: restroomInterior.fixtures.map(fixture => ({ ...fixture, x: fixture.x + padding,
+      ...(fixture.outline ? { outline: [fixture.outline[0] + padding, ...fixture.outline.slice(1)] } : {}) })) };
+}
 
 function floorShortLabel(floorValue) {
   if (floorValue === -1) return 'B1';

@@ -3,7 +3,7 @@
 // 정문은 동쪽 끝(화장실 오른쪽 구역)의 회전문이고, 그 앞에 정전으로 날개가 풀린 스피드 게이트와 충전 도크의 경비 로봇 R-01이 선다.
 // 방 셋은 모두 엘리베이터 왼쪽 서쪽 날개에 벽을 맞대고 선다(왼쪽 3): Harmony Hall 1층 객석, Vision Hall, 건강관리실.
 // 1번 엘리베이터 앞에 층별 안내판(17F~B2), 비상계단 옆 가운데 구역에 안내 데스크가 있다. 여성휴게실은 건강관리실 안쪽의 잠긴 문이다.
-// 방 안 폭은 복도 전면 폭의 6.2배(520/380/300 → 3224/2356/1860).
+// 복도 전면은 그림 속 칸막이 범위에 맞춘다. 내부 문은 그 전면의 문 좌우 벽 비율을 따른다.
 // 장치는 경비 로봇 정비 패널의 네 자리 번호(설비 fixture의 code): 패널 스티커는 "정비 코드 = 제작일(월일)"이라 Vision Hall 진열장의
 // 제작일(11월 7일, 1107)을 넣게 만들지만 옛 번호다. 건강관리실 점검표가 로비 배치(9월 14일) 때 배치일로 바꿨다고 알려 주어 0914가
 // 맞다. 열면 23:58 SYSTEM이 로봇을 "차단" 모드로 바꾸고 차단 대상을 17F 정수호, 최우선 방어 구역을 B2로 둔 기록(gives
@@ -24,15 +24,15 @@ const FLOOR1_LAYOUT = {
   // 확장구역 문처럼 'art-door'(CSS 문 완전히 숨김)로 바꿔서, corridor.png에 이미 그려진 문 위에
   // 기본 CSS 금속문(.metal)이 겹쳐 그려지지 않게 한다.
   // doorOutline(방 문)·outline(설비): 판정은 그대로 두고 근접 테두리만 corridor.png 속 문·사물 상자에 맞춘다(실측).
-  restroomOverride: { doorX: 3733, doorWidth: 158, doorStyle: 'art-door', doorOutline: [3727, 292, 171, 266] },
+  restroomOverride: { x: 3630, width: 615, doorX: 3733, doorWidth: 158, doorStyle: 'art-door', doorOutline: [3727, 292, 171, 266] },
   rooms: [
     // 문 좌표는 설계값이 아니라 assets/background/floor1/corridor.png(실제 그림)에서 육안 실측한 값이다.
     // GENERATED.md의 "문 좌표 보정" 절 참고.
-    { name: 'Harmony Hall', x: 40, width: 520, style: 'hall-portal', target: 'f1-harmony',
+    { name: 'Harmony Hall', x: 156, width: 452, style: 'hall-portal', target: 'f1-harmony',
       doorX: 223, doorWidth: 225, doorStyle: 'hall-double', doorOutline: [204, 261, 237, 296] },
-    { name: 'Vision Hall', x: 560, width: 380, style: 'gallery', target: 'f1-vision',
+    { name: 'Vision Hall', x: 608, width: 332, style: 'gallery', target: 'f1-vision',
       doorX: 650, doorWidth: 143, doorStyle: 'pivot-glass', doorOutline: [617, 261, 178, 296] },
-    { name: '건강관리실', x: 940, width: 300, style: 'clinic', target: 'f1-clinic',
+    { name: '건강관리실', x: 940, width: 262, style: 'clinic', target: 'f1-clinic',
       doorX: 1023, doorWidth: 99, doorStyle: 'clinic-door', doorOutline: [1030, 302, 106, 254] },
   ],
   fixtures: [
@@ -110,11 +110,12 @@ const FLOOR1_LAYOUT = {
   ],
 };
 const FLOOR1_ROOMS = interiorRooms(1, [
-  { id: 'f1-harmony', name: 'Harmony Hall', width: 3224, interiorStyle: 'stalls', exitX: 1215, exitOutline: [1220, 257, 265, 311],
-    // exitX: harmony.png에 이미 문이 x=1215 부근에 그려져 있어(실측), 복도 doorX 변경과 무관하게 고정한다.
+  { id: 'f1-harmony', name: 'Harmony Hall', width: 3224, interiorStyle: 'stalls', exitOutline: [1220, 257, 265, 311],
+    // 배경의 기존 문 그림을 문 좌우 공간 비율에 맞춰 함께 옮긴다. 빈 자리에는 같은 홀의 벽을 쓴다.
+    exitArt: { x: 1215, crop: [1107, 130, 500, 440], fill: [600, 130] },
     backgroundImage: { src: 'assets/background/floor1/harmony.png', height: 720, top: 0 },
     fixtures: [
-      { name: '1층 객석', x: 120, y: 470, width: 1050, style: 'stall-rows' },
+      { name: '1층 객석', x: 120, y: 470, width: 650, style: 'stall-rows' },
       { name: '자동 연주 피아노', x: 2300, y: 430, width: 220, style: 'grand-piano',
         message: '자동 연주 피아노다. 보면대 스티커: "ARCHI 자동 반주 시범 · 제어 B2." 연주 기록: 낮 정기 연주회 박자 이탈 41회. 새벽 03:00 무관객 리허설 이탈 0회. 기록 맨 끝에 한 줄이 더 있다: "박수 · 3분 12초."',
         surface: 'document',
@@ -132,8 +133,8 @@ const FLOOR1_ROOMS = interiorRooms(1, [
           { as: 'note', title: '시설팀 메모', text: '새벽에 홀 문이\n안에서 잠겨 있음.\n2층 영사실 녹화도\n같은 시간.' }] },
       { file: 'water-cooler', size: [256, 512], worldWidth: 62, x: 3150 },
     ] },
-  { id: 'f1-vision', name: 'Vision Hall', width: 2356, interiorStyle: 'exhibit', exitX: 205, exitOutline: [226, 307, 135, 261],
-    // exitX: vision.png에 이미 문이 x=205 부근에 그려져 있어(실측), 복도 doorX 변경과 무관하게 고정한다.
+  { id: 'f1-vision', name: 'Vision Hall', width: 2356, interiorStyle: 'exhibit', exitOutline: [226, 307, 135, 261],
+    exitArt: { x: 205, crop: [45, 264, 368, 306], fill: [1230, 264] },
     backgroundImage: { src: 'assets/background/floor1/vision.png', height: 720, top: 0 },
     fixtures: [
       { name: '기술 연혁 벽', x: 1680, y: 130, width: 520, height: 190, style: 'history-wall',
@@ -141,12 +142,12 @@ const FLOOR1_ROOMS = interiorRooms(1, [
     ],
     props: [
       { file: 'glass-display-cabinet', size: [256, 512], worldWidth: 111, x: 110 },
-      { file: 'glass-display-cabinet', size: [256, 512], worldWidth: 111, x: 700, name: '로봇 진열장',
+      { file: 'glass-display-cabinet', size: [256, 512], worldWidth: 111, x: 850, name: '로봇 진열장',
         message: '맨 아래 칸이 비어 있고 명판만 남았다: "보안 로봇 R-01 · ARCHI 연동 시연용 시제품 · 제작 11월 7일." 옆 쪽지: "로비 경비로 전환 배치."',
         surface: 'label', look: 'plate', writing: ['보안 로봇 R-01', 'ARCHI 연동 시연용 시제품', '제작 11월 7일',
           { as: 'note', text: '로비 경비로 전환 배치.' }],
         caption: '맨 아래 칸이 비어 있고 명판만 남았다. 쪽지는 명판 옆에 붙어 있다.' },
-      { file: 'glass-display-cabinet', size: [256, 512], worldWidth: 111, x: 860 },
+      { file: 'glass-display-cabinet', size: [256, 512], worldWidth: 111, x: 1010 },
       { file: 'reception-counter', size: [512, 256], worldWidth: 322, x: 1400, name: '방명록대',
         message: '방명록 마지막 장. 낮 방문객 이름 아래, 새벽 03:14에 적힌 한 줄: "다시 왔습니다 · R-01." 사람 손글씨가 아니라 자로 잰 듯 반듯하다. 진열장 빈 칸 앞 바닥에는 바퀴 자국이 원을 그리고 있다.',
         surface: 'notebook',
@@ -154,8 +155,8 @@ const FLOOR1_ROOMS = interiorRooms(1, [
         caption: '사람 손글씨가 아니라 자로 잰 듯 반듯하다. 진열장 빈 칸 앞 바닥에는 바퀴 자국이 원을 그리고 있다.' },
       { file: 'large-planter', size: [256, 512], worldWidth: 78, x: 2280 },
     ] },
-  { id: 'f1-clinic', name: '건강관리실', width: 1860, windowless: true, interiorStyle: 'ward', exitX: 865, exitOutline: [852, 277, 155, 291],
-    // exitX: clinic.png에 이미 문이 x=865 부근에 그려져 있어(실측), 복도 doorX 변경과 무관하게 고정한다.
+  { id: 'f1-clinic', name: '건강관리실', width: 1860, windowless: true, interiorStyle: 'ward', exitOutline: [852, 277, 155, 291],
+    exitArt: { x: 865, crop: [824, 210, 214, 360], fill: [1230, 210] },
     backgroundImage: { src: 'assets/background/floor1/clinic.png', height: 720, top: 0 },
     fixtures: [
       { name: '여성휴게실', x: 1570, y: 280, width: 145, height: 290, style: 'art-spot',
@@ -175,8 +176,8 @@ const FLOOR1_ROOMS = interiorRooms(1, [
         writing: [{ as: 'title', text: '보안 로봇 R-01 응급 이송 기능 점검표' }, '9월 14일 로비 배치 완료.', { as: 'rule' }, { text: '비고', size: 'small' },
           { as: 'hand', text: '배치하면서 정비 코드를\n배치일(월일 네 자리)로 바꿈.', ink: 'blue' },
           { as: 'hand', text: '로봇에 붙은 스티커는 예전 것.', ink: 'blue' }] },
-      { file: 'instrument-cart', size: [256, 256], worldWidth: 113, x: 1070 },
-      { file: 'water-cooler', size: [256, 512], worldWidth: 62, x: 1200 },
-      { file: 'glass-display-cabinet', size: [256, 512], worldWidth: 111, x: 1320 },
+      { file: 'instrument-cart', size: [256, 256], worldWidth: 113, x: 1135 },
+      { file: 'water-cooler', size: [256, 512], worldWidth: 62, x: 1230 },
+      { file: 'glass-display-cabinet', size: [256, 512], worldWidth: 111, x: 1360 },
     ] },
 ]);

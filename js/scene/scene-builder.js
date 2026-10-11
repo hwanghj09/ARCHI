@@ -1,11 +1,31 @@
 // 17층 복도·사무실을 뺀 모든 장면(다른 층 복도, 방 내부, 옥상)을 층 데이터로 조립한다.
 // 방은 복도 쪽 벽면 x..x+width를 차지한다. 방 안의 출구는 문 양옆 벽 길이의 비율을 복도에서 본 것과 같게 두어,
-// 복도에서 문 옆에 방이 보이는 만큼 안에서도 같은 쪽에 공간이 있다. 출구 문 그림이 배경에 들어 있는 방은 exitX로
-// 그 위치를 적고, 복도 쪽 문을 거기에 맞춘다. 방 안 폭도 층마다 복도 벽면 폭에 비례하게 잡는다.
+// 복도에서 문 옆에 방이 보이는 만큼 안에서도 같은 쪽에 공간이 있다. 배경에 포함된 출구 그림은 exitArt로 함께 옮기고,
+// 조립식 복도에서는 고정 출구에 맞춰 복도 문을 놓는다.
 function exitDoorX(outside, insideWidth, doorWidth) {
   const left = outside.doorX - outside.x;
-  const right = outside.x + outside.width - outside.doorX - doorWidth;
+  const right = outside.x + outside.width - outside.doorX - (outside.doorWidth ?? 120);
   return Math.round(32 + (insideWidth - 64 - doorWidth) * left / (left + right));
+}
+
+// 승인된 배경의 벽·문 조각을 원래 크기로 배치한다. 문을 옮길 때 판정만 남거나 그림이 늘어나지 않는다.
+function addBackgroundCrop(config, box, source) {
+  const [x, y, width, height] = box;
+  const art = config.backgroundImage;
+  const crop = document.createElement('div');
+  crop.className = 'floor-art-crop';
+  crop.setAttribute('aria-hidden', 'true');
+  Object.assign(crop.style, { left: `${x}px`, top: `${y}px`, width: `${width}px`, height: `${height}px` });
+  const image = new Image();
+  image.className = 'floor-background';
+  image.alt = '';
+  image.draggable = false;
+  setPowerBackground(image, art.src);
+  Object.assign(image.style, { left: `${-source[0]}px`, top: `${-source[1]}px`,
+    width: `${art.width ?? config.width}px`, height: `${art.height}px` });
+  crop.append(image);
+  dynamicScene.append(crop);
+  return crop;
 }
 const lockedStairsMessage = '비상계단 문이 잠겨 있다. 정전 중에는 열리지 않는 것 같다.';
 
@@ -22,8 +42,12 @@ function buildDynamicScene(config) {
     image.draggable = false;
     Object.assign(image.style, { left: `${art.left ?? 0}px`, width: `${art.width ?? config.width}px`, height: `${art.height}px`, top: `${art.top}px` });
     dynamicScene.append(image);
-    addLuminousSigns(image, art.src);
+    if (!config.exitArt) addLuminousSigns(image, art.src);
   }
+  for (let x = 0; x < (config.leftWallExtension || 0); x += 185) {
+    addBackgroundCrop(config, [x, 0, Math.min(185, config.leftWallExtension - x), worldHeight], [0, 0]);
+  }
+  for (const patch of config.artPatches || []) addBackgroundCrop(config, patch.box, patch.from);
   if (config.id === 'rooftop') dynamicScene.append(rooftopBackground);
   const layout = [
     { kind: 'floor', x: 0, y: floorY, width: config.width, height: 150 },
@@ -128,6 +152,15 @@ function buildDynamicScene(config) {
       const doorWidth = config.exitWidth ?? outside.doorWidth ?? 120;
       const exitX = config.exitX ?? exitDoorX(outside, config.width, doorWidth);
       const exitY = outside.doorY ?? parent.roomDoorY ?? 250;
+      const art = config.exitArt;
+      const offset = art ? exitX - art.x : 0;
+      if (art) {
+        addBackgroundCrop(config, art.crop, art.fill).dataset.part = 'old-exit-wall';
+        const [x, y, width, height] = art.crop;
+        const moved = addBackgroundCrop(config, [x + offset, y, width, height], [x, y]);
+        moved.dataset.part = 'exit-art';
+        addLuminousSigns(moved.firstChild, config.backgroundImage.src);
+      }
       // 반복 가구 배경에는 실제 출입 공간이 없다. 지정한 방만 기존 벽 모듈로 문 주변을 비운다.
       if (config.exitWall) {
         const wall = document.createElement('div');
@@ -147,7 +180,7 @@ function buildDynamicScene(config) {
         unlocked: collectedItems.has(outside.unlockedBy), raiseMessage: outside.raiseMessage,
         locked: Boolean(lock) && !collectedItems.has(lock.until), lockedUntil: lock?.until, message: lock?.message,
         surface: lock?.surface, look: lock?.look, writing: lock?.writing, caption: lock?.caption, image: lock?.image,
-        outline: config.exitOutline }));
+        outline: config.exitOutline && [config.exitOutline[0] + offset, ...config.exitOutline.slice(1)] }));
     }
     // 벽을 맞댄 방끼리의 연결문(links, 16층 주방 반입문): 복도를 거치지 않고 옆방에 있는 짝 연결문 앞으로 나온다. 다른 층의 방과도
     // 이을 수 있고, 그때는 hint로 안내 문구를 바꾼다.

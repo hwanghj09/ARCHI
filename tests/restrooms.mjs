@@ -27,7 +27,8 @@ try {
         Body.setPosition(body, { x: door.x + door.width / 2, y: floorY - 81 });
         Body.setVelocity(body, { x: 0, y: 0 });
         grounded = true; cameraX = cameraTarget(); render(); updateInteraction();
-        return { x: door.x, width: door.width, y: door.y };
+        const room = floorById.get(floorId(floor)).rooms.find(room => room.target === `${floorId(floor)}-restroom`);
+        return { x: door.x, width: door.width, y: door.y, roomX: room.x, roomWidth: room.width };
       }, floor);
       assert.equal(await page.locator('#interaction-hint').textContent(), 'E · 화장실 들어가기');
       if (mobile) await page.locator('#interact').tap();
@@ -35,11 +36,24 @@ try {
       await finishSceneTransition(page);
       const exit = await page.evaluate(() => {
         const door = currentDoors.find(door => door.key === 'exit');
+        const config = floorById.get(dynamicFloorId);
+        const bin = config.props.find(prop => prop.file === 'restroom-bin');
         return { x: door.x, y: door.y, width: door.width, style: door.style, image: getComputedStyle(door.element).backgroundImage,
-          mirrorLeft: floorById.get(dynamicFloorId).fixtures[0].outline[0], playerX: body.position.x };
+          configX: config.exitX, configWidth: config.exitWidth, roomWidth: config.width,
+          mirrorLeft: config.fixtures[0].outline[0], binLeft: bin.x - bin.worldWidth / 2,
+          padding: config.leftWallExtension || 0, background: config.backgroundImage, playerX: body.position.x };
       });
-      assert.deepEqual([exit.x, exit.y, exit.width, exit.style], [185, front.y, 145, 'restroom-exit'], `${floor}F common interior door keeps its proportions independently of the corridor art`);
-      assert(exit.x + exit.width < Math.min(exit.mirrorLeft, 380 - 55 / 2), `${floor}F door clears mirror, sinks and bin`);
+      assert.deepEqual([exit.x, exit.y, exit.width, exit.style], [exit.configX, front.y, exit.configWidth, 'restroom-exit'], `${floor}F interior door follows the room geometry`);
+      const outsideRatio = (front.x - front.roomX) / (front.roomWidth - front.width);
+      const expectedX = 32 + outsideRatio * (exit.roomWidth - 64 - exit.width);
+      assert(Math.abs(exit.x - expectedX) <= 1, `${floor}F has the same wall space beside the door inside and outside`);
+      assert.equal(exit.x, 185 + exit.padding, `${floor}F door moves with the original room artwork`);
+      assert.equal(exit.mirrorLeft, 411 + exit.padding, `${floor}F mirror outline moves with the original room artwork`);
+      if (exit.padding) {
+        assert.equal(exit.background.left, exit.padding);
+        assert.equal(exit.background.width, 1800, 'The room artwork keeps its original scale');
+      } else assert.equal(exit.roomWidth, 1800);
+      assert(exit.x + exit.width < Math.min(exit.mirrorLeft, exit.binLeft), `${floor}F door clears mirror, sinks and bin`);
       assert(Math.abs(exit.playerX - exit.x - 40) < 1, `${floor}F entry spawn`);
       assert.match(exit.image, /assets\/objects\/floor16\/restroom-door\.png/);
       assert(await page.locator('.room-door.restroom-exit').isVisible());
@@ -59,7 +73,7 @@ try {
     }
   }
   assert.deepEqual(errors, []);
-  console.log(`PASS: ${floors.length} floors, ${visits} restroom round trips, visible doors, fixture clearance, keyboard/touch`);
+  console.log(`PASS: ${floors.length} floors, ${visits} restroom round trips, matching wall space, visible doors, fixture clearance, keyboard/touch`);
 } finally {
   await browser.close();
 }
