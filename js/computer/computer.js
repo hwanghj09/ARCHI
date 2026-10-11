@@ -38,7 +38,7 @@ function openComputerApp(app, documentId) {
   }
   if (app === 'mail') showComputerMailInbox();
   if (app === 'building') refreshBuildingGuides();
-  if (app === 'browser' || app === 'transfer') refreshSolarDownload();
+  refreshSolarDownload();
   if (app === 'browser') document.getElementById('computer-browser').scrollTop = 0;
   document.getElementById('computer-window-title').textContent = title;
   (app === 'notes' ? computerNote : app === 'mail' ? computerMailSearch : app === 'calculator' ?
@@ -70,8 +70,9 @@ document.getElementById('computer-blog-list-back').addEventListener('click', () 
 
 function refreshSolarDownload() {
   const ready = floorHasPower(17);
+  refreshComputerUsb();
   if (computerSolarTask && (transitioning || !usingComputer || !ready ||
-      (computerSolarTask.kind === 'transfer' && (phoneDock || phoneBattery <= 0)))) {
+      (computerSolarTask.kind === 'transfer' && !computerUsbConnected))) {
     clearInterval(computerSolarTask.timer);
     computerSolarTask = null;
   }
@@ -84,7 +85,10 @@ function refreshSolarDownload() {
     '17층 전력이 끊겨 와이파이에 연결할 수 없습니다. 태양광 장치에서 17층 전력을 켜 주세요.';
   document.getElementById('computer-solar-page').hidden = !ready;
   document.getElementById('computer-solar-download').disabled = !ready || downloaded || installed || Boolean(task);
-  document.getElementById('computer-solar-transfer').disabled = !ready || !downloaded || installed || Boolean(task) || Boolean(phoneDock) || phoneBattery <= 0;
+  document.getElementById('computer-solar-transfer').disabled = !ready || !downloaded || installed || Boolean(task) || !computerUsbConnected;
+  const connectButton = document.getElementById('computer-usb-open');
+  connectButton.disabled = !computerUsbAvailable() || computerUsbConnected;
+  connectButton.textContent = computerUsbConnected ? 'USB 연결됨 · 정수호의 휴대폰' : '휴대폰 연결하기';
   for (const kind of ['download', 'transfer']) {
     const progress = document.getElementById(`computer-solar-${kind}-progress`);
     progress.hidden = task?.kind !== kind;
@@ -97,14 +101,15 @@ function refreshSolarDownload() {
     task?.kind === 'transfer' ? `전송·설치 중 · ${percent}% · 약 ${remaining}초 남음` :
     !ready ? '17층에 태양광 전력을 공급한 뒤 전송하세요.' : !downloaded ? '블로그 앱에서 태양광 제어 앱을 먼저 다운로드하세요.' :
     phoneDock ? '충전함에 맡긴 휴대폰을 가져온 뒤 전송하세요.' : phoneBattery <= 0 ? '휴대폰을 충전한 뒤 전송하세요.' :
+    !computerUsbConnected ? '‘휴대폰 연결하기’를 눌러 책상 위 케이블을 연결하세요.' :
     '전송·설치에는 약 8초가 걸립니다. 완료될 때까지 컴퓨터를 사용해 주세요.';
 }
 
 function startSolarFileTask(kind) {
   const transfer = kind === 'transfer';
-  if (!usingComputer || transitioning || computerWindow.hidden || document.getElementById(`computer-${transfer ? 'transfer' : 'browser'}`).hidden ||
+  if (!usingComputer || transitioning || !computerUsbPanel.hidden || computerWindow.hidden || document.getElementById(`computer-${transfer ? 'transfer' : 'browser'}`).hidden ||
       !floorHasPower(17) || (!transfer && document.getElementById('blog-post-solar').hidden) || computerSolarTask || collectedItems.has('solar-app-installed') ||
-      (transfer ? !collectedItems.has('solar-app-downloaded') || phoneDock || phoneBattery <= 0 : collectedItems.has('solar-app-downloaded'))) return;
+      (transfer ? !collectedItems.has('solar-app-downloaded') || !computerUsbConnected || !computerUsbAvailable() : collectedItems.has('solar-app-downloaded'))) return;
   const task = { kind, elapsed: 0, duration: transfer ? 8000 : 5000, started: Date.now(), timer: null };
   computerSolarTask = task;
   task.timer = setInterval(() => {
@@ -129,6 +134,7 @@ document.getElementById('computer-solar-transfer').addEventListener('click', () 
 
 function closeComputerApp() {
   computerWindow.hidden = true;
+  refreshSolarDownload();
   computer.querySelector('button').focus();
 }
 

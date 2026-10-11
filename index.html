@@ -6,6 +6,7 @@
     <title>ARCHI | 정수호</title>
     <link rel="stylesheet" href="css/elevator.css" />
     <link rel="stylesheet" href="css/computer.css" />
+    <link rel="stylesheet" href="css/usb-connection.css" />
     <link rel="stylesheet" href="css/writing.css" />
     <link rel="stylesheet" href="css/inventory.css" />
     <link rel="stylesheet" href="css/objective.css" />
@@ -83,6 +84,7 @@
     <script src="js/ui/objective.js" defer></script>
     <script src="js/ui/device-apps.js" defer></script>
     <script src="js/computer/documents.js" defer></script>
+    <script src="js/computer/usb-connection.js" defer></script>
     <script src="js/computer/computer.js" defer></script>
     <script src="js/elevator/cabin.js" defer></script>
     <script src="js/player/sanity.js" defer></script>
@@ -535,6 +537,7 @@
           <div class="solar-download-page">
             <h2>휴대폰 파일 전송</h2>
             <p>컴퓨터에 다운로드한 앱을 휴대폰으로 전송하고 설치합니다.</p>
+            <button id="computer-usb-open" type="button">휴대폰 연결하기</button>
             <p id="computer-transfer-file" hidden><strong>ARCHI_태양광_제어앱.apk</strong><br>내 컴퓨터 → 정수호의 휴대폰</p>
             <button id="computer-solar-transfer" type="button" disabled>휴대폰으로 전송·설치</button>
             <progress id="computer-solar-transfer-progress" class="solar-file-progress" max="100" value="0" aria-label="휴대폰 전송·설치 진행률" hidden></progress>
@@ -553,6 +556,20 @@
         <span>17F · PC-01</span>
         <button id="computer-exit" type="button" aria-label="컴퓨터 사용 종료" title="컴퓨터 사용 종료"><img src="assets/vendor/lucide/log-out.svg" alt="" /></button>
       </div>
+    </div>
+    <div id="computer-usb-panel" role="dialog" aria-modal="true" aria-labelledby="computer-usb-title" hidden>
+      <section class="usb-desk">
+        <h2 id="computer-usb-title">휴대폰 USB 연결</h2>
+        <p id="computer-usb-instructions">책상 위 USB-C 케이블의 끝을 휴대폰 아래 포트까지 끌어 연결하세요.</p>
+        <div id="computer-usb-board" data-connected="false" aria-label="책상 위 컴퓨터와 휴대폰">
+          <div class="usb-computer" aria-hidden="true"><span>작업용 컴퓨터</span><i id="computer-usb-socket"></i></div>
+          <svg class="usb-cable" aria-hidden="true"><path id="computer-usb-cable"></path></svg>
+          <div class="usb-phone"><span aria-hidden="true">정수호의<br>휴대폰</span><button id="computer-usb-port" type="button" aria-label="휴대폰 USB-C 포트" aria-describedby="computer-usb-instructions"></button></div>
+          <button id="computer-usb-plug" type="button" aria-label="컴퓨터 USB-C 케이블 단자" aria-pressed="false" aria-describedby="computer-usb-instructions"><span aria-hidden="true"></span></button>
+        </div>
+        <output id="computer-usb-status" role="status" aria-live="polite">USB 연결 안 됨</output>
+        <button id="computer-usb-close" type="button">컴퓨터로 돌아가기 · Esc</button>
+      </section>
     </div>
     <div id="elevator-cabin" role="dialog" aria-modal="true" aria-label="엘리베이터 내부" tabindex="-1" hidden>
       <div id="cabin-scene" data-door="closed">

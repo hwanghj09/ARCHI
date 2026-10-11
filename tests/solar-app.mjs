@@ -6,6 +6,14 @@ const browser = await chromium.launch();
 try {
   const page = await browser.newPage({ viewport: { width: 1280, height: 720 } });
   const errors = [];
+  const connectUsb = async () => {
+    await page.locator('#computer-usb-open').click();
+    assert(await page.locator('#computer').isHidden(), 'The physical cable view is outside the computer desktop');
+    await page.locator('#computer-usb-plug').click();
+    await page.locator('#computer-usb-port').click();
+    assert(await page.evaluate(() => computerUsbConnected));
+    assert(await page.locator('#computer-usb-panel').isHidden());
+  };
   page.on('pageerror', error => errors.push(error.message));
   await page.clock.install();
   await page.goto(new URL('../index.html', import.meta.url).href);
@@ -110,6 +118,10 @@ try {
   assert((await page.evaluate(() => progressSnapshot())).items.includes('solar-app-downloaded'));
   await page.locator('[data-computer-app="transfer"]').click();
   await page.evaluate(() => { buildingBlackout = false; solarEnabled = false; updatePowerState(); });
+  assert(await page.locator('#computer-solar-transfer').isDisabled(), 'A downloaded file still needs a USB connection');
+  await page.locator('#computer-solar-transfer').dispatchEvent('click');
+  assert.equal(await page.evaluate(() => computerSolarTask), null, 'Transfer cannot bypass the cable mission');
+  await connectUsb();
   assert(await page.locator('#computer-solar-transfer').isEnabled(), 'Normal mains power also permits transfers without solar');
   await page.evaluate(() => { phoneBattery = 0; refreshSolarDownload(); });
   assert(await page.locator('#computer-solar-transfer').isDisabled());
@@ -120,6 +132,7 @@ try {
   await page.locator('#computer-solar-transfer').dispatchEvent('click');
   assert.equal(await page.evaluate(() => computerSolarTask), null, 'A docked phone cannot receive a transfer');
   await page.evaluate(() => { phoneDock = null; refreshSolarDownload(); });
+  await connectUsb();
   for (const [width, height] of [[1280, 720], [390, 844], [844, 390], [568, 320]]) {
     await page.setViewportSize({ width, height });
     assert(await page.locator('#computer-transfer').evaluate(el => el.scrollWidth <= el.clientWidth + 1), 'The transfer app fits all viewports');
@@ -140,6 +153,7 @@ try {
   await page.clock.runFor(8000);
   assert.equal(await page.evaluate(() => collectedItems.has('solar-app-installed')), false, 'An unavailable phone cancels the transfer');
   await page.evaluate(() => { phoneBattery = 100; refreshSolarDownload(); });
+  await connectUsb();
   await page.locator('#computer-solar-transfer').click();
   await page.clock.runFor(7900);
   await page.locator('#computer-exit').click();
@@ -149,6 +163,7 @@ try {
   await page.keyboard.press('e');
   await finishSceneTransition(page);
   await page.locator('[data-computer-app="transfer"]').click();
+  await connectUsb();
   await page.locator('#computer-solar-transfer').click();
   await page.clock.runFor(7900);
   assert.equal(await page.evaluate(() => collectedItems.has('solar-app-installed')), false);
@@ -169,15 +184,16 @@ try {
   };
   const floors = () => page.evaluate(() => [...solarPoweredFloors]);
   await supply(12);
-  assert.deepEqual(await floors(), [17, 12]);
+  assert.deepEqual(await floors(), [12]);
   await page.locator('#phone-solar-floor').selectOption('7');
   await page.locator('#phone-solar-supply').focus();
   for (let i = 0; i < 4; i++) await page.keyboard.down('Enter');
   await page.keyboard.up('Enter');
-  assert.deepEqual(await floors(), [12, 7], 'Remote control uses the same two-floor FIFO');
-  assert.match(await page.locator('#phone-solar-status').textContent(), /12F · 7F.*2\/2/);
-  await supply(12);
-  assert.deepEqual(await floors(), [7], 'Selecting a lit floor turns off only that floor');
+  assert.deepEqual(await floors(), [7], 'Remote control replaces the previously supplied floor');
+  assert.match(await page.locator('#phone-solar-status').textContent(), /7F.*1\/1/);
+  await supply(7);
+  assert.deepEqual(await floors(), [], 'Selecting the lit floor turns it off');
+  await supply(7);
   await page.evaluate(() => { phoneBattery = 0; refreshPhone(); });
   await page.locator('#phone-solar-supply').dispatchEvent('click');
   await page.locator('#phone-solar-toggle').dispatchEvent('click');
