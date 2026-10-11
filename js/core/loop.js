@@ -11,6 +11,7 @@ function update() {
   if (openingActive) { updateOpening(step); return; }
   if (blackoutSceneActive) { updateBlackoutScene(step); return; }
   if (storySceneActive) { updateStoryScene(step); return; }
+  if (cctvSceneActive) { updateCctvScene(step); return; }
   if (playerCaught) {
     updateGuardPatrol(step);
     animate(0, false, step);
@@ -79,6 +80,8 @@ function update() {
   updateCameras();
   cameraX += (cameraTarget() - cameraX) * .13;
   cameraX = Math.max(0, Math.min(Math.max(0, worldWidth - viewWidth), cameraX));
+  // 컷씬이 끝나면 확대를 천천히 푼다.
+  cameraZoom = Math.abs(cameraZoom - 1) < .001 ? 1 : cameraZoom + (1 - cameraZoom) * .12;
 }
 
 function frame(time) {

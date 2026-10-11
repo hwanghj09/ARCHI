@@ -11,6 +11,11 @@ window.addEventListener('keydown', event => {
     else if (event.code !== 'Tab' && !(event.target.id === 'blackout-skip' && ['Enter', 'Space'].includes(event.code))) event.preventDefault();
     return;
   }
+  if (cctvSceneActive) {
+    if (event.code === 'Escape') { event.preventDefault(); finishCctvScene(); }
+    else if (event.code !== 'Tab' && !(event.target.id === 'cctv-skip' && ['Enter', 'Space'].includes(event.code))) event.preventDefault();
+    return;
+  }
   if (playerCaught) {
     if (event.code !== 'Tab' && !(['Enter', 'Space'].includes(event.code) && event.target.id === 'guard-retry')) event.preventDefault();
     return;

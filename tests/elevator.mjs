@@ -2062,9 +2062,17 @@ try {
     assert.equal(await page.locator('#dynamic-scene .room-interior.control-room').count(), 1);
     assert.equal(await page.locator('#dynamic-scene .floor-prop').count(), 3);
     assert.equal(await page.locator('#dynamic-scene .fixture.cctv-wall').count(), 1);
+    // 처음 들어오면 CCTV 컷씬이 돈다(자세한 검사는 tests/cctv-scene.mjs). 건너뛰면 벽은 아홉 칸 모두 잡음이다.
+    assert.equal(await page.evaluate(() => cctvSceneActive), true);
+    await page.keyboard.press('Escape');
+    assert.equal(await page.locator('#dynamic-scene .fixture.cctv-wall').getAttribute('data-live'), 'true');
     await assertHumanScale();
     await inspect(400, 'E · BMS 제어 콘솔 조사', /SYSTEM\(ARCHI\).*읽기 전용/);
     await inspect(1240, 'E · CCTV 모니터 벽 조사', /추적 대상 1 · 정수호.*B2 칸만/);
+    // 처음 본 전체 화면을 닫으면 소등 컷씬이 돈다. 건너뛰면 붉은 비상등 조명이 남는다(자세한 검사는 tests/cctv-scene.mjs).
+    assert.equal(await page.evaluate(() => cctvSceneActive), true);
+    await page.keyboard.press('Escape');
+    assert.equal(await page.locator('#world').getAttribute('data-alarm'), 'true');
     await inspect(1700, 'E · 승강기 제어반 조사', /B2 운행 제한.*초록으로/);
     await page.keyboard.press('e');
     assert.match(await status(), /수동 해제됨/);

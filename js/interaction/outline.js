@@ -9,7 +9,9 @@ function outlineBox(door) {
   if (door.outline) return door.outline;
   const box = door.element.getBoundingClientRect();
   const origin = world.getBoundingClientRect();
-  return [(box.left - origin.left) / scale, (box.top - origin.top) / scale, box.width / scale, box.height / scale];
+  // 컷씬 확대(cameraZoom)가 풀리는 중에도 월드 좌표로 되돌린다.
+  const zoom = scale * cameraZoom;
+  return [(box.left - origin.left) / zoom, (box.top - origin.top) / zoom, box.width / zoom, box.height / zoom];
 }
 
 // 소품 그림 상자: 캔버스 요소 상자(left, top, width, height) 안에서 그림이 차지하는 부분.

@@ -38,8 +38,9 @@ function gameAudioBuffer(name) {
   const durations = { step: .2, door: .65, 'elevator-door': 1.05, 'elevator-arrive': 1.05,
     'elevator-alarm': .95, blackout: 1.5, 'robot-servo': .48, 'robot-alert': .6,
     'robot-grab': .65, 'call-ring': .85, phone: .14, charger: .24, pickup: .22, 'item-get': .5, 'item-use': .3, deny: .46,
-    shutter: 1.35, switch: .12, ui: .09 };
-  const loop = ['office', 'dark', 'wind', 'motor'].includes(name);
+    shutter: 1.35, switch: .12, ui: .09,
+    'cctv-beep': 2.2, 'cctv-on': 1.3, 'cctv-hit': 1.8, 'cctv-static': .7, heartbeat: .9, 'cctv-rise': 5.2 };
+  const loop = ['office', 'dark', 'wind', 'motor', 'cctv-bgm', 'cctv-dread'].includes(name);
   const duration = loop ? 8 : durations[name];
   if (!duration) return null;
   const rate = 24000;
@@ -80,6 +81,28 @@ function gameAudioBuffer(name) {
         (.2 * soft + .06 * sin(420, t)) * Math.exp(-((t * 22) % 1) * 4.5) * (.75 + .25 * sin(2.3, t)) * gate(t, .1, 1) + (.2 * sin(70, t) + .16 * soft) * hit(t, 1.15, 26); break;
       case 'switch': sample = (.28 * soft + .1 * sin(210, t)) * hit(t, .008, 48); break;
       case 'ui': sample = .09 * sin(720 - 900 * t, t) * Math.sin(Math.PI * t / duration) * Math.exp(-25 * t); break;
+      // CCTV 컷씬: 신호가 끊긴 화면의 귀를 찢는 "삐——"(1kHz 2.2초, 처음과 끝이 뚝 끊긴다), 브라운관이 켜지는 쿵 소리와 고주파 울림,
+      // 놀랄 때의 낮은 충격과 불협화음, 화면이 바뀔 때의 짧은 잡음, 심장 박동.
+      case 'cctv-beep': sample = .22 * sin(1000, t) + .05 * sin(2000, t); break;
+      case 'cctv-on': sample = .26 * soft * hit(t, 0, 9) + .2 * sin(58, t) * hit(t, 0, 7) + .06 * Math.sign(sin(120, t)) * hit(t, .05, 3) +
+        .03 * sin(7800, t) * Math.min(1, t / .3) * (1 - t / duration); break;
+      case 'cctv-hit': sample = .42 * sin(42 - 10 * t, t) * hit(t, 0, 2.2) + .35 * low * hit(t, 0, 6) +
+        .06 * (sin(311, t) + sin(329.6, t) + sin(466, t)) * Math.min(1, t / .08) * hit(t, 0, 1.6); break;
+      case 'cctv-static': sample = .32 * noise * hit(t, 0, 5) * (.6 + .4 * sin(50, t)) + .04 * sin(7800, t) * hit(t, 0, 4); break;
+      case 'heartbeat': sample = .55 * sin(55, t) * (hit(t, 0, 14) + .7 * hit(t, .26, 14)) + .25 * low * (hit(t, 0, 20) + hit(t, .26, 20)); break;
+      // 걷는 동안 점점 차오르다 끝에서 뚝 끊기는 낮은 웅웅거림. 끝으로 갈수록 떨림이 빨라진다.
+      case 'cctv-rise': sample = (t / duration) ** 2.2 * ((.24 * sin(46, t) + .12 * sin(65, t) + .32 * low) * (1 + .35 * sin(3 + 5 * t / duration, t)) +
+        .05 * sin(466 + 40 * t / duration, t)); break;
+      // 관제실 배경음(반복): 삼전음 간격의 낮은 저음이 8초에 한 번 부풀고, 반음 차이로 맥놀이하는 높은 울림과 1.6초마다 뛰는 심장 박동.
+      case 'cctv-bgm': sample = (.12 * sin(55, t) + .08 * sin(77.78, t)) * (1 + .3 * sin(.125, t)) +
+        .022 * (sin(622.25, t) + sin(659.26, t)) * (.5 + .5 * sin(.25, t)) + .2 * low * (.6 + .4 * sin(.375, t)) +
+        .2 * sin(50, t) * (hit(t % 1.6, 0, 14) + .7 * hit(t % 1.6, .26, 14)); break;
+      // 처음 CCTV를 켜 보는 동안의 배경음(반복): 아주 낮게 웅웅거리는 저음 위로 반음 차이의 높은 음 둘이 맥놀이하며 서로 긁고,
+      // 그 위에서 떨리며 음이 흔들리는 가는 울림이 맴돈다. 2초마다 숨을 들이켜는 듯한 잡음이 지나간다.
+      case 'cctv-dread': sample = .2 * sin(36, t) * (.7 + .3 * sin(.125, t)) + .15 * low * (.5 + .5 * sin(.375, t)) +
+        .06 * (sin(880, t) + sin(932.33, t)) * (.6 + .4 * sin(.25, t)) +
+        .045 * Math.sin(2 * Math.PI * 1318.5 * t + 4 * Math.sin(2 * Math.PI * .5 * t)) * (.5 + .5 * sin(.125, t)) +
+        .14 * soft * hit(t % 2, .3, 3) * Math.min(1, (t % 2) / .3 * 3); break;
       case 'office': sample = .6 * low + .09 * sin(62.5, t) + .025 * sin(125, t); break;
       case 'dark': sample = .46 * low + .065 * sin(37.5, t) * (1 + .18 * sin(.125, t)); break;
       case 'wind': sample = .95 * low * (.65 + .2 * sin(.25, t) + .12 * sin(.625, t)); break;
@@ -117,7 +140,7 @@ function playGameSound(name, options = {}) {
   const gain = gameAudioContext.createGain();
   source.buffer = buffer;
   source.playbackRate.value = name === 'step' ? .94 + Math.random() * .12 : 1;
-  gain.gain.value = (name === 'step' ? (options.landing ? .65 : options.running ? .6 : .42) : name === 'blackout' ? .7 :
+  gain.gain.value = (name === 'step' ? (options.landing ? .65 : options.running ? .6 : .42) : name === 'blackout' ? .7 : name === 'cctv-hit' ? .85 : name === 'cctv-rise' ? .7 :
     name === 'robot-servo' ? .35 : .6) * (1 - distance / 800);
   source.connect(gain).connect(gameAudioMaster);
   const effect = { source, gain, name, stopping: false };
@@ -188,11 +211,15 @@ function updateGameAudio() {
   if (document.hidden || mainMenuActive || !gameStarted) return pauseGameAudio();
   const roof = !selectingFloor && currentSceneFloor === 18;
   const lit = selectingFloor ? !buildingBlackout : floorHasPower(currentSceneFloor) && world.dataset.dark !== 'true';
-  const background = roof ? 'wind' : lit ? 'office' : 'dark';
+  // B1 방재 관제실은 CCTV 컷씬의 지진부터 소름 끼치는 배경음(cctv-bgm)으로 바뀌고, 처음 CCTV를 켜 보는 동안에는 기괴하고
+  // 음산한 배경음(cctv-dread)이 흐른다(js/scene/cctv-event.js).
+  const dread = !selectingFloor && cctvDreadPlaying();
+  const haunted = !selectingFloor && cctvBgmPlaying();
+  const background = dread ? 'cctv-dread' : haunted ? 'cctv-bgm' : roof ? 'wind' : lit ? 'office' : 'dark';
   const moving = selectingFloor && cabinCarIndex !== null && elevatorCars[cabinCarIndex].travelling && elevatorHasPower();
-  const wanted = new Map([[background, roof ? .23 : lit ? .18 : .14]]);
+  const wanted = new Map([[background, dread ? .42 : haunted ? .34 : roof ? .23 : lit ? .18 : .14]]);
   if (moving) wanted.set('motor', .25);
-  if (!selectingFloor && !openingActive && !blackoutSceneActive && !usingComputer && !usingKeypad && !usingPowerPanel && !usingInspection && !transitioning && !playerCaught && guardPatrol.door && lit && (guardPatrol.mode === 'chase' || !guardPatrol.wait)) {
+  if (!selectingFloor && !openingActive && !blackoutSceneActive && !cctvSceneActive && !usingComputer && !usingKeypad && !usingPowerPanel && !usingInspection && !transitioning && !playerCaught && guardPatrol.door && lit && (guardPatrol.mode === 'chase' || !guardPatrol.wait)) {
     playGameSound('robot-servo', { x: guardPatrol.x });
   }
   for (const [name, sound] of gameAudioAmbience) {

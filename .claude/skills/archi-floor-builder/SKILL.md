@@ -256,6 +256,33 @@ work while standing on the floor (y=570), never from on top of a crate.
   (cone `data-active`); the player's centre inside the watched span locks the `guards` room's corridor door (hint
   `(잠김)`, E shows `lockedMessage`) until `lockMs` after leaving it (`.cctv` `data-alert`). Gaps between spans are
   blind spots. With `disabledBy` collected the camera is drawn off with no cones. The count restarts on every rebuild.
+- Monitor wall fixture (B1 control room): drawn from the CCTV asset itself with a dark cover (`cctv-event.css`).
+  `liveBy` sets `data-live="true"` (center screen lit) once that item is collected, `seenBy` sets `"all"` after
+  the first full-screen view, and `fullImage` (+ `imageAlt`) makes E open the picture full screen
+  (`openFullImage` in `js/scene/cctv-event.js`) instead of the writing sheet.
+- `brightness` on a room (B1 control room `.6`): that room is drawn darker by multiplying the menu brightness
+  (`--room-brightness` on `#world`, set in `performFloorChange`, rule in `main-menu.css`).
+- `alarmBy` on a room: once that item is collected, the room gets the red flickering emergency-light overlay
+  (`#room-alarm`, `refreshRoomAlarm` in `js/scene/cctv-event.js`) without touching its background art; the lit
+  monitor wall (`seenBy` fixture) stays bright. B1 control room: `alarmBy: 'b1-cctv-seen'`.
+- Lights-out cutscene (same file, `cctvSceneMode = 'lights'`): closing the first full-screen CCTV view plays it:
+  no static on closing, first "…뭐지. 그동안 계속 날 지켜보고 있었던 거야?" (phase `watch`) → wall glitch (0.7 s) → the normal lights
+  cut out (1.6 s total blackout) → the red light flickers on like a fluorescent tube (`cctvLightsFlicker`, no fades) →
+  "뭐야… 불이 왜 꺼지는 거지?" (sanity drops by 35 once, `b1-lights-out`);
+  the room keeps the red light. Before the blackout the room stays at normal light; under the red light `#world`
+  is dimmed to 40% of the menu brightness (darker than the 60% before the blackout) (`#world[data-alarm="true"]`). Skipping commits
+  the same result. An escape puzzle is planned on top.
+- First-entry CCTV cutscene (B1 control room, `js/scene/cctv-event.js`): entering `b1-control` without `b1-cctv-live`
+  starts a ~9 s scripted scene: a normal-pace walk to the wall (phase times after it are relative to `cctvScreensAt`),
+  all nine screens light up with static only (`data-live="true"`, `data-signal="on"`), a plunge zoom into the center
+  of the CCTV (`cameraFocus`, zoom 2.1) with a 1 kHz "삐——" (`cctv-beep`) that cuts off with a hit (`cctv-hit`) as the
+  screens collapse to red horizontal lines (`data-signal="collapse"`, red `#cctv-dim[data-tint="red"]` flash); the
+  quake with partial even darkness happens right then, still zoomed in (phase `lost`), and only after it settles does
+  the camera pull back slowly (phase `settle`). Timings: `cctvIntroSteps`. `prepareCctvScene()` (called from `performFloorChange`) hides the HUD from the moment
+  the room is entered. Until the CCTV is viewed, the wall shows dimmed gray static in each of its nine screens
+  (masks `--cctv-cells-*` in `cctv-event.css`) and the room's ambience is the `cctv-bgm` loop (`cctvBgmPlaying()` in
+  `updateGameAudio`). Esc, the skip button or a floor change finish it and add the item. Tests that enter that room must
+  skip it first (`tests/elevator.mjs`, `tests/cctv-scene.mjs`).
 - Elevator restriction: `restrictedFloors` / `restrictionItem` in `js/elevator/cabin.js` refuse a floor button
   (`data-restricted`) until the item is collected, like the 15F..12F `badgeFloors` (B2, lifted on B1).
 - Background art: generate with archi-art-prompt and record it next to the art. Vertical

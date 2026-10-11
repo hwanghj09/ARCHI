@@ -2,8 +2,12 @@
 let nearbyDoor = null;
 
 function updateInteraction() {
-  if (itemUseTime > 0 || openingActive || blackoutSceneActive || playerCaught || hallucinationCaught) { hint.hidden = true; return; }
+  if (itemUseTime > 0 || openingActive || blackoutSceneActive || cctvSceneActive || playerCaught || hallucinationCaught) { hint.hidden = true; return; }
   if (room === 'dynamic') {
+    if (shouldStartCctvScene()) {
+      startCctvScene();
+      return;
+    }
     // 전력이 들어온 채 감지했던 자리로 걸어 돌아가는('return') 로봇은 감지를 끈 채 움직이고 있어 바로 옆까지
     // 갈 수 있다. 정비 패널은 멈춘 로봇의 보조 배터리 화면이므로 그동안은 조사 대상에서 뺀다.
     const returningRobot = world.dataset.powered === 'true' && guardPatrol.mode === 'return' ? guardPatrol.door : null;
@@ -65,9 +69,9 @@ function doorHintText(door) {
 }
 
 function interact() {
-  if (itemUseTime > 0 || openingActive || blackoutSceneActive || playerCaught || hallucinationCaught || transitioning || selectingFloor || usingComputer || usingKeypad || usingPhone || usingPowerPanel || usingInspection) return;
+  if (itemUseTime > 0 || openingActive || blackoutSceneActive || cctvSceneActive || playerCaught || hallucinationCaught || transitioning || selectingFloor || usingComputer || usingKeypad || usingPhone || usingPowerPanel || usingInspection) return;
   updateInteraction();
-  if (blackoutSceneActive) return;
+  if (blackoutSceneActive || cctvSceneActive) return;
   if (!nearbyDoor) return;
   if (nearbyDoor.type === 'computer') {
     // 정전 중에는 켜지지 않는다. 옥상 태양광 전력을 17층에 보내면 다시 쓸 수 있다.
@@ -148,7 +152,9 @@ function interact() {
       (lacking < required.length && nearbyDoor.partialMessage || nearbyDoor.missingMessage);
     const inspectionMessage = unreadable || missing || (gives && collectedItems.has(gives) ? nearbyDoor.takenMessage : nearbyDoor.message);
     // 글이 적힌 소품은 지금 보이는 문구에 맞는 표면을 펼친다(message는 소품, takenMessage·missingMessage는 그 sheet).
-    openInspection(nearbyDoor.name, inspectionMessage, writingSheetFor(nearbyDoor, inspectionMessage));
+    // fullImage가 있는 설비(B1 CCTV 모니터 벽)는 그 그림을 화면 전체에 띄운다.
+    if (nearbyDoor.fullImage && !unreadable && !missing) openFullImage(nearbyDoor, inspectionMessage);
+    else openInspection(nearbyDoor.name, inspectionMessage, writingSheetFor(nearbyDoor, inspectionMessage));
     if (missing) return;
     if (!unreadable) { recordClue(nearbyDoor); noteObjectiveRead(nearbyDoor); }
     const alreadyCollected = gives && collectedItems.has(gives);

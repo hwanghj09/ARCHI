@@ -180,6 +180,9 @@ function buildDynamicScene(config) {
       text.textContent = line;
       element.append(text);
     }
+    // 모니터 벽(B1 CCTV, cctv-event.css): liveBy 물건을 챙긴 뒤로는 칸마다 어두운 잡음이 흐르고(data-live), 전체 화면으로 한 번 본 뒤
+    // (seenBy)로는 벽 전체가 켜져 있다(data-live="all").
+    if (fixture.liveBy) element.dataset.live = collectedItems.has(fixture.seenBy) ? 'all' : String(collectedItems.has(fixture.liveBy));
     dynamicScene.append(element);
     if (!fixture.message) continue;
     // 그림에 그려진 장치(단면 에셋 층)도 소품처럼 sequence·ring·cycle을 쓸 수 있다(아래 소품 설명 참고).

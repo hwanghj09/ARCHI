@@ -76,10 +76,21 @@ const B1_ROOMS = interiorRooms(-1, [
     { file: 'maintenance-tool-cabinet', size: [512, 256], worldWidth: 198, x: 1700 },
     { file: 'filing-cabinet', size: [256, 512], worldWidth: 72, x: 1900 },
   ] },
-  { id: 'b1-control', name: '방재 관제실', width: 1892, interiorStyle: 'control-room',
+  // 문 없는 배경 control-room-v4.png(2033×774): 벽·대형 타일 바닥 경계(원본 y=503)를 floorY=570에 맞춘다.
+  // 배율 s=570/503, left=-154. 출구는 기존 control-door.png 스프라이트로 따로 그린다.
+  // CCTV 벽 뒤는 빈 벽으로 두어 별도 3:2 모니터 설비(x=1117~1536, y=147~426)만 표시한다.
+  // alarmBy: CCTV를 전체 화면으로 본 뒤(b1-cctv-seen)로는 소등 컷씬을 거쳐 붉고 어두운 비상등 조명이다(#room-alarm, 배경 그림은
+  // 그대로). 나가는 퍼즐은 나중에 얹는다.
+  // brightness: 들어설 때부터 어둑하다(소등 뒤 붉은 비상등일 때는 cctv-event.css의 붉은 조명 밝기를 따른다).
+  { id: 'b1-control', name: '방재 관제실', width: 1892, interiorStyle: 'control-room', brightness: .6, alarmBy: 'b1-cctv-seen', backgroundWallsOnly: true,
+    backgroundImage: { src: 'assets/background/b1/control-room-v4.png', left: -154, width: 2033 * 570 / 503, height: 774 * 570 / 503, top: 0 },
     fixtures: [
-      { name: 'CCTV 모니터 벽', x: 1000, y: 110, width: 480, height: 220, style: 'cctv-wall',
-        message: '모니터 벽이 켜져 있다. 한 칸에 이 관제실이 비친다. 화면 속 수호가 모니터를 올려다보고 있다. 다른 칸들은 17층부터 수호가 지나온 층을 차례로 되감는다. 구석 글씨: "추적 대상 1 · 정수호". B2 칸만 "권한 없음"으로 검다.',
+      // 처음 들어오면 CCTV 컷씬(js/scene/cctv-event.js)이 돈다: 아홉 칸이 잡음으로 켜지고 "삐——"가 울리다가 브라운관처럼 꺼진다(liveBy).
+      // 그 뒤 CCTV를 보기 전까지 칸마다 회색 잡음이 남는다. 조사해 CCTV를 켜면 칸마다 잡음 사이로 수호를 감시하던 화면(fullImage)이 드러나고, 한 번 본 뒤(seenBy)로는 벽 전체가 켜진다.
+      { name: 'CCTV 모니터 벽', x: 1117, y: 147, width: 419, height: 279, style: 'cctv-wall', liveBy: 'b1-cctv-live', seenBy: 'b1-cctv-seen',
+        fullImage: 'assets/objects/b1/cctv-wall.png',
+        imageAlt: '3×3 CCTV 모니터 벽. 일곱 칸은 17층 사무실, 17층 엘리베이터 앞, 옥상, 1층 로비, 12층, 7층, 엘리베이터 안의 수호를 흑백으로 찍었고, 가운데 칸은 이 관제실에서 모니터 벽을 올려다보는 수호의 뒷모습을 컬러로 비춘다. 오른쪽 아래 B2 칸은 검고 가운데에 붉은 점 하나만 있다.',
+        message: '모니터 벽을 다시 켰다. 지지직거리는 잡음 사이로 화면이 하나씩 잡힌다. 한 칸에 이 관제실이 비친다. 화면 속 수호가 모니터를 올려다보고 있다. 다른 칸들은 17층부터 수호가 지나온 층을 차례로 되감는다. 구석 글씨: "추적 대상 1 · 정수호". B2 칸만 "권한 없음"으로 검다.',
         surface: 'screen',
         writing: [{ text: '추적 대상 1 · 정수호', align: 'right' }, { as: 'rule' }, { as: 'field', label: 'B2', text: '권한 없음' }],
         image: 'assets/objects/b1/cctv-wall-screen.png',
@@ -94,7 +105,7 @@ const B1_ROOMS = interiorRooms(-1, [
           ['조명', 'SYSTEM(ARCHI)', '23:59'], ['공조', 'SYSTEM(ARCHI)', '23:59'], ['자동문', 'SYSTEM(ARCHI)', '23:59'],
           ['엘리베이터', 'SYSTEM(ARCHI)', '23:59'], ['사내 방송', 'SYSTEM(ARCHI)', '23:59']] },
           { as: 'field', label: '관리자 계정', text: '읽기 전용' }] },
-      { file: 'office-desk', size: [512, 256], worldWidth: 252, x: 1240 },
+      { file: 'office-desk', size: [512, 256], worldWidth: 252, x: 1327 },
       { file: 'elevator-control-panel', size: [256, 512], worldWidth: 89, x: 1700, name: '승강기 제어반', gives: 'b1-elevator',
         message: '승강기 제어반: "B2 운행 제한 · 설정 SYSTEM 23:59". 수동 해제는 열쇠 스위치라 SYSTEM이 건드리지 못했다. 꽂혀 있던 관리 키를 "해제"로 돌리자 B2 표시등이 초록으로 바뀐다.',
         surface: 'screen', look: 'lcd',

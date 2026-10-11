@@ -61,7 +61,7 @@ function closeMainMenu() {
 }
 
 function openGameMenu() {
-  if (!gameStarted || mainMenuActive || openingActive || blackoutSceneActive || playerCaught || hallucinationCaught || transitioning ||
+  if (!gameStarted || mainMenuActive || openingActive || blackoutSceneActive || cctvSceneActive || playerCaught || hallucinationCaught || transitioning ||
       usingPhone || usingComputer || usingKeypad || usingInspection || usingPowerPanel) return;
   saveProgress();
   mainMenuActive = true;
