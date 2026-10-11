@@ -23,7 +23,6 @@ const PROP_OUTLINES = {
   'assets/objects/floor-kit/food-dining-table.png': [0.0176, 0.3984, 0.9844, 0.9688],
   'assets/objects/floor-kit/food-kitchen-board.png': [0.0996, 0.0313, 0.8984, 0.9688],
   'assets/objects/floor-kit/food-menu-board.png': [0.0352, 0.1816, 0.9648, 0.9824],
-  'assets/objects/floor-kit/food-refrigerator.png': [0.0898, 0.0176, 0.9102, 0.9844],
   'assets/objects/floor-kit/food-serving-counter.png': [0.0156, 0.2031, 0.9824, 0.9688],
   'assets/objects/floor-kit/food-voice-board.png': [0.2168, 0.0313, 0.7813, 0.9688],
   'assets/objects/floor-kit/glass-display-cabinet.png': [0.0313, 0.1914, 0.9688, 0.9844],

@@ -114,8 +114,7 @@ const FLOOR1_ROOMS = interiorRooms(1, [
     // exitX: harmony.png에 이미 문이 x=1215 부근에 그려져 있어(실측), 복도 doorX 변경과 무관하게 고정한다.
     backgroundImage: { src: 'assets/background/floor1/harmony.png', height: 720, top: 0 },
     fixtures: [
-      { name: '1층 객석', x: 120, y: 470, width: 1240, style: 'stall-rows' },
-      { name: '무대', x: 2000, y: 96, width: 1192, style: 'stage' },
+      { name: '1층 객석', x: 120, y: 470, width: 1050, style: 'stall-rows' },
       { name: '자동 연주 피아노', x: 2300, y: 430, width: 220, style: 'grand-piano',
         message: '자동 연주 피아노다. 보면대 스티커: "ARCHI 자동 반주 시범 · 제어 B2." 연주 기록: 낮 정기 연주회 박자 이탈 41회. 새벽 03:00 무관객 리허설 이탈 0회. 기록 맨 끝에 한 줄이 더 있다: "박수 · 3분 12초."',
         surface: 'document',
@@ -124,7 +123,7 @@ const FLOOR1_ROOMS = interiorRooms(1, [
         caption: '자동 연주 피아노다. 보면대 스티커: "ARCHI 자동 반주 시범 · 제어 B2." 기록 맨 끝에 한 줄이 더 있다.' },
     ],
     props: [
-      { file: 'large-planter', size: [256, 512], worldWidth: 78, x: 1400 },
+      { file: 'large-planter', size: [256, 512], worldWidth: 78, x: 1540 },
       { file: 'rolling-whiteboard', size: [512, 256], worldWidth: 350, x: 1960, name: '대관 일정표',
         message: '대관 일정표 맨 아래 줄: "매일 03:00~04:00 · 대관 SYSTEM · 무관객 리허설." 시설팀 메모: "새벽에 홀 문이 안에서 잠겨 있음. 2층 영사실 녹화도 같은 시간."',
         writing: [{ as: 'title', text: '대관 일정표' },
@@ -159,7 +158,7 @@ const FLOOR1_ROOMS = interiorRooms(1, [
     // exitX: clinic.png에 이미 문이 x=865 부근에 그려져 있어(실측), 복도 doorX 변경과 무관하게 고정한다.
     backgroundImage: { src: 'assets/background/floor1/clinic.png', height: 720, top: 0 },
     fixtures: [
-      { name: '여성휴게실', x: 1600, y: 250, width: 125, style: 'rest-door', lines: ['여성휴게실'],
+      { name: '여성휴게실', x: 1570, y: 280, width: 145, height: 290, style: 'art-spot',
         message: '건강관리실 안쪽의 여성휴게실 문이다. 잠겨 있고 문틈도 캄캄하다. 수호는 손잡이에서 손을 거두고 돌아선다.' },
     ],
     props: [
@@ -176,7 +175,7 @@ const FLOOR1_ROOMS = interiorRooms(1, [
         writing: [{ as: 'title', text: '보안 로봇 R-01 응급 이송 기능 점검표' }, '9월 14일 로비 배치 완료.', { as: 'rule' }, { text: '비고', size: 'small' },
           { as: 'hand', text: '배치하면서 정비 코드를\n배치일(월일 네 자리)로 바꿈.', ink: 'blue' },
           { as: 'hand', text: '로봇에 붙은 스티커는 예전 것.', ink: 'blue' }] },
-      { file: 'instrument-cart', size: [256, 256], worldWidth: 113, x: 1000 },
+      { file: 'instrument-cart', size: [256, 256], worldWidth: 113, x: 1070 },
       { file: 'water-cooler', size: [256, 512], worldWidth: 62, x: 1200 },
       { file: 'glass-display-cabinet', size: [256, 512], worldWidth: 111, x: 1320 },
     ] },

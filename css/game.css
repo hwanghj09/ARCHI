@@ -397,6 +397,8 @@ body { margin: 0; overflow: hidden; background: #27292b; color: #eee; font: 14px
 .fixture { position: absolute; box-sizing: border-box; pointer-events: none; }
 .fixture span { display: block; white-space: nowrap; }
 .floor-background { position: absolute; left: 0; pointer-events: none; user-select: none; image-rendering: pixelated; }
+.floor-exit-wall { position: absolute; pointer-events: none; image-rendering: pixelated; background: #15181a url('../assets/background/wall/wall-concrete.png') no-repeat; filter: brightness(.16) saturate(.5); box-shadow: inset 3px 0 #0008, inset -3px 0 #0008; }
+#world[data-powered="false"] .floor-exit-wall { filter: brightness(.075) saturate(.5); }
 #dynamic-scene[data-art="true"] > .solid:not(.crate),
 #dynamic-scene[data-art="true"] .room-interior { visibility: hidden; }
 #dynamic-scene[data-art="true"] .floor-room { top: 300px; height: 270px; border: 0; background: none; }

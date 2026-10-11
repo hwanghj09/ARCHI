@@ -10,9 +10,9 @@ const FLOOR17 = { id: 'f17', floor: 17, short: '17F', label: '17층 · 복도', 
 const FLOOR17_ROOMS = interiorRooms(17, [
   { id: 'f17-restroom', ...restroomInterior },
   { id: 'f17-manager', name: '관리자실', width: 1800, windowless: true, props: [
-    { file: 'electrical-panel', size: [256, 512], worldWidth: 160, x: 170 },
-    { file: 'office-desk', size: [512, 256], worldWidth: 400, x: 800 },
-    { file: 'filing-cabinet', size: [256, 512], worldWidth: 150, x: 1180 },
-    { file: 'maintenance-tool-cabinet', size: [512, 256], worldWidth: 300, x: 1540 },
+    { file: 'electrical-panel', size: [256, 512], worldWidth: 89, x: 170 },
+    { file: 'office-desk', size: [512, 256], worldWidth: 252, x: 800 },
+    { file: 'filing-cabinet', size: [256, 512], worldWidth: 72, x: 1180 },
+    { file: 'maintenance-tool-cabinet', size: [512, 256], worldWidth: 198, x: 1540 },
   ] },
 ]);

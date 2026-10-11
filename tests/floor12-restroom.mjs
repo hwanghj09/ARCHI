@@ -36,7 +36,7 @@ try {
         image: getComputedStyle(door.element).backgroundImage,
         mirrorLeft: floorById.get('f12-restroom').fixtures[0].outline[0], playerX: body.position.x };
     });
-    assert.deepEqual([exit.x, exit.y, exit.width, exit.height], [185, 210, 117, 360]);
+    assert.deepEqual([exit.x, exit.y, exit.width, exit.height], [185, 210, 145, 360]);
     assert(exit.x + exit.width < exit.mirrorLeft, 'The door stays clear of the mirror and sinks');
     assert(exit.x + exit.width < 380 - 55 / 2, 'The door stays clear of the waste bin');
     assert.match(exit.image, /assets\/objects\/floor16\/restroom-door\.png/);

@@ -16,6 +16,8 @@ try {
     await page.locator('#menu-start').click();
     if (await page.locator('#menu-new-confirm').isVisible()) await page.locator('#menu-new-confirm').click();
     await page.locator('#opening-skip').click();
+    // Geometry checks use a constant walking speed, without low-sanity penalties.
+    await page.evaluate(() => { sanity = 100; updateSanity(0); });
     await page.clock.pauseAt(new Date('2026-09-24T00:01:00Z'));
     await reachInitialCorridor(page);
     await page.locator('#floor17-extension > img').evaluate(img => img.decode());
@@ -118,6 +120,7 @@ try {
   await page.locator('#menu-start').click();
   if (await page.locator('#menu-new-confirm').isVisible()) await page.locator('#menu-new-confirm').click();
   await page.locator('#opening-skip').click();
+  await page.evaluate(() => { sanity = 100; updateSanity(0); });
   await page.clock.runFor(100);
   await reachInitialCorridor(page);
   await walkTo(4463);

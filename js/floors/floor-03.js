@@ -35,7 +35,7 @@ const FLOOR3_LAYOUT = {
       doorX: 4295, doorWidth: 130, doorY: 250, doorSprite: 'assets/objects/floor03/door-studio.png' },
   ],
   fixtures: [
-    { name: '3층 입주사 안내', x: 3160, y: 300, width: 170, style: 'tenant-board',
+    { name: '3층 입주사 안내', x: 3160, y: 300, width: 170, height: 150, style: 'tenant-board',
       lines: ['3F 입주사 안내', 'Fitness Club', '고객만족센터', '㈜하누리서비스', 'Studio'],
       message: '3층 입주사 안내판이다. ㈜하누리서비스(경비·미화)는 고객만족센터 안에 사무를 둔다. 아래 작은 글씨: "야간 무인 운영 · 00:00~06:00 Fitness Club 회원 전용 자동문 닫힘 고정."' },
   ],
@@ -63,6 +63,7 @@ const FLOOR3_ROOMS = interiorRooms(3, [
       missingMessage: '카운터 위 출력물: "회원 312명 최고 달리기 속도 · 요청 ARCHI." 표시된 막대 하나에 "17F 정수호 · 최고 시속 19km · 2분 뒤 급감." 그보다 높은 붉은 막대 셋에는 이름이 없다.',
       message: '"회원 312명 최고 달리기 속도 · 요청 ARCHI." 표시된 막대는 "17F 정수호 · 최고 시속 19km · 2분 뒤 급감." 이름 없는 붉은 막대 셋은 시속 21km, 러닝머신의 R-02 · R-05 · R-07이다. 로봇들은 이미 수호보다 빠르다.' }),
   ], {
+    exitWall: true,
     barriers: [
       { name: '회원 전용 자동문', x: 1328, y: 300, width: 18, style: 'f3-auto-door',
         message: '유리 자동문이 닫혀 있다. 센서에 붉은 불이 켜져 있다: 정전 뒤 "닫힘 고정". 문틀 스티커: "비상 개방 버튼(트레이너 카운터 옆) · 배터리 5초."',
@@ -80,7 +81,7 @@ const FLOOR3_ROOMS = interiorRooms(3, [
       '㈜하누리서비스 야간 경비 일지가 손전등 옆에 펼쳐져 있다: "03:00 B2 순찰 가려는데 로봇 R-05가 계단 앞을 막고 비켜 주지 않음. 무전 응답 없음." 다음 장부터 야간 경비 칸에는 이름이 없다.'),
     floor3Spot('열쇠함', [1708, 1766], [212, 283],
       '하누리서비스 열쇠함. 고리 대부분에 꼬리표만 남았다. 붉은 꼬리표가 걸린 빈 고리: "B2 서버실 수동 열쇠 · 회수 · SYSTEM 요청 · 보관 위치 B1 시설관리실."'),
-  ]),
+  ], { exitWall: true }),
   floor3Room('f3-studio', 'Studio', 'studio', 1840, [
     floor3Spot('제작 데스크', [1014, 1128], [322, 438],
       '꺼진 스위처 옆 촬영 일정표: "AI 상담원 영상 응대 · 표정·자세 표본 촬영 · 매일 03:00 · 운영 SYSTEM." 촬영 대상 칸에는 지워진 이름이 줄지어 있고, 마지막 칸 "17F 정수호 · 예정"만 남았다.'),

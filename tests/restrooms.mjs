@@ -38,7 +38,7 @@ try {
         return { x: door.x, y: door.y, width: door.width, style: door.style, image: getComputedStyle(door.element).backgroundImage,
           mirrorLeft: floorById.get(dynamicFloorId).fixtures[0].outline[0], playerX: body.position.x };
       });
-      assert.deepEqual([exit.x, exit.y, exit.width, exit.style], [185, front.y, front.width, 'restroom-exit'], `${floor}F exit`);
+      assert.deepEqual([exit.x, exit.y, exit.width, exit.style], [185, front.y, 145, 'restroom-exit'], `${floor}F common interior door keeps its proportions independently of the corridor art`);
       assert(exit.x + exit.width < Math.min(exit.mirrorLeft, 380 - 55 / 2), `${floor}F door clears mirror, sinks and bin`);
       assert(Math.abs(exit.playerX - exit.x - 40) < 1, `${floor}F entry spawn`);
       assert.match(exit.image, /assets\/objects\/floor16\/restroom-door\.png/);

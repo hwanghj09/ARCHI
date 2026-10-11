@@ -124,13 +124,25 @@ function buildDynamicScene(config) {
     // inner 방(inner: true)은 복도 쪽 전면이 없어 출구도 없고, 옆방과의 연결문(links)으로만 드나든다.
     const outside = parent.rooms.find(entry => entry.target === config.id);
     if (outside) {
-      const doorWidth = outside.doorWidth ?? 120;
+      const doorWidth = config.exitWidth ?? outside.doorWidth ?? 120;
+      const exitX = config.exitX ?? exitDoorX(outside, config.width, doorWidth);
+      const exitY = outside.doorY ?? parent.roomDoorY ?? 250;
+      // 반복 가구 배경에는 실제 출입 공간이 없다. 지정한 방만 기존 벽 모듈로 문 주변을 비운다.
+      if (config.exitWall) {
+        const wall = document.createElement('div');
+        wall.className = 'floor-exit-wall';
+        const left = Math.max(32, exitX - 16);
+        Object.assign(wall.style, { left: `${left}px`, top: `${exitY - 20}px`,
+          width: `${Math.min(config.width - 32, exitX + doorWidth + 16) - left}px`,
+          height: `${floorY - exitY + 20}px`, backgroundPosition: `0px ${20 - exitY}px` });
+        dynamicScene.append(wall);
+      }
       // exitLock: 들어오면 등 뒤에서 잠기는 출구(7층 검증실). until 물건을 챙기면 그 자리에서 풀린다(lockedUntil).
       // raiseMessage: 안에서만 여는 셔터(16층 CU)를 처음 올리고 나갈 때의 문구. 연출은 interaction.js가 한다.
       const lock = config.exitLock;
       doorList.push(addRoomDoor({ name: '복도', type: 'room', hint: 'E · 복도로 나가기', target: config.parent,
-        arrivalKey: `room:${config.id}`, key: 'exit', x: config.exitX ?? exitDoorX(outside, config.width, doorWidth),
-        y: outside.doorY ?? parent.roomDoorY ?? 250, width: doorWidth, style: config.exitStyle ?? outside.doorStyle, sprite: outside.doorSprite,
+        arrivalKey: `room:${config.id}`, key: 'exit', x: exitX,
+        y: exitY, width: doorWidth, style: config.exitStyle ?? outside.doorStyle, sprite: outside.doorSprite,
         unlocked: collectedItems.has(outside.unlockedBy), raiseMessage: outside.raiseMessage,
         locked: Boolean(lock) && !collectedItems.has(lock.until), lockedUntil: lock?.until, message: lock?.message,
         surface: lock?.surface, look: lock?.look, writing: lock?.writing, caption: lock?.caption, image: lock?.image,
