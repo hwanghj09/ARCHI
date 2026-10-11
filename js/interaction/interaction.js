@@ -155,6 +155,7 @@ function interact() {
     // fullImage가 있는 설비(B1 CCTV 모니터 벽)는 그 그림을 화면 전체에 띄운다.
     if (nearbyDoor.fullImage && !unreadable && !missing) openFullImage(nearbyDoor, inspectionMessage);
     else openInspection(nearbyDoor.name, inspectionMessage, writingSheetFor(nearbyDoor, inspectionMessage));
+    offerArchiDelete(nearbyDoor); // B2 메인 콘솔이면 DELETE 버튼(b2-ending.js)
     if (missing) return;
     if (!unreadable) { recordClue(nearbyDoor); noteObjectiveRead(nearbyDoor); }
     const alreadyCollected = gives && collectedItems.has(gives);

@@ -76,7 +76,8 @@ function enterCabin(carIndex) {
     return;
   }
   if (!car.open) playGameSound('elevator-door');
-  transitionScene(() => showCabin(carIndex));
+  // B2 삭제 추격 중에 타면 칸 화면 대신 임시 해피엔딩 창(b2-ending.js).
+  transitionScene(() => b2Ending.phase === 'running' ? showB2Escape() : showCabin(carIndex));
 }
 
 function showCabin(carIndex) {

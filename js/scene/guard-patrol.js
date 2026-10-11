@@ -6,24 +6,29 @@
 // spottedX는 감지 순간 수호가 서 있던 자리다.
 const guardPatrol = { x: 4530, facing: -1, wait: 0, elapsed: 0, mode: 'dock',
   lostTime: 0, captureTime: 0, door: null, image: null, chaseOriginX: null, spottedX: null, firstEncounter: true };
+// 같은 규칙으로 움직이는 다른 로봇(B2 엔딩 추격, b2-ending.js)은 b2Robots에 둔다. 로봇 옵션:
+// pursuit — 놓쳐도 포기하지 않는다. followToElevator — 엘리베이터 앞에서도 멈추지 않는다.
+// onCaught — 붙잡는 연출이 끝나면 '다시 시도' 창 대신 부른다. 옵션이 없는 R-01은 예전과 똑같이 움직인다.
 const guardCapturePanel = document.getElementById('guard-capture');
 let guardBlocked = [];
+let b2Robots = [];
+let caughtBy = null; // 지금 수호를 붙잡고 있는 로봇
 
 function releaseGuardCapture() {
-  playerCaught = false;
-  guardPatrol.mode = 'patrol';
-  guardPatrol.lostTime = guardPatrol.captureTime = 0;
+  const robot = caughtBy ?? guardPatrol;
+  playerCaught = false; caughtBy = null;
+  robot.mode = robot.pursuit ? 'chase' : 'patrol';
+  robot.lostTime = robot.captureTime = 0;
   guardCapturePanel.hidden = true;
   for (const element of guardBlocked) element.inert = false;
   guardBlocked = [];
   animate(0);
 }
 
-function catchPlayer() {
+function catchPlayer(robot = guardPatrol) {
   closePhone();
-  playGameSound('robot-grab', { x: guardPatrol.x });
-  const robot = guardPatrol;
-  playerCaught = true;
+  playGameSound('robot-grab', { x: robot.x });
+  playerCaught = true; caughtBy = robot;
   robot.mode = 'grab'; robot.captureTime = 0;
   robot.facing = body.position.x >= robot.x ? 1 : -1;
   // Keep the held body inside the 32px walls without shortening the arm reach.
@@ -71,7 +76,12 @@ function mountGuardPatrol() {
 }
 
 function updateGuardPatrol(delta) {
-  const robot = guardPatrol;
+  updateRobot(guardPatrol, delta);
+  // 문 앞에서 멈춰 선(hold) 로봇은 그리기만 한다.
+  for (const robot of b2Robots) updateRobot(robot, robot.hold > 0 ? 0 : delta);
+}
+
+function updateRobot(robot, delta) {
   if (!robot.door) return;
   const { left, right, speed, pause } = robot.door.patrol;
   const powered = world.dataset.powered === 'true';
@@ -81,15 +91,20 @@ function updateGuardPatrol(delta) {
     // 순간 플레이어를 보기도 전에 바로 순찰을 시작해 버린다.
     if (robot.mode !== 'dock') robot.mode = 'patrol';
     robot.lostTime = 0;
+  } else if (playerCaught && caughtBy && caughtBy !== robot) {
+    // 다른 로봇이 붙잡는 동안 나머지는 제자리에 선다.
   } else if (playerCaught) {
     robot.captureTime += delta;
     Body.setPosition(body, { x: robot.x + robot.facing * 82, y: floorY - 81 });
     Body.setVelocity(body, { x: 0, y: 0 });
     grounded = true;
-    if (robot.captureTime >= 1100 && guardCapturePanel.hidden) {
+    if (robot.captureTime >= 1100 && (robot.onCaught ? robot.mode === 'grab' : guardCapturePanel.hidden)) {
       robot.mode = 'caught';
-      guardCapturePanel.hidden = false;
-      document.getElementById('guard-retry').focus();
+      if (robot.onCaught) robot.onCaught();
+      else {
+        guardCapturePanel.hidden = false;
+        document.getElementById('guard-retry').focus();
+      }
     }
   } else if (delta > 0) {
     const dx = body.position.x - robot.x;
@@ -114,7 +129,7 @@ function updateGuardPatrol(delta) {
       // 실제로 꽤 멀리(200px) 달아났을 때만 이 탈출을 인정한다. 로봇 위치로 재면 엘리베이터 앞에 서 있다가
       // 멀리서 감지된 경우 감지와 탈출이 매 프레임 되풀이되어 로봇이 제자리에 멈춘다.
       const fledFar = Math.abs(body.position.x - robot.spottedX) > 200;
-      const nearElevator = fledFar && currentDoors.some(otherDoor => otherDoor.type === 'elevator' &&
+      const nearElevator = !robot.followToElevator && fledFar && currentDoors.some(otherDoor => otherDoor.type === 'elevator' &&
         Math.abs(body.position.x - (otherDoor.x + otherDoor.width / 2)) < otherDoor.width / 2 + 60);
       if (nearElevator) {
         // 순간이동으로 자리를 되돌리지 않는다 — 'return' 모드로 넘어가 감지했던 자리까지 순찰 속도로
@@ -128,7 +143,7 @@ function updateGuardPatrol(delta) {
           setTimeout(() => showStatus('1번 엘리베이터 앞 층별 안내판을 다시 봐야겠다.', 4000), 2400 + 4200);
         }
       } else {
-        robot.lostTime = sameLevel && Math.abs(dx) < 600 ? 0 : robot.lostTime + delta;
+        robot.lostTime = robot.pursuit || (sameLevel && Math.abs(dx) < 600) ? 0 : robot.lostTime + delta;
         if (robot.lostTime >= 1800) {
           robot.mode = 'patrol'; robot.wait = 0;
           collectedItems.add('f1-chase-ended');
@@ -143,7 +158,7 @@ function updateGuardPatrol(delta) {
           const distance = Math.min(Math.abs(dx), 270 * delta / 1000);
           robot.x = Math.max(80, Math.min(worldWidth - 80, robot.x + robot.facing * distance));
           robot.elapsed += delta;
-          if (grounded && Math.abs(body.bounds.max.y - floorY) < 3 && Math.abs(body.position.x - robot.x) <= 84) catchPlayer();
+          if (grounded && Math.abs(body.bounds.max.y - floorY) < 3 && Math.abs(body.position.x - robot.x) <= 84) catchPlayer(robot);
         }
       }
     }

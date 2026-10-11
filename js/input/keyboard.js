@@ -16,8 +16,10 @@ window.addEventListener('keydown', event => {
     else if (event.code !== 'Tab' && !(event.target.id === 'cctv-skip' && ['Enter', 'Space'].includes(event.code))) event.preventDefault();
     return;
   }
-  if (playerCaught) {
-    if (event.code !== 'Tab' && !(['Enter', 'Space'].includes(event.code) && event.target.id === 'guard-retry')) event.preventDefault();
+  // B2 엔딩 창(b2-ending.js)의 버튼만 누를 수 있고, 뒤의 수호는 움직이지 않는다.
+  const endingButton = event.target.closest?.('#b2-bad-ending button, #b2-escape button');
+  if (playerCaught || endingButton) {
+    if (event.code !== 'Tab' && !(['Enter', 'Space'].includes(event.code) && (event.target.id === 'guard-retry' || endingButton))) event.preventDefault();
     return;
   }
   if (hallucinationCaught) {

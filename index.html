@@ -15,6 +15,7 @@
     <link rel="stylesheet" href="css/power.css" />
     <link rel="stylesheet" href="css/wire-puzzle.css" />
     <link rel="stylesheet" href="css/guard-patrol.css" />
+    <link rel="stylesheet" href="css/b2-ending.css" />
     <link rel="stylesheet" href="css/phone.css" />
     <link rel="stylesheet" href="css/sanity.css" />
     <link rel="stylesheet" href="css/main-menu.css" />
@@ -70,6 +71,7 @@
     <script src="js/scene/prop-outlines.js" defer></script>
     <script src="js/scene/scene-builder.js" defer></script>
     <script src="js/scene/guard-patrol.js" defer></script>
+    <script src="js/scene/b2-ending.js" defer></script>
     <script src="js/scene/floor-change.js" defer></script>
     <script src="js/interaction/puzzles.js" defer></script>
     <script src="js/interaction/cctv.js" defer></script>
@@ -327,7 +329,20 @@
       <div id="inspection-sheet" aria-hidden="true" hidden></div>
       <p id="inspection-text" tabindex="0"></p>
       <span id="inspection-description" hidden></span>
-      <div class="dialog-actions"><span class="inspection-help">E / Esc</span><button id="inspection-use" type="button" hidden>사용하기</button><button id="inspection-close" type="button">닫기 ▾</button></div>
+      <div class="dialog-actions"><span class="inspection-help">E / Esc</span><button id="inspection-use" type="button" hidden>사용하기</button><button id="inspection-delete" class="b2-action" type="button" hidden>DELETE</button><button id="inspection-yes" class="b2-action" type="button" hidden>예</button><button id="inspection-no" class="b2-action" type="button" hidden>아니요</button><button id="inspection-close" type="button">닫기 ▾</button></div>
+    </section>
+    <div id="b2-delete-bar" role="status" aria-label="ARCHI 삭제 진행률" hidden>
+      <span>ARCHI DELETE PROCESS <output id="b2-delete-percent">0%</output></span>
+      <span class="b2-delete-track" aria-hidden="true"><span id="b2-delete-fill"></span></span>
+    </div>
+    <section id="b2-bad-ending" class="b2-ending-dialog" role="dialog" aria-modal="true" aria-labelledby="b2-bad-ending-title" hidden>
+      <h2 id="b2-bad-ending-title">베드엔딩</h2>
+      <p>경비 로봇에게 붙잡혔다. ARCHI 삭제는 끝나지 못했다.</p>
+      <div class="b2-ending-actions"><button id="b2-restart" type="button">처음부터 다시하기</button><button id="b2-checkpoint" type="button">체크포인트로 이동</button></div>
+    </section>
+    <section id="b2-escape" class="b2-ending-dialog" role="dialog" aria-modal="true" aria-labelledby="b2-escape-title" hidden>
+      <h2 id="b2-escape-title">탈출 성공 (임시)</h2>
+      <div class="b2-ending-actions"><button id="b2-escape-menu" type="button">메인 메뉴로</button></div>
     </section>
     <aside id="sanity-hud" aria-label="정신력 상태">
       <div class="sanity-heading"><span>정신력</span><output id="sanity-value">100%</output></div>

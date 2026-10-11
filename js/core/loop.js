@@ -72,6 +72,7 @@ function update() {
   if (!wasGrounded && grounded && fallingSpeed > 3) playGameSound('step', { landing: true, x: body.position.x });
   animate(moved, sprinting, step);
   updateGuardPatrol(step);
+  updateB2Ending(step);
   checkStoryScenes(step);
   updateElevators();
   updateInteraction();

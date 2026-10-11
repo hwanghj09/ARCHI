@@ -1,0 +1,20 @@
+/* B2 엔딩(js/scene/b2-ending.js): 콘솔 DELETE·확인 버튼, 화면 위 삭제 진행 바, 베드엔딩·임시 해피엔딩 창. 새 그림 없이 상자와 글자만 쓴다. */
+/* 추격 로봇은 R-01 스프라이트만 그린다(CSS로 그린 대체 로봇 몸통은 지운다). */
+#dynamic-scene .fixture.guard-bot.b2-guard-bot { background: none; }
+#dynamic-scene .fixture.guard-bot.b2-guard-bot::before, #dynamic-scene .fixture.guard-bot.b2-guard-bot::after { content: none; }
+#inspection .b2-action { min-height: 36px; padding: 6px 12px; border-color: #c4574b; background: #3a1714; color: #ffd9d3; font-size: 13px; }
+#inspection .b2-action[hidden], #inspection-close[hidden] { display: none; }
+#inspection .b2-action:focus-visible { outline: 2px solid #dec898; outline-offset: 3px; }
+#b2-delete-bar { position: fixed; z-index: 11; top: 12px; left: 50%; transform: translateX(-50%); width: min(460px, calc(100vw - 32px));
+  padding: 8px 12px; background: #1a0c0bf0; border: 2px solid #c4574b; color: #ffd9d3; font: 700 13px/1.4 monospace; letter-spacing: .04em; pointer-events: none; }
+#b2-delete-bar[hidden] { display: none; }
+.b2-delete-track { display: block; height: 8px; margin-top: 6px; background: #3a1714; }
+#b2-delete-fill { display: block; width: 0; height: 100%; background: #ff5a47; }
+.b2-ending-dialog { position: fixed; z-index: 13; top: 50%; left: 50%; transform: translate(-50%, -50%); width: min(420px, calc(100vw - 32px));
+  padding: 20px 22px; background: #111b20f8; border: 2px solid #ad7666; color: #eee5d6; text-align: center; }
+.b2-ending-dialog[hidden] { display: none; }
+.b2-ending-dialog h2 { margin: 0 0 10px; font-size: 22px; }
+.b2-ending-dialog p { margin: 0 0 14px; font-size: 13px; line-height: 1.5; }
+.b2-ending-actions { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
+.b2-ending-actions button { min-height: 44px; min-width: 140px; border: 1px solid #b9c7b8; background: #243a36; color: #fff; font: inherit; cursor: pointer; }
+.b2-ending-actions button:focus-visible { outline: 3px solid #eac47d; outline-offset: 3px; }

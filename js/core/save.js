@@ -46,7 +46,8 @@ function progressSnapshot() {
 }
 
 function saveProgress() {
-  if (!gameStarted || mainMenuActive || restoringProgress) return false;
+  // B2 삭제가 시작된 뒤(b2-ending.js)에는 저장하지 않는다. 저장 칸은 DELETE 직전 상태로 남는다.
+  if (!gameStarted || mainMenuActive || restoringProgress || b2Ending.phase !== 'idle') return false;
   try {
     localStorage.setItem(progressKey, JSON.stringify(progressSnapshot()));
     progressSaveFailed = false;
@@ -78,6 +79,7 @@ function restoreProgress(data) {
     phoneBlocked = powerBlocked = guardBlocked = hallucinationBlocked = openingBlocked = blackoutBlocked = cctvBlocked = [];
     zeroEventPhase = 'idle'; zeroEventTimer = 0; zeroEventEvasions = 0; zeroEventApproachDone = false;
     endHallucinationSighting();
+    resetB2Ending();
     clearInterval(inspectionTypingTimer);
     inspectionTypingTimer = null;
     delete inspectionPanel.dataset.returnTo;
