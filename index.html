@@ -613,6 +613,9 @@
       #dynamic-scene .fixture.robot-board { padding: 14px; border: 5px solid #4a5650; background: #0d1512; color: #8fe0a0; font: bold 13px/1.9 monospace; box-shadow: 0 0 18px #6ae08a22; }
       #dynamic-scene .fixture.robot-board span:first-child { color: #e8f0d8; font-family: Arial, sans-serif; }
       #dynamic-scene .fixture.power-notice { background: #eee9d5; transform: skewX(-12deg); border-bottom: 1px solid #b9b39f; box-shadow: 0 2px 1px #0008; }
+      #dynamic-scene .fixture.power-notice:has(span) { display: flex; flex-direction: column; justify-content: center; padding: 14px 12px; color: #24302c; font: 600 13px/1.65 Arial, sans-serif; text-align: center; }
+      #dynamic-scene .fixture.power-notice span { white-space: normal; overflow-wrap: anywhere; transform: skewX(12deg); }
+      #dynamic-scene .fixture.power-notice span:first-child { margin-bottom: 8px; color: #702b23; font-size: 18px; }
       #dynamic-scene .fixture.cctv-wall { border: 8px solid #2a3432; background: radial-gradient(circle, #ff5a4a 0 3px, transparent 4px) 108px 8px / 116px 70px, repeating-linear-gradient(90deg, transparent 0 112px, #1a201d 112px 118px), repeating-linear-gradient(transparent 0 66px, #1a201d 66px 72px), linear-gradient(115deg, #7ab0c8 0 20%, #4a7a90 20% 55%, #6a9ab0 55%); box-shadow: 0 0 30px #7ab0c833; }
       /* B2 서버실(core 테마): 격자 이중 바닥, 푸른 서버 불빛과 차가운 천장등, 붉은 경고색. 메인 서버실 앞 천장 감시 카메라(cctv)와
          번갈아 비추는 시야(cctv-cone), 충전 도크의 경비 로봇 셋(dormant-bots). */
