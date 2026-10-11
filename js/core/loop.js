@@ -43,9 +43,10 @@ function update() {
   const directions = [...keys].map(key => movementKeys[key]).concat([...pointers.values()]);
   if (pulseTime > 0) directions.push(pulseDirection);
   pulseTime = Math.max(0, pulseTime - step);
-  const direction = itemUseTime > 0 ? 0 : Number(directions.includes(1)) - Number(directions.includes(-1));
+  const inputDirection = itemUseTime > 0 ? 0 : Number(directions.includes(1)) - Number(directions.includes(-1));
+  const direction = applyZeroSanityTurnDelay(inputDirection); // 정신력 0%: 방향을 바꾸려면 0.2초 기다려야 한다
   if (itemUseTime > 0) jumpQueued = false;
-  const sprinting = !phoneLightOn && [...runKeys].some(key => keys.has(key));
+  const sprinting = sanity > 0 && !phoneLightOn && [...runKeys].some(key => keys.has(key)); // 정신력 0%에서는 뛸 수 없다
   interactionTime = direction || jumpQueued ? 0 : Math.max(0, interactionTime - step);
   if (direction) facing = direction;
   const paceFactor = sanitySpeedFactor();

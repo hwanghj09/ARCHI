@@ -25,7 +25,9 @@ const step = 1000 / 60;
 // 쫓기는 동안(경비 로봇 추적)은 훨씬 빠르게 줄어든다 — 보스전(bossFightActive)은 예외.
 const sanityDarkDrainPerSecond = 1 / 3;
 const sanityChaseDrainPerSecond = 10;
+const sanityAnxietyDrainPerSecond = 2; // 정신 불안 임무(항불안제를 찾아 쓰기 전) 동안 어디서든 줄어드는 속도
 const sanityChaseFloor = 10; // 경비 로봇에게 쫓겨서는 이 값 아래로 줄지 않는다
+const sanityZeroTurnDelayMs = 200; // 정신력 0%에서 방향을 바꿀 때 기다려야 하는 시간
 const newGameSanity = 35; // 새 게임을 시작할 때의 정신력
 const antianxietyRestore = 50; // 항불안제를 사용했을 때의 정신력 회복량
 // 50/40/30/20/10% 미만 구간의 공포 연출 단계(1~5). sanityTierOf()가 이 경계로 계산한다.
@@ -34,7 +36,8 @@ const sanitySlowSpeedFactor = .92; // 30% 미만 이동 속도
 const sanityCriticalSpeedFactor = .8; // 10% 미만 이동 속도(위와 곱해진다)
 const ambientSightingIntervalRange = [7000, 15000]; // 30% 미만에서 먼 환각이 보이는 간격(ms)
 const ambientSightingLifeMs = 3400;
-const blinkIntervalRangeByTier = { 2: [7000, 11000], 3: [6000, 10000], 4: [4500, 8000], 5: [2600, 5200] };
+// 20% 미만(4단계)은 3단계보다 깜빡이는 간격이 1/3 짧고, 10% 미만(5단계)은 거기서 다시 1/3 짧다.
+const blinkIntervalRangeByTier = { 2: [7000, 11000], 3: [6000, 10000], 4: [4000, 6667], 5: [2667, 4444] };
 const zeroEventApproachThreshold = 3; // 0%가 되기 전, 이 수치 이하에서 한 번 예고 환각이 다가온다
 const zeroEventApproachDurationMs = 3600;
 const zeroEventChargeWaitMs = 15000; // 0% 도달 후 첫 돌진까지

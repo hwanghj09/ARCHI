@@ -10,7 +10,8 @@ const sanityFill = document.getElementById('sanity-fill');
 const sanityState = document.getElementById('sanity-state');
 const hallucinations = document.getElementById('hallucinations');
 const hallucinationShadow = document.getElementById('hallucination-shadow');
-const wallEyes = document.getElementById('wall-eyes');
+const flashPrompt = document.getElementById('flash-prompt');
+const redEyes = document.getElementById('red-eyes');
 const blinkFlash = document.getElementById('blink-flash');
 const hallucinationCapturePanel = document.getElementById('hallucination-caught');
 const fearOverlayRed = document.getElementById('fear-overlay-red');
@@ -58,6 +59,15 @@ function sanitySpeedFactor() {
   return fearTier >= 5 ? sanitySlowSpeedFactor * sanityCriticalSpeedFactor : fearTier >= 3 ? sanitySlowSpeedFactor : 1;
 }
 
+// 정신력 0%: 지금 보는 방향의 반대로 걸으려 하면 sanityZeroTurnDelayMs 동안 제자리에서 기다린 뒤에야 돌아선다(그동안 입력은 무시).
+// 보는 방향이 바뀌거나 입력을 떼면 다시 처음부터 잰다. 뛰기를 막는 것은 loop.js가 한다.
+let zeroTurnTimer = 0;
+function applyZeroSanityTurnDelay(input) {
+  if (sanity > 0 || !input || input === facing) { zeroTurnTimer = 0; return input; }
+  zeroTurnTimer += step;
+  return zeroTurnTimer >= sanityZeroTurnDelayMs ? input : 0;
+}
+
 function refreshSanity() {
   const percent = Math.ceil(sanity);
   const state = sanity === 0 ? 'hallucinating' : fearTier >= 1 ? 'low' : 'normal';
@@ -78,7 +88,6 @@ function startZeroCharge() {
   zeroEventTimer = 0;
   zeroEventSide = -facing; // 플레이어가 바라보지 않는 쪽
   if (phoneLightOn) { phoneLightOn = false; refreshPhone(); }
-  showStatus('어둠 속에서 무언가 빠르게 다가온다 — 반대쪽으로 플래시를 비춰야 한다!', 2600);
   beginHallucinationSighting('charge', zeroEventSide, 320);
 }
 
@@ -89,11 +98,9 @@ function resolveZeroEvasion() {
   if (zeroEventForced) {
     // 콘솔로 시작한 추격은 회피 횟수(다음 돌진까지의 대기 시간)에 포함하지 않는다.
     zeroEventForced = false;
-    showStatus('환각이 사라졌다.', 2600);
     return;
   }
   zeroEventEvasions++;
-  showStatus(zeroEventEvasions === 1 ? '환각이 사라졌다. 다시 올 것 같다…' : '또 한 번 피했다.', 2600);
 }
 
 function triggerDevoured() {
@@ -209,6 +216,7 @@ function beginHallucinationSighting(mode, side, distance) {
   hallucinationSide = side;
   hallucinationStartDistance = distance;
   hallucinationLife = 0;
+  flashPrompt.hidden = mode !== 'charge'; // 돌진(추격) 이벤트 동안만 플래시 안내를 깜빡인다
 }
 
 function endHallucinationSighting() {
@@ -216,6 +224,7 @@ function endHallucinationSighting() {
   delete document.body.dataset.hallucinating;
   hallucinations.hidden = true;
   hallucinationShadow.hidden = true;
+  flashPrompt.hidden = true;
 }
 
 function updateHallucinationSighting(elapsed, fsmPaused) {
@@ -262,15 +271,48 @@ function updateComputerFear(active) {
 
 // ---- 눈 깜빡임 연출과, 10% 미만에서 깜빡일 때마다 느는 붉은 눈 ----
 
-function spawnWallEye() {
-  if (wallEyes.children.length >= wallEyeMaxCount) wallEyes.firstElementChild?.remove();
-  const eye = document.createElement('div');
-  eye.className = 'wall-eye';
-  const fromLeft = Math.random() < .5;
-  eye.style.left = fromLeft ? `${4 + Math.random() * 18}%` : 'auto';
-  eye.style.right = fromLeft ? 'auto' : `${4 + Math.random() * 18}%`;
-  eye.style.top = `${18 + Math.random() * 55}%`;
-  wallEyes.append(eye);
+// 붉은 눈(10% 미만): 깜빡일 때마다 화면이 아니라 월드 좌표의 일반 배경(상호작용 대상 옆을 피한 곳, 너무 낮지도 높지도 않은 높이)에
+// 하나씩 생긴다. 어둠 속에서도 어둠 막 위에 그려져 희미하게 빛나고(css/sanity.css), 가운데 검은 눈동자가 늘 수호 쪽으로 움직인다.
+// 장면(층·방)이 바뀌면 지운다. 최대 wallEyeMaxCount개이고 넘치면 오래된 눈부터 사라진다.
+const RED_EYE_SIZE = 52;
+const RED_EYE_Y = [200, 330];
+let redEyeScene = null;
+
+function spawnRedEye() {
+  const minX = Math.max(64, cameraX + 60);
+  const maxX = Math.min(worldWidth - 64, cameraX + viewWidth - 60);
+  if (maxX <= minX) return;
+  for (let tries = 0; tries < 24; tries++) {
+    const x = minX + Math.random() * (maxX - minX);
+    const y = RED_EYE_Y[0] + Math.random() * (RED_EYE_Y[1] - RED_EYE_Y[0]);
+    if (Math.abs(x - body.position.x) < 140) continue; // 수호 바로 옆은 피한다
+    if (currentDoors.some(door => x > door.x - 50 && x < door.x + door.width + 50)) continue; // 문·소품 등 상호작용 대상 옆은 피한다
+    if ([...redEyes.children].some(other => Math.abs(Number(other.dataset.x) - x) < 100)) continue; // 서로 겹치지 않게
+    if (redEyes.children.length >= wallEyeMaxCount) redEyes.firstElementChild.remove();
+    const eye = document.createElement('div');
+    eye.className = 'red-eye';
+    eye.dataset.x = String(x);
+    eye.dataset.y = String(y);
+    Object.assign(eye.style, { left: `${x}px`, top: `${y}px`, width: `${RED_EYE_SIZE}px`, height: `${RED_EYE_SIZE}px` });
+    redEyes.append(eye);
+    return;
+  }
+}
+
+// 매 프레임(render)에서 부른다: 장면이 바뀌었으면 눈을 지우고, 눈동자를 수호가 있는 쪽으로 옮긴다.
+function updateRedEyes() {
+  const key = room === 'dynamic' ? dynamicFloorId : room;
+  if (key !== redEyeScene) { redEyes.replaceChildren(); redEyeScene = key; }
+  const targetX = body.position.x;
+  const targetY = body.position.y - 20;
+  for (const eye of redEyes.children) {
+    const dx = targetX - Number(eye.dataset.x);
+    const dy = targetY - Number(eye.dataset.y);
+    const distance = Math.hypot(dx, dy) || 1;
+    const reach = RED_EYE_SIZE * .2 * Math.min(1, distance / 160); // 아주 가까우면 가운데로 모인다
+    eye.style.setProperty('--px', `${dx / distance * reach}px`);
+    eye.style.setProperty('--py', `${dy / distance * reach}px`);
+  }
 }
 
 function updateBlink(elapsed, fsmPaused) {
@@ -286,7 +328,7 @@ function updateBlink(elapsed, fsmPaused) {
   blinkNextIn = randomBetween(blinkIntervalRangeByTier[fearTier] || blinkIntervalRangeByTier[2]);
   blinkFlash.dataset.active = 'true';
   blinkFlashTimer = 180;
-  if (fearTier >= 5) spawnWallEye();
+  if (fearTier >= 5) spawnRedEye();
 }
 
 function updateSanity(elapsed) {
@@ -297,7 +339,9 @@ function updateSanity(elapsed) {
   const exposure = sanityExposure();
   const chasing = guardPatrol.mode === 'chase' && !bossFightActive;
   if (!paused) {
-    const rate = chasing ? -sanityChaseDrainPerSecond : exposure === 'dark' ? -sanityDarkDrainPerSecond : 0;
+    // 정신 불안 임무: 첫 컷씬을 본 뒤 항불안제를 쓰기 전까지는 어디에 있든 1초에 2%씩 줄어든다(쫓길 때의 감소가 더 빠르면 그쪽).
+    const anxiety = collectedItems.has('story-anxiety-seen') && !collectedItems.has('f16-antianxiety-used');
+    const rate = chasing ? -sanityChaseDrainPerSecond : anxiety ? -sanityAnxietyDrainPerSecond : exposure === 'dark' ? -sanityDarkDrainPerSecond : 0;
     // 쫓기는 동안의 감소는 10%에서 멈춘다(이미 10% 아래면 쫓겨서는 더 줄지 않는다).
     const lowest = chasing ? Math.min(sanity, sanityChaseFloor) : 0;
     sanity = Math.max(lowest, Math.min(100, sanity + rate * elapsed / 1000));
@@ -307,7 +351,7 @@ function updateSanity(elapsed) {
   // 30%→20% 구간에서 검은 비네트가 서서히 붉게 변하고, 20% 밑으로는 완전히 붉다.
   fearOverlayRed.style.opacity = String(Math.max(0, Math.min(1, (30 - sanity) / 10)) * (fearTier >= 1 ? .7 : 0));
   document.body.dataset.weary = String(fearTier >= 3);
-  if (fearTier < 5 && wallEyes.children.length) wallEyes.replaceChildren();
+  if (fearTier < 5 && redEyes.children.length) redEyes.replaceChildren();
   if (computer) computer.dataset.fear = String(fearTier >= 4);
   updateComputerFear(fearTier >= 4);
   updateBlink(elapsed, fsmPaused);
@@ -329,6 +373,7 @@ function renderHallucination() {
   hallucinations.hidden = false;
   hallucinationShadow.hidden = false;
   hallucinations.dataset.mode = hallucinationMode;
+  flashPrompt.hidden = hallucinationMode !== 'charge'; // 매 프레임 환각 종류와 맞춰, 다시 추격할 때도 안내가 뜬다
   document.body.dataset.hallucinating = 'true';
   const width = Math.min(224 * scale, stage.clientWidth * .4);
   let opacity = .5;
