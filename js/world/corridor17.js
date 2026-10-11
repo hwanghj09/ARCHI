@@ -92,3 +92,4 @@ corridorBackground.alt = '';
 corridorBackground.draggable = false;
 Object.assign(corridorBackground.style, { left: '0px', top: '0px', width: '3328px', height: '768px' });
 background.append(corridorBackground);
+addLuminousSigns(corridorBackground, 'assets/background/floor17/floor17.png');

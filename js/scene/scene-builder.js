@@ -22,6 +22,7 @@ function buildDynamicScene(config) {
     image.draggable = false;
     Object.assign(image.style, { left: `${art.left ?? 0}px`, width: `${art.width ?? config.width}px`, height: `${art.height}px`, top: `${art.top}px` });
     dynamicScene.append(image);
+    addLuminousSigns(image, art.src);
   }
   if (config.id === 'rooftop') dynamicScene.append(rooftopBackground);
   const layout = [
