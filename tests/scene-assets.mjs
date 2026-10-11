@@ -22,7 +22,8 @@ try {
     const sources = await page.evaluate(async id => {
       closeInspection();
       performFloorChange(id, id === 'rooftop' ? null : 0, floorById.get(id).interior ? 'exit' : null);
-      await Promise.all([...document.querySelectorAll('img')].map(image => image.decode()));
+      // The computer fear overlay leaves its image empty until an event assigns a frame.
+      await Promise.all([...document.querySelectorAll('img[src]')].filter(image => image.getAttribute('src')).map(image => image.decode()));
       return [...new Set([...document.querySelectorAll('#world, #world *')].flatMap(element =>
         [null, '::before', '::after'].flatMap(pseudo =>
           [...getComputedStyle(element, pseudo).backgroundImage.matchAll(/url\(["']?(.*?)["']?\)/g)].map(match => match[1]))))];

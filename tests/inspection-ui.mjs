@@ -11,7 +11,7 @@ const [html, inspection, interaction, helpers] = await Promise.all([
 
 assert(html.includes('id="inspection"') && html.includes('id="inspection-title"') && html.includes('id="inspection-text"'));
 assert(html.includes('inspection.js'));
-assert(html.includes('assets/ui/dialogue-frame.png'));
+assert((await readFile('css/game.css', 'utf8')).includes('../assets/ui/dialogue-frame.png'));
 assert(interaction.includes('openInspection(nearbyDoor.name, inspectionMessage, '));
 for (const name of ['위생용품 수납장', '휴지통', '미끄럼 주의 표지', '세면대 거울', '화장실 칸', '비상 호출 버튼']) {
   assert(helpers.includes(name), `restroom should expose ${name}`);

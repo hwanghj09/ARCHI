@@ -1,6 +1,6 @@
 #main-menu { position: fixed; z-index: 30; inset: 0; overflow: auto; background: #080e11; color: #e3e8e2; font: 14px/1.6 Arial, sans-serif; isolation: isolate; }
 #main-menu[hidden], #main-menu [hidden] { display: none; }
-.menu-backdrop { position: fixed; z-index: -1; inset: 0; background: linear-gradient(90deg, #080e11 5%, #080e11e8 30%, #080e1140 72%), linear-gradient(0deg, #080e11 0%, transparent 40%, #080e1188), url('assets/background/floor17/service-corridor-off.png') 65% center / cover; filter: brightness(var(--scene-brightness, 1)); }
+.menu-backdrop { position: fixed; z-index: -1; inset: 0; background: linear-gradient(90deg, #080e11 5%, #080e11e8 30%, #080e1140 72%), linear-gradient(0deg, #080e11 0%, transparent 40%, #080e1188), url('../assets/background/floor17/service-corridor-off.png') 65% center / cover; filter: brightness(var(--scene-brightness, 1)); }
 .menu-backdrop::after { content: ''; position: absolute; inset: 0; background: repeating-linear-gradient(0deg, #05090b10 0 1px, transparent 1px 4px); }
 .menu-topline { display: flex; justify-content: space-between; padding: 30px max(36px, env(safe-area-inset-right)) 0 max(36px, env(safe-area-inset-left)); color: #a6b7b1; font-size: 11px; letter-spacing: .18em; }
 .menu-topline > span:first-child { color: #e2e7df; font-weight: bold; }

@@ -6,6 +6,7 @@ let soundStepDistance = 0;
 function update() {
   updateGameAudio(step);
   if (mainMenuActive) return;
+  updateFirstNight(step);
   updatePhoneCharging(step);
   updateSanity(step);
   if (openingActive) { updateOpening(step); return; }

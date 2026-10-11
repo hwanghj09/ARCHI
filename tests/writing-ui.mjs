@@ -4,15 +4,15 @@ import { chromium } from 'playwright';
 
 const [html, css, writing, inspection, interaction, builder] = await Promise.all([
   readFile('index.html', 'utf8'),
-  readFile('writing.css', 'utf8'),
+  readFile('css/writing.css', 'utf8'),
   readFile('js/interaction/writing.js', 'utf8'),
   readFile('js/interaction/inspection.js', 'utf8'),
   readFile('js/interaction/interaction.js', 'utf8'),
   readFile('js/scene/scene-builder.js', 'utf8'),
 ]);
-assert(html.includes('href="writing.css"') && html.includes('js/interaction/writing.js') && html.includes('id="inspection-sheet"'));
+assert(html.includes('href="css/writing.css"') && html.includes('js/interaction/writing.js') && html.includes('id="inspection-sheet"'));
 assert(html.indexOf('js/interaction/writing.js') < html.indexOf('js/scene/scene-builder.js'), 'writing.js loads before scenes are built');
-assert(css.includes("url('assets/vendor/fonts/archi-hand.woff2')") && css.includes("url('assets/ui/notebook/notebook-open-blank.png')"));
+assert(css.includes("url('../assets/vendor/fonts/archi-hand.woff2')") && css.includes("url('../assets/ui/notebook/notebook-open-blank.png')"));
 assert((await stat('assets/vendor/fonts/archi-hand.woff2')).size < 700_000, 'handwriting font stays subset');
 await stat('assets/vendor/fonts/ARCHI-HAND-OFL.txt');
 assert(writing.includes('WRITING_SURFACE_BY_FILE') && inspection.includes('renderWritingSheet'));

@@ -2,16 +2,16 @@
 #elevator-cabin[hidden] { display: none; }
 #cabin-scene { position: relative; width: max(1050px, min(100vw, 150dvh)); aspect-ratio: 3 / 2; margin: auto; overflow: hidden; }
 #cabin-art { display: block; width: 100%; height: 100%; user-select: none; pointer-events: none; }
-#cabin-doorway { position: absolute; left: 26.56%; top: 12.01%; width: 37.11%; height: 74.61%; overflow: hidden; background: #20272a url('assets/background/floor17/floor17.png') 28% center / auto 100% no-repeat; }
+#cabin-doorway { position: absolute; left: 26.56%; top: 12.01%; width: 37.11%; height: 74.61%; overflow: hidden; background: #20272a url('../assets/background/floor17/floor17.png') 28% center / auto 100% no-repeat; }
 #cabin-scene:not([data-floor="17"]) #cabin-doorway { background: linear-gradient(to bottom, #252b2a 78%, #171b1a 78%); }
 /* 12층은 이 날 만든 corridor.png가 있어서 문틈으로 그 복도(개발실 유리 전면 쪽)가 보이게 한다.
    다른 층은 아직 배경 그림이 없어서 위 회색 그라데이션 그대로 쓴다. */
-#cabin-scene[data-floor="12"] #cabin-doorway { background: #20272a url('assets/background/floor12/corridor.png') 15% center / auto 100% no-repeat; }
+#cabin-scene[data-floor="12"] #cabin-doorway { background: #20272a url('../assets/background/floor12/corridor.png') 15% center / auto 100% no-repeat; }
 /* 7층도 corridor.png가 있어서 문틈으로 AI 테스트·검증실 앞(자동문 쪽)이 보이게 한다. */
-#cabin-scene[data-floor="7"] #cabin-doorway { background: #0d1418 url('assets/background/floor7/corridor.png') 15% center / auto 100% no-repeat; }
+#cabin-scene[data-floor="7"] #cabin-doorway { background: #0d1418 url('../assets/background/floor7/corridor.png') 15% center / auto 100% no-repeat; }
 /* 1층도 corridor.png가 있어서 문틈으로 로비 안내 데스크 쪽이 보이게 한다. */
-#cabin-scene[data-floor="1"] #cabin-doorway { background: #10151c url('assets/background/floor1/corridor.png') 15% center / auto 100% no-repeat; }
-.cabin-leaf { position: absolute; inset: 0; background: url('assets/background/elevator/cabin-b2-to-17.png') 42.24% 47.31% / 269.47% 134.03% no-repeat; }
+#cabin-scene[data-floor="1"] #cabin-doorway { background: #10151c url('../assets/background/floor1/corridor.png') 15% center / auto 100% no-repeat; }
+.cabin-leaf { position: absolute; inset: 0; background: url('../assets/background/elevator/cabin-b2-to-17.png') 42.24% 47.31% / 269.47% 134.03% no-repeat; }
 .cabin-leaf.left { clip-path: inset(0 50% 0 0); transform: translateX(calc(var(--door-open, 0) * -50%)); }
 .cabin-leaf.right { clip-path: inset(0 0 0 50%); transform: translateX(calc(var(--door-open, 0) * 50%)); }
 #cabin-display { position: absolute; left: 73%; top: 15.3%; width: 12.3%; height: 6.7%; display: grid; place-items: center; background: #080f10; color: #a2d7a0; font: 32px monospace; white-space: nowrap; }
@@ -46,8 +46,8 @@
 #cabin-scene[data-blackout="true"] #cabin-display { color: #77967c; background: #050807; }
 #cabin-scene[data-blackout="true"] #cabin-status { color: #aebbb2; background: #080d0bf2; }
 #cabin-scene[data-blackout="true"] #cabin-exit { color: #c0c9c2; border-color: #58645c; background: #111913; }
-#cabin-scene[data-hall-blackout="true"][data-floor="17"] #cabin-doorway { background-image: url('assets/background/floor17/floor17-off.png'); }
-#cabin-scene[data-hall-blackout="true"][data-floor="7"] #cabin-doorway { background-image: url('assets/background/floor7/corridor-off.png'); }
+#cabin-scene[data-hall-blackout="true"][data-floor="17"] #cabin-doorway { background-image: url('../assets/background/floor17/floor17-off.png'); }
+#cabin-scene[data-hall-blackout="true"][data-floor="7"] #cabin-doorway { background-image: url('../assets/background/floor7/corridor-off.png'); }
 @media (prefers-reduced-motion: reduce) {
   #cabin-scene[data-door="closing"] .cabin-leaf { transform: none; }
   #cabin-scene[data-door="opening"] .left { transform: translateX(-50%); }

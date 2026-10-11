@@ -11,6 +11,7 @@ function cameraTarget() {
 }
 
 function render() {
+  renderFirstNight();
   world.style.setProperty('--sight-x', `${body.position.x}px`);
   world.style.setProperty('--sight-y', `${body.position.y}px`);
   const state = sprite.dataset.state;

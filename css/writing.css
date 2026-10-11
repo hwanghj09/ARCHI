@@ -2,7 +2,7 @@
 /* ARCHI Hand: Nanum Pen Script(OFL)를 KS X 1001 한글과 게임 문구 글자로 줄인 글꼴(assets/vendor/fonts/README.md). */
 @font-face {
   font-family: 'ARCHI Hand';
-  src: url('assets/vendor/fonts/archi-hand.woff2') format('woff2');
+  src: url('../assets/vendor/fonts/archi-hand.woff2') format('woff2');
   font-display: swap;
 }
 
@@ -280,7 +280,7 @@
   container: book / inline-size;
   --hand-size: clamp(17px, 3.2cqw, 32px);
   width: min(100%, calc((100dvh - var(--book-reserve, 220px)) * 1.5)); margin: 0 auto; aspect-ratio: 1536 / 1024;
-  background: url('assets/ui/notebook/notebook-open-blank.png') center / 100% 100% no-repeat;
+  background: url('../assets/ui/notebook/notebook-open-blank.png') center / 100% 100% no-repeat;
   filter: drop-shadow(0 14px 22px #000a);
 }
 /* 공책은 화면 높이에 맞춰 줄인다. 아래 서술(caption)이 있으면 그만큼 더 비워 둔다. */

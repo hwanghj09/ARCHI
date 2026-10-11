@@ -9,7 +9,7 @@
 /* 두 소켓을 잇는 실제 전선(assets/ui/wire-puzzle/CABLE-PROMPT.md) — JS가 두 점 사이 거리만큼
    너비를 늘리고 각도만큼 회전시킨다. 타일 자체는 빨강 한 장뿐이라 나머지 색은 hue-rotate로 우려낸다. */
 .wire-cable { position: absolute; left: 0; top: 0; z-index: 0; height: 2.2%; min-height: 6px; transform-origin: 0 50%;
-  background-image: url('assets/ui/wire-puzzle/wire-cable.png'); background-repeat: repeat-x; background-size: auto 100%;
+  background-image: url('../assets/ui/wire-puzzle/wire-cable.png'); background-repeat: repeat-x; background-size: auto 100%;
   pointer-events: none; }
 /* 소켓 그림(왼쪽 빈 사각 클립 4개·오른쪽 빈 원형 단자 4개) 위에 자리만 얹는다 — 실측 좌표는
    scripts/prepare-wire-panel-ui.ps1로 만든 wire-panel.png 기준(assets/ui/wire-puzzle/PROMPT.md 참고).

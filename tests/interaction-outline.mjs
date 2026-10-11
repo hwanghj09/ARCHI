@@ -6,7 +6,7 @@ import { measurePropOutlines } from '../scripts/build-prop-outlines.mjs';
 // 근접 테두리는 대상마다 요소 상자가 아니라 보이는 물체 상자(outline)를 감싼 한 장(#interaction-outline)이다.
 const html = await readFile('index.html', 'utf8');
 assert(html.includes('id="interaction-outline"') && html.includes('js/interaction/outline.js') && html.includes('js/scene/prop-outlines.js'));
-assert(!/\.near\s*\{[^}]*outline/.test(html), 'Per-element .near outlines are replaced by #interaction-outline');
+assert(!/\.near\s*\{[^}]*outline/.test(await readFile('css/game.css', 'utf8')), 'Per-element .near outlines are replaced by #interaction-outline');
 
 const browser = await chromium.launch();
 try {

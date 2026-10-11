@@ -38,8 +38,9 @@ function gameAudioBuffer(name) {
   const durations = { step: .2, door: .65, 'elevator-door': 1.05, 'elevator-arrive': 1.05,
     'elevator-alarm': .95, blackout: 1.5, 'robot-servo': .48, 'robot-alert': .6,
     'robot-grab': .65, 'call-ring': .85, phone: .14, charger: .24, pickup: .22, 'item-get': .5, 'item-use': .3, deny: .46,
-    shutter: 1.35, switch: .12, ui: .09 };
-  const loop = ['office', 'dark', 'wind', 'motor'].includes(name);
+    shutter: 1.35, switch: .12, ui: .09, 'night-static': .7, 'night-latch': .8,
+    'night-relay': 2.5, 'night-track': .65, 'night-lock': 1.4 };
+  const loop = ['office', 'dark', 'wind', 'motor', 'night-room'].includes(name);
   const duration = loop ? 8 : durations[name];
   if (!duration) return null;
   const rate = 24000;
@@ -80,6 +81,12 @@ function gameAudioBuffer(name) {
         (.2 * soft + .06 * sin(420, t)) * Math.exp(-((t * 22) % 1) * 4.5) * (.75 + .25 * sin(2.3, t)) * gate(t, .1, 1) + (.2 * sin(70, t) + .16 * soft) * hit(t, 1.15, 26); break;
       case 'switch': sample = (.28 * soft + .1 * sin(210, t)) * hit(t, .008, 48); break;
       case 'ui': sample = .09 * sin(720 - 900 * t, t) * Math.sin(Math.PI * t / duration) * Math.exp(-25 * t); break;
+      case 'night-static': sample = (.2 * soft + .06 * sin(180, t)) * (gate(t, .02, .13) + gate(t, .26, .28)); break;
+      case 'night-latch': sample = (.23 * soft + .13 * sin(95, t)) * (hit(t, .02, 45) + .7 * hit(t, .36, 32)); break;
+      case 'night-relay': sample = (.28 * soft + .1 * sin(210, t)) * (hit(t, .03, 55) + hit(t, .61, 55) + hit(t, 1.22, 55) + hit(t, 1.84, 55)); break;
+      case 'night-track': sample = (.14 * sin(118 + 20 * t, t) + .18 * low) * Math.sin(Math.PI * t / duration); break;
+      case 'night-lock': sample = (.2 * soft + .12 * sin(180, t)) * (hit(t, .02, 35) + hit(t, .43, 35) + hit(t, .94, 35)); break;
+      case 'night-room': sample = .35 * low + .075 * sin(50, t) + .045 * sin(25, t) * (1 + .2 * sin(.25, t)); break;
       case 'office': sample = .6 * low + .09 * sin(62.5, t) + .025 * sin(125, t); break;
       case 'dark': sample = .46 * low + .065 * sin(37.5, t) * (1 + .18 * sin(.125, t)); break;
       case 'wind': sample = .95 * low * (.65 + .2 * sin(.25, t) + .12 * sin(.625, t)); break;
@@ -119,10 +126,13 @@ function playGameSound(name, options = {}) {
   source.playbackRate.value = name === 'step' ? .94 + Math.random() * .12 : 1;
   gain.gain.value = (name === 'step' ? (options.landing ? .65 : options.running ? .6 : .42) : name === 'blackout' ? .7 :
     name === 'robot-servo' ? .35 : .6) * (1 - distance / 800);
-  source.connect(gain).connect(gameAudioMaster);
-  const effect = { source, gain, name, stopping: false };
+  const panner = Number.isFinite(options.pan) && gameAudioContext.createStereoPanner ? gameAudioContext.createStereoPanner() : null;
+  source.connect(gain);
+  if (panner) { panner.pan.value = Math.max(-1, Math.min(1, options.pan)); gain.connect(panner).connect(gameAudioMaster); }
+  else gain.connect(gameAudioMaster);
+  const effect = { source, gain, panner, name, stopping: false };
   gameAudioEffects.add(effect);
-  source.onended = () => { gameAudioEffects.delete(effect); source.disconnect(); gain.disconnect(); };
+  source.onended = () => { gameAudioEffects.delete(effect); source.disconnect(); gain.disconnect(); panner?.disconnect(); };
   source.start();
 }
 
@@ -188,9 +198,11 @@ function updateGameAudio() {
   if (document.hidden || mainMenuActive || !gameStarted) return pauseGameAudio();
   const roof = !selectingFloor && currentSceneFloor === 18;
   const lit = selectingFloor ? !buildingBlackout : floorHasPower(currentSceneFloor) && world.dataset.dark !== 'true';
-  const background = roof ? 'wind' : lit ? 'office' : 'dark';
+  const night = firstNightLocation();
+  const background = roof ? 'wind' : lit ? night ? 'night-room' : 'office' : 'dark';
   const moving = selectingFloor && cabinCarIndex !== null && elevatorCars[cabinCarIndex].travelling && elevatorHasPower();
-  const wanted = new Map([[background, roof ? .23 : lit ? .18 : .14]]);
+  const silence = blackoutSceneActive && blackoutElapsed >= 2900 && blackoutElapsed < 4800;
+  const wanted = new Map(silence ? [] : [[background, roof ? .23 : night ? .12 : lit ? .18 : .14]]);
   if (moving) wanted.set('motor', .25);
   if (!selectingFloor && !openingActive && !blackoutSceneActive && !usingComputer && !usingKeypad && !usingPowerPanel && !usingInspection && !transitioning && !playerCaught && guardPatrol.door && lit && (guardPatrol.mode === 'chase' || !guardPatrol.wait)) {
     playGameSound('robot-servo', { x: guardPatrol.x });

@@ -47,7 +47,7 @@ try {
   await page.clock.runFor(2800);
   assert.equal((await events()).filter(name => name === 'switch').length, 2, 'Both flickers have electrical clicks');
   assert(!(await events()).includes('blackout'), 'Outage impact waits for the final cut');
-  await page.clock.runFor(2100);
+  await page.clock.runFor(5500);
   assert.equal((await events()).filter(name => name === 'blackout').length, 1, 'Final outage fires once');
   await clear();
   await page.evaluate(() => {

@@ -44,7 +44,7 @@ try {
     assert.equal(await page.evaluate(() => blackoutSceneActive), true, 'Landing starts the call attempt cutscene');
     assert.equal((await state()).blackout, false, 'Approach is still illuminated');
     const phases = new Set();
-    for (let i = 0; i < 52; i++) {
+    for (let i = 0; i < 86; i++) {
       phases.add(await page.locator('#world').getAttribute('data-power-flicker'));
       await page.clock.runFor(100);
     }

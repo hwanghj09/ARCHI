@@ -1,6 +1,6 @@
 #phone.device-dialog { z-index: 12; width: min(350px, calc(100vw - 16px), calc((100dvh - 16px) / 2)); aspect-ratio: 1 / 2; padding: 0; border: 0; border-radius: 0; background: transparent; box-shadow: none; filter: drop-shadow(0 16px 28px #000b); }
 .phone-hardware { display: block; width: 100%; height: 100%; pointer-events: none; user-select: none; }
-.phone-screen { position: absolute; left: 12.5%; right: 12.5%; top: 9.1%; bottom: 9.1%; display: flex; flex-direction: column; overflow: auto; scrollbar-width: none; border-radius: 7% / 3%; padding: 18px 16px 0; color: #f3f7fb; background: linear-gradient(#06111c00, #06111c26), url('assets/ui/apps/phone-wallpaper.png') center / cover; }
+.phone-screen { position: absolute; left: 12.5%; right: 12.5%; top: 9.1%; bottom: 9.1%; display: flex; flex-direction: column; overflow: auto; scrollbar-width: none; border-radius: 7% / 3%; padding: 18px 16px 0; color: #f3f7fb; background: linear-gradient(#06111c00, #06111c26), url('../assets/ui/apps/phone-wallpaper.png') center / cover; }
 .phone-statusbar { display: flex; flex-shrink: 0; justify-content: space-between; align-items: center; gap: 8px; color: #fff; font-size: 11px; font-weight: 600; }
 .phone-charge { display: flex; align-items: center; gap: 6px; }
 #phone #phone-battery-track { display: inline-block; width: 23px; height: 10px; margin: 0; padding: 1px; border: 1px solid #81919e; border-radius: 3px; }

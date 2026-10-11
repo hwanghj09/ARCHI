@@ -14,7 +14,7 @@ body:has(#world[data-opening]) :is(header, nav, #debug-floor, #inventory-button,
 #player #opening-sheet { width: 600%; height: 100%; }
 #player[data-state="opening"] #opening-sheet { display: block; }
 /* 배경 속 등받이만 앞 레이어로 복원한다. 캐릭터 좌표·스프라이트는 그대로 둔다. 수호(z-index 6)보다 위에 둔다. */
-#opening-chair-front { display: none; position: absolute; left: 566px; top: 439px; width: 58px; height: 90px; z-index: 7; pointer-events: none; image-rendering: pixelated; background: url('assets/background/floor17/office-interior-aligned.png') -566px -439px no-repeat; clip-path: polygon(12% 0, 90% 0, 98% 9%, 100% 86%, 94% 100%, 3% 100%, 0 85%, 2% 8%); }
+#opening-chair-front { display: none; position: absolute; left: 566px; top: 439px; width: 58px; height: 90px; z-index: 7; pointer-events: none; image-rendering: pixelated; background: url('../assets/background/floor17/office-interior-aligned.png') -566px -439px no-repeat; clip-path: polygon(12% 0, 90% 0, 98% 9%, 100% 86%, 94% 100%, 3% 100%, 0 85%, 2% 8%); }
 #world[data-room="office"]:is([data-opening="work"], [data-opening="shutdown"], [data-opening="off"], [data-opening="turn"]) #opening-chair-front { display: block; }
 #office-computer::before { content: ''; position: absolute; inset: 6px 5px 10px; background: #090f12; border: 1px solid #152126; }
 #office-computer[data-power="on"]::before { background: repeating-linear-gradient(0deg, #375e66 0 1px, transparent 1px 5px), linear-gradient(110deg, #1b3036, #385863); box-shadow: 0 0 24px #78bacb45; }
