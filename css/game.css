@@ -398,7 +398,8 @@ body { margin: 0; overflow: hidden; background: #27292b; color: #eee; font: 14px
 .fixture span { display: block; white-space: nowrap; }
 .floor-background { position: absolute; left: 0; pointer-events: none; user-select: none; image-rendering: pixelated; }
 /* 비상구 유도등(js/world/background-power.js)은 정전·소등에도 빛난다. z-index는 어둠 막(5)과 같지만 문서 순서가 뒤라 그 위에 그려지고 수호(6)보다는 아래다. */
-.luminous-sign { position: absolute; z-index: 5; pointer-events: none; background-repeat: no-repeat; image-rendering: pixelated; }
+#world .luminous-sign { position: absolute; z-index: 5; pointer-events: none; user-select: none; image-rendering: auto; border-radius: 2px; }
+#world[data-background-lights="off"] .luminous-sign.lit, #world:not([data-background-lights="off"]) .luminous-sign.unlit { display: none; }
 #world:is([data-background-lights="off"], [data-blackout="true"], [data-dark="true"]) .luminous-sign { box-shadow: 0 0 14px 4px #2fe39a55; }
 .floor-exit-wall { position: absolute; pointer-events: none; image-rendering: pixelated; background: #15181a url('../assets/background/wall/wall-concrete.png') no-repeat; filter: brightness(.16) saturate(.5); box-shadow: inset 3px 0 #0008, inset -3px 0 #0008; }
 #world[data-powered="false"] .floor-exit-wall { filter: brightness(.075) saturate(.5); }
