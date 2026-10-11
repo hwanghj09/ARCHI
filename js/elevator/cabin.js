@@ -87,6 +87,7 @@ function showCabin(carIndex) {
   cabinDoorAmount = 1;
   cabinScene.style.setProperty('--door-open', '1');
   selectingFloor = true;
+  renderHallucination();
   releaseInput();
   elevatorCars[carIndex].rider = true;
   elevatorCars[carIndex].open = true;

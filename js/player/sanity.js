@@ -185,7 +185,7 @@ function startAmbientSighting() {
 // 콘솔 창 버튼용. 컷씬·전환·포획·창이 열려 있는 동안은 정신력 진행처럼 실행하지 않는다.
 function hallucinationEventBlocked() {
   return !gameStarted || mainMenuActive || openingActive || blackoutSceneActive || playerCaught || hallucinationCaught ||
-    transitioning || usingComputer || usingKeypad || usingPhone || usingPowerPanel || usingInspection;
+    transitioning || selectingFloor || usingComputer || usingKeypad || usingPhone || usingPowerPanel || usingInspection;
 }
 
 function debugTriggerChaseHallucination() {
@@ -319,19 +319,24 @@ function updateSanity(elapsed) {
 }
 
 function renderHallucination() {
+  // 탑승 중에는 복도 환각의 진행 상태를 보존하고 화면 표시만 숨긴다.
+  if (selectingFloor) {
+    hallucinations.hidden = hallucinationShadow.hidden = true;
+    delete document.body.dataset.hallucinating;
+    return;
+  }
   if (!hallucinationMode) return;
   hallucinations.hidden = false;
   hallucinationShadow.hidden = false;
   hallucinations.dataset.mode = hallucinationMode;
   document.body.dataset.hallucinating = 'true';
-  const width = selectingFloor ? Math.min(260, stage.clientHeight * .4) : Math.min(224 * scale, stage.clientWidth * .4);
+  const width = Math.min(224 * scale, stage.clientWidth * .4);
   let opacity = .5;
   let targetX;
   if (hallucinationMode === 'ambient') {
     const progress = hallucinationLife / ambientSightingLifeMs;
     opacity = .4 * Math.sin(Math.PI * Math.min(1, progress + .06));
-    targetX = selectingFloor ? stage.clientWidth * (hallucinationSide < 0 ? .28 : .72) :
-      (hallucinationAnchorX - cameraX) * scale;
+    targetX = (hallucinationAnchorX - cameraX) * scale;
   } else {
     // approach/charge: 플레이어 기준 상대 거리가 진행도에 따라 줄어든다(0%에 닿으면 플레이어 바로 앞).
     const duration = hallucinationMode === 'charge' ? zeroEventRushDurationMs : zeroEventApproachDurationMs;
@@ -340,14 +345,13 @@ function renderHallucination() {
     const minOffset = hallucinationMode === 'approach' ? hallucinationStartDistance * .22 : 0;
     const offset = hallucinationStartDistance - (hallucinationStartDistance - minOffset) * progress;
     opacity = hallucinationMode === 'approach' ? Math.min(1, progress * 2.4) * (1 - Math.max(0, progress - .75) * 4) : Math.min(1, .3 + progress);
-    targetX = selectingFloor ? stage.clientWidth * (hallucinationSide < 0 ? .22 : .78) :
-      (body.position.x + hallucinationSide * offset - cameraX) * scale;
+    targetX = (body.position.x + hallucinationSide * offset - cameraX) * scale;
   }
-  if (!selectingFloor && stage.clientWidth < 600 && hallucinationMode === 'ambient') {
+  if (stage.clientWidth < 600 && hallucinationMode === 'ambient') {
     targetX = (body.position.x - cameraX) * scale < stage.clientWidth / 2 ? stage.clientWidth - width / 2 - 12 : width / 2 + 12;
   }
   const left = Math.max(12, Math.min(stage.clientWidth - width - 12, targetX - width / 2));
-  const top = selectingFloor ? stage.clientHeight * .3 : floorY * scale - 238 * width / 256 + width * .12;
+  const top = floorY * scale - 238 * width / 256 + width * .12;
   Object.assign(hallucinationShadow.style, { left: `${left}px`, top: `${top}px`, width: `${width}px`, height: `${width * 2 / 3}px`,
     opacity: String(Math.max(0, opacity)), transform: `scaleX(${hallucinationSide})` });
 }
