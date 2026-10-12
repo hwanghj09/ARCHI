@@ -88,21 +88,6 @@ body[data-hallucinating="true"] #stage { animation: screen-tremor .16s steps(2) 
 .cctv[data-fear="true"] .cctv-fear-eye { display: block; }
 @keyframes eye-throb { 0%, 100% { opacity: .7; transform: scale(.85); } 50% { opacity: 1; transform: scale(1.1); } }
 
-/* 컴퓨터: 20% 미만에서 화면 절반쯤에 공포스러운 창이 떠 있다. 색상바·오류화면·지직거리는 화면 3장을 돌려가며 보여준다. */
-.computer-fear-window { display: none; position: absolute; right: 6%; top: 16%; width: 38%; min-width: 220px; max-width: 320px;
-  overflow: hidden; background: #0a0a0aee; border: 1px solid #a33; box-shadow: 0 10px 30px #000a;
-  z-index: 5; animation: fear-glitch .3s steps(2) infinite; }
-#computer[data-fear="true"] #computer-fear-window { display: block; }
-.computer-fear-titlebar { padding: 4px 8px; background: #1a0303; border-bottom: 1px solid #733; color: #ff6b6b;
-  font: bold 12px/1.4 monospace; letter-spacing: .08em; }
-.computer-fear-still { display: block; width: 100%; height: 190px; object-fit: cover; image-rendering: pixelated; background: #000; }
-/* 네 가지 중 하나가 "꺼진 화면"일 때: 지직거림을 멈추고 조용한 검은 화면만 보인다(기존 자산 없이 CSS로).
-   클래스 선택자가 기본 규칙(위 .computer-fear-window)보다 뒤에 오게 둬서, 아이디 선택자에 밀려 안 먹는 일이 없게 한다. */
-.computer-fear-window[data-off="true"] { animation: none; border-color: #3a3a3a; }
-.computer-fear-window[data-off="true"] .computer-fear-titlebar { background: #141414; border-bottom-color: #333; color: #6b6b6b; }
-.computer-fear-window[data-off="true"] .computer-fear-still { visibility: hidden; } /* src 없는 img의 깨진 아이콘을 감춘다 */
-.computer-fear-window[data-off="true"]::after { content: ''; position: absolute; right: 10px; bottom: 10px;
-  width: 5px; height: 5px; border-radius: 50%; background: #5a1414; box-shadow: 0 0 4px 1px #5a141499; }
 
 /* 환각에게 잡아먹히는 게임 오버: 경비 로봇 포획 패널과 같은 자리·같은 생김새를 쓴다. */
 #hallucination-caught { position: fixed; z-index: 14; bottom: 16px; left: 50%; transform: translateX(-50%);
@@ -115,7 +100,7 @@ body[data-hallucinating="true"] #stage { animation: screen-tremor .16s steps(2) 
 #hallucination-retry:focus-visible { outline: 3px solid #eac47d; outline-offset: 3px; }
 
 @media (prefers-reduced-motion: reduce) {
-  #hallucinations[data-mode], #hallucinations::after, body[data-hallucinating="true"] #stage, #computer-fear-window { animation: none; }
+  #hallucinations[data-mode], #hallucinations::after, body[data-hallucinating="true"] #stage { animation: none; }
   .red-eye, :is(#world) .red-eye { animation: none; opacity: var(--eye-opacity); }
 }
 
@@ -143,3 +128,24 @@ body[data-hallucinating="true"] #stage { animation: screen-tremor .16s steps(2) 
 /* 환각에게 삼켜질 때의 영상: 화면의 모든 요소(컷씬·창 포함) 앞에서 재생되고, 끝나면 사라져 기존 화면(게임 오버 창)이 드러난다. */
 #devoured-video { position: fixed; inset: 0; z-index: 1000; width: 100vw; height: 100dvh; object-fit: cover; background: #000; pointer-events: auto; }
 #devoured-video[hidden] { display: none; }
+
+/* 컴퓨터(20% 미만): 컴퓨터 안의 창이 아니라 배경(사무실)의 켜진 모니터 화면이 꺼짐·색상바·오류화면·지직거림 중 하나로 바뀐다(sanity.js). */
+#office-computer[data-power="on"][data-fear-still]::after { content: ''; position: absolute; inset: 6px 5px 10px; image-rendering: pixelated; transform: translate(2px, -2px); } /* 화면 그림을 오른쪽 위로 살짝(2px) 올린다 */
+#office-computer[data-power="on"][data-fear-still="off"]::before { background: #040707; box-shadow: none; }
+#office-computer[data-power="on"][data-fear-still="color-bars"]::after { background: url(../assets/ui/computer/fear/color-bars.png) center / 100% 100%; }
+#office-computer[data-power="on"][data-fear-still="boot-error"]::after { background: url(../assets/ui/computer/fear/boot-error.png) center / 100% 100%; }
+#office-computer[data-power="on"][data-fear-still="static-noise"]::after { background: url(../assets/ui/computer/fear/static-noise.webp) center / 106% 106%; animation: monitor-static .3s steps(2) infinite; }
+@media (prefers-reduced-motion: reduce) { #office-computer[data-fear-still="static-noise"]::after { animation: none; } }
+
+/* 배경의 모든 모니터 화면(20% 미만): 책상 소품 위(.floor-prop)와 사무실 배경 그림 위(.office)의 .fear-screen이 같은 네 가지 화면 중 하나를 보인다. */
+.fear-screen { display: none; position: absolute; pointer-events: none; image-rendering: pixelated; transform: translate(2px, -2px); clip-path: inset(0 0 16% 0); /* 아래쪽은 모니터 앞에 놓인 의자 등받이가 가리는 일이 많아 덮지 않는다 */ background: #030606 center / 100% 100% no-repeat; }
+body:is([data-fear-tier="4"], [data-fear-tier="5"]) #world[data-powered="true"] .fear-screen:not(.office, .corridor),
+body:is([data-fear-tier="4"], [data-fear-tier="5"]) #world[data-powered="true"][data-room="office"] .fear-screen.office,
+body:is([data-fear-tier="4"], [data-fear-tier="5"]) #world[data-powered="true"][data-room="corridor"] .fear-screen.corridor { display: block; }
+.fear-screen:is(.corridor, .glass) { opacity: .72; filter: blur(.8px) contrast(.85); } /* 복도(유리벽 너머)에서는 화질을 더 낮춰 흐릿하게 */
+.fear-screen[data-still="color-bars"] { background-image: url(../assets/ui/computer/fear/color-bars.png); }
+.fear-screen[data-still="boot-error"] { background-image: url(../assets/ui/computer/fear/boot-error.png); }
+.fear-screen[data-still="static-noise"] { background-image: url(../assets/ui/computer/fear/static-noise.webp); background-size: 106% 106%; animation: monitor-static .3s steps(2) infinite; }
+@media (prefers-reduced-motion: reduce) { .fear-screen[data-still="static-noise"] { animation: none; } }
+/* 모니터 속 지직거림은 화면 밖으로 나가지 않도록 그림을 움직이지 않고 그림 안쪽 위치만 1px씩 흔든다(그림은 106%로 키워 가장자리가 비지 않는다). */
+@keyframes monitor-static { 0% { background-position: 0 0; } 50% { background-position: 1.5px -1px; } 100% { background-position: -1px 1px; } }

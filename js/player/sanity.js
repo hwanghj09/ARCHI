@@ -273,27 +273,60 @@ function updateHallucinationSighting(elapsed, fsmPaused) {
   // 'charge'는 updateZeroEvent가 회피/도달 시점에 endHallucinationSighting을 직접 부른다.
 }
 
-// ---- 컴퓨터 오류 창: 20% 미만에서 열 때마다 꺼짐·색상바·오류화면·지직거리는 화면 중 하나를 무작위로 보여준다 ----
-// null은 "꺼진 화면"(기존 자산 없이 CSS로 표현). 계속 돌아가며 바뀌지 않고, 컴퓨터를 새로 열 때마다 다시 뽑는다.
-// 컴퓨터 에셋이 여러 대가 되어도 .computer-fear-still마다 따로 뽑으므로 서로 다른 화면을 보여줄 수 있다.
-const COMPUTER_FEAR_STATES = [null, 'assets/ui/computer/fear/color-bars.png', 'assets/ui/computer/fear/boot-error.png',
-  'assets/ui/computer/fear/static-noise.webp'];
-let computerFearWasOpen = false;
-
-function rollComputerFearStills() {
-  for (const img of document.querySelectorAll('.computer-fear-still')) {
-    const state = COMPUTER_FEAR_STATES[Math.floor(Math.random() * COMPUTER_FEAR_STATES.length)];
-    const panel = img.closest('.computer-fear-window');
-    if (panel) panel.dataset.off = String(state === null);
-    if (state === null) img.removeAttribute('src');
-    else img.src = state;
-  }
-}
+// ---- 컴퓨터 화면: 20% 미만에서 배경(17층 사무실)의 켜진 모니터가 꺼짐·색상바·오류화면·지직거리는 화면 중 하나로 바뀐다 ----
+// 컴퓨터 안의 창이 아니라 월드에 놓인 모니터 그림이 바뀐다(css/sanity.css의 #office-computer[data-fear-still]). 정신력이 오르면 원래 화면으로
+// 돌아오고, 20% 미만에서는 장소를 옮길 때마다(사무실 ↔ 복도, 층·방 이동) 다시 뽑는다.
+const COMPUTER_FEAR_STILLS = ['off', 'color-bars', 'boot-error', 'static-noise'];
 
 function updateComputerFear(active) {
-  const open = active && usingComputer && !computer.hidden;
-  if (open && !computerFearWasOpen) rollComputerFearStills();
-  computerFearWasOpen = open;
+  const monitor = officeComputer.element;
+  if (!active) { delete monitor.dataset.fearStill; return; }
+  if (!monitor.dataset.fearStill) { monitor.dataset.fearStill = randomFearStill(); rerollFearScreens(); }
+}
+
+// 배경에 놓인 모든 모니터 화면도 같은 식으로 바뀐다. 책상 에셋에 그려진 모니터는 아래 표의 자리(그림 크기 대비 [x0, y0, x1, y1] 비율)에
+// .fear-screen을 얹고(scene-builder.js의 소품 조립), 사무실 배경 그림 속 모니터는 월드 좌표로 얹는다. 정신력이 오르거나 전력이 없으면 보이지 않는다.
+const MONITOR_SCREENS = {
+  'office-desk': [[.377, .07, .588, .316]],
+  'compact-office-desk': [[.335, .14, .70, .32]],
+  'data-workstation': [[.263, .13, .485, .37], [.515, .13, .735, .37]],
+  'research-workstation': [[.268, .09, .472, .33], [.528, .09, .732, .33]],
+  'support-workstation': [[.285, .10, .50, .335], [.515, .10, .72, .335]],
+  'training-workstation': [[.222, .27, .365, .42], [.64, .27, .79, .42]],
+  'test-terminal-desk': [[.355, .14, .56, .38]],
+  'sales-desk': [[.375, .12, .625, .37]],
+  'materials-desk': [[.375, .12, .625, .345]],
+};
+const randomFearStill = () => COMPUTER_FEAR_STILLS[Math.floor(Math.random() * COMPUTER_FEAR_STILLS.length)];
+
+function fearScreenElement([x0, y0, x1, y1]) {
+  const screen = document.createElement('div');
+  screen.className = 'fear-screen';
+  Object.assign(screen.style, { left: `${x0 * 100}%`, top: `${y0 * 100}%`, width: `${(x1 - x0) * 100}%`, height: `${(y1 - y0) * 100}%` });
+  screen.dataset.still = randomFearStill();
+  return screen;
+}
+
+function rerollFearScreens() {
+  for (const screen of document.querySelectorAll('.fear-screen')) screen.dataset.still = randomFearStill();
+  if (officeComputer.element.dataset.fearStill) officeComputer.element.dataset.fearStill = randomFearStill();
+}
+
+// 17층 사무실 배경 그림 속 모니터 다섯 대(켜진 컴퓨터는 #office-computer가 맡는다): 모니터 왼쪽 x에서 화면 영역(78×48)만큼 안쪽에 얹는다.
+for (const left of [141, 259, 515, 1183, 1299]) {
+  const screen = fearScreenElement([0, 0, 1, 1]);
+  screen.classList.add('office');
+  Object.assign(screen.style, { left: `${left + 5}px`, top: '398px', width: '78px', height: '48px' });
+  world.insertBefore(screen, sprite);
+}
+
+// 17층 복도의 유리벽 너머로 보이는 사무실 모니터 일곱 대([x0, y0, x1, y1], 월드 좌표 = 복도 그림 픽셀 좌표).
+for (const [x0, y0, x1, y1] of [[225, 414, 306, 462], [441, 414, 516, 460], [748, 424, 808, 461], [905, 414, 982, 462], [1030, 419, 1102, 465],
+  [1304, 434, 1350, 460], [1397, 422, 1462, 462]]) {
+  const screen = fearScreenElement([0, 0, 1, 1]);
+  screen.classList.add('corridor');
+  Object.assign(screen.style, { left: `${x0}px`, top: `${y0}px`, width: `${x1 - x0}px`, height: `${y1 - y0}px` });
+  world.insertBefore(screen, sprite);
 }
 
 // ---- 눈 깜빡임 연출과, 10% 미만에서 깜빡일 때마다 느는 붉은 눈 ----
@@ -429,7 +462,6 @@ function updateSanity(elapsed) {
   fearOverlayRed.style.opacity = String(Math.max(0, Math.min(1, (30 - sanity) / 10)) * (fearTier >= 1 ? .7 : 0));
   document.body.dataset.weary = String(fearTier >= 3);
   if (fearTier < 5 && redEyes.children.length) redEyes.replaceChildren();
-  if (computer) computer.dataset.fear = String(fearTier >= 4);
   updateComputerFear(fearTier >= 4);
   updateBlink(elapsed, fsmPaused);
   updateDarkFace(elapsed, fsmPaused);
@@ -482,3 +514,36 @@ function renderHallucination() {
 }
 
 refreshSanity();
+
+// 층 배경 그림 속 모니터. 키는 'assets/background/' 아래 그림 이름(확장자 제외), 값은 [그림 가로, 세로, 종류, 화면들]이다.
+// 종류 'glass'는 복도 유리벽 너머로 보이는 모니터(화질을 더 낮춰 흐릿하게), 'room'은 방 안에서 보이는 모니터. 모니터를 모두 확인한 그림만 올렸다.
+// 화면은 [x0, y0, x1, y1]이고 그림 픽셀 좌표다. 그림을 장면에 놓을 때(scene-builder.js) 그 자리에 .fear-screen을 얹는다.
+const BACKGROUND_MONITORS = {
+  'floor03/floor03-cs-interior': [1846, 556, 'room', [[73, 328, 127, 359], [325, 328, 379, 359], [475, 328, 529, 359], [595, 328, 649, 359],
+    [688, 328, 742, 359], [781, 328, 835, 359], [874, 328, 928, 359], [967, 328, 1021, 359], [1060, 328, 1114, 359], [1153, 328, 1207, 359],
+    [1246, 328, 1300, 359], [1339, 328, 1393, 359], [1459, 328, 1513, 359]]],
+  'floor03/floor03-studio-interior': [1840, 556, 'room', [[1078, 317, 1136, 358]]],
+  'floor04/floor04-lab-interior': [2676, 556, 'room', [[227, 323, 277, 354], [279, 323, 329, 354], [331, 323, 381, 353], [585, 323, 635, 354],
+    [637, 323, 687, 354], [689, 323, 739, 353], [929, 323, 979, 353], [981, 323, 1031, 354], [1033, 323, 1083, 354], [1301, 323, 1351, 354],
+    [1353, 323, 1403, 354], [1405, 323, 1455, 353], [1645, 323, 1695, 353], [1697, 323, 1747, 354], [1749, 323, 1799, 354],
+    [393, 340, 423, 363], [751, 340, 781, 363], [887, 340, 917, 363], [1467, 340, 1497, 363], [1603, 340, 1633, 363]]],
+  'floor05/floor05-security-interior': [1846, 556, 'room', [[510, 326, 566, 360], [566, 326, 622, 360]]],
+  'floor10/floor10-office-interior': [2678, 556, 'room', [[456, 329, 506, 360], [600, 328, 651, 360], [820, 329, 870, 360], [964, 328, 1015, 360],
+    [1177, 328, 1228, 360], [1322, 329, 1372, 360], [1548, 329, 1598, 360], [1692, 328, 1743, 360], [1905, 328, 1956, 360],
+    [2050, 329, 2100, 360], [2272, 328, 2322, 360], [2410, 328, 2461, 360]]],
+  'floor10/floor10-executive-interior': [1822, 556, 'room', [[319, 302, 365, 329]]],
+};
+
+function addBackgroundMonitors(image, src) {
+  const entry = BACKGROUND_MONITORS[src.replace(/^assets\/background\/|\.png$/g, '')];
+  if (!entry) return;
+  const [naturalWidth, naturalHeight, kind, rects] = entry;
+  const left = parseFloat(image.style.left) || 0, top = parseFloat(image.style.top) || 0;
+  const sx = parseFloat(image.style.width) / naturalWidth, sy = parseFloat(image.style.height) / naturalHeight;
+  for (const [x0, y0, x1, y1] of rects) {
+    const screen = fearScreenElement([0, 0, 1, 1]);
+    if (kind === 'glass') screen.classList.add('glass');
+    Object.assign(screen.style, { left: `${left + x0 * sx}px`, top: `${top + y0 * sy}px`, width: `${(x1 - x0) * sx}px`, height: `${(y1 - y0) * sy}px` });
+    image.after(screen);
+  }
+}

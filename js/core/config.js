@@ -28,7 +28,7 @@ const sanityChaseDrainPerSecond = 10;
 const sanityAnxietyDrainPerSecond = 2; // 정신 불안 임무(항불안제를 찾아 쓰기 전) 동안 어디서든 줄어드는 속도
 const sanityChaseFloor = 10; // 경비 로봇에게 쫓겨서는 이 값 아래로 줄지 않는다
 const sanityZeroTurnDelayMs = 200; // 정신력 0%에서 방향을 바꿀 때 기다려야 하는 시간
-const sanityZeroRunFactor = .5; // 정신력 0%에서 달리는 속도 배율(뛸 수는 있지만 절반 속도)
+const sanityZeroRunFactor = .75; // 정신력 0%에서 달리는 속도 배율(평소의 75%, 처음 50%의 1.5배)
 const newGameSanity = 35; // 새 게임을 시작할 때의 정신력
 const antianxietyRestore = 50; // 항불안제를 사용했을 때의 정신력 회복량
 // 50/40/30/20/10% 미만 구간의 공포 연출 단계(1~5). sanityTierOf()가 이 경계로 계산한다.
@@ -43,5 +43,5 @@ const zeroEventApproachThreshold = 3; // 0%가 되기 전, 이 수치 이하에�
 const zeroEventApproachDurationMs = 3600;
 const zeroEventChargeWaitMs = 15000; // 0% 도달 후 첫 돌진까지
 const zeroEventRetryWaitMs = 10000; // 회피 이후 다음 돌진까지
-const zeroEventRushDurationMs = Math.round(2400 / 1.7); // 돌진이 플레이어에게 닿기까지 걸리는 시간(기존 2400ms의 1.7배 속도). 회피하지 못하면 게임 오버
+const zeroEventRushDurationMs = Math.round(2400 / 1.7 / 1.5); // 돌진이 플레이어에게 닿기까지 걸리는 시간(기존 2400ms의 1.7×1.5배 속도). 회피하지 못하면 게임 오버
 const wallEyeMaxCount = 6;

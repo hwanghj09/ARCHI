@@ -9,6 +9,7 @@ const INVENTORY_ITEMS = {
   // B2 전력·냉각실(엔딩 준비): 먹으면 정신력이 최소 50%가 된다(minSanity).
   'b2-antianxiety': { name: '항불안제', description: 'B2 전력·냉각실 캐비닛 위에서 챙긴 항불안제. 먹으면 정신력이 최소 50%까지 돌아온다.', image: 'assets/objects/items/antianxiety-v2.png',
     usedFlag: 'b2-antianxiety-used', use: { label: '사용하기', minSanity: 50, animation: 'antianxiety' } },
+  'f12-lead-key': { name: '팀장실 보조키', description: '12층 책상 서랍에서 챙긴 열쇠. 꼬리표에 "팀장실 보조키"라고 적혀 있다.' },
   'rooftop-key': { name: '낡은 열쇠', description: '옥상문을 열 수 있을 것만 같다… 조금 더럽다.' },
 };
 // 가방에 들어 있는 물건: 챙겼고 아직 쓰지 않은 것(usedFlag가 있는 물건은 쓰면 가방에서 사라진다. 챙김 표시는 그대로 두어 선반에 다시 나타나지 않는다).

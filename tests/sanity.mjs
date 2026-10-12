@@ -157,6 +157,40 @@ try {
   assert.equal(stopped.started, true);
   assert.deepEqual([stopped.phase, stopped.mode, stopped.prompt], ['idle', null, true], '정신력이 오르면 추격이 중지된다');
 
+  // ---- 20% 미만: 컴퓨터 안의 창이 아니라 배경의 켜진 모니터 화면이 바뀐다 ----
+  const monitor = await page.evaluate(() => {
+    const out = {};
+    sanity = 15; updateSanity(0); out.low = officeComputer.element.dataset.fearStill;
+    out.windowGone = document.getElementById('computer-fear-window') === null;
+    sanity = 100; updateSanity(0); out.normal = officeComputer.element.dataset.fearStill ?? null;
+    return out;
+  });
+  assert(['off', 'color-bars', 'boot-error', 'static-noise'].includes(monitor.low), '20% 미만이면 배경 모니터 화면이 바뀐다');
+  assert.equal(monitor.windowGone, true, '컴퓨터 안의 오류 창은 없다');
+  assert.equal(monitor.normal, null, '정신력이 오르면 원래 화면으로 돌아온다');
+
+  // ---- 20% 미만: 배경의 모든 모니터(책상 소품·사무실 그림 속 모니터)가 같은 식으로 바뀐다 ----
+  const screens = await page.evaluate(() => {
+    const out = {};
+    sanity = 15; updateSanity(0);
+    out.office = document.querySelectorAll('.fear-screen.office').length;
+    out.corridor = document.querySelectorAll('.fear-screen.corridor').length;
+    const holder = document.createElement('div'); const art = document.createElement('img'); holder.append(art); document.body.append(holder);
+    Object.assign(art.style, { left: '100px', top: '10px', width: '3692px', height: '1112px' }); addBackgroundMonitors(art, 'assets/background/floor03/floor03-cs-interior.png');
+    const placed = [...holder.querySelectorAll('.fear-screen')]; out.bg = [placed.length, placed[0]?.style.left, placed[0]?.style.top]; holder.remove();
+    out.officeShown = [...document.querySelectorAll('.fear-screen.office')].every(el => getComputedStyle(el).display === 'block');
+    performFloorChange('f12'); updateSanity(0);
+    out.propScreens = document.querySelectorAll('#dynamic-scene .floor-prop .fear-screen').length;
+    sanity = 100; updateSanity(0);
+    out.hidden = [...document.querySelectorAll('.fear-screen')].every(el => getComputedStyle(el).display === 'none');
+    return out;
+  });
+  assert.equal(screens.office, 5);
+  assert.equal(screens.corridor, 7, '복도 유리벽 너머의 모니터도 바뀐다');
+  assert.deepEqual(screens.bg, [13, '246px', '666px'], '층 배경 그림 속 모니터는 그림 배율에 맞춰 놓인다');
+  assert.equal(screens.propScreens > 0, true, '책상 소품의 모니터 화면도 바뀐다');
+  assert.equal(screens.hidden, true, '정신력이 오르면 모두 원래대로 돌아온다');
+
   // ---- 항불안제를 쓴 뒤에는 다시 닳기 시작하는 조건(sanity-drain-resume)이 생기기 전까지 정신력이 닳지 않는다 ----
   const calm = await page.evaluate(() => {
     const out = {};

@@ -173,6 +173,46 @@ let lastHallucinationSightingSound = -1;
 const hallucinationDevouredElement = new Audio('assets/audio/hallucination-devoured.mp3');
 hallucinationDevouredElement.preload = 'auto';
 
+// B2 엘리베이터에서 경비 로봇이 문을 억지로 열기 시작할 때의 소리(b2-ending.js).
+const doorPryElement = new Audio('assets/audio/b2-door-pry.mp3');
+doorPryElement.preload = 'auto';
+
+function playDoorPrySound() {
+  if (document.hidden || gameVolume <= 0 || mainMenuActive || !gameStarted) return;
+  doorPryElement.volume = Math.max(0, Math.min(1, gameVolume));
+  doorPryElement.currentTime = 0;
+  doorPryElement.play().catch(() => {});
+}
+
+// B2 DELETE 뒤 삭제가 진행되는 동안 반복되는 사이렌(b2-ending.js). on이면 켜 두고(이미 돌고 있으면 볼륨만 맞춘다), 끄면 처음으로 되감는다.
+const b2SirenElement = new Audio('assets/audio/b2-siren.mp3');
+b2SirenElement.preload = 'auto';
+// 사이렌 파일은 끝날 때마다 b2SirenGapMs만큼 쉬었다가 다시 울린다(파일 자체의 끝 무음에 더해진다).
+const b2SirenGapMs = 300;
+let b2SirenOn = false;
+let b2SirenWaiting = false;
+let b2SirenTimer = null;
+b2SirenElement.addEventListener('ended', () => {
+  if (!b2SirenOn) return;
+  b2SirenWaiting = true;
+  clearTimeout(b2SirenTimer);
+  b2SirenTimer = setTimeout(() => { b2SirenWaiting = false; if (b2SirenOn) setB2Siren(true); }, b2SirenGapMs);
+});
+
+function setB2Siren(on) {
+  b2SirenOn = on;
+  if (!on) {
+    clearTimeout(b2SirenTimer);
+    b2SirenWaiting = false;
+    b2SirenElement.pause();
+    b2SirenElement.currentTime = 0;
+    return;
+  }
+  if (document.hidden || gameVolume <= 0 || mainMenuActive || !gameStarted) return;
+  b2SirenElement.volume = Math.max(0, Math.min(1, gameVolume));
+  if (b2SirenElement.paused && !b2SirenWaiting) b2SirenElement.play().catch(() => {});
+}
+
 function playHallucinationDevouredSound() {
   if (document.hidden || gameVolume <= 0) return;
   hallucinationDevouredElement.volume = Math.max(0, Math.min(1, gameVolume));
@@ -194,7 +234,7 @@ function playHallucinationSound(volume = 1, randomSighting = false) {
 }
 
 function pauseGameAudio() {
-  if (document.hidden || mainMenuActive || !gameStarted) for (const element of [hallucinationSoundElement, ...hallucinationSightingElements, hallucinationDevouredElement]) element.pause();
+  if (document.hidden || mainMenuActive || !gameStarted) for (const element of [hallucinationSoundElement, ...hallucinationSightingElements, hallucinationDevouredElement, doorPryElement, b2SirenElement]) element.pause();
   if (!gameAudioContext) return;
   for (const sound of gameAudioAmbience.values()) stopGameAudioSource(sound);
   gameAudioAmbience.clear();

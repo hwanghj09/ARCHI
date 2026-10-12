@@ -42,6 +42,7 @@ function buildDynamicScene(config) {
     image.draggable = false;
     Object.assign(image.style, { left: `${art.left ?? 0}px`, width: `${art.width ?? config.width}px`, height: `${art.height}px`, top: `${art.top}px` });
     dynamicScene.append(image);
+    addBackgroundMonitors(image, art.src); // 배경 그림 속 모니터 화면(sanity.js)
     if (!config.exitArt) addLuminousSigns(image, art.src);
   }
   for (let x = 0; x < (config.leftWallExtension || 0); x += 185) {
@@ -267,6 +268,7 @@ function buildDynamicScene(config) {
     image.alt = '';
     image.draggable = false;
     element.append(image);
+    for (const rect of MONITOR_SCREENS[prop.file] || []) element.append(fearScreenElement(rect)); // 정신력 20% 미만에서 모니터 화면이 바뀐다(sanity.js)
     dynamicScene.append(element);
     if (prop.sprite) {
       element.style.overflow = 'hidden';

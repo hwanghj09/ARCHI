@@ -21,6 +21,7 @@ function performRoomChange() {
   stage.setAttribute('aria-label', `ARCHI 17층 ${entering ? '사무실' : '복도'} 사이드뷰 스테이지`);
   document.querySelector('header span').textContent = entering ? '17F · 사무실' : '17F · 00:00';
   showStatus(entering ? '사무실에 들어왔습니다.' : '복도로 나왔습니다.');
+  rerollFearScreens(); // 사무실 ↔ 복도를 오갈 때마다 모니터 화면을 다시 뽑는다(sanity.js)
   updateInteraction();
   render();
 }
@@ -94,6 +95,7 @@ function performFloorChange(destId, carIndex = 0, arrivalKey = null) {
   mountGuardPatrol();
   mountB2Robots();
   refreshPhone();
+  rerollFearScreens(); // 장소를 옮길 때마다 모니터 화면을 다시 뽑는다(sanity.js)
   updateInteraction();
   render();
 }

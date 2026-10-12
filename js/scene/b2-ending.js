@@ -65,7 +65,7 @@ function startArchiDelete() {
   b2DeleteBar.hidden = false;
   refreshB2Bar();
   mountB2Robots();
-  playGameSound('elevator-alarm');
+  setB2Siren(true); // 삭제가 끝날 때까지 사이렌을 반복한다
   showStatus('DELETE ARCHI 실행. 경보가 울리고 복도 끝 충전 도크에서 로봇들이 깨어나는 소리가 난다.', 4000);
 }
 
@@ -119,10 +119,9 @@ function b2DoorX(sceneId, toward) {
 function updateB2Ending(delta) {
   if (b2Ending.phase !== 'running' || b2Ending.offline) return;
   // 1층 전력을 끊기 전까지 삭제는 99%에서 멈춰 있다.
+  setB2Siren(true); // 메뉴·창으로 멈췄다가 돌아와도 이어서 울린다
   b2Ending.elapsed = Math.min(b2DeleteDuration * .99, b2Ending.elapsed + delta);
   refreshB2Bar();
-  b2Ending.alarm += delta;
-  if (b2Ending.alarm >= 2000) { b2Ending.alarm -= 2000; playGameSound('elevator-alarm'); }
   if (b2Ending.stage === 'lobby') { updateB2Lobby(delta); return; }
   const here = room === 'dynamic' ? dynamicFloorId : null;
   const corridorId = floorId(-2);
@@ -227,7 +226,7 @@ function updateB2Cabin() {
     Object.assign(b2Cabin, { state: 'struggle', gauge: Math.max(.15, 1 - cabinDoorAmount), time: 0, robot });
     cabinScene.dataset.door = 'struggle';
     cabinStatus.textContent = '경비 로봇이 문을 억지로 연다! Enter나 스페이스를 연타해 문을 닫아라.';
-    playGameSound('robot-grab', { x: robot.x });
+    playDoorPrySound(); // 문을 억지로 여는 처음에 이 소리를 낸다
     b2DoorGauge.hidden = false;
     refreshB2DoorGauge();
     cabin.focus({ preventScroll: true }); // 버튼에 초점이 있으면 Enter·스페이스가 그 버튼을 눌러 버린다
@@ -318,6 +317,7 @@ function refreshB2Bar() {
 // 엔딩 창이 뜨면 로봇은 그 자리에 멈춘다(hold가 줄지 않는다).
 function endB2Ending() {
   b2Ending.phase = 'over';
+  setB2Siren(false);
   b2DeleteBar.hidden = true;
   hideB2Cabin();
   for (const robot of b2Robots) robot.hold = Infinity;
@@ -374,6 +374,7 @@ function updateB2Lobby(delta) {
   if (dynamicFloorId !== 'f1' || floorHasPower(1)) return;
   // 1층 전력이 끊겼다: R-01은 updateGuardPatrol의 전력 없음 처리로 그 자리에 멈춘다.
   b2Ending.offline = true;
+  setB2Siren(false);
   b2Ending.elapsed = b2DeleteDuration;
   refreshB2Bar();
   b2DeleteBar.querySelector('span').textContent = 'ARCHI — OFFLINE';
@@ -453,6 +454,7 @@ function showB2Escape() {
 
 // 불러오기·새 게임(save.js restoreProgress)이 장면을 다시 짓기 전에 엔딩 상태를 모두 지운다.
 function resetB2Ending() {
+  setB2Siren(false);
   Object.assign(b2Ending, { phase: 'idle', stage: 'b2', elapsed: 0, alarm: 0, offline: false, jam: 0 });
   b2Robots = [];
   caughtBy = null;
