@@ -16,8 +16,10 @@ window.addEventListener('keydown', event => {
     else if (event.code !== 'Tab' && !(event.target.id === 'cctv-skip' && ['Enter', 'Space'].includes(event.code))) event.preventDefault();
     return;
   }
-  if (playerCaught) {
-    if (event.code !== 'Tab' && !(['Enter', 'Space'].includes(event.code) && event.target.id === 'guard-retry')) event.preventDefault();
+  // B2 엔딩 창(b2-ending.js)의 버튼만 누를 수 있고, 뒤의 수호는 움직이지 않는다.
+  const endingButton = event.target.closest?.('#b2-bad-ending button, #b2-escape button');
+  if (playerCaught || endingButton) {
+    if (event.code !== 'Tab' && !(['Enter', 'Space'].includes(event.code) && (event.target.id === 'guard-retry' || endingButton))) event.preventDefault();
     return;
   }
   if (hallucinationCaught) {
@@ -104,6 +106,11 @@ window.addEventListener('keydown', event => {
   }
   if (selectingFloor) {
     if (event.code === 'Escape') exitCabin();
+    // B2 엔딩의 "문 닫기" 게이지(b2-ending.js): Enter·스페이스 연타. 꾹 누르기(반복 입력)는 치지 않는다.
+    if (['Enter', 'Space'].includes(event.code) && b2DoorStruggling()) {
+      event.preventDefault();
+      if (!event.repeat) pushB2Door();
+    }
     return;
   }
   if (event.code === 'Escape') {

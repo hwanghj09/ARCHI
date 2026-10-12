@@ -1,0 +1,67 @@
+/* B2 엔딩(js/scene/b2-ending.js): 콘솔 DELETE·확인 버튼, 화면 위 삭제 진행 바, 베드엔딩·임시 해피엔딩 창. 새 그림 없이 상자와 글자만 쓴다. */
+/* 추격 로봇은 R-01 스프라이트만 그린다(CSS로 그린 대체 로봇 몸통은 지운다). */
+#dynamic-scene .fixture.guard-bot.b2-guard-bot { background: none; }
+#dynamic-scene .fixture.guard-bot.b2-guard-bot::before, #dynamic-scene .fixture.guard-bot.b2-guard-bot::after { content: none; }
+/* 엘리베이터 문 장면: 문틈의 로봇(기존 붙잡기 그림 한 칸), 문 닫기 게이지, 휴대폰 ARCHI 알림. */
+#b2-cabin-robot { position: absolute; left: 50%; bottom: 0; width: 58%; aspect-ratio: 384 / 256; transform: translateX(-50%); overflow: hidden; }
+#b2-cabin-robot[hidden] { display: none; }
+#b2-cabin-robot img { display: block; width: 800%; height: 100%; max-width: none; transform: translateX(-37.5%); }
+#b2-door-gauge { position: absolute; z-index: 3; left: 8.5%; top: 38%; width: 17%; padding: 10px 12px; background: #1a0c0bf2; border: 2px solid #c4574b;
+  color: #ffd9d3; font: 700 14px/1.4 Arial, sans-serif; text-align: center; white-space: nowrap; }
+#b2-door-gauge[hidden] { display: none; }
+.b2-door-track { display: block; height: 14px; margin: 8px 0; background: #3a1714; }
+#b2-door-fill { display: block; width: 0; height: 100%; background: #f5d478; }
+#b2-door-push { min-height: 44px; min-width: 140px; border: 1px solid #f5d478; background: #3a1714; color: #fff; font: inherit; cursor: pointer; touch-action: manipulation; }
+#b2-door-push:focus-visible { outline: 3px solid #eac47d; outline-offset: 3px; }
+#b2-phone-message { position: absolute; z-index: 3; left: 4%; top: 6%; width: 20%; padding: 10px 12px; border-radius: 14px; background: #f2f4f1f2; color: #141a18;
+  font: 14px/1.4 Arial, sans-serif; box-shadow: 0 6px 18px #0008; }
+#b2-phone-message[hidden] { display: none; }
+#b2-phone-message strong { display: block; margin-bottom: 4px; color: #b3261e; font-size: 12px; letter-spacing: .08em; }
+#inspection .b2-action { min-height: 36px; padding: 6px 12px; border-color: #c4574b; background: #3a1714; color: #ffd9d3; font-size: 13px; }
+#inspection .b2-action[hidden], #inspection-close[hidden] { display: none; }
+#inspection .b2-action:focus-visible { outline: 2px solid #dec898; outline-offset: 3px; }
+#b2-delete-bar { position: fixed; z-index: 11; top: 12px; left: 50%; transform: translateX(-50%); width: min(460px, calc(100vw - 32px));
+  padding: 8px 12px; background: #1a0c0bf0; border: 2px solid #c4574b; color: #ffd9d3; font: 700 13px/1.4 monospace; letter-spacing: .04em; pointer-events: none; }
+#b2-delete-bar[hidden] { display: none; }
+.b2-delete-track { display: block; height: 8px; margin-top: 6px; background: #3a1714; }
+#b2-delete-fill { display: block; width: 0; height: 100%; background: #ff5a47; }
+.b2-ending-dialog { position: fixed; z-index: 13; top: 50%; left: 50%; transform: translate(-50%, -50%); width: min(420px, calc(100vw - 32px));
+  padding: 20px 22px; background: #111b20f8; border: 2px solid #ad7666; color: #eee5d6; text-align: center; }
+.b2-ending-dialog[hidden] { display: none; }
+.b2-ending-dialog h2 { margin: 0 0 10px; font-size: 22px; }
+.b2-ending-dialog p { margin: 0 0 14px; font-size: 13px; line-height: 1.5; }
+.b2-ending-actions { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
+.b2-ending-actions button { min-height: 44px; min-width: 140px; border: 1px solid #b9c7b8; background: #243a36; color: #fff; font: inherit; cursor: pointer; }
+.b2-ending-actions button:focus-visible { outline: 3px solid #eac47d; outline-offset: 3px; }
+#b2-delete-bar[data-offline="true"] { border-color: #8fbda3; color: #e6f0e3; }
+#b2-delete-bar[data-offline="true"] #b2-delete-fill { background: #8fbda3; }
+#inspection .b2-action:disabled { border-color: #5d6461; background: #2a2e2d; color: #8d9692; cursor: not-allowed; }
+/* 엔딩 그림(assets/ending, b2-ending.js의 loadB2EndingArt): 문틈 로봇은 문틈을 꽉 채우고 좌우로 흔들린다. */
+#b2-cabin-robot[data-art="custom"] { left: 0; width: 100%; height: 100%; aspect-ratio: auto; transform: none; }
+#b2-cabin-robot[data-art="custom"] img { width: 100%; height: 100%; object-fit: contain; object-position: 50% 100%; transform: none;
+  animation: b2-gap-shake .16s ease-in-out infinite alternate; }
+@keyframes b2-gap-shake { from { transform: translateX(-1.5%); } to { transform: translateX(1.5%); } }
+#b2-bad-end-art { position: fixed; z-index: 12; inset: 0; width: 100%; height: 100%; object-fit: cover; pointer-events: none; }
+#b2-bad-end-art[hidden] { display: none; }
+/* TRUE END: 하얗게 밝아짐(white) → 그림(art) → 제목(title) → 크레딧(credits) → 메뉴 버튼(done). 그림이 없으면 제목은 상자로. */
+#b2-escape { position: fixed; z-index: 14; inset: 0; display: grid; place-items: center; overflow: hidden; background: #fff; color: #eee5d6; outline: none;
+  animation: b2-white-in 1.2s ease-out both; transition: background 1.5s; }
+#b2-escape[hidden] { display: none; }
+@keyframes b2-white-in { from { background: #fff0; } to { background: #fff; } }
+#b2-true-end-art { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity 1.5s; }
+#b2-true-end-art[hidden] { display: none; }
+#b2-escape:not([data-step="white"]) #b2-true-end-art { opacity: 1; }
+#b2-escape-title { position: relative; margin: 0; padding: 20px 28px; opacity: 0; transition: opacity 1s; font: 700 clamp(24px, 4vw, 44px)/1.2 Georgia, serif;
+  letter-spacing: .06em; text-align: center; background: #111b20f8; border: 2px solid #ad7666; }
+#b2-escape[data-art] #b2-escape-title { background: none; border: 0; color: #fff; text-shadow: 0 2px 14px #000d; }
+#b2-escape[data-step="title"] #b2-escape-title { opacity: 1; }
+#b2-escape:is([data-step="credits"], [data-step="done"]) { animation: none; background: #050708; }
+#b2-escape:is([data-step="credits"], [data-step="done"]) #b2-true-end-art { opacity: .2; }
+#b2-credits { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
+.b2-credits-roll { position: absolute; left: 0; right: 0; top: 100%; color: #f1f1e5; font: 24px/1.4 Arial, sans-serif; text-align: center; }
+.b2-credits-roll p { margin: 0 0 30px; }
+.b2-credits-roll span { display: block; color: #9fb0a8; font-size: 13px; letter-spacing: .2em; }
+#b2-escape:is([data-step="credits"], [data-step="done"]) .b2-credits-roll { animation: b2-credits 9s linear forwards; }
+@keyframes b2-credits { to { transform: translateY(calc(-50vh - 50%)); } }
+#b2-escape .b2-ending-actions { position: absolute; left: 0; right: 0; bottom: 8%; visibility: hidden; }
+#b2-escape[data-step="done"] .b2-ending-actions { visibility: visible; }

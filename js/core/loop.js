@@ -30,6 +30,7 @@ function update() {
   }
   if (selectingFloor) {
     updateElevators();
+    updateB2Ending(step); // 칸 안에 있어도 B2 삭제·추격은 계속된다
     updateCabin();
     return;
   }
@@ -73,6 +74,7 @@ function update() {
   if (!wasGrounded && grounded && fallingSpeed > 3) playGameSound('step', { landing: true, x: body.position.x });
   animate(moved, sprinting, step);
   updateGuardPatrol(step);
+  updateB2Ending(step);
   checkStoryScenes(step);
   updateElevators();
   updateInteraction();

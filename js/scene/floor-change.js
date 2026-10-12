@@ -92,6 +92,7 @@ function performFloorChange(destId, carIndex = 0, arrivalKey = null) {
   showStatus(lockedIn || dest.arrival || (arrivalKey ? '복도로 나왔습니다.' : `${dest.label}에 도착했습니다.`), lockedIn ? 5000 : 2500);
   refreshSceneElevatorDoors();
   mountGuardPatrol();
+  mountB2Robots();
   refreshPhone();
   updateInteraction();
   render();

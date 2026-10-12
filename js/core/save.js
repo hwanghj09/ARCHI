@@ -46,7 +46,8 @@ function progressSnapshot() {
 }
 
 function saveProgress() {
-  if (!gameStarted || mainMenuActive || restoringProgress) return false;
+  // B2 삭제가 시작된 뒤(b2-ending.js)에는 저장하지 않는다. 저장 칸은 DELETE 직전 상태로 남는다.
+  if (!gameStarted || mainMenuActive || restoringProgress || b2Ending.phase !== 'idle') return false;
   try {
     localStorage.setItem(progressKey, JSON.stringify(progressSnapshot()));
     progressSaveFailed = false;
@@ -73,11 +74,13 @@ function restoreProgress(data) {
     sceneTransition = null;
     cabinCarIndex = null;
     selectedFloor = null;
+    elevatorEntering = null; // 문이 열리기를 기다리던 탑승(그 사이 붙잡혔다가 불러오면 엉뚱한 곳에서 칸에 들어간다)
     for (const element of [phonePanel, computer, keypad, powerPanel, inspectionPanel, cabin, guardCapturePanel, hallucinationCapturePanel, opening, blackoutScene, storyScene, cctvScene]) element.hidden = true;
     for (const element of document.body.children) if (element !== mainMenu) element.inert = false;
     phoneBlocked = powerBlocked = guardBlocked = hallucinationBlocked = openingBlocked = blackoutBlocked = cctvBlocked = [];
     zeroEventPhase = 'idle'; zeroEventTimer = 0; zeroEventEvasions = 0; zeroEventApproachDone = false;
     endHallucinationSighting();
+    resetB2Ending();
     clearInterval(inspectionTypingTimer);
     inspectionTypingTimer = null;
     delete inspectionPanel.dataset.returnTo;

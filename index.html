@@ -15,6 +15,7 @@
     <link rel="stylesheet" href="css/power.css" />
     <link rel="stylesheet" href="css/wire-puzzle.css" />
     <link rel="stylesheet" href="css/guard-patrol.css" />
+    <link rel="stylesheet" href="css/b2-ending.css" />
     <link rel="stylesheet" href="css/phone.css" />
     <link rel="stylesheet" href="css/sanity.css" />
     <link rel="stylesheet" href="css/main-menu.css" />
@@ -89,6 +90,7 @@
     <script src="js/computer/computer.js" defer></script>
     <script src="js/computer/desktop.js" defer></script>
     <script src="js/elevator/cabin.js" defer></script>
+    <script src="js/scene/b2-ending.js" defer></script>
     <script src="js/player/sanity.js" defer></script>
     <script src="js/scene/pushables.js" defer></script>
     <script src="js/scene/story-scene.js" defer></script>
@@ -328,8 +330,26 @@
       <div id="inspection-sheet" aria-hidden="true" hidden></div>
       <p id="inspection-text" tabindex="0"></p>
       <span id="inspection-description" hidden></span>
-      <div class="dialog-actions"><span class="inspection-help">E / Esc</span><button id="inspection-use" type="button" hidden>사용하기</button><button id="inspection-close" type="button">닫기 ▾</button></div>
+      <div class="dialog-actions"><span class="inspection-help">E / Esc</span><button id="inspection-use" type="button" hidden>사용하기</button><button id="inspection-delete" class="b2-action" type="button" hidden>DELETE</button><button id="inspection-yes" class="b2-action" type="button" hidden>예</button><button id="inspection-no" class="b2-action" type="button" hidden>아니요</button><button id="inspection-close" type="button">닫기 ▾</button></div>
     </section>
+    <div id="b2-delete-bar" role="status" aria-label="ARCHI 삭제 진행률" hidden>
+      <span>ARCHI DELETE PROCESS <output id="b2-delete-percent">0%</output></span>
+      <span class="b2-delete-track" aria-hidden="true"><span id="b2-delete-fill"></span></span>
+    </div>
+    <section id="b2-bad-ending" class="b2-ending-dialog" role="dialog" aria-modal="true" aria-labelledby="b2-bad-ending-title" hidden>
+      <h2 id="b2-bad-ending-title">베드엔딩</h2>
+      <p>경비 로봇에게 붙잡혔다. ARCHI 삭제는 끝나지 못했다.</p>
+      <div class="b2-ending-actions"><button id="b2-restart" type="button">처음부터 다시하기</button><button id="b2-checkpoint" type="button">체크포인트로 이동</button></div>
+    </section>
+    <section id="b2-escape" role="dialog" aria-modal="true" aria-labelledby="b2-escape-title" tabindex="-1" data-step="white" hidden>
+      <img id="b2-true-end-art" alt="" hidden />
+      <h2 id="b2-escape-title">TRUE END — ARCHI OFFLINE</h2>
+      <div id="b2-credits"><div class="b2-credits-roll">
+        <p><span>기획</span>정수호</p><p><span>개발</span>현준</p><p><span>디자인</span>윤찬</p><p><span>사운드</span>정래</p><p><span>PM</span>정민준</p>
+      </div></div>
+      <div class="b2-ending-actions"><button id="b2-escape-menu" type="button">메인 메뉴로</button></div>
+    </section>
+    <img id="b2-bad-end-art" alt="" hidden />
     <aside id="sanity-hud" aria-label="정신력 상태">
       <div class="sanity-heading"><span>정신력</span><output id="sanity-value">100%</output></div>
       <div id="sanity-meter" role="meter" aria-label="정신력" aria-valuemin="0" aria-valuemax="100" aria-valuenow="100">
@@ -596,7 +616,13 @@
     <div id="elevator-cabin" role="dialog" aria-modal="true" aria-label="엘리베이터 내부" tabindex="-1" hidden>
       <div id="cabin-scene" data-door="closed">
         <img id="cabin-art" src="assets/background/elevator/cabin-b2-to-17.png" width="1536" height="1024" alt="" draggable="false" />
-        <div id="cabin-doorway"><div class="cabin-leaf left"></div><div class="cabin-leaf right"></div></div>
+        <div id="cabin-doorway"><div id="b2-cabin-robot" aria-hidden="true" hidden><img src="assets/objects/guard-robot/guard-capture.png" alt="" draggable="false" /></div><div class="cabin-leaf left"></div><div class="cabin-leaf right"></div></div>
+        <div id="b2-door-gauge" role="group" aria-labelledby="b2-door-label" hidden>
+          <span id="b2-door-label">Enter·스페이스 연타!</span>
+          <span class="b2-door-track" aria-hidden="true"><span id="b2-door-fill"></span></span>
+          <button id="b2-door-push" type="button">문 닫기</button>
+        </div>
+        <div id="b2-phone-message" role="status" hidden><strong>ARCHI</strong><span>1층에 경비 로봇이 기다린다.</span></div>
         <output id="cabin-display" aria-label="현재 층">17</output>
         <div id="cabin-floor-buttons"></div>
         <button id="cabin-open" class="cabin-hit" type="button" aria-label="문 열기" title="문 열기"></button>

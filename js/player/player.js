@@ -63,7 +63,8 @@ function animate(distance, sprinting = false, elapsed = 0) {
     refreshPhone();
   }
   if (playerCaught) {
-    const frame = guardPatrol.captureTime < 640 ? 0 : 1 + Math.floor((guardPatrol.captureTime - 640) / 240) % 3;
+    const { captureTime } = caughtBy ?? guardPatrol;
+    const frame = captureTime < 640 ? 0 : 1 + Math.floor((captureTime - 640) / 240) % 3;
     sprite.dataset.state = 'caught'; sprite.dataset.frame = frame;
     caughtSheet.style.transform = `translateX(${-frame * 25}%)`;
     return;
