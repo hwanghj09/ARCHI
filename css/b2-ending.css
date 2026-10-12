@@ -6,8 +6,8 @@
 #b2-cabin-robot { position: absolute; left: 50%; bottom: 0; width: 58%; aspect-ratio: 384 / 256; transform: translateX(-50%); overflow: hidden; }
 #b2-cabin-robot[hidden] { display: none; }
 #b2-cabin-robot img { display: block; width: 800%; height: 100%; max-width: none; transform: translateX(-37.5%); }
-#b2-door-gauge { position: absolute; z-index: 3; left: 26.5%; top: 18%; width: 37%; padding: 10px 12px; background: #1a0c0bf2; border: 2px solid #c4574b;
-  color: #ffd9d3; font: 700 15px/1.4 Arial, sans-serif; text-align: center; }
+#b2-door-gauge { position: absolute; z-index: 3; left: 8.5%; top: 38%; width: 17%; padding: 10px 12px; background: #1a0c0bf2; border: 2px solid #c4574b;
+  color: #ffd9d3; font: 700 14px/1.4 Arial, sans-serif; text-align: center; white-space: nowrap; }
 #b2-door-gauge[hidden] { display: none; }
 .b2-door-track { display: block; height: 14px; margin: 8px 0; background: #3a1714; }
 #b2-door-fill { display: block; width: 0; height: 100%; background: #f5d478; }
