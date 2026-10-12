@@ -353,6 +353,8 @@ function enterB2Lobby(car) {
   b2Robots = []; // B2 로봇은 지하에 남는다
   b2Ending.stage = 'lobby';
   if (allPowerOverride) setAllFloorsPower(false); // 콘솔의 테스트용 전체 전력이 켜져 있으면 1층을 끌 수 없다
+  // 이 장면의 1층 전력은 ARCHI가 넣은 비상 전력뿐이다. 정전 전에(테스트 층 이동 등) 왔어도 끊으면 꺼지게 정전 상태로 맞춘다.
+  buildingBlackout = true;
   collectedItems.add('solar-app-installed'); // 끝까지 앱 없이 왔어도 끌 수단은 있어야 한다
   solarEnabled = true;
   solarPoweredFloors = [1];
