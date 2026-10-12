@@ -30,6 +30,7 @@ function update() {
   }
   if (selectingFloor) {
     updateElevators();
+    updateB2Ending(step); // 칸 안에 있어도 B2 삭제·추격은 계속된다
     updateCabin();
     return;
   }

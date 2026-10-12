@@ -46,6 +46,11 @@ panelFloors.forEach((floor, index) => {
       return;
     }
     if (selectedFloor !== null) return;
+    // B2 삭제 추격 중(b2-ending.js)에는 1층으로만 도망칠 수 있다.
+    if (b2Ending.phase === 'running' && floor !== 1) {
+      cabinStatus.textContent = `${button.title} 버튼이 눌리지 않는다. ARCHI가 막았다. 1층으로 가야 한다.`;
+      return;
+    }
     selectedFloor = floor;
     playGameSound('switch');
     // 문이 닫힌 뒤 updateCabin이 페이드 아웃으로 층을 바꾸고, 페이드 인이 끝나면 문을 연다.
@@ -76,8 +81,7 @@ function enterCabin(carIndex) {
     return;
   }
   if (!car.open) playGameSound('elevator-door');
-  // B2 삭제 추격 중에 타면 칸 화면 대신 임시 해피엔딩 창(b2-ending.js).
-  transitionScene(() => b2Ending.phase === 'running' ? showB2Escape() : showCabin(carIndex));
+  transitionScene(() => showCabin(carIndex));
 }
 
 function showCabin(carIndex) {
@@ -153,6 +157,7 @@ function setCabinDoor(open) {
   }
   cabinAutoClose = 0;
   const phase = cabinScene.dataset.door;
+  if (phase === 'struggle') return; // 로봇과 문을 두고 버티는 중(b2-ending.js)
   if (phase === (open ? 'open' : 'closed') || phase === (open ? 'opening' : 'closing')) return;
   playGameSound('elevator-door');
   car.open = open;
@@ -164,6 +169,7 @@ function setCabinDoor(open) {
 
 function updateCabin() {
   if (cabinCarIndex === null) return;
+  if (updateB2Cabin()) return; // B2 추격 중 엘리베이터 문 장면(b2-ending.js)
   const car = elevatorCars[cabinCarIndex];
   if (!elevatorHasPower() && !car.travelling) {
     selectedFloor = null;
@@ -187,7 +193,8 @@ function updateCabin() {
   if (elevatorHasPower() && !transitioning && !car.travelling && cabinScene.dataset.door === 'closed' && selectedFloor !== null) {
     const floor = selectedFloor;
     cabinStatus.textContent = `${floorShortLabel(floor)} 이동 중`;
-    transitionScene(() => arriveCabinAt(car, floor));
+    if (b2Ending.phase === 'running') startB2Ride(car); // 추격 중: 1층으로 올라가는 장면(b2-ending.js)
+    else transitionScene(() => arriveCabinAt(car, floor));
   }
   refreshCabin();
 }

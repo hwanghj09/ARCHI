@@ -2,6 +2,21 @@
 /* 추격 로봇은 R-01 스프라이트만 그린다(CSS로 그린 대체 로봇 몸통은 지운다). */
 #dynamic-scene .fixture.guard-bot.b2-guard-bot { background: none; }
 #dynamic-scene .fixture.guard-bot.b2-guard-bot::before, #dynamic-scene .fixture.guard-bot.b2-guard-bot::after { content: none; }
+/* 엘리베이터 문 장면: 문틈의 로봇(기존 붙잡기 그림 한 칸), 문 닫기 게이지, 휴대폰 ARCHI 알림. */
+#b2-cabin-robot { position: absolute; left: 50%; bottom: 0; width: 58%; aspect-ratio: 384 / 256; transform: translateX(-50%); overflow: hidden; }
+#b2-cabin-robot[hidden] { display: none; }
+#b2-cabin-robot img { display: block; width: 800%; height: 100%; max-width: none; transform: translateX(-37.5%); }
+#b2-door-gauge { position: absolute; z-index: 3; left: 26.5%; top: 18%; width: 37%; padding: 10px 12px; background: #1a0c0bf2; border: 2px solid #c4574b;
+  color: #ffd9d3; font: 700 15px/1.4 Arial, sans-serif; text-align: center; }
+#b2-door-gauge[hidden] { display: none; }
+.b2-door-track { display: block; height: 14px; margin: 8px 0; background: #3a1714; }
+#b2-door-fill { display: block; width: 0; height: 100%; background: #f5d478; }
+#b2-door-push { min-height: 44px; min-width: 140px; border: 1px solid #f5d478; background: #3a1714; color: #fff; font: inherit; cursor: pointer; touch-action: manipulation; }
+#b2-door-push:focus-visible { outline: 3px solid #eac47d; outline-offset: 3px; }
+#b2-phone-message { position: absolute; z-index: 3; left: 4%; top: 6%; width: 20%; padding: 10px 12px; border-radius: 14px; background: #f2f4f1f2; color: #141a18;
+  font: 14px/1.4 Arial, sans-serif; box-shadow: 0 6px 18px #0008; }
+#b2-phone-message[hidden] { display: none; }
+#b2-phone-message strong { display: block; margin-bottom: 4px; color: #b3261e; font-size: 12px; letter-spacing: .08em; }
 #inspection .b2-action { min-height: 36px; padding: 6px 12px; border-color: #c4574b; background: #3a1714; color: #ffd9d3; font-size: 13px; }
 #inspection .b2-action[hidden], #inspection-close[hidden] { display: none; }
 #inspection .b2-action:focus-visible { outline: 2px solid #dec898; outline-offset: 3px; }

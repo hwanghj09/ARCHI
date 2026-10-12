@@ -51,31 +51,84 @@ try {
     near: Math.abs(body.position.x - 1400) < 160, bar: document.getElementById('b2-delete-bar').hidden }));
   assert.deepEqual(back, { phase: 'idle', robots: 0, caught: false, room: 'b2-main', near: true, bar: true });
 
-  // 콘솔에서 Shift+D로 출구까지 달리고, 복도에서 엘리베이터까지 달려 탄다.
-  await page.evaluate(() => { solarEnabled = true; updatePowerState(); elevatorCars[0].floor = -2; elevatorCars[0].open = false; });
-  await pressDelete();
-  await page.evaluate(() => stage.focus());
-  const run = async (until, label) => {
-    await page.keyboard.down('ShiftLeft'); await page.keyboard.down('KeyD');
-    for (let i = 0; i < 400 && !(await page.evaluate(until)); i++) await page.clock.runFor(50);
-    await page.keyboard.up('KeyD'); await page.keyboard.up('ShiftLeft');
-    const at = await page.evaluate(() => ({ time: b2Ending.elapsed / 1000, x: Math.round(body.position.x),
-      robots: b2Robots.map(robot => `${robot.where}@${Math.round(robot.x)}`).join(', ') }));
-    console.log(`${label}: ${at.time.toFixed(1)}s, x=${at.x}, robots ${at.robots}`);
-    return at;
+
+  // 체크포인트에서 다시 DELETE를 누르고 엘리베이터 1번까지 달리거나(Shift+D) 걸어서 탄다.
+  const visible = selector => page.locator(selector).isVisible();
+  const settle = async (done, limit = 200) => { for (let i = 0; i < limit && !(await page.evaluate(done)); i++) await page.clock.runFor(50); };
+  const toCabin = async walk => {
+    await page.evaluate(() => {
+      if (mainMenuActive) closeMainMenu();
+      restoreProgress(JSON.parse(localStorage.getItem('archi.checkpoint.b2')));
+      Body.setPosition(body, { x: 1400, y: floorY - 81 }); grounded = true; stage.focus();
+    });
+    await pressDelete();
+    const move = async until => {
+      if (!walk) await page.keyboard.down('ShiftLeft');
+      await page.keyboard.down('KeyD');
+      await settle(`playerCaught || (${until})`, 400);
+      await page.keyboard.up('KeyD'); if (!walk) await page.keyboard.up('ShiftLeft');
+    };
+    await move("nearbyDoor?.key === 'exit'");
+    await page.keyboard.press('KeyE');
+    await settle(() => !transitioning && dynamicFloorId === 'b2');
+    await move("nearbyDoor?.type === 'elevator' && nearbyDoor.carIndex === 0");
+    if (!(await page.evaluate(() => playerCaught))) await page.keyboard.press('KeyE');
+    await settle(() => playerCaught || (selectingFloor && !transitioning));
+    return page.evaluate(() => ({ caught: playerCaught, time: b2Ending.elapsed / 1000 }));
   };
-  await run(() => nearbyDoor?.key === 'exit', 'reached server room exit');
-  await page.keyboard.press('KeyE');
-  for (let i = 0; i < 100 && (await page.evaluate(() => transitioning || dynamicFloorId !== 'b2')); i++) await page.clock.runFor(50);
-  await run(() => nearbyDoor?.type === 'elevator' && nearbyDoor.carIndex === 0, 'reached elevator 1');
-  await page.keyboard.press('KeyE');
-  for (let i = 0; i < 200 && !(await page.locator('#b2-escape').isVisible()) && !(await page.locator('#b2-bad-ending').isVisible()); i++) await page.clock.runFor(50);
-  console.log(`escape screen at ${(await page.evaluate(() => b2Ending.elapsed) / 1000).toFixed(1)}s`);
-  assert(await page.locator('#b2-escape').isVisible(), 'Boarding the elevator during the chase shows the temporary escape screen');
-  assert(!(await page.locator('#elevator-cabin').isVisible()));
+  // 칸 안에서 wait ms 기다렸다가 1층을 누르고, 게이지가 뜨면 1초에 rate번 E를 누른다.
+  const escapeFrom = async (wait, rate) => {
+    await page.clock.runFor(wait);
+    if (!(await page.evaluate(() => selectingFloor))) return { result: 'caught before pressing' };
+    await page.locator('[data-floor="1"].cabin-hit').click();
+    let gauge = null, phone = false;
+    for (let i = 0; i < 400 && !(await visible('#b2-escape')) && !(await visible('#b2-bad-ending')); i++) {
+      if (await visible('#b2-door-gauge')) {
+        gauge ??= await page.evaluate(() => b2Cabin.gauge);
+        await page.keyboard.press('KeyE');
+        await page.clock.runFor(1000 / rate);
+      } else await page.clock.runFor(50);
+      phone ||= await visible('#b2-phone-message');
+    }
+    return { result: await visible('#b2-escape') ? 'escaped' : 'caught', gauge, phone };
+  };
+
+  // 1) 달려 와서 바로 1층: 로봇이 아직 안 와서 게이지 없이 닫히고, 휴대폰에 ARCHI 메시지, 1층 도착 → 임시 해피엔딩.
+  await page.evaluate(() => { solarEnabled = true; updatePowerState(); elevatorCars[0].floor = -2; elevatorCars[0].open = false; });
+  const boarded = await toCabin(false);
+  console.log(`run: in the cabin at ${boarded.time.toFixed(1)}s`);
+  assert(!boarded.caught && await visible('#elevator-cabin'), 'Running reaches the elevator cabin');
+  const fast = await escapeFrom(0, 0);
+  console.log('run, press 1F at once:', fast);
+  assert.deepEqual(fast, { result: 'escaped', gauge: null, phone: true });
+  assert.equal(await page.evaluate(() => elevatorCars[0].floor), 1, 'The car went up to 1F');
   await page.locator('#b2-escape-menu').click();
-  assert(await page.locator('#main-menu').isVisible(), 'The escape screen returns to the main menu');
-  assert(await page.locator('#menu-continue').isVisible(), 'Continue resumes from the save before DELETE');
+  assert(await visible('#main-menu'), 'The escape screen returns to the main menu');
+  assert(await visible('#menu-continue'), 'Continue resumes from the save before DELETE');
+
+  // 2) 칸 안에서 머뭇거리면 로봇이 문 앞에 와서 게이지가 뜬다. 연타가 빠르면 성공, 느리면 붙잡힌다.
+  const table = [];
+  for (const [wait, rate] of [[1500, 6], [1500, 3], [2500, 6], [2500, 4], [4000, 6]]) {
+    await toCabin(false);
+    const outcome = await escapeFrom(wait, rate);
+    table.push({ wait, rate, ...outcome });
+    if (outcome.result === 'caught') {
+      assert(await visible('#b2-bad-ending'), 'Losing the door fight shows the bad ending');
+      assert.equal(await page.evaluate(() => [selectingFloor, playerCaught].join()), 'false,true', 'Suho is pulled out and grabbed');
+    }
+  }
+  console.table(table);
+  assert.equal(table[0].result, 'escaped', 'A short pause with steady mashing (6/s) still escapes');
+  assert.equal(table[1].result, 'caught', 'Slow mashing (3/s) loses the door');
+  assert.notEqual(table[0].gauge, null, 'A robot at the closing door starts the gauge');
+  assert.equal(table[2].result, 'escaped', 'Fumbling for the button (2.5s) is still winnable with 6 presses a second');
+  assert.equal(table[4].result, 'caught before pressing', 'Standing in the open cabin gets Suho pulled out');
+
+  // 3) 걸어서 오면 잡힌다.
+  const walked = await toCabin(true);
+  const walkEnd = walked.caught ? { result: 'caught in corridor' } : await escapeFrom(0, 6);
+  console.log(`walk: ${walked.time.toFixed(1)}s`, walkEnd);
+  assert.notEqual(walkEnd.result, 'escaped', 'Walking does not escape');
   assert.deepEqual(errors, []);
   console.log('B2 ending checks passed.');
 } finally {

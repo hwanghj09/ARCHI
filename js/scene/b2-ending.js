@@ -2,7 +2,7 @@
 // 삭제를 시작한다: 화면 위 진행 바(35초, 100%가 돼도 아직 아무 일 없음), 붉은 비상등(#room-alarm), 경보음, 비상계단 잠김 문구.
 // 충전 도크의 경비 로봇 R-02·R-05·R-07이 차례로 깨어나 수호를 쫓는다(guard-patrol.js의 updateRobot, 속도는 R-01 추격과 같은 270px/s).
 // 로봇은 수호와 다른 장면(복도/방)에 있으면 보이지 않는 채로 그 장면의 문까지 걸어가 문을 열고 들어온다.
-// 잡히면 R-01과 같은 붙잡기 연출 뒤 베드엔딩 창, 엘리베이터 칸에 들어가면 임시 해피엔딩 창. 삭제가 시작된 뒤로는 자동 저장을 멈춘다.
+// 잡히면 R-01과 같은 붙잡기 연출 뒤 베드엔딩 창, 엘리베이터 문 장면(아래)을 넘겨 1층에 닿으면 임시 해피엔딩 창. 삭제가 시작된 뒤로는 자동 저장을 멈춘다.
 const b2CheckpointKey = 'archi.checkpoint.b2';
 const b2DeleteDuration = 35000;
 const b2DockX = [4790, 4850, 4910]; // 충전 도크(대기 중인 경비 로봇 fixture)의 세 자리
@@ -53,6 +53,7 @@ function startArchiDelete() {
 // 장면을 새로 그릴 때(floor-change.js) 같은 장면에 있는 로봇만 스프라이트를 붙이고, B2 전체를 비상 모드로 그린다.
 function mountB2Robots() {
   for (const robot of b2Robots) robot.door = robot.image = null;
+  if (b2Ending.phase === 'running') hideB2Cabin(); // 칸에서 나왔으면 문 장면 상태를 지운다
   if (b2Ending.phase === 'idle' || room !== 'dynamic' || floorById.get(dynamicFloorId).floor !== -2) return;
   world.dataset.alarm = 'true';
   const stairs = currentDoors.find(door => door.type === 'stairs');
@@ -106,7 +107,16 @@ function updateB2Ending(delta) {
       robot.mode = 'chase';
       playGameSound('robot-alert', { x: robot.x });
     }
-    if (robot.mode !== 'chase' || robot.where === here || !here) continue;
+    if (robot.mode !== 'chase' || !here) continue;
+    if (robot.where === here) {
+      // 수호가 엘리베이터 칸 안에 있으면(loop.js가 updateGuardPatrol을 부르지 않는다) 그 엘리베이터 문 옆까지 온다.
+      const stop = b2CabinStopX(robot);
+      if (stop === null || robot.x === stop) continue;
+      robot.facing = stop >= robot.x ? 1 : -1;
+      robot.x += robot.facing * Math.min(Math.abs(stop - robot.x), 270 * delta / 1000);
+      if (robot.door) updateRobot(robot, 0);
+      continue;
+    }
     // 다른 장면에 있는 로봇: 지금 장면의 문까지 걸어간다(방 → 복도 → 수호가 있는 방).
     const next = robot.where === corridorId ? here : corridorId;
     const doorX = b2DoorX(robot.where, next);
@@ -131,6 +141,145 @@ function updateB2Ending(delta) {
   }
 }
 
+// 엘리베이터 문 장면(추격 중 칸 안): 1층을 누르면 문이 닫히기 시작한다. 로봇이 문 옆에 와 있으면 문을 억지로 열고
+// "문 닫기" 게이지가 뜬다. E(모바일은 게이지의 버튼이나 칸의 닫힘 버튼)를 연타하면 차고, 로봇은 계속 깎는다. 다 차면
+// 1층으로 올라가며 휴대폰에 ARCHI 메시지가 오고, 도착하면 임시 해피엔딩. 로봇이 다 깎거나 제한 시간이 지나면 붙잡힌다.
+// 로봇이 아직 안 왔으면 게이지 없이 그냥 닫힌다. 문이 열린 채 1층을 안 누르고 있으면 문 옆에 온 로봇이 잠시 뒤 끌어낸다.
+const b2DoorPush = 0.07; // E 한 번에 차는 양
+const b2DoorDrain = 0.2; // 로봇이 1초에 깎는 양
+const b2DoorLimit = 5000; // 게이지 제한 시간
+const b2DoorGrabDelay = 1500; // 문이 열린 채일 때 로봇이 끌어내기까지
+const b2RideTime = 3000; // B2 → 1층
+const b2Cabin = { state: 'idle', gauge: 0, time: 0, grab: 0, robot: null };
+const b2DoorGauge = document.getElementById('b2-door-gauge');
+const b2DoorFill = document.getElementById('b2-door-fill');
+const b2CabinRobot = document.getElementById('b2-cabin-robot');
+const b2PhoneMessage = document.getElementById('b2-phone-message');
+
+function b2CabinDoor() {
+  return selectingFloor && cabinCarIndex !== null ? currentDoors.find(door => door.type === 'elevator' && door.carIndex === cabinCarIndex) : null;
+}
+
+// 칸 안의 수호를 쫓는 로봇이 멈춰 설 자리: 엘리베이터 문 가운데에서 로봇이 오는 쪽으로 60px.
+function b2CabinStopX(robot) {
+  const door = b2CabinDoor();
+  if (!door) return null;
+  const center = door.x + door.width / 2;
+  return center + (robot.x >= center ? 60 : -60);
+}
+
+function b2RobotAtCabinDoor() {
+  return b2Robots.find(robot => robot.mode === 'chase' && !robot.hold && robot.where === dynamicFloorId && robot.x === b2CabinStopX(robot)) ?? null;
+}
+
+// cabin.js의 updateCabin이 매 프레임 먼저 부른다. true면 이번 프레임의 칸 동작을 대신 처리한 것이다.
+function updateB2Cabin() {
+  if (b2Ending.phase !== 'running' || cabinCarIndex === null) return false;
+  const car = elevatorCars[cabinCarIndex];
+  if (b2Cabin.state === 'ride') {
+    b2Cabin.time += step;
+    cabinDisplay.textContent = `↑${b2Cabin.time < b2RideTime / 2 ? 'B1' : '1'}`;
+    if (b2Cabin.time >= b2RideTime && !transitioning) transitionScene(() => { arriveCabinAt(car, 1); showB2Escape(); });
+    return true;
+  }
+  if (b2Cabin.state === 'struggle') {
+    b2Cabin.time += step;
+    b2Cabin.gauge = Math.max(0, b2Cabin.gauge - b2DoorDrain * step / 1000);
+    refreshB2DoorGauge();
+    if (!b2Cabin.gauge || b2Cabin.time >= b2DoorLimit) catchInCabin(b2Cabin.robot);
+    return true;
+  }
+  const robot = b2RobotAtCabinDoor();
+  if (!robot) { b2Cabin.grab = 0; showB2CabinRobot(false); return false; }
+  showB2CabinRobot(true);
+  const phase = cabinScene.dataset.door;
+  if (phase === 'closing' && selectedFloor !== null) {
+    // 닫히던 만큼 게이지가 차 있는 채로 시작한다(빨리 누를수록 유리하다).
+    Object.assign(b2Cabin, { state: 'struggle', gauge: Math.max(.15, 1 - cabinDoorAmount), time: 0, robot });
+    cabinScene.dataset.door = 'struggle';
+    cabinStatus.textContent = '경비 로봇이 문을 억지로 연다! E를 연타해 문을 닫아라.';
+    playGameSound('robot-grab', { x: robot.x });
+    b2DoorGauge.hidden = false;
+    refreshB2DoorGauge();
+    document.getElementById('b2-door-push').focus({ preventScroll: true });
+    return true;
+  }
+  if (phase === 'open' && selectedFloor === null) {
+    if (!b2Cabin.grab) cabinStatus.textContent = '경비 로봇이 문 앞에 왔다! 1층을 눌러!';
+    b2Cabin.grab += step;
+    if (b2Cabin.grab >= b2DoorGrabDelay) {
+      catchInCabin(robot);
+      return true;
+    }
+  }
+  return false;
+}
+
+function pushB2Door() {
+  if (b2Cabin.state !== 'struggle') return;
+  b2Cabin.gauge = Math.min(1, b2Cabin.gauge + b2DoorPush);
+  playGameSound('switch');
+  refreshB2DoorGauge();
+  if (b2Cabin.gauge >= 1) startB2Ride(elevatorCars[cabinCarIndex]);
+}
+
+function refreshB2DoorGauge() {
+  b2DoorFill.style.width = `${Math.round(b2Cabin.gauge * 100)}%`;
+  // 게이지가 찰수록 문이 닫힌다(로봇이 깎으면 다시 벌어진다).
+  cabinDoorAmount = .55 * (1 - b2Cabin.gauge);
+  cabinScene.style.setProperty('--door-open', cabinDoorAmount);
+}
+
+function showB2CabinRobot(show) {
+  if (b2CabinRobot.hidden === !show) return;
+  b2CabinRobot.hidden = !show;
+}
+
+function startB2Ride(car) {
+  Object.assign(b2Cabin, { state: 'ride', time: 0 });
+  b2DoorGauge.hidden = true;
+  showB2CabinRobot(false);
+  car.open = false;
+  cabinDoorAmount = 0;
+  cabinScene.style.setProperty('--door-open', '0');
+  cabinScene.dataset.door = 'closed';
+  refreshSceneElevatorDoors();
+  playGameSound('elevator-door');
+  cabinStatus.textContent = '1층으로 올라가는 중';
+  b2PhoneMessage.hidden = false;
+  playGameSound('phone');
+}
+
+// 실패: 칸에서 끌려 나와 엘리베이터 문 앞에서 붙잡힌다(R-01과 같은 붙잡기 연출 → 베드엔딩 창).
+function catchInCabin(robot) {
+  const door = b2CabinDoor();
+  const car = elevatorCars[cabinCarIndex];
+  Object.assign(car, { rider: false, open: true });
+  hideB2Cabin();
+  selectingFloor = false;
+  selectedFloor = null;
+  cabinCarIndex = null;
+  cabin.hidden = true;
+  stage.inert = false;
+  refreshSceneElevatorDoors();
+  const center = door.x + door.width / 2;
+  Body.setPosition(body, { x: center, y: floorY - 81 });
+  Body.setVelocity(body, { x: 0, y: 0 });
+  grounded = true;
+  robot.x = center + (robot.x >= center ? 82 : -82);
+  cameraX = cameraTarget();
+  catchPlayer(robot);
+}
+
+function hideB2Cabin() {
+  Object.assign(b2Cabin, { state: 'idle', gauge: 0, time: 0, grab: 0, robot: null });
+  b2DoorGauge.hidden = b2CabinRobot.hidden = b2PhoneMessage.hidden = true;
+  if (cabinScene.dataset.door === 'struggle') cabinScene.dataset.door = 'open';
+}
+
+document.getElementById('b2-door-push').addEventListener('click', pushB2Door);
+cabinClose.addEventListener('click', pushB2Door);
+
 function refreshB2Bar() {
   const percent = Math.floor(b2Ending.elapsed / b2DeleteDuration * 100);
   b2DeletePercent.value = `${percent}%`;
@@ -141,6 +290,7 @@ function refreshB2Bar() {
 function endB2Ending() {
   b2Ending.phase = 'over';
   b2DeleteBar.hidden = true;
+  hideB2Cabin();
   for (const robot of b2Robots) robot.hold = Infinity;
 }
 
@@ -152,7 +302,7 @@ function showB2BadEnding() {
   document.getElementById('b2-checkpoint').focus();
 }
 
-// 엘리베이터 칸에 들어가는 순간(cabin.js) 칸 화면 대신 띄운다.
+// 추격 중 엘리베이터로 1층에 도착하면(updateB2Cabin) 띄운다. 1층 장면은 다음 단계에서 만든다.
 function showB2Escape() {
   endB2Ending();
   releaseInput();
@@ -168,6 +318,7 @@ function resetB2Ending() {
   b2Robots = [];
   caughtBy = null;
   b2DeleteBar.hidden = b2BadEnding.hidden = b2Escape.hidden = true;
+  hideB2Cabin();
   for (const element of b2EscapeBlocked) element.inert = false;
   b2EscapeBlocked = [];
 }
