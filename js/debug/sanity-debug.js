@@ -30,7 +30,7 @@ debugConsoleToggle.addEventListener('click', () => {
   debugConsolePanel.hidden = !debugConsolePanel.hidden;
   debugConsoleToggle.setAttribute('aria-expanded', String(!debugConsolePanel.hidden));
 });
-for (const [id, trigger] of [['debug-chase-hallucination', debugTriggerChaseHallucination], ['debug-spawn-hallucination', debugTriggerAmbientHallucination]]) {
+for (const [id, trigger] of [['debug-chase-hallucination', debugTriggerChaseHallucination], ['debug-spawn-hallucination', debugTriggerAmbientHallucination], ['debug-jumpscare', debugTriggerJumpscare]]) {
   document.getElementById(id).addEventListener('click', () => {
     if (!trigger()) showStatus('지금은 환각 이벤트를 실행할 수 없다.', 2000);
     stage.focus({ preventScroll: true }); // 버튼에 포커스가 남아 이동 키가 막히지 않게 한다

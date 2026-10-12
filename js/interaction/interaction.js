@@ -31,7 +31,7 @@ function updateInteraction() {
   }
   const activeDoors = room === 'corridor' ? [...doors.filter(door => door.phoneCharger), ...doors.filter(door => !door.phoneCharger),
     ...officeDoors.filter(door => door.room === room)] :
-    [...officeDoors.filter(door => door.room === room), officeComputer];
+    [...officeDoors.filter(door => door.room === room), officeComputer, ...(officePostit.element.hidden ? [] : [officePostit])];
   nearbyDoor = activeDoors.find(door => grounded && Math.abs(body.bounds.max.y - floorY) < 2 &&
     Math.abs(body.position.x - door.x - door.width / 2) < door.width / 2 + 28) || null;
   if (!realBuildingBlackout() && room === 'corridor' && currentSceneFloor === 17 && nearbyDoor?.type === 'elevator') {
@@ -146,7 +146,7 @@ function interact() {
       playGameSound('deny');
       openInspection(nearbyDoor.name, '정수호의 출입증을 태그했다. "미등록 출입증입니다, 팀장 이상의 직급이 요구됩니다." 칸막이가 열리지 않았다.');
       // 로봇의 습격! 그 이유는? 목표 도중이면 이 조사창을 닫은 뒤 세 번째 컷씬(story-scene.js)이 이어진다.
-      if (currentObjective?.title === '로봇의 습격! 그 이유는?') collectedItems.add('story-gate-tagged');
+      if (currentObjective?.title === '로봇의 습격! 그 이유는?' && !collectedItems.has('story-badge-seen')) collectedItems.add('story-gate-tagged'); // 컷씬은 한 번만(이미 봤으면 다시 나오지 않는다)
       return;
     }
     const missing = !unreadable && lacking && nearbyDoor.missingMessage &&

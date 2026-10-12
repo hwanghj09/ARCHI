@@ -73,7 +73,7 @@ try {
     await button.click();
     if (await button.getAttribute('data-restricted')) {
       assert.equal(await button.getAttribute('aria-pressed'), 'false', 'B2 stays restricted until B1 lifts it');
-      assert.match(await page.locator('#cabin-status').textContent(), /운행 제한 중이다.*B1 방재 관제실/);
+      assert.match(await page.locator('#cabin-status').textContent(), /버튼을 눌렀으나 아무 반응도 없었다./);
       continue;
     }
     assert.equal(await button.getAttribute('aria-pressed'), 'true');

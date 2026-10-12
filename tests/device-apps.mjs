@@ -91,15 +91,11 @@ try {
 
   await pcApp('building').click();
   await pcGuide.locator('[data-building-floor]').selectOption('12');
-  assert.match(await pcGuide.locator('[data-building-access]').textContent(), /조현아 팀장 사원증 필요 \(16층 Café에서 마지막 확인\).*하차 후 게이트/,
-    'A missing card points to where it was last seen');
   const floor12 = await page.evaluate(() => {
     const scene = ALL_FLOORS.find(scene => scene.floor === 12);
-    const gate = scene.barriers.find(item => item.accessGate);
-    return { powered: floorHasPower(12), badge: INVENTORY_ITEMS[gate.requires].name, chargerCount: scene.fixtures.filter(item => item.phoneCharger).length };
+    return { powered: floorHasPower(12), chargerCount: scene.fixtures.filter(item => item.phoneCharger).length };
   });
   assert.equal(await pcGuide.locator('[data-building-power]').getAttribute('data-powered'), String(floor12.powered));
-  assert((await pcGuide.locator('[data-building-access]').textContent()).includes(floor12.badge));
   assert.match(await pcGuide.locator('[data-building-charger]').textContent(), new RegExp(`충전함 ${floor12.chargerCount}곳`));
   await pc.locator('#computer-exit').click();
   await finishSceneTransition(page);
@@ -205,8 +201,6 @@ try {
   await phoneGuide.locator('[data-building-here]').tap();
   assert.equal(await phoneGuide.locator('[data-building-floor]').inputValue(), '12');
   assert.match(await phoneGuide.locator('[data-building-current]').textContent(), /12층/);
-  assert.match(await phoneGuide.locator('[data-building-access]').textContent(), /보유.*게이트/);
-  assert.doesNotMatch(await phoneGuide.locator('[data-building-access]').textContent(), /마지막 확인/, 'A held card needs no location hint');
   await closePhone();
   await place(1826);
   await page.keyboard.press('e');
@@ -214,7 +208,6 @@ try {
   assert.equal(await page.locator('.access-gate[data-open="true"]').count(), 2);
   await page.locator('#phone-button').tap();
   await phoneApp('building').tap();
-  assert.match(await phoneGuide.locator('[data-building-access]').textContent(), /층 인증 완료/);
   await closePhone();
 
   await page.evaluate(() => { phoneBattery = 0; refreshPhone(); });

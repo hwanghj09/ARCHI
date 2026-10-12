@@ -192,6 +192,7 @@ try {
   now = await state();
   assert.equal(now.active, false); assert.equal(now.inert, false);
   assert(await page.evaluate(() => collectedItems.has('b1-lights-out')));
+  assert.equal(await page.evaluate(() => world.dataset.blackout), 'true', '소등 컷씬이 끝나면 지하 전등이 꺼진다');
   assert.equal(await page.locator('#dynamic-scene .cctv-wall').evaluate(el => getComputedStyle(el, '::before').opacity), '0');
   await page.screenshot({ path: '.local/cctv-after.png' });
   // 두 번째로 열면 잡음 없이 뜨고, 소등 컷씬도 다시 돌지 않는다. 다시 들어와도 붉은 조명이고, 다른 방은 그대로다.
@@ -206,6 +207,10 @@ try {
   assert.equal(await page.locator('#world').getAttribute('data-alarm'), 'true', 'Still red when re-entering');
   await page.evaluate(() => performFloorChange('b1'));
   assert.equal(await page.locator('#world').getAttribute('data-alarm'), 'false', 'Only the control room is red');
+  assert.equal(await page.locator('#world').getAttribute('data-blackout'), 'true', 'The whole basement stays dark');
+  assert.equal(await page.evaluate(() => { performFloorChange('b2'); return world.dataset.blackout; }), 'true', 'B2 lights are off too');
+  assert.equal(await page.evaluate(() => { performFloorChange('f1'); return world.dataset.blackout; }), 'false', 'Upper floors keep their lights');
+  await page.evaluate(() => performFloorChange('b1'));
 
   // 소등 컷씬도 건너뛰면 결과(붉은 비상등 조명, 정신력 급감)를 남긴다.
   await enter(true);

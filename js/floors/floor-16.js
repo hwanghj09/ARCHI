@@ -82,14 +82,14 @@ const FLOOR16_ROOMS = interiorRooms(16, [
   ],
   // 밀 수 있는 진라면 박스(js/scene/pushables.js): 플레이어 허리 높이(90px)이고, 옆에서 막힌 채 걸으면 플레이어 이동 속도의 절반으로
   // 밀린다. 왼쪽은 처음 자리(중심 415)보다 더 밀리지 않고, 오른쪽은 계산대 왼쪽 끝(1150 - 312 / 2 + 312 * .0156 ≈ 999)에 박스
-  // 오른쪽 끝(중심 + 71)이 맞닿는 자리(중심 928)에서 멈춘다. 그 상태에서 박스 위에 서야 선반 항불안제에 손이 닿는다.
+  // 오른쪽 끝(중심 + 71)이 맞닿는 자리(중심 928)에서 멈춘다. 박스 위에 서면(어디까지 밀었든) 선반 항불안제에 손이 닿는다.
   movables: [{ kind: 'ramen-box', name: '진라면 박스', x: 344, width: 142, height: 90,
     pushable: { factor: .5, minX: 415, maxX: 928 } }],
-  // 상단 선반 약품 칸의 항불안제(위치는 선반 그림 속 컵라면 칸 위). condition(박스를 오른쪽 끝까지 밀고 그 위에 서기)을 채우기 전에는
+  // 상단 선반 약품 칸의 항불안제(위치는 선반 그림 속 컵라면 칸 위). condition(박스 위에 서기)을 채우기 전에는
   // 손이 닿지 않아 챙길 수 없고, 챙기면(gives) 선반에서 사라지고 가방에 들어간다(INVENTORY_ITEMS).
   fixtures: [
     { name: '항불안제', style: 'pill-item', x: 880, y: 246, width: 48, height: 45,
-      standYs: [floorY, floorY - 90], condition: () => playerOnPushableAtMax('진라면 박스'),
+      standYs: [floorY, floorY - 90], condition: () => playerOnPushable('진라면 박스'),
       gives: 'f16-antianxiety', hideWhenTaken: true,
       surface: 'card', image: 'assets/objects/items/antianxiety.png',
       message: '박스 위에 올라서니 손이 닿는다. 선반 위의 항불안제 한 통을 꺼냈다. 챙겼다.',
@@ -105,9 +105,9 @@ const FLOOR16_ROOMS = interiorRooms(16, [
     { file: 'food-cafe-table', size: [512, 256], worldWidth: 356, x: 950, name: '카페 테이블', gives: 'f16-badge',
       clue: '조현아 팀장(기술본부 ARCHI 프로젝트) 사원증을 챙겼다. 12~15층 하차 로비의 인증 게이트를 열 수 있다.',
       sprite: 'assets/objects/floor16/cafe-table-badge-states.png', stateBy: 'f16-badge',
-      message: '식은 라테 옆에 사원증 한 장이 엎어져 있다: "조현아 · 기술본부 ARCHI 프로젝트 팀장". 저녁에 두고 퇴근한 모양이다. 등록 해제된 수호의 출입증과 달리 아직 살아 있을지 모른다. 챙겼다.',
+      message: '식은 라테 옆에 사원증 한 장이 엎어져 있다: "조현아 · 기술본부 ARCHI 프로젝트 팀장". 저녁에 두고 퇴근한 모양이다.',
       surface: 'card', image: 'assets/objects/id-cards/jo-hyeon-a.png',
-      caption: '식은 라테 옆에 사원증 한 장이 엎어져 있다. 기술본부 ARCHI 프로젝트 팀장. 저녁에 두고 퇴근한 모양이다. 등록 해제된 수호의 출입증과 달리 아직 살아 있을지 모른다. 챙겼다.',
+      caption: '식은 라테 옆에 사원증 한 장이 엎어져 있다. 기술본부 ARCHI 프로젝트 팀장. 저녁에 두고 퇴근한 모양이다.',
       takenMessage: '테이블에는 식은 라테만 남아 있다. 조현아 팀장의 사원증은 이미 챙겼다.' },
     { file: 'food-coffee-bar', size: [512, 256], worldWidth: 296, x: 1330, name: '커피 바',
       message: '에스프레소 머신 옆 메모: "음성 주문 키오스크 또 먹통. 낮엔 아메리카노도 못 알아들음." 그 아래 다른 글씨: "새벽 청소 여사님 말로는 키오스크가 먼저 인사했대."',

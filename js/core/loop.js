@@ -47,11 +47,11 @@ function update() {
   const inputDirection = itemUseTime > 0 ? 0 : Number(directions.includes(1)) - Number(directions.includes(-1));
   const direction = applyZeroSanityTurnDelay(inputDirection); // 정신력 0%: 방향을 바꾸려면 0.2초 기다려야 한다
   if (itemUseTime > 0) jumpQueued = false;
-  const sprinting = sanity > 0 && !phoneLightOn && [...runKeys].some(key => keys.has(key)); // 정신력 0%에서는 뛸 수 없다
+  const sprinting = !phoneLightOn && [...runKeys].some(key => keys.has(key));
   interactionTime = direction || jumpQueued ? 0 : Math.max(0, interactionTime - step);
   if (direction) facing = direction;
   const paceFactor = sanitySpeedFactor();
-  const walkX = pushPushables(direction, direction * (sprinting ? runSpeed : speed) * paceFactor / 60);
+  const walkX = pushPushables(direction, direction * (sprinting ? runSpeed * (sanity <= 0 ? sanityZeroRunFactor : 1) : speed) * paceFactor / 60);
   Body.setVelocity(body, { x: walkX, y: jumpQueued && grounded ? -10.8 : body.velocity.y });
   jumpQueued = false;
   const oldX = body.position.x;

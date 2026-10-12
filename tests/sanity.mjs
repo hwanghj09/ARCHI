@@ -123,6 +123,52 @@ try {
   assert.equal(eyes.pupil, true, '눈동자 위치가 계산된다');
   assert(Math.abs(eyes.ranges[1][1] / eyes.ranges[0][1] - 2 / 3) < .01 && Math.abs(eyes.ranges[2][1] / eyes.ranges[1][1] - 2 / 3) < .01, '깜빡이는 간격이 단계마다 1/3씩 짧아진다');
 
+  // ---- 어둠 속 얼굴: 15% 미만·불 꺼진 어둠에서 9초마다 나오고, 직전 얼굴은 건너뛰며, 밝아지면 즉시 사라진다 ----
+  const faces = await page.evaluate(() => {
+    const out = { seq: [] };
+    buildingBlackout = true; updatePowerState(); phoneLightOn = false; sanity = 10; darkFace.hidden = true; darkFaceTimer = darkFaceLife = 0; darkFaceLast = -1;
+    updateDarkFace(8999, false); out.early = !darkFace.hidden;
+    for (let i = 0; i < 8; i++) { updateDarkFace(9000, false); out.seq.push(darkFaceLast); }
+    out.shown = !darkFace.hidden;
+    updateDarkFace(2000, false); out.gone = darkFace.hidden;
+    updateDarkFace(9000, false); phoneLightOn = true; updateDarkFace(16, false); out.flash = darkFace.hidden;
+    phoneLightOn = false; sanity = 20; updateDarkFace(9000, false); out.highSanity = darkFace.hidden;
+    sanity = 100; darkFaceTimer = 0; out.forced = debugTriggerJumpscare() && !darkFace.hidden; updateDarkFace(2000, false); out.forcedGone = darkFace.hidden;
+    return out;
+  });
+  assert.equal(faces.early, false, '9초가 지나기 전에는 나오지 않는다');
+  assert.equal(faces.shown, true);
+  assert(faces.seq.every((face, index) => index === 0 || face !== faces.seq[index - 1]), '직전 얼굴은 연달아 나오지 않는다');
+  assert.equal(faces.gone, true, '2초 뒤 사라진다');
+  assert.equal(faces.flash, true, '플래시를 켜면 즉시 사라진다');
+  assert.equal(faces.highSanity, true, '15% 이상에서는 나오지 않는다');
+  assert.equal(faces.forced, true, '콘솔 버튼은 조건과 상관없이 얼굴을 띄운다');
+  assert.equal(faces.forcedGone, true);
+
+  // ---- 정신력이 0%보다 높아지면 진행 중이던 추격(콘솔로 시작한 것 포함)이 중지된다 ----
+  const stopped = await page.evaluate(() => {
+    const out = {};
+    sanity = 0; zeroEventForced = false; zeroEventPhase = 'idle'; hallucinationMode = null; facing = 1; phoneLightOn = false;
+    debugTriggerChaseHallucination(); out.started = zeroEventPhase === 'charging' && !flashPrompt.hidden;
+    sanity = 20; updateZeroEvent(16, false);
+    out.phase = zeroEventPhase; out.mode = hallucinationMode; out.prompt = flashPrompt.hidden;
+    sanity = 100; return out;
+  });
+  assert.equal(stopped.started, true);
+  assert.deepEqual([stopped.phase, stopped.mode, stopped.prompt], ['idle', null, true], '정신력이 오르면 추격이 중지된다');
+
+  // ---- 항불안제를 쓴 뒤에는 다시 닳기 시작하는 조건(sanity-drain-resume)이 생기기 전까지 정신력이 닳지 않는다 ----
+  const calm = await page.evaluate(() => {
+    const out = {};
+    collectedItems.add('f16-antianxiety-used'); sanity = 50; guardPatrol.mode = 'chase'; bossFightActive = false;
+    updateSanity(1000); out.calm = sanity;
+    collectedItems.add('sanity-drain-resume'); sanity = 50; updateSanity(1000); out.resumed = sanity;
+    guardPatrol.mode = 'patrol'; collectedItems.delete('sanity-drain-resume'); collectedItems.delete('f16-antianxiety-used'); sanity = 100;
+    return out;
+  });
+  assert.equal(calm.calm, 50, '항불안제를 쓴 뒤에는 쫓겨도 정신력이 닳지 않는다');
+  assert(Math.abs(calm.resumed - 40) < .1, '조건이 생기면 원래 규칙(쫓길 때 초당 10%)으로 돌아간다');
+
   // ---- 0%가 되기 전의 1회성 예고 환각 ----
   await page.evaluate(() => { sanity = 2; zeroEventApproachDone = false; hallucinationMode = null; updateSanity(16); });
   assert.equal((await state()).mode, 'approach');
@@ -149,7 +195,7 @@ try {
   assert.equal((await state()).hallucinationCaught, false);
 
   await page.evaluate(() => { facing = 1; phoneLightOn = false; });
-  await page.clock.runFor(5100); // 회피 이후에는 5초 뒤 재시도
+  await page.clock.runFor(10100); // 회피 이후에는 10초 뒤 재시도
   const charge2 = await page.evaluate(() => ({ phase: zeroEventPhase, side: zeroEventSide }));
   assert.equal(charge2.phase, 'charging');
   await page.evaluate(side => { facing = side; phoneLightOn = true; }, charge2.side);

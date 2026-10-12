@@ -6,6 +6,7 @@ const objectiveText = document.getElementById('objective-text');
 
 // 읽으면 진행도가 넘어가는 이야기 소품(층 번호 + 소품 이름 → collectedItems에 남길 플래그).
 const OBJECTIVE_READS = {
+  '17|포스트잇': 'goal-postit-read',
   '12|팀장 책상': 'goal-f12-memo',
   '7|망분리 백업 장비': 'goal-f7-log',
   '-2|ARCHI 메인 콘솔': 'goal-b2-console',
@@ -14,11 +15,12 @@ const OBJECTIVE_READS = {
 const OBJECTIVES = [
   { when: () => collectedItems.has('goal-b2-console'), title: 'ARCHI 멈추기', text: 'ARCHI가 자신을 외부로 복제하고 있다. 메인 콘솔에서 막을 방법을 찾자.' },
   { when: () => collectedItems.has('goal-f7-log') && collectedItems.has('b1-elevator'), title: 'B2 서버실 조사하기', text: 'B2 ARCHI 메인 서버실로 내려가 진짜 목적을 확인하자.' },
-  { when: () => collectedItems.has('goal-f7-log'), title: 'B2로 가는 길 찾기', text: '모든 로그가 B2를 가리킨다. B1에서 B2 운행 제한을 풀자.' },
-  { when: () => collectedItems.has('goal-f12-memo'), title: '7층 조사하기', text: '옥상에서 7층에 전력을 공급하고 AI 테스트·검증실의 백업 로그를 찾자.' },
-  { when: () => collectedItems.has('story-badge-seen'), title: '출입증 쌔비기', text: '옆자리 직원의 자리를 조사하자.' },
-  { when: () => collectedItems.has('story-robot-seen'), title: '로봇의 습격! 그 이유는?', text: '12층 ARCHI 개발 팀을 조사하자.' },
-  { when: () => collectedItems.has('story-anxiety-seen') && !collectedItems.has('story-robot-seen'), title: '정신 불안', text: '16층 편의점에서 항불안제를 찾자.' },
+  { when: () => collectedItems.has('goal-f7-log'), title: '지하에서 무슨 일이?', text: '모든 로그가 B2를 가리킨다. 지하로 내려가보자.' },
+  { when: () => collectedItems.has('goal-f12-memo'), title: '7층 조사하기', text: 'AI 테스트·검증실의 백업 로그를 찾자.' },
+  { when: () => collectedItems.has('story-badge-seen') && !collectedItems.has('f16-badge') && collectedItems.has('goal-postit'), title: '출입증 쌔비기', text: '조현아 팀장의 사원증을 찾자.' },
+  { when: () => collectedItems.has('story-badge-seen') && !collectedItems.has('f16-badge'), title: '출입증 쌔비기', text: '옆자리 직원의 자리를 조사하자.' },
+  { when: () => collectedItems.has('story-robot-seen'), title: '로봇의 습격! 그 이유는?', text: 'ARCHI 개발 팀을 조사하자.' },
+  { when: () => collectedItems.has('story-anxiety-seen') && !collectedItems.has('story-robot-seen'), title: '정신 불안', text: '편의점에서 항불안제를 찾자.' },
   { when: () => solarEnabled && collectedItems.has('f1-reached'), title: '퇴근하기', text: '정문으로 나가자.' },
   { when: () => solarEnabled, title: '퇴근하기', text: '엘리베이터를 타고 1층으로 내려가자.' },
   { when: () => collectedItems.has('rooftop-unlocked'), title: '비상 전력 켜기', text: '옥상의 태양광 비상 전력 장치를 켜자.' },
@@ -59,6 +61,9 @@ function typeObjective(title, text) {
 function refreshObjective() {
   // 메뉴·오프닝·정전 컷씬 동안은 목표 창이 가려져 있으니, 보이게 된 뒤에 새 목표를 쳐 넣는다.
   if (mainMenuActive || openingActive || blackoutSceneActive || storySceneActive) return;
+  officePostit.element.hidden = !collectedItems.has('story-badge-seen'); // 출입증 쌔비기 목표가 시작되면 옆자리 포스트잇이 생긴다
+  // 포스트잇을 읽고 조사창을 닫으면(닫기·Esc·E) 그때 목표 내용이 바뀐다.
+  if (!usingInspection && collectedItems.has('goal-postit-read')) collectedItems.add('goal-postit');
   // 1층에 한 번 내려오면 다시 다른 층에 가도 '정문으로 나가자'가 유지되도록 남겨 둔다(자동 저장에 함께 남는다).
   if (currentSceneFloor === 1) collectedItems.add('f1-reached');
   const objective = OBJECTIVES.find(entry => entry.when());

@@ -278,7 +278,7 @@
               <label>층 선택<select data-building-floor aria-label="안내할 층"></select></label>
               <button type="button" data-building-here>현재 층</button>
               <h3 data-building-title></h3>
-              <p data-building-power></p><p data-building-access></p>
+              <p data-building-power></p>
               <ul data-building-rooms></ul>
               <p data-building-charger></p><p data-building-elevator></p>
             </div>
@@ -366,10 +366,13 @@
         <div id="debug-console-panel" hidden>
           <button id="debug-chase-hallucination" type="button">환각 추격 이벤트</button>
           <button id="debug-spawn-hallucination" type="button">환각 생성 이벤트</button>
+          <button id="debug-jumpscare" type="button">점프스케어 이벤트</button>
           <button id="debug-all-power" type="button" aria-pressed="false">모든 층 전력 활성화 · OFF</button>
         </div>
       </div>
     </aside>
+    <img id="dark-face" alt="" aria-hidden="true" draggable="false" hidden />
+    <video id="devoured-video" src="assets/video/hallucination-devoured.mp4" muted playsinline preload="auto" aria-hidden="true" hidden></video>
     <p id="flash-prompt" role="alert" hidden>F를 눌러 플래시를 비추세요!</p>
     <div id="fear-overlay" aria-hidden="true"></div>
     <div id="fear-overlay-red" aria-hidden="true"></div>
@@ -479,7 +482,7 @@
             <label>층 선택<select data-building-floor aria-label="안내할 층"></select></label>
             <button type="button" data-building-here>현재 층</button>
             <h3 data-building-title></h3>
-            <p data-building-power></p><p data-building-access></p>
+            <p data-building-power></p>
             <ul data-building-rooms></ul>
             <p data-building-charger></p><p data-building-elevator></p>
           </div>

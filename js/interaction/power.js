@@ -22,7 +22,9 @@ function solarPowerStatus() {
 function updatePowerState() {
   const solarPowered = solarPoweredFloors.includes(currentSceneFloor);
   const aboveGround = currentSceneFloor >= 1 && currentSceneFloor <= 17;
-  const blackout = aboveGround && buildingBlackout && !solarPowered;
+  // B1 방재 관제실의 소등 컷씬(cctv-event.js)이 끝나면 지하(B1·B2)의 전등이 모두 꺼진다. 모든 층 전력 활성화(콘솔)를 켜면 다시 켜진다.
+  const undergroundLightsOut = currentSceneFloor < 0 && collectedItems.has('b1-lights-out') && !allPowerOverride;
+  const blackout = (aboveGround && buildingBlackout && !solarPowered) || undergroundLightsOut;
   world.dataset.blackout = String(blackout);
   world.dataset.powered = String(floorHasPower(currentSceneFloor));
   refreshBackgroundPower();

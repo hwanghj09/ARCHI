@@ -42,7 +42,7 @@ panelFloors.forEach((floor, index) => {
       return;
     }
     if (button.dataset.restricted && selectedFloor !== floor && !collectedItems.has(restrictionItem)) {
-      cabinStatus.textContent = `${button.title}은 운행 제한 중이다. 버튼 옆 표시: "SYSTEM 제한 · 해제는 B1 방재 관제실".`;
+      cabinStatus.textContent = '버튼을 눌렀으나 아무 반응도 없었다.';
       return;
     }
     if (selectedFloor !== null) return;

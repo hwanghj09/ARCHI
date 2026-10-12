@@ -15,14 +15,14 @@ const STORY_SCENES = [
     flag: 'story-anxiety-seen', delay: 3000, ready: () => collectedItems.has('f1-chase-ended'),
     lines: ['왜 경비 로봇이 나를 공격하려고 했던 거지?',
       '으윽.. 야근해서 힘든 와중에 이런 일을 겪으니 너무 힘들다..',
-      '16층 편의점에 가서 항상 복용하던 항불안제를 찾아야겠어..'],
+      '편의점에 가서 항상 복용하던 항불안제를 찾아야겠어..'],
   },
   { // 항불안제를 사용하고(정신 불안 목표 완료) 4초 뒤.
     flag: 'story-robot-seen', delay: 4000, ready: () => collectedItems.has('story-anxiety-seen') && collectedItems.has('f16-antianxiety-used'),
     lines: ['휴.. 겨우 정신을 차렸네..',
       '그래서 경비 로봇이 왜 날 공격했던거지?',
       '그 로봇은 ARCHI 개발 팀에서 만든 로봇이였나?',
-      '12층 ARCHI 개발 팀을 조사해보자.'],
+      'ARCHI 개발 팀을 조사해보자.'],
   },
   { // 로봇의 습격! 그 이유는? 목표 도중 12~15층 게이트에 출입증을 태우고, 그 조사창을 닫은 직후.
     flag: 'story-badge-seen', delay: 300, ready: () => collectedItems.has('story-gate-tagged'),

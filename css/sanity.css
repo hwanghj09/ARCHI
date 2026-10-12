@@ -31,6 +31,8 @@ body:has(#world[data-opening]) #red-eyes, body:has(#world[data-blackout-scene]) 
 #fear-overlay, #fear-overlay-red { position: fixed; z-index: 10; inset: 0; pointer-events: none; opacity: 0;
   transition: opacity .7s, filter .7s; background: radial-gradient(ellipse at center, transparent 42%, #000 92%); }
 #fear-overlay-red { background: radial-gradient(ellipse at center, transparent 30%, #6e0f0f 92%); }
+/* 층 표시·가방·목표 창은 화면 연출(비네트·흐림, z-index 10) 위에 두어 메뉴 버튼처럼 함께 흐려지지 않게 한다. */
+#stage > header, #inventory-button, #objective { z-index: 11; }
 body[data-fear-tier="1"] #fear-overlay { opacity: .4; }
 body[data-fear-tier="2"] #fear-overlay { opacity: .55; filter: blur(1.5px); }
 body[data-fear-tier="3"] #fear-overlay { opacity: .62; filter: blur(1.5px); }
@@ -130,3 +132,14 @@ body[data-hallucinating="true"] #stage { animation: screen-tremor .16s steps(2) 
 #flash-prompt[hidden] { display: none; }
 @keyframes flash-prompt-blink { 0% { opacity: 1; } 50% { opacity: .15; } }
 @media (prefers-reduced-motion: reduce) { #flash-prompt { animation: none; } }
+
+/* 어둠 속 얼굴(15% 미만, sanity.js의 updateDarkFace): 검은 바탕은 screen 합성으로 비치고, 가장자리는 가려 흐리게 번지며 2초 동안 흐릿 → 선명 → 흐릿. */
+#dark-face { position: fixed; z-index: 9; left: 16%; top: 50%; height: 52vh; max-width: 40vw; object-fit: contain; transform: translate(-50%, -50%); pointer-events: none;
+  mix-blend-mode: screen; mask-image: radial-gradient(ellipse closest-side, #000 45%, transparent 100%); animation: dark-face 2s ease-in-out forwards; }
+#dark-face[hidden] { display: none; }
+@keyframes dark-face { 0%, 100% { opacity: 0; filter: blur(14px); } 50% { opacity: .6; filter: blur(0); } }
+@media (prefers-reduced-motion: reduce) { #dark-face { animation: none; opacity: .4; } }
+
+/* 환각에게 삼켜질 때의 영상: 화면의 모든 요소(컷씬·창 포함) 앞에서 재생되고, 끝나면 사라져 기존 화면(게임 오버 창)이 드러난다. */
+#devoured-video { position: fixed; inset: 0; z-index: 1000; width: 100vw; height: 100dvh; object-fit: cover; background: #000; pointer-events: auto; }
+#devoured-video[hidden] { display: none; }

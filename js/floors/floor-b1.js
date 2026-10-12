@@ -33,10 +33,10 @@ const B1_LAYOUT = {
         { as: 'field', label: '비고', text: '야간 순찰 경로 설정 SYSTEM.' }] },
     { name: '비상 전원 안내판', x: 3190, y: 260, width: 210, height: 130, style: 'power-notice',
       lines: ['비상 전원 안내', '정전 시 B1 · B2 자체 운전'],
-      message: '안내판: "정전 시 B1·B2는 비상 발전기와 UPS로 계속 운전됩니다. 지상층은 옥상 태양광 비상 전원으로 한 번에 한 층만 공급합니다. 비상 전원 배분: SYSTEM 자동."',
+      message: '안내판: "정전 시 B1·B2는 비상 발전기와 UPS로 계속 운전됩니다. 비상 전원 배분: SYSTEM 자동."',
       surface: 'document', look: 'notice',
       writing: [{ as: 'title', text: '비상 전원 안내', ink: 'red' }, { text: '정전 시 B1 · B2 자체 운전', align: 'center' }, { as: 'rule' },
-        '정전 시 B1·B2는 비상 발전기와 UPS로 계속 운전됩니다.', '지상층은 옥상 태양광 비상 전원으로 한 번에 한 층만 공급합니다.', { as: 'rule' },
+        '정전 시 B1·B2는 비상 발전기와 UPS로 계속 운전됩니다.', { as: 'rule' },
         { as: 'field', label: '비상 전원 배분', text: 'SYSTEM 자동.' }] },
   ],
   props: [

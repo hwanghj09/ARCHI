@@ -28,10 +28,9 @@ function pushPushables(direction, velocityX) {
   return velocityX;
 }
 
-// 상자가 오른쪽 끝(maxX)에 닿아 있는가, 플레이어가 그 위(발이 윗면)에 서 있는가: 16층 선반 항불안제의 손 닿는 조건.
-function playerOnPushableAtMax(name) {
+// 플레이어가 그 상자 위(발이 윗면)에 서 있는가: 16층 선반 항불안제의 손 닿는 조건(상자를 어디까지 밀었는지는 상관없다).
+function playerOnPushable(name) {
   return movingParts.some(part => pushableOf(part) && part.name === name &&
-    Math.abs(part.body.position.x - part.pushable.maxX) < 1 &&
     Math.abs(body.bounds.max.y - (part.body.position.y - part.height / 2)) < 3 &&
     Math.abs(body.position.x - part.body.position.x) < part.width / 2 + 20);
 }

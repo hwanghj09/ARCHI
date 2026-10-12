@@ -238,11 +238,13 @@ function updateCctvLights(elapsed) {
   updateCctvDim(phase === 'out' || flickerOff ? 1 : 0);
 }
 
-// 소등 결과를 한 번만 남긴다(건너뛰어도 같다): 붉은 비상등 조명이 남고, 정신력이 한 번에 깎인다.
+// 소등 결과를 한 번만 남긴다(건너뛰어도 같다): 붉은 비상등 조명이 남고, 지하(B1·B2)의 전등이 모두 꺼지고, 정신력이 한 번에 깎인다.
 function commitCctvLightsOut() {
   refreshRoomAlarm(floorById.get(dynamicFloorId));
   if (collectedItems.has(cctvLightsOutItem)) return;
   collectedItems.add(cctvLightsOutItem);
+  updatePowerState(); // 지하(B1·B2)의 전등이 모두 꺼진다(power.js)
+  collectedItems.add('sanity-drain-resume'); // 항불안제 뒤에 멈춰 있던 정신력 감소가 이 컷씬 뒤로 다시 정상적으로 이어진다(sanity.js)
   sanity = Math.max(0, sanity - cctvLightsSanityLoss);
   refreshSanity();
 }

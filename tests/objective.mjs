@@ -77,11 +77,11 @@ try {
   await page.locator('#story-scene').waitFor({ state: 'visible' });
   assert.equal(await page.locator('#story-caption').textContent(), '왜 경비 로봇이 나를 공격하려고 했던 거지?');
   await page.waitForFunction(() => storyCaption.textContent.startsWith('으윽'), null, { timeout: 5000 });
-  await page.waitForFunction(() => storyCaption.textContent.startsWith('16층 편의점'), null, { timeout: 5000 });
+  await page.waitForFunction(() => storyCaption.textContent.startsWith('편의점에 가서'), null, { timeout: 5000 });
   await page.keyboard.press('Escape');
   assert(await page.locator('#story-scene').isHidden(), 'Esc ends the scene');
   assert.equal(await page.evaluate(() => collectedItems.has('story-anxiety-seen')), true);
-  await waitTyped('정신 불안', '16층 편의점에서 항불안제를 찾자.');
+  await waitTyped('정신 불안', '편의점에서 항불안제를 찾자.');
 
   // 항불안제를 챙기거나 사용해도 목표는 유지되고, 사용하고 4초 뒤 두 번째 컷씬이 나오고, 끝나면 '로봇의 습격! 그 이유는?' 목표가 생긴다.
   await page.evaluate(() => collectedItems.add('f16-antianxiety'));
@@ -92,10 +92,10 @@ try {
   assert.equal(await page.evaluate(() => currentObjective.title), '정신 불안', '사용한 뒤 컷씬이 나오기 전까지도 목표가 유지된다');
   await page.locator('#story-scene').waitFor({ state: 'visible', timeout: 10000 });
   assert.equal(await page.locator('#story-caption').textContent(), '휴.. 겨우 정신을 차렸네..');
-  await page.waitForFunction(() => storyCaption.textContent.startsWith('12층 ARCHI'), null, { timeout: 12000 });
+  await page.waitForFunction(() => storyCaption.textContent.startsWith('ARCHI 개발 팀'), null, { timeout: 12000 });
   await page.keyboard.press('Escape');
   assert(await page.locator('#story-scene').isHidden());
-  await waitTyped('로봇의 습격! 그 이유는?', '12층 ARCHI 개발 팀을 조사하자.');
+  await waitTyped('로봇의 습격! 그 이유는?', 'ARCHI 개발 팀을 조사하자.');
 
   // 로봇의 습격! 그 이유는? 목표 도중 게이트에 출입증을 태우면(조사창을 닫은 뒤) 세 번째 컷씬이 나오고, 끝나면 '출입증 쌔비기' 목표가 생긴다.
   await page.evaluate(() => collectedItems.add('story-gate-tagged'));
@@ -104,9 +104,28 @@ try {
   await page.waitForFunction(() => storyCaption.textContent === '잠깐 빌리지 뭐', null, { timeout: 12000 });
   await page.keyboard.press('Escape');
   await waitTyped('출입증 쌔비기', '옆자리 직원의 자리를 조사하자.');
+  assert.equal(await page.evaluate(() => officePostit.element.hidden), false, '출입증 쌔비기가 시작되면 옆자리 포스트잇이 생긴다');
+  // 포스트잇을 조사하면 같은 제목 아래 내용이 '조현아 팀장의 사원증을 찾자.'로 바뀐다.
+  await page.evaluate(() => {
+    performFloorChange('f17', null); performRoomChange?.();
+    Body.setPosition(body, { x: officePostit.x + officePostit.width / 2, y: floorY - 81 });
+    Body.setVelocity(body, { x: 0, y: 0 }); grounded = true; updateInteraction();
+  });
+  await page.keyboard.press('e');
+  await page.waitForTimeout(300);
+  assert.equal(await page.evaluate(() => currentObjective.text), '옆자리 직원의 자리를 조사하자.', '조사창이 열려 있는 동안은 목표가 그대로다');
+  await page.keyboard.press('Escape');
+  await waitTyped('출입증 쌔비기', '조현아 팀장의 사원증을 찾자.');
+
+  // 사원증을 챙기면 목표가 '로봇의 습격! 그 이유는?'으로 돌아가고, 12층 게이트 앞에서 컷씬이 다시 나오지 않는다.
+  await page.evaluate(() => { collectedItems.add('f16-badge'); collectedItems.delete('story-gate-tagged'); });
+  await waitTyped('로봇의 습격! 그 이유는?', 'ARCHI 개발 팀을 조사하자.');
+  await page.evaluate(() => { performFloorChange('f12'); });
+  await page.waitForTimeout(500);
+  assert(await page.locator('#story-scene').isHidden(), '컷씬은 다시 나오지 않는다');
 
   assert.equal(await titleAfter(() => collectedItems.add('goal-f12-memo')), '7층 조사하기');
-  assert.equal(await titleAfter(() => collectedItems.add('goal-f7-log')), 'B2로 가는 길 찾기');
+  assert.equal(await titleAfter(() => collectedItems.add('goal-f7-log')), '지하에서 무슨 일이?');
   assert.equal(await titleAfter(() => collectedItems.add('b1-elevator')), 'B2 서버실 조사하기');
   assert.equal(await titleAfter(() => collectedItems.add('goal-b2-console')), 'ARCHI 멈추기');
 
