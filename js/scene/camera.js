@@ -35,4 +35,5 @@ function render() {
   world.style.transform = `translate(${-cameraX * scale - cameraFocus.x * scale * zoomed + cameraShake.x}px, ` +
     `${stage.clientHeight - worldHeight * scale - cameraFocus.y * scale * zoomed + cameraShake.y}px) scale(${scale * cameraZoom})`;
   renderHallucination();
+  updateRedEyes();
 }

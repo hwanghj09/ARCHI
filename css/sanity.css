@@ -22,7 +22,7 @@ body:has(#world[data-blackout-scene]) #sanity-hud,
 body:has(#world[data-opening]) #fear-overlay, body:has(#world[data-opening]) #fear-overlay-red,
 body:has(#world[data-blackout-scene]) #fear-overlay, body:has(#world[data-blackout-scene]) #fear-overlay-red,
 body:has(#world[data-opening]) #blink-flash, body:has(#world[data-blackout-scene]) #blink-flash,
-body:has(#world[data-opening]) #wall-eyes, body:has(#world[data-blackout-scene]) #wall-eyes { visibility: hidden; }
+body:has(#world[data-opening]) #red-eyes, body:has(#world[data-blackout-scene]) #red-eyes { visibility: hidden; }
 @media (max-width: 480px) { #sanity-hud { width: 136px; padding: 8px 10px; } }
 @media (max-height: 480px) { #sanity-hud { top: 106px; } }
 @media (prefers-reduced-motion: reduce) { #hallucination-shadow { filter: blur(.8px); } }
@@ -42,13 +42,19 @@ body[data-fear-tier="5"] #fear-overlay { opacity: .8; filter: blur(3.2px); }
 #blink-flash[data-active="true"] { opacity: 1; transition: opacity .07s ease-in; }
 #blink-flash:not([data-active="true"]) { transition: opacity .22s ease-out; }
 
-/* 10% 미만: 깜빡일 때마다 벽 쪽에 붉은 눈이 하나씩 더 생긴다. */
-#wall-eyes { position: fixed; z-index: 9; inset: 0; pointer-events: none; overflow: hidden; }
-.wall-eye { position: absolute; width: 34px; height: 12px; display: flex; gap: 10px; justify-content: center; opacity: 0;
-  animation: wall-eye-in .5s ease-out forwards; }
-.wall-eye::before, .wall-eye::after { content: ''; width: 8px; height: 8px; border-radius: 50%;
-  background: radial-gradient(circle, #ff3b3b 0%, #6e0707 70%, transparent 100%); box-shadow: 0 0 6px 1px #ff3b3b99; }
-@keyframes wall-eye-in { from { opacity: 0; transform: scale(.4); } to { opacity: .85; transform: scale(1); } }
+/* 10% 미만: 깜빡일 때마다 월드의 일반 배경 위에 붉은 눈이 하나씩 더 생긴다(sanity.js의 spawnRedEye). 어둠 막(z-index 5)보다 문서 순서가 뒤라
+   어둠 속에서도 보이고, 어두울 때는 희미하게 맥동하며 빛난다. 가운데 검은 눈동자(::before)는 --px/--py만큼 수호 쪽으로 움직인다. */
+#red-eyes { position: absolute; inset: 0; z-index: 5; pointer-events: none; --eye-opacity: .85; }
+.red-eye { position: absolute; margin: -26px 0 0 -26px; border-radius: 50%; opacity: 0;
+  background: url(../assets/ui/hallucination/red-eye.png) center / 100% 100% no-repeat; filter: drop-shadow(0 0 6px #ff2a2a88);
+  animation: red-eye-in .5s ease-out forwards; }
+.red-eye::before { content: ''; position: absolute; left: 50%; top: 50%; width: 32%; height: 32%; margin: -16% 0 0 -16%; border-radius: 50%;
+  background: radial-gradient(circle, #000 0 62%, #000c 80%, transparent 100%); transform: translate(var(--px, 0px), var(--py, 0px)); }
+@keyframes red-eye-in { from { opacity: 0; transform: scale(.4); } to { opacity: var(--eye-opacity); transform: scale(1); } }
+@keyframes red-eye-glow { 0%, 100% { opacity: .5; } 50% { opacity: .85; } }
+#world:is([data-blackout="true"], [data-dark="true"][data-room="dynamic"], [data-lights="off"][data-floor="17"]) #red-eyes { --eye-opacity: .6; }
+#world:is([data-blackout="true"], [data-dark="true"][data-room="dynamic"], [data-lights="off"][data-floor="17"]) .red-eye {
+  filter: drop-shadow(0 0 12px #ff2a2add) brightness(1.2); animation: red-eye-in .5s ease-out forwards, red-eye-glow 3.2s ease-in-out .5s infinite; }
 
 /* 30% 미만: 더 지친 모습(새 그림이 없어 필터로 대신한다) + 이동 속도 저하는 config.js의 sanitySpeedFactor가 맡는다. */
 body[data-weary="true"] #player { filter: grayscale(.35) brightness(.82) contrast(1.05); }
@@ -108,7 +114,7 @@ body[data-hallucinating="true"] #stage { animation: screen-tremor .16s steps(2) 
 
 @media (prefers-reduced-motion: reduce) {
   #hallucinations[data-mode], #hallucinations::after, body[data-hallucinating="true"] #stage, #computer-fear-window { animation: none; }
-  .wall-eye { animation: none; opacity: .85; }
+  .red-eye, :is(#world) .red-eye { animation: none; opacity: var(--eye-opacity); }
 }
 
 /* 테스트용 콘솔 창: 정신력 창 맨 아래. 누르면 환각 이벤트 버튼 두 개가 아래로 펼쳐진다. */
@@ -117,3 +123,10 @@ body[data-hallucinating="true"] #stage { animation: screen-tremor .16s steps(2) 
 #debug-console button:hover { border-color: #c9a13b; }
 #debug-console-panel { display: grid; gap: 6px; margin-top: 6px; }
 #debug-console-panel[hidden] { display: none; }
+
+
+/* 환각 추격(돌진) 이벤트 안내: 화면 중앙보다 살짝 아래에서 깜빡인다. 환각이 사라지면 함께 사라진다. */
+#flash-prompt { position: fixed; z-index: 12; left: 50%; top: 58%; transform: translateX(-50%); margin: 0; padding: 8px 18px; border: 1px solid #c97878; background: #1b0d10e6; color: #ffe3dc; font: bold clamp(16px, 2.4vw, 24px) Arial, sans-serif; text-align: center; white-space: nowrap; pointer-events: none; animation: flash-prompt-blink .6s steps(1) infinite; }
+#flash-prompt[hidden] { display: none; }
+@keyframes flash-prompt-blink { 0% { opacity: 1; } 50% { opacity: .15; } }
+@media (prefers-reduced-motion: reduce) { #flash-prompt { animation: none; } }
