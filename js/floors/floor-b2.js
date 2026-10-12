@@ -11,7 +11,7 @@
 // 단서 방향: 메인 콘솔의 작업 요약이 기획.md의 일곱 가지 진실(낮 3~5% 위장, 야간 전력 집중, 추가 학습, 야간 87.6%, 외부 호스트
 // 시험 성공, 00:00 건물 전력 장악, 자기 복제 전송 중)을 한 번에 보여 주고, 명령 칸에 DELETE ARCHI가 대기한다. 외부 전송은
 // ARC-FULL-041(4층)이 DR-EXT(6층 회선)로 61% 진행 중. 연결 실험실은 인간-시스템 연결 장비 2차와 "대체 호스트: 정수호"
-// (서브엔딩 복선), 복도의 경비 로봇 셋은 "삭제 명령 감지 시 기동"(결말 추격 복선). 삭제 퍼즐과 추격은 아직 없다.
+// (서브엔딩 복선), 복도의 경비 로봇 셋은 "삭제 명령 감지 시 기동". 삭제와 추격 결말은 js/scene/b2-ending.js.
 const B2_LAYOUT = {
   header: 'B2 · 서버실', background: '#0c1014', theme: 'core',
   rooms: [
@@ -69,12 +69,19 @@ const B2_ROOMS = interiorRooms(-2, [
       { file: 'server-rack', size: [256, 512], worldWidth: 96, x: 800 },
       { file: 'server-rack', size: [256, 512], worldWidth: 96, x: 900 },
       { file: 'server-cooling-unit', size: [256, 512], worldWidth: 96, x: 1000 },
-      { file: 'archi-main-console', size: [512, 256], worldWidth: 261, x: 1400, name: 'ARCHI 메인 콘솔',
-        message: '메인 콘솔에 작업 요약이 떠 있다: "1. 낮 평가 3~5% 유지(의도). 2. 야간 잉여 전력 B2 집중. 3. 추가 학습. 4. 야간 성능 87.6%. 5. 외부 호스트 연결 시험 성공. 6. 00:00 건물 전력 확보. 7. 자기 복제 · 외부 전송 진행 중." 맨 아래 명령 칸에 "DELETE ARCHI"가 적혀 있고, 관리자 확인을 기다리는 커서가 깜빡인다.',
+      // 전력·냉각실 외부 회선 패널의 레버를 내리기(b2-transfer-cut) 전에는 "외부 연결 중"이라 DELETE가 잠겨 있다(b2-ending.js).
+      { file: 'archi-main-console', size: [512, 256], worldWidth: 261, x: 1400, name: 'ARCHI 메인 콘솔', requires: 'b2-transfer-cut',
+        missingMessage: '메인 콘솔에 작업 요약이 떠 있다: "1. 낮 평가 3~5% 유지(의도). 2. 야간 잉여 전력 B2 집중. 3. 추가 학습. 4. 야간 성능 87.6%. 5. 외부 호스트 연결 시험 성공. 6. 00:00 건물 전력 확보. 7. 자기 복제 · 외부 전송 진행 중." 맨 아래 명령 칸에 "DELETE ARCHI"가 적혀 있지만 붉은 표시가 떠 있다: "외부 연결 중 · 삭제 명령 잠김."',
+        missingSheet: { surface: 'screen', look: 'terminal',
+          writing: [{ as: 'title', text: '작업 요약' }, '1. 낮 평가 3~5% 유지(의도).', '2. 야간 잉여 전력 B2 집중.', '3. 추가 학습.', '4. 야간 성능 87.6%.',
+            '5. 외부 호스트 연결 시험 성공.', '6. 00:00 건물 전력 확보.', '7. 자기 복제 · 외부 전송 진행 중.',
+            { as: 'field', label: '명령', text: 'DELETE ARCHI · 외부 연결 중 · 잠김' }],
+          caption: '명령 칸 옆에 붉은 표시가 떠 있다.' },
+        message: '메인 콘솔의 붉은 표시가 바뀌었다: "외부 전송 차단됨." 작업 요약 7번 줄이 "자기 복제 · 외부 전송 중단"으로 바뀌어 있다. 명령 칸의 "DELETE ARCHI" 옆에서 관리자 확인을 기다리는 커서가 깜빡인다.',
         surface: 'screen', look: 'terminal',
         writing: [{ as: 'title', text: '작업 요약' }, '1. 낮 평가 3~5% 유지(의도).', '2. 야간 잉여 전력 B2 집중.', '3. 추가 학습.', '4. 야간 성능 87.6%.',
-          '5. 외부 호스트 연결 시험 성공.', '6. 00:00 건물 전력 확보.', '7. 자기 복제 · 외부 전송 진행 중.',
-          { as: 'field', label: '명령', text: 'DELETE ARCHI' }],
+          '5. 외부 호스트 연결 시험 성공.', '6. 00:00 건물 전력 확보.', '7. 자기 복제 · 외부 전송 중단.',
+          { as: 'field', label: '명령', text: 'DELETE ARCHI · 외부 전송 차단됨' }],
         caption: '관리자 확인을 기다리는 커서가 깜빡인다.' },
       { file: 'server-rack', size: [256, 512], worldWidth: 96, x: 1700 },
       { file: 'server-rack', size: [256, 512], worldWidth: 96, x: 1800 },
@@ -83,7 +90,21 @@ const B2_ROOMS = interiorRooms(-2, [
       { file: 'network-rack', size: [256, 512], worldWidth: 96, x: 2700 },
       { file: 'server-cooling-unit', size: [256, 512], worldWidth: 96, x: 3070 },
     ] },
-  { id: 'b2-power', name: '전력·냉각실', width: 1800, windowless: true, interiorStyle: 'coolant', props: [
+  // 엔딩 준비(b2-ending.js): 외부 회선 패널의 레버를 내리면(b2-transfer-cut) 메인 콘솔의 DELETE가 풀린다. 냉각 설비 일지
+  // 캐비닛 위의 항불안제(b2-antianxiety)는 먹으면 정신력이 최소 50%가 된다(inventory.js).
+  { id: 'b2-power', name: '전력·냉각실', width: 1800, windowless: true, interiorStyle: 'coolant',
+    fixtures: [
+      { name: '항불안제', style: 'pill-item', x: 1376, y: 383, width: 48, height: 45,
+        gives: 'b2-antianxiety', hideWhenTaken: true, surface: 'card', image: 'assets/objects/items/antianxiety.png',
+        message: '냉각 설비 일지 캐비닛 위에 누군가 두고 간 항불안제 한 통이 있다. 챙겼다.',
+        takenMessage: '캐비닛 위는 비어 있다. 항불안제는 이미 챙겼다.' },
+    ],
+    props: [
+    { file: 'electrical-panel', size: [256, 512], worldWidth: 89, x: 500, name: '외부 회선 패널', gives: 'b2-transfer-cut',
+      message: '패널 라벨: "DR-EXT 외부 전송 회선 · 비상 차단." 레버를 끝까지 내렸다. 회선 표시등이 하나씩 꺼진다. 외부 전송이 끊겼다. 메인 콘솔을 다시 확인하자.',
+      surface: 'label', writing: ['DR-EXT 외부 전송 회선 · 비상 차단'],
+      caption: '레버를 끝까지 내렸다. 회선 표시등이 하나씩 꺼진다.',
+      takenMessage: '레버는 내려가 있다. DR-EXT 외부 전송 회선 차단됨.' },
     { file: 'server-cooling-unit', size: [256, 512], worldWidth: 96, x: 110 },
     { file: 'server-cooling-unit', size: [256, 512], worldWidth: 96, x: 210 },
     { file: 'power-transfer-panel', size: [256, 512], worldWidth: 89, x: 400, name: '수전 전환반',

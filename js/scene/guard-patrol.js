@@ -8,6 +8,7 @@ const guardPatrol = { x: 4530, facing: -1, wait: 0, elapsed: 0, mode: 'dock',
   lostTime: 0, captureTime: 0, door: null, image: null, chaseOriginX: null, spottedX: null, firstEncounter: true };
 // 같은 규칙으로 움직이는 다른 로봇(B2 엔딩 추격, b2-ending.js)은 b2Robots에 둔다. 로봇 옵션:
 // pursuit — 놓쳐도 포기하지 않는다. followToElevator — 엘리베이터 앞에서도 멈추지 않는다. sight — 감지 거리(아래).
+// chaseSpeed — 추격 속도(px/s)를 돌려주는 함수(없으면 270).
 // onCaught — 붙잡는 연출이 끝나면 '다시 시도' 창 대신 부른다. 옵션이 없는 R-01은 예전과 똑같이 움직인다.
 const guardCapturePanel = document.getElementById('guard-capture');
 let guardBlocked = [];
@@ -156,7 +157,7 @@ function updateRobot(robot, delta) {
         }
         else {
           robot.facing = dx >= 0 ? 1 : -1;
-          const distance = Math.min(Math.abs(dx), 270 * delta / 1000);
+          const distance = Math.min(Math.abs(dx), (robot.chaseSpeed?.() ?? 270) * delta / 1000);
           robot.x = Math.max(80, Math.min(worldWidth - 80, robot.x + robot.facing * distance));
           robot.elapsed += delta;
           if (grounded && Math.abs(body.bounds.max.y - floorY) < 3 && Math.abs(body.position.x - robot.x) <= 84) catchPlayer(robot);

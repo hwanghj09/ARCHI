@@ -35,3 +35,33 @@
 .b2-ending-actions button:focus-visible { outline: 3px solid #eac47d; outline-offset: 3px; }
 #b2-delete-bar[data-offline="true"] { border-color: #8fbda3; color: #e6f0e3; }
 #b2-delete-bar[data-offline="true"] #b2-delete-fill { background: #8fbda3; }
+#inspection .b2-action:disabled { border-color: #5d6461; background: #2a2e2d; color: #8d9692; cursor: not-allowed; }
+/* 엔딩 그림(assets/ending, b2-ending.js의 loadB2EndingArt): 문틈 로봇은 문틈을 꽉 채우고 좌우로 흔들린다. */
+#b2-cabin-robot[data-art="custom"] { left: 0; width: 100%; height: 100%; aspect-ratio: auto; transform: none; }
+#b2-cabin-robot[data-art="custom"] img { width: 100%; height: 100%; object-fit: contain; object-position: 50% 100%; transform: none;
+  animation: b2-gap-shake .16s ease-in-out infinite alternate; }
+@keyframes b2-gap-shake { from { transform: translateX(-1.5%); } to { transform: translateX(1.5%); } }
+#b2-bad-end-art { position: fixed; z-index: 12; inset: 0; width: 100%; height: 100%; object-fit: cover; pointer-events: none; }
+#b2-bad-end-art[hidden] { display: none; }
+/* TRUE END: 하얗게 밝아짐(white) → 그림(art) → 제목(title) → 크레딧(credits) → 메뉴 버튼(done). 그림이 없으면 제목은 상자로. */
+#b2-escape { position: fixed; z-index: 14; inset: 0; display: grid; place-items: center; overflow: hidden; background: #fff; color: #eee5d6; outline: none;
+  animation: b2-white-in 1.2s ease-out both; transition: background 1.5s; }
+#b2-escape[hidden] { display: none; }
+@keyframes b2-white-in { from { background: #fff0; } to { background: #fff; } }
+#b2-true-end-art { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity 1.5s; }
+#b2-true-end-art[hidden] { display: none; }
+#b2-escape:not([data-step="white"]) #b2-true-end-art { opacity: 1; }
+#b2-escape-title { position: relative; margin: 0; padding: 20px 28px; opacity: 0; transition: opacity 1s; font: 700 clamp(24px, 4vw, 44px)/1.2 Georgia, serif;
+  letter-spacing: .06em; text-align: center; background: #111b20f8; border: 2px solid #ad7666; }
+#b2-escape[data-art] #b2-escape-title { background: none; border: 0; color: #fff; text-shadow: 0 2px 14px #000d; }
+#b2-escape[data-step="title"] #b2-escape-title { opacity: 1; }
+#b2-escape:is([data-step="credits"], [data-step="done"]) { animation: none; background: #050708; }
+#b2-escape:is([data-step="credits"], [data-step="done"]) #b2-true-end-art { opacity: .2; }
+#b2-credits { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
+.b2-credits-roll { position: absolute; left: 0; right: 0; top: 100%; color: #f1f1e5; font: 24px/1.4 Arial, sans-serif; text-align: center; }
+.b2-credits-roll p { margin: 0 0 30px; }
+.b2-credits-roll span { display: block; color: #9fb0a8; font-size: 13px; letter-spacing: .2em; }
+#b2-escape:is([data-step="credits"], [data-step="done"]) .b2-credits-roll { animation: b2-credits 9s linear forwards; }
+@keyframes b2-credits { to { transform: translateY(calc(-50vh - 50%)); } }
+#b2-escape .b2-ending-actions { position: absolute; left: 0; right: 0; bottom: 8%; visibility: hidden; }
+#b2-escape[data-step="done"] .b2-ending-actions { visibility: visible; }

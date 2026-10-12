@@ -74,6 +74,7 @@ function restoreProgress(data) {
     sceneTransition = null;
     cabinCarIndex = null;
     selectedFloor = null;
+    elevatorEntering = null; // 문이 열리기를 기다리던 탑승(그 사이 붙잡혔다가 불러오면 엉뚱한 곳에서 칸에 들어간다)
     for (const element of [phonePanel, computer, keypad, powerPanel, inspectionPanel, cabin, guardCapturePanel, hallucinationCapturePanel, opening, blackoutScene, storyScene, cctvScene]) element.hidden = true;
     for (const element of document.body.children) if (element !== mainMenu) element.inert = false;
     phoneBlocked = powerBlocked = guardBlocked = hallucinationBlocked = openingBlocked = blackoutBlocked = cctvBlocked = [];

@@ -1,12 +1,25 @@
 // B2 마지막 엔딩(추격전) 최소 버전. 메인 서버실 콘솔의 DELETE → 경고 [예]를 누르기 직전에 체크포인트를 따로 저장하고
 // 삭제를 시작한다: 화면 위 진행 바(35초, 100%가 돼도 아직 아무 일 없음), 붉은 비상등(#room-alarm), 경보음, 비상계단 잠김 문구.
-// 충전 도크의 경비 로봇 R-02·R-05·R-07이 차례로 깨어나 수호를 쫓는다(guard-patrol.js의 updateRobot, 속도는 R-01 추격과 같은 270px/s).
+// 충전 도크의 경비 로봇 R-02·R-05·R-07이 차례로 깨어나 수호를 쫓는다(guard-patrol.js의 updateRobot, 속도는 정신력 45% 규칙: b2ChaseSpeed).
 // 로봇은 수호와 다른 장면(복도/방)에 있으면 보이지 않는 채로 그 장면의 문까지 걸어가 문을 열고 들어온다.
-// 잡히면 R-01과 같은 붙잡기 연출 뒤 베드엔딩 창, 엘리베이터 문 장면(아래)을 넘겨 1층에 닿으면 임시 해피엔딩 창. 삭제가 시작된 뒤로는 자동 저장을 멈춘다.
+// 잡히면 R-01과 같은 붙잡기 연출 뒤 베드엔딩 창, 엘리베이터 문 장면(아래)을 넘겨 1층에 닿으면 R-01 장면, 1층 전력을 끊고
+// 정문으로 나가면 TRUE END와 크레딧. 삭제가 시작된 뒤로는 자동 저장을 멈춘다. DELETE는 전력·냉각실 외부 회선 패널의 레버를
+// 내린 뒤(b2-transfer-cut)에만 누를 수 있다.
 const b2CheckpointKey = 'archi.checkpoint.b2';
 const b2DeleteDuration = 35000;
 const b2DockX = [4790, 4850, 4910]; // 충전 도크(대기 중인 경비 로봇 fixture)의 세 자리
 const b2DoorHold = 700; // 문을 열고 들어온 로봇이 잠깐 멈춰 서는 시간
+const b2WakeDelay = 1000; // DELETE 뒤 첫 로봇이 깨어나기까지(나머지는 0.7초씩 늦게)
+// 정신력 45% 규칙(B2 로봇 3대와 엔딩 중 R-01만): 로봇 추격 속도를 지금 수호가 낼 수 있는 가장 빠른 속도(뛰기, 정신력 0%면 걷기)에
+// 곱해 정한다. 45% 이상이면 수호보다 느리고(b2SlowRatio), 미만이면 빠르다(b2FastRatio).
+const b2SanityLine = 45;
+const b2SlowRatio = .85;
+const b2FastRatio = 1.05;
+
+function b2ChaseSpeed() {
+  const suho = (sanity > 0 ? runSpeed : speed) * sanitySpeedFactor();
+  return suho * (sanity >= b2SanityLine ? b2SlowRatio : b2FastRatio);
+}
 // phase: idle → running → over. stage: 'b2'(B2 추격·엘리베이터) → 'lobby'(1층, R-01). offline: 1층 전력을 끊어 ARCHI가 꺼졌다. jam: 휴대폰 전력 앱 방해 남은 ms.
 const b2Ending = { phase: 'idle', stage: 'b2', elapsed: 0, alarm: 0, offline: false, jam: 0 };
 const b2DeleteButton = document.getElementById('inspection-delete');
@@ -19,9 +32,13 @@ const b2BadEnding = document.getElementById('b2-bad-ending');
 const b2Escape = document.getElementById('b2-escape');
 let b2EscapeBlocked = [];
 
-// 조사창을 연 물건이 B2 메인 콘솔이면(삭제 전) DELETE 버튼을 보인다(interaction.js).
+// 조사창을 연 물건이 B2 메인 콘솔이면(삭제 전) DELETE 버튼을 보인다(interaction.js). 외부 회선을 끊기 전에는 회색으로 잠겨 있다.
 function offerArchiDelete(door) {
-  if (b2Ending.phase === 'idle' && dynamicFloorId === 'b2-main' && door.name === 'ARCHI 메인 콘솔') b2DeleteButton.hidden = false;
+  if (b2Ending.phase !== 'idle' || dynamicFloorId !== 'b2-main' || door.name !== 'ARCHI 메인 콘솔') return;
+  const ready = collectedItems.has('b2-transfer-cut');
+  b2DeleteButton.disabled = !ready;
+  b2DeleteButton.textContent = ready ? 'DELETE' : 'DELETE · 외부 연결 중에는 삭제할 수 없음';
+  b2DeleteButton.hidden = false;
 }
 
 b2DeleteButton.addEventListener('click', () => {
@@ -42,8 +59,9 @@ function startArchiDelete() {
   closeInspection();
   Object.assign(b2Ending, { phase: 'running', elapsed: 0, alarm: 0 });
   b2Robots = b2DockX.map((x, index) => ({ name: ['R-02', 'R-05', 'R-07'][index], where: floorId(-2), x, facing: -1, wait: 0, elapsed: 0,
-    mode: 'dock', hold: index * 700, lostTime: 0, captureTime: 0, door: null, image: null, chaseOriginX: null, spottedX: null,
-    firstEncounter: false, pursuit: true, followToElevator: true, onCaught: showB2BadEnding }));
+    mode: 'dock', hold: b2WakeDelay + index * 700, lostTime: 0, captureTime: 0, door: null, image: null, chaseOriginX: null, spottedX: null,
+    firstEncounter: false, pursuit: true, followToElevator: true, chaseSpeed: b2ChaseSpeed, onCaught: showB2BadEnding }));
+  loadB2EndingArt();
   b2DeleteBar.hidden = false;
   refreshB2Bar();
   mountB2Robots();
@@ -55,6 +73,13 @@ function startArchiDelete() {
 function mountB2Robots() {
   for (const robot of b2Robots) robot.door = robot.image = null;
   if (b2Ending.phase === 'running') hideB2Cabin(); // 칸에서 나왔으면 문 장면 상태를 지운다
+  if (b2Ending.phase === 'running' && b2Ending.stage === 'lobby' && dynamicFloorId === 'f1') {
+    // 1층 장면: 방 문은 ARCHI가 잠갔다(방에 숨어 R-01을 피할 수 없다).
+    for (const door of currentDoors.filter(entry => entry.type === 'room')) {
+      Object.assign(door, { locked: true, message: '문이 열리지 않는다. 손잡이 옆 표시등이 붉다: "ARCHI가 잠갔다."' });
+      door.element.setAttribute('aria-label', `${door.name} 출입문 · 잠김`);
+    }
+  }
   if (b2Ending.phase === 'idle' || room !== 'dynamic' || floorById.get(dynamicFloorId).floor !== -2) return;
   world.dataset.alarm = 'true';
   const stairs = currentDoors.find(door => door.type === 'stairs');
@@ -116,7 +141,7 @@ function updateB2Ending(delta) {
       const stop = b2CabinStopX(robot);
       if (stop === null || robot.x === stop) continue;
       robot.facing = stop >= robot.x ? 1 : -1;
-      robot.x += robot.facing * Math.min(Math.abs(stop - robot.x), 270 * delta / 1000);
+      robot.x += robot.facing * Math.min(Math.abs(stop - robot.x), b2ChaseSpeed() * delta / 1000);
       if (robot.door) updateRobot(robot, 0);
       continue;
     }
@@ -124,7 +149,7 @@ function updateB2Ending(delta) {
     const next = robot.where === corridorId ? here : corridorId;
     const doorX = b2DoorX(robot.where, next);
     robot.facing = doorX >= robot.x ? 1 : -1;
-    robot.x += robot.facing * Math.min(Math.abs(doorX - robot.x), 270 * delta / 1000);
+    robot.x += robot.facing * Math.min(Math.abs(doorX - robot.x), b2ChaseSpeed() * delta / 1000);
     if (robot.x !== doorX) continue;
     const from = robot.where;
     robot.where = next;
@@ -149,7 +174,8 @@ function updateB2Ending(delta) {
 // 1층으로 올라가며 휴대폰에 ARCHI 메시지가 오고, 도착하면 1층 장면(enterB2Lobby). 로봇이 다 깎거나 제한 시간이 지나면 붙잡힌다.
 // 로봇이 아직 안 왔으면 게이지 없이 그냥 닫힌다. 문이 열린 채 1층을 안 누르고 있으면 문 옆에 온 로봇이 잠시 뒤 끌어낸다.
 const b2DoorPush = 0.07; // E 한 번에 차는 양
-const b2DoorDrain = 0.2; // 로봇이 1초에 깎는 양
+const b2DoorDrain = 0.2; // 로봇이 1초에 깎는 양(정신력 45% 이상)
+const b2DoorDrainLow = 0.32; // 정신력 45% 미만: 로봇이 더 세게 연다
 const b2DoorLimit = 5000; // 게이지 제한 시간
 const b2DoorGrabDelay = 1500; // 문이 열린 채일 때 로봇이 끌어내기까지
 const b2RideTime = 3000; // B2 → 1층
@@ -187,7 +213,7 @@ function updateB2Cabin() {
   }
   if (b2Cabin.state === 'struggle') {
     b2Cabin.time += step;
-    b2Cabin.gauge = Math.max(0, b2Cabin.gauge - b2DoorDrain * step / 1000);
+    b2Cabin.gauge = Math.max(0, b2Cabin.gauge - (sanity >= b2SanityLine ? b2DoorDrain : b2DoorDrainLow) * step / 1000);
     refreshB2DoorGauge();
     if (!b2Cabin.gauge || b2Cabin.time >= b2DoorLimit) catchInCabin(b2Cabin.robot);
     return true;
@@ -300,6 +326,7 @@ function endB2Ending() {
 // 붙잡기 연출(1.1초)이 끝나면 guard-patrol.js가 부른다. catchPlayer가 막아 둔 화면에서 이 창만 다시 쓸 수 있게 한다.
 function showB2BadEnding() {
   endB2Ending();
+  if (b2Art.badEnd) { b2BadEndArt.src = b2Art.badEnd; b2BadEndArt.hidden = false; }
   b2BadEnding.inert = false;
   b2BadEnding.hidden = false;
   document.getElementById('b2-checkpoint').focus();
@@ -310,7 +337,10 @@ function showB2BadEnding() {
 // 1층 전력을 끊으면 R-01이 멈추고 삭제가 100%가 되며 ARCHI — OFFLINE. 그 뒤 정문으로 나가면 TRUE END. 앱을 열 때마다
 // ARCHI가 b2SolarJam ms 동안 방해해서 버튼이 눌리지 않는다. 끊기 전에 R-01에게 잡히면 베드엔딩.
 const b2SolarJam = 3500;
-const b2LobbyR01 = { pursuit: true, followToElevator: true, sight: 4800, onCaught: showB2BadEnding };
+const b2LobbyR01 = { pursuit: true, followToElevator: true, sight: 4800, chaseSpeed: b2ChaseSpeed, onCaught: showB2BadEnding };
+// R-01이 서 있는 자리: 엘리베이터에서 내린 수호에게서 이만큼 떨어진 곳(정문 앞 도크 4530보다 멀어지지는 않는다).
+// 내리자마자 앱을 열고 방해가 끝나자마자 끄면, 정신력 45% 이상일 때 R-01이 약 2초 거리에 있다.
+const b2LobbyR01Distance = 1850;
 
 function enterB2Lobby(car) {
   arriveCabinAt(car, 1);
@@ -328,9 +358,10 @@ function enterB2Lobby(car) {
   solarPoweredFloors = [1];
   performFloorChange('f1', cabinCarIndex);
   cabinCarIndex = null;
-  Object.assign(guardPatrol, { x: 4530, facing: -1, wait: 0, elapsed: 0, mode: 'dock', lostTime: 0, captureTime: 0 }, b2LobbyR01);
+  Object.assign(guardPatrol, { x: Math.min(4530, body.position.x + b2LobbyR01Distance), facing: -1, wait: 0, elapsed: 0, mode: 'dock',
+    lostTime: 0, captureTime: 0 }, b2LobbyR01);
   updatePowerState();
-  showStatus('1층. 정문 앞에서 R-01이 이쪽을 보고 있다. 휴대폰(P)의 비상 전력 제어로 1층 전력을 끊어야 한다.', 5000);
+  showStatus('1층. 로비 저편에서 R-01이 이쪽을 보고 있다. 휴대폰(P)의 비상 전력 제어로 1층 전력을 끊어야 한다.', 5000);
 }
 
 function updateB2Lobby(delta) {
@@ -373,14 +404,49 @@ function enterB2TrueEnd(door) {
   return true;
 }
 
-// TRUE END(임시) 창.
+// 엔딩 그림(assets/ending): 있으면 쓰고 없으면 지금 연출 그대로. 다른 테스트가 "없는 파일 요청"을 오류로 보므로 게임을 켤 때가
+// 아니라 DELETE를 누를 때 한 번만 찾아본다.
+//   elevator-gap-robot.png 570×764 투명 — 엘리베이터 문틈(#cabin-doorway)을 꽉 채우고 좌우로 흔들린다.
+//   true-end.png 1920×1080 불투명 — TRUE END 화면 전체. bad-end.png 1920×1080 불투명 — 베드엔딩 창 뒤 화면 전체.
+const b2ArtFiles = { gap: 'assets/ending/elevator-gap-robot.png', trueEnd: 'assets/ending/true-end.png', badEnd: 'assets/ending/bad-end.png' };
+const b2Art = {};
+const b2TrueEndArt = document.getElementById('b2-true-end-art');
+const b2BadEndArt = document.getElementById('b2-bad-end-art');
+let b2FinaleTimers = [];
+
+function loadB2EndingArt() {
+  for (const [key, src] of Object.entries(b2ArtFiles)) {
+    if (key in b2Art) continue;
+    b2Art[key] = null;
+    const image = new Image();
+    image.onload = () => {
+      b2Art[key] = src;
+      if (key !== 'gap') return;
+      b2CabinRobot.dataset.art = 'custom';
+      b2CabinRobot.firstElementChild.src = src;
+    };
+    image.src = src;
+  }
+}
+
+// TRUE END: 화면이 하얗게 밝아지고 → 그림(없으면 흰 화면) → "TRUE END — ARCHI OFFLINE"(그림이 없으면 상자) → 크레딧이 위로
+// 올라가고 → [메인 메뉴로]. 단계는 data-step으로 그린다(b2-ending.css).
+const b2FinaleSteps = [['art', 1200], ['title', 2700], ['credits', 6000], ['done', 15000]];
+
 function showB2Escape() {
   endB2Ending();
   releaseInput();
   b2EscapeBlocked = [...document.body.children].filter(element => element !== b2Escape && element.tagName !== 'SCRIPT' && !element.inert);
   for (const element of b2EscapeBlocked) element.inert = true;
+  b2TrueEndArt.hidden = !b2Art.trueEnd;
+  if (b2Art.trueEnd) { b2TrueEndArt.src = b2Art.trueEnd; b2Escape.dataset.art = 'true'; }
+  b2Escape.dataset.step = 'white';
   b2Escape.hidden = false;
-  document.getElementById('b2-escape-menu').focus();
+  b2Escape.focus();
+  b2FinaleTimers = b2FinaleSteps.map(([step, at]) => setTimeout(() => {
+    b2Escape.dataset.step = step;
+    if (step === 'done') document.getElementById('b2-escape-menu').focus();
+  }, at));
 }
 
 // 불러오기·새 게임(save.js restoreProgress)이 장면을 다시 짓기 전에 엔딩 상태를 모두 지운다.
@@ -391,7 +457,9 @@ function resetB2Ending() {
   for (const key of Object.keys(b2LobbyR01)) delete guardPatrol[key];
   b2DeleteBar.querySelector('span').replaceChildren('ARCHI DELETE PROCESS ', b2DeletePercent);
   delete b2DeleteBar.dataset.offline;
-  b2DeleteBar.hidden = b2BadEnding.hidden = b2Escape.hidden = true;
+  b2DeleteBar.hidden = b2BadEnding.hidden = b2Escape.hidden = b2BadEndArt.hidden = true;
+  b2FinaleTimers.forEach(clearTimeout);
+  b2FinaleTimers = [];
   hideB2Cabin();
   for (const element of b2EscapeBlocked) element.inert = false;
   b2EscapeBlocked = [];
