@@ -33,3 +33,5 @@
 .b2-ending-actions { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
 .b2-ending-actions button { min-height: 44px; min-width: 140px; border: 1px solid #b9c7b8; background: #243a36; color: #fff; font: inherit; cursor: pointer; }
 .b2-ending-actions button:focus-visible { outline: 3px solid #eac47d; outline-offset: 3px; }
+#b2-delete-bar[data-offline="true"] { border-color: #8fbda3; color: #e6f0e3; }
+#b2-delete-bar[data-offline="true"] #b2-delete-fill { background: #8fbda3; }

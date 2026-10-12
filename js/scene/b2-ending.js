@@ -7,7 +7,8 @@ const b2CheckpointKey = 'archi.checkpoint.b2';
 const b2DeleteDuration = 35000;
 const b2DockX = [4790, 4850, 4910]; // 충전 도크(대기 중인 경비 로봇 fixture)의 세 자리
 const b2DoorHold = 700; // 문을 열고 들어온 로봇이 잠깐 멈춰 서는 시간
-const b2Ending = { phase: 'idle', elapsed: 0, alarm: 0 }; // phase: idle → running → over
+// phase: idle → running → over. stage: 'b2'(B2 추격·엘리베이터) → 'lobby'(1층, R-01). offline: 1층 전력을 끊어 ARCHI가 꺼졌다. jam: 휴대폰 전력 앱 방해 남은 ms.
+const b2Ending = { phase: 'idle', stage: 'b2', elapsed: 0, alarm: 0, offline: false, jam: 0 };
 const b2DeleteButton = document.getElementById('inspection-delete');
 const b2ConfirmYes = document.getElementById('inspection-yes');
 const b2ConfirmNo = document.getElementById('inspection-no');
@@ -91,11 +92,13 @@ function b2DoorX(sceneId, toward) {
 }
 
 function updateB2Ending(delta) {
-  if (b2Ending.phase !== 'running') return;
-  b2Ending.elapsed = Math.min(b2DeleteDuration, b2Ending.elapsed + delta);
+  if (b2Ending.phase !== 'running' || b2Ending.offline) return;
+  // 1층 전력을 끊기 전까지 삭제는 99%에서 멈춰 있다.
+  b2Ending.elapsed = Math.min(b2DeleteDuration * .99, b2Ending.elapsed + delta);
   refreshB2Bar();
   b2Ending.alarm += delta;
   if (b2Ending.alarm >= 2000) { b2Ending.alarm -= 2000; playGameSound('elevator-alarm'); }
+  if (b2Ending.stage === 'lobby') { updateB2Lobby(delta); return; }
   const here = room === 'dynamic' ? dynamicFloorId : null;
   const corridorId = floorId(-2);
   for (const robot of b2Robots) {
@@ -142,8 +145,8 @@ function updateB2Ending(delta) {
 }
 
 // 엘리베이터 문 장면(추격 중 칸 안): 1층을 누르면 문이 닫히기 시작한다. 로봇이 문 옆에 와 있으면 문을 억지로 열고
-// "문 닫기" 게이지가 뜬다. E(모바일은 게이지의 버튼이나 칸의 닫힘 버튼)를 연타하면 차고, 로봇은 계속 깎는다. 다 차면
-// 1층으로 올라가며 휴대폰에 ARCHI 메시지가 오고, 도착하면 임시 해피엔딩. 로봇이 다 깎거나 제한 시간이 지나면 붙잡힌다.
+// "문 닫기" 게이지가 뜬다. Enter·스페이스(모바일은 게이지의 버튼이나 칸의 닫힘 버튼)를 연타하면 차고, 로봇은 계속 깎는다. 다 차면
+// 1층으로 올라가며 휴대폰에 ARCHI 메시지가 오고, 도착하면 1층 장면(enterB2Lobby). 로봇이 다 깎거나 제한 시간이 지나면 붙잡힌다.
 // 로봇이 아직 안 왔으면 게이지 없이 그냥 닫힌다. 문이 열린 채 1층을 안 누르고 있으면 문 옆에 온 로봇이 잠시 뒤 끌어낸다.
 const b2DoorPush = 0.07; // E 한 번에 차는 양
 const b2DoorDrain = 0.2; // 로봇이 1초에 깎는 양
@@ -179,7 +182,7 @@ function updateB2Cabin() {
   if (b2Cabin.state === 'ride') {
     b2Cabin.time += step;
     cabinDisplay.textContent = `↑${b2Cabin.time < b2RideTime / 2 ? 'B1' : '1'}`;
-    if (b2Cabin.time >= b2RideTime && !transitioning) transitionScene(() => { arriveCabinAt(car, 1); showB2Escape(); });
+    if (b2Cabin.time >= b2RideTime && !transitioning) transitionScene(() => enterB2Lobby(car));
     return true;
   }
   if (b2Cabin.state === 'struggle') {
@@ -197,11 +200,11 @@ function updateB2Cabin() {
     // 닫히던 만큼 게이지가 차 있는 채로 시작한다(빨리 누를수록 유리하다).
     Object.assign(b2Cabin, { state: 'struggle', gauge: Math.max(.15, 1 - cabinDoorAmount), time: 0, robot });
     cabinScene.dataset.door = 'struggle';
-    cabinStatus.textContent = '경비 로봇이 문을 억지로 연다! E를 연타해 문을 닫아라.';
+    cabinStatus.textContent = '경비 로봇이 문을 억지로 연다! Enter나 스페이스를 연타해 문을 닫아라.';
     playGameSound('robot-grab', { x: robot.x });
     b2DoorGauge.hidden = false;
     refreshB2DoorGauge();
-    document.getElementById('b2-door-push').focus({ preventScroll: true });
+    cabin.focus({ preventScroll: true }); // 버튼에 초점이 있으면 Enter·스페이스가 그 버튼을 눌러 버린다
     return true;
   }
   if (phase === 'open' && selectedFloor === null) {
@@ -302,7 +305,75 @@ function showB2BadEnding() {
   document.getElementById('b2-checkpoint').focus();
 }
 
-// 추격 중 엘리베이터로 1층에 도착하면(updateB2Cabin) 띄운다. 1층 장면은 다음 단계에서 만든다.
+// 1층 장면: 엘리베이터에서 내리면 ARCHI가 옥상 태양광 장치로 1층에 전력을 넣어 둔 상태다(1층 전력 상태와 상관없이).
+// 정문 앞 도크의 R-01이 로비 끝까지 지켜보다(sight) 수호를 보면 끝까지 쫓는다. 휴대폰 '비상 전력 제어' 앱(power.js)에서
+// 1층 전력을 끊으면 R-01이 멈추고 삭제가 100%가 되며 ARCHI — OFFLINE. 그 뒤 정문으로 나가면 TRUE END. 앱을 열 때마다
+// ARCHI가 b2SolarJam ms 동안 방해해서 버튼이 눌리지 않는다. 끊기 전에 R-01에게 잡히면 베드엔딩.
+const b2SolarJam = 3500;
+const b2LobbyR01 = { pursuit: true, followToElevator: true, sight: 4800, onCaught: showB2BadEnding };
+
+function enterB2Lobby(car) {
+  arriveCabinAt(car, 1);
+  Object.assign(car, { rider: false, open: true });
+  hideB2Cabin();
+  selectingFloor = false;
+  cabin.hidden = true;
+  stage.inert = false;
+  releaseInput();
+  b2Robots = []; // B2 로봇은 지하에 남는다
+  b2Ending.stage = 'lobby';
+  if (allPowerOverride) setAllFloorsPower(false); // 콘솔의 테스트용 전체 전력이 켜져 있으면 1층을 끌 수 없다
+  collectedItems.add('solar-app-installed'); // 끝까지 앱 없이 왔어도 끌 수단은 있어야 한다
+  solarEnabled = true;
+  solarPoweredFloors = [1];
+  performFloorChange('f1', cabinCarIndex);
+  cabinCarIndex = null;
+  Object.assign(guardPatrol, { x: 4530, facing: -1, wait: 0, elapsed: 0, mode: 'dock', lostTime: 0, captureTime: 0 }, b2LobbyR01);
+  updatePowerState();
+  showStatus('1층. 정문 앞에서 R-01이 이쪽을 보고 있다. 휴대폰(P)의 비상 전력 제어로 1층 전력을 끊어야 한다.', 5000);
+}
+
+function updateB2Lobby(delta) {
+  if (b2Ending.jam > 0) {
+    b2Ending.jam = Math.max(0, b2Ending.jam - delta);
+    if (!b2Ending.jam) refreshSolarApp();
+  }
+  if (dynamicFloorId !== 'f1' || floorHasPower(1)) return;
+  // 1층 전력이 끊겼다: R-01은 updateGuardPatrol의 전력 없음 처리로 그 자리에 멈춘다.
+  b2Ending.offline = true;
+  b2Ending.elapsed = b2DeleteDuration;
+  refreshB2Bar();
+  b2DeleteBar.querySelector('span').textContent = 'ARCHI — OFFLINE';
+  b2DeleteBar.dataset.offline = 'true';
+  for (const key of Object.keys(b2LobbyR01)) delete guardPatrol[key]; // 다시 전력이 들어와도 평소 R-01로 돌아간다
+  playGameSound('blackout');
+  showStatus('ARCHI — OFFLINE. R-01이 그 자리에 멈췄다. 정문으로 나가자.', 5000);
+}
+
+// 휴대폰 '비상 전력 제어' 앱을 열 때(phone.js) 1층 장면이면 ARCHI가 잠시 막는다.
+function jamB2SolarApp() {
+  if (b2Ending.phase !== 'running' || b2Ending.stage !== 'lobby' || b2Ending.offline) return;
+  b2Ending.jam = b2SolarJam;
+  refreshSolarApp();
+}
+
+function b2SolarJammed() {
+  return b2Ending.jam > 0;
+}
+
+function b2DoorStruggling() {
+  return b2Cabin.state === 'struggle';
+}
+
+// ARCHI가 꺼진 뒤 1층 정문을 조사하면(interaction.js) TRUE END.
+function enterB2TrueEnd(door) {
+  if (!b2Ending.offline || b2Ending.phase !== 'running' || dynamicFloorId !== 'f1' || door.name !== '정문') return false;
+  playGameSound('door');
+  showB2Escape();
+  return true;
+}
+
+// TRUE END(임시) 창.
 function showB2Escape() {
   endB2Ending();
   releaseInput();
@@ -314,9 +385,12 @@ function showB2Escape() {
 
 // 불러오기·새 게임(save.js restoreProgress)이 장면을 다시 짓기 전에 엔딩 상태를 모두 지운다.
 function resetB2Ending() {
-  Object.assign(b2Ending, { phase: 'idle', elapsed: 0, alarm: 0 });
+  Object.assign(b2Ending, { phase: 'idle', stage: 'b2', elapsed: 0, alarm: 0, offline: false, jam: 0 });
   b2Robots = [];
   caughtBy = null;
+  for (const key of Object.keys(b2LobbyR01)) delete guardPatrol[key];
+  b2DeleteBar.querySelector('span').replaceChildren('ARCHI DELETE PROCESS ', b2DeletePercent);
+  delete b2DeleteBar.dataset.offline;
   b2DeleteBar.hidden = b2BadEnding.hidden = b2Escape.hidden = true;
   hideB2Cabin();
   for (const element of b2EscapeBlocked) element.inert = false;

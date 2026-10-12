@@ -7,7 +7,7 @@
 const guardPatrol = { x: 4530, facing: -1, wait: 0, elapsed: 0, mode: 'dock',
   lostTime: 0, captureTime: 0, door: null, image: null, chaseOriginX: null, spottedX: null, firstEncounter: true };
 // 같은 규칙으로 움직이는 다른 로봇(B2 엔딩 추격, b2-ending.js)은 b2Robots에 둔다. 로봇 옵션:
-// pursuit — 놓쳐도 포기하지 않는다. followToElevator — 엘리베이터 앞에서도 멈추지 않는다.
+// pursuit — 놓쳐도 포기하지 않는다. followToElevator — 엘리베이터 앞에서도 멈추지 않는다. sight — 감지 거리(아래).
 // onCaught — 붙잡는 연출이 끝나면 '다시 시도' 창 대신 부른다. 옵션이 없는 R-01은 예전과 똑같이 움직인다.
 const guardCapturePanel = document.getElementById('guard-capture');
 let guardBlocked = [];
@@ -114,8 +114,9 @@ function updateRobot(robot, delta) {
     // 담당 구역 밖 추격이라 부당하다. 바로 옆 근접 감지(130px)는 구간과 무관하게 그대로 둔다 —
     // 추격을 놓치고 patrol로 돌아가는 로봇이 아직 구간 밖에 있는 채로 수호가 바로 옆에 다가와도
     // 눈앞의 수호를 못 알아보면 그게 더 이상하다.
-    const inBeat = body.position.x >= left;
-    const seesPlayer = sameLevel && (Math.abs(dx) < 130 || (inBeat && dx * robot.facing > 0 && Math.abs(dx) < 720));
+    // sight(B2 엔딩의 1층 R-01): 순찰 구간과 상관없이 바라보는 쪽 sight px 안의 수호를 본다.
+    const inBeat = robot.sight || body.position.x >= left;
+    const seesPlayer = sameLevel && (Math.abs(dx) < 130 || (inBeat && dx * robot.facing > 0 && Math.abs(dx) < (robot.sight ?? 720)));
     // 'return'(복귀 이동 중)도 patrol/dock과 똑같이 감지된다 — 복귀 중이라고 무적은 아니다.
     if ((robot.mode === 'patrol' || robot.mode === 'dock' || robot.mode === 'return') && seesPlayer) {
       robot.mode = 'chase'; robot.lostTime = 0; robot.chaseOriginX = robot.x; robot.spottedX = body.position.x;

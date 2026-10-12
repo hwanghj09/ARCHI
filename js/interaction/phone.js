@@ -39,6 +39,7 @@ function openPhoneApp(app) {
   if (app === 'building') refreshBuildingGuides();
   if (app === 'solar') {
     document.getElementById('phone-solar-floor').value = String(solarPoweredFloors[0] || 17);
+    jamB2SolarApp(); // B2 엔딩 1층: 열 때마다 ARCHI가 잠시 방해한다
     refreshSolarApp();
   }
   playGameSound('phone');

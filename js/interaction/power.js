@@ -78,8 +78,9 @@ function supplySolarFloor(floor) {
 }
 
 function refreshSolarApp() {
-  const available = collectedItems.has('solar-app-installed') && phoneBattery > 0 && !phoneDock;
-  document.getElementById('phone-solar-status').textContent = !available ? '휴대폰을 사용할 수 없습니다.' :
+  const jammed = typeof b2SolarJammed === 'function' && b2SolarJammed(); // B2 엔딩 1층: ARCHI가 잠시 막는다(b2-ending.js)
+  const available = collectedItems.has('solar-app-installed') && phoneBattery > 0 && !phoneDock && !jammed;
+  document.getElementById('phone-solar-status').textContent = jammed ? 'ARCHI 방해 중…' : !available ? '휴대폰을 사용할 수 없습니다.' :
     `장치 연결됨 · ${solarPowerStatus()}`;
   const toggle = document.getElementById('phone-solar-toggle');
   toggle.disabled = !available;
@@ -168,12 +169,12 @@ for (let floor = 17; floor >= 1; floor -= 1) {
 }
 
 document.getElementById('phone-solar-toggle').addEventListener('click', () => {
-  if (!usingPhone || currentPhoneApp !== 'solar' || !collectedItems.has('solar-app-installed') || phoneBattery <= 0 || phoneDock) return;
+  if (!usingPhone || currentPhoneApp !== 'solar' || !collectedItems.has('solar-app-installed') || phoneBattery <= 0 || phoneDock || b2SolarJammed()) return;
   setSolarPower(!solarEnabled);
   saveProgress();
 });
 document.getElementById('phone-solar-supply').addEventListener('click', () => {
-  if (!usingPhone || currentPhoneApp !== 'solar' || !collectedItems.has('solar-app-installed') || phoneBattery <= 0 || phoneDock) return;
+  if (!usingPhone || currentPhoneApp !== 'solar' || !collectedItems.has('solar-app-installed') || phoneBattery <= 0 || phoneDock || b2SolarJammed()) return;
   supplySolarFloor(Number(document.getElementById('phone-solar-floor').value));
   saveProgress();
 });

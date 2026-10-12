@@ -106,8 +106,8 @@ window.addEventListener('keydown', event => {
   }
   if (selectingFloor) {
     if (event.code === 'Escape') exitCabin();
-    // B2 엔딩의 "문 닫기" 게이지(b2-ending.js): 꾹 누르기(반복 입력)는 치지 않고 연타만 센다.
-    if (event.code === 'KeyE') {
+    // B2 엔딩의 "문 닫기" 게이지(b2-ending.js): Enter·스페이스 연타. 꾹 누르기(반복 입력)는 치지 않는다.
+    if (['Enter', 'Space'].includes(event.code) && b2DoorStruggling()) {
       event.preventDefault();
       if (!event.repeat) pushB2Door();
     }
