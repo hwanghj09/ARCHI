@@ -67,6 +67,7 @@ const context = createContext({ console, Element: class {},
   updateGuardPatrol: noop, updateB2Ending: noop, updateElevators: noop, updateInteraction: noop, updateCall: noop, checkStoryScenes: noop,
   updateTimedBarriers: noop, updateCameras: noop, cameraTarget: () => 0,
   sanitySpeedFactor: () => 1,
+  applyZeroSanityTurnDelay: direction => direction,
   pushPushables: (direction, amount) => amount,
   closeInspection: () => runInContext('usingInspection = false', context),
 });

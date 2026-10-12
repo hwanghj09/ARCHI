@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { chromium } from 'playwright';
 
-// 16층 CU 편의점: 진라면 박스를 밀어(플레이어 속도의 절반) 계산대 앞 오른쪽 끝에 세우고 그 위에 올라서야 선반의 항불안제를 챙길 수 있다.
+// 16층 CU 편의점: 진라면 박스를 밀어(플레이어 속도의 절반) 선반 가까이 옮기고 그 위에 올라서면 항불안제를 챙길 수 있다.
 const browser = await chromium.launch();
 try {
   const page = await browser.newPage({ viewport: { width: 1280, height: 720 } });
@@ -13,13 +13,14 @@ try {
   if (await page.locator('#menu-new-confirm').isVisible()) await page.locator('#menu-new-confirm').click();
   await page.locator('#opening-skip').click();
   await page.clock.pauseAt(new Date(Date.now() + 1000));
+  const groundY = await page.evaluate(() => floorY);
   const box = () => page.evaluate(() => ({ x: movingParts[0].body.position.x, ...movingParts[0].pushable }));
-  const place = (x, y = floorY - 81) => page.evaluate(([x, y]) => {
+  const place = (x, y = groundY - 81) => page.evaluate(([x, y]) => {
     Body.setPosition(body, { x, y }); Body.setVelocity(body, { x: 0, y: 0 }); grounded = true;
     cameraX = cameraTarget(); render(); updateInteraction();
   }, [x, y]);
 
-  await page.evaluate(() => performFloorChange('f16-cu', null));
+  await page.evaluate(() => { sanity = 100; performFloorChange('f16-cu', null, 'exit'); });
   const start = await box();
   assert.equal(start.x, 415);
   assert.equal(start.maxX, 928);
@@ -45,9 +46,14 @@ try {
   await page.keyboard.up('ArrowRight');
   assert.equal((await box()).x, 928);
 
-  // 박스 위에 올라서면 손이 닿는다(박스가 끝에 있을 때만).
-  await place(920, floorY - 90 - 81);
+  // 최신 규칙: 끝까지 밀지 않아도 선반 가까운 박스 위에서 약을 챙길 수 있다.
+  await page.evaluate(() => {
+    const part = movingParts[0];
+    Body.setPosition(part.body, { x: 808, y: part.body.position.y });
+  });
+  await place(860, groundY - 90 - 81);
   await page.clock.runFor(200);
+  assert((await box()).x < start.maxX, 'Medicine pickup does not require the box at its limit');
   assert.equal(await page.evaluate(() => nearbyDoor?.name), '항불안제');
   await page.keyboard.press('e');
   assert.equal(await page.evaluate(() => collectedItems.has('f16-antianxiety')), true);

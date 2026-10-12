@@ -7,11 +7,12 @@ try {
   const page = await browser.newPage({ viewport: { width: 1280, height: 720 } });
   const errors = [];
   page.on('pageerror', error => errors.push(error.message));
-  await page.clock.install();
+  await page.clock.install({ time: new Date('2026-10-04T00:00:00Z') });
   await page.goto(new URL('../index.html', import.meta.url).href);
   await page.locator('#menu-start').click();
   if (await page.locator('#menu-new-confirm').isVisible()) await page.locator('#menu-new-confirm').click();
   await page.locator('#opening-skip').click();
+  await page.clock.pauseAt(new Date('2026-10-04T00:01:00Z'));
   await page.evaluate(() => triggerBuildingBlackout());
   await page.clock.runFor(100);
   await mkdir('.local', { recursive: true });

@@ -1,5 +1,5 @@
 // 옥상 레버는 모든 엘리베이터 운행을 복구한다. 층 선택은 해당 층의 조명·설비만 추가로 공급한다.
-// 층은 두 개까지 켜진다. 세 번째를 켜면 가장 먼저 켠 층이 꺼지고, 켜진 층을 다시 누르면 그 층만 꺼진다.
+// 한 층만 켜진다. 다른 층을 켜면 이전 층이 꺼지고, 켜진 층을 다시 누르면 공급을 끈다.
 const powerPanel = document.getElementById('power-panel');
 const powerGrid = document.getElementById('power-floor-grid');
 const powerStatus = document.getElementById('power-status');
@@ -12,7 +12,7 @@ function floorHasPower(floor) {
   return floor >= 1 && floor <= 17 && (!buildingBlackout || (solarEnabled && solarPoweredFloors.includes(floor)));
 }
 
-// 켠 순서대로 적는다. 예: 12F · 7F 전력 공급 중 (2/2)
+// 선택한 층과 공급 한도를 적는다. 예: 12F 전력 공급 중 (1/1)
 function solarPowerStatus() {
   if (!solarEnabled) return '비상 전력 꺼짐';
   const count = `(${solarPoweredFloors.length}/${solarFloorLimit})`;

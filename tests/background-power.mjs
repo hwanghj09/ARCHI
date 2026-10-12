@@ -51,33 +51,32 @@ try {
     const floor = await page.evaluate(() => currentSceneFloor);
     assert(await check(floor > 0), `${id}: power state on entry, including shared restrooms`);
     if (floor > 0) {
-      const [second, third] = [17, 16, 15].filter(other => other !== floor);
+      const [replacement] = [17, 16].filter(other => other !== floor);
       await page.evaluate(floor => { setSolarPower(true); powerGrid.querySelector(`[data-floor="${floor}"]`).click(); }, floor);
       await decode(); assert(await check(false), `${id}: power restored`);
-      await page.evaluate(other => powerGrid.querySelector(`[data-floor="${other}"]`).click(), second);
-      await decode(); assert(await check(false), `${id}: a second floor keeps this floor lit`);
-      await page.evaluate(other => powerGrid.querySelector(`[data-floor="${other}"]`).click(), third);
-      await decode(); assert(await check(true), `${id}: a third floor turns off the earliest one`);
+      await page.evaluate(other => powerGrid.querySelector(`[data-floor="${other}"]`).click(), replacement);
+      await decode(); assert(await check(true), `${id}: selecting another floor cuts this floor's power`);
+      assert.deepEqual(await page.evaluate(() => solarPoweredFloors), [replacement], `${id}: only the replacement floor is supplied`);
       await page.evaluate(() => powerLever.click());
     } else assert.equal(await page.locator('#world').getAttribute('data-powered'), 'true');
   }
-  // Two-floor rule on a painted floor: 12F then 7F stay on together, a third drops the earliest,
-  // pressing a lit floor turns off only that floor, and the lever clears every floor.
+  // One-floor rule on a painted floor: another selection replaces the supplied floor,
+  // pressing the lit floor stops supply, and the lever clears the selection.
   const press = number => page.evaluate(number => powerGrid.querySelector(`[data-floor="${number}"]`).click(), number);
   const supply = () => page.evaluate(() => ({ floors: [...solarPoweredFloors], f12: floorHasPower(12), f7: floorHasPower(7) }));
   await page.evaluate(() => { performFloorChange('f7'); setSolarPower(true); });
   assert(await page.locator('img[data-lit-src]').count() > 0, '7F corridor uses switchable painted backgrounds');
   await press(12); await decode(); assert(await check(true), '7F stays dark while only 12F is supplied');
   await press(7); await decode(); assert(await check(false));
-  assert.deepEqual(await supply(), { floors: [12, 7], f12: true, f7: true }, 'Powering 12F then 7F keeps both on');
+  assert.deepEqual(await supply(), { floors: [7], f12: false, f7: true }, 'Powering 7F replaces 12F');
   await press(7); await decode(); assert(await check(true));
-  assert.deepEqual(await supply(), { floors: [12], f12: true, f7: false }, 'Pressing a lit floor turns off only that floor');
-  await press(7); await press(16); await decode(); assert(await check(false));
-  assert.deepEqual(await supply(), { floors: [7, 16], f12: false, f7: true }, 'A third floor turns off the earliest (12F)');
-  await press(1); await decode(); assert(await check(true), 'The next floor drops 7F, now the earliest');
-  assert.deepEqual((await supply()).floors, [16, 1]);
+  assert.deepEqual(await supply(), { floors: [], f12: false, f7: false }, 'Pressing the lit floor stops supply');
+  await press(7); await press(16); await decode(); assert(await check(true));
+  assert.deepEqual(await supply(), { floors: [16], f12: false, f7: false }, 'Selecting 16F replaces 7F');
+  await press(1); await decode(); assert(await check(true), '7F stays dark when 1F replaces 16F');
+  assert.deepEqual((await supply()).floors, [1]);
   await page.evaluate(() => powerLever.click()); await decode(); assert(await check(true));
-  assert.deepEqual(await supply(), { floors: [], f12: false, f7: false }, 'Raising the lever clears both floors');
+  assert.deepEqual(await supply(), { floors: [], f12: false, f7: false }, 'Raising the lever clears the supplied floor');
   assert.equal(await page.locator('#world').getAttribute('data-powered'), 'false');
   await page.evaluate(() => {
     performFloorChange('f14-archive', 0, 'exit');
@@ -96,7 +95,7 @@ try {
   assert(await page.locator('#darkness').isVisible(), 'Battery illumination does not leak into other rooms');
   await page.screenshot({ path: '.local/background-cafe-off-mobile.png' });
   assert.deepEqual(errors, []);
-  console.log(`PASS: ${manifest.assets.length} painted backgrounds; ${scenes.length} scenes; power restoration, two-floor supply with earliest-first drop, single-floor off and lever reset, shared restrooms, emergency power, battery lamp, flashlight, geometry and mobile.`);
+  console.log(`PASS: ${manifest.assets.length} painted backgrounds; ${scenes.length} scenes; power restoration, one-floor supply and replacement, same-floor off and lever reset, shared restrooms, emergency power, battery lamp, flashlight, geometry and mobile.`);
 } finally {
   await browser.close();
 }

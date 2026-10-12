@@ -5,7 +5,7 @@ import { chromium } from 'playwright';
 await mkdir('.local', { recursive: true });
 const browser = await chromium.launch();
 try {
-  // 360 is the narrowest common phone width; the two-floor status must still fit there.
+  // 360 is the narrowest common phone width; the supplied-floor status must still fit there.
   for (const [width, height] of [[1280, 720], [390, 844], [360, 740]]) {
     const mobile = width < 768;
     const page = await browser.newPage({ viewport: { width, height }, hasTouch: mobile });
@@ -40,13 +40,13 @@ try {
     await page.keyboard.press('Escape');
     await page.evaluate(() => {
       triggerBuildingBlackout(); performFloorChange('rooftop', null);
-      Body.setPosition(body, { x: 900, y: floorY - 81 }); grounded = true; updateInteraction(); render();
+      Body.setPosition(body, { x: 1040, y: floorY - 81 }); grounded = true; updateInteraction(); render();
     });
     await page.keyboard.press('e');
     const lever = page.locator('#power-lever');
     const floor = number => page.locator(`#power-floor-grid [data-floor="${number}"]`);
     const state = () => page.evaluate(() => ({ on: solarEnabled, floors: [...solarPoweredFloors] }));
-    // The status reads like '12F · 7F 전력 공급 중 (2/2)' and must stay on one line inside its painted window.
+    // The status reads like '12F 전력 공급 중 (1/1)' and must stay on one line inside its painted window.
     const status = async text => {
       assert.equal(await page.locator('#power-status').textContent(), text);
       assert(await page.locator('#power-status').evaluate(el => {
@@ -121,32 +121,32 @@ try {
     for (let i = 0; i < 4; i += 1) await page.keyboard.down('Enter');
     await page.keyboard.up('Enter');
     assert.deepEqual(await state(), { on: true, floors: [12] }, 'Holding Enter presses a floor once');
-    await status('12F 전력 공급 중 (1/2)');
-    // Two floors stay lit together, in the order they were turned on.
+    await status('12F 전력 공급 중 (1/1)');
+    // Selecting another floor replaces the currently supplied floor.
     await floor(7).click();
-    assert.deepEqual(await state(), { on: true, floors: [12, 7] }, 'Powering 12F then 7F keeps both on');
-    await status('12F · 7F 전력 공급 중 (2/2)');
-    await pressed([12, 7], [17, 1]);
-    assert(await page.evaluate(() => floorHasPower(12) && floorHasPower(7) && !floorHasPower(13)));
+    assert.deepEqual(await state(), { on: true, floors: [7] }, 'Powering 7F replaces 12F');
+    await status('7F 전력 공급 중 (1/1)');
+    await pressed([7], [12, 17, 1]);
+    assert(await page.evaluate(() => !floorHasPower(12) && floorHasPower(7) && !floorHasPower(13)));
     assert(await page.locator('#power-floor-grid button.active').evaluateAll(buttons =>
-      buttons.every(button => getComputedStyle(button).backgroundColor === 'rgb(40, 76, 57)')), 'Both lit floors use the lit button art');
-    await page.screenshot({ path: `.local/solar-panel-two-${width}.png` });
-    // A third floor drops the earliest one; the 1F suggestion ends once 1F is chosen.
+      buttons.every(button => getComputedStyle(button).backgroundColor === 'rgb(40, 76, 57)')), 'The supplied floor uses the lit button art');
+    await page.screenshot({ path: `.local/solar-panel-replacement-${width}.png` });
+    // Replacing the floor reports which supply was cut.
     await floor(1).click();
-    assert.deepEqual(await state(), { on: true, floors: [7, 1] }, 'A third floor turns off the oldest');
-    await status('7F · 1F 전력 공급 중 (2/2)');
-    await pressed([7, 1], [12]);
+    assert.deepEqual(await state(), { on: true, floors: [1] }, 'Selecting 1F replaces 7F');
+    await status('1F 전력 공급 중 (1/1)');
+    await pressed([1], [7, 12]);
     assert(await floor(1).evaluate(el => !el.classList.contains('suggested') && !el.hasAttribute('aria-label')));
-    assert.match(await page.locator('#interaction-status').textContent(), /1층.*먼저 켠 12층은 꺼집니다/);
+    assert.match(await page.locator('#interaction-status').textContent(), /1층.*켜져 있던 7층은 꺼집니다/);
     assert(await page.evaluate(() => Number(getComputedStyle(document.getElementById('interaction-status')).zIndex) >
       Number(getComputedStyle(document.getElementById('power-panel')).zIndex)), 'The drop notice shows above the open panel');
-    // Pressing a lit floor turns off only that floor.
-    await floor(7).click();
-    assert.deepEqual(await state(), { on: true, floors: [1] }, 'Clicking a powered floor turns only it off');
-    await status('1F 전력 공급 중 (1/2)');
-    await pressed([1], [7, 12]);
+    // Pressing the lit floor stops supply without raising the lever.
+    await floor(1).click();
+    assert.deepEqual(await state(), { on: true, floors: [] }, 'Clicking the supplied floor turns it off');
+    await status('공급할 층 선택 (0/1)');
+    await pressed([], [1, 7, 12]);
     await floor(16).click();
-    assert.deepEqual(await state(), { on: true, floors: [1, 16] });
+    assert.deepEqual(await state(), { on: true, floors: [16] });
     await page.screenshot({ path: `.local/solar-panel-on-${width}.png` });
     const layout = await page.locator('#power-panel').evaluate(panel => [...panel.querySelectorAll('button')].every(button => {
       const r = button.getBoundingClientRect();
@@ -160,24 +160,24 @@ try {
       const face = { left: cabinet.left + cabinet.width * 82 / 384, right: cabinet.left + cabinet.width * 304 / 384,
         top: cabinet.top + cabinet.height * 427 / 512, bottom: cabinet.top + cabinet.height * 450 / 512 };
       const label = document.getElementById('power-lever-label').getBoundingClientRect();
-      return el.textContent.includes('최대 두 층') && lines.length >= 2 && lines.every(line => line.left >= face.left && line.right <= face.right &&
+      return el.textContent.includes('엘리베이터 복구') && el.textContent.includes('층 버튼: 조명') && lines.length >= 1 && lines.every(line => line.left >= face.left && line.right <= face.right &&
         line.top >= face.top && line.bottom <= face.bottom && (line.top >= label.bottom || line.left >= label.right));
-    }), 'Both help steps, including the two-floor limit, sit on the painted plate face clear of the lever label');
+    }), 'The lever and floor-button help sits on the painted plate clear of the lever label');
     await page.keyboard.press('Escape');
     assert.equal(await page.locator('#stage').evaluate(el => el.inert), false);
     await page.keyboard.press('e');
-    assert.deepEqual(await state(), { on: true, floors: [1, 16] }, 'Closing and reopening preserves supply');
-    await status('1F · 16F 전력 공급 중 (2/2)');
+    assert.deepEqual(await state(), { on: true, floors: [16] }, 'Closing and reopening preserves supply');
+    await status('16F 전력 공급 중 (1/1)');
     if (width === 1280) {
       const box = await lever.boundingBox();
       // Dragging down again must leave an already lowered lever ON.
       await page.mouse.move(box.x + box.width / 2, box.y + 30); await page.mouse.down();
       await page.mouse.move(box.x + box.width / 2, box.y + box.height - 30, { steps: 8 }); await page.mouse.up();
-      assert.deepEqual(await state(), { on: true, floors: [1, 16] });
+      assert.deepEqual(await state(), { on: true, floors: [16] });
       await page.mouse.down();
       await page.mouse.move(box.x + box.width / 2, box.y + 30, { steps: 8 }); await page.mouse.up();
     } else { await lever.focus(); await page.keyboard.press('Space'); }
-    assert.deepEqual(await state(), { on: false, floors: [] }, 'Raising the lever disconnects supply and clears both floors');
+    assert.deepEqual(await state(), { on: false, floors: [] }, 'Raising the lever disconnects supply and clears the selected floor');
     await status('비상 전력 꺼짐');
     await pressed([], [1, 16]);
     assert(await floor(16).isDisabled());

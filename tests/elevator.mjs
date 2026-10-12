@@ -17,8 +17,11 @@ try {
   await page.locator('#opening-skip').click();
   await page.clock.pauseAt(new Date('2026-09-20T00:01:00Z'));
   await page.clock.runFor(100);
+  // Route timings use normal walking speed; fear and sanity progression have separate suites.
+  await page.evaluate(() => setDebugSanity(100));
   await reachInitialCorridor(page);
   const hold = async (key, ms) => {
+    await page.evaluate(() => setDebugSanity(100));
     await page.keyboard.down(key);
     await page.clock.runFor(ms);
     await page.keyboard.up(key);
@@ -30,7 +33,10 @@ try {
   // Rooftop power recovery is exercised by elevator-power.mjs; this suite checks the powered floor routes.
   await page.evaluate(() => { solarEnabled = true; updatePowerState(); });
   await page.keyboard.press('e');
-  await page.clock.runFor(19400);
+  await page.clock.runFor(await page.evaluate(() =>
+    (currentSceneFloor - elevatorCars[0].floor) * elevatorFloorTime + 100));
+  assert(await page.evaluate(() => elevatorCars[0].floor === currentSceneFloor && elevatorCars[0].open),
+    'The called elevator arrives with its door open');
   await page.keyboard.press('e');
   const cabin = page.locator('#elevator-cabin');
   const fade = page.locator('#room-transition');
@@ -69,16 +75,14 @@ try {
   assert.deepEqual(await page.locator('#cabin-floor-buttons [data-restricted]').evaluateAll(els => els.map(el => el.dataset.floor)),
     ['-2'], 'ARCHI keeps the elevator away from B2');
   for (const button of await floorButtons.all()) {
-    if (await button.isDisabled()) continue;
-    await button.click();
+    const floor = Number(await button.getAttribute('data-floor'));
+    assert.equal(await button.isDisabled(), floor === 17, 'Only the current floor is disabled');
+    assert.equal(await button.getAttribute('aria-pressed'), 'false');
     if (await button.getAttribute('data-restricted')) {
+      await button.click();
       assert.equal(await button.getAttribute('aria-pressed'), 'false', 'B2 stays restricted until B1 lifts it');
       assert.match(await page.locator('#cabin-status').textContent(), /버튼을 눌렀으나 아무 반응도 없었다./);
-      continue;
     }
-    assert.equal(await button.getAttribute('aria-pressed'), 'true');
-    await button.click();
-    assert.equal(await button.getAttribute('aria-pressed'), 'false');
   }
   await page.screenshot({ path: '.local/cabin-desktop-open.png' });
   const playerPosition = await page.locator('#player').getAttribute('style');
@@ -93,20 +97,29 @@ try {
   await page.locator('#cabin-open').click();
   await page.clock.runFor(1200);
   await page.locator('#cabin-floor-buttons [data-floor="16"]').click();
-  await page.locator('#cabin-close').click();
+  assert.equal(await page.locator('#cabin-floor-buttons [data-floor="16"]').getAttribute('aria-pressed'), 'true');
+  assert.equal(await page.locator('#cabin-scene').getAttribute('data-door'), 'closing', 'Selecting a floor closes the door');
+  await page.locator('#cabin-floor-buttons [data-floor="16"]').click();
+  await page.locator('#cabin-floor-buttons [data-floor="15"]').click();
+  assert.equal(await page.locator('#cabin-floor-buttons [data-floor="16"]').getAttribute('aria-pressed'), 'true', 'Repeated input keeps the requested floor');
+  assert.equal(await page.locator('#cabin-floor-buttons [data-floor="15"]').getAttribute('aria-pressed'), 'false', 'A second destination cannot replace the request');
   await page.clock.runFor(300);
   await page.locator('#cabin-open').click();
-  await page.clock.runFor(1800);
-  assert.equal(await cabin.getAttribute('data-floor'), '17', 'Reopening cancels departure');
-  await page.locator('#cabin-close').click();
-  await page.clock.runFor(1300);
-  assert.equal(await cabin.getAttribute('data-moving'), 'true');
-  assert(await page.locator('#cabin-open').isDisabled());
-  assert(await page.locator('#cabin-exit').isDisabled());
+  assert.equal(await page.locator('#cabin-floor-buttons [data-floor="16"]').getAttribute('aria-pressed'), 'true', 'Reopening keeps the requested destination');
+  for (let i = 0; i < 110 && await fade.getAttribute('data-phase') === 'idle'; i++) await page.clock.runFor(16);
+  assert.equal(await fade.getAttribute('data-phase'), 'out', 'Travel fades out after the door closes');
+  assert.equal(await cabin.getAttribute('data-floor'), '17', 'The floor stays unchanged before the black frame');
+  assert(await cabin.evaluate(el => el.inert), 'Cabin input is locked during travel');
+  await page.locator('#cabin-open').dispatchEvent('click');
+  await page.locator('#cabin-exit').dispatchEvent('click');
   await page.keyboard.press('Escape');
   assert(await cabin.isVisible());
-  await page.clock.runFor(2400);
+  await page.clock.runFor(150);
+  assert.equal(await cabin.getAttribute('data-floor'), '17', 'The old floor remains during fade-out');
+  await finishSceneTransition(page);
+  await page.clock.runFor(1200);
   assert.equal(await cabin.getAttribute('data-floor'), '16');
+  assert.equal(await page.locator('#cabin-scene').getAttribute('data-door'), 'open', 'The arrival door opens after fade-in');
   await page.locator('#cabin-exit').click();
   assert(await cabin.isVisible(), 'Cabin remains visible until departure fade reaches black');
   assert.equal(await page.locator('header span').textContent(), '17F · 00:00');
@@ -118,8 +131,16 @@ try {
   const header = () => page.locator('header span').textContent();
   const near = (actual, expected, message) => assert(Math.abs(actual - expected) < 1, `${message}: ${actual}`);
   const playerX = () => page.locator('#player').evaluate(el => new DOMMatrix(getComputedStyle(el).transform).m41 + 96);
+  const sprintSpeed = await page.evaluate(() => runSpeed);
   const walkTo = async x => {
-    const from = await playerX();
+    let from = await playerX();
+    // Use actual sprint input for long routes, then walk up to the interaction target.
+    if (Math.abs(x - from) > 400) {
+      await page.keyboard.down('ShiftLeft');
+      await hold(x < from ? 'a' : 'd', (Math.abs(x - from) - 200) / sprintSpeed * 1000);
+      await page.keyboard.up('ShiftLeft');
+      from = await playerX();
+    }
     await hold(x < from ? 'a' : 'd', Math.abs(x - from) / 200 * 1000);
   };
   const hint = () => page.locator('#interaction-hint').textContent();
@@ -148,7 +169,7 @@ try {
     assert.deepEqual([restroom.room.x, restroom.room.width, restroom.door], [...(painted?.restroomFront || [3556, 726]), { x: painted?.restroom[0] || 3612, y: 210, width: painted?.restroom[1] || 145 }],
       'Restroom matches its authored door position');
   };
-  // Every floor's restroom is the same room as 17F's, entered from the same door.
+  // Painted corridor fronts add blank wall space to preserve the restroom door's position.
   const visitRestroom = async short => {
     const corridorHeader = await header();
     const front = await roomFront(page, '화장실');
@@ -157,7 +178,7 @@ try {
     await page.keyboard.press('e');
     await finishSceneTransition(page);
     assert.equal(await header(), `${short} · 화장실`);
-    assert.equal(await worldWidth(page), 1800);
+    assert.equal(await worldWidth(page), ({ '1F': 2065, '7F': 2126, '12F': 2381 })[short] || 1800);
     const restroomProps = page.locator('#dynamic-scene .floor-prop img');
     assert.deepEqual(await restroomProps.evaluateAll(images => images.map(image => image.src.split('/').pop())),
       ['restroom-supply-cabinet.png', 'restroom-bin.png', 'wet-floor-sign.png']);
@@ -402,14 +423,18 @@ try {
     near(await playerX(), cuLink.x + 40, 'Arrive at the matching goods door');
     assert.equal(await worldWidth(page), 2040);
     assert.equal(await page.locator('#dynamic-scene .room-interior.shelves').count(), 1);
-    assert.equal(await page.locator('#dynamic-scene .floor-prop').count(), 7);
-    assert.equal(await page.locator('img[src$="food-refrigerator.png"]').count(), 2);
+    assert.equal(await page.locator('#dynamic-scene .floor-prop').count(), 4);
+    assert.equal(await page.locator('#dynamic-scene .floor-background:is([src$="amenity-cu-interior.png"], [src$="amenity-cu-interior-off.png"])').count(), 1,
+      'The refrigerators are painted in the CU interior');
     assert.equal(await page.locator('img[src$="food-checkout.png"]').count(), 1);
     await assertHumanScale();
     const cuExit = await exitDoor(page);
     assert.deepEqual([cuExit.y, cuExit.width], [cu.door.y, cu.door.width], 'The store exit is the shutter itself');
     assertMirroredDoor(cu.room, cu.door, 2040, cuExit, 'CU 편의점');
     roomScales.push(2040 / cu.room.width);
+    await walkTo(300);
+    await jump('d');
+    assert(await playerX() > 486, 'Jump clears the ramen box on the way to the checkout');
     await inspect(1150, 'E · 계산대 조사', /23:47.*정수호/);
     await page.screenshot({ path: '.local/floor-16-cu.png' });
     await inspect(1640, 'E · 셔터 제어함 조사', /명령 SYSTEM/);
@@ -417,6 +442,9 @@ try {
     assert.equal(await page.locator('#dynamic-scene .room-door.shutter').getAttribute('aria-label'), 'CU 편의점 출입문',
       'Raising the shutter from inside opens the store from the corridor');
     await enterRoom('CU 편의점', '16F');
+    await walkTo(530);
+    await jump('a');
+    assert(await playerX() < 344, 'Jump clears the ramen box on the way to the kitchen goods door');
     await walkTo(cuLink.x + cuLink.width / 2);
     assert.equal(await hint(), 'E · The Kitchen 들어가기');
     await page.keyboard.press('e');
@@ -1056,7 +1084,7 @@ try {
     assert(training.exit.x > 1400, 'The training room door is at the right end inside, as in the corridor');
     assert.equal(await page.locator('#dynamic-scene .floor-prop').count(), 5);
     await assertHumanScale();
-    await inspect(300, 'E · 교육 자료 보드 조사', /두 층까지만/);
+    await inspect(300, 'E · 교육 자료 보드 조사', /한 번에 한 층에만/);
     await inspect(1120, 'E · 교육생 자리 조사', /1\/5/);
     await page.screenshot({ path: '.local/floor-13-training.png' });
     assert(Math.max(...roomScales) / Math.min(...roomScales) < 1.02, `Room fronts scale with their interiors: ${roomScales}`);
@@ -1572,7 +1600,7 @@ try {
     assert.equal(vision.room.x + vision.room.width, clinic.room.x, 'Vision Hall and the health room share a wall');
     assert(hall.room.x >= 32 && clinic.room.x + clinic.room.width <= 1790 && clinic.door.x + clinic.door.width + 28 <= 1790,
       'All three rooms sit in the west wing');
-    assert.deepEqual(await page.locator('#dynamic-scene .fixture:not(.phone-charger)').evaluateAll(els => els.map(el => [el.className, el.getAttribute('aria-label')])),
+    assert.deepEqual(await page.locator('#dynamic-scene .fixture').evaluateAll(els => els.map(el => [el.className, el.getAttribute('aria-label')])),
       [['fixture directory-board', '층별 안내판'], ['fixture speed-gates', '스피드 게이트'], ['fixture guard-bot', '경비 로봇'],
         ['fixture revolving-door', '정문'], ['fixture phone-charger', '비상 휴대폰 충전함 · 전력 없음']]);
     const directory = await page.locator('#dynamic-scene .fixture.directory-board span').allTextContents();
@@ -1655,7 +1683,7 @@ try {
     await assertHumanScale();
     await inspect(560, 'E · 간호사 책상 조사', /B2 · 인체 신호 연결 장비/);
     await inspect(800, 'E · 장비 점검함 조사', /배치일\(월일 네 자리\)/);
-    await inspect(1740, 'E · 여성휴게실 조사', /손을 거두고/);
+    await inspect(1642, 'E · 여성휴게실 조사', /손을 거두고/);
     assert.equal(await header(), '1F · 건강관리실', 'The women\'s lounge door opens nothing');
     await page.screenshot({ path: '.local/floor-1-clinic.png' });
     assert(Math.max(...roomScales) / Math.min(...roomScales) < 1.02, `Room fronts scale with their interiors: ${roomScales}`);
@@ -1697,7 +1725,7 @@ try {
     const verify = await roomFront(page, '검증실');
     assert(vip.room.x >= 32 && vip.room.x + vip.room.width <= 1790 && vip.door.x - 28 >= 32, 'The VIP Room sits in the left zone');
     assert.equal(test.room.x + test.room.width, verify.room.x, 'The two labs share a wall');
-    assert(test.room.x >= 4282 && verify.room.x + verify.room.width <= 4968 && verify.door.x + verify.door.width + 28 <= 4968,
+    assert(test.room.x >= 4282 && verify.room.x + verify.room.width <= 4970 && verify.door.x + verify.door.width + 28 <= 4968,
       'Both labs sit in the right zone, past the restroom');
     assert.deepEqual([vip.door.width, test.door.width, verify.door.width], [197, 188, 104]);
     assert.equal(await page.locator('#dynamic-scene .floor-prop').count(), 6, 'Planters, sofas, display cabinet and bar');
@@ -2032,7 +2060,7 @@ try {
     assert(office.room.x >= 4282 && power.room.x + power.room.width <= 4968 && power.door.x + power.door.width + 28 <= 4968,
       'All three rooms sit right of the restroom');
     assert.equal(await page.locator('#dynamic-scene .floor-prop').count(), 7, 'Four charging docks, tool cabinet, panel and UPS');
-    assert.deepEqual(await page.locator('#dynamic-scene .fixture:not(.phone-charger)').evaluateAll(els => els.map(el => [el.className, el.getAttribute('aria-label')])),
+    assert.deepEqual(await page.locator('#dynamic-scene .fixture').evaluateAll(els => els.map(el => [el.className, el.getAttribute('aria-label')])),
       [['fixture pipe-run', '천장 배관'], ['fixture utility-plaque', '시설관리 구역 표지'], ['fixture robot-board', '로봇 운용 현황판'],
         ['fixture power-notice', '비상 전원 안내판'], ['fixture phone-charger', '비상 휴대폰 충전함 · 전력 공급 중']]);
     await page.locator('#dynamic-scene .floor-prop img').evaluateAll(images => Promise.all(images.map(img => img.decode())));
@@ -2049,7 +2077,7 @@ try {
     await page.keyboard.press('e');
     await page.clock.runFor(800);
     assert.match(await status(), /비상계단 문이 잠겨/);
-    await inspect(3295, 'E · 비상 전원 안내판 조사', /한 번에 두 층까지만/);
+    await inspect(3295, 'E · 비상 전원 안내판 조사', /비상 발전기와 UPS.*SYSTEM 자동/);
     await visitRestroom('B1');
 
     const controlRoom = await enterRoom('방재 관제실', 'B1');
@@ -2094,7 +2122,7 @@ try {
     assert.equal(await page.locator('#dynamic-scene .floor-prop').count(), 7);
     await assertHumanScale();
     await inspect(330, 'E · 전력 분배반 조사', /B1 6% · B2 94%/);
-    await inspect(600, 'E · 태양광 수전반 조사', /두 층까지/);
+    await inspect(600, 'E · 태양광 수전반 조사', /지상층 한 층만/);
     await inspect(900, 'E · 야간 전력 기록 조사', /서버 한 동/);
     await page.screenshot({ path: '.local/floor-b1-power.png' });
     assert(Math.max(...roomScales) / Math.min(...roomScales) < 1.02, `Room fronts scale with their interiors: ${roomScales}`);
@@ -2103,7 +2131,7 @@ try {
     await walkTo(startX);
     await page.clock.runFor(100);
   };
-  // B2 is the ARCHI server floor and the ending floor (the delete puzzle and the final chase are not built yet). Its
+  // B2 is the ARCHI server floor; the complete delete/ending routes are covered by b2-ending.mjs. Its
   // mechanic: a ceiling camera outside the main server room watches the elevator-side corridor and the door in turn,
   // 4 s each (cameras, js/interaction/cctv.js). Being in the watched stretch locks the door until 5 s after leaving it;
   // the pillar under the camera is a blind spot. Pulling the camera's power inside the server room switches it off.
@@ -2137,7 +2165,7 @@ try {
       && power.door.x + power.door.width + 28 <= 3584, 'The power room sits between the stair door and the restroom');
     assert(link.room.x >= 4282 && link.room.x + link.room.width <= 4968, 'The link lab sits past the restroom');
     assert.equal(await page.locator('#dynamic-scene .floor-prop').count(), 3, 'Overflow racks');
-    assert.deepEqual(await page.locator('#dynamic-scene .fixture:not(.phone-charger)').evaluateAll(els => els.map(el => [el.className, el.getAttribute('aria-label')])),
+    assert.deepEqual(await page.locator('#dynamic-scene .fixture').evaluateAll(els => els.map(el => [el.className, el.getAttribute('aria-label')])),
       [['fixture core-pillar', '사각 기둥'], ['fixture core-plaque', 'ARCHI 운영 구역 표지'], ['fixture dormant-bots', '대기 중인 경비 로봇'],
         ['fixture phone-charger', '비상 휴대폰 충전함 · 전력 공급 중']]);
     assert.equal(await cones.count(), 2, 'The camera watches two stretches');
@@ -2195,11 +2223,15 @@ try {
     assert.equal(await worldWidth(page), 1800);
     assert.equal(powerRoom.exit.x, 873);
     assert.equal(await page.locator('#dynamic-scene .room-interior.coolant.windowless').count(), 1);
-    assert.equal(await page.locator('#dynamic-scene .floor-prop').count(), 7);
+    assert.equal(await page.locator('#dynamic-scene .floor-prop').count(), 8);
     await assertHumanScale();
     await inspect(400, 'E · 수전 전환반 조사', /00:00 건물 전 층 → B2 집중 모드/);
     await inspect(640, 'E · 대용량 UPS 조사', /1순위 ARCHI-MAIN/);
+    await inspect(1400, 'E · 항불안제 조사', /항불안제.*챙겼다/);
+    assert(await page.evaluate(() => collectedItems.has('b2-antianxiety')));
     await inspect(1400, 'E · 냉각 설비 일지 조사', /3~5%밖에/);
+    await inspect(500, 'E · 외부 회선 패널 조사', /외부 전송이 끊겼다/);
+    assert(await page.evaluate(() => collectedItems.has('b2-transfer-cut')));
     await page.screenshot({ path: '.local/floor-b2-power.png' });
     await leaveRoom(powerRoom, corridorHeader);
     await visitRestroom('B2');
@@ -2222,14 +2254,19 @@ try {
   console.log('PASS: 16F route and employee badge');
   assert(await page.locator('#player').evaluate(el =>
     Math.abs(new DOMMatrix(getComputedStyle(el).transform).m42 + 178 - 570) < 1));
-  await page.keyboard.press('e');
-  await finishSceneTransition(page);
-  assert(await cabin.isVisible(), 'Can reboard at the arrival floor');
+  const reboard = async () => {
+    await page.keyboard.press('e');
+    const openingTime = await page.evaluate(() => elevatorEntering?.remaining || 0);
+    if (openingTime) await page.clock.runFor(openingTime + 34);
+    await finishSceneTransition(page);
+    assert(await cabin.isVisible(), 'Can reboard at the arrival floor');
+  };
+  await reboard();
   let emptyRestroomVisited = false;
   for (let floor = 15; floor >= 1; floor--) {
     console.log(`Checking ${floor}F route and puzzles...`);
     await page.locator(`#cabin-floor-buttons [data-floor="${floor}"]`).click();
-    if (floor === 15) assert.equal(await page.locator('#cabin-status').textContent(), '15층 선택');
+    assert.equal(await page.locator(`#cabin-floor-buttons [data-floor="${floor}"]`).getAttribute('aria-pressed'), 'true');
     if (floor !== 15) await page.locator('#cabin-close').click();
     await page.clock.runFor(floor === 15 ? 5300 : 3600);
     assert.equal(await cabin.getAttribute('data-floor'), String(floor));
@@ -2295,8 +2332,7 @@ try {
       }
     }
     await page.clock.runFor(100);
-    await page.keyboard.press('e');
-    await finishSceneTransition(page);
+    await reboard();
     assert(await cabin.isVisible(), `Floor ${floor} must allow reboarding`);
   }
   // B2 is still restricted from 1F, so the basements go 1F → B1 (lift the restriction) → B2.
@@ -2313,8 +2349,7 @@ try {
   await page.locator('#cabin-exit').click();
   await finishSceneTransition(page);
   await checkFloorB1();
-  await page.keyboard.press('e');
-  await finishSceneTransition(page);
+  await reboard();
   // The last ride runs at a phone viewport: B1's elevator control panel has opened the B2 button.
   await page.setViewportSize({ width: 390, height: 844 });
   await cabin.evaluate(el => { el.scrollLeft = el.scrollWidth - el.clientWidth; });
@@ -2335,8 +2370,17 @@ try {
   await page.setViewportSize({ width: 1280, height: 720 });
   await page.clock.runFor(100);
   await checkFloorB2();
+  await walkTo(1858);
+  await reboard();
+  await page.locator('#cabin-floor-buttons [data-floor="17"]').click();
+  assert.equal(await page.locator('#cabin-floor-buttons [data-floor="17"]').getAttribute('aria-pressed'), 'true');
+  await page.clock.runFor(3600);
+  assert.equal(await cabin.getAttribute('data-floor'), '17', 'The final button returns from B2 to 17F');
+  await page.locator('#cabin-exit').click();
+  await finishSceneTransition(page);
+  assert.equal(await page.evaluate(() => currentSceneFloor), 17);
   assert.deepEqual(errors, []);
-  console.log('PASS: 19 mouse floor buttons, door controls, reopen cancellation, travel locks, same-car reboarding, all-floor destinations, basement numbering, alarm, keyboard focus and mobile cabin.');
+  console.log('PASS: 19 floor buttons, door controls, destination locks, travel fades, same-car reboarding, all-floor destinations, basement numbering, alarm, keyboard focus and mobile cabin.');
 } finally {
   await browser.close();
 }

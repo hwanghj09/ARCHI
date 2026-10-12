@@ -79,7 +79,7 @@ const FLOOR13_ROOMS = interiorRooms(13, [
       writing: [
         { as: 'paper', title: '정전 시 대응  1/3', text: '(배터리 그림)\n옥상 태양광 비상 전력 장치를 쓴다.\n용량이 작다.' },
         { as: 'paper', title: '정전 시 대응  2/3', text: '(태양광 패널과 층 그림. 전력이 가는 층만 주황색)\n한 번에 한 층에만\n전력을 보낼 수 있다.' },
-        { as: 'paper', title: '정전 시 대응  3/3', text: '(스위치 그림)\n세 번째 층을 켜면\n가장 먼저 켠 층의 전력은 자동으로 끊긴다.' }],
+        { as: 'paper', title: '정전 시 대응  3/3', text: '(스위치 그림)\n다른 층을 켜면\n이전에 켠 층의 전력은 자동으로 끊긴다.' }],
       caption: '사내 안전 교육 슬라이드 출력물 세 장.' },
     { file: 'training-workstation', size: [512, 256], worldWidth: 300, x: 720 },
     { file: 'training-workstation', size: [512, 256], worldWidth: 300, x: 1120, name: '교육생 자리',

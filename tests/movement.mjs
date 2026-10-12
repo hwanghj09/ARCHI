@@ -47,7 +47,7 @@ try {
       Math.abs(new DOMMatrix(getComputedStyle(el).transform).m41 + frame * el.parentElement.clientWidth) < .01,
     frame), 'Action sheet must show the selected cell');
   };
-  const tiles = page.locator('#background img');
+  const tiles = page.locator('#background img:not(.luminous-sign)');
   await tiles.evaluateAll(images => Promise.all(images.map(image => image.decode())));
   assert.equal(await tiles.count(), 1, 'The corridor uses one registered power-switchable atlas');
   assert(await tiles.evaluateAll(images => images.every(image =>
@@ -84,6 +84,7 @@ try {
     }
   });
   const indicators = page.locator('.elevator-indicator');
+  const elevatorFloorMs = await page.evaluate(() => elevatorFloorTime);
   assert.deepEqual(await indicators.allTextContents(), ['01F', '01F', '01F']);
   assert(await doors.locator('img').evaluateAll(images => images.every(image =>
     image.naturalWidth === 512 && image.naturalHeight === 512)), 'Door sheets must contain two 256x512 frames');
@@ -196,17 +197,16 @@ try {
   await actionFrame('#interact-sheet', 0);
   await page.clock.runFor(220);
   await actionFrame('#interact-sheet', 1);
+  assert.equal(await indicators.nth(0).textContent(), '↑ 02F', 'The floor display advances before arrival');
   await page.clock.runFor(250);
   assert.equal((await state()).animation, 'idle');
-  await page.clock.runFor(800);
-  assert.equal(await indicators.nth(0).textContent(), '↑ 02F', 'The floor display must advance gradually');
   await page.keyboard.press('e');
   assert.equal(await doors.nth(0).getAttribute('data-open'), 'false', 'Repeated calls must not open a moving elevator');
   await page.screenshot({ path: '.local/elevator-ascending.png' });
-  await page.clock.runFor(17700);
+  await page.clock.runFor(16 * elevatorFloorMs - 470 - elevatorFloorMs / 2);
   assert.equal(await indicators.nth(0).textContent(), '↑ 16F', 'Repeated calls must not restart or accelerate travel');
   assert.equal(await doors.nth(0).getAttribute('data-open'), 'false', 'The door stays shut before arrival');
-  await page.clock.runFor(400);
+  await page.clock.runFor(elevatorFloorMs);
   assert.equal(await indicators.nth(0).textContent(), '17F');
   assert.equal(await doors.nth(0).getAttribute('data-open'), 'true', 'Arrival must automatically open the door');
   assert.match(await page.locator('#interaction-status').textContent(), /17층에 도착/);
@@ -238,7 +238,7 @@ try {
     assert.equal(await doors.nth(index).getAttribute('data-open'), 'false',
       'Elevators must travel before opening');
   }
-  await page.clock.runFor(19400);
+  await page.clock.runFor(16 * elevatorFloorMs + 100);
   assert.deepEqual(await indicators.allTextContents(), ['17F', '17F', '17F'], 'Elevators keep travelling independently when the player walks away');
   for (const index of [2, 1]) {
     assert.equal(await doors.nth(index).getAttribute('data-open'), 'true');
@@ -302,12 +302,17 @@ try {
   near((await state()).feet, 570, 'Landscape must preserve physics coordinates');
   await page.screenshot({ path: '.local/sideview-landscape.png' });
 
-  // Board an already-open elevator and return from an empty floor.
+  // Walking around lets the car auto-close; re-open it before boarding and make a return trip.
   const beforeTravel = await state();
   const stepsToElevator0 = (beforeTravel.x - 1818) / 200 * 1000;
   await hold(stepsToElevator0 > 0 ? 'a' : 'd', Math.abs(stepsToElevator0));
+  assert.equal(await doors.nth(0).getAttribute('data-open'), 'false', 'An idle car closes while the player walks away');
   await page.keyboard.press('e');
+  const boardingDelay = await page.evaluate(() => elevatorEntering?.remaining ?? 0);
+  assert(boardingDelay > 0, 'A closed door opens before boarding');
+  await page.clock.runFor(boardingDelay + 34);
   await finishSceneTransition(page);
+  assert(await page.locator('#elevator-cabin').isVisible(), 'Reopening a parked car enters the cabin');
   await page.locator('#cabin-floor-buttons [data-floor="12"]').click();
   assert.equal(await page.locator('#cabin-floor-buttons [data-floor="12"]').getAttribute('aria-pressed'), 'true');
   await page.locator('#cabin-close').click();
@@ -317,7 +322,7 @@ try {
   assert.equal(await page.locator('#world').getAttribute('data-room'), 'dynamic', 'Boarding must move the player to a dynamically built floor');
   assert.equal(await page.evaluate(() => document.getElementById('world').style.width), '5000px', 'Every floor shares the 17F width');
   assert.equal(await page.locator('header span').textContent(), '12F · 기술본부 ARCHI 개발팀');
-  assert.equal(await page.locator('#dynamic-scene .solid:not(.floor):not(.boundary)').count(), 0, 'The 12F corridor has no obstacles');
+  assert.equal(await page.locator('#dynamic-scene .solid:not(.floor):not(.boundary)').count(), 0, 'The 12F corridor has no extra box obstacles');
   assert.match(await page.locator('#interaction-status').textContent(), /12층에 도착/);
   assert.equal(await page.locator('#elevator-cabin').isHidden(), true, 'Exiting must close the cabin view');
   await page.screenshot({ path: '.local/floor-12.png' });

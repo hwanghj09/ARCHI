@@ -77,15 +77,19 @@ try {
   assert.equal((await state()).sanity, 7, '10% 아래에서는 쫓겨도 더 줄지 않는다');
   await page.evaluate(() => { guardPatrol.mode = 'patrol'; });
   await page.evaluate(() => { sanity = 100; guardPatrol.mode = 'chase'; bossFightActive = true; updateSanity(1000); });
-  assert.equal((await state()).sanity, 100, '보스전 중에는 추격 감소가 없다');
-  await page.evaluate(() => { guardPatrol.mode = 'patrol'; bossFightActive = false; });
+  near((await state()).sanity, 100 - 1 / 3); // 보스전은 추격 감소만 제외하고 어둠의 기본 소모는 유지한다.
+  await page.evaluate(() => { sanity = 100; phoneLightOn = true; phoneBattery = 100; updateSanity(1000); });
+  assert.equal((await state()).sanity, 100, '보스전 중 빛을 비추면 추격·어둠 감소가 모두 없다');
+  await page.evaluate(() => { guardPatrol.mode = 'patrol'; bossFightActive = false; phoneLightOn = false; });
 
   // ---- 정신 불안 임무 동안은 어디서든 1초에 2%씩 줄고, 항불안제를 쓰면 멈춘다 ----
   await page.evaluate(() => { collectedItems.add('story-anxiety-seen'); sanity = 50; updateSanity(1000); });
   near((await state()).sanity, 48);
-  await page.evaluate(() => { collectedItems.add('f16-antianxiety-used'); sanity = 50; updateSanity(1000); });
-  assert.equal((await state()).sanity, 50, '항불안제를 쓰면 임무 감소가 멈춘다');
-  await page.evaluate(() => { collectedItems.delete('story-anxiety-seen'); collectedItems.delete('f16-antianxiety-used'); });
+  await page.evaluate(() => { collectedItems.add('f16-antianxiety-used'); collectedItems.add('sanity-drain-resume'); sanity = 50; updateSanity(1000); });
+  near((await state()).sanity, 50 - 1 / 3); // 임무 감소만 멈추고 어둠의 기본 소모는 유지한다.
+  await page.evaluate(() => { sanity = 50; phoneLightOn = true; phoneBattery = 100; updateSanity(1000); });
+  assert.equal((await state()).sanity, 50, '항불안제 사용 후 빛을 비추면 임무·어둠 감소가 모두 없다');
+  await page.evaluate(() => { collectedItems.delete('story-anxiety-seen'); collectedItems.delete('f16-antianxiety-used'); collectedItems.delete('sanity-drain-resume'); phoneLightOn = false; });
 
   // ---- 정신력 0%: 방향 전환에 0.2초가 걸리고(그동안 제자리), 같은 방향이거나 정신력이 있으면 지연 없음 ----
   const turn = await page.evaluate(() => {
@@ -177,9 +181,10 @@ try {
     out.corridor = document.querySelectorAll('.fear-screen.corridor').length;
     const holder = document.createElement('div'); const art = document.createElement('img'); holder.append(art); document.body.append(holder);
     Object.assign(art.style, { left: '100px', top: '10px', width: '3692px', height: '1112px' }); addBackgroundMonitors(art, 'assets/background/floor03/floor03-cs-interior.png');
-    const placed = [...holder.querySelectorAll('.fear-screen')]; out.bg = [placed.length, placed[0]?.style.left, placed[0]?.style.top]; holder.remove();
+    const placed = [...holder.querySelectorAll('.fear-screen')].sort((a, b) => parseFloat(a.style.left) - parseFloat(b.style.left));
+    out.bg = [placed.length, placed[0]?.style.left, placed[0]?.style.top]; holder.remove();
     out.officeShown = [...document.querySelectorAll('.fear-screen.office')].every(el => getComputedStyle(el).display === 'block');
-    performFloorChange('f12'); updateSanity(0);
+    performFloorChange('f12-dev', 0, 'exit'); updateSanity(0);
     out.propScreens = document.querySelectorAll('#dynamic-scene .floor-prop .fear-screen').length;
     sanity = 100; updateSanity(0);
     out.hidden = [...document.querySelectorAll('.fear-screen')].every(el => getComputedStyle(el).display === 'none');

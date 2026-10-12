@@ -28,7 +28,7 @@ try {
   // A real phone deposit plus acquired items, gate progress, power and a non-default sanity level.
   await page.evaluate(() => {
     collectedItems.add('f17-badge'); collectedItems.add('f16-badge'); collectedItems.add('f12-access');
-    buildingBlackout = true; solarEnabled = true; solarPoweredFloors = [12, 7];
+    buildingBlackout = true; solarEnabled = true; solarPoweredFloors = [12];
     performFloorChange('f12'); phoneBattery = 40; sanity = 15;
     const point = currentDoors.find(door => door.phoneCharger);
     Body.setPosition(body, { x: point.x + point.width / 2, y: floorY - 81 }); Body.setVelocity(body, { x: 0, y: 0 });
@@ -43,8 +43,8 @@ try {
   assert.equal(resumed.id, 'f12'); assert(Math.abs(resumed.x - saved.scene.x) < 1);
   assert.equal(resumed.battery, saved.battery); assert.equal(resumed.sanity, saved.sanity);
   assert.deepEqual(resumed.dock, saved.dock); assert.deepEqual(resumed.items, saved.items);
-  assert.deepEqual(saved.solarPoweredFloors, [12, 7]); assert.deepEqual(resumed.solarPoweredFloors, [12, 7], 'Both powered floors resume in the order they were turned on');
-  assert(await page.evaluate(() => floorHasPower(12) && floorHasPower(7) && !floorHasPower(13))); assert.equal(resumed.blackout, true);
+  assert.deepEqual(saved.solarPoweredFloors, [12]); assert.deepEqual(resumed.solarPoweredFloors, [12], 'The supplied floor resumes');
+  assert(await page.evaluate(() => floorHasPower(12) && !floorHasPower(7) && !floorHasPower(13))); assert.equal(resumed.blackout, true);
   assert.equal(await page.locator('.access-gate[data-open="true"]').count(), 2);
   assert.equal(await page.locator('.docked-phone:visible').count(), 1);
   assert(await page.locator('#opening').isHidden(), 'Continue never replays the opening');
@@ -81,16 +81,35 @@ try {
   const timerSave = await reloadContinue();
   assert.equal(await page.evaluate(() => timedBarriers.length), 1);
   assert.equal(await page.evaluate(() => timedBarriers[0].closesIn), timerSave.runtime.timed[0].remaining);
-  // A trip resumes with its doors, destination and elapsed travel time intact.
+  // A selected cabin destination resumes while its doors are closing, then completes the trip.
   await page.evaluate(() => { performFloorChange('f16'); elevatorCars[0].floor = 16; showCabin(0); });
   await page.locator('#cabin-floor-buttons [data-floor="15"]').click(); await page.locator('#cabin-close').click();
-  await page.clock.runFor(1400); assert(await page.evaluate(() => elevatorCars[0].travelling));
+  await page.clock.runFor(100);
+  assert(await page.evaluate(() => selectedFloor === 15 && cabinScene.dataset.door === 'closing'));
   const trip = await reloadContinue();
-  assert((await state()).cabin); assert.equal(await page.evaluate(() => elevatorCars[0].elapsed), trip.elevators[0].elapsed);
-  assert.equal(await page.locator('#cabin-scene').getAttribute('data-door'), 'closed');
-  await page.clock.runFor(1500); assert.equal(await page.evaluate(() => elevatorCars[0].floor), 15);
+  assert((await state()).cabin); assert.equal(await page.evaluate(() => selectedFloor), trip.cabin.selectedFloor);
+  assert.equal(await page.evaluate(() => cabinDoorAmount), trip.cabin.amount);
+  assert.equal(await page.locator('#cabin-scene').getAttribute('data-door'), trip.cabin.phase);
+  await page.clock.runFor(2100); assert.equal(await page.evaluate(() => elevatorCars[0].floor), 15);
   await page.clock.runFor(1300); await page.locator('#cabin-exit').click(); await page.clock.runFor(900);
   assert.equal((await state()).id, 'f15');
+  // Occupied trips from the older moving-car implementation retain their destination and elapsed time.
+  await page.evaluate(() => {
+    showCabin(0);
+    Object.assign(elevatorCars[0], { travelling: true, destination: 10, elapsed: 90, open: false });
+    cabinDoorAmount = 0; cabinScene.dataset.door = 'closed'; cabinScene.style.setProperty('--door-open', '0');
+  });
+  const legacyTrip = await reloadContinue();
+  assert((await state()).cabin);
+  assert.deepEqual(await page.evaluate(() => {
+    const { floor, destination, elapsed, travelling, rider } = elevatorCars[0];
+    return { floor, destination, elapsed, travelling, rider };
+  }), { floor: 15, destination: 10, elapsed: legacyTrip.elevators[0].elapsed, travelling: true, rider: true });
+  await page.clock.runFor(2400);
+  assert.equal(await page.evaluate(() => elevatorCars[0].floor), 10);
+  assert(await page.locator('#cabin-exit').isEnabled());
+  await page.locator('#cabin-exit').click(); await page.clock.runFor(900);
+  assert.equal((await state()).id, 'f10');
   // A mid-blackout quit commits the one-time event; capture resumes from the lobby checkpoint.
   await page.evaluate(() => {
     buildingBlackout = true; performFloorChange('f17'); buildingBlackout = false; solarEnabled = false; solarPoweredFloors = []; updatePowerState();
@@ -135,7 +154,7 @@ try {
   await checkpoint();
   assert.deepEqual((await stored()).items, ['f17-badge', 'rooftop-key']);
   // Saves from the one-floor power rule load a numeric floor as one powered floor; an empty value powers none.
-  for (const [legacyFloor, expected, status] of [[7, [7], '7F 전력 공급 중 (1/2)'], [null, [], '공급할 층 선택 (0/2)']]) {
+  for (const [legacyFloor, expected, status] of [[7, [7], '7F 전력 공급 중 (1/1)'], [null, [], '공급할 층 선택 (0/1)']]) {
     await page.locator('#game-menu-button').tap();
     await page.evaluate(floor => {
       const legacy = JSON.parse(localStorage.getItem(progressKey));
@@ -151,6 +170,17 @@ try {
     const resaved = await stored();
     assert.deepEqual(resaved.solarPoweredFloors, expected); assert(!('solarPoweredFloor' in resaved), 'New saves use only the array');
   }
+  // Older two-floor saves retain the last selected valid floor under the current one-floor limit.
+  await page.locator('#game-menu-button').tap();
+  await page.evaluate(() => {
+    const legacy = JSON.parse(localStorage.getItem(progressKey));
+    Object.assign(legacy, { blackout: true, solarEnabled: true, solarPoweredFloors: [12, 7] });
+    localStorage.setItem(progressKey, JSON.stringify(legacy));
+  });
+  await page.reload(); await page.locator('#menu-continue').click();
+  assert.deepEqual((await state()).solarPoweredFloors, [7]);
+  assert(await page.evaluate(() => floorHasPower(7) && !floorHasPower(12)));
+  await checkpoint(); assert.deepEqual((await stored()).solarPoweredFloors, [7]);
   // Invalid saves are ignored, and blocked storage cannot prevent a fresh game.
   await page.evaluate(() => {
     const saved = localStorage.getItem(progressKey);
@@ -172,5 +202,5 @@ try {
   await page.reload(); await page.locator('#menu-start').click(); await page.locator('#opening-skip').click();
   assert(await page.evaluate(() => gameStarted && progressSaveFailed && !mainMenuActive));
   assert.deepEqual(errors, []);
-  console.log('PASS: autosave/pagehide/visibility, continue/new game/cancel, pause and touch, position/items/gates/power/battery/sanity/dock, puzzle steps/platforms/timed doors, active elevator trip, blackout/capture checkpoints, two-floor power and legacy one-floor saves, invalid data and blocked storage.');
+  console.log('PASS: autosave/pagehide/visibility, continue/new game/cancel, pause and touch, position/items/gates/power/battery/sanity/dock, puzzle steps/platforms/timed doors, pending cabin destination and legacy moving occupied-trip reload, blackout/capture checkpoints, one-floor power and legacy numeric/two-floor saves, invalid data and blocked storage.');
 } finally { await browser.close(); }

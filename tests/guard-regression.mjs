@@ -21,7 +21,11 @@ try {
   await page.locator('#opening-skip').click();
   await page.clock.pauseAt(new Date('2026-10-04T00:01:00Z'));
   const reset = (options = {}) => page.evaluate(options => {
+    finishStoryScene();
     closePhone(); closeKeypad(); closeInspection(); closePowerPanel(); releaseInput();
+    // Story cutscenes have their own route tests; keep independent robot cases on the simulation clock.
+    for (const scene of STORY_SCENES) collectedItems.add(scene.flag);
+    sanity = 100;
     triggerBuildingBlackout(); solarEnabled = true; solarPoweredFloors = [1];
     performFloorChange('f1');
     Object.assign(guardPatrol, { x: 3000, facing: 1, mode: 'patrol', wait: 0,
@@ -84,11 +88,23 @@ try {
       assert.equal(Math.round(Math.abs(captured.playerX - captured.x)), 82, 'Grippers retain their alignment');
     }
   });
-  await check('Every modal pauses an active chase and resumes without a jump', async () => {
-    for (const modal of ['phone', 'inventory', 'keypad', 'power']) {
+  await check('Phone keeps an active chase running and closes on capture', async () => {
+    await reset({ playerX: 3340, robot: { mode: 'chase' } });
+    await page.evaluate(() => togglePhone());
+    assert(await page.evaluate(() => usingPhone));
+    const before = await state(); await page.clock.runFor(500);
+    assert((await state()).x > before.x);
+    assert.equal((await state()).caught, false);
+    assert(await page.evaluate(() => usingPhone));
+    await page.clock.runFor(2000);
+    assert((await state()).caught);
+    assert(await page.evaluate(() => !usingPhone && phonePanel.hidden));
+    assert(await page.locator('#guard-capture').isVisible());
+  });
+  await check('Inventory, keypad and power modals pause chase and resume without a jump', async () => {
+    for (const modal of ['inventory', 'keypad', 'power']) {
       await reset({ playerX: 3340, robot: { mode: 'chase' } });
       await page.evaluate(modal => {
-        if (modal === 'phone') togglePhone();
         if (modal === 'inventory') toggleInventory();
         if (modal === 'keypad') openKeypad(guardPatrol.door);
         if (modal === 'power') openPowerPanel();
@@ -215,7 +231,7 @@ try {
     const escape = await escapeToElevator();
     assert.equal(escape.mode, 'return', JSON.stringify(escape));
     const reacquired = await page.evaluate(() => {
-      Body.setPosition(body, { x: guardPatrol.x + 40, y: floorY - 81 }); grounded = true;
+      Body.setPosition(body, { x: guardPatrol.x + 100, y: floorY - 81 }); grounded = true;
       updateGuardPatrol(1000 / 60);
       return { mode: guardPatrol.mode, x: guardPatrol.x, playerX: body.position.x };
     });
@@ -316,7 +332,7 @@ try {
     await page.locator('#guard-retry').tap(); assert.equal((await state()).caught, false);
   });
   await check('Ten simulated minutes of patrol stay bounded and keep reversing', async () => {
-    await reset({ playerX: 1000 });
+    await reset({ playerX: 1000, robot: { x: 3040 } });
     const patrol = await page.evaluate(() => {
       Body.setPosition(body, { x: 1000, y: floorY - 1000 }); grounded = false;
       let turns = 0, min = Infinity, max = -Infinity;

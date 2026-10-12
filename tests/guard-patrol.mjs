@@ -88,6 +88,11 @@ try {
   const unpowered = await state(); await page.clock.runFor(1000); assert.deepEqual(await state(), unpowered);
   assert.equal(unpowered.frame, '7');
   await page.evaluate(() => { solarPoweredFloors = [1]; updatePowerState(); togglePhone(); });
+  const reading = await state(); await page.clock.runFor(1000);
+  assert(Math.abs((await state()).x - reading.x - 80) < 3, 'Phone keeps the powered patrol running');
+  assert(await page.evaluate(() => usingPhone));
+  await page.keyboard.press('Escape');
+  await page.evaluate(() => toggleInventory());
   const paused = await state(); await page.clock.runFor(1000); assert.deepEqual(await state(), paused, 'Modal pauses patrol');
   await page.keyboard.press('Escape');
   await page.evaluate(() => performFloorChange('f1-vision', 0, 'exit'));
@@ -123,5 +128,5 @@ try {
   await page.evaluate(() => performFloorChange('f17'));
   assert.equal(await robot.count(), 0); assert.equal(await page.locator('.robot-dock-patch').count(), 0);
   assert.deepEqual(errors, []);
-  console.log('PASS: eight aligned frames, rolling/scan/turn, power pause/resume, modal pause, room persistence, moving maintenance target, scene cleanup and mobile.');
+  console.log('PASS: eight aligned frames, rolling/scan/turn, power pause/resume, phone continues, inventory pause, room persistence, moving maintenance target, scene cleanup and mobile.');
 } finally { await browser.close(); }

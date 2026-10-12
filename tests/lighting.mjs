@@ -15,6 +15,8 @@ try {
   if (await page.locator('#menu-new-confirm').isVisible()) await page.locator('#menu-new-confirm').click();
   await page.locator('#opening-skip').click();
   await page.clock.pauseAt(new Date('2026-09-21T00:01:00Z'));
+  // Keep timed route movement at its nominal speed; low-sanity slowdown is covered by sanity.mjs.
+  await page.evaluate(() => { sanity = 100; });
   // The switch can illuminate 17F only after the rooftop generator supplies it.
   assert(await page.locator('#darkness').isHidden(), 'The building starts with mains power');
   await page.evaluate(() => triggerBuildingBlackout());

@@ -18,6 +18,8 @@ try {
   await page.clock.pauseAt(new Date('2026-09-25T00:01:00Z'));
   const position = () => page.locator('#player').evaluate(el => new DOMMatrix(getComputedStyle(el).transform).m41 + 96);
   const walk = async x => {
+    // Geometry routes use normal speed; sanity effects are covered by sanity.mjs.
+    await page.evaluate(() => setDebugSanity(100));
     const start = await position();
     const key = x < start ? 'a' : 'd';
     await page.keyboard.down(key);
@@ -42,7 +44,7 @@ try {
     'amenity-cu-interior.png': 602, 'amenity-cafe-interior.png': 596,
   };
   const doorFiles = { cafeteria: 'cafeteria-door.png', shutter: 'cu-shutter-states.png',
-    metal: 'restroom-door.png', cafe: 'cafe-door.png', backdoor: 'service-door.png' };
+    metal: 'restroom-door.png', 'restroom-exit': 'restroom-door.png', cafe: 'cafe-door.png', backdoor: 'service-door.png' };
   const checkDoors = async () => {
     for (const door of await page.locator('#dynamic-scene .room-door').all()) {
       const state = await door.evaluate(async el => {
@@ -110,11 +112,22 @@ try {
   await use(3515);
   assert.equal(await page.locator('header span').textContent(), '16F · CU 편의점');
   await checkArt(1);
-  await use(470);
-  assert.match(await interactionMessage(page), /새벽 전원 차단/);
-  await capture('refrigerators');
+  assert.equal(await page.locator('.fixture.pill-item').count(), 1, 'The medicine is on the upper shelf');
+  assert.equal(await page.evaluate(() => movingParts[0].body.position.x), 415, 'The ramen box starts in front of the shelves');
+  await walk(300);
+  await page.keyboard.down('Shift');
+  await page.keyboard.down('d');
+  await page.keyboard.press('Space');
+  await page.clock.runFor(900);
+  await page.keyboard.up('d');
+  await page.keyboard.up('Shift');
+  await page.clock.runFor(34);
+  assert(await position() > 486, 'The shelf box can be cleared with a running jump');
+  await capture('shelves');
   await use(1150);
   assert.match(await interactionMessage(page), /23:47/);
+  await use(1640);
+  assert.match(await interactionMessage(page), /명령 SYSTEM/);
   await capture('cu');
   const exit = await exitDoor(page);
   // The first exit by the shutter pulls the inner lever: record the store as open at once (a save in the middle of the
@@ -192,6 +205,16 @@ try {
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.evaluate(() => { collectedItems.delete('f16-cu'); performFloorChange('f16-cu', null, 'link:f16-kitchen'); });
   await page.clock.runFor(100);
+  // The stockroom entry is left of the shelf box, including on the reduced-motion route.
+  await walk(300);
+  await page.keyboard.down('Shift');
+  await page.keyboard.down('d');
+  await page.keyboard.press('Space');
+  await page.clock.runFor(900);
+  await page.keyboard.up('d');
+  await page.keyboard.up('Shift');
+  await page.clock.runFor(34);
+  assert(await position() > 486, 'Reduced motion preserves the shelf-box jump');
   await walk(exit.x + exit.width / 2);
   await page.evaluate(() => { soundLog.length = 0; });
   await page.keyboard.press('e');
@@ -210,7 +233,7 @@ try {
   await page.locator('.floor-background').evaluate(img => img.decode());
   await checkDoors();
   assert.equal(await page.locator('.floor-background').count(), 1);
-  await jumpFloor('f15');
+  await jumpFloor('b1');
   assert.equal(await page.locator('#dynamic-scene').getAttribute('data-art'), 'false', 'CSS floors retain their original renderer');
   assert.equal(await page.locator('.floor-background').count(), 0);
   assert.deepEqual(errors, []);

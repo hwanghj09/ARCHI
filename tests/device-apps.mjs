@@ -178,15 +178,22 @@ try {
   await phoneGuide.locator('[data-building-floor]').selectOption('12');
   assert.equal(await phoneGuide.locator('[data-building-power]').getAttribute('data-powered'), 'false');
   assert.match(await phoneGuide.locator('[data-building-elevator]').textContent(), /레버/);
-  await page.evaluate(() => { solarEnabled = true; solarPoweredFloors = [12, 7]; updatePowerState(); });
+  await page.evaluate(() => { setSolarPower(true); supplySolarFloor(12); });
+  assert.deepEqual(await page.evaluate(() => solarPoweredFloors), [12]);
   assert.equal(await phoneGuide.locator('[data-building-power]').getAttribute('data-powered'), 'true');
   assert.match(await phoneGuide.locator('[data-building-elevator]').textContent(), /비상 전력으로 운행 가능/);
-  // Both solar floors read as powered in the guide; other floors stay dark.
-  for (const [floor, powered] of [['7', 'true'], ['13', 'false'], ['12', 'true']]) {
-    await phoneGuide.locator('[data-building-floor]').selectOption(floor);
-    assert.equal(await phoneGuide.locator('[data-building-power]').getAttribute('data-powered'), powered, `${floor}F guide power`);
-    assert.match(await phoneGuide.locator('[data-building-charger]').textContent(), powered === 'true' ? /충전 가능/ : /전력 공급 필요/);
+  // The guide follows the one-floor supply limit and updates when that floor is replaced.
+  for (const supplied of [12, 7]) {
+    if (supplied === 7) await page.evaluate(() => supplySolarFloor(7));
+    assert.deepEqual(await page.evaluate(() => solarPoweredFloors), [supplied]);
+    for (const floor of ['7', '13', '12']) {
+      const powered = Number(floor) === supplied;
+      await phoneGuide.locator('[data-building-floor]').selectOption(floor);
+      assert.equal(await phoneGuide.locator('[data-building-power]').getAttribute('data-powered'), String(powered), `${floor}F guide power with ${supplied}F supplied`);
+      assert.match(await phoneGuide.locator('[data-building-charger]').textContent(), powered ? /충전 가능/ : /전력 공급 필요/);
+    }
   }
+  await page.evaluate(() => supplySolarFloor(12));
   await closePhone();
 
   // Pick up the real badge and authenticate the real gate, then inspect their guide status.

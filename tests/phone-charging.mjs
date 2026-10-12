@@ -81,14 +81,15 @@ try {
   await page.clock.runFor(3000); assert.equal((await state()).battery, beforeAway + 6, 'Charging follows the origin floor power');
   await place(await charger()); await page.keyboard.press('e'); assert.equal((await state()).dock.floor, 12);
   // Native power controls reroute power away from the phone's floor, then restore it.
-  // A second floor (13F) joins 12F without cutting it; pressing lit 12F again turns off only 12F.
+  // Only one floor can be supplied; choosing 13F cuts power to the docked phone on 12F.
   await page.evaluate(() => openPowerPanel());
   await page.locator('#power-floor-grid button[data-floor="13"]').click(); await page.keyboard.press('Escape');
-  const shared = (await state()).battery;
-  await page.clock.runFor(3000); assert((await state()).battery > shared, 'Adding a second floor keeps 12F charging');
-  await page.evaluate(() => openPowerPanel());
-  await page.locator('#power-floor-grid button[data-floor="12"]').click(); await page.keyboard.press('Escape');
   assert.deepEqual(await page.evaluate(() => solarPoweredFloors), [13]);
+  const rerouted = (await state()).battery;
+  await page.clock.runFor(3000); assert.equal((await state()).battery, rerouted, 'Rerouting power away from 12F pauses charging');
+  await page.evaluate(() => openPowerPanel());
+  await page.locator('#power-floor-grid button[data-floor="13"]').click(); await page.keyboard.press('Escape');
+  assert.deepEqual(await page.evaluate(() => solarPoweredFloors), [], 'Selecting the supplied floor again disconnects it');
   const stopped = (await state()).battery;
   await page.clock.runFor(3000); assert.equal((await state()).battery, stopped);
   await page.evaluate(() => performFloorChange('f12')); await place(at);

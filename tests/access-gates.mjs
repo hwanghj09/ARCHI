@@ -50,11 +50,14 @@ try {
   // All formerly restricted floor buttons work with no badge at all; keep B2 restriction.
   await page.evaluate(() => collectedItems.delete('f17-badge'));
   for (const floor of [12, 13, 14, 15]) {
+    await page.evaluate(() => showCabin(0));
     const button = page.locator(`[data-floor="${floor}"].cabin-hit`);
-    await button.click(); assert.equal(await button.getAttribute('aria-pressed'), 'true'); await button.click();
+    await button.click(); assert.equal(await button.getAttribute('aria-pressed'), 'true');
+    assert.equal(await page.evaluate(() => selectedFloor), floor);
   }
+  await page.evaluate(() => showCabin(0));
   await page.locator('[data-floor="-2"].cabin-hit').click();
-  assert.match(await page.locator('#cabin-status').textContent(), /운행 제한/);
+  assert.match(await page.locator('#cabin-status').textContent(), /버튼을 눌렀으나 아무 반응도 없었다/);
   await page.locator('[data-floor="15"].cabin-hit').click();
   await page.locator('#cabin-close').click(); await page.clock.runFor(5000);
   await page.locator('#cabin-exit').click(); await page.clock.runFor(800);

@@ -167,6 +167,7 @@ try {
   await capture('mobile');
   await use(directorExit);
   assert.equal(await page.locator('header span').textContent(), '15F · 연구본부');
+  await page.setViewportSize({ width: 1280, height: 720 });
   await jumpFloor('f14');
   assert.equal(await page.locator('#dynamic-scene').getAttribute('data-theme'), 'dataset');
   assert.equal(await page.locator('#dynamic-scene').evaluate(el => getComputedStyle(el.querySelector('.room-door')).backgroundImage.includes('/floor15/')), false);

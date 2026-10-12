@@ -97,7 +97,7 @@ function restoreProgress(data) {
     buildingBlackout = data.blackout === true;
     if (typeof syncAllPowerButton === 'function') syncAllPowerButton();
     solarEnabled = data.solarEnabled === true;
-    // 한 층만 켜던 예전 저장은 숫자 solarPoweredFloor를 [숫자]로 읽는다. 켠 순서를 지키고 최근 두 층만 남긴다.
+    // 숫자 solarPoweredFloor를 쓰던 예전 저장도 읽고, 구버전 다중 공급 저장은 최근 선택한 층만 남긴다.
     const solarFloors = Array.isArray(data.solarPoweredFloors) ? data.solarPoweredFloors : [data.solarPoweredFloor];
     solarPoweredFloors = solarEnabled ?
       [...new Set(solarFloors.filter(floor => Number.isInteger(floor) && floor >= 1 && floor <= 17))].slice(-solarFloorLimit) : [];
