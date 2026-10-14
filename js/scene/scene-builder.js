@@ -269,6 +269,15 @@ function buildDynamicScene(config) {
     image.alt = '';
     image.draggable = false;
     element.append(image);
+    if (!prop.sprite && ['office-desk', 'filing-cabinet', 'large-planter'].includes(prop.file)) {
+      const haunted = new Image();
+      haunted.src = `assets/objects/fear/${prop.file}.png`;
+      haunted.className = 'haunted-prop';
+      haunted.alt = '';
+      haunted.draggable = false;
+      element.dataset.haunted = 'true';
+      element.append(haunted);
+    }
     for (const rect of MONITOR_SCREENS[prop.file] || []) element.append(fearScreenElement(rect)); // 정신력 20% 미만에서 모니터 화면이 바뀐다(sanity.js)
     dynamicScene.append(element);
     if (prop.sprite) {

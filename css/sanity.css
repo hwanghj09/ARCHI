@@ -149,3 +149,14 @@ body:is([data-fear-tier="4"], [data-fear-tier="5"]) #world[data-powered="true"][
 @media (prefers-reduced-motion: reduce) { .fear-screen[data-still="static-noise"] { animation: none; } }
 /* 모니터 속 지직거림은 화면 밖으로 나가지 않도록 그림을 움직이지 않고 그림 안쪽 위치만 1px씩 흔든다(그림은 106%로 키워 가장자리가 비지 않는다). */
 @keyframes monitor-static { 0% { background-position: 0 0; } 50% { background-position: 1.5px -1px; } 100% { background-position: -1px 1px; } }
+
+/* 30% 미만부터 원래 소품이 서서히 뒤틀리고, 10% 미만에서는 완전히 변한다. */
+body[data-fear-tier="3"] { --haunted-opacity: .35; }
+body[data-fear-tier="4"] { --haunted-opacity: .75; }
+body[data-fear-tier="5"] { --haunted-opacity: 1; }
+.haunted-prop { position: absolute; inset: 0; opacity: var(--haunted-opacity, 0); transition: opacity .45s; pointer-events: none; image-rendering: pixelated; }
+.floor-prop[data-haunted] > img:first-child { opacity: calc(1 - var(--haunted-opacity, 0)); transition: opacity .45s; }
+.office-desk-backdrop { position: absolute; pointer-events: none; image-rendering: pixelated; }
+#office-workstation, .office-desk-backdrop { display: none; }
+#world[data-room="office"] :is(#office-workstation, .office-desk-backdrop) { display: block; }
+@media (prefers-reduced-motion: reduce) { .haunted-prop, .floor-prop[data-haunted] > img:first-child { transition: none; } }

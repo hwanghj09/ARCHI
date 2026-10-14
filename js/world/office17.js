@@ -31,6 +31,29 @@ Object.assign(officeBackground.style, {
   left: '0px', top: '0px',
 });
 document.getElementById('opening-chair-front').style.backgroundSize = `${officeWidth}px ${724 * floorY / 504}px`;
+// 배경에 그려진 책상 전체를 빈 벽으로 지운 뒤, 같은 영역의 스프라이트 한 장만 교체한다.
+const officeDeskBox = {
+  left: `${406 * officeWidth / 2196}px`, top: `${320 * floorY / 504}px`,
+  width: `${368 * officeWidth / 2196}px`, height: `${184 * floorY / 504}px`,
+};
+const officeDeskBackdrop = new Image();
+officeDeskBackdrop.src = 'assets/background/floor17/workstation-empty.png';
+officeDeskBackdrop.className = 'office-desk-backdrop';
+officeDeskBackdrop.alt = '';
+officeDeskBackdrop.draggable = false;
+Object.assign(officeDeskBackdrop.style, officeDeskBox);
+const officeWorkstation = document.createElement('div');
+officeWorkstation.id = 'office-workstation';
+officeWorkstation.className = 'floor-prop';
+Object.assign(officeWorkstation.style, officeDeskBox);
+const officeDeskImage = new Image();
+officeDeskImage.src = 'assets/objects/floor17/workstation.png';
+officeDeskImage.alt = '';
+officeDeskImage.draggable = false;
+officeWorkstation.append(officeDeskImage);
+officeBackground.after(officeDeskBackdrop);
+officeDeskBackdrop.after(officeWorkstation);
+new Image().src = 'assets/objects/floor17/workstation-fear.png';
 // 복도 그림에서 사무실 유리벽은 x=32..1555이고 문은 그 왼쪽에서 39% 지점이다. 방 안 배경
 // (office-interior-aligned.png)도 문을 같은 비율 위치에 두어, 문 양옆 공간과 켜진 책상의 방향이 복도에서 본 것과 같다.
 const officeDoors = [
@@ -61,7 +84,6 @@ Object.assign(officeCharger.element.style, { left: `${officeCharger.x}px`, top: 
 officeCharger.element.style.setProperty('--phone-top', `${officeCharger.phoneTop}px`);
 world.insertBefore(officeCharger.element, sprite);
 officeDoors.push(officeCharger);
-
 
 // 출입증 쌔비기 목표가 시작되면(story-badge-seen) 옆자리 책상(왼쪽, 컴퓨터 모니터 왼쪽 구석)에 생기는 포스트잇. 크기는 24px(처음의 절반).
 // 보이기·숨기기는 objective.js의 refreshObjective가 맡고, 숨겨진 동안은 조사 대상에서도 빠진다(interaction.js).

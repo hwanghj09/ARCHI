@@ -458,6 +458,8 @@ function updateSanity(elapsed) {
   }
   const tier = sanityTierOf(sanity);
   if (tier !== fearTier) { fearTier = tier; document.body.dataset.fearTier = String(fearTier); }
+  const deskSrc = `assets/objects/floor17/workstation${fearTier >= 3 ? '-fear' : ''}.png`;
+  if (officeDeskImage.getAttribute('src') !== deskSrc) officeDeskImage.src = deskSrc;
   // 30%→20% 구간에서 검은 비네트가 서서히 붉게 변하고, 20% 밑으로는 완전히 붉다.
   fearOverlayRed.style.opacity = String(Math.max(0, Math.min(1, (30 - sanity) / 10)) * (fearTier >= 1 ? .7 : 0));
   document.body.dataset.weary = String(fearTier >= 3);
