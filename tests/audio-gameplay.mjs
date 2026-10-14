@@ -45,7 +45,7 @@ try {
     audioEvents.length = 0;
   });
   await page.clock.runFor(2800);
-  assert.equal((await events()).filter(name => name === 'switch').length, 2, 'Both flickers have electrical clicks');
+  assert.equal((await events()).filter(name => name === 'switch').length, 8, 'Each brief flicker has an electrical click');
   assert(!(await events()).includes('blackout'), 'Outage impact waits for the final cut');
   await page.clock.runFor(2100);
   assert.equal((await events()).filter(name => name === 'blackout').length, 1, 'Final outage fires once');

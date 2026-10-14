@@ -2,6 +2,7 @@
 const blackoutScene = document.getElementById('blackout-scene');
 const blackoutCaption = document.getElementById('blackout-caption');
 const blackoutCallSheet = document.getElementById('blackout-call-sheet');
+const blackoutFlickerTimes = [1500, 1560, 1680, 1720, 1900, 1990, 2070, 2110, 2250, 2300, 2360, 2470, 2530, 2580, 2700, 2780];
 let blackoutElapsed = 0;
 let blackoutStartX = 0;
 let blackoutCallX = 0;
@@ -39,11 +40,11 @@ function updateBlackoutScene(elapsed) {
       phase === 'reach' ? '호출 버튼에 손을 뻗었다.' : '…뭐야?! 불이 왜…';
   }
   const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const dim = !reducedMotion && ((time >= 1500 && time < 1780) || (time >= 2250 && time < 2560));
+  const dim = phase === 'shock' || (!reducedMotion && blackoutFlickerTimes.filter(at => time >= at).length % 2 === 1);
   const light = dim ? 'off' : 'on';
   if (world.dataset.powerFlicker !== light) {
     world.dataset.powerFlicker = light;
-    if (light === 'off') playGameSound('switch');
+    if (light === 'off' && phase !== 'shock') playGameSound('switch');
     refreshBackgroundPower();
   }
   if (phase === 'shock') triggerBuildingBlackout();

@@ -42,15 +42,25 @@ try {
   assert.equal((await state()).pose, 'blackout-call'); assert.equal((await state()).frame, '1');
   assert.deepEqual(await page.locator('#blackout-call-sheet').evaluate(img => [img.naturalWidth, img.naturalHeight]), [512, 256]);
   await page.screenshot({ path: '.local/blackout-call-reach.png' });
-  const lights = [];
-  for (const time of [1550, 1850, 2350, 2700, 3050]) {
-    await advance(time); lights.push((await state()).lights);
-    if (time === 1550) {
-      assert.equal((await state()).blackout, false, 'First dip does not yet shut down mains power');
+  const changes = [];
+  let lastLight = 'on';
+  while ((await state()).elapsed < 3050) {
+    await page.clock.runFor(17);
+    const current = await state();
+    if (current.lights === lastLight) continue;
+    changes.push({ light: current.lights, time: current.elapsed });
+    lastLight = current.lights;
+    if (changes.length === 1) {
+      assert.equal(current.blackout, false, 'First dip does not yet shut down mains power');
       await page.screenshot({ path: '.local/blackout-flicker.png' });
     }
   }
-  assert.deepEqual(lights, ['off', 'on', 'off', 'on', 'off']);
+  const flickers = changes.filter(change => change.time < 2900);
+  assert.equal(flickers.filter(change => change.light === 'off').length, 8, 'Several quick dips precede the final outage');
+  const durations = flickers.slice(1).map((change, index) => Math.round(change.time - flickers[index].time));
+  assert(Math.max(...durations) < 200, 'Flickering intervals stay fast');
+  assert(new Set(durations).size >= 4, 'Flickering intervals vary instead of following a regular beat');
+  assert.equal(changes.at(-1).light, 'off', 'The final cut stays dark');
   assert.equal((await state()).phase, 'shock'); assert.equal((await state()).pose, 'startled');
   assert.equal((await state()).blackout, true); assert.equal((await state()).called, false);
   assert.equal(await page.locator('#player img:visible').count(), 1);
@@ -92,5 +102,5 @@ try {
   await page.keyboard.press('Escape');
   assert(await page.evaluate(() => phoneLightOn && sprite.dataset.phoneHeld === 'true'), 'The prior flashlight state resumes after the cutscene');
   assert.deepEqual(errors, []);
-  console.log('PASS: call attempt, two light dips/restoration, permanent outage, recoil, locked input, all cars/directions, skip/scene cleanup, no retrigger, reduced motion and mobile.');
+  console.log('PASS: call attempt, rapid irregular flickering, permanent outage, recoil, locked input, all cars/directions, skip/scene cleanup, no retrigger, reduced motion and mobile.');
 } finally { await browser.close(); }
