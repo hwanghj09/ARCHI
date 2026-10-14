@@ -97,7 +97,7 @@ inspectionPanel.addEventListener('keydown', event => {
     event.preventDefault();
     return;
   }
-  if (event.key !== 'Tab') return;
+  if (event.key !== 'Tab' || (inventoryShown() && !event.shiftKey)) return;
   event.preventDefault();
   const focusable = [...inspectionPanel.querySelectorAll('button:not(:disabled), [tabindex="0"]')].filter(element => !element.hidden);
   const index = focusable.indexOf(document.activeElement);

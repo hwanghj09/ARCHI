@@ -31,7 +31,7 @@ try {
   await page.keyboard.press('Tab');
   assert.equal(await page.locator('.inventory-item').count(), 1);
   assert(await page.locator('[data-item="f17-badge"]').isVisible(), 'The starting inventory contains Suho’s badge');
-  // Tab opens the bag and navigates its items; the bag button closes the whole bag.
+  // Tab toggles the whole bag; Shift+Tab navigates its items.
   const panel = () => page.evaluate(() => ({ open: usingInspection && !inspectionPanel.hidden, surface: !inspectionPanel.hidden && inspectionPanel.dataset.surface || null,
     returnTo: inspectionPanel.dataset.returnTo || null, expanded: inventoryButton.getAttribute('aria-expanded'),
     focus: document.activeElement.dataset.item || document.activeElement.id }));
@@ -64,15 +64,29 @@ try {
   await page.keyboard.press('Tab');
   await badge.click();
   await page.keyboard.press('Tab');
-  assert.equal((await panel()).open, true, 'Tab on a bag card keeps it open for keyboard navigation');
+  assert.deepEqual(await panel(), bagClosed, 'Tab on a bag card closes the whole bag');
+  await page.locator('#inventory-button').click();
   await page.locator('#inventory-button').click();
   assert.deepEqual(await panel(), bagClosed, 'The bag button closes the whole bag');
   await page.keyboard.press('Tab');
   assert.deepEqual(await panel(), bagList('inspection-close'), 'Tab reopens the bag at the list');
-  await page.keyboard.press('Tab');
-  assert.deepEqual(await panel(), bagList('f17-badge'), 'Tab selects the first bag item');
+  await page.keyboard.down('Tab');
+  assert.deepEqual(await panel(), bagClosed, 'A second Tab closes the bag list');
+  for (let i = 0; i < 3; i++) {
+    await page.keyboard.down('Tab');
+    assert.deepEqual(await panel(), bagClosed, 'Holding Tab does not reopen the bag');
+  }
+  await page.keyboard.up('Tab');
+  await page.keyboard.down('Tab');
+  for (let i = 0; i < 3; i++) {
+    await page.keyboard.down('Tab');
+    assert.deepEqual(await panel(), bagList('inspection-close'), 'Holding Tab does not close the bag');
+  }
+  await page.keyboard.up('Tab');
   await page.keyboard.press('Shift+Tab');
-  assert.deepEqual(await panel(), bagList('inspection-close'), 'Shift+Tab returns to the close button');
+  assert.deepEqual(await panel(), bagList('f17-badge'), 'Shift+Tab selects the first bag item');
+  await page.keyboard.press('Shift+Tab');
+  assert.deepEqual(await panel(), bagList('inspection-close'), 'Shift+Tab cycles back to the close button');
   await page.locator('#inventory-button').click();
   await page.locator('#inventory-button').click();
   assert.deepEqual(await panel(), bagList('inspection-close'), 'The bag button opens the list');

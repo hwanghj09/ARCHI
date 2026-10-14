@@ -12,7 +12,7 @@ const officeDocuments = [
       </tbody></table>
       <h2>02. 상호작용</h2><table><thead><tr><th>키</th><th>동작</th><th>화면 버튼</th></tr></thead><tbody>
         <tr><td>E</td><td>가까이 있는 문·장치·물건을 조사하거나 사용한다.</td><td>E</td></tr>
-        <tr><td>Tab</td><td>가방을 연다. 가방 안에서는 항목을 선택한다.</td><td>가방 · Tab</td></tr>
+        <tr><td>Tab</td><td>가방을 열고 닫는다. 가방 안에서는 Shift + Tab으로 항목을 선택한다.</td><td>가방 · Tab</td></tr>
         <tr><td>P</td><td>휴대폰 화면을 열고 닫는다. 플래시를 켠 동안만 손에 들고 이동한다.</td><td>▣</td></tr>
         <tr><td>F</td><td>휴대폰 플래시를 켜고 끈다. 켜져 있는 동안에는 달릴 수 없다.</td><td>휴대폰의 라이트 버튼</td></tr>
       </tbody></table>

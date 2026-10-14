@@ -33,10 +33,10 @@ window.addEventListener('keydown', event => {
   }
   if (itemUseTime > 0 && event.code !== 'Escape') { event.preventDefault(); return; }
   if (transitioning) { event.preventDefault(); return; }
-  if (event.code === 'Tab' && !event.shiftKey && !event.repeat && !selectingFloor && !usingComputer && !usingKeypad &&
-      !usingPhone && !usingPowerPanel && !usingInspection) {
+  if (event.code === 'Tab' && !event.shiftKey && !selectingFloor && !usingComputer && !usingKeypad &&
+      !usingPhone && !usingPowerPanel && (!usingInspection || inventoryShown())) {
     event.preventDefault();
-    toggleInventory();
+    if (!event.repeat) toggleInventory();
     return;
   }
   if (event.code === 'KeyP' && !event.repeat && !usingPhone && !selectingFloor && !usingComputer && !usingKeypad && !usingPowerPanel && !usingInspection) {
