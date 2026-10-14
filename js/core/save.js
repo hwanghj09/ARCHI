@@ -107,8 +107,10 @@ function restoreProgress(data) {
     sanity = savedNumber(data.sanity, 100, 0, 100);
     phoneDock = null;
     if (data.dock && Number.isFinite(data.dock.x)) {
-      const config = data.dock.floor === 18 ? ROOFTOP : ALL_FLOORS.find(entry => entry.floor === data.dock.floor);
-      if (config?.fixtures?.some(fixture => fixture.phoneCharger && fixture.x === data.dock.x)) phoneDock = { floor: data.dock.floor, x: data.dock.x };
+      const chargers = data.dock.scene === 'office' ? [officeCharger] : floorById.get(data.dock.scene)?.fixtures;
+      const charger = chargers?.find(fixture => fixture.phoneCharger && fixture.floor === data.dock.floor && fixture.x === data.dock.x);
+      // 사라진 복도 충전함의 휴대폰은 소지 상태로 돌려준다.
+      if (charger) phoneDock = { floor: charger.floor, scene: charger.scene, x: charger.x };
     }
     phoneLightOn = data.light === true && phoneBattery > 0 && !phoneDock;
     phoneAwayTime = phoneTime = 0;

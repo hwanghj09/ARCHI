@@ -29,7 +29,7 @@ try {
   await page.evaluate(() => {
     collectedItems.add('f17-badge'); collectedItems.add('f16-badge'); collectedItems.add('f12-access');
     buildingBlackout = true; solarEnabled = true; solarPoweredFloors = [12];
-    performFloorChange('f12'); phoneBattery = 40; sanity = 15;
+    performFloorChange('f12-dev', 0, 'exit'); phoneBattery = 40; sanity = 15;
     const point = currentDoors.find(door => door.phoneCharger);
     Body.setPosition(body, { x: point.x + point.width / 2, y: floorY - 81 }); Body.setVelocity(body, { x: 0, y: 0 });
     grounded = true; refreshPhone(); updateInteraction(); cameraX = cameraTarget(); render();
@@ -37,15 +37,15 @@ try {
   await page.keyboard.press('e'); assert((await state()).dock);
   await page.keyboard.down('d'); await page.clock.runFor(500); await page.keyboard.up('d');
   await page.clock.runFor(2200);
-  const automatic = await stored(); assert.equal(automatic.scene.id, 'f12'); assert(automatic.battery > 40);
+  const automatic = await stored(); assert.equal(automatic.scene.id, 'f12-dev'); assert(automatic.battery > 40);
   const saved = await reloadContinue();
   const resumed = await state();
-  assert.equal(resumed.id, 'f12'); assert(Math.abs(resumed.x - saved.scene.x) < 1);
+  assert.equal(resumed.id, 'f12-dev'); assert(Math.abs(resumed.x - saved.scene.x) < 1);
   assert.equal(resumed.battery, saved.battery); assert.equal(resumed.sanity, saved.sanity);
   assert.deepEqual(resumed.dock, saved.dock); assert.deepEqual(resumed.items, saved.items);
   assert.deepEqual(saved.solarPoweredFloors, [12]); assert.deepEqual(resumed.solarPoweredFloors, [12], 'The supplied floor resumes');
   assert(await page.evaluate(() => floorHasPower(12) && !floorHasPower(7) && !floorHasPower(13))); assert.equal(resumed.blackout, true);
-  assert.equal(await page.locator('.access-gate[data-open="true"]').count(), 2);
+  assert(await page.evaluate(() => collectedItems.has('f12-access')), 'Gate progress survives an indoor charging save');
   assert.equal(await page.locator('.docked-phone:visible').count(), 1);
   assert(await page.locator('#opening').isHidden(), 'Continue never replays the opening');
   await page.keyboard.press('p'); await page.keyboard.press('f'); assert(await page.locator('#phone').isHidden());
@@ -181,6 +181,32 @@ try {
   assert.deepEqual((await state()).solarPoweredFloors, [7]);
   assert(await page.evaluate(() => floorHasPower(7) && !floorHasPower(12)));
   await checkpoint(); assert.deepEqual((await stored()).solarPoweredFloors, [7]);
+  // The fixed starting office uses the same room-aware charging save as dynamic rooms.
+  await page.evaluate(() => {
+    solarEnabled = true; solarPoweredFloors = [17];
+    performFloorChange('f17'); performRoomChange(); phoneBattery = 30;
+    chargePhone(officeCharger);
+  });
+  const officeSaved = await reloadContinue();
+  assert.equal((await state()).id, 'office');
+  assert.deepEqual((await state()).dock, officeSaved.dock);
+  assert.equal((await state()).dock.scene, 'office');
+  assert.equal(await page.locator('.docked-phone:visible').count(), 1);
+  // Removed corridor deposits return the phone to the player without losing its battery.
+  for (const [id, oldX] of [['f12', 2052], ['f17', 1180], ['f17', 2072]]) {
+    await page.locator('#game-menu-button').tap();
+    await page.evaluate(([id, oldX]) => {
+      const config = floorById.get(id);
+      const legacy = JSON.parse(localStorage.getItem(progressKey));
+      legacy.scene = { id, x: BUILDING_CORE.elevators[0].x + 40, y: floorY - 81 };
+      Object.assign(legacy, { dock: { floor: config.floor, x: oldX }, battery: 40, light: false });
+      localStorage.setItem(progressKey, JSON.stringify(legacy));
+    }, [id, oldX]);
+    await page.reload(); await page.locator('#menu-continue').click();
+    assert.equal((await state()).dock, null, `${id} removed charger returns the phone`);
+    assert.equal((await state()).battery, 40);
+    assert.equal(await page.locator('.docked-phone:visible').count(), 0);
+  }
   // Invalid saves are ignored, and blocked storage cannot prevent a fresh game.
   await page.evaluate(() => {
     const saved = localStorage.getItem(progressKey);

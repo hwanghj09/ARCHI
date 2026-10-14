@@ -1602,7 +1602,7 @@ try {
       'All three rooms sit in the west wing');
     assert.deepEqual(await page.locator('#dynamic-scene .fixture').evaluateAll(els => els.map(el => [el.className, el.getAttribute('aria-label')])),
       [['fixture directory-board', '층별 안내판'], ['fixture speed-gates', '스피드 게이트'], ['fixture guard-bot', '경비 로봇'],
-        ['fixture revolving-door', '정문'], ['fixture phone-charger', '비상 휴대폰 충전함 · 전력 없음']]);
+        ['fixture revolving-door', '정문']]);
     const directory = await page.locator('#dynamic-scene .fixture.directory-board span').allTextContents();
     assert.equal(directory.length, 15, 'The directory lists 17F to B2 with minor floors grouped as "···"');
     assert.equal(directory[0], '17F  TmaxSoft 사업테스트본부');
@@ -2062,7 +2062,7 @@ try {
     assert.equal(await page.locator('#dynamic-scene .floor-prop').count(), 7, 'Four charging docks, tool cabinet, panel and UPS');
     assert.deepEqual(await page.locator('#dynamic-scene .fixture').evaluateAll(els => els.map(el => [el.className, el.getAttribute('aria-label')])),
       [['fixture pipe-run', '천장 배관'], ['fixture utility-plaque', '시설관리 구역 표지'], ['fixture robot-board', '로봇 운용 현황판'],
-        ['fixture power-notice', '비상 전원 안내판'], ['fixture phone-charger', '비상 휴대폰 충전함 · 전력 공급 중']]);
+        ['fixture power-notice', '비상 전원 안내판']]);
     await page.locator('#dynamic-scene .floor-prop img').evaluateAll(images => Promise.all(images.map(img => img.decode())));
     await assertHumanScale();
     await page.clock.runFor(100);
@@ -2166,8 +2166,7 @@ try {
     assert(link.room.x >= 4282 && link.room.x + link.room.width <= 4968, 'The link lab sits past the restroom');
     assert.equal(await page.locator('#dynamic-scene .floor-prop').count(), 3, 'Overflow racks');
     assert.deepEqual(await page.locator('#dynamic-scene .fixture').evaluateAll(els => els.map(el => [el.className, el.getAttribute('aria-label')])),
-      [['fixture core-pillar', '사각 기둥'], ['fixture core-plaque', 'ARCHI 운영 구역 표지'], ['fixture dormant-bots', '대기 중인 경비 로봇'],
-        ['fixture phone-charger', '비상 휴대폰 충전함 · 전력 공급 중']]);
+      [['fixture core-pillar', '사각 기둥'], ['fixture core-plaque', 'ARCHI 운영 구역 표지'], ['fixture dormant-bots', '대기 중인 경비 로봇']]);
     assert.equal(await cones.count(), 2, 'The camera watches two stretches');
     assert.deepEqual([await camera.getAttribute('aria-label'), await camera.getAttribute('data-off')], ['B2 복도 카메라', 'false']);
     await page.locator('#dynamic-scene .floor-prop img').evaluateAll(images => Promise.all(images.map(img => img.decode())));

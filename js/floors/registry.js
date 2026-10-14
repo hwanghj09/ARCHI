@@ -6,13 +6,8 @@ const FLOOR_NUMBERS = [-2, -1, ...Array.from({ length: 16 }, (_, index) => index
 const FLOORS = FLOOR_NUMBERS.map(floor => {
   const short = floor < 0 ? `B${-floor}` : `${floor}F`;
   const layout = FLOOR_LAYOUTS[floor] || {};
-  // 그 층 그림에 맞춘 1·2번 승강기 사이 벽면에 둔다. 12층의 좁은 간격도 문을 덮지 않는다.
-  const firstEnd = BUILDING_CORE.elevators[0].x + (layout.elevatorOffsets?.[0] ?? 0) +
-    BUILDING_CORE.elevators[0].width + (layout.elevatorWidthDeltas?.[0] ?? 0);
-  const secondStart = BUILDING_CORE.elevators[1].x + (layout.elevatorOffsets?.[1] ?? 0);
   return { id: floorId(floor), floor, short, label: floorName(floor),
     header: `${short} · 빈 층`, aria: floorName(floor), background: '#252b2a', ...layout,
-    fixtures: [...(layout.fixtures || []), phoneChargerFixture(Math.round((firstEnd + secondStart) / 2 - 20))],
     // 인증은 하차 후 로비 양쪽 칸막이에서 한다. 한 번 인증하면 그 층의 양쪽 통로가 열린다.
     barriers: [...(layout.barriers || []), ...([12, 13, 14, 15].includes(floor) ? [1774, 2740].map((x, index) => ({
       name: `${floor}층 ${index ? '동쪽' : '서쪽'} 인증 게이트`, x, y: 128, width: 32,
@@ -48,3 +43,14 @@ const ROOFTOP = { id: 'rooftop', floor: 18, label: '옥상', header: 'RF · 옥�
       ] },
   ] };
 const floorById = new Map([...ALL_FLOORS, ROOFTOP, ...FLOOR1_ROOMS, ...FLOOR2_ROOMS, ...FLOOR3_ROOMS, ...FLOOR4_ROOMS, ...FLOOR5_ROOMS, ...FLOOR6_ROOMS, ...FLOOR7_ROOMS, ...FLOOR8_ROOMS, ...FLOOR9_ROOMS, ...FLOOR10_ROOMS, ...FLOOR11_ROOMS, ...FLOOR12_ROOMS, ...FLOOR13_ROOMS, ...FLOOR14_ROOMS, ...FLOOR15_ROOMS, ...FLOOR16_ROOMS, ...FLOOR17_ROOMS, ...B1_ROOMS, ...B2_ROOMS, ...RESTROOMS].map(entry => [entry.id, entry]));
+// 충전 콘센트는 방 안의 PC 책상·카페 테이블 옆에만 둔다.
+for (const config of floorById.values()) {
+  if (!config.interior) continue;
+  const desk = (config.props || []).find(prop => ['office-desk', 'support-workstation', 'research-workstation', 'training-workstation', 'food-cafe-table'].includes(prop.file));
+  if (!desk) continue;
+  // 소품 그림의 상판 높이(px)를 월드 높이로 맞춰 휴대폰이 책상 위에 놓이게 한다.
+  const tabletop = { 'office-desk': 112, 'support-workstation': 124, 'research-workstation': 120, 'training-workstation': 132, 'food-cafe-table': 136 }[desk.file];
+  const tabletopY = floorY - (desk.base || 0) - (desk.size[1] - 8 - tabletop) * desk.worldWidth / desk.size[0];
+  config.fixtures = [...(config.fixtures || []), { ...phoneChargerFixture(desk.x + desk.worldWidth / 2 - 72, tabletopY),
+    floor: config.floor, scene: config.id }];
+}

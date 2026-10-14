@@ -1,7 +1,7 @@
 // 17층: 확장 구역의 방(FLOOR17)과 방 내부(FLOOR17_ROOMS). 복도 자체는 world/corridor17.js의 고정 장면이다.
 // 복도 벽면 범위는 service-corridor.png의 벽기둥 중심(x=3556, 4282)과 끝벽(4968) 기준이다.
 const FLOOR17 = { id: 'f17', floor: 17, short: '17F', label: '17층 · 복도', header: '17F · 00:00', aria: '17층 복도', roomDoorY: 210,
-  fixtures: [phoneChargerFixture(1180, 64), phoneChargerFixture(2072)], rooms: [
+  rooms: [
   { name: '화장실', target: 'f17-restroom', ...BUILDING_CORE.restroom },
   { name: '관리자 외 출입금지', target: 'f17-manager', x: 4282, width: 686,
     doorX: 4378, doorWidth: 171, doorStyle: 'metal', locked: true,

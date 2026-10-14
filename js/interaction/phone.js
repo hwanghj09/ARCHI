@@ -59,11 +59,13 @@ function closePhoneApp(focus = true) {
 }
 
 function phoneDockLocation() {
-  return phoneDock.floor === 18 ? '옥상' : phoneDock.floor < 0 ? `지하 ${-phoneDock.floor}층` : `${phoneDock.floor}층`;
+  const floor = phoneDock.floor < 0 ? `지하 ${-phoneDock.floor}층` : `${phoneDock.floor}층`;
+  const name = phoneDock.scene === 'office' ? '개발팀 사무실' : floorById.get(phoneDock.scene)?.name;
+  return name ? `${floor} ${name}` : floor;
 }
 
 function isPhoneDock(door) {
-  return phoneDock?.floor === currentSceneFloor && phoneDock.x === door.x;
+  return Boolean(door) && phoneDock?.scene === door.scene && phoneDock?.floor === door.floor && phoneDock.x === door.x;
 }
 
 function phoneChargeState() {
@@ -72,15 +74,15 @@ function phoneChargeState() {
 
 function phoneChargerHint(door) {
   if (isPhoneDock(door)) return `E · 휴대폰 가져가기 · ${Math.ceil(phoneBattery)}% · ${phoneChargeState()}`;
-  if (phoneDock) return `휴대폰은 ${phoneDockLocation()} 충전함에 있습니다`;
+  if (phoneDock) return `휴대폰은 ${phoneDockLocation()} 충전 콘센트에 있습니다`;
   return floorHasPower(currentSceneFloor) ? 'E · 휴대폰 맡겨 충전' : 'E · 충전 불가 · 전력 없음';
 }
 
 function refreshPhoneChargers() {
-  for (const door of new Set([...doors, ...currentDoors])) {
+  for (const door of new Set([...officeDoors, ...currentDoors])) {
     if (!door.phoneCharger) continue;
     const docked = isPhoneDock(door);
-    door.element.dataset.powered = String(floorHasPower(currentSceneFloor));
+    door.element.dataset.powered = String(floorHasPower(door.floor));
     door.element.dataset.docked = String(docked);
     let image = door.element.querySelector('.docked-phone');
     if (docked && !image) {
@@ -90,7 +92,7 @@ function refreshPhoneChargers() {
       image.alt = '';
       door.element.append(image);
     } else if (!docked) image?.remove();
-    door.element.setAttribute('aria-label', `${door.name} · ${docked ? `${Math.ceil(phoneBattery)}% · ${phoneChargeState()}` : floorHasPower(currentSceneFloor) ? '전력 공급 중' : '전력 없음'}`);
+    door.element.setAttribute('aria-label', `${door.name} · ${docked ? `${Math.ceil(phoneBattery)}% · ${phoneChargeState()}` : floorHasPower(door.floor) ? '전력 공급 중' : '전력 없음'}`);
   }
 }
 
@@ -106,7 +108,7 @@ function refreshPhone() {
   phoneLightButton.setAttribute('aria-pressed', String(phoneLightOn));
   phoneLightButton.setAttribute('aria-label', phoneLightOn ? '플래시 끄기' : '플래시 켜기');
   document.getElementById('phone-light-state').textContent = phoneLightOn ? '켜짐' : '꺼짐';
-  document.getElementById('phone-help').textContent = percent === 0 ? '배터리 없음 · 충전함에서 충전하세요.' : '';
+  document.getElementById('phone-help').textContent = percent === 0 ? '배터리 없음 · 카페나 사무실 콘센트에서 충전하세요.' : '';
   world.dataset.flashlight = phoneLightOn && itemUseTime <= 0 ? 'on' : 'off';
   phoneButton.dataset.flashlight = phoneLightOn ? 'on' : 'off';
   const flashState = `플래시 ${phoneLightOn ? '켜짐' : '꺼짐'}`;
@@ -114,7 +116,7 @@ function refreshPhone() {
   document.getElementById('phone-flash-state').hidden = Boolean(phoneDock);
   phoneButton.dataset.docked = String(Boolean(phoneDock));
   phoneButton.dataset.charge = phoneDock ? `${phoneDockLocation()} · ${percent}% · ${phoneChargeState()}` : '';
-  phoneButton.setAttribute('aria-label', phoneDock ? `${phoneButton.dataset.charge} · 충전함에서 휴대폰 가져오기` : `휴대폰 열기 · ${flashState}`);
+  phoneButton.setAttribute('aria-label', phoneDock ? `${phoneButton.dataset.charge} · 충전 콘센트에서 휴대폰 가져오기` : `휴대폰 열기 · ${flashState}`);
   refreshPhoneChargers();
   if (typeof refreshSolarApp === 'function') refreshSolarApp();
 }
@@ -122,7 +124,7 @@ function refreshPhone() {
 function togglePhone() {
   if (itemUseTime > 0 || playerCaught || hallucinationCaught || blackoutSceneActive || cctvSceneActive) return;
   if (usingPhone) return closePhone();
-  if (phoneDock) return showStatus(`${phoneDockLocation()} 충전함에 휴대폰을 두었다. 그 충전함 앞에서 E로 가져오자.`, 4000);
+  if (phoneDock) return showStatus(`${phoneDockLocation()} 책상에 휴대폰을 두었다. 그 자리에서 E로 가져오자.`, 4000);
   usingPhone = true;
   playGameSound('phone');
   phoneTime = 0;
@@ -151,7 +153,7 @@ function closePhone() {
 
 function togglePhoneLight() {
   if (itemUseTime > 0 || playerCaught || hallucinationCaught || blackoutSceneActive || cctvSceneActive) return;
-  if (phoneDock) return showStatus(`${phoneDockLocation()} 충전함에 휴대폰을 두어 플래시를 사용할 수 없다.`, 4000);
+  if (phoneDock) return showStatus(`${phoneDockLocation()} 책상에 휴대폰을 두어 플래시를 사용할 수 없다.`, 4000);
   if (!phoneLightOn && phoneBattery <= 0) return showStatus('휴대폰 배터리가 없습니다.');
   phoneLightOn = !phoneLightOn;
   playGameSound('phone');
@@ -161,6 +163,7 @@ function togglePhoneLight() {
 }
 
 function chargePhone(door) {
+  if (!door?.phoneCharger) return;
   if (isPhoneDock(door)) {
     playGameSound('pickup');
     phoneDock = null;
@@ -170,13 +173,13 @@ function chargePhone(door) {
     showStatus(`휴대폰을 가져왔다. 배터리 ${Math.ceil(phoneBattery)}%.`, 4000);
     return;
   }
-  if (phoneDock) return showStatus(`${phoneDockLocation()} 충전함에 둔 휴대폰을 먼저 가져와야 한다.`, 4000);
+  if (phoneDock) return showStatus(`${phoneDockLocation()} 책상에 둔 휴대폰을 먼저 가져와야 한다.`, 4000);
   if (!floorHasPower(currentSceneFloor)) return showStatus('이 층에 전력이 없어 충전할 수 없다. 전력을 공급해야 한다.', 4000);
   if (phoneBattery >= 100) {
     showStatus('휴대폰 배터리가 이미 100%다.', 3000);
     return;
   }
-  phoneDock = { floor: currentSceneFloor, x: door.x };
+  phoneDock = { floor: door.floor, scene: door.scene, x: door.x };
   playGameSound('charger');
   phoneLightOn = false;
   phoneAwayTime = 0;
@@ -184,7 +187,7 @@ function chargePhone(door) {
   phoneDrainAccumulator = 0;
   refreshPhone();
   animate(0);
-  showStatus('휴대폰을 충전함에 두었다. 충전 중에는 사용할 수 없다. 돌아와 E로 가져오자.', 5000);
+  showStatus('충전기를 콘센트에 꽂고 휴대폰을 책상에 두었다. 충전 중에는 사용할 수 없다. 돌아와 E로 가져오자.', 5000);
 }
 
 function updatePhoneCharging(elapsed) {
@@ -194,7 +197,7 @@ function updatePhoneCharging(elapsed) {
   phoneBattery = Math.min(100, phoneBattery + 2 * Math.floor(phoneChargeAccumulator / 1000));
   phoneChargeAccumulator %= 1000;
   refreshPhone();
-  if (phoneBattery === 100) showStatus(`${phoneDockLocation()}의 휴대폰 충전이 끝났다. 충전함에서 E로 가져오자.`, 5000);
+  if (phoneBattery === 100) showStatus(`${phoneDockLocation()}의 휴대폰 충전이 끝났다. 맡긴 자리에서 E로 가져오자.`, 5000);
 }
 
 function updatePhone(elapsed) {

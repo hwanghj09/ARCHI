@@ -61,14 +61,12 @@
   #phone #phone-light { grid-template-columns: 26px 1fr; padding: 8px; }
   #phone-light .app-art { width: 26px; height: 26px; }
 }
-/* 충전함은 기존 벽면 설비와 같은 CSS 픽셀 스타일이며, 문·통로와 충돌하지 않는다. */
-.phone-charger { position: absolute; padding: 48px 1px 0; border: 3px solid #7a8c8d; background: linear-gradient(90deg, #17272d, #304349 48%, #17272d); box-shadow: inset 2px 0 #c4cebd55, 3px 3px #0b171d; pointer-events: none; }
-.phone-charger::before { content: ''; position: absolute; left: 50%; top: 12px; width: 20px; height: 24px; transform: translateX(-50%); border: 2px solid #a4baa2; background: repeating-linear-gradient(90deg, #8cc98e 0 4px, #2f4b3e 4px 6px) 2px 3px / 14px 14px no-repeat, #111f25; }
-.phone-charger::after { content: ''; position: absolute; left: 50%; top: 72px; width: 18px; height: 10px; transform: translateX(-50%); border: 2px solid #9ea9a7; border-radius: 3px; background: #081218; box-shadow: 0 13px 0 -5px #d1c89b; }
-.phone-charger > span { display: block; color: #d8e3c6; font: bold 8px/12px Arial, sans-serif; text-align: center; white-space: nowrap; }
-#world:not([data-room="corridor"]) > .phone-charger[data-fixed] { display: none; }
-.phone-charger[data-powered="false"]::before { background: #111719; border-color: #566260; }
-.phone-charger .docked-phone { position: absolute; left: 50%; top: 7px; width: 22px; height: 44px; transform: translateX(-50%); image-rendering: pixelated; }
+/* 책상 아래 벽 콘센트와 책상 위 휴대폰을 충전선으로 연결한다. */
+.phone-charger { position: absolute; z-index: 1; border: 2px solid #777b7b; border-radius: 2px; background: #c4c1b5; box-shadow: 1px 2px #151719; pointer-events: none; }
+.phone-charger::before { content: ''; position: absolute; left: 6px; top: 9px; width: 3px; height: 6px; background: #303431; box-shadow: 7px 0 #303431; }
+.phone-charger[data-docked="true"]::after { content: ''; position: absolute; left: 10px; top: calc(var(--phone-top) + 44px); width: 2px; height: calc(-1 * var(--phone-top) - 30px); background: #282c2b; }
+#world:not([data-room="office"]) > .phone-charger[data-fixed] { display: none; }
+.phone-charger .docked-phone { position: absolute; left: 50%; top: var(--phone-top); width: 22px; height: 44px; transform: translateX(-50%); image-rendering: pixelated; }
 #phone-button { position: relative; }
 #phone-flash-state { position: absolute; right: 0; bottom: calc(100% + 6px); padding: 4px 6px; border: 1px solid #6b6d70; border-radius: 4px; background: #252629; color: #c9cdd1; font: 11px/1.4 Arial, sans-serif; white-space: nowrap; pointer-events: none; }
 #phone-button[data-flashlight="on"] { border-color: #ffe99b; color: #ffe99b; }

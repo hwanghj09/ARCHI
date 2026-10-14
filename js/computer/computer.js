@@ -97,7 +97,7 @@ function refreshSolarDownload() {
   document.getElementById('computer-transfer-status').textContent = installed ? '등록 완료 · 휴대폰에서 전력 제어 가능' :
     task?.kind === 'transfer' ? `설치 ${percent}%` :
     !ready ? '17층 전력 필요' : !downloaded ? '블로그에서 앱 다운로드 필요' :
-    phoneDock ? '충전함에서 휴대폰을 가져오세요.' : phoneBattery <= 0 ? '휴대폰 충전 필요' :
+    phoneDock ? '충전하던 책상에서 휴대폰을 가져오세요.' : phoneBattery <= 0 ? '휴대폰 충전 필요' :
     !computerUsbConnected ? '휴대폰 연결 필요' :
     '';
 }

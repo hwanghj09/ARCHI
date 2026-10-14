@@ -50,8 +50,9 @@ function floorShortLabel(floorValue) {
   if (floorValue === 18) return 'RF';
   return `${String(floorValue).padStart(2, '0')}F`;
 }
-// 해당 층 전력으로 작동하는 USB 충전함. 휴대폰을 두고 갔다가 다시 찾아갈 수 있다.
-function phoneChargerFixture(x, width = 40) {
-  return { name: '비상 휴대폰 충전함', x, y: 348, width, height: 104, style: 'phone-charger', phoneCharger: true,
-    lines: ['USB-C', '휴대폰 충전'], message: '전력이 공급될 때 휴대폰을 맡겨 충전할 수 있다. 같은 충전함에서 다시 가져가자.' };
+// 책상 아래 콘센트에 충전기를 꽂고 휴대폰을 책상에 둔다. 전력은 해당 층 공급을 따른다.
+function phoneChargerFixture(x, tabletopY = 450) {
+  return { name: '휴대폰 충전 콘센트', x, y: 530, width: 24, height: 32, phoneTop: Math.round(tabletopY) - 574,
+    style: 'phone-charger', phoneCharger: true,
+    message: '콘센트에 충전기를 꽂고 휴대폰을 책상에 두어 충전한다. 같은 자리에서 다시 가져가자.' };
 }

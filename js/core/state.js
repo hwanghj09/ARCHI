@@ -35,7 +35,7 @@ let usingPhone = false;
 let usingPowerPanel = false;
 let usingInspection = false;
 let phoneBattery = 100;
-// 휴대폰을 맡긴 충전함의 층·위치. 장면을 다시 그려도 같은 충전함에서 찾아간다.
+// 휴대폰을 충전하는 방·층·콘센트 위치. 맡긴 방의 같은 자리에서 찾아간다.
 let phoneDock = null;
 let sanity = 100;
 let phoneLightOn = false;

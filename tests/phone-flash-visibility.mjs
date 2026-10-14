@@ -62,11 +62,12 @@ try {
   assert.equal(await badge.textContent(), '플래시 꺼짐');
   await page.evaluate(() => {
     phoneBattery = 50; togglePhoneLight();
-    chargePhone(doors.find(door => door.phoneCharger));
+    if (room !== 'office') { performFloorChange('f17'); performRoomChange(); }
+    chargePhone(officeCharger);
   });
   assert(await glow.isHidden(), 'Leaving the phone in a charger removes the glow');
   assert(await badge.isHidden(), 'Charging status replaces the flashlight badge');
-  assert.match(await page.locator('#phone-button').getAttribute('aria-label'), /충전함/);
+  assert.match(await page.locator('#phone-button').getAttribute('aria-label'), /충전 콘센트/);
   assert.deepEqual(errors, []);
   console.log('PASS: lit/dark flashlight visibility, hand tracking, desktop/mobile state, keyboard/touch, battery and charging');
 } finally {

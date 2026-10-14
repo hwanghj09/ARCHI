@@ -50,6 +50,18 @@ for (const door of officeDoors) {
   world.insertBefore(door.element, sprite);
 }
 
+const officeCharger = { ...phoneChargerFixture(744), type: 'inspect', room: 'office', scene: 'office', floor: 17,
+  element: document.createElement('div') };
+officeCharger.element.className = 'fixture phone-charger';
+officeCharger.element.dataset.fixed = 'true';
+officeCharger.element.setAttribute('role', 'img');
+officeCharger.element.setAttribute('aria-label', officeCharger.name);
+Object.assign(officeCharger.element.style, { left: `${officeCharger.x}px`, top: `${officeCharger.y}px`,
+  width: `${officeCharger.width}px`, height: `${officeCharger.height}px` });
+officeCharger.element.style.setProperty('--phone-top', `${officeCharger.phoneTop}px`);
+world.insertBefore(officeCharger.element, sprite);
+officeDoors.push(officeCharger);
+
 
 // 출입증 쌔비기 목표가 시작되면(story-badge-seen) 옆자리 책상(왼쪽, 컴퓨터 모니터 왼쪽 구석)에 생기는 포스트잇. 크기는 24px(처음의 절반).
 // 보이기·숨기기는 objective.js의 refreshObjective가 맡고, 숨겨진 동안은 조사 대상에서도 빠진다(interaction.js).

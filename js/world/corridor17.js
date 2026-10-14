@@ -68,22 +68,6 @@ doors.push({ name: 'CCTV 아래 게시판', type: 'inspect', x: 1644, y: 284, wi
   ],
 });
 
-for (const fixture of FLOOR17.fixtures) {
-  const element = document.createElement('div');
-  element.className = 'fixture phone-charger';
-  element.dataset.fixed = 'true';
-  element.setAttribute('role', 'img');
-  element.setAttribute('aria-label', fixture.name);
-  Object.assign(element.style, { left: `${fixture.x}px`, top: `${fixture.y}px`, width: `${fixture.width}px`, height: `${fixture.height}px` });
-  for (const line of fixture.lines) {
-    const label = document.createElement('span');
-    label.textContent = line;
-    element.append(label);
-  }
-  world.insertBefore(element, sprite);
-  doors.push({ ...fixture, type: 'inspect', element });
-}
-
 const background = document.getElementById('background');
 // 기존 39개 타일과 동일한 아틀라스를 사용해 전원 변경 시 그림을 한 번에 교체한다.
 const corridorBackground = new Image(3328, 768);

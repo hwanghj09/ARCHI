@@ -52,14 +52,15 @@ try {
   await clear();
   await page.evaluate(() => {
     triggerBuildingBlackout();
+    performFloorChange('f17'); performRoomChange();
     phoneBattery = 30;
-    chargePhone(currentDoors.find(door => door.phoneCharger));
+    chargePhone(officeCharger);
   });
   assert(!(await events()).includes('blackout') && !(await events()).includes('charger'), 'Repeated outages and unpowered chargers stay silent');
   await page.evaluate(() => {
     solarEnabled = true; solarPoweredFloors = [17]; updatePowerState();
-    chargePhone(currentDoors.find(door => door.phoneCharger));
-    chargePhone(currentDoors.find(door => door.phoneCharger));
+    chargePhone(officeCharger);
+    chargePhone(officeCharger);
     togglePhoneLight();
   });
   assert.deepEqual(await events(), ['charger', 'pickup', 'phone']);

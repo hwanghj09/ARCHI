@@ -92,11 +92,11 @@ try {
   await pcApp('building').click();
   await pcGuide.locator('[data-building-floor]').selectOption('12');
   const floor12 = await page.evaluate(() => {
-    const scene = ALL_FLOORS.find(scene => scene.floor === 12);
-    return { powered: floorHasPower(12), chargerCount: scene.fixtures.filter(item => item.phoneCharger).length };
+    return { powered: floorHasPower(12), chargerCount: [...floorById.values()]
+      .filter(scene => scene.floor === 12).flatMap(scene => scene.fixtures || []).filter(item => item.phoneCharger).length };
   });
   assert.equal(await pcGuide.locator('[data-building-power]').getAttribute('data-powered'), String(floor12.powered));
-  assert.match(await pcGuide.locator('[data-building-charger]').textContent(), new RegExp(`충전함 ${floor12.chargerCount}곳`));
+  assert.match(await pcGuide.locator('[data-building-charger]').textContent(), new RegExp(`충전 콘센트 ${floor12.chargerCount}곳`));
   await pc.locator('#computer-exit').click();
   await finishSceneTransition(page);
 
@@ -224,6 +224,7 @@ try {
   assert(await phone.locator('#phone-app-window').isHidden(), 'Empty battery cannot launch a phone app');
   await closePhone();
   await page.evaluate(() => { phoneBattery = 20; refreshPhone(); });
+  await page.evaluate(() => performFloorChange('f12-dev', 0, 'exit'));
   await place(await page.evaluate(() => { const charger = currentDoors.find(door => door.phoneCharger); return charger.x + charger.width / 2; }));
   await page.keyboard.press('e');
   assert(await page.evaluate(() => phoneDock?.floor === 12));

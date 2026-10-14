@@ -222,6 +222,7 @@ function buildDynamicScene(config) {
     element.setAttribute('aria-label', fixture.name);
     Object.assign(element.style, { left: `${fixture.x}px`, top: `${fixture.y}px`, width: `${fixture.width}px`,
       height: `${fixture.height ?? floorY - fixture.y}px` });
+    if (fixture.phoneCharger) element.style.setProperty('--phone-top', `${fixture.phoneTop}px`);
     for (const line of fixture.lines || []) {
       const text = document.createElement('span');
       text.textContent = line;

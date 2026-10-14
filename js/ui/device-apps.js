@@ -83,8 +83,10 @@ function refreshBuildingGuides() {
     if (scene.floor === 18) rooms.push('태양광 비상 배전반', '비상계단');
     const list = guide.querySelector('[data-building-rooms]');
     list.replaceChildren(...rooms.map(name => { const item = document.createElement('li'); item.textContent = name; return item; }));
-    const chargers = (scene.fixtures || []).filter(item => item.phoneCharger).length;
-    guide.querySelector('[data-building-charger]').textContent = `충전함 ${chargers}곳 · ${powered ? '충전 가능' : '전력 공급 필요'}`;
+    const chargingRooms = [...floorById.values()].filter(config => config.floor === scene.floor && config.fixtures?.some(item => item.phoneCharger)).map(config => config.name);
+    if (scene.floor === 17) chargingRooms.unshift('개발팀 사무실');
+    guide.querySelector('[data-building-charger]').textContent = chargingRooms.length ?
+      `충전 콘센트 ${chargingRooms.length}곳 · ${chargingRooms.join(', ')} · ${powered ? '충전 가능' : '전력 공급 필요'}` : '충전 콘센트 없음';
     guide.querySelector('[data-building-elevator]').textContent = scene.floor === 18 ? '옥상은 17층 비상계단으로 이동' :
       `엘리베이터 · ${elevatorHasPower() ? solarEnabled ? '비상 전력으로 운행 가능' : '정상 운행' : '옥상 비상 전력 레버를 내려야 운행 가능'}`;
   }
