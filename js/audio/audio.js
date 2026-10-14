@@ -1,4 +1,4 @@
-// 직접 합성한 짧은 효과음과 환경음. 외부 파일을 읽지 않아 file://에서도 동작한다.
+// 효과음·환경음은 직접 합성하고, 새 정신력 BGM은 로컬 음원 파일로 재생한다.
 let gameAudioContext = null;
 let gameAudioMaster = null;
 let gameAudioAppliedVolume = null;
@@ -6,6 +6,12 @@ const gameAudioBuffers = new Map();
 const gameAudioEffects = new Set();
 const gameAudioAmbience = new Map();
 const gameAudioLastPlayed = new Map();
+const sanityMusicElement = new Audio('assets/audio/sanity-dread.wav');
+sanityMusicElement.preload = 'auto';
+sanityMusicElement.loop = true;
+sanityMusicElement.volume = 0;
+let sanityMusicGain = 0;
+let sanityMusicTarget = 0;
 
 function unlockGameAudio() {
   const Context = window.AudioContext || window.webkitAudioContext;
@@ -25,8 +31,9 @@ function unlockGameAudio() {
 }
 
 function refreshGameAudioVolume() {
-  if (!gameAudioMaster) return;
   const volume = Math.max(0, Math.min(1, gameVolume));
+  sanityMusicElement.volume = volume * sanityMusicGain;
+  if (!gameAudioMaster) return;
   if (gameAudioAppliedVolume === volume) return;
   gameAudioAppliedVolume = volume;
   gameAudioMaster.gain.setTargetAtTime(volume, gameAudioContext.currentTime, .02);
@@ -234,6 +241,9 @@ function playHallucinationSound(volume = 1, randomSighting = false) {
 }
 
 function pauseGameAudio() {
+  sanityMusicElement.pause();
+  sanityMusicGain = sanityMusicTarget = 0;
+  sanityMusicElement.volume = 0;
   if (document.hidden || mainMenuActive || !gameStarted) for (const element of [hallucinationSoundElement, ...hallucinationSightingElements, hallucinationDevouredElement, doorPryElement, b2SirenElement]) element.pause();
   if (!gameAudioContext) return;
   for (const sound of gameAudioAmbience.values()) stopGameAudioSource(sound);
@@ -245,7 +255,19 @@ function stopGameSound(name) {
   for (const sound of gameAudioEffects) if (sound.name === name) stopGameAudioSource(sound);
 }
 
-function updateGameAudio() {
+// <audio>는 file://에서도 재생된다. 곡을 다시 시작하지 않고 음량만 부드럽게 바꾼다.
+function updateSanityMusic(target, elapsed) {
+  sanityMusicTarget = target;
+  sanityMusicGain += (target - sanityMusicGain) * Math.min(1, elapsed / 300);
+  if (!target && sanityMusicGain < .001) {
+    sanityMusicGain = 0;
+    sanityMusicElement.pause();
+  }
+  sanityMusicElement.volume = Math.max(0, Math.min(1, gameVolume)) * sanityMusicGain;
+  if (target && sanityMusicElement.paused) sanityMusicElement.play().catch(() => {});
+}
+
+function updateGameAudio(elapsed = step) {
   if (!gameAudioContext || gameAudioContext.state !== 'running') return;
   refreshGameAudioVolume();
   if (document.hidden || mainMenuActive || !gameStarted) return pauseGameAudio();
@@ -258,6 +280,9 @@ function updateGameAudio() {
   const background = dread ? 'cctv-dread' : haunted ? 'cctv-bgm' : roof ? 'wind' : lit ? 'office' : 'dark';
   const moving = selectingFloor && cabinCarIndex !== null && elevatorCars[cabinCarIndex].travelling && elevatorHasPower();
   const wanted = new Map([[background, dread ? .42 : haunted ? .34 : roof ? .23 : lit ? .18 : .14]]);
+  const fear = sanityTierOf(sanity);
+  const musicAllowed = !dread && !haunted && !openingActive && !blackoutSceneActive && !storySceneActive && !cctvSceneActive && !playerCaught && !hallucinationCaught;
+  updateSanityMusic(musicAllowed ? fear * .06 : 0, elapsed);
   if (moving) wanted.set('motor', .25);
   if (!selectingFloor && !openingActive && !blackoutSceneActive && !cctvSceneActive && !usingComputer && !usingKeypad && !usingPowerPanel && !usingInspection && !transitioning && !playerCaught && guardPatrol.door && lit && (guardPatrol.mode === 'chase' || !guardPatrol.wait)) {
     playGameSound('robot-servo', { x: guardPatrol.x });
