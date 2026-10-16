@@ -1,7 +1,7 @@
 // 3층: FLOOR3_LAYOUT(복도)과 FLOOR3_ROOMS(방 내부). 등록은 registry.js에서 한다.
 // 3층 복지·고객 대응층(층별 안내: Fitness Club / ㈜하누리서비스 / 고객만족센터 / Studio): 사용자가 준 단면 에셋
-// (assets/background/floor03/floor03-welfare.png, PROMPT.md)이 배경이다. 에셋은 플레이어 162px = 175cm 기준이라 1:1로 쓰고
-// (원본 바닥선 y=438 → 월드 y=570, top=132), build.py가 복도 1장(방 앞은 유리 너머로 방 그림), 방 내부 3장, 문 3장(닫힘|열림)을 만든다.
+// (assets/background/floor03/floor03-welfare.png, PROMPT.md)이 배경이다. build.py가 벽 부분만 늘린 방 내부와 별도 천장·바닥,
+// 공용 벽 모듈로 합성한 복도를 만든다. 방 내부의 원본 바닥선 y=438은 월드 y=570에 맞춘다.
 // 건물 코어가 모든 층에서 같은 자리라 Fitness Club·고객만족센터는 코어 왼쪽, Studio는 화장실 오른쪽에 둔다(왼쪽 2 + 오른쪽 1).
 // ㈜하누리서비스(경비·미화 용역)는 고객만족센터 안 서류 캐비닛·열쇠함과 복도 청소 카트로 들어간다.
 // 방 안 폭은 복도 전면 폭의 약 2.68배(1000/690/680 → 2676/1846/1840). 조사 지점은 그림 속 물건 위에 겹친 투명 설비('art-spot').
@@ -15,17 +15,23 @@
 // 질문을 끼워 넣고 설문 응답을 스스로 채운다는 것, B2로 가던 마지막 경비원을 로봇이 막았고 B2 수동 열쇠가 B1 시설관리실로
 // 회수됐다는 것, 스튜디오 카메라가 빈 스툴을 찍으며 사람 표본을 모은다는 것. 정전 상태(조명·네온·단말 꺼짐, 자동문 버튼·카메라·
 // 노트북·전화기 한 대만 배터리)를 기준으로 썼다.
-const FLOOR3_ART_TOP = 570 - 438;
+const FLOOR3_CEILING = 100;
+const FLOOR3_ROW0 = 82;
+const FLOOR3_SCALE_Y = (570 - FLOOR3_CEILING) / (438 - FLOOR3_ROW0);
+const floor3Y = row => Math.round(FLOOR3_CEILING + (row - FLOOR3_ROW0) * FLOOR3_SCALE_Y);
 const FLOOR3_BACKGROUND = 'linear-gradient(#100f0e, #191715)';
-const floor3Art = (name, width) => ({ src: `assets/background/floor03/floor03-${name}.png`, width, height: 556, top: FLOOR3_ART_TOP });
+const floor3Scene = (name, width) => [
+  { src: `assets/background/floor03/floor03-ceiling-${name}.png`, width, height: FLOOR3_CEILING, top: 0 },
+  { src: `assets/background/floor03/floor03-floor-${name}.png`, width, height: 204, top: 556 },
+  { src: `assets/background/floor03/floor03-${name}-interior.png`, width, height: floor3Y(442) - FLOOR3_CEILING, top: FLOOR3_CEILING }];
 // 그림 속 조사 지점: 월드 x 범위와 원본 행 범위(그 물건의 위아래)로 적는다.
 const floor3Spot = (name, [x0, x1], [y0, y1], extra) => ({ name, style: 'art-spot', x: x0, width: x1 - x0,
-  y: FLOOR3_ART_TOP + y0, height: y1 - y0, ...(typeof extra === 'string' ? { message: extra } : extra) });
+  y: floor3Y(y0), height: floor3Y(y1) - floor3Y(y0), ...(typeof extra === 'string' ? { message: extra } : extra) });
 const FLOOR3_LAYOUT = {
   header: '3F · Fitness Club · 고객만족센터', background: FLOOR3_BACKGROUND, theme: 'gym',
   // 복도 벽은 assets/background/wall 모듈로 합성한 한 장(walls-layout.json → walls.png, archi-floor-walls), 문은 assets/objects/floor03/door-*.png
   // (유리벽 방은 같은 유리의 맞춘 유리문, 흰 벽 방은 방에 맞는 문, archi-floor-doors).
-  backgroundWallsOnly: true, backgroundImage: { src: 'assets/background/floor03/walls.png', height: 752, top: 0 },
+  backgroundWallsOnly: true, backgroundImage: { src: 'assets/background/floor03/walls.png', height: 760, top: 0 },
   rooms: [
     { name: 'Fitness Club', x: 40, width: 1000, style: 'painted', target: 'f3-fitness',
       doorX: 755, doorWidth: 240, doorY: 250, doorSprite: 'assets/objects/floor03/door-fitness.png' },
@@ -35,7 +41,7 @@ const FLOOR3_LAYOUT = {
       doorX: 4295, doorWidth: 130, doorY: 250, doorSprite: 'assets/objects/floor03/door-studio.png' },
   ],
   fixtures: [
-    { name: '3층 입주사 안내', x: 3160, y: 300, width: 170, height: 150, style: 'tenant-board',
+    { name: '3층 입주사 안내', x: 3160, y: 300, width: 170, height: 150, style: 'wall-notice',
       lines: ['3F 입주사 안내', 'Fitness Club', '고객만족센터', '㈜하누리서비스', 'Studio'],
       message: '3층 입주사 안내판이다. ㈜하누리서비스(경비·미화)는 고객만족센터 안에 사무를 둔다. 아래 작은 글씨: "야간 무인 운영 · 00:00~06:00 Fitness Club 회원 전용 자동문 닫힘 고정."' },
   ],
@@ -45,7 +51,7 @@ const FLOOR3_LAYOUT = {
   ],
 };
 const floor3Room = (id, name, art, width, fixtures, extra = {}) => ({ id, name, width, background: FLOOR3_BACKGROUND,
-  backgroundWallsOnly: true, backgroundImage: floor3Art(`${art}-interior`, width), fixtures, ...extra });
+  backgroundWallsOnly: true, backgroundImage: floor3Scene(art, width), fixtures, ...extra });
 const FLOOR3_ROOMS = interiorRooms(3, [
   floor3Room('f3-fitness', 'Fitness Club', 'gym', 2676, [
     floor3Spot('러닝머신 벨트', [300, 440], [396, 438],
@@ -65,7 +71,7 @@ const FLOOR3_ROOMS = interiorRooms(3, [
   ], {
     exitWall: true,
     barriers: [
-      { name: '회원 전용 자동문', x: 1328, y: 300, width: 18, style: 'f3-auto-door',
+      { name: '회원 전용 자동문', x: 1328, y: floor3Y(168), width: 18, style: 'f3-auto-door',
         message: '유리 자동문이 닫혀 있다. 센서에 붉은 불이 켜져 있다: 정전 뒤 "닫힘 고정". 문틀 스티커: "비상 개방 버튼(트레이너 카운터 옆) · 배터리 5초."',
         closedMessage: '자동문이 스르르 다시 닫혔다.' },
     ],

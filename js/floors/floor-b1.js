@@ -12,6 +12,7 @@
 // 00:00부로 건물 전력의 94%가 B2로 가며, 석 달 동안 새벽마다 지상층 전력이 B2로 몰렸다는 기록.
 const B1_LAYOUT = {
   header: 'B1 · 시설 관리실', background: '#2c3430', theme: 'utility',
+  backgroundWallsOnly: true, backgroundImage: { src: 'assets/background/b1/b1-corridor-finished.png', height: 760, top: 0 },
   rooms: [
     { name: '시설관리팀 사무실', x: 4290, width: 240, style: 'facility-office', target: 'b1-office',
       doorX: 4320, doorWidth: 110, doorStyle: 'facility-door' },
@@ -54,7 +55,8 @@ const B1_LAYOUT = {
   ],
 };
 const B1_ROOMS = interiorRooms(-1, [
-  { id: 'b1-office', name: '시설관리팀 사무실', width: 2064, interiorStyle: 'facility-office', props: [
+  { id: 'b1-office', name: '시설관리팀 사무실', width: 2064, interiorStyle: 'facility-office',
+    backgroundWallsOnly: true, backgroundImage: { src: 'assets/background/b1/b1-office-finished.png', height: 760, top: 0 }, props: [
     { file: 'staff-lockers', size: [256, 512], worldWidth: 130, x: 120, name: '사물함',
       message: '사물함 문에 쪽지가 붙어 있다: "관제실 CCTV에 B2 카메라는 안 나옴. B2 카메라 권한은 SYSTEM 전용이라 우리도 못 봄."',
       surface: 'memo', look: 'slip',
@@ -83,7 +85,7 @@ const B1_ROOMS = interiorRooms(-1, [
   // 그대로). 나가는 퍼즐은 나중에 얹는다.
   // brightness: 들어설 때부터 어둑하다(소등 뒤 붉은 비상등일 때는 cctv-event.css의 붉은 조명 밝기를 따른다).
   { id: 'b1-control', name: '방재 관제실', width: 1892, interiorStyle: 'control-room', brightness: .6, alarmBy: 'b1-cctv-seen', backgroundWallsOnly: true,
-    backgroundImage: { src: 'assets/background/b1/control-room-v4.png', left: -154, width: 2033 * 570 / 503, height: 774 * 570 / 503, top: 0 },
+    backgroundImage: { src: 'assets/background/b1/control-room-v4-finished.png', height: 760, top: 0 },
     fixtures: [
       // 처음 들어오면 CCTV 컷씬(js/scene/cctv-event.js)이 돈다: 아홉 칸이 잡음으로 켜지고 "삐——"가 울리다가 브라운관처럼 꺼진다(liveBy).
       // 그 뒤 CCTV를 보기 전까지 칸마다 회색 잡음이 남는다. 조사해 CCTV를 켜면 칸마다 잡음 사이로 수호를 감시하던 화면(fullImage)이 드러나고, 한 번 본 뒤(seenBy)로는 벽 전체가 켜진다.
@@ -115,7 +117,8 @@ const B1_ROOMS = interiorRooms(-1, [
         takenSheet: { surface: 'screen', look: 'lcd', writing: [{ as: 'title', text: 'B2 운행 제한' }, { text: '수동 해제됨', ink: 'green' }],
           caption: '이제 엘리베이터로 B2에 갈 수 있다.' } },
     ] },
-  { id: 'b1-power', name: '전력 분배실', width: 1806, windowless: true, interiorStyle: 'switchgear', props: [
+  { id: 'b1-power', name: '전력 분배실', width: 1806, windowless: true, interiorStyle: 'switchgear',
+    backgroundWallsOnly: true, backgroundImage: { src: 'assets/background/b1/b1-power-finished.png', height: 760, top: 0 }, props: [
     { file: 'electrical-panel', size: [256, 512], worldWidth: 89, x: 110 },
     { file: 'electrical-panel', size: [256, 512], worldWidth: 89, x: 210 },
     { file: 'power-distribution-panel', size: [256, 512], worldWidth: 89, x: 330, name: '전력 분배반',

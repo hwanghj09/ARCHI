@@ -53,7 +53,7 @@ try {
   assert.equal(await page.locator('#cabin-floor-buttons button').count(), 19);
   assert.equal(await page.locator('#cabin-floor-buttons [data-floor="18"]').count(), 0);
   await page.locator('#dynamic-scene img').evaluateAll(images => Promise.all(images.map(img => img.decode())));
-  assert.equal(await page.locator('#dynamic-scene > img').evaluate(img => img.naturalWidth), 2172);
+  assert.deepEqual(await page.locator('#dynamic-scene > img').evaluate(img => [img.naturalWidth, img.naturalHeight]), [2400, 760]);
   const supply = page.locator('#dynamic-scene .solar-supply');
   assert.equal(await supply.count(), 1);
   assert(await supply.isVisible());

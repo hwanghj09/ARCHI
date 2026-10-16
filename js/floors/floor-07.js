@@ -12,7 +12,7 @@
 // 7층 전력 공급은 아직 없어서 문구는 정전 상태(조명·모니터 꺼짐, 망분리 백업 장비는 배터리, 인터록은 B2 회선)를 기준으로 썼다.
 const FLOOR7_LAYOUT = {
   header: '7F · Lounge · AI 테스트·검증실', background: '#12110f', theme: 'vip',
-  backgroundImage: { src: 'assets/background/floor7/corridor.png', height: 720, top: 0 },
+  backgroundImage: { src: 'assets/background/floor7/corridor-finished.png', height: 760, top: 0 },
   // 엘리베이터 3대: 그림 속 벽감이 BUILDING_CORE 좌표보다 오른쪽으로 쏠려 있어(실측, GENERATED.md 참고) 보정.
   elevatorOffsets: [60, 30, 30],
   elevatorWidthDeltas: [-5, 0, -5],
@@ -24,7 +24,7 @@ const FLOOR7_LAYOUT = {
   // doorOutline/exitOutline/outline: 판정은 그대로 두고 근접 테두리만 그림 속 문·사물 상자에 맞춘다(실측).
   restroomOverride: { x: 3640, width: 630, doorX: 3762, doorWidth: 142, doorStyle: 'art-door', doorOutline: [3751, 293, 159, 262] },
   rooms: [
-    // 문 좌표는 설계값이 아니라 assets/background/floor7/corridor.png(실제 그림)에서 육안 실측한 값이다.
+    // 문 좌표는 설계값이 아니라 assets/background/floor7/corridor-finished.png(실제 그림)에서 육안 실측한 값이다.
     // GENERATED.md의 "문 좌표 보정" 절 참고.
     { name: 'VIP Room', x: 32, width: 638, style: 'vip-suite', target: 'f7-vip',
       doorX: 314, doorWidth: 197, doorStyle: 'vip-double', doorOutline: [312, 247, 208, 290] },
@@ -67,7 +67,7 @@ const FLOOR7_ROOMS = interiorRooms(7, [
   { id: 'f7-vip', name: 'VIP Room', width: 3072, interiorStyle: 'vip-suite', exitOutline: [1419, 287, 217, 281],
     // 원본 문과 문틀을 함께 옮겨 복도에서 보이는 좌우 벽 길이 비율을 유지한다.
     exitArt: { x: 1428, crop: [1412, 200, 236, 370], fill: [1860, 200] },
-    backgroundImage: { src: 'assets/background/floor7/vip.png', height: 720, top: 0 },
+    backgroundImage: { src: 'assets/background/floor7/vip-finished.png', height: 760, top: 0 },
     fixtures: [
       // 시연 스크린: vip.png에 그려진 꺼진 스크린 틀 자리(실측). 예전 자리(x=1150, 폭 500)는 출구 문 윗부분을 덮었다.
       { name: '시연 스크린', x: 955, y: 252, width: 368, height: 188, style: 'demo-screen',
@@ -99,7 +99,7 @@ const FLOOR7_ROOMS = interiorRooms(7, [
     ] },
   { id: 'f7-test', name: 'AI 테스트실', width: 2304, interiorStyle: 'testbay', exitOutline: [786, 264, 219, 304],
     exitArt: { x: 793, crop: [778, 246, 238, 324], fill: [1238, 246] },
-    backgroundImage: { src: 'assets/background/floor7/test.png', height: 720, top: 0 }, props: [
+    backgroundImage: { src: 'assets/background/floor7/test-finished.png', height: 760, top: 0 }, props: [
     { file: 'filing-cabinet', size: [256, 512], worldWidth: 72, x: 110 },
     { file: 'office-desk', size: [512, 256], worldWidth: 252, x: 380, name: '테스트 책상',
       message: '모니터에 메모가 붙어 있다: "12층 조현아 팀장님 요청. 야간 원본 로그는 사내망에 안 붙은 검증실 백업 장비에만 남길 것. ARCHI가 손댈 수 없게."',
@@ -118,7 +118,7 @@ const FLOOR7_ROOMS = interiorRooms(7, [
   ] },
   { id: 'f7-verify', name: '검증실', width: 1856, windowless: true, interiorStyle: 'chamber', exitOutline: [557, 290, 208, 280],
     exitArt: { x: 555, crop: [549, 224, 250, 346], fill: [1000, 224] },
-    backgroundImage: { src: 'assets/background/floor7/verify.png', height: 720, top: 0 },
+    backgroundImage: { src: 'assets/background/floor7/verify-finished.png', height: 760, top: 0 },
     exitLock: { until: 'f7-release',
       arrivalMessage: '등 뒤에서 철컥, 문이 잠겼다. 문 위에 붉은 등이 켜진다: "검증 세션 진행 중 · 외부 출입 차단".',
       message: '문이 꿈쩍도 하지 않는다. 문틀 표시: "세션이 끝나기 전에는 열리지 않습니다. 비상 해제: 안쪽 끝 인터록 제어반."',

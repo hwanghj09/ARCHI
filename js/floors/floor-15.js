@@ -4,8 +4,15 @@
 // 세미나실은 B2로 옮길 GPU 서버 포장 상자가 바닥을 막고 있어(solids) 점프로 넘어가야 안쪽 작업 지시서에 닿는다.
 // 단서는 예약자 없는 새벽 연구 클러스터 100% 사용, 능력 은닉을 다룬 세미나 주제, 연구 GPU를 B2로 옮기는 자동 생성
 // 요청과 야간 배치의 자동 승인. 정전 상태(PC 꺼짐)를 기준으로 썼다.
+// build.py가 공용 벽 모듈의 복도와 별도 천장·바닥·벽을 만든다. 문·소품과 GPU 상자의 충돌 크기·높이는 유지한다.
+const floor15Scene = (name, width) => [
+  { src: `assets/background/floor15/floor15-ceiling-${name}.png`, width, height: 100, top: 0 },
+  { src: `assets/background/floor15/floor15-floor-${name}.png`, width, height: 204, top: 556 },
+  { src: `assets/background/floor15/floor15-${name}-interior.png`, width, height: 475, top: 100 },
+];
 const FLOOR15_LAYOUT = {
   header: '15F · 연구본부', background: '#141b1b', theme: 'research',
+  backgroundWallsOnly: true, backgroundImage: { src: 'assets/background/floor15/walls.png', height: 760, top: 0 },
   rooms: [
     { name: '연구실', x: 64, width: 860, style: 'partition', target: 'f15-lab',
       doorX: 280, doorWidth: 140, doorStyle: 'research' },
@@ -28,7 +35,8 @@ const FLOOR15_LAYOUT = {
   ],
 };
 const FLOOR15_ROOMS = interiorRooms(15, [
-  { id: 'f15-lab', name: '연구실', width: 3440, props: [
+  { id: 'f15-lab', name: '연구실', width: 3440,
+    backgroundWallsOnly: true, backgroundImage: floor15Scene('lab', 3440), props: [
     { file: 'large-planter', size: [256, 512], worldWidth: 78, x: 100 },
     { file: 'filing-cabinet', size: [256, 512], worldWidth: 72, x: 220 },
     { file: 'filing-cabinet', size: [256, 512], worldWidth: 72, x: 300 },
@@ -54,6 +62,7 @@ const FLOOR15_ROOMS = interiorRooms(15, [
     { file: 'water-cooler', size: [256, 512], worldWidth: 62, x: 3360 },
   ] },
   { id: 'f15-seminar', name: '세미나실', width: 2480,
+    backgroundWallsOnly: true, backgroundImage: floor15Scene('seminar', 2480),
     solids: [{ x: 760, width: 110, height: 50 }, { x: 1360, width: 90, height: 60 }], props: [
     { file: 'gpu-transfer-cart', size: [256, 256], worldWidth: 100, x: 420, name: '이관 카트',
       message: '카트 위 체크리스트: "GPU 서버 16대 포장 완료 · B2 서버실 이관 2차분". 포장 상자가 바닥을 막고 있다.',
@@ -69,7 +78,8 @@ const FLOOR15_ROOMS = interiorRooms(15, [
     { file: 'server-rack', size: [256, 512], worldWidth: 96, x: 2200 },
     { file: 'server-rack', size: [256, 512], worldWidth: 96, x: 2320 },
   ] },
-  { id: 'f15-director', name: '연구본부장실', width: 1824, props: [
+  { id: 'f15-director', name: '연구본부장실', width: 1824,
+    backgroundWallsOnly: true, backgroundImage: floor15Scene('director', 1824), props: [
     { file: 'glass-display-cabinet', size: [256, 512], worldWidth: 111, x: 120 },
     { file: 'filing-cabinet', size: [256, 512], worldWidth: 72, x: 240 },
     { file: 'research-director-desk', size: [512, 256], worldWidth: 298, x: 900, name: '본부장 책상',

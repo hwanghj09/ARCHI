@@ -1,29 +1,20 @@
-# 10층 배경: 사용자가 준 단면 에셋 floor10-management.png(3200×556, PROMPT.md)로 복도 1장, 방 내부 3장, 문 스프라이트 3장을
-# 만든다. 실행: python assets/background/floor10/build.py (저장소 루트에서, Pillow·numpy).
-# 에셋은 플레이어 162px = 175cm 기준이라 1:1로 쓴다(원본 바닥선 y=438 → 월드 y=570, top=132). 건물 코어는 모든 층에서 같은
-# 자리라 경영관리 사무실·임원 회의실은 코어 왼쪽, 임원실은 화장실 오른쪽에 두고, 복도에는 방 앞 유리 너머로 방 그림 일부를 보인다.
+# 10층 배경: 단면 에셋 floor10-management.png로 방 내부·천장·바닥과 공용 벽 모듈의 복도를 만든다. 문은 4층 그림을 재사용한다.
+# 실행: python assets/background/floor10/build.py (저장소 루트에서, Pillow·numpy).
+# 가로는 1:1, 벽 행 82..441만 늘려 월드 y=100..575에 둔다(원본 바닥선 y=438 → 월드 y=570). 건물 코어는 모든 층에서 같은
+# 자리라 경영관리 사무실·임원 회의실은 코어 왼쪽, 임원실은 화장실 오른쪽이다. 사무실·회의실은 유리 뒤로 일부 보이고 임원실은 벽으로 가린다.
 import sys
 sys.path.insert(0, 'assets/background')
 import numpy as np
-from cutaway_kit import Cutaway, door_sheet  # noqa: E402
+from PIL import Image, ImageDraw
+from cutaway_kit import Cutaway  # noqa: E402
+from cutaway_finish import finish_floor  # noqa: E402
 
 HERE = 'assets/background/floor10/'
-DOORS = 'assets/objects/floor10/'                # 문 그림은 오브젝트 폴더(파일 정리 규칙)
 kit = Cutaway(HERE + 'floor10-management.png', seed=10)
 
-# ---------------------------------------------------------------- 복도
-corridor = kit.corridor_wall(5000, wall=(1305, 1320))          # 회의실 왼쪽 빈 옥색 벽의 행별 색
-corridor[:, 10:40] = kit.A[:, 48:78]                             # 왼쪽 끝벽
-# 경영관리 사무실 앞(월드 40..1040): 끝벽 옆 벽 78..96 + 빈 벽 2px + 진열장부터 유리 칸막이까지 320..1300(캐비닛 셋은 뺀다)
-kit.place(corridor, 40, kit.glass(kit.cols((78, 96), (80, 82), (320, 1300))))
-# 임원 회의실 앞(월드 1080..1770): 미디어 월·상석·크레덴자 1590..2280
-kit.place(corridor, 1080, kit.glass(kit.cols((1590, 2280))))
-# 임원실 앞(월드 4282..5000): 원목 칸막이 2280..2304 + 비서 데스크~드레이프 2304..2896 + 책장 오른쪽 3044..3122 + 끝벽 3128..3152
-kit.place(corridor, 4282, kit.glass(kit.cols((2280, 2304), (2304, 2896), (3044, 3122), (3128, 3152))))
-# 비상구 유도등(원본 1225..1268, 166..184행)을 계단 문 위에, 멈춘 벽시계(1108..1136, 164..188행)를 가운데 구역 벽에
-kit.decor(corridor, (1225, 166, 1268, 184), 2974, 210)
-kit.decor(corridor, (1108, 164, 1136, 188), 3336, 340)
-kit.save(corridor, HERE + 'floor10-corridor.png')
+# 공용 유리벽 뒤 그림은 기존 복도의 방별 조합을 재사용한다. 임원실은 불투명 벽이다.
+kit.save(kit.cols((78, 96), (80, 82), (320, 1300)), HERE + 'behind-a.png')
+kit.save(kit.cols((1590, 2280)), HERE + 'behind-b.png')
 
 # ---------------------------------------------------------------- 방 내부
 # 경영관리 사무실(2678): 원본 78..810(캐비닛·진열장·창 아래 첫 책상)에 창 두 개와 책상 한 줄 칸(446..810)을 네 번(번갈아
@@ -52,13 +43,18 @@ def plain(width):
 shelf = kit.cols((2904, 3120))
 executive = np.concatenate([kit.cols((2280, 2308)), plain(250), kit.cols((2308, 2904)), plain(90), shelf, plain(70),
                             shelf[:, ::-1], plain(108), kit.cols((2904, 3152))], axis=1)
-for name, block in (('office', office), ('meeting', meeting), ('executive', executive)):
-    print(name, kit.save(block, HERE + f'floor10-{name}-interior.png'))
-
-# ---------------------------------------------------------------- 문 스프라이트(닫힘 | 열림), 높이 210
-# 사무실: 짙은 원목 틀 유리문, 회의실: 짙은 원목 문(황동 손잡이), 임원실: 칠한 원목 문, 카드 리더 붉은 대기등
-door_sheet('glass', 140, DOORS + 'door-office.png', colors=((48, 38, 28), (22, 34, 32), (74, 92, 86)))
-door_sheet('wood', 110, DOORS + 'door-meeting.png', colors=((40, 28, 20), (62, 44, 32), (96, 72, 50)))
-door_sheet('wood', 120, DOORS + 'door-executive.png', colors=((30, 22, 18), (58, 40, 30), (150, 124, 66)),
-           accent=(190, 50, 40))
+finish_floor(HERE, {
+    'office': (office, (78, 90, 84), (50, 72, 62)),
+    'meeting': (meeting, (52, 68, 62), (60, 72, 50)),
+    'executive': (executive, (72, 60, 48), (86, 66, 42)),
+})
+# 원본의 벽과 몰딩을 덜어 내고 시계만 새 복도 조사 범위에 맞춰 옮긴다.
+clock = Image.fromarray(kit.A[164:188, 1108:1136])
+mask = Image.new('L', clock.size)
+ImageDraw.Draw(mask).ellipse((2, 4, 27, 23), fill=255)
+clock.putalpha(mask)
+with Image.open(HERE + 'walls.png') as walls:
+    corridor = walls.copy()
+corridor.alpha_composite(clock.resize((40, 32), Image.Resampling.LANCZOS), (3330, 266))
+corridor.save(HERE + 'walls.png')
 print('built 10F assets')

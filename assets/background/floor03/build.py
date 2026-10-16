@@ -1,6 +1,6 @@
-# 3층 배경: 사용자가 준 단면 에셋 floor03-welfare.png(3200×556, PROMPT.md)로 복도 1장, 방 내부 3장, 문 스프라이트 3장을 만든다.
+# 3층 배경: 단면 에셋의 방 내부 3장·천장·바닥과 공용 벽 모듈의 복도를 만든다. 문 그림은 assets/objects/floor03/을 쓴다.
 # 실행: python assets/background/floor03/build.py (저장소 루트에서, Pillow·numpy).
-# 에셋은 플레이어 162px = 175cm 기준이라 1:1로 쓴다(원본 바닥선 y=438 → 월드 y=570, top=132). 건물 코어는 모든 층에서 같은 자리라
+# 가로는 1:1, 벽 행 82..441만 늘려 월드 y=100..575에 둔다(원본 바닥선 y=438 → 월드 y=570). 건물 코어는 모든 층에서 같은 자리라
 # 복도에는 방 앞 유리 너머로 방 그림의 일부만 보이고(Fitness Club·고객만족센터는 코어 왼쪽, Studio는 화장실 오른쪽), 방 안에는 방 그림
 # 전체를 반복 칸으로 넓혀 쓴다. Fitness Club 안은 그림 속 유리 자동문(기둥 1176..1228)을 가운데로 옮겨 안쪽 유산소·GX 구역과
 # 바깥 웨이트·사물함·트레이너 카운터 구역을 나누고, 카운터의 배터리 비상 개방 버튼과 자동문 사이를 약 1300px로 벌린다.
@@ -8,6 +8,7 @@ import sys
 sys.path.insert(0, 'assets/background')
 import numpy as np
 from cutaway_kit import Cutaway
+from cutaway_finish import finish_floor
 
 HERE = 'assets/background/floor03/'
 kit = Cutaway(HERE + 'floor03-welfare.png', seed=3)
@@ -102,9 +103,9 @@ foam[312:438, case_x:case_x + 86] = A[312:438, 3026:3112][:, ::-1]
 studio = np.concatenate([A[:, 2236:2316], foam, A[:, 2316:3152]], axis=1)
 print('studio', studio.shape[1])
 
-for name, block in (('gym', gym), ('cs', cs), ('studio', studio)):
-    kit.save(block, HERE + f'floor03-{name}-interior.png')
-
-# 복도·문은 이 스크립트가 만들지 않는다: 복도는 assets/background/wall 모듈로 합성한 walls.png(walls-layout.json, archi-floor-walls),
-# 문 그림은 assets/objects/floorNN/(archi-floor-doors).
+finish_floor(HERE, {
+    'gym': (gym, (44, 47, 45), (72, 60, 48)),
+    'cs': (cs, (94, 100, 100), (60, 68, 70)),
+    'studio': (studio, (30, 32, 36), (18, 20, 24)),
+})
 print('built 3F assets')

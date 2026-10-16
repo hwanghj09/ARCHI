@@ -38,11 +38,6 @@ try {
     await finishSceneTransition(page);
     await page.clock.runFor(100);
   };
-  const ground = {
-    'amenity-corridor-left.png': 562, 'amenity-corridor-core.png': 601, 'amenity-corridor-right.png': 563,
-    'amenity-kitchen-dining.png': 571, 'amenity-kitchen-service.png': 591,
-    'amenity-cu-interior.png': 602, 'amenity-cafe-interior.png': 596,
-  };
   const doorFiles = { cafeteria: 'cafeteria-door.png', shutter: 'cu-shutter-states.png',
     metal: 'restroom-door.png', 'restroom-exit': 'restroom-door.png', cafe: 'cafe-door.png', backdoor: 'service-door.png' };
   const checkDoors = async () => {
@@ -75,12 +70,15 @@ try {
       top: parseFloat(img.style.top), height: parseFloat(img.style.height), natural: [img.naturalWidth, img.naturalHeight],
     })));
     assert.equal(panels.length, count);
+    assert.equal(await page.locator('.floor-background[data-lit-src]').count(), 1, 'Finished artwork retains power switching');
+    const expected = await page.evaluate(() => ({ f16: 'corridor', 'f16-kitchen': 'kitchen', 'f16-cu': 'cu', 'f16-cafe': 'cafe' })[dynamicFloorId]);
     let edge = 0;
     for (const panel of panels) {
-      assert.deepEqual(panel.natural, [1983, 793], 'Generated image loads at its original resolution');
+      assert.equal(panel.file, `floor16-${expected}.png`, 'The scene uses its finished amenity artwork');
+      assert.deepEqual(panel.natural, [await worldWidth(page), 760], 'Finished artwork renders at its generated size');
       assert.equal(panel.left, edge, 'Background panels leave no horizontal gaps');
       edge += panel.width;
-      assert(Math.abs(panel.top + ground[panel.file] * panel.height / 793 - 570) < .01, 'Painted floor meets collision floor');
+      assert.deepEqual([panel.top, panel.height], [0, 760], 'Finished artwork covers the full ceiling and floor');
     }
     assert.equal(edge, await worldWidth(page));
     assert.equal(await page.locator('#dynamic-scene > .floor').evaluate(el => getComputedStyle(el).visibility), 'hidden');
@@ -88,7 +86,7 @@ try {
   };
   const capture = name => page.screenshot({ path: `.local/floor16-art-${name}.png` });
   await jumpFloor('f16');
-  await checkArt(3);
+  await checkArt(1);
   assert.equal(await page.locator('.room-door.shutter').getAttribute('data-unlocked'), 'false');
   await walk(620);
   await capture('kitchen-door');
@@ -100,7 +98,7 @@ try {
   assert.equal(await page.locator('header span').textContent(), '16F · 편의시설', 'CU is still locked from the corridor');
   const front = await roomFront(page, 'The Kitchen');
   await use(594);
-  await checkArt(2);
+  await checkArt(1);
   assertMirroredDoor(front.room, front.door, await worldWidth(page), await exitDoor(page), 'Kitchen');
   await walk(750);
   await capture('dining');
@@ -234,8 +232,8 @@ try {
   await checkDoors();
   assert.equal(await page.locator('.floor-background').count(), 1);
   await jumpFloor('b1');
-  assert.equal(await page.locator('#dynamic-scene').getAttribute('data-art'), 'false', 'CSS floors retain their original renderer');
-  assert.equal(await page.locator('.floor-background').count(), 0);
+  assert.equal(await page.locator('#dynamic-scene').getAttribute('data-art'), 'walls', 'B1 uses the shared finished corridor');
+  assert.equal(await page.locator('.floor-background').count(), 1);
   assert.deepEqual(errors, []);
   console.log('PASS 16F backgrounds: image loading, floor alignment, doors, room links, clues, first-exit CU shutter event, mobile and legacy rendering');
 } finally {

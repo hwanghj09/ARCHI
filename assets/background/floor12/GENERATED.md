@@ -1,5 +1,25 @@
 # 12층 배경 그림과 실제 적용 규격 (2026-09-28 재작성)
 
+## 현재 마감 (2026-10-16)
+
+- 저장소 루트에서 `python -B assets/background/floor12/build.py`로 마감본을 재생성한다(Pillow·numpy 필요). 아래 원본 합성 기록의 `corridor.png`·`office.png`·`eval.png`·`lead.png`는 덮어쓰지 않는다.
+- 게임은 `corridor-finished.png`(5000×760), `office-finished.png`(3280×760), `eval-finished.png`(1804×760), `lead-finished.png`(2132×760)를 사용한다. `backgroundImage`를 단일 이미지로 유지해 기존 `exitArt`·`artPatches`가 같은 배율로 작동한다.
+- 실내는 원본 y=100..569 픽셀을 그대로 유지한다. 위 100px은 공용 천장 패널·환기구·꺼진 조명, 아래 y=570..760은 공용 바닥으로 채워 화면 위아래의 단색 빈 띠와 아래층 배관 단면을 없앤다. 창·블라인드·평가 모니터·문·이동한 출구의 좌표는 유지한다.
+- 복도는 `walls-layout.json`과 공용 벽 모듈로 합성한다. 개발실은 혼합 유리, 모델 평가실은 불투명 벽, 팀장실은 간유리다. 공용 벽 부분은 이웃 층의 밝기·채도에 맞추고, 원본 문 그림은 아래 범위를 그대로 얹는다.
+
+| 원본 복도 문 | 원본 및 마감본의 영역 [left, top, right, bottom] |
+| --- | --- |
+| 개발실 자동문 | [707, 250, 916, 570] |
+| 모델 평가실 보안문·리더 | [3000, 295, 3185, 570] |
+| 팀장실 블라인드 문 | [4490, 280, 4660, 570] |
+
+- `backgroundWallsOnly`를 켜지 않고 기존 `data-art="true"`를 유지한다. 문이 이미 그림에 있으므로 CSS 문을 겹치지 않는다. 엘리베이터·계단·화장실의 보정 좌표와 방 안의 개별 소품·팀장실 보조키 퍼즐도 유지한다.
+- 방 이름표는 공용 천장 띠 아래 월드 y=90으로 옮겼다. 화장실 이름표는 보정된 문 중심 x=3746.5에 맞추고 기존 16층 문 그림을 유지한다.
+- `js/world/background-power.js`의 마감본 비상구 표시등은 자연 높이 760을 기준으로 배치한다. 개발실·평가실 표시등은 `exitArt`의 문 조각과 함께 이동한다.
+- `build.py`는 실내 벽 픽셀 유지와 완전 불투명 채움을 자체 검사한다. `tests/elevator.mjs`의 12층 경로는 마감본 크기·이름표·단서·보조키·방 출입을 검사하고, `tests/room-spatial-layout.mjs`와 `tests/floor12-restroom.mjs`가 출구 그림·비상구 표시등·가구 간격 및 PC·터치 왕복을 검사한다.
+
+## 원본 합성 기록
+
 - 이 문서는 전면 재작성이다. 예전 버전(2026-09-24~26)은 휴게실이 있던 옛 `FLOOR12_LAYOUT`(방 4개, `player.js`
   단일 파일 구조, `floor12Art()` 헬퍼, `dev.png`/`lab.png`/`lounge.png`, `tests/elevator.mjs`의 `checkFlatArt`)을
   기준으로 쓰여 있었는데, 그 방식은 이후 폐기되고 코드가 `js/floors/floor-12.js` 등 모듈 구조로 리팩터링되면서

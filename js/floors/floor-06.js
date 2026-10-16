@@ -1,8 +1,7 @@
 // 6층: FLOOR6_LAYOUT(복도)과 FLOOR6_ROOMS(방 내부). 등록은 registry.js에서 한다.
 // 6층 TmaxTibero 기술본부(층별 안내 그대로, 고객사 DB 기술지원): 사용자가 준 단면 에셋(assets/background/floor06/
-// floor06-tech-division.png, PROMPT.md)이 배경이다. 에셋은 플레이어 162px = 175cm 기준이라 1:1로 쓰고(원본 바닥선 y=438 → 월드
-// y=570, top=132), build.py가 복도 1장(방 앞은 유리 너머로 방 그림을 보인다), 방 내부 3장(방 그림 전체를 반복 칸으로 넓힘),
-// 문 3장(닫힘|열림)을 만든다. 올리브 카펫·카키 벽·겨자색 띠(oncall 테마).
+// floor06-tech-division.png, PROMPT.md)이 배경이다. build.py가 벽 부분만 늘린 방 내부와 별도 천장·바닥, 공용 벽 모듈의 복도를
+// 만든다(원본 바닥선 y=438 → 월드 y=570). 문은 기존 assets/objects/floor06/의 그림을 쓴다. 카키 벽·겨자색 띠(oncall 테마).
 // 건물 코어가 모든 층에서 같은 자리라 기술 개발 업무 공간·공용 엔지니어링 구역은 코어 왼쪽, 기술 회의실은 화장실 오른쪽에 둔다.
 // 방 안 폭은 복도 전면 폭의 약 2.68배(1000/690/680 → 2676/1846/1840). 조사 지점은 그림 속 물건 위에 투명하게 겹친 설비('art-spot').
 // 장치는 울리는 전화(설비 ring): 공용 엔지니어링 구역에 들어오고 2.5초 뒤 작업대의 당직 전화(그림 속 붉은 벨 램프)가 울리고,
@@ -14,17 +13,23 @@
 // 매일 03:00 고객사 DR 센터에 접속해 03:05~03:40 고객사 DR 복제 전용선을 등록되지 않은 해외 주소로 꽉 채워 썼다는 것
 // ("B2 ARCHI-MAIN → DR-EXT" 새 광케이블이 바닥 슬리브로 B2까지 내려간다). 외부 호스트 연결 준비·성공 여부는 7층에서 밝혀진다.
 // 정전 상태(조명·단말 꺼짐, 비상 형광등 몇 개와 당직 전화·회의실 카드 리더·스피커폰만 배터리/UPS로 살아 있음)를 기준으로 썼다.
-const FLOOR6_ART_TOP = 570 - 438;
+const FLOOR6_CEILING = 100;
+const FLOOR6_ROW0 = 82;
+const FLOOR6_SCALE_Y = (570 - FLOOR6_CEILING) / (438 - FLOOR6_ROW0);
+const floor6Y = row => Math.round(FLOOR6_CEILING + (row - FLOOR6_ROW0) * FLOOR6_SCALE_Y);
 const FLOOR6_BACKGROUND = 'linear-gradient(#10110b, #181a12)';
-const floor6Art = (name, width) => ({ src: `assets/background/floor06/floor06-${name}.png`, width, height: 556, top: FLOOR6_ART_TOP });
+const floor6Scene = (name, width) => [
+  { src: `assets/background/floor06/floor06-ceiling-${name}.png`, width, height: FLOOR6_CEILING, top: 0 },
+  { src: `assets/background/floor06/floor06-floor-${name}.png`, width, height: 204, top: 556 },
+  { src: `assets/background/floor06/floor06-${name}-interior.png`, width, height: floor6Y(442) - FLOOR6_CEILING, top: FLOOR6_CEILING }];
 // 그림 속 조사 지점: 월드 x 범위와 원본 행 범위(그 물건의 위아래)로 적는다. 조사는 x 범위만 보고, 테두리는 가까이 가면 보인다.
 const floor6Spot = (name, [x0, x1], [y0, y1], extra) => ({ name, style: 'art-spot', x: x0, width: x1 - x0,
-  y: FLOOR6_ART_TOP + y0, height: y1 - y0, ...(typeof extra === 'string' ? { message: extra } : extra) });
+  y: floor6Y(y0), height: floor6Y(y1) - floor6Y(y0), ...(typeof extra === 'string' ? { message: extra } : extra) });
 const FLOOR6_LAYOUT = {
   header: '6F · TmaxTibero 기술본부', background: FLOOR6_BACKGROUND, theme: 'oncall',
   // 복도 벽은 assets/background/wall 모듈로 합성한 한 장(walls-layout.json → walls.png, archi-floor-walls), 문은 assets/objects/floor06/door-*.png
   // (유리벽 방은 같은 유리의 맞춘 유리문, 흰 벽 방은 방에 맞는 문, archi-floor-doors).
-  backgroundWallsOnly: true, backgroundImage: { src: 'assets/background/floor06/walls.png', height: 752, top: 0 },
+  backgroundWallsOnly: true, backgroundImage: { src: 'assets/background/floor06/walls.png', height: 760, top: 0 },
   rooms: [
     { name: '기술 개발 업무 공간', x: 40, width: 1000, style: 'painted', target: 'f6-work',
       doorX: 280, doorWidth: 240, doorY: 250, doorSprite: 'assets/objects/floor06/door-work.png' },
@@ -44,7 +49,7 @@ const FLOOR6_LAYOUT = {
   ],
 };
 const floor6Room = (id, name, art, width, fixtures, extra = {}) => ({ id, name, width, background: FLOOR6_BACKGROUND,
-  backgroundWallsOnly: true, backgroundImage: floor6Art(`${art}-interior`, width), fixtures, ...extra });
+  backgroundWallsOnly: true, backgroundImage: floor6Scene(art, width), fixtures, ...extra });
 const FLOOR6_ROOMS = interiorRooms(6, [
   floor6Room('f6-work', '기술 개발 업무 공간', 'work', 2676, [
     floor6Spot('서류장 바인더', [157, 251], [262, 300],

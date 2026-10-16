@@ -6,8 +6,15 @@
 // (소품 requires = 다른 소품의 gives, 그 전에는 missingMessage).
 // 단서는 새벽 B2 전력 경보·외부 송신 경보를 SYSTEM이 자동 종결했다는 것, 설치 기록 없는 원격 접속 에이전트,
 // 옥상 비상 전력은 한 번에 한 층만 켤 수 있다는 교육 자료. 정전 상태(모니터 꺼짐)를 기준으로 썼다.
+// build.py가 공용 벽 모듈의 복도와 별도 천장·바닥·벽을 만든다. 문·소품·UPS와 프린터 회선은 기존 좌표를 유지한다.
+const floor13Scene = (name, width) => [
+  { src: `assets/background/floor13/floor13-ceiling-${name}.png`, width, height: 100, top: 0 },
+  { src: `assets/background/floor13/floor13-floor-${name}.png`, width, height: 204, top: 556 },
+  { src: `assets/background/floor13/floor13-${name}-interior.png`, width, height: 475, top: 100 },
+];
 const FLOOR13_LAYOUT = {
   header: '13F · 기술본부', background: '#18191b', theme: 'support',
+  backgroundWallsOnly: true, backgroundImage: { src: 'assets/background/floor13/walls.png', height: 760, top: 0 },
   rooms: [
     { name: '기술지원 상황실', x: 3090, width: 460, style: 'ops', target: 'f13-ops',
       doorX: 3240, doorWidth: 160, doorStyle: 'ops' },
@@ -31,7 +38,8 @@ const FLOOR13_LAYOUT = {
   ],
 };
 const FLOOR13_ROOMS = interiorRooms(13, [
-  { id: 'f13-ops', name: '기술지원 상황실', width: 2622, interiorStyle: 'monitors', props: [
+  { id: 'f13-ops', name: '기술지원 상황실', width: 2622, interiorStyle: 'monitors',
+    backgroundWallsOnly: true, backgroundImage: floor13Scene('ops', 2622), props: [
     { file: 'filing-cabinet', size: [256, 512], worldWidth: 72, x: 120 },
     { file: 'filing-cabinet', size: [256, 512], worldWidth: 72, x: 200 },
     { file: 'support-workstation', size: [512, 256], worldWidth: 270, x: 480, name: '교대 근무 일지',
@@ -56,7 +64,8 @@ const FLOOR13_ROOMS = interiorRooms(13, [
     { file: 'network-rack', size: [256, 512], worldWidth: 96, x: 2250 },
     { file: 'water-cooler', size: [256, 512], worldWidth: 62, x: 2540 },
   ] },
-  { id: 'f13-testbay', name: '장비 검증실', width: 1824, windowless: true, props: [
+  { id: 'f13-testbay', name: '장비 검증실', width: 1824, windowless: true,
+    backgroundWallsOnly: true, backgroundImage: floor13Scene('testbay', 1824), props: [
     { file: 'testbay-ups', size: [256, 256], worldWidth: 107, x: 420, name: 'UPS', gives: 'f13-ups',
       sprite: 'assets/objects/floor13/testbay-ups-states.png', stateBy: 'f13-ups',
       message: 'UPS 비상 출력 스위치를 올렸다. 팬이 돌기 시작하고 초록 불이 들어온다. 비상 회선으로 전기가 나간다.',
@@ -72,7 +81,8 @@ const FLOOR13_ROOMS = interiorRooms(13, [
     { file: 'server-rack', size: [256, 512], worldWidth: 96, x: 1520 },
     { file: 'network-rack', size: [256, 512], worldWidth: 96, x: 1640 },
   ] },
-  { id: 'f13-training', name: '고객 교육장', width: 1824, props: [
+  { id: 'f13-training', name: '고객 교육장', width: 1824,
+    backgroundWallsOnly: true, backgroundImage: floor13Scene('training', 1824), props: [
     { file: 'training-slide-board', size: [512, 256], worldWidth: 350, x: 300, name: '교육 자료 보드',
       message: '사내 안전 교육 슬라이드 출력물: "정전 시 옥상 태양광 비상 전력 장치를 쓴다. 용량이 작아 한 번에 한 층에만 전력을 보낼 수 있다. 다른 층을 켜면 켜져 있던 층의 전력은 자동으로 끊긴다."',
       // 그림처럼 슬라이드 세 장(배터리 · 태양광 패널과 층, 전력이 가는 층만 주황 · 스위치)을 나란히 붙였다.

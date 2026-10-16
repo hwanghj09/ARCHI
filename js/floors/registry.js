@@ -28,6 +28,7 @@ const RESTROOMS = FLOORS.flatMap(config => {
 });
 const ALL_FLOORS = [FLOOR17, ...FLOORS];
 const ROOFTOP = { id: 'rooftop', floor: 18, label: '옥상', header: 'RF · 옥상', aria: '옥상', width: 2400, background: '#11191d',
+  backgroundWallsOnly: true,
   fixtures: [
     { name: '태양광 작업 설명서', x: 810, y: 410, width: 72, height: 5, style: 'power-notice',
       surface: 'document', look: 'sheet',

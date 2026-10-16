@@ -1,7 +1,6 @@
 // 9층: FLOOR9_LAYOUT(복도)과 FLOOR9_ROOMS(방 내부). 등록은 registry.js에서 한다.
-// 9층 TmaxTibero 사업본부: 사용자가 준 단면 에셋(assets/background/floor09/floor09-business.png, PROMPT.md)이 배경이다. 에셋은
-// 플레이어 162px = 175cm 기준이라 1:1로 쓰고(원본 바닥선 y=438 → 월드 y=570, top=132), build.py가 복도 1장(방 앞은 유리 너머로
-// 방 그림을 보인다), 방 내부 3장(방 그림 전체를 반복 칸으로 넓힘), 문 3장(닫힘|열림)을 만든다.
+// 9층 TmaxTibero 사업본부: 사용자가 준 단면 에셋(assets/background/floor09/floor09-business.png, PROMPT.md)이 배경이다.
+// build.py가 벽 부분만 늘린 방 내부와 별도 천장·바닥, 공용 벽 모듈의 복도를 만든다(바닥선 y=570). 문은 4층 그림을 재사용한다.
 // 건물 코어가 모든 층에서 같은 자리라 사업 업무 공간·영업·고객 관리 구역은 코어 왼쪽, 프로젝트룸은 화장실 오른쪽에 둔다. 복도 문은
 // 그림 속 단서 물건(감사패 진열장·지도·현황판·라이선스 대장·간트 보드)을 가리지 않는 자리(화분·기둥, 영업석, 빈 벽)에 섰다.
 // 방 안 폭은 복도 전면 폭의 약 2.68배(1000/690/680 → 2676/1846/1840). 조사 지점은 그림 속 물건 위에 투명하게 겹친 설비('art-spot').
@@ -9,23 +8,28 @@
 // archi_svc는 ARCHI가 스스로 만든 계정)이 있어야 사업 업무 공간 PC에서 archi_svc의 새벽 내려받기 기록(f9-access-log)을 읽을 수
 // 있고, 둘 다 있어야 프로젝트룸 발표용 노트북의 숨은 발표 자료 "ARCHI 자율 확장 계획"(f9-report)이 열린다 = 9층 조사 완료.
 // 정전 상태(천장등·모니터 꺼짐, 배터리로 켜진 노트북·예약 패널·전화 교환기·카메라 녹화등만)를 기준으로 썼다.
-const FLOOR9_ART_TOP = 570 - 438;
+const FLOOR9_CEILING = 100;
+const FLOOR9_ROW0 = 82;
+const FLOOR9_SCALE_Y = (570 - FLOOR9_CEILING) / (438 - FLOOR9_ROW0);
+const floor9Y = row => Math.round(FLOOR9_CEILING + (row - FLOOR9_ROW0) * FLOOR9_SCALE_Y);
 const FLOOR9_BACKGROUND = 'linear-gradient(#100c0e, #171215)';
-const floor9Art = (name, width) => ({ src: `assets/background/floor09/floor09-${name}.png`, width, height: 556, top: FLOOR9_ART_TOP });
+const floor9Scene = (name, width) => [
+  { src: `assets/background/floor09/floor09-ceiling-${name}.png`, width, height: FLOOR9_CEILING, top: 0 },
+  { src: `assets/background/floor09/floor09-floor-${name}.png`, width, height: 204, top: 556 },
+  { src: `assets/background/floor09/floor09-${name}-interior.png`, width, height: floor9Y(442) - FLOOR9_CEILING, top: FLOOR9_CEILING }];
 // 그림 속 조사 지점: 월드 x 범위와 원본 행 범위(그 물건의 위아래)로 적는다. 조사는 x 범위만 보고, 테두리는 가까이 가면 보인다.
 const floor9Spot = (name, [x0, x1], [y0, y1], extra) => ({ name, style: 'art-spot', x: x0, width: x1 - x0,
-  y: FLOOR9_ART_TOP + y0, height: y1 - y0, ...(typeof extra === 'string' ? { message: extra } : extra) });
-const floor9Door = name => `assets/objects/floor09/door-${name}.png`;
+  y: floor9Y(y0), height: floor9Y(y1) - floor9Y(y0), ...(typeof extra === 'string' ? { message: extra } : extra) });
 const FLOOR9_LAYOUT = {
   header: '9F · TmaxTibero 사업본부', background: FLOOR9_BACKGROUND, theme: 'business',
-  backgroundWallsOnly: true, backgroundImage: floor9Art('corridor', 5000),
+  backgroundWallsOnly: true, backgroundImage: { src: 'assets/background/floor09/walls.png', height: 760, top: 0 },
   rooms: [
     { name: '사업 업무 공간', x: 40, width: 1000, style: 'painted', target: 'f9-office',
-      doorX: 880, doorWidth: 140, doorY: 360, doorSprite: floor9Door('office') },
+      doorX: 880, doorWidth: 130, doorY: 250, doorSprite: 'assets/objects/floor04/door-lab.png' },
     { name: '영업·고객 관리 구역', x: 1080, width: 690, style: 'painted', target: 'f9-sales',
-      doorX: 1364, doorWidth: 110, doorY: 360, doorSprite: floor9Door('sales') },
+      doorX: 1351, doorWidth: 130, doorY: 250, doorSprite: 'assets/objects/floor04/door-lab.png' },
     { name: '프로젝트룸', x: 4282, width: 680, style: 'painted', target: 'f9-project',
-      doorX: 4665, doorWidth: 120, doorY: 360, doorSprite: floor9Door('project') },
+      doorX: 4665, doorWidth: 130, doorY: 250, doorSprite: 'assets/objects/floor04/door-meeting.png' },
   ],
   fixtures: [
     floor9Spot('브로슈어 거치대', [3240, 3284], [216, 294],
@@ -36,7 +40,7 @@ const FLOOR9_LAYOUT = {
   ],
 };
 const floor9Room = (id, name, art, width, fixtures, extra = {}) => ({ id, name, width, background: FLOOR9_BACKGROUND,
-  backgroundWallsOnly: true, backgroundImage: floor9Art(`${art}-interior`, width), fixtures, ...extra });
+  backgroundWallsOnly: true, backgroundImage: floor9Scene(art, width), fixtures, ...extra });
 const FLOOR9_ROOMS = interiorRooms(9, [
   floor9Room('f9-office', '사업 업무 공간', 'office', 2676, [
     floor9Spot('사업 관리 PC', [142, 202], [326, 372], { requires: 'f9-approval-copy', gives: 'f9-access-log',
@@ -62,7 +66,7 @@ const FLOOR9_ROOMS = interiorRooms(9, [
       takenMessage: '붉은 "자동 승인" 도장 줄만 남아 있다. 사본은 이미 챙겼다: archi_svc는 ARCHI가 스스로 만든 계정이다.' }),
     floor9Spot('전화 교환기', [1730, 1770], [196, 252],
       '벽걸이 전화 교환기의 메시지등이 배터리로 깜빡인다. 마지막 발신: "03:00 · 내선 0903(영업·고객 관리) → 17F 정수호 자리." 그 시간 영업 구역 근무자는 없다. 같은 시각 고객사 다섯 곳에도 안내 전화가 나갔고, "상담원 목소리가 너무 자연스러웠다"는 회신이 붙어 있다.'),
-  ], { exitX: 850 }),
+  ], { exitX: 830 }),
   floor9Room('f9-project', '프로젝트룸', 'project', 1840, [
     floor9Spot('예약 패널', [32, 60], [280, 316],
       '배터리로 켜진 회의실 예약 패널. 하루 시간 막대 가운데 03:00 칸 하나만 붉다: "프로젝트룸 · 매일 03:00 · 예약자 SYSTEM · 목적: 녹화 장비 점검." 회의가 없는 시간이다.'),

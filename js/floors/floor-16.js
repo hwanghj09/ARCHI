@@ -7,14 +7,11 @@
 // 단서는 새벽마다 끊기는 냉동고 전원, 정전 직전 SYSTEM이 내린 셔터와 수호의 23:47 영수증, 낮에는 주문도 못 알아듣다가
 // 새벽에는 먼저 인사하는 음성 주문 키오스크(ARCHI 시범). 배경은 편의시설 전용 그림이며 문·소품은 별도로 그린다.
 // 카페 테이블의 조현아 팀장 사원증(gives 'f16-badge')으로 12~15층 하차 로비의 인증 게이트를 통과한다(registry.js).
+// build.py가 원래 표시 배율의 벽·선반을 유지하고 공용 천장·바닥·복도를 높이 760으로 마감한다. 점등·소등 그림을 함께 만든다.
 const FLOOR16_LAYOUT = {
   header: '16F · 편의시설', background: '#1d1b17', theme: 'food',
   backgroundWallsOnly: true,
-  backgroundImage: [
-    { src: 'assets/background/floor16/amenity-corridor-left.png', left: 0, width: 1800, height: 793 * 570 / 562, top: 0 },
-    { src: 'assets/background/floor16/amenity-corridor-core.png', left: 1800, width: 1756, height: 793 * 570 / 601, top: 0 },
-    { src: 'assets/background/floor16/amenity-corridor-right.png', left: 3556, width: 1444, height: 793 * 570 / 563, top: 0 },
-  ],
+  backgroundImage: { src: 'assets/background/floor16/floor16-corridor.png', height: 760, top: 0 },
   rooms: [
     { name: 'The Kitchen', x: 64, width: 1060, style: 'kitchen', target: 'f16-kitchen',
       doorX: 494, doorWidth: 200, doorStyle: 'cafeteria' },
@@ -37,10 +34,7 @@ const FLOOR16_LAYOUT = {
 const FLOOR16_ROOMS = interiorRooms(16, [
   { id: 'f16-kitchen', name: 'The Kitchen', width: 3604, interiorStyle: 'tiles',
     backgroundWallsOnly: true,
-    backgroundImage: [
-      { src: 'assets/background/floor16/amenity-kitchen-dining.png', left: 0, width: 1802, height: 793 * 570 / 571, top: 0 },
-      { src: 'assets/background/floor16/amenity-kitchen-service.png', left: 1802, width: 1802, height: 793 * 570 / 591, top: 0 },
-    ],
+    backgroundImage: { src: 'assets/background/floor16/floor16-kitchen.png', height: 760, top: 0 },
     links: [{ target: 'f16-cu', x: 3460, width: 110, style: 'backdoor' }], props: [
     { file: 'large-planter', size: [256, 512], worldWidth: 78, x: 100 },
     { file: 'food-dining-table', size: [512, 256], worldWidth: 243, x: 380 },
@@ -65,7 +59,7 @@ const FLOOR16_ROOMS = interiorRooms(16, [
   ] },
   { id: 'f16-cu', name: 'CU 편의점', width: 2040, interiorStyle: 'shelves',
     backgroundWallsOnly: true,
-    backgroundImage: { src: 'assets/background/floor16/amenity-cu-interior.png', height: 793 * 570 / 602, top: 0 },
+    backgroundImage: { src: 'assets/background/floor16/floor16-cu.png', height: 760, top: 0 },
     links: [{ target: 'f16-kitchen', x: 56, width: 110, style: 'backdoor' }], props: [
     { file: 'instrument-cart', size: [256, 256], worldWidth: 113, x: 290 },
     { file: 'food-checkout', size: [512, 256], worldWidth: 312, x: 1150, name: '계산대',
@@ -98,7 +92,7 @@ const FLOOR16_ROOMS = interiorRooms(16, [
   ] },
   { id: 'f16-cafe', name: 'Café', width: 1904,
     backgroundWallsOnly: true,
-    backgroundImage: { src: 'assets/background/floor16/amenity-cafe-interior.png', height: 793 * 570 / 596, top: 0 },
+    backgroundImage: { src: 'assets/background/floor16/floor16-cafe.png', height: 760, top: 0 },
     props: [
     { file: 'large-planter', size: [256, 512], worldWidth: 78, x: 330 },
     { file: 'waiting-sofa', size: [512, 256], worldWidth: 250, x: 560 },

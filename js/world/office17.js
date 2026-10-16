@@ -14,7 +14,7 @@ function refreshOfficeComputerPower() {
 }
 
 const officeBackground = document.getElementById('office-background');
-setPowerBackground(officeBackground, 'assets/background/floor17/office-interior-aligned.png');
+setPowerBackground(officeBackground, 'assets/background/floor17/office-interior-aligned-finished.png');
 const lightSwitch = document.getElementById('floor17-light-switch');
 const lights = document.getElementById('floor17-lights');
 lights.addEventListener('change', () => {
@@ -27,7 +27,7 @@ lights.addEventListener('change', () => {
 });
 // The generated office floor starts at source y=504; align it with the physics floor.
 Object.assign(officeBackground.style, {
-  width: `${officeWidth}px`, height: `${724 * floorY / 504}px`,
+  width: `${officeWidth}px`, height: '760px',
   left: '0px', top: '0px',
 });
 document.getElementById('opening-chair-front').style.backgroundSize = `${officeWidth}px ${724 * floorY / 504}px`;

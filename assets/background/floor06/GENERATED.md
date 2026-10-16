@@ -1,31 +1,37 @@
 # 6층 배경 적용
 
 - 원본: 사용자가 준 `floor06-tech-division.png`(3200×556 RGBA, 사방 여백 48px)와 `PROMPT.md`(제작 기록·좌표).
-- 배율 1:1(원본 바닥선 y=438 → 월드 y=570, `top: 132`, 높이 556).
-- `build.py`(저장소 루트에서 `python assets/background/floor06/build.py`)가 `assets/background/cutaway_kit.py`로 만든다.
+- 가로는 1:1, 벽은 원본 행 82..441을 높이 475px로 늘려 월드 y=100..575에 둔다(원본 바닥선 y=438 → 월드 y=570).
+- `build.py`(저장소 루트에서 `python assets/background/floor06/build.py`, Pillow·numpy 필요)가 공용 `cutaway_kit.py`와 `cutaway_finish.py`로 방 내부·천장·바닥·복도를 만든다.
 
 | 파일 | 원본 영역 | 월드 |
 | --- | --- | --- |
-| floor06-corridor.png | 끝벽 48..78, 업무 공간 앞 48..1024 + 기둥 1340..1364(유리), 엔지니어링 구역 앞 서고 1378..1604 + 빈 벽 120(문 자리) + 1606..1950(유리), 회의실 앞 2360..2830 + 빈 벽 216(문 자리) + 끝벽 3120..3152(유리), 나머지는 원본 슬래브·벽(1604..1612 열)·바닥(400..1000)으로 이은 복도 벽. 야간 승인 규칙판 액자(1917..1992, 196..286행)를 가운데 구역(월드 3200, y=328)에 야간 당직 안내문으로 | 0..5000 |
 | floor06-work-interior.png | 48..936 + 깨끗한 책상 칸(512..936) 3번(뒤집기·그대로·뒤집기) + 칸막이 틈 74px + 936..1378(기둥까지). 반복 칸은 포스트잇 모니터를 빈 화면으로 덮고, 켜진 비상 형광등(450..560)의 반쪽과 빛 웅덩이를 셋째 칸과 밝기를 맞춰 걷어 냄 | 폭 2676 |
 | floor06-engineering-interior.png | 기둥·서고 1340..1606 + 빈 벽 150 + 서고(1384..1604) 뒤집음 + 빈 벽 200(출구 문 자리) + 서고 + 빈 벽 36 + 1606..2360 | 폭 1846 |
 | floor06-meeting-interior.png | 2336..3030 + 테이블 끝 칸(2862..3030) 4번(뒤집기·디스플레이 그대로·뒤집기·그대로, 나머지 칸은 디스플레이를 빈 벽으로 덮음) + 빈 벽 352(출구 문 자리, 천장은 2920..2928 열) + 3030..3152. 빈 벽에 맞닿는 반쪽 등기구는 지움 | 폭 1840 |
-| floor06-work/engineering/meeting-door.png | `door_sheet` glass / steel / steel(붉은 카드 리더 등), 올리브 팔레트 | 140/110/120 × 210 |
+
+## 천장·바닥 마감 (2026-10-16)
+
+- 각 방은 천장(`floor06-ceiling-{work,engineering,meeting}.png`, y=0..100), 바닥(`floor06-floor-{work,engineering,meeting}.png`, y=556..760), 벽 그림의 세 층이다.
+- 세 층의 폭은 업무 공간 2676, 엔지니어링 구역 1846, 회의실 1840으로 같다. 벽은 월드 y=556부터 투명하게 비워 연속 바닥과 연결하고 원본 위아래 슬래브 이음매를 없앤다.
+- 천장은 방의 올리브·카키·겨자색에 맞춘 천장판·몰딩·꺼진 매입등·환기구다. 원본의 비상 형광등은 벽 그림에 남긴다.
+- `floor6Y()`가 조사 지점을 옮긴다. 당직 전화는 y=441·높이 39가 되어 벨 표시와 함께 그림에 맞는다.
+- 입장 2.5초 뒤 벨이 울리고 7.5초 동안 응답을 기다리는 규칙, 부재중 후 재입장 시 재호출, 응답 후 회의실 출입 승인은 유지한다.
 
 에셋에는 비상구 유도등이 없어 계단 문 위에 옮기지 않았다. 당직 전화가 울리는 모습(붉은 깜빡임)은 그림 위 설비
 (`.fixture.duty-phone[data-ringing="true"]`)의 CSS로 그린다.
 
-## 복도 벽·문 (2026-10-10 파일 정리 기준, 이 절이 최신)
+## 복도 벽·문 (2026-10-16)
 
-- 복도: `walls.png`(5000×752, top 0, 바닥선 570) = `assets/background/wall` 모듈을 `walls-layout.json`(`"modules": "../wall"`)으로 합성.
-  다시 만들기: `python assets/background/wall/compose_floor.py assets/background/floor06/walls-layout.json assets/background/floor06/walls.png`.
+- 복도: `walls.png`(5000×760, top 0, 바닥선 570). `walls-layout.json`의 공용 벽 모듈 합성 결과(752px)에 같은 바닥 8px을 이어 화면 끝을 채운다.
+- 최종 생성에는 `build.py`를 쓴다. 공용 `compose_floor.py`만 실행하면 높이가 752px로 돌아간다.
 - 유리 구간 뒤 그림(`behind-*.png`)은 이 층 단면 에셋에서 자른 것(behind_floor_y 438).
 - 문: 게임 그림 `assets/objects/floor06/door-*.png`(닫힘|열림), 원본 `assets/objects/floor06/source/door-*.png`.
   유리문은 `flush_door_base.py --no-kick` → `make_door_sprite.py`(자동문은 `--double --top 0.075`). 모두 y=250, 높이 320.
-- `build.py`는 방 내부만 만든다. 위쪽의 이전 기록에 나오는 복도 그림(`floor06-corridor.png`)·코드로 그린 문은 정리하면서 지웠다.
+- 야간 당직 안내문은 공용 `wall-notice` 스타일이다. 화장실 이름표는 문 위에 놓고 16층 화장실 문 그림을 쓰는 기존 공용 CSS를 유지한다.
 
 | 방(월드 x·폭) | 벽 모듈 | 유리 너머(behind) | 문 |
 | --- | --- | --- | --- |
 | 기술 개발 업무 공간 (40·1000) | wall-glass-mixed | `behind-a.png` | `assets/objects/floor06/door-work.png` ← `source/door-work.png` (혼합 유리 자동문), doorX 280, 폭 240 |
 | 공용 엔지니어링 구역 (1080·690) | wall-concrete | — | `assets/objects/floor06/door-engineering.png` ← `source/door-engineering.png` (흰 문(세로창)), doorX 1296, 폭 130 |
-| 기술 회의실 (4282·680) | wall-glass-mixed | `behind-c.png` | `assets/objects/floor06/door-meeting.png` ← `source/door-meeting.png` (혼합 유리 수동문), doorX 4577, 폭 130 |
+| 기술 회의실 (4282·680) | wall-glass-mixed | `behind-c.png` | `assets/objects/floor06/door-meeting.png` ← `source/door-meeting.png` (혼합 유리 수동문), doorX 4749, 폭 130 |

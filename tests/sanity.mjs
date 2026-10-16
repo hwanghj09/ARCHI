@@ -180,7 +180,7 @@ try {
     out.office = document.querySelectorAll('.fear-screen.office').length;
     out.corridor = document.querySelectorAll('.fear-screen.corridor').length;
     const holder = document.createElement('div'); const art = document.createElement('img'); holder.append(art); document.body.append(holder);
-    Object.assign(art.style, { left: '100px', top: '10px', width: '3692px', height: '1112px' }); addBackgroundMonitors(art, 'assets/background/floor03/floor03-cs-interior.png');
+    Object.assign(art.style, { left: '100px', top: '10px', width: '3692px', height: '950px' }); addBackgroundMonitors(art, 'assets/background/floor03/floor03-cs-interior.png');
     const placed = [...holder.querySelectorAll('.fear-screen')].sort((a, b) => parseFloat(a.style.left) - parseFloat(b.style.left));
     out.bg = [placed.length, placed[0]?.style.left, placed[0]?.style.top]; holder.remove();
     out.officeShown = [...document.querySelectorAll('.fear-screen.office')].every(el => getComputedStyle(el).display === 'block');
@@ -192,7 +192,7 @@ try {
   });
   assert.equal(screens.office, 5);
   assert.equal(screens.corridor, 7, '복도 유리벽 너머의 모니터도 바뀐다');
-  assert.deepEqual(screens.bg, [13, '246px', '666px'], '층 배경 그림 속 모니터는 그림 배율에 맞춰 놓인다');
+  assert.deepEqual(screens.bg, [13, '246px', '660px'], '층 배경 그림 속 모니터는 그림 배율에 맞춰 놓인다');
   assert.equal(screens.propScreens > 0, true, '책상 소품의 모니터 화면도 바뀐다');
   assert.equal(screens.hidden, true, '정신력이 오르면 모두 원래대로 돌아온다');
 

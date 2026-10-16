@@ -1,0 +1,249 @@
+{
+  "assets": [
+    {
+      "output": "assets/background/floor1/corridor-finished.png",
+      "width": 5000,
+      "height": 760,
+      "original": "assets/background/floor1/corridor.png",
+      "preserved": [
+        100,
+        570
+      ]
+    },
+    {
+      "output": "assets/background/floor1/harmony-finished.png",
+      "width": 3224,
+      "height": 760,
+      "original": "assets/background/floor1/harmony.png",
+      "preserved": [
+        100,
+        570
+      ]
+    },
+    {
+      "output": "assets/background/floor1/vision-finished.png",
+      "width": 2356,
+      "height": 760,
+      "original": "assets/background/floor1/vision.png",
+      "preserved": [
+        100,
+        570
+      ]
+    },
+    {
+      "output": "assets/background/floor1/clinic-finished.png",
+      "width": 1860,
+      "height": 760,
+      "original": "assets/background/floor1/clinic.png",
+      "preserved": [
+        100,
+        570
+      ]
+    },
+    {
+      "output": "assets/background/floor7/corridor-finished.png",
+      "width": 5000,
+      "height": 760,
+      "original": "assets/background/floor7/corridor.png",
+      "preserved": [
+        100,
+        570
+      ]
+    },
+    {
+      "output": "assets/background/floor7/corridor-finished-off.png",
+      "width": 5000,
+      "height": 760,
+      "original": "assets/background/floor7/corridor-off.png",
+      "preserved": [
+        100,
+        570
+      ]
+    },
+    {
+      "output": "assets/background/floor7/vip-finished.png",
+      "width": 3072,
+      "height": 760,
+      "original": "assets/background/floor7/vip.png",
+      "preserved": [
+        100,
+        570
+      ]
+    },
+    {
+      "output": "assets/background/floor7/vip-finished-off.png",
+      "width": 3072,
+      "height": 760,
+      "original": "assets/background/floor7/vip-off.png",
+      "preserved": [
+        100,
+        570
+      ]
+    },
+    {
+      "output": "assets/background/floor7/test-finished.png",
+      "width": 2304,
+      "height": 760,
+      "original": "assets/background/floor7/test.png",
+      "preserved": [
+        100,
+        570
+      ]
+    },
+    {
+      "output": "assets/background/floor7/verify-finished.png",
+      "width": 1856,
+      "height": 760,
+      "original": "assets/background/floor7/verify.png",
+      "preserved": [
+        100,
+        570
+      ]
+    },
+    {
+      "output": "assets/background/floor17/floor17-finished.png",
+      "width": 3328,
+      "height": 760,
+      "original": "assets/background/floor17/floor17.png",
+      "preserved": [
+        100,
+        570
+      ]
+    },
+    {
+      "output": "assets/background/floor17/floor17-finished-off.png",
+      "width": 3328,
+      "height": 760,
+      "original": "assets/background/floor17/floor17-off.png",
+      "preserved": [
+        100,
+        570
+      ]
+    },
+    {
+      "output": "assets/background/floor17/service-corridor-finished.png",
+      "width": 1800,
+      "height": 760,
+      "original": "assets/background/floor17/service-corridor.png",
+      "preserved": [
+        100,
+        570
+      ]
+    },
+    {
+      "output": "assets/background/floor17/service-corridor-finished-off.png",
+      "width": 1800,
+      "height": 760,
+      "original": "assets/background/floor17/service-corridor-off.png",
+      "preserved": [
+        100,
+        570
+      ]
+    },
+    {
+      "output": "assets/background/floor17/office-interior-aligned-finished.png",
+      "width": 2400,
+      "height": 760,
+      "original": "assets/background/floor17/office-interior-aligned.png",
+      "preserved": [
+        100,
+        570
+      ]
+    },
+    {
+      "output": "assets/background/floor17/office-interior-aligned-finished-off.png",
+      "width": 2400,
+      "height": 760,
+      "original": "assets/background/floor17/office-interior-aligned-off.png",
+      "preserved": [
+        100,
+        570
+      ]
+    },
+    {
+      "output": "assets/background/floor17/restroom-finished.png",
+      "width": 1800,
+      "height": 760,
+      "original": "assets/background/floor17/restroom.png",
+      "preserved": [
+        100,
+        570
+      ]
+    },
+    {
+      "output": "assets/background/floor17/restroom-finished-off.png",
+      "width": 1800,
+      "height": 760,
+      "original": "assets/background/floor17/restroom-off.png",
+      "preserved": [
+        100,
+        570
+      ]
+    },
+    {
+      "output": "assets/background/b1/control-room-v4-finished.png",
+      "width": 1892,
+      "height": 760,
+      "original": "assets/background/b1/control-room-v4.png",
+      "preserved": [
+        100,
+        570
+      ]
+    },
+    {
+      "output": "assets/background/rooftop/rooftop-finished.png",
+      "width": 2400,
+      "height": 760,
+      "original": "assets/background/rooftop/rooftop.png",
+      "preserved": [
+        0,
+        570
+      ]
+    },
+    {
+      "output": "assets/background/b1/b1-office-finished.png",
+      "width": 2064,
+      "height": 760
+    },
+    {
+      "output": "assets/background/b1/b1-power-finished.png",
+      "width": 1806,
+      "height": 760
+    },
+    {
+      "output": "assets/background/b1/b1-corridor-finished.png",
+      "width": 5000,
+      "height": 760
+    },
+    {
+      "output": "assets/background/b2/b2-main-finished.png",
+      "width": 3150,
+      "height": 760
+    },
+    {
+      "output": "assets/background/b2/b2-power-finished.png",
+      "width": 1800,
+      "height": 760
+    },
+    {
+      "output": "assets/background/b2/b2-link-finished.png",
+      "width": 1800,
+      "height": 760
+    },
+    {
+      "output": "assets/background/b2/b2-corridor-finished.png",
+      "width": 5000,
+      "height": 760
+    },
+    {
+      "output": "assets/background/floor17/floor17-manager-finished.png",
+      "width": 1800,
+      "height": 760
+    },
+    {
+      "output": "assets/background/floor02/walls-finished.png",
+      "width": 5000,
+      "height": 760
+    }
+  ]
+}

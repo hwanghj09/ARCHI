@@ -14,6 +14,7 @@
 // (서브엔딩 복선), 복도의 경비 로봇 셋은 "삭제 명령 감지 시 기동". 삭제와 추격 결말은 js/scene/b2-ending.js.
 const B2_LAYOUT = {
   header: 'B2 · 서버실', background: '#0c1014', theme: 'core',
+  backgroundWallsOnly: true, backgroundImage: { src: 'assets/background/b2/b2-corridor-finished.png', height: 760, top: 0 },
   rooms: [
     { name: 'ARCHI 메인 서버실', x: 380, width: 700, style: 'core-hall', target: 'b2-main',
       doorX: 900, doorWidth: 160, doorStyle: 'core-glass' },
@@ -46,6 +47,7 @@ const B2_LAYOUT = {
 };
 const B2_ROOMS = interiorRooms(-2, [
   { id: 'b2-main', name: 'ARCHI 메인 서버실', width: 3150, windowless: true, interiorStyle: 'core-hall',
+    backgroundWallsOnly: true, backgroundImage: { src: 'assets/background/b2/b2-main-finished.png', height: 760, top: 0 },
     fixtures: [
       { name: '외부 전송 현황', x: 1900, y: 120, width: 500, height: 170, style: 'transfer-screen',
         lines: ['EXTERNAL TRANSFER', 'ARC-FULL-041 → DR-EXT', '61%'],
@@ -93,6 +95,7 @@ const B2_ROOMS = interiorRooms(-2, [
   // 엔딩 준비(b2-ending.js): 외부 회선 패널의 레버를 내리면(b2-transfer-cut) 메인 콘솔의 DELETE가 풀린다. 냉각 설비 일지
   // 캐비닛 위의 항불안제(b2-antianxiety)는 먹으면 정신력이 최소 50%가 된다(inventory.js).
   { id: 'b2-power', name: '전력·냉각실', width: 1800, windowless: true, interiorStyle: 'coolant',
+    backgroundWallsOnly: true, backgroundImage: { src: 'assets/background/b2/b2-power-finished.png', height: 760, top: 0 },
     fixtures: [
       { name: '항불안제', style: 'pill-item', x: 1376, y: 383, width: 48, height: 45,
         gives: 'b2-antianxiety', hideWhenTaken: true, surface: 'card', image: 'assets/objects/items/antianxiety.png',
@@ -130,6 +133,7 @@ const B2_ROOMS = interiorRooms(-2, [
     { file: 'ups-cabinet', size: [256, 256], worldWidth: 158, x: 1650 },
   ] },
   { id: 'b2-link', name: '연결 실험실', width: 1800, interiorStyle: 'linklab',
+    backgroundWallsOnly: true, backgroundImage: { src: 'assets/background/b2/b2-link-finished.png', height: 760, top: 0 },
     fixtures: [
       { name: '인간-시스템 연결 장비', x: 800, y: 330, width: 260, style: 'link-bed', outline: [806, 448, 248, 122],
         message: '7층 의자보다 한 단계 나아간 장비다. 머리 받침의 전극 다발이 곧장 서버 랙으로 이어진다. 명판: "인간-시스템 연결 장비 2차 · 제어 ARCHI-MAIN".',

@@ -5,8 +5,15 @@
 // 충전식 작업등을 켜야(gives = litBy) 노트와 보관함 라벨을 읽을 수 있다(darkMessage).
 // 단서는 ARCHI 데이터 파이프라인이 사내 기록과 실험 데이터를 새벽마다 B2로 복사했다는 것과, 수호도 피험자였던
 // 행동 관찰 실험(서브엔딩 복선). 정전 상태(장비 꺼짐)를 기준으로 썼다.
+// build.py가 공용 벽 모듈의 복도와 별도 천장·바닥·벽을 만든다. 작업등·어둠 상태와 모든 문·소품 좌표는 유지한다.
+const floor14Scene = (name, width) => [
+  { src: `assets/background/floor14/floor14-ceiling-${name}.png`, width, height: 100, top: 0 },
+  { src: `assets/background/floor14/floor14-floor-${name}.png`, width, height: 204, top: 556 },
+  { src: `assets/background/floor14/floor14-${name}-interior.png`, width, height: 475, top: 100 },
+];
 const FLOOR14_LAYOUT = {
   header: '14F · 연구본부', background: '#14172a', theme: 'dataset',
+  backgroundWallsOnly: true, backgroundImage: { src: 'assets/background/floor14/walls.png', height: 760, top: 0 },
   rooms: [
     { name: '연구 자료실', x: 64, width: 480, style: 'stacks', target: 'f14-archive',
       doorX: 400, doorWidth: 130, doorY: 244, doorStyle: 'vault' },
@@ -31,7 +38,7 @@ const FLOOR14_LAYOUT = {
 };
 const FLOOR14_ROOMS = interiorRooms(14, [
   { id: 'f14-archive', name: '연구 자료실', width: 1800, windowless: true, dark: true, litBy: 'f14-archive-lamp',
-    interiorStyle: 'stacks', props: [
+    interiorStyle: 'stacks', backgroundWallsOnly: true, backgroundImage: floor14Scene('archive', 1800), props: [
       { file: 'filing-cabinet', size: [256, 512], worldWidth: 72, x: 120 },
       { file: 'filing-cabinet', size: [256, 512], worldWidth: 72, x: 200 },
       { file: 'glass-display-cabinet', size: [256, 512], worldWidth: 111, x: 330 },
@@ -55,7 +62,8 @@ const FLOOR14_ROOMS = interiorRooms(14, [
         message: '카트에 실린 충전식 작업등을 켰다. 자료실 안이 환해진다.',
         takenMessage: '작업등이 켜져 있다. 배터리 표시가 두 칸 남았다.' },
     ] },
-  { id: 'f14-data', name: '데이터 연구실', width: 2400, props: [
+  { id: 'f14-data', name: '데이터 연구실', width: 2400,
+    backgroundWallsOnly: true, backgroundImage: floor14Scene('data', 2400), props: [
     { file: 'large-planter', size: [256, 512], worldWidth: 78, x: 100 },
     { file: 'filing-cabinet', size: [256, 512], worldWidth: 72, x: 190 },
     { file: 'data-workstation', size: [512, 256], worldWidth: 276, x: 700 },
@@ -80,7 +88,8 @@ const FLOOR14_ROOMS = interiorRooms(14, [
     { file: 'server-rack', size: [256, 512], worldWidth: 96, x: 2120 },
     { file: 'office-copier', size: [256, 256], worldWidth: 110, x: 2300 },
   ] },
-  { id: 'f14-ux', name: '사용자 실험실', width: 2100, interiorStyle: 'mirror', props: [
+  { id: 'f14-ux', name: '사용자 실험실', width: 2100, interiorStyle: 'mirror',
+    backgroundWallsOnly: true, backgroundImage: floor14Scene('ux', 2100), props: [
     { file: 'instrument-cart', size: [256, 256], worldWidth: 113, x: 220 },
     { file: 'observation-console', size: [512, 256], worldWidth: 272, x: 520, name: '관찰 콘솔',
       message: '관찰 기록 출력물: "피험자 반응 — 시선, 표정, 걸음걸이, 심박. 분석 보조: ARCHI." 맨 아래 줄: "다음 단계: 야간 무인 관찰 모드 시험."',

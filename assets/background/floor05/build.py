@@ -1,6 +1,6 @@
-# 5층 배경: 사용자가 준 단면 에셋 floor05-research.png(3200×556, PROMPT.md)로 복도 1장, 방 내부 3장, 문 스프라이트 3장,
-# 이동식 발판 그림 1장을 만든다. 실행: python assets/background/floor05/build.py (저장소 루트에서, Pillow·numpy).
-# 에셋은 플레이어 162px = 175cm 기준이라 1:1로 쓴다(원본 바닥선 y=438 → 월드 y=570, top=132). 건물 코어는 모든 층에서 같은
+# 5층 배경: 단면 에셋 floor05-research.png로 방 내부·천장·바닥·복도·이동식 발판을 만든다. 문 그림은 assets/objects/floor05/를 쓴다.
+# 실행: python assets/background/floor05/build.py (저장소 루트에서, Pillow·numpy).
+# 가로는 1:1, 벽 행 82..441만 늘려 월드 y=100..575에 둔다(원본 바닥선 y=438 → 월드 y=570). 건물 코어는 모든 층에서 같은
 # 자리라 연구개발실·기술연구실은 코어 왼쪽, 회의실은 화장실 오른쪽에 두고, 복도에는 방 앞 유리 너머로 방 그림 일부를 보인다.
 # 장치(밀어서 옮기는 발판)는 그림 속 자리에 고정된 발판(원본 1070..1114)을 지우고, 게임 쪽 충돌체(movables)에 따로 그린
 # floor05-step.png를 입힌다. 가장 높은 서가(원본 1155..1259, 186px)는 방 안 오른쪽 끝벽에 붙여 둔다.
@@ -9,6 +9,7 @@ sys.path.insert(0, 'assets/background')
 import numpy as np
 from PIL import Image, ImageDraw
 from cutaway_kit import Cutaway  # noqa: E402
+from cutaway_finish import finish_floor  # noqa: E402
 
 HERE = 'assets/background/floor05/'
 kit = Cutaway(HERE + 'floor05-research.png', seed=5)
@@ -39,15 +40,12 @@ def slate(width):
     block = np.zeros((kit.H, width, 4), np.uint8)
     block[:180] = np.concatenate([top, top[:, ::-1]] * (width // 92 + 1), axis=1)[:, :width]
     profile = np.median(A[180:438, 1262:1267].astype(int), axis=1)             # 행별 벽색(황동 허리 띠 포함)
-    wall = profile[:, None, :] + np.random.default_rng(5).integers(-2, 3, (258, width, 1))   # 자체 시드(재생성해도 같은 결과)
+    wall = profile[:, None, :] + np.random.default_rng(5).integers(-2, 3, (258, width, 1)) * np.array([1, 1, 1, 0])  # 벽색만 흔들고 불투명도는 유지
     block[180:438] = np.clip(wall, 0, 255).astype(np.uint8)
     slab = A[438:, 420:1040]
     block[438:] = np.concatenate([slab, slab[:, ::-1]] * (width // 1240 + 1), axis=1)[:, :width]
     return block
 
-
-# 복도·문은 이 스크립트가 만들지 않는다: 복도는 assets/background/wall 모듈로 합성한 walls.png(walls-layout.json, archi-floor-walls),
-# 문 그림은 assets/objects/floorNN/(archi-floor-doors).
 
 # ---------------------------------------------------------------- 방 내부
 # 연구개발실(2676): 원본 48..880(끝벽, 루버 창 아래 책상 두 줄)에 창 두 칸과 책상 한 줄 칸(476..880)을 세 번(번갈아 뒤집어)
@@ -64,8 +62,20 @@ security = np.concatenate([kit.cols((1290, 1402)), panels(328), kit.cols((1402, 
 chair = np.concatenate([A[:340, 2900:2974], A[340:, 2712:2786]], axis=0)
 meeting = np.concatenate([kit.cols((2232, 2786)), *[chair[:, ::-1] if k % 2 else chair for k in range(12)],
                           kit.cols((2786, 3152))], axis=1)
-for name, block in (('rnd', rnd), ('security', security), ('meeting', meeting)):
-    print(name, kit.save(block, HERE + f'floor05-{name}-interior.png'))
+# 퍼즐 서가까지 늘리면 발판에서 뛰어도 닿지 않으므로, 공책과 서가만 기존 1:1 크기로 다시 붙인다.
+shelf = Image.new('RGBA', (330, 194))
+for x0, x1, y0 in ((932, 1155, 266), (1155, 1259, 252), (1160, 1186, 238), (1200, 1230, 246)):
+    shelf.paste(Image.fromarray(A[y0:424, x0:x1]), (x0 - 932, y0 - 230))
+rnd[230:438, 2322:2652] = slate(330)[230:438]
+finish_floor(HERE, {
+    'rnd': (rnd, (62, 66, 74), (78, 66, 46)),
+    'security': (security, (80, 88, 94), (50, 64, 70)),
+    'meeting': (meeting, (76, 66, 52), (86, 68, 42)),
+})
+with Image.open(HERE + 'floor05-rnd-interior.png') as wall:
+    interior = wall.copy()
+interior.alpha_composite(shelf, (2322, 262))  # 원본 top 132 + 행 230 - 새 벽 top 100
+interior.save(HERE + 'floor05-rnd-interior.png')
 
 # ---------------------------------------------------------------- 이동식 발판(84×76): 바퀴 달린 강철 2단 발판, 황동 디딤 테
 W, H = 84, 76

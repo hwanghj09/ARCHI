@@ -1,9 +1,9 @@
 // 10층: FLOOR10_LAYOUT(복도)과 FLOOR10_ROOMS(방 내부). 등록은 registry.js에서 한다.
 // 10층 TmaxSoft·TmaxTibero 경영관리본부(finance 테마): 사용자가 준 단면 에셋(assets/background/floor10/floor10-management.png,
-// PROMPT.md)이 배경이다. 에셋은 플레이어 162px = 175cm 기준이라 1:1로 쓰고(원본 바닥선 y=438 → 월드 y=570, top=132), build.py가
-// 복도 1장(방 앞은 유리 너머로 방 그림을 보인다), 방 내부 3장(방 그림 전체를 반복 칸으로 넓힘), 문 3장(닫힘|열림)을 만든다.
+// PROMPT.md)이 배경이다. build.py가 벽 부분만 늘린 방 내부와 별도 천장·바닥, 공용 벽 모듈의 복도를 만든다(바닥선 y=570).
+// 문은 기존 4층의 혼합 유리문·불투명 유리문을 재사용한다.
 // 건물 코어가 모든 층에서 같은 자리라 경영관리 사무실·임원 회의실은 코어 왼쪽, 임원실은 화장실 오른쪽에 둔다. 왼쪽에서 오른쪽으로
-// 갈수록 공간이 닫히고 조용해진다(유리 칸막이 → 원목 칸막이). 방 안 폭은 복도 전면 폭의 약 2.68배(1000/690/680 → 2678/1844/1822).
+// 갈수록 공간이 닫히고 조용해진다(혼합 유리 → 간유리 → 불투명 벽). 방 안 폭은 복도 전면 폭의 약 2.68배(1000/690/680 → 2678/1844/1822).
 // 조사 지점은 그림 속 물건 위에 투명하게 겹친 설비('art-spot').
 // 장치는 이중 잠금 서류함: 임원실 서류함(그림 속 황동 열쇠 구멍 두 개)은 requires 두 개라 경영관리 사무실 재무팀장 서랍의 열쇠
 // (f10-key-finance)와 임원 책상 결재 대기 서류 위의 열쇠(f10-key-director)를 둘 다 챙겨야 열린다(하나만 있으면 partialMessage).
@@ -11,22 +11,28 @@
 // 고지서(사용처 전부 B2), 결산 보드의 B1 시설관리실 3회째 무회신 문의와 따로 떼어 집계하는 ARCHI 프로젝트 비용, archi-ops가 낸
 // GPU 구매 요청의 자동 처리 결재, B2 서버실 앞에서 찍은 ARCHI 프로젝트 출범식 사진, 성과 3~5%에 비해 과다한 비용 검토 서류.
 // 예전 판의 창 없는 금고실과 그 UPS 단서는 없앴다. 정전 상태(회의실 상석 마이크·오디오 허브만 배터리)를 기준으로 썼다.
-const FLOOR10_ART_TOP = 570 - 438;
+const FLOOR10_CEILING = 100;
+const FLOOR10_ROW0 = 82;
+const FLOOR10_SCALE_Y = (570 - FLOOR10_CEILING) / (438 - FLOOR10_ROW0);
+const floor10Y = row => Math.round(FLOOR10_CEILING + (row - FLOOR10_ROW0) * FLOOR10_SCALE_Y);
 const FLOOR10_BACKGROUND = 'linear-gradient(#0b1311, #111b18)';
-const floor10Art = (name, width) => ({ src: `assets/background/floor10/floor10-${name}.png`, width, height: 556, top: FLOOR10_ART_TOP });
+const floor10Scene = (name, width) => [
+  { src: `assets/background/floor10/floor10-ceiling-${name}.png`, width, height: FLOOR10_CEILING, top: 0 },
+  { src: `assets/background/floor10/floor10-floor-${name}.png`, width, height: 204, top: 556 },
+  { src: `assets/background/floor10/floor10-${name}-interior.png`, width, height: floor10Y(442) - FLOOR10_CEILING, top: FLOOR10_CEILING }];
 // 그림 속 조사 지점: 월드 x 범위와 원본 행 범위(그 물건의 위아래)로 적는다. 조사는 x 범위만 보고, 테두리는 가까이 가면 보인다.
 const floor10Spot = (name, [x0, x1], [y0, y1], extra) => ({ name, style: 'art-spot', x: x0, width: x1 - x0,
-  y: FLOOR10_ART_TOP + y0, height: y1 - y0, ...(typeof extra === 'string' ? { message: extra } : extra) });
+  y: floor10Y(y0), height: floor10Y(y1) - floor10Y(y0), ...(typeof extra === 'string' ? { message: extra } : extra) });
 const FLOOR10_LAYOUT = {
   header: '10F · 경영관리본부', background: FLOOR10_BACKGROUND, theme: 'finance',
-  backgroundWallsOnly: true, backgroundImage: floor10Art('corridor', 5000),
+  backgroundWallsOnly: true, backgroundImage: { src: 'assets/background/floor10/walls.png', height: 760, top: 0 },
   rooms: [
     { name: '경영관리 사무실', x: 40, width: 1000, style: 'painted', target: 'f10-office',
-      doorX: 420, doorWidth: 140, doorY: 360, doorSprite: 'assets/objects/floor10/door-office.png' },
+      doorX: 420, doorWidth: 130, doorY: 250, doorSprite: 'assets/objects/floor04/door-lab.png' },
     { name: '임원 회의실', x: 1080, width: 690, style: 'painted', target: 'f10-meeting',
-      doorX: 1340, doorWidth: 110, doorY: 360, doorSprite: 'assets/objects/floor10/door-meeting.png' },
+      doorX: 1340, doorWidth: 130, doorY: 250, doorSprite: 'assets/objects/floor04/door-meeting.png' },
     { name: '임원실', x: 4282, width: 680, style: 'painted', target: 'f10-executive',
-      doorX: 4300, doorWidth: 120, doorY: 360, doorSprite: 'assets/objects/floor10/door-executive.png' },
+      doorX: 4318, doorWidth: 130, doorY: 250, doorSprite: 'assets/objects/floor04/door-meeting.png' },
   ],
   fixtures: [
     floor10Spot('멈춘 벽시계', [3330, 3370], [208, 232],
@@ -34,7 +40,7 @@ const FLOOR10_LAYOUT = {
   ],
 };
 const floor10Room = (id, name, art, width, fixtures, extra = {}) => ({ id, name, width, background: FLOOR10_BACKGROUND,
-  backgroundWallsOnly: true, backgroundImage: floor10Art(`${art}-interior`, width), fixtures, ...extra });
+  backgroundWallsOnly: true, backgroundImage: floor10Scene(art, width), fixtures, ...extra });
 const FLOOR10_ROOMS = interiorRooms(10, [
   floor10Room('f10-office', '경영관리 사무실', 'office', 2678, [
     floor10Spot('진열장', [252, 352], [268, 436],

@@ -51,9 +51,9 @@ try {
   await tiles.evaluateAll(images => Promise.all(images.map(image => image.decode())));
   assert.equal(await tiles.count(), 1, 'The corridor uses one registered power-switchable atlas');
   assert(await tiles.evaluateAll(images => images.every(image =>
-    image.naturalWidth === 3328 && image.naturalHeight === 768 &&
-    image.offsetLeft === 0 && image.offsetTop === 0 && image.clientWidth === 3328 && image.clientHeight === 768)),
-  'The full corridor atlas retains its original dimensions and alignment');
+    image.naturalWidth === 3328 && image.naturalHeight === 760 &&
+    image.offsetLeft === 0 && image.offsetTop === 0 && image.clientWidth === 3328 && image.clientHeight === 760)),
+  'The finished corridor atlas retains its world alignment');
   near((await state()).feet, 570, 'Player must stand on the floor');
   const doors = page.locator('.door');
   await doors.locator('img').evaluateAll(images => Promise.all(images.map(image => image.decode())));

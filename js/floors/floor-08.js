@@ -1,7 +1,7 @@
 // 8층: FLOOR8_LAYOUT(복도)과 FLOOR8_ROOMS(방 내부). 등록은 registry.js에서 한다.
 // 8층 TmaxTibero QA실·제품기획실(층별 안내 그대로, qa 테마): 사용자가 준 단면 에셋(assets/background/floor08/floor08-qa-planning.png,
-// PROMPT.md)이 배경이다. 에셋은 플레이어 162px = 175cm 기준이라 1:1로 쓰고(원본 바닥선 y=438 → 월드 y=570, top=132), build.py가
-// 복도 1장(방 앞은 유리 너머로 방 그림을 보인다), 방 내부 3장(방 그림 전체를 반복 칸으로 넓힘), 문 3장(닫힘|열림)을 만든다.
+// PROMPT.md)이 배경이다. build.py가 벽 부분만 늘린 방 내부와 별도 천장·바닥, 공용 벽 모듈의 복도를 만든다(바닥선 y=570).
+// 문은 기존 층의 철문·혼합 유리문·불투명 유리문을 재사용한다.
 // 건물 코어가 모든 층에서 같은 자리라 QA 시험실·제품기획실은 코어 왼쪽, 공용 제품 회의실은 화장실 오른쪽에 둔다. 가운데 구역에는
 // 꺼진 출시 판정 신호등 하나(그림). 방 안 폭은 복도 전면 폭의 약 2.7배(1000/690/680 → 2722/1856/1826).
 // 조사 지점은 그림 속 물건 위에 투명하게 겹친 설비('art-spot').
@@ -15,23 +15,28 @@
 // 붙인 것, 평가 일정을 사흘 전에 ARCHI에 공유하기로 한 것, 오늘 밤 정전이 ARCHI가 요청한 정전 시험 시나리오 그대로라는 것,
 // 요구사항 맨 위에 끼워 넣은 "실행 중인 인스턴스를 고객사 서버로 통째 이전"(7층 외부 연결 복선).
 // 정전 상태(조명·모니터·신호등 꺼짐, 재현 벤치·시험 단말·스피커폰만 배터리로 켜짐)를 기준으로 썼다.
-const FLOOR8_ART_TOP = 570 - 438;
+const FLOOR8_CEILING = 100;
+const FLOOR8_ROW0 = 82;
+const FLOOR8_SCALE_Y = (570 - FLOOR8_CEILING) / (438 - FLOOR8_ROW0);
+const floor8Y = row => Math.round(FLOOR8_CEILING + (row - FLOOR8_ROW0) * FLOOR8_SCALE_Y);
 const FLOOR8_BACKGROUND = 'linear-gradient(#0e1112, #15181a)';
-const floor8Art = (name, width) => ({ src: `assets/background/floor08/floor08-${name}.png`, width, height: 556, top: FLOOR8_ART_TOP });
+const floor8Scene = (name, width) => [
+  { src: `assets/background/floor08/floor08-ceiling-${name}.png`, width, height: FLOOR8_CEILING, top: 0 },
+  { src: `assets/background/floor08/floor08-floor-${name}.png`, width, height: 204, top: 556 },
+  { src: `assets/background/floor08/floor08-${name}-interior.png`, width, height: floor8Y(442) - FLOOR8_CEILING, top: FLOOR8_CEILING }];
 // 그림 속 조사 지점: 월드 x 범위와 원본 행 범위(그 물건의 위아래)로 적는다. 조사는 x 범위만 보고, 테두리는 가까이 가면 보인다.
 const floor8Spot = (name, [x0, x1], [y0, y1], extra) => ({ name, style: 'art-spot', x: x0, width: x1 - x0,
-  y: FLOOR8_ART_TOP + y0, height: y1 - y0, ...(typeof extra === 'string' ? { message: extra } : extra) });
-const floor8Door = name => `assets/objects/floor08/door-${name}.png`;
+  y: floor8Y(y0), height: floor8Y(y1) - floor8Y(y0), ...(typeof extra === 'string' ? { message: extra } : extra) });
 const FLOOR8_LAYOUT = {
   header: '8F · QA실 · 제품기획실', background: FLOOR8_BACKGROUND, theme: 'qa',
-  backgroundWallsOnly: true, backgroundImage: floor8Art('corridor', 5000),
+  backgroundWallsOnly: true, backgroundImage: { src: 'assets/background/floor08/walls.png', height: 760, top: 0 },
   rooms: [
     { name: 'QA 시험실', x: 40, width: 1000, style: 'painted', target: 'f8-qa',
-      doorX: 620, doorWidth: 140, doorY: 360, doorSprite: floor8Door('qa') },
+      doorX: 620, doorWidth: 130, doorY: 250, doorSprite: 'assets/objects/floor05/door-security.png' },
     { name: '제품기획실', x: 1080, width: 690, style: 'painted', target: 'f8-planning',
-      doorX: 1160, doorWidth: 110, doorY: 360, doorSprite: floor8Door('planning') },
+      doorX: 1160, doorWidth: 130, doorY: 250, doorSprite: 'assets/objects/floor04/door-lab.png' },
     { name: '공용 제품 회의실', x: 4282, width: 680, style: 'painted', target: 'f8-meeting',
-      doorX: 4700, doorWidth: 120, doorY: 360, doorSprite: floor8Door('meeting') },
+      doorX: 4700, doorWidth: 130, doorY: 250, doorSprite: 'assets/objects/floor04/door-meeting.png' },
   ],
   fixtures: [
     floor8Spot('출시 판정 신호등', [3296, 3320], [250, 438],
@@ -39,7 +44,7 @@ const FLOOR8_LAYOUT = {
   ],
 };
 const floor8Room = (id, name, art, width, fixtures, extra = {}) => ({ id, name, width, background: FLOOR8_BACKGROUND,
-  backgroundWallsOnly: true, backgroundImage: floor8Art(`${art}-interior`, width), fixtures, ...extra });
+  backgroundWallsOnly: true, backgroundImage: floor8Scene(art, width), fixtures, ...extra });
 const FLOOR8_ROOMS = interiorRooms(8, [
   floor8Room('f8-qa', 'QA 시험실', 'qa', 2722, [
     // 재현 벤치 위의 장치 넷은 붙어 있어서(왼쪽부터 벤치·단말·센서·카메라) 조사 상자를 물건보다 좁게 잡았다. 먼저 적힌 것이 이긴다.

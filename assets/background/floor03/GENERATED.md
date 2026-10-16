@@ -1,5 +1,18 @@
 # 3층 배경 적용
 
+## 천장·바닥·복도 마감 (2026-10-16, 아래 이전 기록보다 우선)
+
+- `python assets/background/floor03/build.py`가 방 내부·천장·바닥·복도를 함께 만든다(Pillow·numpy 필요).
+- 가로는 1:1로 유지하고 원본 벽 행 82..441을 높이 475px로 늘려 월드 y=100..575에 놓는다. 원본 바닥선 438행은 월드 y=570에 맞춘다.
+- `floor03-ceiling-{gym,cs,studio}.png`는 y=0..100의 천장판·꺼진 매입등·환기구·몰딩이다.
+- `floor03-floor-{gym,cs,studio}.png`는 y=556..760의 바닥이다. 벽 그림은 y=556부터 투명하게 비워 바닥과 연결한다. 원본 슬래브와 그 반복 이음매는 제거했다.
+- 각 방의 세 이미지 폭은 gym 2676, cs 1846, studio 1840으로 같다. `floor3Y()`가 조사 지점과 자동문의 높이도 같은 비율로 옮긴다. 자동문 센서 표시는 높이 40px이며, 5초 개방·달리기 통과 규칙은 유지한다.
+- 복도는 기존 `walls-layout.json`을 공용 벽 모듈로 합성한 뒤, 아래쪽에 같은 바닥 8px을 이어 `walls.png`(5000×760)로 만든다. 별도로 `compose_floor.py`만 실행하면 752px이므로 최종 생성에는 `build.py`를 쓴다.
+- 입주사 안내판은 공용 `wall-notice` 스타일로 맞췄다. 기존 공용 CSS의 화장실 문 위 이름표와 16층 화장실 문 그림을 유지한다.
+- 방 문은 기존 `assets/objects/floor03/door-*.png`의 닫힘·열림 스프라이트를 유지한다.
+
+## 이전 제작 기록
+
 - 원본: 사용자가 준 `floor03-welfare.png`(3200×556 RGBA, 사방 여백 48px)와 `PROMPT.md`(제작 기록·좌표).
 - 배율 1:1(원본 바닥선 y=438 → 월드 y=570, `top: 132`, 높이 556).
 - `build.py`(저장소 루트에서 `python assets/background/floor03/build.py`, 공용 `assets/background/cutaway_kit.py` 사용)가 만든다.

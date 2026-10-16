@@ -1,5 +1,7 @@
 # 7층 배경 그림과 실제 적용 규격 (2026-09-29)
 
+> 2026-10-16 마감 갱신: 게임은 원본 좌표를 보존한 높이 760의 *-finished.png를 사용한다. 원본 합성 후 저장소 루트에서 python -B assets/background/finish_building.py를 실행한다. 현재 구현·전력 전환·검증 방법은 [건물 전체 마감](../FINISHING.md)을 따른다. 아래는 원본 제작 기록이다.
+
 `PROMPT.md`의 9개 프롬프트(corridor-a/b/c/d, vip-1/2, test-1/2, verify)로 생성한 그림을
 `scripts/compose-floor7-art.py`로 합성해 `js/floors/floor-07.js`에 연결한 기록이다. 12층
 (`compose-floor12-art.py`/`floor12/GENERATED.md`)과 같은 절차 — 바닥선 자동 검출 → 동일 배율

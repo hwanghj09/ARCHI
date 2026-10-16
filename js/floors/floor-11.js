@@ -1,11 +1,18 @@
 // 11층: FLOOR11_LAYOUT(복도)과 FLOOR11_ROOMS(방 내부). 등록은 registry.js에서 한다.
-// 11층 TmaxSoft 사업본부·전략마케팅본부: 남색 카펫과 금색 테(sales 테마). 코어 왼쪽에 큰 영업본부 사무실 하나, 화장실
+// 11층 TmaxSoft 사업본부·전략마케팅본부: 남색 벽과 금색 테(sales 테마). 공용 벽 모듈과 별도 천장·바닥을 쓰고 소품은 유지한다.
+// 코어 왼쪽에 큰 영업본부 사무실 하나, 화장실
 // 오른쪽에 전략회의실·마케팅 자료실을 붙여 둔다. 정전 직전 SYSTEM이 원격으로 내린 방화셔터(barriers)가 화장실 오른쪽 복도를
 // 막고 있어, 영업본부 사무실의 층 비상 대응함에서 수동 개방 핸들(gives)을 챙겨 와야 셔터를 올리고 두 방에 갈 수 있다.
 // 방 안 폭은 복도 전면 폭의 5.7배(632/316/316 → 3600/1800/1800). 단서는 낮 시연 실패와 밤 리허설 성공, 사업화 보류,
 // 외부 파트너 데모 서버 계정의 새벽 비밀번호 변경(7층 외부 연결 복선). 정전 상태 기준으로 썼다.
+const floor11Scene = (name, width) => [
+  { src: `assets/background/floor11/floor11-ceiling-${name}.png`, width, height: 100, top: 0 },
+  { src: `assets/background/floor11/floor11-floor-${name}.png`, width, height: 204, top: 556 },
+  { src: `assets/background/floor11/floor11-${name}-interior.png`, width, height: 475, top: 100 },
+];
 const FLOOR11_LAYOUT = {
   header: '11F · 사업본부 · 전략마케팅본부', background: '#141824', theme: 'sales',
+  backgroundWallsOnly: true, backgroundImage: { src: 'assets/background/floor11/walls.png', height: 760, top: 0 },
   rooms: [
     { name: '영업본부 사무실', x: 64, width: 632, style: 'sales', target: 'f11-sales',
       doorX: 244, doorWidth: 140, doorStyle: 'gilt' },
@@ -36,7 +43,8 @@ const FLOOR11_LAYOUT = {
   ],
 };
 const FLOOR11_ROOMS = interiorRooms(11, [
-  { id: 'f11-sales', name: '영업본부 사무실', width: 3600, props: [
+  { id: 'f11-sales', name: '영업본부 사무실', width: 3600,
+    backgroundWallsOnly: true, backgroundImage: floor11Scene('sales', 3600), props: [
     { file: 'large-planter', size: [256, 512], worldWidth: 78, x: 100 },
     { file: 'staff-lockers', size: [256, 512], worldWidth: 130, x: 250 },
     { file: 'office-desk', size: [512, 256], worldWidth: 252, x: 520 },
@@ -63,7 +71,8 @@ const FLOOR11_ROOMS = interiorRooms(11, [
     { file: 'water-cooler', size: [256, 512], worldWidth: 62, x: 3400 },
     { file: 'large-planter', size: [256, 512], worldWidth: 78, x: 3520 },
   ] },
-  { id: 'f11-strategy', name: '전략회의실', width: 1800, interiorStyle: 'boardroom', props: [
+  { id: 'f11-strategy', name: '전략회의실', width: 1800, interiorStyle: 'boardroom',
+    backgroundWallsOnly: true, backgroundImage: floor11Scene('strategy', 1800), props: [
     { file: 'large-planter', size: [256, 512], worldWidth: 78, x: 100 },
     { file: 'glass-display-cabinet', size: [256, 512], worldWidth: 111, x: 260 },
     { file: 'strategy-board', size: [512, 256], worldWidth: 350, x: 560, name: '전략 보드',
@@ -91,7 +100,8 @@ const FLOOR11_ROOMS = interiorRooms(11, [
       caption: '회의록 한 장.' },
     { file: 'waiting-sofa', size: [512, 256], worldWidth: 250, x: 1620 },
   ] },
-  { id: 'f11-marketing', name: '마케팅 자료실', width: 1800, windowless: true, props: [
+  { id: 'f11-marketing', name: '마케팅 자료실', width: 1800, windowless: true,
+    backgroundWallsOnly: true, backgroundImage: floor11Scene('marketing', 1800), props: [
     { file: 'brochure-rack', size: [256, 512], worldWidth: 111, x: 420, name: '브로슈어 진열장',
       message: 'ARCHI 브로슈어 초판이 쌓여 있다. "사람처럼 배우는 AI." 출시일 칸은 매직으로 지워져 있다.',
       surface: 'document',

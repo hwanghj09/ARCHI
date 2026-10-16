@@ -1,0 +1,10 @@
+{
+  "modules": "../wall",
+  "width": 5000,
+  "fill": "wall-concrete",
+  "segments": [
+    { "x": 48, "width": 1070, "wall": "wall-glass-mixed", "behind": "corridor.png", "behind_floor_y": 570 },
+    { "x": 2960, "width": 543, "wall": "wall-concrete" },
+    { "x": 4070, "width": 723, "wall": "wall-frosted" }
+  ]
+}

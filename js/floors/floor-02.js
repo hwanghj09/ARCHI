@@ -32,7 +32,7 @@ const floor2ScreenCover = x => ({ name: '꺼진 스크린', style: 'screen-cover
   x, y: floor2Y(134), width: 372, height: floor2Y(340) - floor2Y(134) });
 const FLOOR2_LAYOUT = {
   header: '2F · Harmony Hall · 서버실', background: FLOOR2_BACKGROUND, theme: 'concert',
-  backgroundWallsOnly: true, backgroundImage: { src: 'assets/background/floor02/walls.png', height: 752, top: 0 },
+  backgroundWallsOnly: true, backgroundImage: { src: 'assets/background/floor02/walls-finished.png', height: 760, top: 0 },
   rooms: [
     { name: 'Harmony Hall', x: 40, width: 1000, style: 'painted', target: 'f2-harmony',
       ...floor2Door('harmony', 723) },

@@ -1,6 +1,6 @@
-# 4층 배경: 사용자가 준 단면 에셋 floor04-rnd.png(3200×556, PROMPT.md)로 복도 1장, 방 내부 3장, 문 스프라이트 3장을 만든다.
+# 4층 배경: 단면 에셋 floor04-rnd.png로 방 내부·천장·바닥과 공용 벽 모듈의 복도를 만든다. 문 그림은 assets/objects/floor04/를 쓴다.
 # 실행: python assets/background/floor04/build.py (저장소 루트에서, Pillow·numpy). 공용 도구는 assets/background/cutaway_kit.py.
-# 에셋은 플레이어 162px = 175cm 기준이라 1:1로 쓴다(원본 바닥선 y=438 → 월드 y=570, top=132). 건물 코어는 모든 층에서 같은 자리라
+# 가로는 1:1, 벽 행 82..441만 늘려 월드 y=100..575에 둔다(원본 바닥선 y=438 → 월드 y=570). 건물 코어는 모든 층에서 같은 자리라
 # 연구개발 업무 공간·개발자 업무 구역은 코어 왼쪽, 연구 회의실은 화장실 오른쪽에 둔다.
 import sys
 
@@ -8,6 +8,7 @@ import numpy as np
 
 sys.path.insert(0, 'assets/background')
 from cutaway_kit import Cutaway  # noqa: E402
+from cutaway_finish import finish_floor  # noqa: E402
 
 HERE = 'assets/background/floor04/'
 kit = Cutaway(HERE + 'floor04-rnd.png', seed=4)
@@ -21,9 +22,6 @@ def tile(a, b, width):
     block = A[:, a:b]
     return np.concatenate([block, block[:, ::-1]] * (width // (2 * (b - a)) + 1), axis=1)[:, :width]
 
-
-# 복도·문은 이 스크립트가 만들지 않는다: 복도는 assets/background/wall 모듈로 합성한 walls.png(walls-layout.json, archi-floor-walls),
-# 문 그림은 assets/objects/floorNN/(archi-floor-doors).
 
 # ---------------------------------------------------------------- 방 내부
 # 연구개발 업무 공간(2676): 원본 48..524(랙·시험 서버 책상) 다음에 책상·선반 칸(166..524)을 네 번(번갈아 뒤집어), 빈 벽·둘째 테이프 선반 222px,
@@ -73,7 +71,10 @@ for x in (540, 1010):                                     # 빈 벽에도 출력
     extra[204:252, x:x + 74] = A[204:252, 2776:2850]
 meeting = np.concatenate([kit.cols((2462, 3044)), extra, kit.cols((3044, 3152))], axis=1)
 
-for name, block in (('lab', lab), ('dev', dev), ('meeting', meeting)):
-    print(name, kit.save(block, HERE + f'floor04-{name}-interior.png'))
+finish_floor(HERE, {
+    'lab': (lab, (66, 82, 84), (40, 62, 62)),
+    'dev': (dev, (94, 100, 100), (60, 74, 72)),
+    'meeting': (meeting, (82, 92, 92), (44, 68, 64)),
+})
 
 print('built 4F assets')

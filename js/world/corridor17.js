@@ -31,7 +31,7 @@ for (const door of doors) {
 }
 
 const extension = document.getElementById('floor17-extension');
-setPowerBackground(extension.querySelector('img'), 'assets/background/floor17/service-corridor.png');
+setPowerBackground(extension.querySelector('img'), 'assets/background/floor17/service-corridor-finished.png');
 for (const entry of FLOOR17.rooms) {
   const door = addRoomDoor({ name: entry.name, type: 'room', hint: `E · ${entry.name} 들어가기`,
     target: entry.target, arrivalKey: 'exit', key: `room:${entry.target}`, locked: entry.locked, message: entry.message,
@@ -71,9 +71,9 @@ doors.push({ name: 'CCTV 아래 게시판', type: 'inspect', x: 1644, y: 284, wi
 const background = document.getElementById('background');
 // 기존 39개 타일과 동일한 아틀라스를 사용해 전원 변경 시 그림을 한 번에 교체한다.
 const corridorBackground = new Image(3328, 768);
-setPowerBackground(corridorBackground, 'assets/background/floor17/floor17.png');
+setPowerBackground(corridorBackground, 'assets/background/floor17/floor17-finished.png');
 corridorBackground.alt = '';
 corridorBackground.draggable = false;
-Object.assign(corridorBackground.style, { left: '0px', top: '0px', width: '3328px', height: '768px' });
+Object.assign(corridorBackground.style, { left: '0px', top: '0px', width: '3328px', height: '760px' });
 background.append(corridorBackground);
-addLuminousSigns(corridorBackground, 'assets/background/floor17/floor17.png');
+addLuminousSigns(corridorBackground, 'assets/background/floor17/floor17-finished.png');

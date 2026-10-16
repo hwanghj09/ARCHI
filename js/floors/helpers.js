@@ -13,7 +13,7 @@ const interiorRooms = (floor, rooms) => rooms.map(entry => ({ ...entry, floor, i
 // 비상 호출 버튼은 닫힌 칸 문의 표시등 패널이다.
 // 그림과 설비의 비율은 유지하고, 복도 입구가 오른쪽에 있는 층은 왼쪽 벽을 더 이어 붙인다.
 const restroomInterior = { name: '화장실', width: 1800, windowless: true, exitX: 185, exitWidth: 145, exitStyle: 'restroom-exit',
-  backgroundImage: { src: 'assets/background/floor17/restroom.png', height: 824.84, top: 0 },
+  backgroundImage: { src: 'assets/background/floor17/restroom-finished.png', height: 760, top: 0 },
   fixtures: [
     { name: '세면대 거울', x: 520, y: 250, width: 260, height: 180, outline: [411, 216, 503, 183],
       message: '거울 아래 세면대에 물방울이 남아 있다. 정전 직전까지 누군가 이곳을 사용한 것 같다.' },

@@ -13,7 +13,7 @@
 // 리허설에서는 완벽한 ARCHI 자동 반주(2층 영사실 녹화와 이어짐). 정전 상태(조명·모니터 꺼짐, 로봇 정비 패널만 도크 배터리)를 기준으로 썼다.
 const FLOOR1_LAYOUT = {
   header: '1F · 로비', background: '#1d1b17', theme: 'atrium',
-  backgroundImage: { src: 'assets/background/floor1/corridor.png', height: 720, top: 0 },
+  backgroundImage: { src: 'assets/background/floor1/corridor-finished.png', height: 760, top: 0 },
   // 엘리베이터 3대: 그림 속 벽감이 BUILDING_CORE 좌표보다 오른쪽으로/좁게 쏠려 있어(실측) 보정.
   elevatorOffsets: [130, 74, 51],
   elevatorWidthDeltas: [-21, -16, -16],
@@ -26,7 +26,7 @@ const FLOOR1_LAYOUT = {
   // doorOutline(방 문)·outline(설비): 판정은 그대로 두고 근접 테두리만 corridor.png 속 문·사물 상자에 맞춘다(실측).
   restroomOverride: { x: 3630, width: 615, doorX: 3733, doorWidth: 158, doorStyle: 'art-door', doorOutline: [3727, 292, 171, 266] },
   rooms: [
-    // 문 좌표는 설계값이 아니라 assets/background/floor1/corridor.png(실제 그림)에서 육안 실측한 값이다.
+    // 문 좌표는 설계값이 아니라 assets/background/floor1/corridor-finished.png(실제 그림)에서 육안 실측한 값이다.
     // GENERATED.md의 "문 좌표 보정" 절 참고.
     { name: 'Harmony Hall', x: 156, width: 452, style: 'hall-portal', target: 'f1-harmony',
       doorX: 223, doorWidth: 225, doorStyle: 'hall-double', doorOutline: [204, 261, 237, 296] },
@@ -113,7 +113,7 @@ const FLOOR1_ROOMS = interiorRooms(1, [
   { id: 'f1-harmony', name: 'Harmony Hall', width: 3224, interiorStyle: 'stalls', exitOutline: [1220, 257, 265, 311],
     // 배경의 기존 문 그림을 문 좌우 공간 비율에 맞춰 함께 옮긴다. 빈 자리에는 같은 홀의 벽을 쓴다.
     exitArt: { x: 1215, crop: [1107, 130, 500, 440], fill: [600, 130] },
-    backgroundImage: { src: 'assets/background/floor1/harmony.png', height: 720, top: 0 },
+    backgroundImage: { src: 'assets/background/floor1/harmony-finished.png', height: 760, top: 0 },
     fixtures: [
       { name: '1층 객석', x: 120, y: 470, width: 650, style: 'stall-rows' },
       { name: '자동 연주 피아노', x: 2300, y: 430, width: 220, style: 'grand-piano',
@@ -135,7 +135,7 @@ const FLOOR1_ROOMS = interiorRooms(1, [
     ] },
   { id: 'f1-vision', name: 'Vision Hall', width: 2356, interiorStyle: 'exhibit', exitOutline: [226, 307, 135, 261],
     exitArt: { x: 205, crop: [45, 264, 368, 306], fill: [1230, 264] },
-    backgroundImage: { src: 'assets/background/floor1/vision.png', height: 720, top: 0 },
+    backgroundImage: { src: 'assets/background/floor1/vision-finished.png', height: 760, top: 0 },
     fixtures: [
       { name: '기술 연혁 벽', x: 1680, y: 130, width: 520, height: 190, style: 'history-wall',
         lines: ['TMAXSOFT 기술 연혁', '1997 · 2003 · 2008 · 2015 · 2021', '올해 · ARCHI 사내 공개'] },
@@ -157,7 +157,7 @@ const FLOOR1_ROOMS = interiorRooms(1, [
     ] },
   { id: 'f1-clinic', name: '건강관리실', width: 1860, windowless: true, interiorStyle: 'ward', exitOutline: [852, 277, 155, 291],
     exitArt: { x: 865, crop: [824, 210, 214, 360], fill: [1230, 210] },
-    backgroundImage: { src: 'assets/background/floor1/clinic.png', height: 720, top: 0 },
+    backgroundImage: { src: 'assets/background/floor1/clinic-finished.png', height: 760, top: 0 },
     fixtures: [
       { name: '여성휴게실', x: 1570, y: 280, width: 145, height: 290, style: 'art-spot',
         message: '건강관리실 안쪽의 여성휴게실 문이다. 잠겨 있고 문틈도 캄캄하다. 수호는 손잡이에서 손을 거두고 돌아선다.' },

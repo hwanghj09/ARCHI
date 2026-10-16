@@ -1,0 +1,28 @@
+{
+  "modules": "../wall",
+  "width": 5000,
+  "fill": "wall-concrete",
+  "segments": [
+    {
+      "x": 64,
+      "width": 1060,
+      "wall": "wall-glass-mixed",
+      "behind": "behind-kitchen-off.png",
+      "behind_floor_y": 570
+    },
+    {
+      "x": 1124,
+      "width": 600,
+      "wall": "wall-glass-mixed",
+      "behind": "behind-store-off.png",
+      "behind_floor_y": 570
+    },
+    {
+      "x": 4322,
+      "width": 560,
+      "wall": "wall-glass-mixed",
+      "behind": "behind-cafe-off.png",
+      "behind_floor_y": 570
+    }
+  ]
+}

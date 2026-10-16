@@ -46,7 +46,7 @@ function buildDynamicScene(config) {
     if (!config.exitArt) addLuminousSigns(image, art.src);
   }
   for (let x = 0; x < (config.leftWallExtension || 0); x += 185) {
-    addBackgroundCrop(config, [x, 0, Math.min(185, config.leftWallExtension - x), worldHeight], [0, 0]);
+    addBackgroundCrop(config, [x, 0, Math.min(185, config.leftWallExtension - x), Math.max(worldHeight, config.backgroundImage.height)], [0, 0]);
   }
   for (const patch of config.artPatches || []) addBackgroundCrop(config, patch.box, patch.from);
   if (config.id === 'rooftop') dynamicScene.append(rooftopBackground);

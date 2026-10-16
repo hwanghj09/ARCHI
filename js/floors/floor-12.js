@@ -4,9 +4,10 @@
 // 계단과 화장실 사이 모델 평가실(창 없는 보안문 방), 오른쪽 팀장실(블라인드). 팀장실은 잠겨 있고
 // 개발실 책상 서랍의 보조키(gives)를 얻으면 열린다(unlockedBy). 전면 구획은 복도 그림의 유리벽·기둥을 따른다.
 // 단서는 낮 3~5%·밤 80~90% 성능 기록과 7층 원본 로그 백업 메모. 정전 상태(PC 꺼짐)를 기준으로 썼다.
+// build.py가 원본 벽·문 좌표를 유지하고 천장·바닥과 공용 복도 벽을 마감한 높이 760의 배경을 만든다.
 const FLOOR12_LAYOUT = {
   header: '12F · 기술본부 ARCHI 개발팀', background: '#15171b', theme: 'lab',
-  backgroundImage: { src: 'assets/background/floor12/corridor.png', height: 720, top: 0 },
+  backgroundImage: { src: 'assets/background/floor12/corridor-finished.png', height: 760, top: 0 },
   // 왼쪽 엘리베이터(1번) +35px(오른쪽), 가운데(2번) -55px(왼쪽), 오른쪽(3번) -120px(왼쪽) 보정. 다른 층 엘리베이터 좌표에는 영향 없음.
   elevatorOffsets: [35, -55, -120],
   // 세 엘리베이터 폭 전부 20px 축소(문 너비만, 위치는 elevatorOffsets 그대로).
@@ -40,7 +41,7 @@ const FLOOR12_ROOMS = interiorRooms(12, [
     exitArt: { x: 1550, crop: [1490, 210, 257, 360], fill: [200, 210] },
     // 이동한 문 뒤의 대형 화면을 벽 조각으로 비워 잘린 화면이 남지 않게 한다.
     artPatches: [1870, 2000, 2130].map(x => ({ box: [x, 210, 130, 360], from: [1770, 210] })),
-    backgroundImage: { src: 'assets/background/floor12/office.png', height: 720, top: 0 }, props: [
+    backgroundImage: { src: 'assets/background/floor12/office-finished.png', height: 760, top: 0 }, props: [
     { file: 'large-planter', size: [256, 512], worldWidth: 78, x: 100 },
     { file: 'filing-cabinet', size: [256, 512], worldWidth: 72, x: 220 },
     { file: 'filing-cabinet', size: [256, 512], worldWidth: 72, x: 300 },
@@ -65,7 +66,7 @@ const FLOOR12_ROOMS = interiorRooms(12, [
   ] },
   { id: 'f12-eval', name: '모델 평가실', width: 1804, windowless: true, exitOutline: [335, 312, 174, 256],
     exitArt: { x: 344, crop: [327, 210, 226, 360], fill: [1120, 210] },
-    backgroundImage: { src: 'assets/background/floor12/eval.png', height: 720, top: 0 }, props: [
+    backgroundImage: { src: 'assets/background/floor12/eval-finished.png', height: 760, top: 0 }, props: [
     { file: 'server-rack', size: [256, 512], worldWidth: 96, x: 100 },
     { file: 'network-rack', size: [256, 512], worldWidth: 96, x: 200, name: '네트워크 랙',
       message: '정전인데 스위치 한 대의 포트 표시등만 깜빡인다. 케이블 라벨: "B2 직결 · UPS".',
@@ -83,7 +84,7 @@ const FLOOR12_ROOMS = interiorRooms(12, [
   ] },
   { id: 'f12-lead', name: '팀장실', width: 2132, exitOutline: [1815, 290, 180, 278],
     exitArt: { x: 1863, crop: [1800, 200, 210, 370], fill: [30, 200] },
-    backgroundImage: { src: 'assets/background/floor12/lead.png', height: 720, top: 0 }, props: [
+    backgroundImage: { src: 'assets/background/floor12/lead-finished.png', height: 760, top: 0 }, props: [
     { file: 'large-planter', size: [256, 512], worldWidth: 78, x: 100 },
     { file: 'glass-display-cabinet', size: [256, 512], worldWidth: 111, x: 280, name: '진열장',
       message: '상패 하나가 놓여 있다: "사내 AI 경진대회 · ARCHI · 참가상". 옆 사진 속 팀원들이 어색하게 웃고 있다.',

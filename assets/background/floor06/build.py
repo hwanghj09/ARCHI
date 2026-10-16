@@ -1,12 +1,13 @@
-# 6층 배경: 사용자가 준 단면 에셋 floor06-tech-division.png(3200×556, PROMPT.md)로 복도 1장, 방 내부 3장, 문 스프라이트 3장을
-# 만든다. 실행: python assets/background/floor06/build.py (저장소 루트에서, Pillow·numpy).
-# 에셋은 플레이어 162px = 175cm 기준이라 1:1로 쓴다(원본 바닥선 y=438 → 월드 y=570, top=132). 건물 코어는 모든 층에서 같은
+# 6층 배경: 단면 에셋 floor06-tech-division.png로 방 내부·천장·바닥과 공용 벽 모듈의 복도를 만든다. 문은 assets/objects/floor06/를 쓴다.
+# 실행: python assets/background/floor06/build.py (저장소 루트에서, Pillow·numpy).
+# 가로는 1:1, 벽 행 82..441만 늘려 월드 y=100..575에 둔다(원본 바닥선 y=438 → 월드 y=570). 건물 코어는 모든 층에서 같은
 # 자리라 기술 개발 업무 공간·공용 엔지니어링 구역은 코어 왼쪽, 기술 회의실은 화장실 오른쪽에 둔다. 방 안 폭은 복도 전면 폭의
 # 약 2.68배(1000/690/680 → 2676/1846/1840).
 import sys
 sys.path.insert(0, 'assets/background')
 import numpy as np
 from cutaway_kit import Cutaway
+from cutaway_finish import finish_floor
 
 HERE = 'assets/background/floor06/'
 kit = Cutaway(HERE + 'floor06-tech-division.png', seed=6)
@@ -53,9 +54,6 @@ def flip(block, mirrored):
     return block[:, ::-1] if mirrored else block
 
 
-# 복도·문은 이 스크립트가 만들지 않는다: 복도는 assets/background/wall 모듈로 합성한 walls.png(walls-layout.json, archi-floor-walls),
-# 문 그림은 assets/objects/floorNN/(archi-floor-doors).
-
 # ---------------------------------------------------------------- 방 내부
 # 기술 개발 업무 공간(2676): 원본 48..936, 깨끗한 책상 칸 세 번(뒤집기·그대로·뒤집기, 칸막이 틈 가운데끼리 맞닿는다), 칸막이 틈 74px, 원본 936..1378(기둥까지)
 gap = np.repeat(desk_bay[:, 2:10], 10, axis=1)[:, :74]          # 칸막이 틈(칸 첫 열들)을 편 것
@@ -69,7 +67,10 @@ engineering = np.concatenate([kit.cols((1340, 1606)), kit.strip(1604, 1612, 150)
 # 빈 벽 352(출구 문 자리), 원본 3030..3152(캐비닛·끝벽)
 meeting = np.concatenate([kit.cols((2336, 3030)), flip(table_bay, True), table_disp, flip(table_bay, True), no_troffer(table_bay, 96, 168),
                           meeting_wall(352), no_troffer(kit.cols((3030, 3152)), 0, 42)], axis=1)
-for name, block in (('work', work), ('engineering', engineering), ('meeting', meeting)):
-    print(name, kit.save(block, HERE + f'floor06-{name}-interior.png'))
+finish_floor(HERE, {
+    'work': (work, (70, 74, 60), (86, 80, 42)),
+    'engineering': (engineering, (88, 92, 78), (64, 70, 48)),
+    'meeting': (meeting, (74, 78, 64), (80, 76, 42)),
+})
 
 print('built 6F assets')

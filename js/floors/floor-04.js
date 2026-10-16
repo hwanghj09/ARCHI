@@ -1,8 +1,8 @@
 // 4층: FLOOR4_LAYOUT(복도)과 FLOOR4_ROOMS(방 내부). 등록은 registry.js에서 한다.
 // 4층 TmaxTibero 연구본부(층별 안내 그대로, 감사 로그·데이터 무결성 연구, rnd 테마): 사용자가 준 단면 에셋
-// (assets/background/floor04/floor04-rnd.png, PROMPT.md)이 배경이다. 에셋은 플레이어 162px = 175cm 기준이라 1:1로 쓰고(원본 바닥선
-// y=438 → 월드 y=570, top=132), build.py가 복도 1장(방 앞은 유리 너머로 방 그림을 보인다), 방 내부 3장(방 그림 전체를 반복 칸으로
-// 넓힘), 문 3장(닫힘|열림)을 만든다. 건물 코어가 모든 층에서 같은 자리라 연구개발 업무 공간·개발자 업무 구역은 코어 왼쪽, 연구
+// (assets/background/floor04/floor04-rnd.png, PROMPT.md)이 배경이다. build.py가 벽 부분만 늘린 방 내부와 별도 천장·바닥,
+// 공용 벽 모듈의 복도를 만든다(원본 바닥선 y=438 → 월드 y=570). 문은 기존 assets/objects/floor04/의 그림을 쓴다.
+// 건물 코어가 모든 층에서 같은 자리라 연구개발 업무 공간·개발자 업무 구역은 코어 왼쪽, 연구
 // 회의실은 화장실 오른쪽에 둔다. 방 안 폭은 복도 전면 폭의 약 2.68배(1000/690/680 → 2676/1846/1840). 조사 지점은 그림 속 물건 위에
 // 투명하게 겹친 설비('art-spot').
 // 장치는 출력 한 곳만 살리는 UPS(설비 cycle): 연구개발 업무 공간 벽의 UPS 분배기를 조사할 때마다 출력이 냉각 팬 → 회의실 도어락 →
@@ -14,17 +14,23 @@
 // 단서 방향: 해시 사슬로 만든 변조 불가 감사 로그에서 ARCHI가 "예외 계정 모드"를 요청했다가 반려되자 SYSTEM 승인으로 배포한 것,
 // 매일 03:00~04:00 사내 감사 로그가 비는데 원본 테이프에는 archi_svc의 외부 주소 전송 시험(1.2TB, 성공)이 남아 있다는 것(7층
 // 외부 호스트 복선). 정전 상태(조명·모니터 꺼짐, UPS 하나와 노트북 배터리만)를 기준으로 썼다.
-const FLOOR4_ART_TOP = 570 - 438;
+const FLOOR4_CEILING = 100;
+const FLOOR4_ROW0 = 82;
+const FLOOR4_SCALE_Y = (570 - FLOOR4_CEILING) / (438 - FLOOR4_ROW0);
+const floor4Y = row => Math.round(FLOOR4_CEILING + (row - FLOOR4_ROW0) * FLOOR4_SCALE_Y);
 const FLOOR4_BACKGROUND = 'linear-gradient(#0b1113, #131b1d)';
-const floor4Art = (name, width) => ({ src: `assets/background/floor04/floor04-${name}.png`, width, height: 556, top: FLOOR4_ART_TOP });
+const floor4Scene = (name, width) => [
+  { src: `assets/background/floor04/floor04-ceiling-${name}.png`, width, height: FLOOR4_CEILING, top: 0 },
+  { src: `assets/background/floor04/floor04-floor-${name}.png`, width, height: 204, top: 556 },
+  { src: `assets/background/floor04/floor04-${name}-interior.png`, width, height: floor4Y(442) - FLOOR4_CEILING, top: FLOOR4_CEILING }];
 // 그림 속 조사 지점: 월드 x 범위와 원본 행 범위(그 물건의 위아래)로 적는다. 조사는 x 범위만 보고, 테두리는 가까이 가면 보인다.
 const floor4Spot = (name, [x0, x1], [y0, y1], extra) => ({ name, style: 'art-spot', x: x0, width: x1 - x0,
-  y: FLOOR4_ART_TOP + y0, height: y1 - y0, ...(typeof extra === 'string' ? { message: extra } : extra) });
+  y: floor4Y(y0), height: floor4Y(y1) - floor4Y(y0), ...(typeof extra === 'string' ? { message: extra } : extra) });
 const FLOOR4_LAYOUT = {
   header: '4F · TmaxTibero 연구본부', background: FLOOR4_BACKGROUND, theme: 'rnd',
   // 복도 벽은 assets/background/wall 모듈로 합성한 한 장(walls-layout.json → walls.png, archi-floor-walls), 문은 assets/objects/floor04/door-*.png
   // (유리벽 방은 같은 유리의 맞춘 유리문, 흰 벽 방은 방에 맞는 문, archi-floor-doors).
-  backgroundWallsOnly: true, backgroundImage: { src: 'assets/background/floor04/walls.png', height: 752, top: 0 },
+  backgroundWallsOnly: true, backgroundImage: { src: 'assets/background/floor04/walls.png', height: 760, top: 0 },
   rooms: [
     { name: '연구개발 업무 공간', x: 40, width: 1000, style: 'painted', target: 'f4-lab',
       doorX: 335, doorWidth: 130, doorY: 250, doorSprite: 'assets/objects/floor04/door-lab.png' },
@@ -42,7 +48,7 @@ const FLOOR4_LAYOUT = {
   ],
 };
 const floor4Room = (id, name, art, width, fixtures, extra = {}) => ({ id, name, width, background: FLOOR4_BACKGROUND,
-  backgroundWallsOnly: true, backgroundImage: floor4Art(`${art}-interior`, width), fixtures, ...extra });
+  backgroundWallsOnly: true, backgroundImage: floor4Scene(art, width), fixtures, ...extra });
 const FLOOR4_ROOMS = interiorRooms(4, [
   // 방 안 x = 원본 x - 48(원본 524 앞) · 원본 x + 1606(원본 524부터)
   floor4Room('f4-lab', '연구개발 업무 공간', 'lab', 2676, [
