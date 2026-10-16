@@ -2418,6 +2418,8 @@ try {
   let emptyRestroomVisited = false;
   for (let floor = 15; floor >= 1; floor--) {
     console.log(`Checking ${floor}F route and puzzles...`);
+    // 7층 로그를 읽으면 버튼이 뒤집힌다(퍼즐 F, tests/puzzles.mjs). 이 경로 검사는 누른 층으로 가야 하므로 뒤집기를 끈다.
+    await page.evaluate(() => collectedItems.add('elevator-unscrambled'));
     await page.locator(`#cabin-floor-buttons [data-floor="${floor}"]`).click();
     assert.equal(await page.locator(`#cabin-floor-buttons [data-floor="${floor}"]`).getAttribute('aria-pressed'), 'true');
     if (floor !== 15) await page.locator('#cabin-close').click();

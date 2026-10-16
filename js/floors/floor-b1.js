@@ -112,7 +112,7 @@ const B1_ROOMS = interiorRooms(-1, [
       { file: 'office-desk', size: [512, 256], worldWidth: 252, x: 1327 },
       { file: 'elevator-control-panel', size: [256, 512], worldWidth: 89, x: 1700, name: '승강기 제어반', gives: 'b1-elevator',
         control: { kind: 'key', label: '꽂혀 있는 관리 키를 "해제"로 돌리자.', ends: ['제한', '해제'] },
-        message: '승강기 제어반: "B2 운행 제한 · 설정 SYSTEM 23:59". 수동 해제는 열쇠 스위치라 SYSTEM이 건드리지 못했다. 관리 키가 "해제"에 걸리자 B2 표시등이 초록으로 바뀐다.',
+        message: '승강기 제어반: "B2 운행 제한 · 설정 SYSTEM 23:59". 수동 해제는 열쇠 스위치라 SYSTEM이 건드리지 못했다. 관리 키가 "해제"에 걸리자 B2 표시등이 초록으로 바뀐다. 엘리베이터 패널의 "재배열" 표시도 꺼지고 수동 운행으로 돌아간다.',
         surface: 'screen', look: 'lcd',
         writing: [{ as: 'title', text: 'B2 운행 제한' }, { as: 'field', label: '설정', text: 'SYSTEM 23:59' }],
         caption: '수동 해제는 열쇠 스위치라 SYSTEM이 건드리지 못했다. 관리 키가 "해제"에 걸리자 B2 표시등이 초록으로 바뀐다.',

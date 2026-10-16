@@ -106,6 +106,22 @@ try {
   assert(await page.locator('#keypad').isVisible(), 'After the last claim the admin key pad opens');
   await page.keyboard.press('Escape');
 
+  // F. 7층 로그 뒤 엘리베이터 버튼 뒤집기: 누른 버튼의 반대편 칸 층으로 간다(16 → B1, 8은 그대로). B1 열쇠 스위치로 풀린다.
+  const press = floor => page.evaluate(floor => {
+    cabinCarIndex = 0; selectedFloor = null; Object.assign(elevatorCars[0], { floor: 7, travelling: false });
+    document.querySelector(`#cabin-floor-buttons [data-floor="${floor}"]`).click();
+    return { selected: selectedFloor, status: cabinStatus.textContent };
+  }, floor);
+  await page.evaluate(() => { solarEnabled = true; updatePowerState(); collectedItems.delete('b1-elevator'); collectedItems.add('goal-f7-log'); });
+  const flipped = await press(16);
+  assert.equal(flipped.selected, -1, 'Pressing 16 goes to B1 while the panel is flipped');
+  assert.match(flipped.status, /패널 재배열/);
+  assert.equal((await press(8)).selected, 8, 'The middle button stays');
+  assert.equal((await press(17)).selected, null, 'The flipped 17 leads to the restricted B2');
+  await page.evaluate(() => collectedItems.add('b1-elevator'));
+  assert.equal((await press(16)).selected, 16, 'The B1 key switch restores the panel');
+  await page.evaluate(() => { selectedFloor = null; cabinCarIndex = null; });
+
   assert.deepEqual(errors, []);
   console.log('Puzzle tests passed.');
 } finally {
