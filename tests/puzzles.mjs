@@ -281,6 +281,31 @@ try {
   assert.match(await text('#inspection-description'), /업로드 대기 412GB/);
   await page.evaluate(() => closeInspection());
 
+  // E. 3층 순찰 로봇 R-05: 서쪽 방 앞을 지킨다. 청소 카트 경보(10초 뒤)로 카트 앞까지 불러낸 뒤 그쪽을 보는 동안 지나간다.
+  await page.evaluate(() => { performFloorChange('f3', 0, null); });
+  const r05 = () => page.evaluate(() => { const robot = floorRobots.f3; return { x: Math.round(robot.x), mode: robot.mode, mounted: Boolean(robot.door) }; });
+  const posted = await r05();
+  assert.deepEqual([posted.mode, posted.mounted, posted.x >= 300 && posted.x <= 1400], ['patrol', true, true], 'R-05 patrols in front of the west rooms');
+  await inspectProp('f3', '청소 카트');
+  assert(await page.locator('#manual-control').isVisible(), 'The cleaning cart has an alarm button');
+  await page.keyboard.press('Enter');
+  await page.waitForFunction(() => !usingControl && floorRobotLure);
+  // 경보를 기다리는 동안 고객만족센터에 숨는다. 다른 장면에서 울리면 로봇은 바로 카트 앞에 가 있다.
+  await page.evaluate(() => { performFloorChange('f3-cs', null, 'exit'); floorRobotLure.left = 50; });
+  await page.waitForFunction(() => !floorRobotLure && floorRobots.f3.mode === 'lure');
+  assert.equal((await r05()).x, 3330, 'The alarm draws R-05 to the cart');
+  await page.evaluate(() => { performFloorChange('f3', null, 'room:f3-cs'); });
+  assert.equal(await page.evaluate(() => floorRobots.f3.facing), 1, 'R-05 watches the cart, its back to the west rooms');
+  await standAt(875);
+  await page.waitForTimeout(400);
+  assert.equal(await page.evaluate(() => playerCaught || floorRobots.f3.mode), 'lure', 'Behind its back the player reaches the Fitness Club door');
+  // 로봇 앞으로 다가가면 들켜 붙잡히고 엘리베이터 앞으로 끌려 나온다.
+  await page.evaluate(() => { floorRobots.f3.lure.left = 60000; Body.setPosition(body, { x: 3420, y: floorY - 81 }); grounded = true; });
+  await page.waitForFunction(() => playerCaught, null, { timeout: 8000 });
+  await page.waitForFunction(() => !playerCaught && floorRobots.f3.mode === 'patrol', null, { timeout: 8000 });
+  assert.equal(await page.evaluate(() => floorRobots.f3.x >= 300 && floorRobots.f3.x <= 1400 && dynamicFloorId === 'f3'), true,
+    'After the catch R-05 goes back to its post and the player is put by the elevator');
+
   assert.deepEqual(errors, []);
   console.log('Puzzle tests passed.');
 } finally {
