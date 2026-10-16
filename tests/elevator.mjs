@@ -580,10 +580,14 @@ try {
     await page.screenshot({ path: '.local/floor-15-lab.png' });
     await leaveRoom(lab, corridorHeader);
 
+    // 연구본부장실은 전기 잠금 + 복도 카메라(퍼즐 D, tests/puzzles.mjs). 이 경로 검사는 15층에 잠깐 전력을 넣고 카메라를 빼고 들어간다.
+    const savedPower = await page.evaluate(() => { const saved = [...solarPoweredFloors]; solarEnabled = true; solarPoweredFloors = [15];
+      updatePowerState(); activeCameras = []; return saved; });
     const office = await enterRoom('연구본부장실', '15F');
+    await page.evaluate(saved => { solarPoweredFloors = saved; updatePowerState(); }, savedPower);
     assert.equal(await worldWidth(page), 1824);
     await checkCutawayArt('floor15-director-interior.png', 1824);
-    assert.equal(await page.locator('#dynamic-scene .floor-prop').count(), 6);
+    assert.equal(await page.locator('#dynamic-scene .floor-prop').count(), 7, 'Director room props include the held-back file cabinet');
     await assertHumanScale();
     await inspect(900, 'E · 본부장 책상 조사', /자동 승인 · 야간 배치/);
     await page.screenshot({ path: '.local/floor-15-director.png' });

@@ -93,12 +93,15 @@ try {
   await page.keyboard.press('e');
   await page.clock.runFor(800);
   assert.equal(await page.locator('#world').getAttribute('data-room'), 'corridor');
-  assert.match(await interactionMessage(page), /관리자실 문이 잠겨/);
+  // 관리자실 문은 도어락이다(퍼즐 J, tests/puzzles.mjs). 플래시 없이 열면 번호판이 안 보인다는 키패드가 뜬다.
+  assert.match(await page.locator('#keypad-text').textContent(), /관리자실 도어락.*하나도 안 보인다/);
+  await page.keyboard.press('Escape');
   await page.setViewportSize({ width: 390, height: 844 });
   await page.clock.runFor(100);
   await page.locator('#interact').click();
   assert.equal(await page.locator('#room-transition').getAttribute('data-phase'), 'idle', 'Touch cannot bypass lock');
   await page.screenshot({ path: '.local/floor17-manager-locked-mobile.png' });
+  await page.evaluate(() => closeKeypad()); // 터치로 연 도어락 키패드를 닫는다
   await page.setViewportSize({ width: 1280, height: 720 });
   await walkTo(4990);
   assert(Math.abs(await position() - 4948) < 1, 'Extended corridor ends at the new wall');
