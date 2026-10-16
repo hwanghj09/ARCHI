@@ -404,6 +404,23 @@ function updateB2Lobby(delta) {
   showStatus('ARCHI — OFFLINE. R-01이 그 자리에 멈췄다. 정문으로 나가자.', 5000);
 }
 
+// 퍼즐 K: 1층 로비 분전반(floor-01.js). ARCHI가 라벨을 바꿔 붙여, "조명" 라벨이 붙은 맨 왼쪽 칸이 진짜 1F 주 전원이다.
+// 맞는 칸을 내리면 휴대폰 앱이 막혀 있어도 1층 전력이 끊긴다(다음 updateB2Lobby가 OFFLINE 처리). 틀린 칸은 겁만 준다.
+function pullLobbyBreaker(choice) {
+  if (b2Ending.phase !== 'running' || b2Ending.stage !== 'lobby' || b2Ending.offline) return;
+  if (choice === 0) {
+    solarPoweredFloors = solarPoweredFloors.filter(floor => floor !== 1);
+    updatePowerState();
+    showStatus('철컥. 분전반의 "조명" 칸을 내리자 로비 전체가 꺼진다. 라벨이 거짓말이었다.', 4000);
+    return;
+  }
+  playGameSound('deny');
+  sanity = Math.max(0, sanity - 10);
+  refreshSanity();
+  showStatus(choice === 1 ? '엘리베이터 쪽 표시등만 꺼졌다. R-01은 그대로 다가온다. 정신력 -10%' :
+    '"1F 주 전원" 라벨 칸을 내렸는데 천장 조명만 깜빡였다. 라벨이 바뀌어 있다! 정신력 -10%', 4000);
+}
+
 // 휴대폰 '비상 전력 제어' 앱을 열 때(phone.js) 1층 장면이면 ARCHI가 잠시 막는다.
 function jamB2SolarApp() {
   if (b2Ending.phase !== 'running' || b2Ending.stage !== 'lobby' || b2Ending.offline) return;

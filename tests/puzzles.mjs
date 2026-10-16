@@ -50,7 +50,8 @@ try {
   // I. 14층 관찰 콘솔: 정신력 30% 미만일 때만 여백의 붉은 글씨가 보이고 단서로 남는다.
   const inspectProp = (scene, name) => page.evaluate(([scene, name]) => {
     closeInspection();
-    if (dynamicFloorId !== scene) performFloorChange(scene, null, 'exit');
+    const inside = floorById.get(scene).interior;
+    if (dynamicFloorId !== scene) performFloorChange(scene, inside ? null : 0, inside ? 'exit' : null);
     const door = currentDoors.find(entry => entry.name === name);
     Body.setPosition(body, { x: door.x + door.width / 2, y: (door.standY ?? floorY) - 81 }); Body.setVelocity(body, { x: 0, y: 0 });
     grounded = true; interact();
@@ -121,6 +122,26 @@ try {
   await page.evaluate(() => collectedItems.add('b1-elevator'));
   assert.equal((await press(16)).selected, 16, 'The B1 key switch restores the panel');
   await page.evaluate(() => { selectedFloor = null; cabinCarIndex = null; });
+
+  // K. 엔딩 1층 로비 분전반: ARCHI가 라벨을 바꿔 붙였다. "1F 주 전원" 라벨은 조명이고, 매직 글씨대로 맨 왼쪽을 내려야 1층 전력이 끊긴다.
+  assert.match(await inspectProp('f1', '로비 분전반'), /왼쪽 = 1F 주 전원/, 'Outside the ending the panel is only inspected');
+  await page.evaluate(() => {
+    closeInspection();
+    Object.assign(b2Ending, { phase: 'running', stage: 'lobby', offline: false });
+    buildingBlackout = true; solarEnabled = true; solarPoweredFloors = [1]; updatePowerState(); sanity = 60;
+  });
+  await inspectProp('f1', '로비 분전반');
+  assert(await page.locator('#manual-control').isVisible(), 'During the ending the panel opens as a selector');
+  await page.keyboard.press('ArrowRight');
+  await page.keyboard.press('Enter');
+  await page.waitForFunction(() => !usingControl);
+  assert.deepEqual(await page.evaluate(() => [floorHasPower(1), sanity]), [true, 50], 'The "1F 주 전원" label is a lie');
+  await inspectProp('f1', '로비 분전반');
+  await page.keyboard.press('ArrowLeft');
+  await page.keyboard.press('Enter');
+  await page.waitForFunction(() => !usingControl);
+  assert.equal(await page.evaluate(() => floorHasPower(1)), false, 'The leftmost breaker is the real 1F main power');
+  await page.evaluate(() => Object.assign(b2Ending, { phase: 'idle', stage: 'b2', offline: false }));
 
   assert.deepEqual(errors, []);
   console.log('Puzzle tests passed.');

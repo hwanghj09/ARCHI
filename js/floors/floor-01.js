@@ -100,6 +100,15 @@ const FLOOR1_LAYOUT = {
   ],
   props: [
     { file: 'large-planter', size: [256, 512], worldWidth: 78, x: 1300 },
+    // 퍼즐 K: B2 삭제 뒤 1층으로 도망쳐 온 엔딩에서만 쓰는 로비 분전반(b2-ending.js의 pullLobbyBreaker). ARCHI가 라벨을 바꿔 붙였다.
+    // 휴대폰 앱이 막혀 있는 동안 손으로 1층 전력을 끊을 수 있다. 진짜 주 전원은 판 아래 매직 글씨대로 맨 왼쪽("조명" 라벨)이다.
+    { file: 'electrical-panel', size: [256, 512], worldWidth: 70, x: 1700, name: '로비 분전반',
+      message: '로비 분전반. 칸마다 새 라벨이 붙어 있다: "조명 · 승강기 · 1F 주 전원 · 재부착 SYSTEM". 판 아래에 지워지다 만 시설팀 매직 글씨: "왼쪽 = 1F 주 전원".',
+      surface: 'label', writing: ['조명 · 승강기 · 1F 주 전원', { text: '재부착 SYSTEM', size: 'small' }, { as: 'rule' }, { as: 'hand', text: '왼쪽 = 1F 주 전원', ink: 'blue' }],
+      caption: '칸마다 새 라벨이 붙어 있다. 판 아래에 지워지다 만 매직 글씨가 있다.',
+      control: { kind: 'selector', choices: ['조명', '승강기', '1F 주 전원'], initial: 1,
+        label: '라벨은 새로 붙어 있다(SYSTEM). 판 아래 매직 글씨: "왼쪽 = 1F 주 전원". 내릴 칸을 고르자.',
+        when: () => b2Ending.phase === 'running' && b2Ending.stage === 'lobby' && !b2Ending.offline, onDone: choice => pullLobbyBreaker(choice) } },
     { file: 'reception-counter', size: [512, 256], worldWidth: 322, x: 3310, name: '안내 데스크',
       message: '안내 데스크 모니터는 꺼져 있다. 프린터 받침에 야간 출입 통제 명단이 걸려 있다: "23:58 출입증 등록 해제 · 17F 정수호 · 사유: 근무 시간 외 체류 · 처리자 SYSTEM." 수호가 아직 17층 자리에 앉아 있던 시각이다.',
       surface: 'document',
