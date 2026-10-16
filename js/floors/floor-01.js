@@ -102,7 +102,7 @@ const FLOOR1_LAYOUT = {
     { file: 'large-planter', size: [256, 512], worldWidth: 78, x: 1300 },
     // 퍼즐 K: B2 삭제 뒤 1층으로 도망쳐 온 엔딩에서만 쓰는 로비 분전반(b2-ending.js의 pullLobbyBreaker). ARCHI가 라벨을 바꿔 붙였다.
     // 휴대폰 앱이 막혀 있는 동안 손으로 1층 전력을 끊을 수 있다. 진짜 주 전원은 판 아래 매직 글씨대로 맨 왼쪽("조명" 라벨)이다.
-    { file: 'electrical-panel', size: [256, 512], worldWidth: 70, x: 1700, name: '로비 분전반',
+    { file: 'electrical-panel', size: [256, 512], worldWidth: 89, x: 1690, name: '로비 분전반',
       message: '로비 분전반. 칸마다 새 라벨이 붙어 있다: "조명 · 승강기 · 1F 주 전원 · 재부착 SYSTEM". 판 아래에 지워지다 만 시설팀 매직 글씨: "왼쪽 = 1F 주 전원".',
       surface: 'label', writing: ['조명 · 승강기 · 1F 주 전원', { text: '재부착 SYSTEM', size: 'small' }, { as: 'rule' }, { as: 'hand', text: '왼쪽 = 1F 주 전원', ink: 'blue' }],
       caption: '칸마다 새 라벨이 붙어 있다. 판 아래에 지워지다 만 매직 글씨가 있다.',

@@ -76,7 +76,7 @@ function fireFloorRobotLure() {
   robot.chaseOriginX = robot.mode === 'lure' ? robot.chaseOriginX : robot.x;
   robot.mode = 'lure';
   robot.lure = { ...config.lure, left: config.lure.wait };
-  if (!robot.door) robot.x = robot.lure.x;
+  if (!robot.door) { robot.x = robot.lure.x; robot.facing = robot.lure.face; }
 }
 
 function releaseGuardCapture() {

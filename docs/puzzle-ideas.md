@@ -25,6 +25,14 @@
 | 16층 키오스크 | 카페 음성 주문 키오스크(전력 있을 때) | 없음. |
 | 11층 비밀번호 | 마케팅 자료실 복합기 + 자료실 책상 → demo7030 | 없음. |
 
+### 테스트 결과 (2026-10-17)
+
+전체 `node scripts/test.mjs`: 64개 중 53개 통과로 시작해, 이 브랜치 때문에 깨진 것(floor17-extension, elevator의 15·5·1층 검사)은 고쳤다.
+`tests/puzzles.mjs`는 새 퍼즐을 모두 확인한다. elevator.mjs는 12층과 2층 검사를 빼고 17층부터 1층까지 통과한다.
+남은 실패는 main에서도 같은 이유로 실패하는 것들이다: interaction-outline(prop-outlines 갱신 필요), floor15-art(가구 바닥선),
+guard-capture, cabin-blackout, computer, device-app-art, device-apps, scene-assets, usb-connection, elevator의 12층(평가실 소품 수·
+단말 책상 크기)과 2층(라운지 천장 그림).
+
 ## 1. 지금 있는 퍼즐
 
 | 층 | 퍼즐 | 방식 | 필수 진행 여부 |

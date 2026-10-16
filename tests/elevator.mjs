@@ -1778,7 +1778,7 @@ try {
       return { box: ['left', 'top', 'width', 'height'].map(key => parseFloat(board.style[key])),
         fits: inside && board.scrollHeight <= board.clientHeight && board.scrollWidth <= board.clientWidth };
     }), { box: [1323, 229, 321, 276], fits: true }, 'The directory text sits inside the painted gold frame');
-    assert.equal(await page.locator('#dynamic-scene .floor-prop').count(), 3, 'Info desk and planters');
+    assert.equal(await page.locator('#dynamic-scene .floor-prop').count(), 4, 'Info desk, planters and the lobby breaker panel (puzzle K)');
     await page.locator('#dynamic-scene .floor-prop img').evaluateAll(images => Promise.all(images.map(img => img.decode())));
     await assertHumanScale();
     await page.clock.runFor(100);
