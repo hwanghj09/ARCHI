@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import { mkdir, readFile, stat } from 'node:fs/promises';
 import { chromium } from 'playwright';
+import { autoControl } from './auto-control.mjs';
 
 const [html, css, writing, inspection, interaction, builder] = await Promise.all([
   readFile('index.html', 'utf8'),
@@ -41,6 +42,7 @@ function sheetText(item) {
 const browser = await chromium.launch();
 try {
   const page = await browser.newPage({ viewport: { width: 1280, height: 720 }, reducedMotion: 'reduce' });
+  await autoControl(page);
   const errors = [];
   page.on('pageerror', error => errors.push(error.message));
   await page.goto(new URL('../index.html', import.meta.url).href);
@@ -96,14 +98,14 @@ try {
         const panel = document.getElementById('inspection').getBoundingClientRect();
         const controls = document.querySelector('nav').getBoundingClientRect();
         const sheet = document.getElementById('inspection-sheet');
-        const pages = document.querySelector('.writing-pages');
+        const pages = sheet.querySelector('.writing-pages');
         const spread = pages && getComputedStyle(pages).position === 'absolute' && getComputedStyle(pages).columnCount === '2';
-        const board = document.querySelector('.writing-board')?.getBoundingClientRect();
+        const board = sheet.querySelector('.writing-board')?.getBoundingClientRect();
         return {
           fits: panel.top >= 0 && panel.left >= 0 && panel.right <= innerWidth && panel.bottom <= controls.top + 0.5,
           scrolls: sheet.scrollHeight > sheet.clientHeight + 1,
           overflow: Boolean(spread && (pages.scrollWidth > pages.clientWidth + 1 || pages.scrollHeight > pages.clientHeight + 1)),
-          outside: board ? [...document.querySelectorAll('.writing-item')].filter(node => {
+          outside: board ? [...sheet.querySelectorAll('.writing-item')].filter(node => {
             const box = node.getBoundingClientRect();
             return box.left < board.left - 2 || box.right > board.right + 2;
           }).length : 0,
@@ -311,8 +313,11 @@ try {
     board.image = 'assets/ui/notebook/notebook-open-blank.png';
   });
   await inspectAt('f12-dev', '화이트보드');
-  assert.equal(await page.locator('.writing-art').getAttribute('src'), 'assets/ui/notebook/notebook-open-blank.png');
-  assert.equal(await page.locator('.writing-board').count(), 0, 'Finished artwork takes precedence over text rendering');
+  assert.equal(await page.locator('#inspection-sheet .writing-art').getAttribute('src'), 'assets/ui/notebook/notebook-open-blank.png');
+  assert.equal(await page.locator('#inspection-sheet .writing-board').count(), 0, 'Finished artwork takes precedence over text rendering');
+  await page.locator('.world-whiteboard-writing .writing-art').evaluate(image => image.decode());
+  assert(await page.locator('.world-whiteboard-writing').evaluate(element => element.getBoundingClientRect().width < 350),
+    'A finished picture also fits the world board after loading');
   await page.evaluate(() => { delete floorById.get('f12-dev').props.find(prop => prop.name === '화이트보드').image; });
   assert.deepEqual(errors, []);
   console.log(`PASS: ${items.length} writing surfaces (${Object.entries(counts).map(([key, value]) => `${key} ${value}`).join(', ')}) keep message details, fit desktop/mobile/landscape, open from real inspection (dark room waits for the lamp), and normal inspection keeps the dialogue box.`);

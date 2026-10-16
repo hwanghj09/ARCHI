@@ -1,0 +1,8 @@
+{
+  "tool": "built-in imagegen",
+  "date": "2026-10-16",
+  "reference": "assets/background/floor02/floor02-lounge-interior.png",
+  "prompts": {
+    "remote": "Create a single tiny game inventory/world prop sprite: a dark graphite projector remote control, laid HORIZONTALLY on a coffee table viewed in near-front orthographic elevation with a little top face visible. Long thin rectangular rounded shape, a few pale buttons and ONE small red power button, a small beige label strip without legible text. Muted desaturated hand-painted pixel art matching a dark Korean office horror side-scrolling game. No glow, outline halo, table or hand, no other objects. True transparent background. Entire remote fully visible, tightly fitted horizontal canvas around 4:1 with a small transparent margin. Should remain recognizable scaled to about 38 pixels wide."
+  }
+}

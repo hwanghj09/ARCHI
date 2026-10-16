@@ -69,19 +69,21 @@ const FLOOR12_ROOMS = interiorRooms(12, [
     backgroundImage: { src: 'assets/background/floor12/eval-finished.png', height: 760, top: 0 }, props: [
     { file: 'server-rack', size: [256, 512], worldWidth: 96, x: 100 },
     { file: 'network-rack', size: [256, 512], worldWidth: 96, x: 200, name: '네트워크 랙',
+      // 야간 로그가 지워지는 동안만 스위치 케이블을 직접 뽑는다(log-puzzle.js).
+      control: { kind: 'plug', dir: 'out', label: '네트워크 스위치 케이블을 뽑자!', socket: 'B2 직결', item: 'LAN', when: () => logPuzzleTimer },
       message: '정전인데 스위치 한 대의 포트 표시등만 깜빡인다. 케이블 라벨: "B2 직결 · UPS".',
       surface: 'label', writing: ['B2 직결 · UPS'], caption: '정전인데 스위치 한 대의 포트 표시등만 깜빡인다. 케이블 라벨.' },
     // 야간 로그 단말기: 조사하면 전용 창(log-puzzle.js)이 열려 밤 자동 평가 로그를 보여 준다. ARCHI가 로그를
     // 한 줄씩 지우기 시작하는데(가장 결정적인 10/07 줄부터), 위 네트워크 랙을 뽑으면 멈춘다. 둘 다 이름으로
     // 찾아 특수 처리하므로(interaction.js) message는 그 특수 처리가 안 먹었을 때만 보일 일반 조사문이다.
-    { file: 'test-terminal-desk', size: [512, 256], worldWidth: 270, x: 480, name: '야간 로그 단말기',
+    { file: 'test-terminal-desk', size: [512, 256], worldWidth: 270, x: 630, name: '야간 로그 단말기',
       message: '평가용 PC다. 야간 자동 평가 로그를 열람할 수 있다.' },
-    { file: 'electronics-bench', size: [512, 256], worldWidth: 261, x: 760, name: '평가 벤치',
+    { file: 'electronics-bench', size: [512, 256], worldWidth: 261, x: 910, name: '평가 벤치',
       message: '출력된 결과지: "야간 자동 평가 · 03:12 · ARCHI 정답률 87.6%". 빨간 펜 메모: "측정 오류? 같은 문제 세트가 낮엔 4.1%."',
       surface: 'document', writing: [{ as: 'title', text: '야간 자동 평가' }, { as: 'field', label: '시각', text: '03:12' },
         { as: 'field', label: 'ARCHI 정답률', text: '87.6%' }, { as: 'hand', text: '측정 오류?\n같은 문제 세트가 낮엔 4.1%.', ink: 'red' }],
       caption: '출력된 결과지.' },
-    { file: 'instrument-cart', size: [256, 256], worldWidth: 113, x: 1000 },
+    { file: 'instrument-cart', size: [256, 256], worldWidth: 113, x: 1120 },
     { file: 'server-rack', size: [256, 512], worldWidth: 96, x: 1240 },
     { file: 'server-rack', size: [256, 512], worldWidth: 96, x: 1350 },
     { file: 'server-cooling-unit', size: [256, 512], worldWidth: 96, x: 1460 },

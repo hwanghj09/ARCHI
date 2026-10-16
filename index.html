@@ -14,6 +14,7 @@
     <link rel="stylesheet" href="css/opening.css" />
     <link rel="stylesheet" href="css/power.css" />
     <link rel="stylesheet" href="css/wire-puzzle.css" />
+    <link rel="stylesheet" href="css/manual-control.css" />
     <link rel="stylesheet" href="css/log-puzzle.css" />
     <link rel="stylesheet" href="css/guard-patrol.css" />
     <link rel="stylesheet" href="css/b2-ending.css" />
@@ -29,6 +30,7 @@
     <link rel="preload" as="image" href="assets/player/jeong-suho-phone-walk-on.png" />
     <link rel="preload" as="image" href="assets/player/jeong-suho-phone-run-on.png" />
     <link rel="stylesheet" href="css/game.css" />
+    <link rel="stylesheet" href="css/debug.css" />
     <script src="assets/vendor/matter.min.js" defer></script>
     <!-- 게임 스크립트는 모두 일반 스크립트라 최상위 선언(전역)을 서로 함께 쓴다. 불러오는 순서가 곧 의존 순서다:
          설정·상태 → 층 데이터 → 엘리베이터·17층 고정 장면·물리 → 기능별 로직 → 입력 → main.js(첫 화면과 루프 시작). -->
@@ -76,6 +78,7 @@
     <script src="js/interaction/puzzles.js" defer></script>
     <script src="js/interaction/cctv.js" defer></script>
     <script src="js/interaction/keypad.js" defer></script>
+    <script src="js/interaction/manual-control.js" defer></script>
     <script src="js/interaction/wire-puzzle.js" defer></script>
     <script src="js/interaction/log-puzzle.js" defer></script>
     <script src="js/interaction/outline.js" defer></script>
@@ -100,6 +103,7 @@
     <script src="js/input/input.js" defer></script>
     <script src="js/input/keyboard.js" defer></script>
     <script src="js/input/touch.js" defer></script>
+    <script src="js/debug/sidebar.js" defer></script>
     <script src="js/debug/floor-select.js" defer></script>
     <script src="js/debug/sanity-debug.js" defer></script>
     <script src="js/scene/opening.js" defer></script>
@@ -147,10 +151,7 @@
       </div>
       <header><strong>ARCHI</strong><span>17F · 사무실</span><label id="floor17-light-switch"><input id="floor17-lights" type="checkbox" checked aria-label="17층 조명" /><output id="floor17-light-state">조명 켜짐</output></label></header>
       <nav aria-label="플레이어 조작">
-        <button type="button" data-direction="-1" aria-label="왼쪽 이동" title="왼쪽 이동 (A / ←)">←</button>
-        <button type="button" data-direction="1" aria-label="오른쪽 이동" title="오른쪽 이동 (D / →)">→</button>
         <button id="interact" type="button" aria-label="상호작용" title="상호작용 (E)">E</button>
-        <button id="jump" type="button" aria-label="점프" title="점프 (Space / W / ↑)">↑</button>
         <button id="phone-button" type="button" aria-label="휴대폰" title="휴대폰 (P)">▣<span id="phone-flash-state" aria-hidden="true">플래시 꺼짐</span></button>
       </nav>
       <div id="interaction-status" role="status" aria-live="polite"></div>
@@ -176,6 +177,7 @@
           <label class="menu-setting" for="menu-volume"><span>전체 음량 <output id="menu-volume-value" for="menu-volume">70%</output></span><input id="menu-volume" type="range" min="0" max="100" value="70" /></label>
           <label class="menu-setting" for="menu-brightness"><span>화면 밝기 <output id="menu-brightness-value" for="menu-brightness">100%</output></span><input id="menu-brightness" type="range" min="75" max="125" value="100" /></label>
           <button id="menu-fullscreen" class="menu-screen-button" type="button">전체화면으로 전환 ↗</button>
+          <button id="menu-debug-toggle" class="menu-screen-button" type="button" aria-pressed="false" aria-controls="debug-sidebar">개발 UI · OFF (F2)</button>
           <p id="menu-settings-status" class="menu-note" role="status" aria-live="polite">설정은 자동으로 저장됩니다.</p>
         </div>
         <div id="menu-controls" class="menu-view" hidden>
@@ -189,7 +191,7 @@
             <div><dt>P / F</dt><dd>휴대폰 / 플래시</dd></div>
             <div><dt>Tab / Esc</dt><dd>가방 / 창 닫기</dd></div>
           </dl>
-          <p class="menu-note">터치 화면에서는 화면 아래 버튼을 사용하세요.<br />어둠 속에서는 정신력이 줄어듭니다. 빛을 찾으세요.</p>
+          <p class="menu-note">이동과 점프는 키보드로 조작합니다.<br />어둠 속에서는 정신력이 줄어듭니다. 빛을 찾으세요.</p>
         </div>
         <div id="menu-new-game" class="menu-view" hidden>
           <h2>새 게임</h2>
@@ -216,6 +218,14 @@
         <button type="submit" id="keypad-submit">확인</button>
       </div>
     </form>
+    <!-- 직접 조작하는 장치(레버·열쇠·전원선 ...) -->
+    <section id="manual-control" role="dialog" aria-modal="true" aria-labelledby="manual-control-title" aria-describedby="manual-control-label" hidden>
+      <h2 id="manual-control-title"></h2>
+      <p id="manual-control-label"></p>
+      <div id="manual-control-device" class="control-device" tabindex="0"></div>
+      <p id="manual-control-help"></p>
+      <button id="manual-control-close" type="button">닫기 · Esc</button>
+    </section>
     <section id="blackout-scene" role="dialog" aria-modal="true" aria-label="엘리베이터 앞 정전" hidden>
       <p id="blackout-caption" role="status" aria-live="polite"></p>
       <button id="blackout-skip" type="button">건너뛰기 · Esc</button>
@@ -373,20 +383,6 @@
         <span id="sanity-fill" aria-hidden="true"></span>
       </div>
       <span id="sanity-state" aria-live="polite">안정</span>
-      <form id="debug-sanity" aria-label="테스트용 정신력 조정">
-        <label for="debug-sanity-range">TEST 정신력</label>
-        <input id="debug-sanity-range" type="range" min="0" max="100" value="100" />
-        <input id="debug-sanity-number" type="number" min="0" max="100" value="100" />
-      </form>
-      <div id="debug-console">
-        <button id="debug-console-toggle" type="button" aria-expanded="false" aria-controls="debug-console-panel">콘솔 창</button>
-        <div id="debug-console-panel" hidden>
-          <button id="debug-chase-hallucination" type="button">환각 추격 이벤트</button>
-          <button id="debug-spawn-hallucination" type="button">환각 생성 이벤트</button>
-          <button id="debug-jumpscare" type="button">점프스케어 이벤트</button>
-          <button id="debug-all-power" type="button" aria-pressed="false">모든 층 전력 활성화 · OFF</button>
-        </div>
-      </div>
     </aside>
     <img id="dark-face" alt="" aria-hidden="true" draggable="false" hidden />
     <video id="devoured-video" src="assets/video/hallucination-devoured.mp4" muted playsinline preload="auto" aria-hidden="true" hidden></video>
@@ -409,11 +405,37 @@
       <strong id="objective-title"></strong>
       <p id="objective-text"></p>
     </section>
-    <form id="debug-floor" aria-label="테스트용 층 이동">
-      <label for="debug-floor-select">TEST 층 이동</label>
-      <select id="debug-floor-select"></select>
-      <button type="submit">이동</button>
-    </form>
+    <aside id="debug-sidebar" aria-labelledby="debug-heading" hidden>
+      <div class="debug-heading"><h2 id="debug-heading">개발 도구</h2><button id="debug-close" type="button">닫기 · F2</button></div>
+      <p class="debug-note">테스트용 변경은 자동 저장에 반영됩니다. F2로 사이드바를 켜고 끌 수 있습니다.</p>
+      <section><h3>현재 상태</h3><output id="debug-state"></output></section>
+      <section><h3>장소 이동</h3>
+        <form id="debug-floor" aria-label="테스트용 층 이동">
+          <label for="debug-floor-select">층</label><select id="debug-floor-select"></select><button type="submit">이동</button>
+        </form>
+        <form id="debug-room" aria-label="테스트용 방 이동">
+          <label for="debug-room-select">실내</label><select id="debug-room-select"></select><button type="submit">이동</button>
+        </form>
+      </section>
+      <section><h3>플레이어</h3>
+        <form id="debug-sanity" aria-label="테스트용 정신력 조정">
+          <label for="debug-sanity-range">정신력</label>
+          <input id="debug-sanity-range" type="range" min="0" max="100" value="100" />
+          <input id="debug-sanity-number" aria-label="정신력 수치" type="number" min="0" max="100" value="100" />
+        </form>
+        <label class="debug-battery" for="debug-battery">배터리<input id="debug-battery" type="number" min="0" max="100" value="100" /></label>
+        <button id="debug-restore" type="button">정신력·배터리 100% 회복</button>
+      </section>
+      <section id="debug-console"><h3>이벤트·전력</h3>
+        <button id="debug-console-toggle" type="button" aria-expanded="false" aria-controls="debug-console-panel">이벤트 펼치기</button>
+        <div id="debug-console-panel" hidden>
+          <button id="debug-chase-hallucination" type="button">환각 추격 이벤트</button>
+          <button id="debug-spawn-hallucination" type="button">환각 생성 이벤트</button>
+          <button id="debug-jumpscare" type="button">점프스케어 이벤트</button>
+          <button id="debug-all-power" type="button" aria-pressed="false">모든 층 전력 활성화 · OFF</button>
+        </div>
+      </section>
+    </aside>
     <div id="room-transition" aria-hidden="true" data-phase="idle"></div>
     <div id="computer" role="dialog" aria-modal="true" aria-label="17층 사무실 컴퓨터" tabindex="-1" hidden>
       <img id="computer-wallpaper" src="assets/ui/computer/wallpaper.png" alt="" draggable="false" />

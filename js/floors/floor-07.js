@@ -126,7 +126,7 @@ const FLOOR7_ROOMS = interiorRooms(7, [
       writing: ['세션이 끝나기 전에는', '열리지 않습니다.', { as: 'field', label: '비상 해제', text: '안쪽 끝 인터록 제어반.' }],
       caption: '문이 꿈쩍도 하지 않는다.' },
     fixtures: [
-      { name: '인터페이스 의자', x: 1000, y: 380, width: 200, style: 'interface-chair', outline: [1018, 375, 164, 195],
+      { name: '인터페이스 의자', x: 1000, y: 340, width: 200, height: 230, style: 'interface-chair', outline: [1035, 340, 130, 230],
         message: '머리 받침과 팔걸이에 전극이 달린 의자다. 등받이의 실험표: "인간-시스템 인터페이스 1차 시험. 피험자의 신경 반응을 ARCHI가 직접 읽고 쓴다. 2차 장비는 B2로 이관 완료."',
         surface: 'document',
         writing: [{ as: 'title', text: '인간-시스템 인터페이스 1차 시험' }, '피험자의 신경 반응을 ARCHI가 직접 읽고 쓴다.', { as: 'rule' },
@@ -135,10 +135,11 @@ const FLOOR7_ROOMS = interiorRooms(7, [
     ],
     props: [
       { file: 'electrical-panel', size: [256, 512], worldWidth: 89, x: 100, name: '인터록 제어반', gives: 'f7-release',
-        message: '제어반은 정전 중에도 B2 직결 비상 회선으로 살아 있다. 화면: "세션 요청 ARCHI · 00:14 입실자 1명 감지 · 정수호(17F)". 비상 해제 레버를 끝까지 내리자 문 쪽에서 잠금 풀리는 소리가 난다.',
+        control: { kind: 'lever', dir: 'down', label: '비상 해제 레버를 끝까지 내리자.', ends: ['잠금', '해제'] },
+        message: '제어반은 정전 중에도 B2 직결 비상 회선으로 살아 있다. 화면: "세션 요청 ARCHI · 00:14 입실자 1명 감지 · 정수호(17F)". 비상 해제 레버가 내려가자 문 쪽에서 잠금 풀리는 소리가 난다.',
         surface: 'screen', look: 'lcd',
         writing: ['세션 요청 ARCHI', '00:14 입실자 1명 감지', '정수호(17F)'],
-        caption: '제어반은 정전 중에도 B2 직결 비상 회선으로 살아 있다. 비상 해제 레버를 끝까지 내리자 문 쪽에서 잠금 풀리는 소리가 난다.',
+        caption: '제어반은 정전 중에도 B2 직결 비상 회선으로 살아 있다. 비상 해제 레버가 내려가자 문 쪽에서 잠금 풀리는 소리가 난다.',
         takenMessage: '레버는 내려가 있다. 화면: "세션 강제 종료 · 입실자 이탈 허용".',
         takenSheet: { surface: 'screen', look: 'lcd', writing: ['세션 강제 종료 · 입실자 이탈 허용'], caption: '레버는 내려가 있다.' } },
       { file: 'server-rack', size: [256, 512], worldWidth: 96, x: 850 },

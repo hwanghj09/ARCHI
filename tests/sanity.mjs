@@ -82,9 +82,17 @@ try {
   assert.equal((await state()).sanity, 100, '보스전 중 빛을 비추면 추격·어둠 감소가 모두 없다');
   await page.evaluate(() => { guardPatrol.mode = 'patrol'; bossFightActive = false; phoneLightOn = false; });
 
-  // ---- 정신 불안 임무 동안은 어디서든 1초에 2%씩 줄고, 항불안제를 쓰면 멈춘다 ----
+  // ---- 추격 후 10%에서도 약을 찾으러 이동할 여유가 있다. 빛 유무와 무관하게 초당 0.1% 감소 ----
+  await page.evaluate(() => {
+    collectedItems.add('story-anxiety-seen'); sanity = 10; phoneLightOn = true; phoneBattery = 100;
+    updateSanity(5000);
+  });
+  near((await state()).sanity, 9.5);
+  await page.evaluate(() => updateSanity(55000));
+  near((await state()).sanity, 4); // 이동·탐색 1분 뒤에도 고갈되지 않는다.
+  await page.evaluate(() => { phoneLightOn = false; });
   await page.evaluate(() => { collectedItems.add('story-anxiety-seen'); sanity = 50; updateSanity(1000); });
-  near((await state()).sanity, 48);
+  near((await state()).sanity, 49.9);
   await page.evaluate(() => { collectedItems.add('f16-antianxiety-used'); collectedItems.add('sanity-drain-resume'); sanity = 50; updateSanity(1000); });
   near((await state()).sanity, 50 - 1 / 3); // 임무 감소만 멈추고 어둠의 기본 소모는 유지한다.
   await page.evaluate(() => { sanity = 50; phoneLightOn = true; phoneBattery = 100; updateSanity(1000); });

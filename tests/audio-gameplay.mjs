@@ -1,9 +1,11 @@
 import assert from 'node:assert/strict';
 import { chromium } from 'playwright';
+import { autoControl } from './auto-control.mjs';
 
 const browser = await chromium.launch();
 try {
   const page = await browser.newPage();
+  await autoControl(page);
   const errors = [];
   page.on('pageerror', error => errors.push(error.message));
   await page.clock.install({ time: new Date('2026-10-04T00:00:00Z') });

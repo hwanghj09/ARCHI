@@ -3,7 +3,7 @@ import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
-const helpers = new Set(['room-geometry.mjs', 'scene-transition.mjs']);
+const helpers = new Set(['room-geometry.mjs', 'scene-transition.mjs', 'auto-control.mjs']);
 const tests = readdirSync(new URL('../tests/', import.meta.url)).filter(name => name.endsWith('.mjs') && !helpers.has(name)).sort();
 let failures = 0;
 for (const test of tests) {

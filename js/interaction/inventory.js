@@ -118,7 +118,7 @@ function toggleInventory() {
     inventoryButton.focus();
     return;
   }
-  if (itemUseTime > 0 || transitioning || selectingFloor || usingComputer || usingKeypad || usingPhone || usingPowerPanel || usingInspection) return;
+  if (itemUseTime > 0 || transitioning || selectingFloor || usingComputer || usingKeypad || usingControl || usingPhone || usingPowerPanel || usingInspection) return;
   showInventoryList();
 }
 

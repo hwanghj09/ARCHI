@@ -67,8 +67,9 @@ const FLOOR13_ROOMS = interiorRooms(13, [
   { id: 'f13-testbay', name: '장비 검증실', width: 1824, windowless: true,
     backgroundWallsOnly: true, backgroundImage: floor13Scene('testbay', 1824), props: [
     { file: 'testbay-ups', size: [256, 256], worldWidth: 107, x: 420, name: 'UPS', gives: 'f13-ups',
+      control: { kind: 'switch', dir: 'up', label: '비상 출력 스위치를 올리자.', ends: ['ON', 'OFF'] },
       sprite: 'assets/objects/floor13/testbay-ups-states.png', stateBy: 'f13-ups',
-      message: 'UPS 비상 출력 스위치를 올렸다. 팬이 돌기 시작하고 초록 불이 들어온다. 비상 회선으로 전기가 나간다.',
+      message: 'UPS 비상 출력이 켜졌다. 팬이 돌기 시작하고 초록 불이 들어온다. 비상 회선으로 전기가 나간다.',
       takenMessage: 'UPS가 돌아가고 있다. 배터리 잔량 71%.' },
     { file: 'server-validation-bench', size: [512, 256], worldWidth: 260, x: 800, name: '검증 벤치',
       message: '검증 결과지: "고객사 납품 서버 3대 · 원격 접속 에이전트 발견 · 설치 기록 없음". 담당자 메모: "어디서 들어온 거지? 보안팀 문의."',

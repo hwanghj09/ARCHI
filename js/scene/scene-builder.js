@@ -178,7 +178,7 @@ function buildDynamicScene(config) {
       doorList.push(addRoomDoor({ name: '복도', type: 'room', hint: 'E · 복도로 나가기', target: config.parent,
         arrivalKey: `room:${config.id}`, key: 'exit', x: exitX,
         y: exitY, width: doorWidth, style: config.exitStyle ?? outside.doorStyle, sprite: outside.doorSprite,
-        unlocked: collectedItems.has(outside.unlockedBy), raiseMessage: outside.raiseMessage,
+        unlocked: collectedItems.has(outside.unlockedBy), raiseMessage: outside.raiseMessage, control: outside.raiseControl,
         locked: Boolean(lock) && !collectedItems.has(lock.until), lockedUntil: lock?.until, message: lock?.message,
         surface: lock?.surface, look: lock?.look, writing: lock?.writing, caption: lock?.caption, image: lock?.image,
         outline: config.exitOutline && [config.exitOutline[0] + offset, ...config.exitOutline.slice(1)] }));
@@ -259,6 +259,7 @@ function buildDynamicScene(config) {
     const base = prop.base || 0;
     const element = document.createElement('div');
     element.className = `floor-prop ${prop.style || ''}`.trim();
+    if (prop.hideWhenTaken && prop.gives) element.dataset.hiddenBy = prop.gives;
     if (base) element.dataset.base = String(base);
     const left = prop.x - width / 2 * scale;
     const top = floorY - base - (height - 8) * scale;
@@ -280,6 +281,7 @@ function buildDynamicScene(config) {
     }
     for (const rect of MONITOR_SCREENS[prop.file] || []) element.append(fearScreenElement(rect)); // 정신력 20% 미만에서 모니터 화면이 바뀐다(sanity.js)
     dynamicScene.append(element);
+    addWorldWhiteboardWriting(element, prop);
     if (prop.sprite) {
       element.style.overflow = 'hidden';
       image.style.width = `${(prop.frames || 2) * 100}%`;
@@ -298,9 +300,10 @@ function buildDynamicScene(config) {
     // cycle: 조사할 때마다 출력 칸이 바뀌는 선택기(4층 UPS). 지금 칸 번호를 data-state로 그린다.
     if (prop.cycle) element.dataset.state = String(cycleState(prop.cycle));
     doorList.push({ name: prop.name, type: 'inspect', message: prop.message, gives: prop.gives,
+      hideWhenTaken: prop.hideWhenTaken,
       takenMessage: prop.takenMessage, darkMessage: prop.darkMessage, requires: prop.requires,
       missingMessage: prop.missingMessage, partialMessage: prop.partialMessage, element, standY: floorY - base,
-      code: prop.code, codePrompt: prop.codePrompt, cycle: prop.cycle, opens: prop.opens,
+      code: prop.code, codePrompt: prop.codePrompt, cycle: prop.cycle, opens: prop.opens, control: prop.control,
       animation: prop.animation, poweredSprite: prop.poweredSprite,
       surface: prop.surface || WRITING_SURFACE_BY_FILE[prop.file], look: prop.look, writing: prop.writing, caption: prop.caption,
       image: prop.image, missingSheet: prop.missingSheet, takenSheet: prop.takenSheet,

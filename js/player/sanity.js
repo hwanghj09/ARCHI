@@ -65,7 +65,7 @@ function sanitySpeedFactor() {
 }
 
 // 정신력 0%: 지금 보는 방향의 반대로 걸으려 하면 sanityZeroTurnDelayMs 동안 제자리에서 기다린 뒤에야 돌아선다(그동안 입력은 무시).
-// 보는 방향이 바뀌거나 입력을 떼면 다시 처음부터 잰다. 0%에서 달리는 속도를 줄이는 것은 loop.js가 한다(sanityZeroRunFactor).
+// 보는 방향이 바뀌거나 입력을 떼면 다시 처음부터 잰다.
 let zeroTurnTimer = 0;
 function applyZeroSanityTurnDelay(input) {
   if (sanity > 0 || !input || input === facing) { zeroTurnTimer = 0; return input; }
@@ -218,7 +218,7 @@ function startAmbientSighting() {
 // 콘솔 창 버튼용. 컷씬·전환·포획·창이 열려 있는 동안은 정신력 진행처럼 실행하지 않는다.
 function hallucinationEventBlocked() {
   return !gameStarted || mainMenuActive || openingActive || blackoutSceneActive || cctvSceneActive || playerCaught || hallucinationCaught ||
-    transitioning || selectingFloor || usingComputer || usingKeypad || usingPhone || usingPowerPanel || usingInspection;
+    transitioning || selectingFloor || usingComputer || usingKeypad || usingControl || usingPhone || usingPowerPanel || usingInspection;
 }
 
 function debugTriggerChaseHallucination() {
@@ -441,13 +441,13 @@ function updateBlink(elapsed, fsmPaused) {
 function updateSanity(elapsed) {
   // 컷씬·장면 전환·포획과 문서를 읽는 동안은 공포 진행을 멈춘다.
   const paused = openingActive || blackoutSceneActive || cctvSceneActive || playerCaught || hallucinationCaught || transitioning ||
-    usingComputer || usingKeypad || usingPowerPanel || usingInspection;
+    usingComputer || usingKeypad || usingControl || usingPowerPanel || usingInspection;
   const fsmPaused = paused || selectingFloor;
   const exposure = sanityExposure();
   // B2 엔딩 중에는 R-01에게 쫓겨도 줄지 않는다: 정신력은 로봇 속도(45% 규칙, b2-ending.js)를 정하는 데 쓰인다.
   const chasing = guardPatrol.mode === 'chase' && !bossFightActive && b2Ending.phase !== 'running';
   if (!paused) {
-    // 정신 불안 임무: 첫 컷씬을 본 뒤 항불안제를 쓰기 전까지는 어디에 있든 1초에 2%씩 줄어든다(쫓길 때의 감소가 더 빠르면 그쪽).
+    // 정신 불안 임무: 첫 컷씬을 본 뒤 항불안제를 쓰기 전까지는 어디서든 천천히 줄어든다(추격 중에는 추격 감소량 적용).
     const anxiety = collectedItems.has('story-anxiety-seen') && !collectedItems.has('f16-antianxiety-used') && !collectedItems.has('b2-antianxiety-used');
     // 항불안제를 쓴 뒤에는 다시 닳기 시작하는 조건(collectedItems의 'sanity-drain-resume', 아직 정해지지 않아 어디서도 켜지 않는다)이 생기기 전까지 정신력이 닳지 않는다.
     const calm = collectedItems.has('f16-antianxiety-used') && !collectedItems.has('sanity-drain-resume');

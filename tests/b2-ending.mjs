@@ -1,11 +1,13 @@
 import assert from 'node:assert/strict';
 import { chromium } from 'playwright';
+import { autoControl } from './auto-control.mjs';
 
 // B2 엔딩 전체: 준비(외부 회선 레버, 항불안제) → DELETE → 체크포인트 → 로봇 3대 추격 → 엘리베이터 문 장면 → 1층 R-01 →
 // 1층 전력 끊기 → 정문 → TRUE END · 크레딧, 그리고 각 단계의 베드엔딩. 정신력 45% 규칙에 따른 시간과 여유를 출력한다.
 const browser = await chromium.launch();
 try {
   const page = await browser.newPage({ viewport: { width: 1280, height: 720 } });
+  await autoControl(page);
   const errors = [];
   page.on('pageerror', error => errors.push(error.message));
   await page.clock.install({ time: new Date('2026-10-03T00:00:00Z') });

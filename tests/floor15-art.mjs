@@ -38,9 +38,11 @@ try {
     await page.clock.runFor(34);
   };
   const jumpFloor = async floor => {
+    await page.keyboard.press('F2');
     await page.selectOption('#debug-floor-select', floor);
     await page.locator('#debug-floor button').click();
     await finishSceneTransition(page);
+    await page.keyboard.press('F2');
     await page.clock.runFor(100);
   };
   const capture = name => page.screenshot({ path: `.local/floor15-art-${name}.png` });

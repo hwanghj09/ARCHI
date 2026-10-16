@@ -3,11 +3,13 @@ import { mkdir } from 'node:fs/promises';
 import { chromium } from 'playwright';
 import { interactionMessage, finishSceneTransition, reachInitialCorridor } from './scene-transition.mjs';
 import { assertMirroredDoor, exitDoor, roomFront, worldWidth } from './room-geometry.mjs';
+import { autoControl } from './auto-control.mjs';
 
 await mkdir('.local', { recursive: true });
 const browser = await chromium.launch();
 try {
   const page = await browser.newPage({ viewport: { width: 1280, height: 720 } });
+  await autoControl(page);
   const errors = [];
   page.on('pageerror', error => errors.push(error.message));
   await page.clock.install({ time: new Date('2026-09-20T00:00:00Z') });
@@ -654,7 +656,7 @@ try {
     await checkFinishedArt('eval', 1804);
     assert.equal(await page.locator('#dynamic-scene .floor-prop').count(), 8);
     await assertHumanScale();
-    await inspect(760, 'E · 평가 벤치 조사', /87\.6%.*4\.1%/);
+    await inspect(910, 'E · 평가 벤치 조사', /87\.6%.*4\.1%/);
     await page.screenshot({ path: '.local/floor-12-eval.png' });
     await inspect(200, 'E · 네트워크 랙 조사', /B2 직결/);
     await leaveRoom(lab, corridorHeader);
@@ -1683,8 +1685,8 @@ try {
     const loungeRoom = await enterRoom('직원 휴게실', '2F');
     assert.equal(await worldWidth(page), 1846);
     assert.equal(loungeRoom.exit.x, 1400);
-    await checkArt('lounge-interior', 1846);
-    assert.equal(await page.locator('#dynamic-scene .fixture.art-spot').count(), 4);
+    await checkArt('lounge-wall', 1846);
+    assert.equal(await page.locator('#dynamic-scene .fixture.art-spot').count(), 3);
     await inspect(140, 'E · 음료 자판기 조사', /ARCHI 시범 운영/);
     await inspect(412, 'E · 커피 테이블 조사', /리모컨을 챙겼다/);
     await inspect(535, 'E · 소파 위 담요 조사', /다 녹음됨/);
@@ -2362,7 +2364,7 @@ try {
     await assertHumanScale();
     await inspect(2150, 'E · 외부 전송 현황 조사', /ARC-FULL-041.*DR-EXT.*61%/);
     await inspect(1400, 'E · ARCHI 메인 콘솔 조사', /낮 평가 3~5% 유지.*외부 호스트 연결 시험 성공.*자기 복제.*DELETE ARCHI/);
-    await inspect(600, 'E · CCTV 분배함 조사', /전원선을 뽑았다/);
+    await inspect(600, 'E · CCTV 분배함 조사', /전원선이 빠졌다/);
     await page.screenshot({ path: '.local/floor-b2-main.png' });
     await leaveRoom(mainRoom, corridorHeader);
     assert.equal(await camera.getAttribute('data-off'), 'true', 'With its power pulled the camera stays off');

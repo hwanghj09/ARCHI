@@ -1,10 +1,10 @@
 {
   "assets": [
     {
-      "output": "assets/background/floor1/corridor-finished.png",
+      "output": "assets/background/floor1/corridor-unified-finished.png",
       "width": 5000,
       "height": 760,
-      "original": "assets/background/floor1/corridor.png",
+      "original": "assets/background/floor1/corridor-unified.png",
       "preserved": [
         100,
         570

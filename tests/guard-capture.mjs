@@ -83,7 +83,7 @@ try {
   const pinned = (await state()).playerX;
   await page.locator('#guard-retry').evaluate(button => button.blur());
   for (const key of ['d', 'a', 'Space', 'e', 'p', 'f', 'i', 'Escape']) await page.keyboard.press(key);
-  await page.locator('nav [data-direction="1"]').dispatchEvent('pointerdown', { button: 0, pointerId: 1 });
+  await page.locator('nav #interact').dispatchEvent('pointerdown', { button: 0, pointerId: 1 });
   await page.clock.runFor(500);
   assert.equal((await state()).playerX, pinned, 'Caught player cannot escape using keyboard or touch');
   assert.equal(await page.evaluate(() => usingPhone || usingInspection || usingKeypad), false);

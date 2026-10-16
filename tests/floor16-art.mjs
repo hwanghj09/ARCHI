@@ -3,11 +3,13 @@ import { mkdir } from 'node:fs/promises';
 import { chromium } from 'playwright';
 import { interactionMessage, finishSceneTransition } from './scene-transition.mjs';
 import { assertMirroredDoor, exitDoor, roomFront, worldWidth } from './room-geometry.mjs';
+import { autoControl } from './auto-control.mjs';
 
 await mkdir('.local', { recursive: true });
 const browser = await chromium.launch();
 try {
   const page = await browser.newPage({ viewport: { width: 1280, height: 720 } });
+  await autoControl(page);
   const errors = [];
   page.on('pageerror', error => errors.push(error.message));
   await page.clock.install({ time: new Date('2026-09-25T00:00:00Z') });
@@ -33,9 +35,11 @@ try {
     await finishSceneTransition(page);
   };
   const jumpFloor = async floor => {
+    await page.keyboard.press('F2');
     await page.selectOption('#debug-floor-select', floor);
     await page.locator('#debug-floor button').click();
     await finishSceneTransition(page);
+    await page.keyboard.press('F2');
     await page.clock.runFor(100);
   };
   const doorFiles = { cafeteria: 'cafeteria-door.png', shutter: 'cu-shutter-states.png',
@@ -135,7 +139,7 @@ try {
     const original = playGameSound;
     playGameSound = (name, options) => { soundLog.push(name); original(name, options); };
   });
-  const raiseMessage = '안쪽 수동 레버를 당기자 셔터가 덜컹거리며 말려 올라간다.';
+  const raiseMessage = '셔터가 덜컹거리며 말려 올라간다.';
   const status = () => page.locator('#interaction-status').textContent();
   const raising = () => page.locator('.room-door.shutter').getAttribute('data-raising');
   assert.equal(await page.evaluate(() => collectedItems.has('f16-cu')), false);

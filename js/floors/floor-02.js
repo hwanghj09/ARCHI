@@ -3,7 +3,7 @@
 // PROMPT.md)이 배경이다. 에셋은 가로 1:1, 세로는 벽 부분만 약 1.32배로 늘려 쓰고(원본 바닥선 y=438 → 월드 y=570), build.py가
 // 복도는 assets/background/wall 모듈로 합성한 walls.png, 방 내부 3장(방 그림 전체를 반복 칸으로 넓힘), 문 3장(닫힘|열림)을 만든다.
 // 건물 코어가 모든 층에서 같은 자리라 Harmony Hall(대형 행사장)·직원 휴게실은 코어 왼쪽, 서버실은 화장실 오른쪽에 둔다.
-// 방 안 폭은 복도 전면 폭의 약 2.68배(1000/690/680 → 2676/1846/1840). 조사 지점은 그림 속 물건 위에 투명하게 겹친 설비('art-spot').
+// 방 안 폭은 복도 전면 폭의 약 2.68배(1000/690/680 → 2676/1846/1840). 휴게실 가구·리모컨은 별도 소품이며, 나머지 그림 속 조사 지점은 'art-spot' 설비다.
 // 장치는 방을 건너는 영사: 서버실 녹화 NAS에서 04:00 자동 삭제를 앞둔 "03:00 무관객 리허설" 원본 디스크(f2-reel)와 휴게실 커피
 // 테이블의 영사기 리모컨(f2-remote)을 둘 다 챙겨야 행사장 천장 트러스의 배터리 영사기가 돌고(f2-projected), 그제야 스크린 덮개가
 // 걷혀(설비 requires → data-ready) 화면이 보인다.
@@ -59,9 +59,11 @@ const FLOOR2_ROOMS = interiorRooms(2, [
       missingMessage: '무대 위 스크린이 까맣다. 천장 트러스의 배터리 영사기가 꺼져 있다.',
       message: '스크린에 어젯밤 03:00 무관객 리허설 녹화가 비친다. 무대에는 아무도 없고 조명만 움직인다. 자막: "음성 합성 시험 · 화자 표본 312명." 작은 파형 312개 가운데 마지막 한 칸만 붉은 테두리다. 같은 문장이 사람을 바꿔 가며 이어진다: "안녕하세요, 저는 ___입니다." 마지막 이름은 "17F 정수호"다.' }),
     floor2Spot('배터리 영사기', [540, 590], [108, 130], { requires: ['f2-reel', 'f2-remote'], gives: 'f2-projected',
+      control: [{ kind: 'press', label: '리모컨의 하강 버튼을 눌러 영사기를 내리자.', text: '▼' },
+        { kind: 'plug', dir: 'in', label: '디스크를 투입구에 끝까지 밀어 넣자.', socket: '투입구', item: 'NAS' }],
       missingMessage: '천장 트러스에 매달린 배터리 영사기다. 전원 표시등만 켜져 있다. 너무 높아 손이 닿지 않고, 라벨에는 "녹화 NAS 디스크 전용 · 리모컨으로 내려서 투입"이라고 적혀 있다.',
       partialMessage: '영사기가 반응하지만 재생되지 않는다. 서버실 녹화 NAS의 디스크와 영사기 리모컨이 둘 다 있어야 한다.',
-      message: '리모컨으로 영사기를 내려 디스크를 꽂자 영사기가 돌기 시작한다. 빛줄기가 무대 뒤 스크린을 비춘다.',
+      message: '내려온 영사기가 디스크를 물고 돌기 시작한다. 빛줄기가 무대 뒤 스크린을 비춘다.',
       takenMessage: '영사기가 조용히 돌고 있다. 빛줄기는 계속 스크린을 비춘다.' }),
     floor2Spot('객석 마이크', [672, 712], [330, 400],
       '빈 객석 팔걸이마다 작은 마이크가 붙어 있고 빨간 불이 켜져 있다. 라벨: "관객 반응 수집 · 무관객 리허설 중에도 수집 · ARCHI." 관객이 없는 밤에 무엇을 모았을까.'),
@@ -75,14 +77,23 @@ const FLOOR2_ROOMS = interiorRooms(2, [
   floor2Room('f2-lounge', '직원 휴게실', 'lounge', 1846, [
     floor2Spot('음료 자판기', [60, 220], [262, 438],
       '정전으로 꺼진 자판기. 옆에 붙은 안내문: "휴게실 자판기 음성 안내 ARCHI 시범 운영 중." 누군가 그 밑에 적었다: "내 이름을 불렀음."'),
-    floor2Spot('커피 테이블', [370, 455], [388, 438], { gives: 'f2-remote',
-      message: '엎어 둔 휴대폰과 잡지 사이에 "행사장 영사기" 라벨이 붙은 리모컨이 있다. 휴대폰 화면에 알림 하나: "03:00 무관객 리허설 시작 · 객석 마이크 점검 · 발신 SYSTEM." 리모컨을 챙겼다.',
-      takenMessage: '엎어 둔 휴대폰과 잡지만 남아 있다. 영사기 리모컨은 이미 챙겼다.' }),
     floor2Spot('소파 위 담요', [515, 555], [383, 428],
       '반쯤 갠 담요 위에 쪽지가 있다: "리허설 중에는 객석에 앉아 있지 말 것. 다 녹음됨." 행사 운영팀 이름이 적혀 있다.'),
     floor2Spot('연주회 포스터', [1588, 1664], [198, 300],
       '피아노 건반과 파형만 그린 포스터. 여백에 볼펜 낙서: "반주는 ARCHI가 한다는데, 리허설 때 우리 목소리를 왜 녹음하지?"'),
-  ], { exitX: 1400 }),
+  ], { exitX: 1400,
+    backgroundImage: floor2Scene('lounge', 'lounge-wall', 1846),
+    props: [
+      { sprite: 'assets/objects/floor02/lounge-sofa.png', frames: 1, size: [512, 152], worldWidth: 270, x: 425 },
+      { sprite: 'assets/objects/floor02/lounge-sofa.png', frames: 1, size: [512, 152], worldWidth: 270, x: 942 },
+      { sprite: 'assets/objects/floor02/lounge-table.png', frames: 1, size: [512, 128], worldWidth: 140, x: 435,
+        name: '커피 테이블', gives: 'f2-remote',
+        message: '엎어 둔 휴대폰과 잡지 사이에 "행사장 영사기" 라벨이 붙은 리모컨이 있다. 휴대폰 화면에 알림 하나: "03:00 무관객 리허설 시작 · 객석 마이크 점검 · 발신 SYSTEM." 리모컨을 챙겼다.',
+        takenMessage: '엎어 둔 휴대폰과 잡지만 남아 있다. 영사기 리모컨은 이미 챙겼다.' },
+      { sprite: 'assets/objects/floor02/lounge-table.png', frames: 1, size: [512, 128], worldWidth: 140, x: 935 },
+      { sprite: 'assets/objects/floor02/projector-remote.png', frames: 1, size: [160, 40], worldWidth: 38, x: 435,
+        base: 31, gives: 'f2-remote', hideWhenTaken: true },
+    ] }),
   floor2Room('f2-server', '서버실', 'server', 1840, [
     floor2Spot('녹화 NAS', [1220, 1275], [212, 398], { gives: 'f2-reel',
       message: 'Harmony Hall 녹화 NAS다. 디스크 칸 하나가 반쯤 빠진 채 붉게 깜빡인다. 라벨: "03:00 무관객 리허설 · 원본 · 04:00 자동 삭제." 정전으로 삭제가 멈춘 모양이다. 디스크를 챙겼다.',

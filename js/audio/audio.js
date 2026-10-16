@@ -284,7 +284,7 @@ function updateGameAudio(elapsed = step) {
   const musicAllowed = !dread && !haunted && !openingActive && !blackoutSceneActive && !storySceneActive && !cctvSceneActive && !playerCaught && !hallucinationCaught;
   updateSanityMusic(musicAllowed ? fear * .06 : 0, elapsed);
   if (moving) wanted.set('motor', .25);
-  if (!selectingFloor && !openingActive && !blackoutSceneActive && !cctvSceneActive && !usingComputer && !usingKeypad && !usingPowerPanel && !usingInspection && !transitioning && !playerCaught && guardPatrol.door && lit && (guardPatrol.mode === 'chase' || !guardPatrol.wait)) {
+  if (!selectingFloor && !openingActive && !blackoutSceneActive && !cctvSceneActive && !usingComputer && !usingKeypad && !usingControl && !usingPowerPanel && !usingInspection && !transitioning && !playerCaught && guardPatrol.door && lit && (guardPatrol.mode === 'chase' || !guardPatrol.wait)) {
     playGameSound('robot-servo', { x: guardPatrol.x });
   }
   for (const [name, sound] of gameAudioAmbience) {

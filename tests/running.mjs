@@ -63,6 +63,27 @@ try {
   await page.clock.runFor(300);
   assert.equal((await state()).animation, 'walk');
   assert(Math.abs((await state()).x - released.x - 60) < 6, 'Shift release restores walking speed');
+  await page.evaluate(() => setDebugSanity(30));
+  await page.keyboard.down('ShiftLeft');
+  await page.clock.runFor(100);
+  assert.equal((await state()).animation, 'run', '30% still allows running');
+  for (const sanity of [29.9, 10, 0]) {
+    await page.evaluate(value => setDebugSanity(value), sanity);
+    await page.clock.runFor(300);
+    assert.equal((await state()).animation, 'walk', `${sanity}% cancels a held sprint`);
+    assert(await page.evaluate(() => Math.abs(body.velocity.x - speed * sanitySpeedFactor() / 60) < .01),
+      'Low sanity uses walking speed');
+    await page.keyboard.up('ShiftLeft');
+    await page.keyboard.down('ShiftRight');
+    await page.clock.runFor(100);
+    assert.equal((await state()).animation, 'walk', 'Pressing the other Shift key cannot restart a low-sanity sprint');
+    await page.keyboard.up('ShiftRight');
+    await page.keyboard.down('ShiftLeft');
+  }
+  await page.evaluate(() => setDebugSanity(35));
+  await page.clock.runFor(100);
+  assert.equal((await state()).animation, 'run', 'Recovery allows running again with Shift held');
+  await page.keyboard.up('ShiftLeft');
   await page.keyboard.up('d');
   await page.keyboard.down('ShiftLeft');
   await page.clock.runFor(100);
@@ -122,7 +143,7 @@ try {
   await page.keyboard.up('d');
   await page.keyboard.up('ShiftLeft');
   assert.deepEqual(errors, []);
-  console.log('PASS: Shift speed, eight frames, both Shift keys, release, collisions, jump, blur, scene reset and mobile layout.');
+  console.log('PASS: Shift speed, eight frames, both Shift keys, low-sanity cancellation and recovery, release, collisions, jump, blur, scene reset and mobile layout.');
 } finally {
   await browser.close();
 }

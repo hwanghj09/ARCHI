@@ -1,6 +1,7 @@
 // 엘리베이터 내부 화면: 층 버튼, 문 열고 닫기, 비상벨, 내리기.
 const cabin = document.getElementById('elevator-cabin');
 const cabinScene = document.getElementById('cabin-scene');
+const cabinDoorway = document.getElementById('cabin-doorway');
 const cabinStatus = document.getElementById('cabin-status');
 const cabinDisplay = document.getElementById('cabin-display');
 const cabinOpen = document.getElementById('cabin-open');
@@ -135,7 +136,13 @@ function refreshCabin() {
   cabinScene.dataset.floor = car.floor;
   // The cabin uses the building circuit; restoring one floor does not relight a moving car.
   cabinScene.dataset.blackout = String(buildingBlackout);
-  cabinScene.dataset.hallBlackout = String(buildingBlackout && car.floor > 0 && !solarPoweredFloors.includes(car.floor));
+  const hallBlackout = !floorHasPower(car.floor) || (car.floor === 17 && world.dataset.lights === 'off');
+  cabinScene.dataset.hallBlackout = String(hallBlackout);
+  // Read the same artwork as the corridor so new floors and art replacements stay in sync.
+  const hallArt = car.floor === 17 ? corridorBackground.dataset.litSrc : FLOOR_LAYOUTS[car.floor].backgroundImage.src;
+  const hallSrc = hallBlackout && switchableBackgrounds.has(hallArt) ? hallArt.replace(/\.png$/, '-off.png') : hallArt;
+  const hallImage = `url("${hallSrc}")`;
+  if (cabinDoorway.style.backgroundImage !== hallImage) cabinDoorway.style.backgroundImage = hallImage;
   cabinOpen.disabled = car.travelling;
   cabinClose.disabled = !powered || car.travelling;
   cabinExit.disabled = car.travelling || cabinScene.dataset.door !== 'open';

@@ -71,6 +71,11 @@
   word-break: keep-all;
   overflow-wrap: anywhere;
 }
+/* The world prop shares its inspection content, scaled into the painted board face. */
+.world-whiteboard-writing { position: absolute; width: 800px; padding: 0; pointer-events: none; transform-origin: 0 0; overflow: hidden; }
+.world-whiteboard-writing[data-surface="whiteboard"] .writing-board { border: 0; border-radius: 0; background: #d5dadd; box-shadow: none; }
+.world-whiteboard-writing .writing-tray { display: none; }
+#dynamic-scene[data-art="true"] .world-whiteboard-writing { filter: brightness(.68) saturate(.8); }
 .writing-board, .writing-book { --ink: var(--ink-black); position: relative; box-sizing: border-box; isolation: isolate; color: var(--ink); }
 .writing-sheet [data-ink="black"] { --ink: var(--ink-black); }
 .writing-sheet [data-ink="blue"] { --ink: var(--ink-blue); }

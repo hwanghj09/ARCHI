@@ -33,13 +33,15 @@ window.addEventListener('keydown', event => {
   }
   if (itemUseTime > 0 && event.code !== 'Escape') { event.preventDefault(); return; }
   if (transitioning) { event.preventDefault(); return; }
-  if (event.code === 'Tab' && !event.shiftKey && !selectingFloor && !usingComputer && !usingKeypad &&
+  // 조작 창(manual-control.js)은 자기 keydown에서 입력을 받는다. 창 밖에 초점이 있어도 수호는 움직이지 않는다.
+  if (usingControl) { if (event.code === 'Escape') closeControl(); event.preventDefault(); return; }
+  if (event.code === 'Tab' && !event.shiftKey && !selectingFloor && !usingComputer && !usingKeypad && !usingControl &&
       !usingPhone && !usingPowerPanel && (!usingInspection || inventoryShown())) {
     event.preventDefault();
     if (!event.repeat) toggleInventory();
     return;
   }
-  if (event.code === 'KeyP' && !event.repeat && !usingPhone && !selectingFloor && !usingComputer && !usingKeypad && !usingPowerPanel && !usingInspection) {
+  if (event.code === 'KeyP' && !event.repeat && !usingPhone && !selectingFloor && !usingComputer && !usingKeypad && !usingControl && !usingPowerPanel && !usingInspection) {
     event.preventDefault();
     togglePhone();
     return;

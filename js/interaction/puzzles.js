@@ -141,7 +141,9 @@ function cycleState(cycle) {
 function advanceCycle(door) {
   const { cycle } = door;
   const current = cycleState(cycle);
-  const next = (current + 1) % cycle.states.length;
+  // 조작 창에서 칸을 직접 골랐으면(controlChoice) 그 칸으로, 아니면 다음 칸으로 넘어간다.
+  const next = door.controlChoice ?? (current + 1) % cycle.states.length;
+  delete door.controlChoice;
   collectedItems.delete(`${cycle.id}=${cycle.states[current]}`);
   collectedItems.add(`${cycle.id}=${cycle.states[next]}`);
   door.element.dataset.state = String(next);

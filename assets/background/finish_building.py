@@ -57,7 +57,7 @@ def painted(relative, width, height=720, left=0, outdoor=False):
         save(result, output, original=source_path.as_posix(), preserved=[y, 570])
 
 
-for name, width in [('corridor', 5000), ('harmony', 3224), ('vision', 2356), ('clinic', 1860)]:
+for name, width in [('corridor-unified', 5000), ('harmony', 3224), ('vision', 2356), ('clinic', 1860)]:
     painted(f'floor1/{name}.png', width)
 for name, width in [('corridor', 5000), ('vip', 3072), ('test', 2304), ('verify', 1856)]:
     painted(f'floor7/{name}.png', width)

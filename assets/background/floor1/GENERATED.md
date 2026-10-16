@@ -1,5 +1,19 @@
 # 1층 로비 배경 합성 기록 (2026-09-30 전면 재작성)
 
+## 서쪽 벽과 엘리베이터 구간 통일 (2026-10-16)
+
+현재 복도는 `corridor-unified-finished.png`를 사용한다. 서쪽 0..1818 구간의 벽을 엘리베이터
+구간과 같은 회색 석재 패널로 편집했다. 천장 배관과 황동 띠는 기존 엘리베이터 그림에서
+연결해 높이 차이를 없앴다. 문 3개, 문패, 안내판은 원본 픽셀과 좌표를 보존하며,
+천장 0..100, 바닥 570 이후, 나머지 복도 1818..5000도 그대로다.
+
+- 도구: 기본 내장 `image_gen` 편집, 입력은 기존 완성 복도의 서쪽 구간과 엘리베이터 구간.
+- 생성 원본: [source/corridor-west-unified.png](source/corridor-west-unified.png).
+- 프롬프트: [prompts/corridor-west-unified.txt](prompts/corridor-west-unified.txt).
+- 재조립: 저장소 루트에서 `node scripts/prepare-floor1-wall.mjs`. 보존 영역 픽셀 검증 포함.
+- 전체 마감 재생성 시에도 `finish_building.py`가 `corridor-unified.png`를 사용한다.
+- PC 1280×720에서 이음매, 안내판, 출입 판정 및 전력 전환을 확인한다.
+
 > 2026-10-16 마감 갱신: 게임은 원본 좌표를 보존한 높이 760의 *-finished.png를 사용한다. 원본 합성 후 저장소 루트에서 python -B assets/background/finish_building.py를 실행한다. 현재 구현·전력 전환·검증 방법은 [건물 전체 마감](../FINISHING.md)을 따른다. 아래는 원본 제작 기록이다.
 
 이 문서는 전면 재작성이다. 이전 버전(2026-09-26, "3차")은 입구·안내데스크·로봇·게이트가 복도

@@ -2,11 +2,13 @@ import assert from 'node:assert/strict';
 import { mkdir } from 'node:fs/promises';
 import { chromium } from 'playwright';
 import { finishSceneTransition } from './scene-transition.mjs';
+import { autoControl } from './auto-control.mjs';
 
 await mkdir('.local', { recursive: true });
 const browser = await chromium.launch();
 try {
   const page = await browser.newPage({ viewport: { width: 1280, height: 720 } });
+  await autoControl(page);
   const errors = [];
   page.on('pageerror', error => errors.push(error.message));
   await page.clock.install({ time: new Date('2026-10-04T00:00:00Z') });

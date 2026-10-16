@@ -71,10 +71,12 @@ function doorHintText(door) {
 }
 
 function interact() {
-  if (itemUseTime > 0 || openingActive || blackoutSceneActive || cctvSceneActive || playerCaught || hallucinationCaught || transitioning || selectingFloor || usingComputer || usingKeypad || usingPhone || usingPowerPanel || usingInspection) return;
+  if (itemUseTime > 0 || openingActive || blackoutSceneActive || cctvSceneActive || playerCaught || hallucinationCaught || transitioning || selectingFloor || usingComputer || usingKeypad || usingControl || usingPhone || usingPowerPanel || usingInspection) return;
   updateInteraction();
   if (blackoutSceneActive || cctvSceneActive) return;
   if (!nearbyDoor) return;
+  // 레버·열쇠·전원선 같은 장치(control)는 먼저 직접 조작하게 하고, 다 하면 이 함수를 다시 불러 결과를 보인다(manual-control.js).
+  if (needsControl(nearbyDoor)) { openControl(nearbyDoor); return; }
   if (nearbyDoor.type === 'computer') {
     // 정전 중에는 켜지지 않는다. 옥상 태양광 전력을 17층에 보내면 다시 쓸 수 있다.
     if (!floorHasPower(currentSceneFloor)) return showStatus('전원이 들어오지 않는다. 전력을 공급해야 한다.', 4000);

@@ -20,6 +20,7 @@ try {
   }));
   assert.deepEqual(await state(), { blackout: true, real: true, elevator: false, floors: [true, true, false, false, false, false] });
 
+  await page.keyboard.press('F2');
   await page.locator('#debug-console-toggle').click();
   await page.locator('#debug-all-power').click();
   assert.equal(await page.locator('#debug-all-power').getAttribute('aria-pressed'), 'true');

@@ -67,7 +67,7 @@ function restoreProgress(data) {
     resetComputerDesktop();
     releaseInput();
     // 재개할 때 조사·휴대폰 등의 창은 닫는다. 퍼즐 진행과 실제 게임 상태는 복원한다.
-    usingPhone = usingComputer = usingKeypad = usingPowerPanel = usingInspection = selectingFloor = false;
+    usingPhone = usingComputer = usingKeypad = usingControl = usingPowerPanel = usingInspection = selectingFloor = false;
     transitioning = playerCaught = blackoutSceneActive = storySceneActive = hallucinationCaught = cctvSceneActive = false;
     cameraZoom = 1; cameraShake.x = cameraShake.y = 0; cctvRevealWall = null; cctvFirstViewOpen = false;
     openingActive = true; // 장면을 조립하는 동안 정전 컷씬과 입력이 시작되지 않게 한다.

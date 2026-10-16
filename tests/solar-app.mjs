@@ -177,6 +177,8 @@ try {
   await page.keyboard.press('Escape');
   await finishSceneTransition(page);
   await page.evaluate(() => { buildingBlackout = true; solarEnabled = true; solarPoweredFloors = [17]; updatePowerState(); });
+  await page.evaluate(() => refreshObjective());
+  assert.equal(await page.evaluate(() => currentObjective.title), '1층 전력 켜기', 'Actual USB installation advances the power objective');
   await page.keyboard.press('p');
   await page.locator('[data-phone-app="solar"]').click();
   const supply = async floor => {
@@ -184,8 +186,13 @@ try {
     await page.locator('#phone-solar-supply').click();
   };
   const floors = () => page.evaluate(() => [...solarPoweredFloors]);
+  await supply(1);
+  await page.evaluate(() => refreshObjective());
+  assert.equal(await page.evaluate(() => currentObjective.text), '엘리베이터를 타고 1층으로 내려가자.');
   await supply(12);
   assert.deepEqual(await floors(), [12]);
+  await page.evaluate(() => refreshObjective());
+  assert.equal(await page.evaluate(() => currentObjective.title), '1층 전력 켜기', 'Switching power away from the lobby restores its prerequisite');
   await page.locator('#phone-solar-floor').selectOption('7');
   await page.locator('#phone-solar-supply').focus();
   for (let i = 0; i < 4; i++) await page.keyboard.down('Enter');
@@ -206,6 +213,7 @@ try {
   assert.deepEqual(await floors(), []);
   assert.equal(await page.evaluate(() => solarEnabled), false);
   await page.locator('#phone-solar-toggle').click();
+  assert.match(await page.locator('#interaction-status').textContent(), /휴대폰의 비상 전력 제어 앱에서 공급할 층/);
   await supply(17);
   const saved = await page.evaluate(() => progressSnapshot());
   assert(saved.items.includes('solar-app-installed'));

@@ -266,27 +266,8 @@ try {
   await page.clock.runFor(100);
   near((await state()).x, beforeResize.x, 'Resize must preserve world position');
   near((await state()).feet, beforeResize.feet, 'Resize must preserve floor contact');
-  assert.equal(await page.locator('nav').count(), 1, 'On-screen controls must be present for touch');
-  assert.equal(await page.locator('nav button').count(), 5, 'Left, right, interact, jump and phone buttons must exist');
-
-  const holdButton = async (selector, duration) => {
-    const box = await page.locator(selector).boundingBox();
-    await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
-    await page.mouse.down();
-    await page.clock.runFor(duration);
-    await page.mouse.up();
-    await page.clock.runFor(34);
-  };
-  const beforeButtons = await state();
-  await holdButton('button[data-direction="-1"]', 400);
-  const afterLeftButton = await state();
-  assert(afterLeftButton.x < beforeButtons.x - 60, 'Left button must move the player left');
-  await holdButton('button[data-direction="1"]', 400);
-  assert((await state()).x > afterLeftButton.x + 60, 'Right button must move the player right');
-  await page.locator('#jump').click();
-  await page.clock.runFor(150);
-  assert((await state()).feet < 500, 'Jump button must lift the player');
-  await page.clock.runFor(900);
+  assert.equal(await page.locator('nav button').count(), 2, 'Only interact and phone screen buttons remain');
+  assert.equal(await page.locator('nav [data-direction], nav #jump').count(), 0, 'Movement and jump use the keyboard');
 
   await hold('a', 300);
   assert((await state()).x < beforeResize.x - 40, 'Keyboard must still move left');

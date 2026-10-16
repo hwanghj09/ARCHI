@@ -58,7 +58,9 @@ function setSolarPower(enabled) {
   solarEnabled = enabled;
   if (!enabled) solarPoweredFloors = [];
   updatePowerState();
-  showStatus(enabled ? '태양광 비상 전력 ON · 엘리베이터 운행이 복구됐다. 17층 전력을 켜고 작업용 컴퓨터로 돌아가자.' :
+  showStatus(enabled ? (collectedItems.has('solar-app-installed') ?
+    '태양광 비상 전력 ON · 휴대폰의 비상 전력 제어 앱에서 공급할 층을 선택하자.' :
+    '태양광 비상 전력 ON · 엘리베이터 운행이 복구됐다. 17층 전력을 켜고 작업용 컴퓨터로 돌아가자.') :
     '태양광 비상 전력 OFF · 정전 상태에서는 엘리베이터가 멈춘다.', 6000);
 }
 
@@ -193,7 +195,7 @@ powerLever.addEventListener('click', () => {
     if (collectedItems.has('roof-wires-fixed')) { setSolarPower(true); return; }
     closePowerPanel();
     openKeypad({ type: 'power', name: '태양광 비상 전력 승인', code: '1997',
-      codePrompt: '4자리 비밀번호를 입력하세요. 관리 메모는 17층 CCTV 아래 게시판에 붙어 있다.' });
+      codePrompt: '4자리 비밀번호를 입력하세요.' });
     return;
   }
   setSolarPower(false);

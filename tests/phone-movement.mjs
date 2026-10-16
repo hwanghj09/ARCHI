@@ -132,12 +132,12 @@ try {
   await page.evaluate(() => { phoneBattery = 50; refreshPhone(); });
   await page.locator('#phone-light').click();
   await page.locator('#phone-close').click();
-  await page.locator('nav [data-direction="-1"]').dispatchEvent('pointerdown', { pointerId: 1, button: 0 });
+  await page.keyboard.down('a');
   await page.clock.runFor(100);
   assert.equal(await active().getAttribute('id'), 'phone-walk-sheet');
   assert((await active().getAttribute('src')).endsWith('walk-on.png'));
   await page.screenshot({ path: '.local/phone-walk-mobile.png' });
-  await page.locator('nav [data-direction="-1"]').dispatchEvent('pointerup', { pointerId: 1, button: 0 });
+  await page.keyboard.up('a');
   // Sample the actual CSS darkness mask over white to verify forward light and dark rear.
   await page.setViewportSize({ width: 1280, height: 720 });
   await page.clock.runFor(34);

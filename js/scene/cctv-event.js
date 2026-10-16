@@ -52,7 +52,7 @@ const cctvLightsOutItem = 'b1-lights-out';
 
 function shouldStartCctvScene() {
   return room === 'dynamic' && dynamicFloorId === cctvRoomId && !collectedItems.has(cctvLiveItem) && !cctvSceneActive &&
-    !transitioning && !mainMenuActive && !restoringProgress && !selectingFloor && !usingComputer && !usingKeypad &&
+    !transitioning && !mainMenuActive && !restoringProgress && !selectingFloor && !usingComputer && !usingKeypad && !usingControl &&
     !usingPhone && !usingPowerPanel && !usingInspection;
 }
 

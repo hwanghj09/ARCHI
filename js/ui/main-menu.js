@@ -62,7 +62,7 @@ function closeMainMenu() {
 
 function openGameMenu() {
   if (!gameStarted || mainMenuActive || openingActive || blackoutSceneActive || cctvSceneActive || playerCaught || hallucinationCaught || transitioning ||
-      usingPhone || usingComputer || usingKeypad || usingInspection || usingPowerPanel) return;
+      usingPhone || usingComputer || usingKeypad || usingControl || usingInspection || usingPowerPanel) return;
   saveProgress();
   mainMenuActive = true;
   document.body.dataset.mainMenu = 'true';

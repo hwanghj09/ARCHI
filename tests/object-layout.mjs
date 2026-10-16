@@ -50,7 +50,19 @@ try {
           parseFloat(element.style.width), parseFloat(element.style.height)) };
       });
       const chair = currentDoors.find(door => door.name === '인터페이스 의자');
-      if (chair) props.push({ name: chair.name, rect: outlineBox(chair) });
+      if (chair) {
+        props.push({ name: chair.name, rect: outlineBox(chair) });
+        const style = getComputedStyle(chair.element);
+        const image = new Image();
+        image.src = style.backgroundImage.match(/url\("(.+)"\)/)?.[1] || '';
+        await image.decode();
+        if (!image.src.endsWith('/floor07/interface-chair.png') || image.naturalWidth !== 256 || image.naturalHeight !== 451)
+          throw new Error('The interface chair uses its finished transparent artwork');
+        if (parseFloat(chair.element.style.top) + parseFloat(chair.element.style.height) !== floorY)
+          throw new Error('The interface chair base must meet the walking floor');
+        for (const pseudo of ['::before', '::after']) if (getComputedStyle(chair.element, pseudo).content !== 'none')
+          throw new Error('The old placeholder chair must not cover the artwork');
+      }
       return { exit: outlineBox(door), props, seats: config.fixtures?.find(fixture => fixture.style === 'stall-rows') };
     }, id);
     const [x, y, w, h] = geometry.exit;

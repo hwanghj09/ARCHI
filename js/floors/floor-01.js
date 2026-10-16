@@ -13,7 +13,7 @@
 // 리허설에서는 완벽한 ARCHI 자동 반주(2층 영사실 녹화와 이어짐). 정전 상태(조명·모니터 꺼짐, 로봇 정비 패널만 도크 배터리)를 기준으로 썼다.
 const FLOOR1_LAYOUT = {
   header: '1F · 로비', background: '#1d1b17', theme: 'atrium',
-  backgroundImage: { src: 'assets/background/floor1/corridor-finished.png', height: 760, top: 0 },
+  backgroundImage: { src: 'assets/background/floor1/corridor-unified-finished.png', height: 760, top: 0 },
   // 엘리베이터 3대: 그림 속 벽감이 BUILDING_CORE 좌표보다 오른쪽으로/좁게 쏠려 있어(실측) 보정.
   elevatorOffsets: [130, 74, 51],
   elevatorWidthDeltas: [-21, -16, -16],
@@ -75,9 +75,10 @@ const FLOOR1_LAYOUT = {
         { text: 'B2  AI 서버실', size: 'small' }],
     },
     { name: '스피드 게이트', x: 4300, y: 470, width: 100, style: 'speed-gates', outline: [4316, 464, 179, 93],
-      message: '출입증을 대자 작은 화면이 붉게 깜빡인다: "미등록 출입증." 그래도 날개는 정전 때 저절로 풀리는 방식이라 손으로 밀면 그냥 열린다.',
+      control: { kind: 'card', label: '출입증을 리더기에 대자.' },
+      message: '작은 화면이 붉게 깜빡인다: "미등록 출입증." 그래도 날개는 정전 때 저절로 풀리는 방식이라 손으로 밀면 그냥 열린다.',
       surface: 'screen', look: 'lcd', writing: [{ text: '미등록 출입증.', ink: 'red', size: 'large', align: 'center' }],
-      caption: '출입증을 대자 작은 화면이 깜빡인다. 그래도 날개는 정전 때 저절로 풀리는 방식이라 손으로 밀면 그냥 열린다.' },
+      caption: '작은 화면이 깜빡인다. 그래도 날개는 정전 때 저절로 풀리는 방식이라 손으로 밀면 그냥 열린다.' },
     // 배경에 그려진 로봇은 빈 도크 패치로 가리고, 이동 스프라이트와 조사 범위를 함께 갱신한다.
     // 순찰 서쪽 경계(3040)는 비상계단(BUILDING_CORE.stairs, 보정 후 2895~3040) 동쪽 끝 — 로비 동쪽
     // 구역(스피드 게이트·정문)만 돌고 비상계단을 넘어 엘리베이터·방 쪽으로는 가지 않는다.

@@ -4,6 +4,7 @@ const debugSanity = document.getElementById('debug-sanity');
 const debugSanityRange = document.getElementById('debug-sanity-range');
 const debugSanityNumber = document.getElementById('debug-sanity-number');
 debugSanity.addEventListener('keydown', event => event.stopPropagation());
+debugSanity.addEventListener('submit', event => event.preventDefault());
 
 function setDebugSanity(value) {
   sanity = Math.max(0, Math.min(100, Number(value) || 0));
@@ -17,6 +18,7 @@ function syncDebugSanity() {
   const rounded = String(Math.round(sanity));
   if (document.activeElement !== debugSanityRange && debugSanityRange.value !== rounded) debugSanityRange.value = rounded;
   if (document.activeElement !== debugSanityNumber && debugSanityNumber.value !== rounded) debugSanityNumber.value = rounded;
+  syncDebugSidebar();
   requestAnimationFrame(syncDebugSanity);
 }
 syncDebugSanity();
@@ -29,6 +31,7 @@ debugConsole.addEventListener('keydown', event => event.stopPropagation());
 debugConsoleToggle.addEventListener('click', () => {
   debugConsolePanel.hidden = !debugConsolePanel.hidden;
   debugConsoleToggle.setAttribute('aria-expanded', String(!debugConsolePanel.hidden));
+  debugConsoleToggle.textContent = debugConsolePanel.hidden ? '이벤트 펼치기' : '이벤트 접기';
 });
 for (const [id, trigger] of [['debug-chase-hallucination', debugTriggerChaseHallucination], ['debug-spawn-hallucination', debugTriggerAmbientHallucination], ['debug-jumpscare', debugTriggerJumpscare]]) {
   document.getElementById(id).addEventListener('click', () => {

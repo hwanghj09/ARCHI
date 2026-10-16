@@ -34,6 +34,8 @@ let usingKeypad = false;
 let usingPhone = false;
 let usingPowerPanel = false;
 let usingInspection = false;
+// 직접 조작하는 장치(manual-control.js): 레버·열쇠·전원선 같은 조작 창이 열려 있는 동안 플레이어 조작을 멈춘다.
+let usingControl = false;
 let phoneBattery = 100;
 // 휴대폰을 충전하는 방·층·콘센트 위치. 맡긴 방의 같은 자리에서 찾아간다.
 let phoneDock = null;

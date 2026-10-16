@@ -714,9 +714,7 @@ body { margin: 0; overflow: hidden; background: #27292b; color: #eee; font: 14px
 #dynamic-scene .fixture.demo-screen { border: 10px solid #2a2520; background: linear-gradient(115deg, transparent 0 38%, #ffffff0a 38% 42%, transparent 42%), #050506; }
 /* VIP Room 그림(vip.png)에 꺼진 스크린 틀이 그려져 있어 art 모드에서는 CSS 스크린을 숨긴다(fixture 좌표가 그림 속 틀이다). */
 #dynamic-scene[data-art="true"] .fixture.demo-screen { border: 0; background: none; }
-#dynamic-scene .fixture.interface-chair { background: linear-gradient(#4a4f56, #4a4f56) 50% 100% / 14px 44px no-repeat, repeating-linear-gradient(90deg, transparent 0 18px, #8a2a24 18px 20px) 60px 10px / 120px 2px no-repeat; }
-#dynamic-scene .fixture.interface-chair::before { content: ''; position: absolute; left: 20px; top: 0; width: 56px; height: 128px; border-radius: 18px 18px 6px 6px; background: radial-gradient(circle at 50% 14%, #9aa6b0 0 5px, transparent 6px), linear-gradient(#3e444c, #2c3036); box-shadow: 0 -8px 0 -3px #6b2622; }
-#dynamic-scene .fixture.interface-chair::after { content: ''; position: absolute; left: 20px; right: 20px; bottom: 44px; height: 30px; border-radius: 4px; background: radial-gradient(circle, #c9d2da 0 3px, transparent 4px) right 8px center / 12px 12px no-repeat, linear-gradient(#3e444c, #2c3036); }
+#dynamic-scene .fixture.interface-chair { background: url('../assets/objects/floor07/interface-chair.png') center bottom / auto 100% no-repeat; image-rendering: pixelated; filter: brightness(.8) saturate(.8); }
 /* 6F TmaxTibero 기술본부(oncall 테마): 올리브색 카펫 타일과 카키 벽, 겨자색 표지. 블라인드 너머 꺼진 단말이 줄지은 원격 지원실,
    케이블 트레이와 UPS로 붉은 불이 켜진 카드 리더의 회선 관리실, 간유리 작은 창과 "당직실" 명판의 당직실. */
 #dynamic-scene[data-theme="oncall"] > .floor { background: repeating-conic-gradient(#1d1f16 0 25%, #191a12 0 50%) 0 0 / 80px 80px; border-top-color: #6e6a3a; }
@@ -922,9 +920,6 @@ nav button { width: 56px; height: 52px; flex-shrink: 0; padding: 0; border: 1px 
 nav button:hover { border-color: #b9c6cf; }
 nav button.active, nav button:active { background: #bdd1dc; color: #22282e; }
 nav button:focus-visible { outline: 2px solid #c9dde5; outline-offset: 4px; }
-/* 테스트용 층 이동 창 */
-#debug-floor { position: fixed; top: 64px; left: max(24px, env(safe-area-inset-left)); z-index: 5; display: flex; align-items: center; gap: 6px; padding: 6px 8px; background: #101b20e6; border: 1px dashed #c9a13b; font-size: 12px; }
-#debug-floor select, #debug-floor button { font: 12px Arial, sans-serif; }
 /* 도어락 키패드: 방 문·소품의 code. 열려 있는 동안 스테이지 조작이 멈춘다 */
 #keypad { position: fixed; left: 50%; top: 50%; z-index: 6; box-sizing: border-box; width: min(340px, calc(100vw - 32px)); padding: 18px; border: 2px solid #3d4e52; background: #0d1417f2; color: #cfd9d3; font: 14px Arial, sans-serif; transform: translate(-50%, -50%); box-shadow: 0 12px 40px #000a; }
 #keypad[hidden] { display: none; }

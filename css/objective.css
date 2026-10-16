@@ -5,6 +5,7 @@
 #objective-text { margin: 4px 0 0; color: #d8d0bb; font: 11pt/1.5 Arial, sans-serif; word-break: keep-all; }
 #objective.updated { animation: objective-updated 1.6s ease-out; }
 @keyframes objective-updated { from { border-color: #dbc18b; box-shadow: 0 0 0 2px #dbc18b80; } }
-body[data-main-menu] #objective, body:has(#world[data-opening]) #objective, body:has(#world[data-blackout-scene]) #objective { visibility: hidden; }
+body[data-main-menu] #objective, body:has(#world[data-opening]) #objective, body:has(#world[data-blackout-scene]) #objective,
+body:has(#elevator-cabin:not([hidden])) #objective { visibility: hidden; }
 @media (max-height: 480px) { #objective { top: 112px; padding: 6px 10px; } }
 @media (prefers-reduced-motion: reduce) { #objective.updated { animation: none; } }

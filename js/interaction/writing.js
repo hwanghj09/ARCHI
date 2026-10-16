@@ -41,6 +41,31 @@ const WRITING_BOARDS = new Set(['whiteboard', 'corkboard', 'chalkboard']);
 const WRITING_PINNED = new Set(['note', 'paper']);
 const WRITING_LINE_TILTS = [-0.5, 0.3, -0.15, 0.45, -0.35, 0.2];
 const WRITING_PINNED_TILTS = [-2.2, 1.6, -1, 2.4, -1.7, 0.8];
+// Writable faces in the 512x256 prop artwork; frames and wheels remain visible.
+const WHITEBOARD_FACES = {
+  'rolling-whiteboard': [104, 16, 304, 137], 'research-board': [51, 34, 408, 132],
+  'strategy-board': [51, 42, 408, 128], 'sales-kpi-board': [44, 37, 423, 136],
+  'dispatch-board': [52, 48, 356, 121], 'labeling-board': [51, 40, 382, 132],
+  'training-slide-board': [51, 36, 408, 130],
+};
+
+function addWorldWhiteboardWriting(element, prop) {
+  const face = WHITEBOARD_FACES[prop.file];
+  if (!face || !prop.writing?.length) return;
+  const [x, y, width, height] = face;
+  const scale = prop.worldWidth / prop.size[0];
+  const sheet = renderWritingSheet({ surface: 'whiteboard', writing: prop.writing, image: prop.image });
+  sheet.classList.add('world-whiteboard-writing');
+  sheet.setAttribute('aria-hidden', 'true');
+  Object.assign(sheet.style, { left: `${x * scale}px`, top: `${y * scale}px` });
+  element.append(sheet);
+  const fit = () => {
+    if (sheet.isConnected && sheet.scrollHeight) sheet.style.transform = `scale(${width * scale / 800}, ${height * scale / sheet.scrollHeight})`;
+  };
+  for (const image of sheet.querySelectorAll('img')) image.addEventListener('load', fit);
+  fit();
+  document.fonts.ready.then(fit);
+}
 
 function writingNode(tag, className, text) {
   const node = document.createElement(tag);

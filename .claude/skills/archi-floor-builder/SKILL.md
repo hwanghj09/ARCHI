@@ -244,6 +244,13 @@ work while standing on the floor (y=570), never from on top of a crate.
 - Selector: a prop with `cycle: { id, states, messages, initial }` advances one state per E and holds exactly one item
   `${id}=${state}` (`data-state` = index). Other props `requires` it and doors use it as `unlockedBy`, so a device
   works only while selected; the corridor door re-locks on the next rebuild once the state moves (4F UPS).
+- Hands-on device: a prop, fixture or barrier that the player physically operates (lever, switch, key, plug, button)
+  takes `control: { kind, label, ... }` or a list of steps, and its `message` then describes only the result, never
+  the action ("레버를 내렸다" is the player's job). Kinds: `lever`/`switch` (`dir: 'down'|'up'`, `ends: [top, bottom]`),
+  `plug` (`dir: 'out'|'in'`, `socket`, `item`), `card`, `key`/`crank`/`clock` (`turn` degrees), `selector` (picks a
+  `cycle` state), `press` (`text`). It opens once requirements are met and before the result; `doneBy` / `when` cover
+  devices without `gives`. Room exit shutters use `raiseControl` next to `raiseMessage` (16F CU). See
+  `js/interaction/manual-control.js`; tests that only check results import `tests/auto-control.mjs`.
 - A fixture with `requires` gets `data-requires` and `data-ready` (all collected). `refreshReady()` runs on build,
   after any `gives` and after a cycle step, so CSS can show a state change in the same room (2F booth window).
 - A fixture can take `code` + `codePrompt` + `gives` like a prop (1F robot panel); after the right code, E shows

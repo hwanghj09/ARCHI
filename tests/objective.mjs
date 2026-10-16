@@ -60,7 +60,25 @@ try {
   };
   assert.equal(await titleAfter(() => collectedItems.add('rooftop-key')), '정전', 'Picking up the rooftop key keeps the blackout objective');
   assert.equal(await titleAfter(() => collectedItems.add('rooftop-unlocked')), '비상 전력 켜기');
-  assert.equal(await titleAfter(() => { solarEnabled = true; }), '퇴근하기');
+  assert.equal(await titleAfter(() => setSolarPower(true)), '17층 전력 켜기');
+  assert.match(await page.locator('#interaction-status').textContent(), /17층 전력을 켜고 작업용 컴퓨터로/);
+  await waitTyped('17층 전력 켜기', '옥상 배전반에서 17층 전력을 켜 작업용 컴퓨터를 복구하자.');
+  assert.equal(await titleAfter(() => supplySolarFloor(17)), '전력 앱 내려받기');
+  await waitTyped('전력 앱 내려받기', '17층 작업용 컴퓨터의 블로그에서 비상 전력 제어 앱을 내려받자.');
+  assert.equal(await titleAfter(() => collectedItems.add('solar-app-downloaded')), '전력 앱 설치하기');
+  await waitTyped('전력 앱 설치하기', '17층 컴퓨터에 휴대폰을 USB로 연결하고 파일 전송 앱에서 설치하자.');
+
+  // 먼저 1층으로 가 버린 저장도, 설치를 마치기 전에는 정문으로 보내지 않는다.
+  const beforeEarlyVisit = await page.evaluate(() => progressSnapshot());
+  await page.evaluate(() => { performFloorChange('f1', 0); refreshObjective(); saveProgress(); });
+  await page.reload(); await page.locator('#menu-continue').click();
+  await page.waitForFunction(() => currentObjective?.title === '전력 앱 설치하기');
+  assert(await page.evaluate(() => collectedItems.has('f1-reached')));
+  assert.equal(await titleAfter(() => supplySolarFloor(1)), '17층 전력 켜기', 'An uninstalled app still needs the 17F computer');
+  await page.evaluate(data => restoreProgress(data), beforeEarlyVisit);
+  assert.equal(await titleAfter(() => collectedItems.add('solar-app-installed')), '1층 전력 켜기');
+  await waitTyped('1층 전력 켜기', '휴대폰(P)의 비상 전력 제어 앱에서 1층에 전력을 공급하자.');
+  assert.equal(await titleAfter(() => supplySolarFloor(1)), '퇴근하기');
   await waitTyped('퇴근하기', '엘리베이터를 타고 1층으로 내려가자.');
   // 처음 1층에 내려오면 같은 제목 아래 내용이 '정문으로 나가자.'로 바뀌고, 다른 층으로 가도 유지된다.
   await page.evaluate(() => { solarPoweredFloors = [1]; updatePowerState(); performFloorChange('f1', 0); });
@@ -72,16 +90,17 @@ try {
   // 로봇 추격이 끝나고 3초 뒤 혼잣말 컷씬이 나오고, Esc로 끝내면 '정신 불안' 목표가 생긴다.
   await page.evaluate(() => {
     collectedItems.add('f1-chase-ended'); // 추격이 끝난 것으로 치면 3초 뒤 컷씬이 시작된다
+    collectedItems.delete('solar-app-installed'); solarPoweredFloors = [17]; updatePowerState(); // 이전 저장의 후속 이야기는 설치 목표로 되돌리지 않는다
     performFloorChange('f1', 0);
   });
   await page.locator('#story-scene').waitFor({ state: 'visible' });
   assert.equal(await page.locator('#story-caption').textContent(), '왜 경비 로봇이 나를 공격하려고 했던 거지?');
   await page.waitForFunction(() => storyCaption.textContent.startsWith('으윽'), null, { timeout: 5000 });
-  await page.waitForFunction(() => storyCaption.textContent.startsWith('편의점에 가서'), null, { timeout: 5000 });
+  await page.waitForFunction(() => storyCaption.textContent.startsWith('16층 CU 편의점에 가서'), null, { timeout: 5000 });
   await page.keyboard.press('Escape');
   assert(await page.locator('#story-scene').isHidden(), 'Esc ends the scene');
   assert.equal(await page.evaluate(() => collectedItems.has('story-anxiety-seen')), true);
-  await waitTyped('정신 불안', '편의점에서 항불안제를 찾자.');
+  await waitTyped('정신 불안', '16층 CU 편의점에서 항불안제를 찾아 가방(Tab)에서 복용하자.');
 
   // 항불안제를 챙기거나 사용해도 목표는 유지되고, 사용하고 4초 뒤 두 번째 컷씬이 나오고, 끝나면 '로봇의 습격! 그 이유는?' 목표가 생긴다.
   await page.evaluate(() => collectedItems.add('f16-antianxiety'));

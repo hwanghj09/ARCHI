@@ -18,6 +18,7 @@ const luminousSigns = {
   'floor1/clinic-finished': [1860, 760, [[888, 211, 71, 46]]],
   'floor1/corridor': [5000, 720, [[2941, 193, 54, 35]]],
   'floor1/corridor-finished': [5000, 760, [[2941, 193, 54, 35]]],
+  'floor1/corridor-unified-finished': [5000, 760, [[2941, 193, 54, 35]]],
   'floor1/vision': [2356, 720, [[270, 270, 49, 32]]],
   'floor1/vision-finished': [2356, 760, [[270, 270, 49, 32]]],
   'floor7/corridor': [5000, 720, [[2921, 190, 58, 38]]],

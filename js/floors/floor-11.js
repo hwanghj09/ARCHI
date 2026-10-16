@@ -23,11 +23,13 @@ const FLOOR11_LAYOUT = {
   ],
   barriers: [
     { name: '방화셔터', x: 4292, y: 112, width: 24, style: 'shutter', outline: [4283, 86, 31, 484], sprite: 'assets/objects/floor11/fire-shutter-states.png', requires: 'f11-crank', gives: 'f11-shutter-open',
+      control: [{ kind: 'plug', dir: 'in', label: '수동 개방 핸들을 구멍에 꽂자.', socket: '개방구', item: '핸들' },
+        { kind: 'crank', label: '핸들을 두 바퀴 돌려 셔터를 올리자.' }],
       animation: { src: 'assets/objects/floor11/fire-shutter-crank.png', frames: 4 }, sound: 'shutter',
       missingMessage: '방화셔터가 바닥까지 내려와 있다. 제어함 표시: "23:58 원격 폐쇄 · SYSTEM". 수동 개방 핸들을 꽂는 구멍이 비어 있다.',
       missingSheet: { surface: 'screen', look: 'lcd', writing: [{ as: 'title', text: '방화셔터 제어' }, '23:58  원격 폐쇄', '       SYSTEM'],
         caption: '방화셔터가 바닥까지 내려와 있다. 수동 개방 핸들을 꽂는 구멍이 비어 있다.' },
-      message: '수동 개방 핸들을 꽂고 돌리자 셔터가 천천히 말려 올라간다.',
+      message: '셔터가 천천히 말려 올라간다.',
       takenMessage: '셔터가 천장까지 말려 올라가 있다. 불이 난 흔적은 어디에도 없다.' },
   ],
   props: [

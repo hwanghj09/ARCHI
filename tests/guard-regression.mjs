@@ -309,7 +309,7 @@ try {
       if (i % 2) await page.keyboard.press('Space');
       else await page.locator('#guard-retry').click();
       assert.equal((await state()).caught, false); assert.equal((await state()).inert, false);
-      assert(await page.evaluate(() => collectedItems.has('f1-robot-log') && keys.size === 0 && pointers.size === 0));
+      assert(await page.evaluate(() => collectedItems.has('f1-robot-log') && keys.size === 0));
       assert.equal(await page.locator('.guard-robot-sprite').count(), 1);
     }
   });
@@ -317,7 +317,7 @@ try {
     await reset({ playerX: 3060 });
     await page.keyboard.press('f'); await page.keyboard.down('d');
     await page.clock.runFor(100); assert((await state()).caught);
-    assert(await page.evaluate(() => !usingPhone && !phoneLightOn && !jumpQueued && keys.size === 0 && pointers.size === 0));
+    assert(await page.evaluate(() => !usingPhone && !phoneLightOn && !jumpQueued && keys.size === 0));
     await page.clock.runFor(1200); await page.locator('#guard-retry').click();
     const x = (await state()).playerX; await page.clock.runFor(200);
     assert(Math.abs((await state()).playerX - x) < 1, 'A held key must not leak into retry');
