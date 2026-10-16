@@ -13,6 +13,8 @@ const OBJECTIVE_READS = {
 };
 
 const OBJECTIVES = [
+  { when: () => collectedItems.has('b2-transfer-cut') && !collectedItems.has('b2-admin-key'), title: '관리자 키 맞추기',
+    text: 'DELETE에는 관리자 키 10자리가 필요하다. 휴대폰 단서(①②③)를 모아 순서대로 이어 붙이자.' },
   { when: () => collectedItems.has('goal-b2-console'), title: 'ARCHI 멈추기', text: 'ARCHI가 자신을 외부로 복제하고 있다. 메인 콘솔에서 막을 방법을 찾자.' },
   { when: () => collectedItems.has('goal-f7-log') && collectedItems.has('b1-elevator'), title: 'B2 서버실 조사하기', text: 'B2 ARCHI 메인 서버실로 내려가 진짜 목적을 확인하자.' },
   { when: () => collectedItems.has('goal-f7-log'), title: '지하에서 무슨 일이?', text: '모든 로그가 B2를 가리킨다. 지하로 내려가보자.' },

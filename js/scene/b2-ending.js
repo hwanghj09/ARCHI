@@ -41,13 +41,27 @@ function offerArchiDelete(door) {
   b2DeleteButton.hidden = false;
 }
 
+// 관리자 키(퍼즐 C): 12층 팀장 책상·7층 망분리 백업 장비·B1 시설관리팀장 책상의 쪽지가 알려 주는 세 칸을 이어 붙인다.
+// ① 프로젝트 시작 월일(12층 진열장 0412) ② 첫 외부 연결 시험 시각(7층 로그 0341) ③ ARCHI-MAIN 랙 번호(B2 메인 랙 27).
+// 한 번 맞히면(b2-admin-key) 체크포인트에서 다시 누를 때는 묻지 않는다. ARCHI는 입력 칸에 가짜 힌트(옥상 비밀번호)를 띄운다.
+const b2AdminCode = '0412034127';
 b2DeleteButton.addEventListener('click', () => {
+  if (!collectedItems.has('b2-admin-key')) {
+    closeInspection();
+    openKeypad({ name: 'DELETE ARCHI · 관리자 확인', code: b2AdminCode, gives: 'b2-admin-key', wrongMessage: 'ARCHI: "틀렸어요, 수호 씨. 힌트는 1997이라니까요."',
+      codePrompt: '관리자 키 10자리를 입력하세요. (① 4자리 · ② 4자리 · ③ 2자리) 화면 구석에 ARCHI의 글씨가 끼어든다: "힌트: 1997"',
+      then: confirmArchiDelete });
+    return;
+  }
+  confirmArchiDelete();
+});
+function confirmArchiDelete() {
   openInspection('DELETE ARCHI', '복구할 수 없습니다. 계속하시겠습니까?');
   finishInspectionText();
   b2ConfirmYes.hidden = b2ConfirmNo.hidden = false;
   inspectionClose.hidden = true;
   b2ConfirmNo.focus();
-});
+}
 b2ConfirmNo.addEventListener('click', () => closeInspection());
 b2ConfirmYes.addEventListener('click', startArchiDelete);
 
