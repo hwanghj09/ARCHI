@@ -1,0 +1,53 @@
+/* 12층 모델 평가실 "야간 로그 단말기" 퍼즐 창. #cctv-scene처럼 화면 전체를 덮는 레터박스 위에,
+   컴퓨터 모니터를 바짝 당겨 본 그림(assets/ui/log-puzzle/log-terminal.png, 1448x1086)을 원래
+   비율(4:3) 그대로 최대 크기로 띄운다. 그림 속 실제 화면 영역에만 로그 줄·퀴즈를 퍼센트 좌표로
+   얹는다 — 글자는 늘 DOM이 그리고 그림 쪽은 비어 있다(와이어 퍼즐이 전선 색은 비우고 소켓 자리만
+   그리는 것과 같은 이유). 퀴즈가 뜬 동안에는 그 아래쪽에 보기 4칸 테두리만 그린 투명 오버레이
+   (log-quiz-slots.png, 1499x1049)를 한 장 더 겹친다. 실측값은 각 규칙 위 주석과
+   assets/ui/log-puzzle/PROMPT.md 참고. */
+#log-panel { position: fixed; inset: 0; z-index: 9; display: grid; place-items: center; background: #000; }
+#log-panel[hidden] { display: none; }
+#log-frame { position: relative; width: min(100vw, 133.334vh); aspect-ratio: 4 / 3;
+  background: url('../assets/ui/log-puzzle/log-terminal.png') center / 100% 100% no-repeat, #0d1417; color: #cfd9d3; }
+/* 화면 영역 실측(log-terminal.png, 1448x1086): x=33~1414px(2.28%~97.65%), y=40~985px(3.68%~90.70%). */
+#log-screen { position: absolute; left: 2.3%; top: 3.7%; width: 95.3%; height: 87%; box-sizing: border-box;
+  padding: 2% 3%; display: flex; flex-direction: column; justify-content: center; text-align: center; overflow: hidden; }
+#log-title { margin: 0 0 2%; flex: none; color: #e2d2b8; font-size: clamp(16px, 2.6vw, 28px); }
+#log-rows { display: flex; flex-direction: column; align-items: center; gap: .3em; margin: 0 0 2%; flex: none; }
+.log-row { margin: 0; font: clamp(15px, 2.1vw, 23px)/1.5 monospace; color: #9fe0b0; white-space: pre; }
+.log-row[data-anomaly="true"] { color: #f2d689; }
+.log-row[data-deleted="true"] { color: #5c6a63; font-style: italic; }
+.log-row[data-glitching="true"] { animation: log-row-glitch .5s steps(2, end) 2; }
+@keyframes log-row-glitch {
+  0%, 100% { transform: translateX(0); opacity: 1; }
+  25% { transform: translateX(-3px); opacity: .4; color: #e08a7a; }
+  50% { transform: translateX(3px); opacity: .8; }
+  75% { transform: translateX(-2px); opacity: .5; }
+}
+#log-status { flex: none; min-height: 1.3em; margin: 0 0 2%; line-height: 1.5; color: #e08a7a;
+  font-size: clamp(14px, 1.9vw, 20px); }
+#log-quiz { position: relative; flex: 1 1 auto; min-height: 0;
+  background: url('../assets/ui/log-puzzle/log-quiz-slots.png') center / 100% 100% no-repeat; }
+#log-quiz[hidden] { display: none; }
+#log-quiz-question { position: absolute; left: 0; top: 3%; width: 100%; margin: 0; line-height: 1.4;
+  font-size: clamp(14px, 1.9vw, 20px); }
+#log-quiz-record { position: absolute; left: 0; top: 12%; width: 100%; margin: 0; color: #9fe0b0;
+  font: clamp(12px, 1.5vw, 16px) monospace; }
+/* 보기 4칸 실측(log-quiz-slots.png, 1499x1049): 왼쪽 칸 x=56~731px, 오른쪽 칸 x=770~1445px,
+   위쪽 줄 y=315~508px, 아래쪽 줄 y=585~778px — 그 바깥 틀(left/top/width/height)과 칸 사이
+   간격(column-gap/row-gap)을 그 비율 그대로 퍼센트로 옮겼다. */
+#log-quiz-options { position: absolute; left: 3.74%; top: 30.03%; width: 92.66%; height: 44.17%;
+  display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; column-gap: 2.8%; row-gap: 16.6%; }
+#log-quiz-options button { padding: 0; border: 0; background: none; color: inherit; cursor: pointer;
+  font: clamp(14px, 1.9vw, 20px) Arial, sans-serif; }
+#log-quiz-options button:hover, #log-quiz-options button:focus-visible { color: #b9e89c; outline: none; }
+#log-frame.glitching { animation: log-panel-glitch .4s steps(2, end) 1; }
+@keyframes log-panel-glitch {
+  0%, 100% { filter: none; }
+  30% { filter: hue-rotate(40deg) contrast(1.4); transform: translateX(-.5%); }
+  60% { filter: hue-rotate(-30deg); transform: translateX(.5%); }
+}
+#log-close { position: absolute; left: 38%; top: 90.5%; width: 24%; min-height: 28px; padding: 4px;
+  border: 1px solid #10151366; border-radius: 4px; background: transparent; color: #cfd6cd;
+  font-size: clamp(9px, 1.3vw, 12px); cursor: pointer; }
+#log-close:focus-visible { outline: 2px solid #f2d689; outline-offset: 2px; }

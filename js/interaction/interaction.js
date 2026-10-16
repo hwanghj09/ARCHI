@@ -53,6 +53,8 @@ function doorHintText(door) {
   if (door.type === 'power') return 'E · 태양광 전력 제어';
   if (door.phoneCharger) return phoneChargerHint(door);
   if (door.accessGate) return door.element.dataset.open === 'true' ? '인증 완료 · 통과 가능' : 'E · 출입증 태그';
+  // 12층 야간 로그 삭제가 진행 중일 때만 네트워크 랙의 힌트를 "뽑기"로 바꿔 지금 할 일을 알려 준다(log-puzzle.js).
+  if (door.name === '네트워크 랙' && dynamicFloorId === 'f12-eval' && logPuzzleTimer) return 'E · 네트워크 스위치 뽑기';
   if (door.type === 'inspect') return `E · ${door.name} 조사`;
   if (door.locked) return `E · ${door.name} (잠김)`;
   if (door.type === 'room') return door.hint;
@@ -103,6 +105,7 @@ function interact() {
       return;
     }
     if (enterB2TrueEnd(nearbyDoor)) return; // ARCHI를 끈 뒤 1층 정문으로 나가기(b2-ending.js)
+    if (handleLogTerminalInteract(nearbyDoor)) return; // 12층 야간 로그 단말기·네트워크 랙(log-puzzle.js)
     const { gives } = nearbyDoor;
     // 도어락(code): 잠긴 문이나 아직 열지 못한 소품은 키패드를 연다. 맞는 번호를 넣으면 문이 열리거나 gives를 챙긴다.
     if (nearbyDoor.code && (nearbyDoor.type === 'room' ? nearbyDoor.locked : !collectedItems.has(gives))) {
