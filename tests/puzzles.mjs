@@ -188,6 +188,35 @@ try {
     });
   }), [true, true, false, true, true, true]);
 
+  // H. 3층 Studio 음성 인증: 2층 영사 뒤 음향 콘솔에서 사내 방송 담당(김도윤, 리플릿) 목소리를 녹음해 틀어야 열린다.
+  const studioDoor = () => page.evaluate(() => {
+    const door = currentDoors.find(entry => entry.target === 'f3-studio');
+    Body.setPosition(body, { x: door.x + door.width / 2, y: floorY - 81 }); grounded = true; closeInspection(); interact();
+    return { locked: door.locked, text: usingInspection ? inspectionDescription.textContent : status.textContent };
+  });
+  await page.evaluate(() => { performFloorChange('f3', 0, null); sanity = 60; });
+  assert.match((await studioDoor()).text, /사내 방송 담당자/, 'Without a recording the panel only explains itself');
+  assert.match(await inspectProp('f2-harmony', '음향 콘솔'), /출력 단자가 비어/, 'Before the projector runs the console is only inspected');
+  await page.evaluate(() => { closeInspection(); collectedItems.add('f2-projected'); });
+  await inspectProp('f2-harmony', '음향 콘솔');
+  assert(await page.locator('#manual-control').isVisible(), 'With the rehearsal playing the console offers voices to record');
+  await page.keyboard.press('ArrowRight'); await page.keyboard.press('ArrowRight'); await page.keyboard.press('ArrowRight');
+  await page.keyboard.press('Enter');
+  await page.waitForFunction(() => !usingControl && collectedItems.has('voice=정수호'));
+  await page.evaluate(() => performFloorChange('f3', 0, null));
+  const wrong = await studioDoor();
+  assert.equal(wrong.locked, true);
+  assert.match(wrong.text, /이미 제가 갖고 있어요/, 'Playing your own voice gets an answer in that voice');
+  assert.equal(await page.evaluate(() => sanity), 55);
+  await inspectProp('f2-harmony', '음향 콘솔');
+  await page.keyboard.press('ArrowRight');
+  await page.keyboard.press('Enter');
+  await page.waitForFunction(() => !usingControl && collectedItems.has('voice=김도윤') && !collectedItems.has('voice=정수호'));
+  await page.evaluate(() => performFloorChange('f3', 0, null));
+  const right = await studioDoor();
+  assert.equal(right.locked, false, "The broadcast manager's voice opens the Studio");
+  assert.equal(await page.evaluate(() => collectedItems.has('f3-studio-open')), true);
+
   assert.deepEqual(errors, []);
   console.log('Puzzle tests passed.');
 } finally {

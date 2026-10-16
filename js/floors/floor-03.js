@@ -37,8 +37,11 @@ const FLOOR3_LAYOUT = {
       doorX: 755, doorWidth: 240, doorY: 250, doorSprite: 'assets/objects/floor03/door-fitness.png' },
     { name: '고객만족센터', x: 1080, width: 690, style: 'painted', target: 'f3-cs',
       doorX: 1375, doorWidth: 130, doorY: 250, doorSprite: 'assets/objects/floor03/door-cs.png' },
+    // 퍼즐 H: 방송실 음성 인증 문(js/interaction/voice-lock.js). 2층 리허설 녹화에서 사내 방송 담당자(김도윤)의 목소리를 녹음해 와야 한다.
     { name: 'Studio', x: 4282, width: 680, style: 'painted', target: 'f3-studio',
-      doorX: 4295, doorWidth: 130, doorY: 250, doorSprite: 'assets/objects/floor03/door-studio.png' },
+      doorX: 4295, doorWidth: 130, doorY: 250, doorSprite: 'assets/objects/floor03/door-studio.png',
+      locked: true, unlockedBy: 'f3-studio-open', voiceLock: { voice: '김도윤' },
+      message: '방송실 문에 음성 인증 패널이 붙어 있다. 정전에도 배터리로 깨어 있다: "등록 음성 · 사내 방송 담당자 · 인증 문장: 안녕하세요, 저는 ___입니다." 담당자의 목소리를 들려줄 수만 있다면.' },
   ],
   fixtures: [
     { name: '3층 입주사 안내', x: 3160, y: 300, width: 170, height: 150, style: 'wall-notice',

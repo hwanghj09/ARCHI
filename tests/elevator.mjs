@@ -1545,6 +1545,8 @@ try {
     await page.screenshot({ path: '.local/floor-3-cs.png' });
     await leaveRoom(csRoom, corridorHeader);
 
+    // Studio 음성 인증 문(퍼즐 H)은 tests/puzzles.mjs가 확인한다. 여기서는 열린 것으로 두고 방 배치만 본다.
+    await page.evaluate(() => { collectedItems.add('f3-studio-open'); currentDoors.find(door => door.target === 'f3-studio').locked = false; });
     const studioRoom = await enterThroughSpriteDoor('Studio', '3F');
     assert.equal(await worldWidth(page), 1840);
     assert.equal(studioRoom.exit.x, 71);
