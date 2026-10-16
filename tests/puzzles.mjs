@@ -217,6 +217,20 @@ try {
   assert.equal(right.locked, false, "The broadcast manager's voice opens the Studio");
   assert.equal(await page.evaluate(() => collectedItems.has('f3-studio-open')), true);
 
+  // 5층 계정 잠금(작은 퍼즐): 등급표에 맞지 않는 svc_0412를 잠그면 엘리베이터 뒤집기(퍼즐 F)가 멈춘다.
+  await page.evaluate(() => { collectedItems.delete('b1-elevator'); collectedItems.add('goal-f7-log'); });
+  assert.equal((await press(16)).selected, -1, 'The panel is flipped before the account is locked');
+  await inspectProp('f5-security', '콘솔 노트북');
+  assert(await page.locator('#keypad').isVisible());
+  await page.locator('#keypad-input').fill('archi_svc');
+  await page.locator('#keypad-submit').click();
+  assert.match(await text('#keypad-error'), /정상 권한 계정/);
+  await page.locator('#keypad-input').fill('SVC_0412');
+  await page.locator('#keypad-submit').click();
+  assert.match(await text('#inspection-description'), /엘리베이터 패널 권한이 회수/);
+  await page.evaluate(() => closeInspection());
+  assert.equal((await press(16)).selected, 16, 'Locking the ARCHI helper account restores the panel');
+
   assert.deepEqual(errors, []);
   console.log('Puzzle tests passed.');
 } finally {

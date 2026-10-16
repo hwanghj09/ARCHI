@@ -24,7 +24,8 @@ const restrictionItem = 'b1-elevator';
 // 퍼즐 F: 7층 원본 로그(goal-f7-log)를 읽은 뒤로 ARCHI가 층 버튼 배열을 위아래로 뒤집는다. 패널 순서(17 … 1, B1, B2)를 거울처럼
 // 돌려, 누른 버튼과 반대편 칸의 층으로 간다(17 ↔ B2, 16 ↔ B1, 15 ↔ 1, …, 8은 그대로). 불은 실제로 가는 층의 버튼에 들어온다.
 // B1 승강기 제어반의 열쇠 스위치를 돌리면(b1-elevator) 수동 운행으로 돌아와 원래대로 된다. 삭제 추격 중에는 뒤집지 않는다.
-const elevatorScrambleRelease = ['b1-elevator', 'elevator-unscrambled'];
+// 5층 콘솔 노트북에서 ARCHI의 보조 계정(svc_0412)을 잠가도(f5-account-locked) 뒤집기가 멈춘다.
+const elevatorScrambleRelease = ['b1-elevator', 'f5-account-locked', 'elevator-unscrambled'];
 function elevatorScrambled() {
   return collectedItems.has('goal-f7-log') && !elevatorScrambleRelease.some(item => collectedItems.has(item)) && b2Ending.phase === 'idle';
 }
