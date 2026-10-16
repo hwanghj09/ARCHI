@@ -47,6 +47,24 @@ try {
   await page.evaluate(() => { closeInspection(); phoneBattery = 12; useInventoryItem('f17-powerbank'); });
   assert.equal(await page.evaluate(() => phoneBattery), 100, 'The power bank refills the phone');
 
+  // I. 14층 관찰 콘솔: 정신력 30% 미만일 때만 여백의 붉은 글씨가 보이고 단서로 남는다.
+  const inspectProp = (scene, name) => page.evaluate(([scene, name]) => {
+    closeInspection();
+    if (dynamicFloorId !== scene) performFloorChange(scene, null, 'exit');
+    const door = currentDoors.find(entry => entry.name === name);
+    Body.setPosition(body, { x: door.x + door.width / 2, y: (door.standY ?? floorY) - 81 }); Body.setVelocity(body, { x: 0, y: 0 });
+    grounded = true; interact();
+    return inspectionDescription.textContent;
+  }, [scene, name]);
+  await page.evaluate(() => { sanity = 80; });
+  assert.match(await inspectProp('f14-ux', '관찰 콘솔'), /여백이 이상하게 넓다/);
+  assert.equal(await page.evaluate(() => collectedItems.has('f14-hidden-record')), false, 'A clear mind sees an empty margin');
+  await page.evaluate(() => { sanity = 20; });
+  assert.match(await inspectProp('f14-ux', '관찰 콘솔'), /대체 호스트 후보/, 'Low sanity reveals the red writing');
+  assert.match(await text('#inspection-sheet'), /신경 반응 적합도 98%/, 'The red writing is drawn on the printout');
+  assert.equal(await page.evaluate(() => collectedItems.has('f14-hidden-record') && collectedClues.some(clue => clue.text.includes('대체 호스트'))), true);
+  await page.evaluate(() => { closeInspection(); sanity = 80; });
+
   assert.deepEqual(errors, []);
   console.log('Puzzle tests passed.');
 } finally {

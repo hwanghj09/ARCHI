@@ -303,7 +303,7 @@ function buildDynamicScene(config) {
       hideWhenTaken: prop.hideWhenTaken,
       takenMessage: prop.takenMessage, darkMessage: prop.darkMessage, requires: prop.requires,
       missingMessage: prop.missingMessage, partialMessage: prop.partialMessage, element, standY: floorY - base,
-      code: prop.code, codePrompt: prop.codePrompt, cycle: prop.cycle, opens: prop.opens, control: prop.control,
+      code: prop.code, codePrompt: prop.codePrompt, cycle: prop.cycle, opens: prop.opens, control: prop.control, lowSanity: prop.lowSanity,
       animation: prop.animation, poweredSprite: prop.poweredSprite,
       surface: prop.surface || WRITING_SURFACE_BY_FILE[prop.file], look: prop.look, writing: prop.writing, caption: prop.caption,
       image: prop.image, missingSheet: prop.missingSheet, takenSheet: prop.takenSheet,

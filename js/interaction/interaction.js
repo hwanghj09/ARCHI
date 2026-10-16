@@ -156,11 +156,17 @@ function interact() {
     }
     const missing = !unreadable && lacking && nearbyDoor.missingMessage &&
       (lacking < required.length && nearbyDoor.partialMessage || nearbyDoor.missingMessage);
-    const inspectionMessage = unreadable || missing || (gives && collectedItems.has(gives) ? nearbyDoor.takenMessage : nearbyDoor.message);
+    // 정신이 흐릴 때만 보이는 글씨(lowSanity, 14층 관찰 콘솔): 정신력이 below% 미만이면 다른 문구와 덧붙인 표면을 보이고, 그 단서를 챙긴다.
+    const haunted = !unreadable && !missing && nearbyDoor.lowSanity && sanity < nearbyDoor.lowSanity.below ? nearbyDoor.lowSanity : null;
+    const inspectionMessage = unreadable || missing || haunted?.message ||
+      (gives && collectedItems.has(gives) ? nearbyDoor.takenMessage : nearbyDoor.message);
     // 글이 적힌 소품은 지금 보이는 문구에 맞는 표면을 펼친다(message는 소품, takenMessage·missingMessage는 그 sheet).
     // fullImage가 있는 설비(B1 CCTV 모니터 벽)는 그 그림을 화면 전체에 띄운다.
     if (nearbyDoor.fullImage && !unreadable && !missing) openFullImage(nearbyDoor, inspectionMessage);
-    else openInspection(nearbyDoor.name, inspectionMessage, writingSheetFor(nearbyDoor, inspectionMessage));
+    else openInspection(nearbyDoor.name, inspectionMessage, haunted ?
+      { ...nearbyDoor, writing: [...nearbyDoor.writing, ...haunted.writing], caption: haunted.caption } :
+      writingSheetFor(nearbyDoor, inspectionMessage));
+    if (haunted) revealLowSanityClue(nearbyDoor, haunted);
     offerArchiDelete(nearbyDoor); // B2 메인 콘솔이면 DELETE 버튼(b2-ending.js)
     if (missing) return;
     if (!unreadable) { recordClue(nearbyDoor); noteObjectiveRead(nearbyDoor); }
