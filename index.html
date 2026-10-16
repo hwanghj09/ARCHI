@@ -14,6 +14,7 @@
     <link rel="stylesheet" href="css/opening.css" />
     <link rel="stylesheet" href="css/power.css" />
     <link rel="stylesheet" href="css/wire-puzzle.css" />
+    <link rel="stylesheet" href="css/log-puzzle.css" />
     <link rel="stylesheet" href="css/guard-patrol.css" />
     <link rel="stylesheet" href="css/b2-ending.css" />
     <link rel="stylesheet" href="css/phone.css" />
@@ -76,6 +77,7 @@
     <script src="js/interaction/cctv.js" defer></script>
     <script src="js/interaction/keypad.js" defer></script>
     <script src="js/interaction/wire-puzzle.js" defer></script>
+    <script src="js/interaction/log-puzzle.js" defer></script>
     <script src="js/interaction/outline.js" defer></script>
     <script src="js/interaction/interaction.js" defer></script>
     <script src="js/interaction/phone.js" defer></script>
@@ -323,6 +325,21 @@
         </div>
         <p id="wire-status" role="status" aria-live="polite"></p>
         <button id="wire-cancel" type="button">나중에 · Esc</button>
+      </div>
+    </section>
+    <section id="log-panel" role="dialog" aria-modal="true" aria-labelledby="log-title" aria-describedby="log-status" hidden>
+      <div id="log-frame">
+        <div id="log-screen">
+          <h2 id="log-title">평가실 PC · 야간 자동 평가 로그</h2>
+          <div id="log-rows"></div>
+          <p id="log-status" role="status" aria-live="polite"></p>
+          <div id="log-quiz" hidden>
+            <p id="log-quiz-question"></p>
+            <p id="log-quiz-record"></p>
+            <div id="log-quiz-options" role="group" aria-label="10/07 밤 성능 저하 원인"></div>
+          </div>
+        </div>
+        <button id="log-close" type="button">나가기 · Esc</button>
       </div>
     </section>
     <section id="inspection" class="device-dialog" role="dialog" aria-modal="true" aria-labelledby="inspection-title" aria-describedby="inspection-description" hidden>
