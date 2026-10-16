@@ -155,6 +155,12 @@ function interact() {
       if (currentObjective?.title === '로봇의 습격! 그 이유는?' && !collectedItems.has('story-badge-seen')) collectedItems.add('story-gate-tagged'); // 컷씬은 한 번만(이미 봤으면 다시 나오지 않는다)
       return;
     }
+    // 해시 사슬 판독기(terminal 'hash', 4층): 필요한 물건이 다 있고 아직 못 풀었으면 검증 화면을 연다(hash-puzzle.js).
+    if (nearbyDoor.terminal === 'hash' && !lacking && !collectedItems.has(gives) && !nearbyDoor.terminalPassed) {
+      openHashPuzzle(nearbyDoor);
+      return;
+    }
+    nearbyDoor.terminalPassed = false;
     const missing = !unreadable && lacking && nearbyDoor.missingMessage &&
       (lacking < required.length && nearbyDoor.partialMessage || nearbyDoor.missingMessage);
     // 정신이 흐릴 때만 보이는 글씨(lowSanity, 14층 관찰 콘솔): 정신력이 below% 미만이면 다른 문구와 덧붙인 표면을 보이고, 그 단서를 챙긴다.

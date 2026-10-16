@@ -1415,6 +1415,8 @@ try {
     await inspect(2355, 'E · 로그 판독기 조사', /테이프와 UPS 전원이 둘 다/);
     await inspect(2240, 'E · UPS 분배기 조사', /셋째 칸 로그 판독기로/);
     assert.equal(await upsState(), '2');
+    // 해시 사슬 검증(퍼즐 G)은 tests/puzzles.mjs가 확인한다. 여기서는 풀린 것으로 두고 결과 문구만 본다.
+    await page.evaluate(() => { currentDoors.find(door => door.name === '로그 판독기').terminalPassed = true; });
     await inspect(2355, 'E · 로그 판독기 조사', /archi_svc · 외부 주소로 전송 시험 · 1\.2TB · 성공/);
     await page.screenshot({ path: '.local/floor-4-lab.png' });
     await leaveRoom(labRoom, corridorHeader);

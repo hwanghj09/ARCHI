@@ -85,6 +85,7 @@
     <script src="js/interaction/log-puzzle.js" defer></script>
     <script src="js/interaction/sql-console.js" defer></script>
     <script src="js/interaction/archi-talk.js" defer></script>
+    <script src="js/interaction/hash-puzzle.js" defer></script>
     <script src="js/interaction/outline.js" defer></script>
     <script src="js/interaction/interaction.js" defer></script>
     <script src="js/interaction/phone.js" defer></script>
@@ -350,6 +351,17 @@
         <div id="archi-talk-cards" role="group" aria-label="증거 카드"></div>
         <button id="archi-talk-close" type="button">물러나기 · Esc</button>
       </div>
+    </section>
+    <section id="hash-panel" role="dialog" aria-modal="true" aria-labelledby="hash-title" aria-describedby="hash-status" hidden>
+      <div id="hash-frame">
+        <div id="hash-screen">
+          <h2 id="hash-title">로그 판독기 · 감사 로그 해시 사슬</h2>
+          <p id="hash-rule">검산 = (앞 줄 검산 + 이 줄 숫자들의 합)의 끝자리 · 첫 줄의 앞 검산은 0</p>
+          <div id="hash-lines" role="group" aria-label="감사 로그 줄"></div>
+          <p id="hash-status" role="status" aria-live="polite"></p>
+        </div>
+      </div>
+      <button id="hash-close" type="button">나가기 · Esc</button>
     </section>
     <section id="sql-panel" role="dialog" aria-modal="true" aria-labelledby="sql-title" hidden>
       <div id="sql-frame">

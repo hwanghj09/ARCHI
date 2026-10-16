@@ -164,6 +164,30 @@ try {
   assert.match(await inspectProp('f15-director', '보류 서류함'), /18kg/);
   await page.evaluate(() => { closeInspection(); solarPoweredFloors = []; updatePowerState(); });
 
+  // G. 4층 로그 판독기 해시 사슬: 규칙(앞 줄 검산 + 숫자 합의 끝자리)이 어긋나는 셋째 줄을 골라야 원본이 되살아난다.
+  await page.evaluate(() => { collectedItems.add('f4-tape'); collectedItems.add('f4-ups=로그 판독기'); sanity = 60; });
+  await inspectProp('f4-lab', '로그 판독기');
+  assert(await page.locator('#hash-panel').isVisible(), 'The reader opens the hash chain check');
+  await page.locator('#hash-lines [data-line="1"]').click();
+  assert.match(await text('#hash-status'), /규칙대로 맞는다/);
+  assert.equal(await page.evaluate(() => sanity), 55);
+  await page.locator('#hash-lines [data-line="2"]').click();
+  assert.match(await text('#hash-lines [data-line="2"]'), /archi_svc/, 'The forged line is restored from the original tape');
+  await page.waitForFunction(() => document.getElementById('hash-panel').hidden && usingInspection);
+  assert.match(await text('#inspection-description'), /1\.2TB · 성공/);
+  assert.equal(await page.evaluate(() => collectedItems.has('f4-audit')), true);
+  await page.evaluate(() => closeInspection());
+  // 숫자 검산: 위조된 줄만 규칙이 어긋난다.
+  assert.deepEqual(await page.evaluate(() => {
+    let previous = 0;
+    return HASH_LINES.map(line => {
+      const sum = [...line.text].filter(ch => /\d/.test(ch)).reduce((total, digit) => total + Number(digit), 0);
+      const ok = (previous + sum) % 10 === line.check;
+      previous = line.check;
+      return ok;
+    });
+  }), [true, true, false, true, true, true]);
+
   assert.deepEqual(errors, []);
   console.log('Puzzle tests passed.');
 } finally {
