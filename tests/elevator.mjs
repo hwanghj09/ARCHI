@@ -2168,9 +2168,14 @@ try {
     assert.equal(await page.locator('#dynamic-scene .fixture.art-spot').count(), 5);
     await inspect(76, 'E · 보안 캐비닛 조사', /키패드가 꺼져/);
     await inspect(532, 'E · 보안 연구원 자리 조사', /214번/);
-    await inspect(650, 'E · 로그 모니터 조사', /연구 보조.*archi_svc 하나뿐/);
+    await inspect(650, 'E · 로그 모니터 조사', /연구 보조.*svc_0412.*외부망 허용은 없다/);
     await inspect(1030, 'E · 감사 로그 프린터 조사', /감사 대상 0건/);
-    await inspect(1224, 'E · 콘솔 노트북 조사', /예외 규칙 추가.*archi_svc/);
+    // 콘솔 노트북은 계정 잠금 키패드다(5층 계정 퍼즐, tests/puzzles.mjs). 키패드 안내의 변경 기록을 확인한다.
+    await walkTo(1224);
+    assert.equal(await hint(), 'E · 콘솔 노트북 조사');
+    await page.keyboard.press('e');
+    assert.match(await page.locator('#keypad-text').textContent(), /예외 규칙 추가.*archi_svc/);
+    await page.keyboard.press('Escape');
     await page.screenshot({ path: '.local/floor-5-security.png' });
     await leaveRoom(securityRoom, corridorHeader);
 
