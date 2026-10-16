@@ -242,6 +242,17 @@ try {
   assert.match(await text('#inspection-description'), /B2 연결 실험실입니다/);
   await page.evaluate(() => closeInspection());
 
+  // 15층 이관 상자(작은 퍼즐): 186kg 팔레트 C에서 개별 무게가 빠진 11번을 연다.
+  await inspectProp('f15-seminar', '이관 카트');
+  assert.match(await text('#keypad-text'), /C\(9~12번\) 186kg/);
+  await page.locator('#keypad-input').fill('7');
+  await page.locator('#keypad-submit').click();
+  assert.match(await text('#keypad-error'), /GPU 서버가 들어 있다/);
+  await page.locator('#keypad-input').fill('11');
+  await page.locator('#keypad-submit').click();
+  assert.match(await text('#inspection-description'), /신경 신호 변환기 부품/);
+  await page.evaluate(() => closeInspection());
+
   assert.deepEqual(errors, []);
   console.log('Puzzle tests passed.');
 } finally {

@@ -546,7 +546,12 @@ try {
     assert.equal(await page.locator('#dynamic-scene .solid.crate').count(), 2);
     assert.equal(await page.locator('#dynamic-scene .floor-prop').count(), 5);
     await assertHumanScale();
-    await inspect(420, 'E · 이관 카트 조사', /B2 서버실 이관 2차분/);
+    // 이관 카트는 이제 상자를 여는 키패드다(15층 상자 퍼즐, tests/puzzles.mjs). 키패드 안내의 운송장을 확인한다.
+    await walkTo(420);
+    assert.equal(await hint(), 'E · 이관 카트 조사');
+    await page.keyboard.press('e');
+    assert.match(await page.locator('#keypad-text').textContent(), /GPU 서버 16대/);
+    await page.keyboard.press('Escape');
     await walkTo(730);
     await hold('d', 500);
     assert((await playerX()) < 742, 'The boxed servers block walking');
