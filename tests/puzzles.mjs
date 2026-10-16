@@ -270,6 +270,17 @@ try {
   assert.match(await inspectProp('f16-cafe', '음성 주문 키오스크'), /먼저 인사한다/, 'Without power it is only inspected');
   await page.evaluate(() => closeInspection());
 
+  // 11층 데모 서버(작은 퍼즐): 복합기의 이전 알림(01:52 → demo2510, 02:30 → demo0320)에서 규칙을 찾아 03:07 → demo7030.
+  assert.match(await inspectProp('f11-marketing', '복합기'), /demo2510.*demo0320/);
+  await inspectProp('f11-marketing', '자료실 책상');
+  await page.locator('#keypad-input').fill('demo0703');
+  await page.locator('#keypad-submit').click();
+  assert.match(await text('#keypad-error'), /로그인 실패/);
+  await page.locator('#keypad-input').fill('demo7030');
+  await page.locator('#keypad-submit').click();
+  assert.match(await text('#inspection-description'), /업로드 대기 412GB/);
+  await page.evaluate(() => closeInspection());
+
   assert.deepEqual(errors, []);
   console.log('Puzzle tests passed.');
 } finally {

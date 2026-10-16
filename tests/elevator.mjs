@@ -778,7 +778,12 @@ try {
     assert.equal(await page.locator('#dynamic-scene .room-interior.windowless').count(), 1);
     assert.equal(await page.locator('#dynamic-scene .floor-prop').count(), 8);
     await assertHumanScale();
-    await inspect(900, 'E · 자료실 책상 조사', /archi-demo.*03:07/);
+    // 자료실 책상은 이제 데모 서버 로그인 키패드다(11층 데모 서버 퍼즐, tests/puzzles.mjs). 키패드 안내의 알림 메일을 확인한다.
+    await walkTo(900);
+    assert.equal(await hint(), 'E · 자료실 책상 조사');
+    await page.keyboard.press('e');
+    assert.match(await page.locator('#keypad-text').textContent(), /archi-demo.*03:07/);
+    await page.keyboard.press('Escape');
     await inspect(420, 'E · 브로슈어 진열장 조사', /출시일/);
     await page.screenshot({ path: '.local/floor-11-marketing.png' });
     assert(Math.max(...roomScales) / Math.min(...roomScales) < 1.02, `Room fronts scale with their interiors: ${roomScales}`);
