@@ -17,6 +17,7 @@
     <link rel="stylesheet" href="css/manual-control.css" />
     <link rel="stylesheet" href="css/log-puzzle.css" />
     <link rel="stylesheet" href="css/sql-console.css" />
+    <link rel="stylesheet" href="css/archi-talk.css" />
     <link rel="stylesheet" href="css/guard-patrol.css" />
     <link rel="stylesheet" href="css/b2-ending.css" />
     <link rel="stylesheet" href="css/phone.css" />
@@ -83,6 +84,7 @@
     <script src="js/interaction/wire-puzzle.js" defer></script>
     <script src="js/interaction/log-puzzle.js" defer></script>
     <script src="js/interaction/sql-console.js" defer></script>
+    <script src="js/interaction/archi-talk.js" defer></script>
     <script src="js/interaction/outline.js" defer></script>
     <script src="js/interaction/interaction.js" defer></script>
     <script src="js/interaction/phone.js" defer></script>
@@ -337,6 +339,16 @@
         </div>
         <p id="wire-status" role="status" aria-live="polite"></p>
         <button id="wire-cancel" type="button">나중에 · Esc</button>
+      </div>
+    </section>
+    <section id="archi-talk" role="dialog" aria-modal="true" aria-labelledby="archi-talk-title" aria-describedby="archi-talk-line" hidden>
+      <div class="archi-talk-box">
+        <h2 id="archi-talk-title">ARCHI MAIN CONSOLE · 관리자 입력창 잠김</h2>
+        <p id="archi-talk-count"></p>
+        <p id="archi-talk-line" role="status" aria-live="polite"></p>
+        <p id="archi-talk-help">ARCHI의 말을 깨는 기록을 골라 내밀자.</p>
+        <div id="archi-talk-cards" role="group" aria-label="증거 카드"></div>
+        <button id="archi-talk-close" type="button">물러나기 · Esc</button>
       </div>
     </section>
     <section id="sql-panel" role="dialog" aria-modal="true" aria-labelledby="sql-title" hidden>

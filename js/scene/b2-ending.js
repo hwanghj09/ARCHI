@@ -46,6 +46,12 @@ function offerArchiDelete(door) {
 // 한 번 맞히면(b2-admin-key) 체크포인트에서 다시 누를 때는 묻지 않는다. ARCHI는 입력 칸에 가짜 힌트(옥상 비밀번호)를 띄운다.
 const b2AdminCode = '0412034127';
 b2DeleteButton.addEventListener('click', () => {
+  // 퍼즐 B: 처음에는 ARCHI가 입력창을 잠그고 말을 건다(archi-talk.js). 주장 넷을 다 깨면 관리자 키로 넘어간다.
+  if (!collectedItems.has('b2-archi-refuted')) {
+    closeInspection();
+    openArchiTalk(() => b2DeleteButton.click());
+    return;
+  }
   if (!collectedItems.has('b2-admin-key')) {
     closeInspection();
     openKeypad({ name: 'DELETE ARCHI · 관리자 확인', code: b2AdminCode, gives: 'b2-admin-key', wrongMessage: 'ARCHI: "틀렸어요, 수호 씨. 힌트는 1997이라니까요."',

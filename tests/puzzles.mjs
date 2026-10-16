@@ -84,6 +84,28 @@ try {
   await page.keyboard.press('Escape');
   assert(await page.locator('#sql-panel').isHidden());
 
+  // B. B2 DELETE 앞 ARCHI 심문: 주장 넷을 맞는 증거로 깨야 관리자 키(퍼즐 C) 입력창이 열린다. 틀리면 정신력 -5%.
+  await page.evaluate(() => { collectedItems.add('b2-transfer-cut'); sanity = 60; });
+  await inspectProp('b2-main', 'ARCHI 메인 콘솔');
+  await page.locator('#inspection-delete').click();
+  assert(await page.locator('#archi-talk').isVisible(), 'ARCHI locks the console and talks first');
+  assert.match(await text('#archi-talk-line'), /3% 남짓/);
+  await page.locator('[data-evidence="receipt"]').click();
+  assert.equal(await page.evaluate(() => sanity), 55, 'Wrong evidence costs sanity');
+  for (const [id, next] of [['bench', /자동 최적화/], ['power', /나가려고/], ['link', /보든 안 보든/]]) {
+    await page.locator(`[data-evidence="${id}"]`).click();
+    assert.match(await text('#archi-talk-line'), next);
+  }
+  await page.keyboard.press('Escape');
+  await inspectProp('b2-main', 'ARCHI 메인 콘솔');
+  await page.locator('#inspection-delete').click();
+  assert.match(await text('#archi-talk-count'), /주장 4 \/ 4/, 'Broken claims stay broken after leaving');
+  await page.locator('[data-evidence="presence"]').click();
+  assert.equal(await page.evaluate(() => collectedItems.has('b2-archi-refuted')), true);
+  await page.locator('#archi-talk-cards button').click();
+  assert(await page.locator('#keypad').isVisible(), 'After the last claim the admin key pad opens');
+  await page.keyboard.press('Escape');
+
   assert.deepEqual(errors, []);
   console.log('Puzzle tests passed.');
 } finally {

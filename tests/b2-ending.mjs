@@ -51,6 +51,8 @@ try {
   assert.match(await page.locator('#inspection-description').textContent(), /외부 전송 차단됨/);
   await page.evaluate(() => closeInspection());
 
+  // ARCHI 심문(퍼즐 B)은 tests/puzzles.mjs가 확인한다. 여기서는 이미 깬 것으로 둔다.
+  await page.evaluate(() => collectedItems.add('b2-archi-refuted'));
   // 관리자 키(퍼즐 C): 처음 DELETE를 누르면 10자리 키패드가 열린다. ARCHI의 가짜 힌트(1997)는 틀리고, 단서 세 조각을 이으면 맞는다.
   await inspect();
   await page.locator('#inspection-delete').click();
