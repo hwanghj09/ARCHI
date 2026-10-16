@@ -964,3 +964,9 @@ nav button:focus-visible { outline: 2px solid #c9dde5; outline-offset: 4px; }
 /* 17층 사무실 옆자리 포스트잇(office17.js의 officePostit): 출입증 쌔비기 목표가 시작되면 나타난다. */
 .office-postit { position: absolute; background: url(../assets/objects/floor17/postit.png) center / 100% 100% no-repeat; pointer-events: none; }
 .office-postit[hidden], #world:not([data-room="office"]) .office-postit { display: none; }
+/* 퍼즐 J: 수호 책상 옆 기둥의 벽 달력(흰 종이, 붉은 머리띠와 동그라미). */
+.office-calendar { position: absolute; pointer-events: none; border-radius: 2px 2px 0 0; background:
+  radial-gradient(circle at 30% 68%, transparent 2.2px, #c3463b 2.4px 3.2px, transparent 3.4px),
+  radial-gradient(circle at 72% 68%, transparent 2.2px, #c3463b 2.4px 3.2px, transparent 3.4px),
+  linear-gradient(#b8382e 0 5px, #ece7da 5px); box-shadow: 0 2px 3px #0008, inset 0 0 0 1px #9c968a; }
+#world:not([data-room="office"]) .office-calendar { display: none; }

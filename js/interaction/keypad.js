@@ -10,7 +10,8 @@ function openKeypad(target) {
   releaseInput();
   hint.hidden = true;
   document.getElementById('keypad-title').textContent = target.name;
-  document.getElementById('keypad-text').textContent = target.type === 'room' ? target.message : target.codePrompt;
+  const prompt = target.codePrompt ?? (target.type === 'room' ? target.message : '');
+  document.getElementById('keypad-text').textContent = typeof prompt === 'function' ? prompt() : prompt;
   keypadInput.value = '';
   keypadInput.maxLength = String(target.code).length;
   keypadError.textContent = '';
