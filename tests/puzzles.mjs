@@ -253,6 +253,23 @@ try {
   assert.match(await text('#inspection-description'), /신경 신호 변환기 부품/);
   await page.evaluate(() => closeInspection());
 
+  // 16층 키오스크(작은 퍼즐): 전력이 있으면 질문을 고른다. CU 영수증의 주문을 물어야 수호를 지켜본 기록을 털어놓는다.
+  await page.evaluate(() => { solarPoweredFloors = [16]; updatePowerState(); });
+  await inspectProp('f16-cafe', '음성 주문 키오스크');
+  assert(await page.locator('#manual-control').isVisible(), 'A powered kiosk asks what to order');
+  await page.keyboard.press('Enter');
+  await page.waitForFunction(() => !usingControl && usingInspection);
+  assert.match(await text('#inspection-description'), /다시 말씀해/);
+  await inspectProp('f16-cafe', '음성 주문 키오스크');
+  for (let i = 0; i < 3; i++) await page.keyboard.press('ArrowRight');
+  await page.keyboard.press('Enter');
+  await page.waitForFunction(() => !usingControl && usingInspection);
+  assert.match(await text('#inspection-description'), /걸음 속도까지 다 저장/);
+  assert.equal(await page.evaluate(() => collectedItems.has('f16-kiosk-answered')), true);
+  await page.evaluate(() => { closeInspection(); solarPoweredFloors = []; updatePowerState(); });
+  assert.match(await inspectProp('f16-cafe', '음성 주문 키오스크'), /먼저 인사한다/, 'Without power it is only inspected');
+  await page.evaluate(() => closeInspection());
+
   assert.deepEqual(errors, []);
   console.log('Puzzle tests passed.');
 } finally {

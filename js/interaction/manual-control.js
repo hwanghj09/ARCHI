@@ -143,7 +143,7 @@ function finishControl() {
   door.controlPassed = true;
   if (door.cycle) door.controlChoice = choice;
   const onDone = [].concat(door.control).at(-1).onDone;
-  if (onDone) { door.controlPassed = false; onDone(choice); return; }
+  if (onDone) { door.controlPassed = false; onDone(choice, door); return; }
   interact();
 }
 
