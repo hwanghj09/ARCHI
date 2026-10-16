@@ -231,6 +231,17 @@ try {
   await page.evaluate(() => closeInspection());
   assert.equal((await press(16)).selected, 16, 'Locking the ARCHI helper account restores the panel');
 
+  // 6층 콜백(작은 퍼즐): 당직 전화 발신 번호 9203을 내선 규칙으로 풀면 B2 연결 실험실이고, 스피커폰으로 걸 수 있다.
+  assert.match(await inspectProp('f6-meeting', '캐비닛 바인더'), /9\+층/);
+  await inspectProp('f6-meeting', '스피커폰');
+  await page.locator('#keypad-input').fill('9103');
+  await page.locator('#keypad-submit').click();
+  assert.match(await text('#keypad-error'), /없는 내선/);
+  await page.locator('#keypad-input').fill('9203');
+  await page.locator('#keypad-submit').click();
+  assert.match(await text('#inspection-description'), /B2 연결 실험실입니다/);
+  await page.evaluate(() => closeInspection());
+
   assert.deepEqual(errors, []);
   console.log('Puzzle tests passed.');
 } finally {

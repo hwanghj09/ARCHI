@@ -2054,7 +2054,12 @@ try {
     assert.equal(await spots(), 4);
     await inspect(1764, 'E · 캐비닛 바인더 조사', /DR-EXT 경로 추가.*당직 ARS 무응답 자동 승인/);
     await inspect(614, 'E · 꺼진 디스플레이 조사', /매일 03:00.*주최 archi_svc/);
-    await inspect(384, 'E · 스피커폰 조사', /내선 2000\(B2 서버실\).*참석자 0명/);
+    // 스피커폰은 이제 내선을 거는 키패드다(6층 콜백 퍼즐, tests/puzzles.mjs). 키패드 안내 문구로 통화 기록을 확인한다.
+    await walkTo(384);
+    assert.equal(await hint(), 'E · 스피커폰 조사');
+    await page.keyboard.press('e');
+    assert.match(await page.locator('#keypad-text').textContent(), /내선 2000\(B2 서버실\).*참석자 0명/);
+    await page.keyboard.press('Escape');
     await inspect(182, 'E · 화이트보드 조사', /B2 ARCHI-MAIN.*고객사 DR 센터.*DR-EXT · 등록되지 않은 주소 · 해외.*03:05~03:40/);
     await page.screenshot({ path: '.local/floor-6-meeting.png' });
     await leaveRoom(meetingRoom, corridorHeader);
