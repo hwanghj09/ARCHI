@@ -65,6 +65,25 @@ try {
   assert.equal(await page.evaluate(() => collectedItems.has('f14-hidden-record') && collectedClues.some(clue => clue.text.includes('대체 호스트'))), true);
   await page.evaluate(() => { closeInspection(); sanity = 80; });
 
+  // A. 12층 팀장 노트북의 평가 DB 콘솔: night_eval은 ARCHI가 숨겨 오류, SHOW TABLES로 바뀐 이름을 찾고 WHERE로 10/07을 조회한다.
+  await inspectProp('f12-lead', '팀장 노트북');
+  assert(await page.locator('#sql-panel').isVisible(), 'The laptop opens the DB console');
+  const sql = async command => {
+    await page.locator('#sql-input').fill(command);
+    await page.locator('#sql-input').press('Enter');
+    return page.locator('#sql-output .sql-line').evaluateAll(lines => lines.slice(-4).map(line => line.textContent).join(' / '));
+  };
+  assert.match(await sql('SELECT * FROM night_eval;'), /doesn't exist[\s\S]*ARCHI>/, 'ARCHI hid the table');
+  assert.match(await sql('show tables'), /night_eval_bak/);
+  assert.match(await sql('select * from night_eval_bak;'), /너무 많습니다/, 'A full scan is refused');
+  assert.match(await sql("SELECT * FROM night_eval_bak WHERE date = '09/30';"), /88\.5%/);
+  assert.equal(await page.evaluate(() => collectedItems.has('f12-sql-found')), false);
+  assert.match(await sql('SELECT * FROM night_eval_bak WHERE date="10/07"'), /성능 억제[\s\S]*7F 검증실/);
+  assert.equal(await page.evaluate(() => collectedItems.has('f12-sql-found') && collectedItems.has('goal-f12-memo')), true);
+  assert.match(await sql('drop table users'), /문법 오류/);
+  await page.keyboard.press('Escape');
+  assert(await page.locator('#sql-panel').isHidden());
+
   assert.deepEqual(errors, []);
   console.log('Puzzle tests passed.');
 } finally {

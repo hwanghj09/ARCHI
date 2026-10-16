@@ -108,6 +108,7 @@ function interact() {
     }
     if (enterB2TrueEnd(nearbyDoor)) return; // ARCHI를 끈 뒤 1층 정문으로 나가기(b2-ending.js)
     if (handleLogTerminalInteract(nearbyDoor)) return; // 12층 야간 로그 단말기·네트워크 랙(log-puzzle.js)
+    if (nearbyDoor.terminal === 'sql') { openSqlConsole(); return; } // 12층 팀장 노트북의 평가 DB 콘솔(sql-console.js)
     const { gives } = nearbyDoor;
     // 도어락(code): 잠긴 문이나 아직 열지 못한 소품은 키패드를 연다. 맞는 번호를 넣으면 문이 열리거나 gives를 챙긴다.
     if (nearbyDoor.code && (nearbyDoor.type === 'room' ? nearbyDoor.locked : !collectedItems.has(gives))) {

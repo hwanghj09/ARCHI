@@ -16,6 +16,7 @@
     <link rel="stylesheet" href="css/wire-puzzle.css" />
     <link rel="stylesheet" href="css/manual-control.css" />
     <link rel="stylesheet" href="css/log-puzzle.css" />
+    <link rel="stylesheet" href="css/sql-console.css" />
     <link rel="stylesheet" href="css/guard-patrol.css" />
     <link rel="stylesheet" href="css/b2-ending.css" />
     <link rel="stylesheet" href="css/phone.css" />
@@ -81,6 +82,7 @@
     <script src="js/interaction/manual-control.js" defer></script>
     <script src="js/interaction/wire-puzzle.js" defer></script>
     <script src="js/interaction/log-puzzle.js" defer></script>
+    <script src="js/interaction/sql-console.js" defer></script>
     <script src="js/interaction/outline.js" defer></script>
     <script src="js/interaction/interaction.js" defer></script>
     <script src="js/interaction/phone.js" defer></script>
@@ -336,6 +338,16 @@
         <p id="wire-status" role="status" aria-live="polite"></p>
         <button id="wire-cancel" type="button">나중에 · Esc</button>
       </div>
+    </section>
+    <section id="sql-panel" role="dialog" aria-modal="true" aria-labelledby="sql-title" hidden>
+      <div id="sql-frame">
+        <div id="sql-screen">
+          <h2 id="sql-title">팀장 노트북 · 평가 DB 콘솔</h2>
+          <div id="sql-output" role="log" aria-live="polite"></div>
+          <form id="sql-form"><label for="sql-input">eval_db&gt;</label><input id="sql-input" type="text" autocomplete="off" spellcheck="false" autocapitalize="off" /></form>
+        </div>
+      </div>
+      <button id="sql-close" type="button">나가기 · Esc</button>
     </section>
     <section id="log-panel" role="dialog" aria-modal="true" aria-labelledby="log-title" aria-describedby="log-status" hidden>
       <div id="log-frame">
