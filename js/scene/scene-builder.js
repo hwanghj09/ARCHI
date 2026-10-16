@@ -202,7 +202,10 @@ function buildDynamicScene(config) {
     roomElement.append(sign);
     dynamicScene.append(roomElement);
     doorList.push(addRoomDoor({ name: roomConfig.name, type: 'room', hint: `E · ${roomConfig.name} 들어가기`,
-      locked: roomConfig.locked && !collectedItems.has(roomConfig.unlockedBy), message: roomConfig.message,
+      // 전기 잠금(poweredLock)은 그 층에 전력이 없으면 잠긴 채 그린다. 전력·카메라가 바뀌면 cctv.js의 refreshPoweredLocks가 맞춘다.
+      locked: (roomConfig.locked && !collectedItems.has(roomConfig.unlockedBy)) || Boolean(roomConfig.poweredLock && !floorHasPower(roomConfig.poweredLock.floor)),
+      message: roomConfig.poweredLock && !floorHasPower(roomConfig.poweredLock.floor) ? roomConfig.poweredLock.message : roomConfig.message,
+      poweredLock: roomConfig.poweredLock,
       surface: roomConfig.surface, look: roomConfig.look, writing: roomConfig.writing, caption: roomConfig.caption, image: roomConfig.image,
       unlocked: collectedItems.has(roomConfig.unlockedBy),
       code: roomConfig.code, codeMessage: roomConfig.codeMessage, unlockedBy: roomConfig.unlockedBy,

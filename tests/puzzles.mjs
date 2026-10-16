@@ -143,6 +143,27 @@ try {
   assert.equal(await page.evaluate(() => floorHasPower(1)), false, 'The leftmost breaker is the real 1F main power');
   await page.evaluate(() => Object.assign(b2Ending, { phase: 'idle', stage: 'b2', offline: false }));
 
+  // D. 15층 연구본부장실 전기 잠금: 정전이면 잠기고, 15층에 전력을 넣으면 열리지만 복도 카메라가 깨어나 들키면 다시 잠긴다.
+  const director = () => page.evaluate(() => { const door = currentDoors.find(entry => entry.target === 'f15-director'); return { locked: door.locked, message: door.message }; });
+  await page.evaluate(() => { b2Ending.phase = 'idle'; buildingBlackout = true; solarEnabled = true; solarPoweredFloors = []; updatePowerState();
+    performFloorChange('f15', 0, null); Body.setPosition(body, { x: 3050, y: floorY - 81 }); });
+  assert.equal((await director()).locked, true);
+  assert.match((await director()).message, /전기 잠금/, 'Without power the electric lock holds');
+  await page.evaluate(() => { solarPoweredFloors = [15]; updatePowerState(); });
+  assert.equal((await director()).locked, false, 'Power opens the electric lock');
+  // 카메라가 문 구간(첫 구간)을 비출 때 문 앞에 서면 들켜 잠긴다.
+  await page.evaluate(() => { const camera = activeCameras[0]; camera.elapsed = 0; camera.span = -1; Body.setPosition(body, { x: 3220, y: floorY - 81 }); });
+  await page.waitForFunction(() => currentDoors.find(entry => entry.target === 'f15-director').locked);
+  assert.match((await director()).message, /카메라가 이쪽을/, 'The awakened camera relocks the door');
+  // 사각지대로 물러났다가 카메라가 왼쪽을 비출 때 들어간다.
+  await page.evaluate(() => Body.setPosition(body, { x: 3050, y: floorY - 81 }));
+  await page.waitForFunction(() => !currentDoors.find(entry => entry.target === 'f15-director').locked && activeCameras[0].span === 1, null, { timeout: 12000 });
+  await standAt(3220);
+  await interact();
+  await page.waitForFunction(() => dynamicFloorId === 'f15-director' && !transitioning);
+  assert.match(await inspectProp('f15-director', '보류 서류함'), /18kg/);
+  await page.evaluate(() => { closeInspection(); solarPoweredFloors = []; updatePowerState(); });
+
   assert.deepEqual(errors, []);
   console.log('Puzzle tests passed.');
 } finally {

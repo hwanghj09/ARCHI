@@ -38,13 +38,35 @@ function buildCameras(config, doorList) {
 
 function setCameraLock(camera, locked) {
   if (!camera.door) return;
+  camera.seen = locked;
+  if (camera.door.poweredLock) { refreshPoweredLocks(); return; }
   camera.door.locked = locked;
   camera.door.message = locked ? camera.lockedMessage : undefined;
   camera.door.element.setAttribute('aria-label', `${camera.door.name} 출입문${locked ? ' · 잠김' : ''}`);
 }
 
+// 전기 잠금 문(poweredLock, 15층 연구본부장실): 그 층에 전력이 없으면 잠기고, 전력이 있어도 지키는 카메라에 들키면 잠긴다.
+// 장면을 그릴 때와 전력이 바뀔 때(refreshReady) 다시 맞춘다.
+function refreshPoweredLocks() {
+  for (const door of currentDoors.filter(entry => entry.poweredLock)) {
+    const powered = floorHasPower(door.poweredLock.floor);
+    const camera = activeCameras.find(entry => entry.door === door && entry.seen);
+    door.locked = !powered || Boolean(camera);
+    door.message = !powered ? door.poweredLock.message : camera ? camera.lockedMessage : undefined;
+    door.element.setAttribute('aria-label', `${door.name} 출입문${door.locked ? ' · 잠김' : ''}`);
+  }
+}
+
 function updateCameras() {
   for (const camera of activeCameras) {
+    // 층 전력으로 도는 카메라(poweredBy)는 전력이 없으면 꺼져 아무것도 잠그지 않는다.
+    const live = !camera.poweredBy || floorHasPower(camera.poweredBy);
+    if (camera.element.dataset.off !== String(!live)) {
+      camera.element.dataset.off = String(!live);
+      for (const cone of camera.cones) cone.hidden = !live;
+      if (!live) { camera.lockLeft = 0; setCameraLock(camera, false); }
+    }
+    if (!live) continue;
     camera.elapsed += step;
     const span = Math.floor(camera.elapsed / camera.period) % camera.spans.length;
     if (span !== camera.span) {

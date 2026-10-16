@@ -18,8 +18,17 @@ const FLOOR15_LAYOUT = {
       doorX: 280, doorWidth: 140, doorStyle: 'research' },
     { name: '세미나실', x: 954, width: 620, style: 'seminar', target: 'f15-seminar',
       doorX: 970, doorWidth: 130, doorStyle: 'seminar' },
+    // 퍼즐 D: 연구본부장실은 전기 잠금(poweredLock)이라 15층에 전력을 넣어야 열린다. 그런데 전력이 들어가면 문 위 복도 카메라도
+    // 깨어나(poweredBy) 수호를 보면 문을 다시 잠근다. 카메라가 왼쪽 구간을 비추는 동안 사각지대에서 문으로 들어가야 한다.
     { name: '연구본부장실', x: 3092, width: 456, style: 'director', target: 'f15-director',
-      doorX: 3160, doorWidth: 120, doorY: 240, doorStyle: 'director' },
+      doorX: 3160, doorWidth: 120, doorY: 240, doorStyle: 'director',
+      poweredLock: { floor: 15, message: '전기 잠금이다. 정전이라 걸쇠가 꿈쩍도 하지 않는다. 문 위 카메라도 꺼져 있다. 이 층에 전력을 넣으면 열리겠지만, 카메라도 같이 깨어날 것이다.' } },
+  ],
+  cameras: [
+    { name: '15F 복도 카메라', x: 3060, y: 150, spans: [[3130, 3330], [2700, 2980]], period: 3000, guards: 'f15-director', lockMs: 4000,
+      poweredBy: 15,
+      detectedMessage: '문 위 카메라가 수호에게서 멈춘다. 연구본부장실 전기 잠금이 다시 철컥 걸린다.',
+      lockedMessage: '문이 잠겨 있다. 카메라가 이쪽을 보고 있는 동안은 열리지 않는다. 카메라가 다른 곳을 비출 때를 노리자.' },
   ],
   props: [
     { file: 'water-cooler', size: [256, 512], worldWidth: 62, x: 1640 },
@@ -87,6 +96,12 @@ const FLOOR15_ROOMS = interiorRooms(15, [
       surface: 'document',
       writing: [{ as: 'title', text: '결재 서류' }, '연구용 GPU 서버 B2 이관 1차분', { as: 'rule' }, { as: 'field', label: '본부장 서명', text: '' },
         { as: 'stamp', text: '자동 승인\n야간 배치 02:14' }, { as: 'note', text: '누가 승인했는지\n확인할 것.\n2차분은 보류.' }] },
+    { file: 'filing-cabinet', size: [256, 512], worldWidth: 72, x: 1150, name: '보류 서류함',
+      message: '"2차분 · 보류" 꼬리표가 붙은 서랍. 이관 명세서: "B2 연결 실험실행 · 상자 12개 · 품목 GPU 서버." 본부장 메모: "상자 하나만 무게가 18kg 더 나감. GPU가 아님. 열어 보지 말라는 지시 · SYSTEM."',
+      clue: '15층 본부장실: B2 이관 2차분 상자 12개 중 하나만 18kg 더 무겁다. GPU가 아님(SYSTEM이 개봉 금지).',
+      surface: 'document', writing: [{ as: 'title', text: '이관 명세서 · 2차분' }, { as: 'field', label: '수신', text: 'B2 연결 실험실' },
+        { as: 'field', label: '상자', text: '12개 · GPU 서버' }, { as: 'note', text: '상자 하나만 18kg 더 나감.\nGPU가 아님.\n개봉 금지 · SYSTEM' }],
+      caption: '"2차분 · 보류" 꼬리표가 붙은 서랍이다.' },
     { file: 'waiting-sofa', size: [512, 256], worldWidth: 250, x: 1300 },
     { file: 'large-planter', size: [256, 512], worldWidth: 78, x: 1560 },
     { file: 'water-cooler', size: [256, 512], worldWidth: 62, x: 1740 },
