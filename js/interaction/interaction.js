@@ -57,6 +57,7 @@ function doorHintText(door) {
   if (door.name === '네트워크 랙' && dynamicFloorId === 'f12-eval' && logDeleting()) return 'E · LAN 케이블 뽑기';
   if (door.shutterLever) return collectedItems.has(door.shutterLever) ? 'E · 셔터 내리기' : 'E · 셔터 올리기';
   if (door.type === 'inspect') return `E · ${door.name} 조사`;
+  if (door.locked && door.control && [].concat(door.requires || []).every(item => collectedItems.has(item))) return `E · ${door.name} 카드키 태그`;
   if (door.locked) return `E · ${door.name} (잠김)`;
   if (door.type === 'room') return door.hint;
   if (door.type === 'stairs') return currentSceneFloor === 18 ? 'E · 17층으로 내려가기' : 'E · 옥상으로 올라가기';

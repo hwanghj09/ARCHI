@@ -24,7 +24,10 @@ const FLOOR12_LAYOUT = {
       // doorOutline/exitOutline: 판정은 그대로 두고 근접 테두리만 그림 속 양쪽 미닫이문 전체에 맞춘다(실측).
       doorX: 708, doorWidth: 132, doorStyle: 'slide', doorOutline: [707, 250, 209, 318] },
     { name: '모델 평가실', x: 2960, width: 543, style: 'lab', target: 'f12-eval',
-      doorX: 3020, doorWidth: 140, doorY: 314, doorStyle: 'security', locked: true, unlockedBy: 'f12-eval-keycard',
+      // 카드키(f12-eval-keycard)를 가진 채 E를 누르면 카드를 직접 끌어 리더기에 대야 열린다(manual-control.js의 card).
+      doorX: 3020, doorWidth: 140, doorY: 314, doorStyle: 'security', locked: true, unlockedBy: 'f12-eval-door-opened',
+      requires: 'f12-eval-keycard',
+      control: { kind: 'card', label: '카드키를 마우스로 끌어 리더기에 올리자.', reader: '카드키', doneBy: 'f12-eval-door-opened' },
       message: '모델 평가실 문이 잠겨 있다. 전자 잠금장치에 전용 카드키가 필요하다. 개발실 서랍부터 찾아보자.' },
     { name: '팀장실', x: 4070, width: 723, style: 'blinds', target: 'f12-lead',
       doorX: 4508, doorWidth: 137, doorY: 298, doorStyle: 'blinds', locked: true, unlockedBy: 'f12-lead-key',

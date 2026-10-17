@@ -666,6 +666,8 @@ try {
     }
     await page.getByRole('button', { name: '모델 평가실 카드키 줍기' }).click();
     await page.keyboard.press('Escape');
+    // 카드 리더 조작은 tests/floor12-drawer.mjs가 본다. 여기서는 이미 대 둔 것으로 치고 방 크기·배치를 본다.
+    await page.evaluate(() => collectedItems.add('f12-eval-door-opened'));
     await leaveRoom(dev, corridorHeader);
 
     const lab = await enterRoom('모델 평가실', '12F');

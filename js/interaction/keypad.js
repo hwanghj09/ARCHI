@@ -56,12 +56,8 @@ function submitKeypad() {
       showStatus('전선을 다시 연결했다. 태양광 비상 전력이 켜진다.', 4200);
     });
   } else if (target.type === 'room') {
-    // 맞는 번호를 누르면 그 자리에서 문이 열린다. 다음에 층을 그릴 때는 unlockedBy를 챙긴 것으로 열린 채 그린다.
-    collectedItems.add(target.unlockedBy);
-    target.locked = false;
-    target.element.dataset.unlocked = 'true';
-    target.element.setAttribute('aria-label', `${target.name} 출입문`);
     closeKeypad();
+    unlockRoomDoor(target);
     showStatus(target.codeMessage || '도어락이 열렸다.', 5000);
   } else {
     if (target.gives) collectedItems.add(target.gives);
@@ -69,6 +65,14 @@ function submitKeypad() {
     // 열린 소품의 내용은 조사 창으로 보인다(1층 경비 로봇 정비 패널은 writing이 있으면 그 화면으로).
     openInspection(target.name, target.message, target);
   }
+}
+
+// 맞는 번호를 누르거나 카드키를 대면(manual-control.js) 그 자리에서 문이 열린다. 다음에 층을 그릴 때는 unlockedBy를 챙긴 것으로 열린 채 그린다.
+function unlockRoomDoor(door) {
+  collectedItems.add(door.unlockedBy);
+  door.locked = false;
+  door.element.dataset.unlocked = 'true';
+  door.element.setAttribute('aria-label', `${door.name} 출입문`);
 }
 
 // 키패드 안의 입력은 플레이어 조작으로 넘기지 않는다. Enter는 폼 제출, Esc는 닫기.

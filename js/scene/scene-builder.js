@@ -207,6 +207,7 @@ function buildDynamicScene(config) {
       surface: roomConfig.surface, look: roomConfig.look, writing: roomConfig.writing, caption: roomConfig.caption, image: roomConfig.image,
       unlocked: collectedItems.has(roomConfig.unlockedBy),
       code: roomConfig.code, codeMessage: roomConfig.codeMessage, unlockedBy: roomConfig.unlockedBy,
+      requires: roomConfig.requires, control: roomConfig.control,
       target: roomConfig.target, arrivalKey: 'exit', key: `room:${roomConfig.target}`,
       x: roomConfig.doorX, y: roomConfig.doorY ?? config.roomDoorY ?? 250, width: roomConfig.doorWidth ?? 120,
       style: roomConfig.doorStyle, sprite: roomConfig.doorSprite, outline: roomConfig.doorOutline }));

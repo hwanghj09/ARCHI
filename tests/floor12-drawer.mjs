@@ -105,9 +105,28 @@ try {
     await page.evaluate(data => restoreProgress(data), saved);
     await enter('exit');
     await near('f12-eval');
-    assert.match(await page.locator('#interaction-hint').textContent(), /모델 평가실 들어가기/);
-    await enter('f12-eval');
-    assert.equal(await page.evaluate(() => dynamicFloorId), 'f12-eval');
+    // 카드키가 있어도 바로 열리지 않는다: 카드를 리더기까지 끌어야 한다(반만 끌고 놓으면 제자리).
+    assert.match(await page.locator('#interaction-hint').textContent(), /모델 평가실 카드키 태그/);
+    await page.keyboard.press('e');
+    assert.equal(await page.evaluate(() => usingControl), true, 'The card reader opens');
+    assert.equal(await page.locator('#manual-control-device').getAttribute('class'), 'control-device control-card');
+    if (name === 'mobile') {
+      for (let i = 0; i < 9; i++) await page.keyboard.press('ArrowRight');
+    } else {
+      const handle = await page.locator('#manual-control-device .control-handle').boundingBox();
+      const start = { x: handle.x + handle.width / 2, y: handle.y + handle.height / 2 };
+      await page.mouse.move(start.x, start.y); await page.mouse.down();
+      await page.mouse.move(start.x + 60, start.y, { steps: 4 }); await page.mouse.up();
+      assert.equal(await page.evaluate(() => controlStep.value), 0, 'A half swipe springs back');
+      assert.equal(await page.evaluate(() => collectedItems.has('f12-eval-door-opened')), false);
+      await page.mouse.move(start.x, start.y); await page.mouse.down();
+      await page.mouse.move(start.x + 260, start.y, { steps: 8 }); await page.mouse.up();
+    }
+    await page.clock.runFor(500);
+    assert.equal(await page.evaluate(() => usingControl), false);
+    await finishSceneTransition(page);
+    assert.equal(await page.evaluate(() => collectedItems.has('f12-eval-door-opened')), true);
+    assert.equal(await page.evaluate(() => dynamicFloorId), 'f12-eval', 'Swiping the card opens the door and walks in');
     await enter('exit');
     await enter('f12-dev');
     // The existing team lead key remains a separate pickup.
