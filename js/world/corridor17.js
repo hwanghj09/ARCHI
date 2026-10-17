@@ -45,7 +45,19 @@ for (const entry of FLOOR17.rooms) {
 }
 doors.push({ name: '소화전', type: 'inspect', x: 4023, y: 248, width: 145,
   element: document.getElementById('floor17-hydrant'), container: 'hydrant',
-  message: '소화전 안에 호스와 관창이 정리되어 있다. 아래 선반에 작은 열쇠와 접힌 관리실 메모가 있다.' });
+  message: '소화전 안에 호스와 관창이 정리되어 있다. 아래 선반에 작은 열쇠가 있다.' });
+
+// 확장 복도 그림 오른쪽 끝의 청소 카트(service-corridor-finished.png x≈1584~1755). 조사하면 숨겨 둔
+// 관리실 비상 출입 메모를 펼쳐 보이고 가방에 넣는다. 챙긴 뒤에 다시 조사하면 아무것도 없다.
+const cleaningCart = document.createElement('div');
+cleaningCart.id = 'floor17-cleaning-cart';
+cleaningCart.setAttribute('role', 'img');
+cleaningCart.setAttribute('aria-label', '청소 카트');
+Object.assign(cleaningCart.style, { position: 'absolute', left: '4784px', top: '382px', width: '171px', height: '186px', pointerEvents: 'none' });
+world.insertBefore(cleaningCart, sprite);
+doors.push({ name: '청소 카트', type: 'inspect', x: 4784, y: 382, width: 171, element: cleaningCart,
+  gives: 'f17-manager-memo', ...MANAGER_MEMO_SHEET,
+  message: `세제통 밑에 접힌 메모가 숨겨져 있다. ${MANAGER_MEMO_TEXT}`, takenMessage: '아무것도 없다.' });
 
 // 배경에 그려진 CCTV 아래 게시판의 위치에 조사 영역만 겹친다.
 const noticeboard = document.createElement('div');

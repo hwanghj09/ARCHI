@@ -22,7 +22,6 @@ function finishInspectionText() {
 // 한 단계 뒤로: 가방에서 연 카드(returnTo: 'inventory')는 가방 목록으로 돌아가고, 나머지는 닫는다.
 function stepBackInspection() {
   if (inspectionPanel.dataset.returnTo === 'inventory') closeInventoryCard();
-  else if (inspectionPanel.dataset.returnTo === 'hydrant') openHydrant();
   else if (inspectionPanel.dataset.returnTo === 'gallery') {
     closeInspection();
     togglePhone();

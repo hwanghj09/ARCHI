@@ -16,14 +16,7 @@ const INVENTORY_ITEMS = {
     hint: '13층 보안 자료실 백업 장치 보관함' },
   'rooftop-key': { name: '낡은 열쇠', description: '옥상문을 열 수 있을 것만 같다… 조금 더럽다.' },
   'f17-manager-memo': { name: '관리실 비상 출입 메모', image: 'assets/ui/floor17/manager-memo.png',
-    description: `관리자 외 출입금지실 비밀번호: ${MANAGER_ROOM_CODE}. 태양광은 전등 전용. 승강기가 멈췄으면 관리실 책상의 회로 안내도를 보고 비상 전력 분배반의 회선을 연결할 것.`,
-    sheet: { surface: 'memo', look: 'manager-access', writing: [
-      { as: 'title', text: '관리실 비상 출입 메모' },
-      '관리자 외 출입금지실',
-      { as: 'hand', text: `비밀번호: ${MANAGER_ROOM_CODE}`, ink: 'red', bold: true },
-      '태양광은 전등 전용.',
-      '승강기 정지 시 관리실 책상의 회로 안내도를 보고 비상 전력 분배반의 회선을 연결할 것.',
-    ] } },
+    description: MANAGER_MEMO_TEXT, sheet: MANAGER_MEMO_SHEET },
 };
 // 가방에 들어 있는 물건: 챙겼고 아직 쓰지 않은 것(usedFlag가 있는 물건은 쓰면 가방에서 사라진다. 챙김 표시는 그대로 두어 선반에 다시 나타나지 않는다).
 const ownedInventoryIds = () => Object.keys(INVENTORY_ITEMS).filter(id => collectedItems.has(id) && !collectedItems.has(INVENTORY_ITEMS[id].usedFlag));
@@ -88,20 +81,8 @@ function openHydrant() {
     });
     cabinet.append(key);
   } else {
-    description.textContent = '호스와 관창은 그대로다. 열쇠는 이미 챙겼다. 옆에 관리실 비상 출입 메모가 있다.';
+    description.textContent = '호스와 관창은 그대로다. 열쇠는 이미 챙겼다.';
   }
-  const memo = itemButton('f17-manager-memo');
-  memo.setAttribute('aria-label', '관리실 비상 출입 메모 읽기');
-  memo.addEventListener('click', () => {
-    collectedItems.add('f17-manager-memo');
-    const item = INVENTORY_ITEMS['f17-manager-memo'];
-    openInspection(item.name, item.description, item.sheet);
-    inspectionPanel.dataset.returnTo = 'hydrant';
-    refreshInventoryCount();
-    playGameSound('item-get');
-    saveProgress();
-  });
-  cabinet.append(memo);
   openItemPanel('17층 소화전', description.textContent, 'hydrant', content);
 }
 

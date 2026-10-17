@@ -37,13 +37,12 @@ try {
   };
   await page.evaluate(() => triggerBuildingBlackout());
   assert.deepEqual(await state(), { lift: false, equipment: false, lights: false, solved: false });
-  await approach('소화전');
-  await page.locator('.hydrant-cabinet > img').evaluate(image => image.decode());
-  await page.getByRole('button', { name: '관리실 비상 출입 메모 읽기' }).click();
+  // 관리실 비상 출입 메모는 확장 복도 오른쪽 끝 청소 카트에 숨겨져 있다. 조사하면 메모가 펼쳐지고 가방에 들어간다.
+  await approach('청소 카트');
   const memo = await page.locator('.writing-memo').textContent();
   const code = memo.match(/비밀번호:\s*(\d{4})/)[1];
   assert.match(memo, /태양광은 전등 전용/);
-  assert.equal(await page.locator('#inspection').getAttribute('data-return-to'), 'hydrant');
+  assert.equal(await page.evaluate(() => collectedItems.has('f17-manager-memo')), true, 'Inspecting the cart puts the memo in the bag');
   for (const viewport of [{ width: 390, height: 844 }, { width: 844, height: 390 }, { width: 1280, height: 720 }]) {
     await page.setViewportSize(viewport);
     assert(await page.locator('.writing-memo').evaluate(paper => {
@@ -58,7 +57,8 @@ try {
   }
   await page.screenshot({ path: '.local/floor17-power-memo.png' });
   await page.keyboard.press('Escape');
-  assert(await page.locator('.hydrant-cabinet').isVisible(), 'Closing the memo returns to the key');
+  await approach('청소 카트');
+  assert.equal(await page.locator('#inspection-description').textContent(), '아무것도 없다.', 'The emptied cart has nothing left');
   await page.keyboard.press('Escape');
   await page.locator('#inventory-button').click();
   await page.locator('[data-item="f17-manager-memo"]').click();
