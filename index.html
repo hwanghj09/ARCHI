@@ -110,6 +110,7 @@
     <script src="js/input/keyboard.js" defer></script>
     <script src="js/input/touch.js" defer></script>
     <script src="js/debug/sidebar.js" defer></script>
+    <script src="js/debug/puzzle-jump.js" defer></script>
     <script src="js/debug/floor-select.js" defer></script>
     <script src="js/debug/sanity-debug.js" defer></script>
     <script src="js/scene/opening.js" defer></script>
@@ -453,6 +454,12 @@
         <form id="debug-room" aria-label="테스트용 방 이동">
           <label for="debug-room-select">실내</label><select id="debug-room-select"></select><button type="submit">이동</button>
         </form>
+      </section>
+      <section><h3>퍼즐 테스트</h3>
+        <form id="debug-puzzle" aria-label="새 퍼즐 앞으로 이동">
+          <select id="debug-puzzle-select" aria-label="퍼즐"></select><button type="submit">이동</button>
+        </form>
+        <p id="debug-puzzle-note" class="debug-note" aria-live="polite"></p>
       </section>
       <section><h3>플레이어</h3>
         <form id="debug-sanity" aria-label="테스트용 정신력 조정">
