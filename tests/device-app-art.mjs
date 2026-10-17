@@ -93,7 +93,7 @@ try {
     await finishSceneTransition(page);
     await page.locator('#phone-button').tap();
     assert.match(await phone.locator('.phone-screen').evaluate(element => getComputedStyle(element).backgroundImage), /phone-wallpaper\.png/);
-    for (const name of ['notes', 'calculator', 'building']) {
+    for (const name of ['notes', 'calculator']) {
       const shortcut = phone.locator(`[data-phone-app="${name}"]`);
       await shortcut.scrollIntoViewIfNeeded();
       await checkIcon(shortcut.locator('.app-art'));

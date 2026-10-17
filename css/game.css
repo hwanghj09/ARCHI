@@ -932,7 +932,7 @@ nav button:hover { border-color: #b9c6cf; }
 nav button.active, nav button:active { background: #bdd1dc; color: #22282e; }
 nav button:focus-visible { outline: 2px solid #c9dde5; outline-offset: 4px; }
 /* 도어락 키패드: 방 문·소품의 code. 열려 있는 동안 스테이지 조작이 멈춘다 */
-#keypad { position: fixed; left: 50%; top: 50%; z-index: 6; box-sizing: border-box; width: min(340px, calc(100vw - 32px)); padding: 18px; border: 2px solid #3d4e52; background: #0d1417f2; color: #cfd9d3; font: 14px Arial, sans-serif; transform: translate(-50%, -50%); box-shadow: 0 12px 40px #000a; }
+#keypad { position: fixed; left: 50%; top: 50%; z-index: 13; box-sizing: border-box; width: min(340px, calc(100vw - 32px)); padding: 18px; border: 2px solid #3d4e52; background: #0d1417f2; color: #cfd9d3; font: 14px Arial, sans-serif; transform: translate(-50%, -50%); box-shadow: 0 12px 40px #000a; }
 #keypad[hidden] { display: none; }
 #keypad h2 { margin: 0 0 8px; color: #e2d2b8; font-size: 16px; }
 #keypad p { margin: 0 0 12px; line-height: 1.5; }

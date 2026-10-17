@@ -23,7 +23,6 @@ try {
   const pcCalc = pc.locator('[data-device-calculator]');
   const phoneCalc = phone.locator('[data-device-calculator]');
   const pcGuide = pc.locator('[data-building-guide]');
-  const phoneGuide = phone.locator('[data-building-guide]');
   const key = (calculator, value) => calculator.locator(`[data-calculator-key="${value}"]`);
   const display = calculator => calculator.locator('[data-calculator-display]').textContent();
   const closePhone = async () => {
@@ -155,14 +154,10 @@ try {
     await pc.locator('#computer-exit').tap();
     await finishSceneTransition(page);
     await page.locator('#phone-button').tap();
-    for (const name of ['notes', 'calculator', 'building']) {
+    for (const name of ['notes', 'calculator']) {
       await phoneApp(name).tap();
       assert(await phone.locator(`[data-phone-view="${name}"]`).isVisible());
       if (name === 'calculator') await key(phoneCalc, '=').tap();
-      if (name === 'building') {
-        await phoneGuide.locator('[data-building-floor]').selectOption('12');
-        await phone.locator('.phone-screen').evaluate(element => { element.scrollTop = element.scrollHeight; });
-      }
       assert(await phone.locator('.phone-screen').evaluate(element => element.scrollWidth <= element.clientWidth + 1), `${name} scrolls without sideways overflow`);
       await phone.locator('#phone-app-back').tap();
       assert(await phone.locator('#phone-app-window').isHidden());
@@ -172,31 +167,30 @@ try {
     if (viewport.width === 390) { await page.clock.runFor(100); await page.keyboard.press('e'); await finishSceneTransition(page); }
   }
 
+  // The phone no longer has the guide, so check the PC guide's DOM directly while the PC is closed.
+  const pickGuideFloor = floor => pcGuide.locator('[data-building-floor]').evaluate((select, value) => { select.value = value; select.dispatchEvent(new Event('change')); }, floor);
   await page.evaluate(() => { buildingBlackout = true; solarEnabled = false; solarPoweredFloors = []; updatePowerState(); });
-  await page.locator('#phone-button').tap();
-  await phoneApp('building').tap();
-  await phoneGuide.locator('[data-building-floor]').selectOption('12');
-  assert.equal(await phoneGuide.locator('[data-building-power]').getAttribute('data-powered'), 'false');
-  assert.match(await phoneGuide.locator('[data-building-elevator]').textContent(), /관리실.*회선/);
+  await pickGuideFloor('12');
+  assert.equal(await pcGuide.locator('[data-building-power]').getAttribute('data-powered'), 'false');
+  assert.match(await pcGuide.locator('[data-building-elevator]').textContent(), /관리실.*회선/);
   await page.evaluate(() => { setSolarPower(true); supplySolarFloor(12); });
   assert.deepEqual(await page.evaluate(() => solarPoweredFloors), [12]);
-  assert.equal(await phoneGuide.locator('[data-building-power]').getAttribute('data-powered'), 'true');
-  assert.match(await phoneGuide.locator('[data-building-elevator]').textContent(), /관리실.*회선/);
+  assert.equal(await pcGuide.locator('[data-building-power]').getAttribute('data-powered'), 'true');
+  assert.match(await pcGuide.locator('[data-building-elevator]').textContent(), /관리실.*회선/);
   await page.evaluate(() => { collectedItems.add('f17-emergency-linked'); updatePowerState(); });
-  assert.match(await phoneGuide.locator('[data-building-elevator]').textContent(), /비상 UPS로 운행 가능/);
+  assert.match(await pcGuide.locator('[data-building-elevator]').textContent(), /비상 UPS로 운행 가능/);
   // The guide follows the one-floor supply limit and updates when that floor is replaced.
   for (const supplied of [12, 7]) {
     if (supplied === 7) await page.evaluate(() => supplySolarFloor(7));
     assert.deepEqual(await page.evaluate(() => solarPoweredFloors), [supplied]);
     for (const floor of ['7', '13', '12']) {
       const powered = Number(floor) === supplied;
-      await phoneGuide.locator('[data-building-floor]').selectOption(floor);
-      assert.equal(await phoneGuide.locator('[data-building-power]').getAttribute('data-powered'), String(powered), `${floor}F guide power with ${supplied}F supplied`);
-      assert.match(await phoneGuide.locator('[data-building-charger]').textContent(), /충전 가능/, 'Emergency outlets are independent of the selected lighting floor');
+      await pickGuideFloor(floor);
+      assert.equal(await pcGuide.locator('[data-building-power]').getAttribute('data-powered'), String(powered), `${floor}F guide power with ${supplied}F supplied`);
+      assert.match(await pcGuide.locator('[data-building-charger]').textContent(), /충전 가능/, 'Emergency outlets are independent of the selected lighting floor');
     }
   }
   await page.evaluate(() => supplySolarFloor(12));
-  await closePhone();
 
   // Pick up the real badge and authenticate the real gate, then inspect their guide status.
   await page.evaluate(() => performFloorChange('f16-cafe', null, 'exit'));
@@ -205,23 +199,17 @@ try {
   await page.keyboard.press('Escape');
   assert(await page.evaluate(() => collectedItems.has('f16-badge')));
   await page.evaluate(() => performFloorChange('f12'));
-  await page.locator('#phone-button').tap();
-  await phoneApp('building').tap();
-  await phoneGuide.locator('[data-building-here]').tap();
-  assert.equal(await phoneGuide.locator('[data-building-floor]').inputValue(), '12');
-  assert.match(await phoneGuide.locator('[data-building-current]').textContent(), /12층/);
-  await closePhone();
+  await pcGuide.locator('[data-building-here]').evaluate(button => button.click());
+  assert.equal(await pcGuide.locator('[data-building-floor]').inputValue(), '12');
+  assert.match(await pcGuide.locator('[data-building-current]').textContent(), /12층/);
   await place(1826);
   await page.keyboard.press('e');
   await page.keyboard.press('Escape');
   assert.equal(await page.locator('.access-gate[data-open="true"]').count(), 2);
-  await page.locator('#phone-button').tap();
-  await phoneApp('building').tap();
-  await closePhone();
 
   await page.evaluate(() => { phoneBattery = 0; refreshPhone(); });
   await page.locator('#phone-button').tap();
-  for (const name of ['notes', 'calculator', 'building']) assert(await phoneApp(name).isDisabled());
+  for (const name of ['notes', 'calculator']) assert(await phoneApp(name).isDisabled());
   await page.evaluate(() => openPhoneApp('notes'));
   assert(await phone.locator('#phone-app-window').isHidden(), 'Empty battery cannot launch a phone app');
   await closePhone();

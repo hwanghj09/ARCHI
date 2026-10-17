@@ -9,6 +9,9 @@
 /* 붙잡는 동안(grab/caught)은 두 팔이 수호의 허리를 앞에서 감싸야 하므로 수호(6)보다 위로 올린다. 포획은 그 층에 전력이
    있을 때만 일어나서 정전 어둠 막(5)과 겹칠 일이 없다. 전체 겹침 순서는 index.html의 #darkness 주석 참고. */
 #dynamic-scene .fixture.guard-bot:is([data-patrol="grab"], [data-patrol="caught"]) { z-index: 7; }
+/* 순찰 로봇 R-03은 스프라이트만 그린다. game.css가 뒤에 읽혀서 CSS로 그린 대체 몸통(회색 상자)이 겹쳐 보였다. */
+#dynamic-scene .fixture.guard-bot.roaming-guard-bot { background: none; }
+#dynamic-scene .fixture.guard-bot.roaming-guard-bot::before, #dynamic-scene .fixture.guard-bot.roaming-guard-bot::after { content: none; }
 /* 엘리베이터 문 강제 개방(js/elevator/cabin-pry.js): 문틈을 채운 로봇이 좌우로 흔들리고, 왼쪽에 "문 닫기" 게이지. */
 #cabin-pry-robot { position: absolute; inset: 0; overflow: hidden; }
 #cabin-pry-robot[hidden], #cabin-pry-gauge[hidden] { display: none; }
