@@ -6,15 +6,20 @@ let storyLines = [];
 let storyFlag = null;
 let storyLineShown = -1;
 let storyBlocked = [];
+let storyWalkTo = null; // 대사가 끝나면 걸어가서 조사할 대상 이름(walkTo)
+let storyWalkX = null; // 걸어가는 중이면 목표 x
+let storyWalkStuck = 0;
+let storyInspectPending = false; // 건너뛰어 대상 앞으로 옮긴 뒤, 화면이 다 밝아지면 조사한다
 
 // 이야기 컷씬 목록(순서대로 하나씩 본다). ready()가 참이 된 뒤 delay가 지나면 시작하고, 끝나면 flag를 남겨 목표가 생긴다(objective.js).
 const STORY_SCENES = [
   { // 1층 경비 로봇의 추격이 끝나고 3초 뒤. 추격이 끝났다는 기록(f1-chase-ended)은 guard-patrol.js가 남긴다.
-    flag: 'story-anxiety-seen', delay: 3000, ready: () => collectedItems.has('f1-chase-ended'),
+    // 대사를 다 넘기면 수호가 층별 안내판 앞까지 걸어가 조사하고, 그 조사창이 뜨면 컷씬이 끝난다(walkTo).
+    flag: 'story-anxiety-seen', delay: 3000, ready: () => collectedItems.has('f1-chase-ended'), walkTo: '층별 안내판',
     lines: ['왜 경비 로봇이 나를 공격하려고 했던 거지?',
       '으윽.. 야근해서 힘든 와중에 이런 일을 겪으니 너무 힘들다..',
       '우리 사내 편의점에서 항불안제를 팔았던가?',
-      '편의점으로 가보자.'],
+      '편의점이 몇 층이었더라?'],
   },
   { // 항불안제를 사용하고(정신 불안 목표 완료) 2초 뒤.
     flag: 'story-robot-seen', delay: 2000, ready: () => collectedItems.has('story-anxiety-seen') && collectedItems.has('f16-antianxiety-used'),
@@ -37,6 +42,7 @@ let storyDelay = 0;
 
 // 게임 루프가 매 걸음 부른다(조작을 막는 창·컷씬 중에는 불리지 않아 그동안은 시간도 흐르지 않는다).
 function checkStoryScenes(elapsed) {
+  if (storyInspectPending) { storyInspectPending = false; interact(); return; }
   const scene = storySceneActive ? null : STORY_SCENES.find(entry => !collectedItems.has(entry.flag));
   if (!scene || !scene.ready()) { storyDelayScene = null; return; }
   if (guardPatrol.mode === 'chase') storyDelay = 0; // 다시 쫓기면 처음부터 다시 잰다
@@ -51,9 +57,11 @@ function showStoryLine(index) {
   storyCaption.textContent = storyLines[index];
 }
 
-function startStoryScene({ lines, flag }) {
+function startStoryScene({ lines, flag, walkTo }) {
   storySceneActive = true;
   clearEventsForCutscene();
+  storyWalkTo = walkTo ?? null;
+  storyWalkX = null;
   usingInspection = true; // 이동·상호작용·메뉴·정신력 진행을 막는 기존 규칙을 그대로 쓴다
   storyLines = lines;
   storyFlag = flag;
@@ -69,15 +77,70 @@ function startStoryScene({ lines, flag }) {
 
 // 화면을 클릭하면 다음 대사로 넘어가고, 마지막 대사에서 클릭하면 끝난다.
 function advanceStoryScene() {
-  if (!storySceneActive) return;
-  if (storyLineShown + 1 >= storyLines.length) return finishStoryScene();
+  if (!storySceneActive || transitioning) return;
+  if (storyWalkX !== null) return; // 걸어가는 동안에는 클릭으로 넘기지 않는다
+  if (storyLineShown + 1 >= storyLines.length) return storyWalkTo ? startStoryWalk() : finishStoryScene();
   showStoryLine(storyLineShown + 1);
+}
+
+// walkTo: 대사를 다 넘기면 대사창을 내리고 수호가 대상 앞까지 걷는다. 대상이 이 층에 없으면 그냥 끝낸다.
+function startStoryWalk() {
+  const target = currentDoors.find(door => door.name === storyWalkTo);
+  if (!target) return finishStoryScene();
+  storyWalkX = target.x + target.width / 2;
+  storyWalkStuck = 0;
+  storyCaption.textContent = '';
+}
+
+// 게임 루프가 컷씬 중에 매 걸음 부른다. 로봇·엘리베이터는 움직이지 않고 수호만 걷는다.
+// 도착하면(또는 1.5초 넘게 막히면) 컷씬을 끝내고 그 자리에서 조사(E)한다.
+function updateStoryWalk(elapsed) {
+  if (storyWalkX === null) { fallDuringStoryScene(); return; } // 대사 중에는 공중이면 떨어지기만 한다(loop.js)
+  const dx = storyWalkX - body.position.x;
+  if (Math.abs(dx) < 8 || storyWalkStuck >= 1500) {
+    storyWalkX = null;
+    Body.setVelocity(body, { x: 0, y: body.velocity.y });
+    animate(0, false, elapsed);
+    finishStoryScene();
+    interact();
+    return;
+  }
+  const direction = Math.sign(dx);
+  facing = direction;
+  const walkX = pushPushables(direction, direction * Math.min(speed / 60, Math.abs(dx)));
+  Body.setVelocity(body, { x: walkX, y: body.velocity.y });
+  const oldX = body.position.x;
+  Engine.update(engine, elapsed);
+  const moved = Math.abs(body.position.x - oldX);
+  storyWalkStuck = moved > .1 ? 0 : storyWalkStuck + elapsed;
+  animate(moved, false, elapsed);
+  cameraX += (cameraTarget() - cameraX) * .13;
+  cameraX = Math.max(0, Math.min(Math.max(0, worldWidth - viewWidth), cameraX));
+}
+
+// 건너뛰기·Esc. walkTo 컷씬이면 화면이 한 번 어두워지는 동안 수호를 대상 앞으로 옮기고, 밝아지면 조사창이 열린 상태가 된다.
+function skipStoryScene() {
+  if (!storySceneActive || transitioning) return;
+  const target = storyWalkTo && currentDoors.find(door => door.name === storyWalkTo);
+  if (!target) return finishStoryScene();
+  storyWalkX = null;
+  storyScene.hidden = true;
+  transitionScene(() => {
+    Body.setPosition(body, { x: target.x + target.width / 2, y: body.position.y });
+    Body.setVelocity(body, { x: 0, y: 0 });
+    facing = 1;
+    animate(0);
+    cameraX = Math.max(0, Math.min(Math.max(0, worldWidth - viewWidth), cameraTarget()));
+    finishStoryScene();
+    storyInspectPending = true;
+  });
 }
 
 function finishStoryScene() {
   if (!storySceneActive) return;
   storySceneActive = false;
   usingInspection = false;
+  storyWalkTo = storyWalkX = null;
   storyScene.hidden = true;
   for (const el of storyBlocked) el.inert = false;
   storyBlocked = [];
@@ -87,5 +150,5 @@ function finishStoryScene() {
   stage.focus({ preventScroll: true });
 }
 
-document.getElementById('story-skip').addEventListener('click', event => { event.stopPropagation(); finishStoryScene(); });
+document.getElementById('story-skip').addEventListener('click', event => { event.stopPropagation(); skipStoryScene(); });
 storyScene.addEventListener('click', advanceStoryScene);

@@ -31,7 +31,7 @@ const inventoryButton = document.getElementById('inventory-button');
 
 function refreshInventoryCount() {
   const count = ownedInventoryIds().length;
-  inventoryButton.ariaLabel = inventoryButton.title = count ? `가방 (${count}) · Tab` : '가방 · Tab'; // 화면에는 그림만 보이고 글자는 접근성 이름으로만 남는다
+  inventoryButton.ariaLabel = inventoryButton.title = `${count ? `가방 (${count})` : '가방'} · ${bindingLabel('inventory')}`; // 화면에는 그림만 보이고 글자는 접근성 이름으로만 남는다
 }
 
 function itemButton(id) {

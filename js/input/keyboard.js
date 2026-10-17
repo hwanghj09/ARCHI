@@ -1,4 +1,4 @@
-// 키보드 조작: A/D·방향키 이동, Space/W/위 점프, Shift 달리기, E 상호작용, Esc 닫기.
+// 게임 조작키는 input.js의 설정을 사용한다. Esc와 창 안의 탐색 키는 고정한다.
 window.addEventListener('keydown', event => {
   if (mainMenuActive) return;
   // 지도 창(map.js)은 게임을 멈추지 않는다: Esc만 지도를 닫고 나머지 입력은 그대로 게임에 간다.
@@ -6,7 +6,7 @@ window.addEventListener('keydown', event => {
   // M: 지도 버튼을 누른 것과 같다. 글을 쓰는 칸에서는 글자로 입력된다.
   if (event.code === 'KeyM' && !event.repeat && !event.ctrlKey && !event.metaKey && !event.altKey && !event.target.closest?.('textarea, input, select')) { event.preventDefault(); toggleMap(); return; }
   if (storySceneActive) {
-    if (event.code === 'Escape') { event.preventDefault(); finishStoryScene(); }
+    if (event.code === 'Escape') { event.preventDefault(); skipStoryScene(); }
     else if (event.code !== 'Tab' && !(event.target.id === 'story-skip' && ['Enter'].includes(event.code))) event.preventDefault();
     return;
   }
@@ -37,6 +37,11 @@ window.addEventListener('keydown', event => {
   }
   if (photoCaptureTime > 0 || itemUseTime > 0 && event.code !== 'Escape') { event.preventDefault(); return; }
   if (transitioning) { event.preventDefault(); return; }
+  // B2 삭제 배틀 터미널(b2-ending.js)은 입력 칸이 키를 받는다. Esc로 닫는다.
+  if (b2TerminalOpen) {
+    if (event.code === 'Escape' && !event.repeat) { event.preventDefault(); closeB2Terminal(); }
+    return;
+  }
   // 조작 창(manual-control.js)은 자기 keydown에서 입력을 받는다. 창 밖에 초점이 있어도 수호는 움직이지 않는다.
   if (usingControl) { if (event.code === 'Escape') closeControl(); event.preventDefault(); return; }
   // 전력 회선 퍼즐: 연결한 단자가 비활성화돼 초점이 창 밖으로 빠져도 이동을 막고 Esc로 닫는다.
@@ -54,13 +59,13 @@ window.addEventListener('keydown', event => {
     event.preventDefault();
     return;
   }
-  if (event.code === 'Tab' && !event.shiftKey && !selectingFloor && !usingComputer && !usingKeypad && !usingControl &&
+  if (keyMatches('inventory', event.code) && !(event.code === 'Tab' && event.shiftKey) && !selectingFloor && !usingComputer && !usingKeypad && !usingControl &&
       !usingPhone && !usingPowerPanel && (!usingInspection || inventoryShown())) {
     event.preventDefault();
     if (!event.repeat) toggleInventory();
     return;
   }
-  if (event.code === 'KeyP' && !event.repeat && !usingPhone && !selectingFloor && !usingComputer && !usingKeypad && !usingControl && !usingPowerPanel && !usingInspection) {
+  if (keyMatches('phone', event.code) && !event.repeat && !usingPhone && !selectingFloor && !usingComputer && !usingKeypad && !usingControl && !usingPowerPanel && !usingInspection) {
     event.preventDefault();
     togglePhone();
     return;
@@ -77,8 +82,8 @@ window.addEventListener('keydown', event => {
       event.preventDefault(); return;
     }
     if (event.code === 'Tab' || (['Enter', 'Space'].includes(event.code) && event.target.closest('#phone button'))) return;
-    if (event.code === 'KeyP' && !event.repeat) closePhone();
-    if (event.code === 'KeyF' && !event.repeat) togglePhoneLight();
+    if (keyMatches('phone', event.code) && !event.repeat) closePhone();
+    if (keyMatches('light', event.code) && !event.repeat) togglePhoneLight();
     event.preventDefault();
     return;
   }
@@ -100,7 +105,7 @@ window.addEventListener('keydown', event => {
       return;
     }
     // Esc는 한 단계 뒤로 간다(가방에서 연 카드 → 가방 목록 → 닫기).
-    if (event.code === 'Escape' || event.code === 'KeyE') {
+    if (event.code === 'Escape' || keyMatches('interact', event.code)) {
       if (!event.repeat) {
         if (event.code === 'Escape') stepBackInspection();
         else advanceInspection();
@@ -129,10 +134,15 @@ window.addEventListener('keydown', event => {
   }
   if (selectingFloor) {
     if (event.code === 'Escape') exitCabin();
-    // B2 엔딩의 "문 닫기" 게이지(b2-ending.js): Enter·스페이스 연타. 꾹 누르기(반복 입력)는 치지 않는다.
-    if (['Enter', 'Space'].includes(event.code) && b2DoorStruggling()) {
+    // 로봇이 문을 억지로 여는 중(cabin-pry.js): Enter·스페이스 연타. 꾹 누르기(반복 입력)는 치지 않는다.
+    if (['Enter', 'Space'].includes(event.code) && cabinPryStruggling()) {
       event.preventDefault();
-      if (!event.repeat) pushB2Door();
+      if (!event.repeat) pushCabinPry();
+    }
+    // 로봇이 문을 억지로 여는 중(cabin-pry.js): Enter·스페이스 연타. 꾹 누르기(반복 입력)는 치지 않는다.
+    if (['Enter', 'Space'].includes(event.code) && cabinPryStruggling()) {
+      event.preventDefault();
+      if (!event.repeat) pushCabinPry();
     }
     return;
   }
@@ -141,18 +151,18 @@ window.addEventListener('keydown', event => {
     openGameMenu();
     return;
   }
-  if (event.code === 'KeyF') {
+  if (keyMatches('light', event.code)) {
     event.preventDefault();
     if (!event.repeat) togglePhoneLight();
     return;
   }
   if (event.target instanceof Element && event.target.closest('button, input') && event.code === 'Space') return;
-  if (event.code === 'KeyE') {
+  if (keyMatches('interact', event.code)) {
     event.preventDefault();
     if (!event.repeat) interact();
     return;
   }
-  if (!Object.hasOwn(movementKeys, event.code) && !jumpKeys.has(event.code) && !runKeys.has(event.code)) return;
+  if (!Object.hasOwn(movementKeys, event.code) && !jumpKeys.has(event.code) && !runKeys.has(event.code) && !crouchKeys.has(event.code)) return;
   event.preventDefault();
   if (jumpKeys.has(event.code)) {
     if (!event.repeat) jumpQueued = true;

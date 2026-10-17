@@ -75,7 +75,7 @@ try {
   await page.keyboard.press('Escape');
   assert(await page.locator('#menu-settings-button').evaluate(el => el === document.activeElement));
   await page.locator('#menu-controls-button').click();
-  assert.equal(await page.locator('.menu-key-list > div').count(), 6);
+  assert.equal(await page.locator('.menu-key-list > div').count(), 9);
   await page.keyboard.press('Escape');
   await page.reload(); await page.clock.runFor(100);
   assert(await page.locator('#main-menu').isVisible()); assert.deepEqual(await frozen(), before);

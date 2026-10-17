@@ -9,5 +9,19 @@
 /* 붙잡는 동안(grab/caught)은 두 팔이 수호의 허리를 앞에서 감싸야 하므로 수호(6)보다 위로 올린다. 포획은 그 층에 전력이
    있을 때만 일어나서 정전 어둠 막(5)과 겹칠 일이 없다. 전체 겹침 순서는 index.html의 #darkness 주석 참고. */
 #dynamic-scene .fixture.guard-bot:is([data-patrol="grab"], [data-patrol="caught"]) { z-index: 7; }
+/* 순찰 로봇 R-03은 스프라이트만 그린다. game.css가 뒤에 읽혀서 CSS로 그린 대체 몸통(회색 상자)이 겹쳐 보였다. */
+#dynamic-scene .fixture.guard-bot.roaming-guard-bot { background: none; }
+#dynamic-scene .fixture.guard-bot.roaming-guard-bot::before, #dynamic-scene .fixture.guard-bot.roaming-guard-bot::after { content: none; }
+/* 엘리베이터 문 강제 개방(js/elevator/cabin-pry.js): 문틈을 채운 로봇이 좌우로 흔들리고, 왼쪽에 "문 닫기" 게이지. */
+#cabin-pry-robot { position: absolute; inset: 0; overflow: hidden; }
+#cabin-pry-robot[hidden], #cabin-pry-gauge[hidden] { display: none; }
+#cabin-pry-robot img { display: block; width: 100%; height: 100%; object-fit: contain; object-position: 50% 100%; animation: cabin-pry-shake .18s steps(2) infinite; }
+@keyframes cabin-pry-shake { 50% { transform: translateX(1.5%); } }
+#cabin-pry-gauge { position: absolute; z-index: 3; left: 8.5%; top: 38%; width: 17%; padding: 10px 12px; background: #1a0c0bf2; border: 2px solid #c4574b;
+  color: #ffd9d3; font-size: 13px; font-weight: 700; line-height: 1.4; text-align: center; }
+.cabin-pry-track { display: block; height: 14px; margin: 8px 0; background: #3a1714; }
+#cabin-pry-fill { display: block; width: 0; height: 100%; background: #f5d478; }
+#cabin-pry-push { min-height: 44px; min-width: 140px; border: 1px solid #f5d478; background: #3a1714; color: #fff; font: inherit; cursor: pointer; touch-action: manipulation; }
+#cabin-pry-push:focus-visible { outline: 3px solid #eac47d; outline-offset: 3px; }
 #player #caught-sheet { width: 400%; height: 100%; }
 #player[data-state="caught"] #caught-sheet { display: block; }

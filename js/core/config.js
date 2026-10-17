@@ -16,6 +16,7 @@ const elevatorFloorTime = 200; // 엘리베이터가 한 층을 지나는 데 �
 
 const speed = 200;
 const runSpeed = 340;
+const crouchSpeed = 90;
 const runFrames = 8;
 const runFrameDistance = 192 / runFrames;
 const walkFrames = 6;

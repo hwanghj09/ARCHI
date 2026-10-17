@@ -184,15 +184,15 @@ try {
   await page.evaluate(() => { collectedItems.add('b1-elevator'); });
   assert.equal(await objective(), 'B2 서버실 조사하기');
 
-  // B2 DELETE 뒤 엔딩 추격 단계마다 목표가 바뀐다.
+  // B2 DELETE 뒤 엔딩 단계(문 막기 → 삭제 배틀 → 완료)마다 목표가 바뀐다.
   await page.evaluate(() => collectedItems.add('goal-b2-console'));
   assert.equal(await objective(), 'ARCHI 멈추기');
   await page.evaluate(() => { b2Ending.phase = 'running'; });
-  assert.equal(await objective(), '도망치기');
-  await page.evaluate(() => { b2Ending.stage = 'lobby'; });
-  assert.equal(await objective(), '1층 전력 끊기');
+  assert.equal(await objective(), '문 막기');
+  await page.evaluate(() => { b2Ending.barricaded = true; });
+  assert.equal(await objective(), '삭제 배틀');
   await page.evaluate(() => { b2Ending.offline = true; });
-  assert.equal(await objective(), '탈출하기');
+  assert.equal(await objective(), 'ARCHI 삭제 완료');
   await page.evaluate(() => { resetB2Ending(); collectedItems.delete('goal-b2-console'); });
 
   // 저장·불러오기 후에도 진행이 남는다.

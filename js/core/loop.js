@@ -24,7 +24,7 @@ function update() {
   updateSanity(step);
   if (openingActive) { updateOpening(step); return; }
   if (blackoutSceneActive) { updateBlackoutScene(step); return; }
-  if (storySceneActive) { fallDuringStoryScene(); return; } // 대사는 클릭으로 넘긴다(story-scene.js)
+  if (storySceneActive && !transitioning) { updateStoryWalk(step); return; } // 대사는 클릭으로 넘기고, walkTo 컷씬은 대상까지 걷는다(story-scene.js)
   if (cctvSceneActive) { updateCctvScene(step); return; }
   if (photoCaptureTime > 0) {
     updatePhotoCapture(step);
@@ -56,6 +56,7 @@ function update() {
   if (selectingFloor) {
     updateElevators();
     updateB2Ending(step); // 칸 안에 있어도 B2 삭제·추격은 계속된다
+    updateRoamerCabin(step); // 쫓던 순찰 로봇 R-03이 엘리베이터 문까지 온다
     updateCabin();
     return;
   }
@@ -69,12 +70,13 @@ function update() {
   const directions = [...keys].map(key => movementKeys[key]);
   const inputDirection = itemUseTime > 0 ? 0 : Number(directions.includes(1)) - Number(directions.includes(-1));
   const direction = applyZeroSanityTurnDelay(inputDirection); // 정신력 0%: 방향을 바꾸려면 0.1초 기다려야 한다
-  if (itemUseTime > 0) jumpQueued = false;
-  const sprinting = !phoneLightOn && [...runKeys].some(key => keys.has(key));
+  setCrouching(grounded && itemUseTime <= 0 && !usingPhone && [...crouchKeys].some(key => keys.has(key)));
+  if (itemUseTime > 0 || crouching) jumpQueued = false;
+  const sprinting = !crouching && !phoneLightOn && [...runKeys].some(key => keys.has(key));
   interactionTime = direction || jumpQueued ? 0 : Math.max(0, interactionTime - step);
   if (direction) facing = direction;
   const paceFactor = sanitySpeedFactor();
-  const walkX = pushPushables(direction, direction * (sprinting ? runSpeed : speed) * paceFactor / 60);
+  const walkX = pushPushables(direction, direction * (crouching ? crouchSpeed : sprinting ? runSpeed : speed) * paceFactor / 60);
   Body.setVelocity(body, { x: walkX, y: jumpQueued && grounded ? -10.8 : body.velocity.y });
   jumpQueued = false;
   const oldX = body.position.x;

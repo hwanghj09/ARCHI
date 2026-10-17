@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-    <title>ARCHI | 정수호</title>
+    <title>ARCHI</title>
     <link rel="stylesheet" href="css/elevator.css" />
     <link rel="stylesheet" href="css/computer.css" />
     <link rel="stylesheet" href="css/usb-connection.css" />
@@ -103,6 +103,7 @@
     <script src="js/computer/computer.js" defer></script>
     <script src="js/computer/desktop.js" defer></script>
     <script src="js/elevator/cabin.js" defer></script>
+    <script src="js/elevator/cabin-pry.js" defer></script>
     <script src="js/scene/b2-ending.js" defer></script>
     <script src="js/player/sanity.js" defer></script>
     <script src="js/scene/pushables.js" defer></script>
@@ -115,6 +116,7 @@
     <script src="js/input/touch.js" defer></script>
     <script src="js/debug/sidebar.js" defer></script>
     <script src="js/debug/floor-select.js" defer></script>
+    <script src="js/debug/puzzle-skip.js" defer></script>
     <script src="js/debug/sanity-debug.js" defer></script>
     <script src="js/scene/scene-gate.js" defer></script>
     <script src="js/scene/opening.js" defer></script>
@@ -151,6 +153,7 @@
           <img id="walk-sheet" src="assets/player/jeong-suho-walk-six.png" alt="" width="1536" height="256" draggable="false" />
           <img id="push-sheet" src="assets/player/jeong-suho-push-box.png" alt="" width="1536" height="256" draggable="false" />
           <img id="run-sheet" src="assets/player/jeong-suho-run-eight.png" alt="" width="2048" height="256" draggable="false" />
+          <img id="crouch-sheet" src="assets/player/jeong-suho-crouch.png" alt="" width="1024" height="256" draggable="false" />
           <img id="phone-walk-sheet" src="assets/player/jeong-suho-phone-walk-off.png" alt="" width="1536" height="256" draggable="false" />
           <img id="phone-run-sheet" src="assets/player/jeong-suho-phone-run-off.png" alt="" width="2048" height="256" draggable="false" />
           <img id="jump-sheet" class="action-sheet" src="assets/player/jeong-suho-jump-fall.png" alt="" width="1774" height="887" draggable="false" />
@@ -179,7 +182,7 @@
             <button id="menu-continue" class="menu-primary" type="button" hidden><span>계속하기</span><span aria-hidden="true">↗</span></button>
             <button id="menu-start" class="menu-primary" type="button"><span>새 게임</span><span aria-hidden="true">01</span></button>
             <button id="menu-settings-button" type="button"><span>설정</span><span aria-hidden="true">02</span></button>
-            <button id="menu-controls-button" type="button"><span>조작 방법</span><span aria-hidden="true">03</span></button>
+            <button id="menu-controls-button" type="button"><span>조작키 설정</span><span aria-hidden="true">03</span></button>
             <button id="menu-slots-button" type="button"><span>저장 · 불러오기</span><span aria-hidden="true">04</span></button>
           </div>
           <p id="menu-save-info" class="menu-note" role="status" aria-live="polite">진행 상황은 자동으로 저장됩니다.</p>
@@ -191,20 +194,16 @@
           <label class="menu-setting" for="menu-brightness"><span>화면 밝기 <output id="menu-brightness-value" for="menu-brightness">100%</output></span><input id="menu-brightness" type="range" min="75" max="125" value="100" /></label>
           <button id="menu-fullscreen" class="menu-screen-button" type="button">전체화면으로 전환 ↗</button>
           <button id="menu-debug-toggle" class="menu-screen-button" type="button" aria-pressed="false" aria-controls="debug-sidebar">개발 UI · OFF (F2)</button>
+          <button id="menu-keybindings-button" class="menu-screen-button" type="button">조작키 설정 →</button>
           <p id="menu-settings-status" class="menu-note" role="status" aria-live="polite">설정은 자동으로 저장됩니다.</p>
         </div>
         <div id="menu-controls" class="menu-view" hidden>
           <button class="menu-back" type="button">← 메인으로</button>
-          <h2>조작 방법</h2>
-          <dl class="menu-key-list">
-            <div><dt>A / D · ← / →</dt><dd>이동</dd></div>
-            <div><dt>Shift</dt><dd>달리기</dd></div>
-            <div><dt>Space · W · ↑</dt><dd>점프</dd></div>
-            <div><dt>E</dt><dd>상호작용 · 물건 조사</dd></div>
-            <div><dt>P / F</dt><dd>휴대폰 / 플래시</dd></div>
-            <div><dt>Tab / Esc</dt><dd>가방 / 창 닫기</dd></div>
-          </dl>
-          <p class="menu-note">이동과 점프는 키보드로 조작합니다.<br />어둠 속에서는 정신력이 줄어듭니다. 빛을 찾으세요.</p>
+          <h2>조작키 설정</h2>
+          <p id="menu-key-help" class="menu-note">키 버튼을 선택하고 사용할 키 하나를 누르세요. 변경하면 해당 동작의 기존 키를 대체합니다.<br />Esc는 변경 취소·창 닫기, Tab은 메뉴 탐색, Enter는 버튼 선택에 사용합니다.</p>
+          <dl id="menu-key-list" class="menu-key-list" aria-describedby="menu-key-help"></dl>
+          <button id="menu-keys-reset" class="menu-screen-button" type="button">기본 조작키로 복원</button>
+          <p id="menu-keys-status" class="menu-note" role="status" aria-live="polite">조작키는 자동으로 저장됩니다. Esc · 창 닫기 / 메뉴</p>
         </div>
         <div id="menu-slots" class="menu-view" hidden>
           <button class="menu-back" type="button">← 메인으로</button>
@@ -283,7 +282,6 @@
           <div id="phone-app-grid">
             <button type="button" data-phone-app="notes"><span class="phone-app-icon app-art" data-app-icon="notes" aria-hidden="true"></span><span>메모</span></button>
             <button type="button" data-phone-app="calculator"><span class="phone-app-icon app-art" data-app-icon="calculator" aria-hidden="true"></span><span>계산기</span></button>
-            <button type="button" data-phone-app="building"><span class="phone-app-icon app-art" data-app-icon="building" aria-hidden="true"></span><span>시설 안내</span></button>
             <button type="button" data-phone-app="gallery"><span class="phone-app-icon phone-gallery-icon" aria-hidden="true">▧</span><span>갤러리</span></button>
             <button type="button" data-phone-app="solar" hidden><span class="phone-app-icon app-art" data-app-icon="flashlight" aria-hidden="true"></span><span>비상 전력 제어</span></button>
           </div>
@@ -310,17 +308,6 @@
               <small data-calculator-history aria-hidden="true"></small>
               <output class="calculator-display" data-calculator-display aria-label="계산 결과" aria-live="polite">0</output>
               <div class="calculator-keys"></div>
-            </div>
-          </div>
-          <div id="phone-building" data-phone-view="building" hidden>
-            <div class="building-guide" data-building-guide>
-              <p data-building-current></p>
-              <label>층 선택<select data-building-floor aria-label="안내할 층"></select></label>
-              <button type="button" data-building-here>현재 층</button>
-              <h3 data-building-title></h3>
-              <p data-building-power></p>
-              <ul data-building-rooms></ul>
-              <p data-building-charger></p><p data-building-elevator></p>
             </div>
           </div>
           <div id="phone-solar" data-phone-view="solar" hidden>
@@ -430,9 +417,16 @@
     </section>
     <div id="photo-shutter" aria-hidden="true" hidden></div>
     <div id="b2-delete-bar" role="status" aria-label="ARCHI 삭제 진행률" hidden>
-      <span>ARCHI DELETE PROCESS <output id="b2-delete-percent">0%</output></span>
+      <span><span id="b2-delete-label">ARCHI DELETE PROCESS</span> <output id="b2-delete-percent">0%</output></span>
       <span class="b2-delete-track" aria-hidden="true"><span id="b2-delete-fill"></span></span>
+      <span id="b2-barricade-line" hidden>BARRICADE <output id="b2-barricade-value">100%</output><span class="b2-delete-track" aria-hidden="true"><span id="b2-barricade-fill"></span></span></span>
     </div>
+    <section id="b2-terminal" role="dialog" aria-modal="true" aria-labelledby="b2-terminal-title" hidden>
+      <header><h2 id="b2-terminal-title">ARCHI-MAIN · ROOT CONSOLE</h2><button id="b2-terminal-close" type="button">닫기 · Esc</button></header>
+      <ol id="b2-terminal-log" aria-live="polite"></ol>
+      <div id="b2-terminal-threat" role="alert" hidden><span id="b2-terminal-threat-text"></span><span class="b2-delete-track" aria-hidden="true"><span id="b2-terminal-threat-fill"></span></span></div>
+      <form id="b2-terminal-form"><label for="b2-terminal-input">root@archi-main:~#</label><input id="b2-terminal-input" type="text" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="send" lang="en" /></form>
+    </section>
     <section id="b2-bad-ending" class="b2-ending-dialog" role="dialog" aria-modal="true" aria-labelledby="b2-bad-ending-title" hidden>
       <h2 id="b2-bad-ending-title">베드엔딩</h2>
       <p>경비 로봇에게 붙잡혔다. ARCHI 삭제는 끝나지 못했다.</p>
@@ -487,6 +481,11 @@
         </form>
         <form id="debug-room" aria-label="테스트용 방 이동">
           <label for="debug-room-select">실내</label><select id="debug-room-select"></select><button type="submit">이동</button>
+        </form>
+      </section>
+      <section><h3>퍼즐 건너뛰기</h3>
+        <form id="debug-puzzle" aria-label="테스트용 퍼즐 건너뛰기">
+          <label for="debug-puzzle-select">퍼즐</label><select id="debug-puzzle-select"></select><button type="submit">건너뛰기</button>
         </form>
       </section>
       <section><h3>플레이어</h3>
@@ -726,13 +725,12 @@
     <div id="elevator-cabin" role="dialog" aria-modal="true" aria-label="엘리베이터 내부" tabindex="-1" hidden>
       <div id="cabin-scene" data-door="closed">
         <img id="cabin-art" src="assets/background/elevator/cabin-b2-to-17.png" width="1536" height="1024" alt="" draggable="false" />
-        <div id="cabin-doorway"><div id="b2-cabin-robot" aria-hidden="true" hidden><img src="assets/objects/guard-robot/guard-capture.png" alt="" draggable="false" /></div><div class="cabin-leaf left"></div><div class="cabin-leaf right"></div></div>
-        <div id="b2-door-gauge" role="group" aria-labelledby="b2-door-label" hidden>
-          <span id="b2-door-label">Enter·스페이스 연타!</span>
-          <span class="b2-door-track" aria-hidden="true"><span id="b2-door-fill"></span></span>
-          <button id="b2-door-push" type="button">문 닫기</button>
+        <div id="cabin-doorway"><div id="cabin-pry-robot" aria-hidden="true" hidden><img src="assets/ending/elevator-gap-robot.png" alt="" draggable="false" /></div><div class="cabin-leaf left"></div><div class="cabin-leaf right"></div></div>
+        <div id="cabin-pry-gauge" role="group" aria-labelledby="cabin-pry-label" hidden>
+          <span id="cabin-pry-label">Enter·스페이스 연타!</span>
+          <span class="cabin-pry-track" aria-hidden="true"><span id="cabin-pry-fill"></span></span>
+          <button id="cabin-pry-push" type="button">문 닫기</button>
         </div>
-        <div id="b2-phone-message" role="status" hidden><strong>ARCHI</strong><span>1층에 경비 로봇이 기다린다.</span></div>
         <output id="cabin-display" aria-label="현재 층">17</output>
         <div id="cabin-floor-buttons"></div>
         <button id="cabin-open" class="cabin-hit" type="button" aria-label="문 열기" title="문 열기"></button>

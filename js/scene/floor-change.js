@@ -1,5 +1,6 @@
 // 장면 교체: 17층 사무실과 복도 사이, 그리고 다른 층·방·옥상으로 이동.
 function performRoomChange() {
+  setCrouching(false, true);
   if (blackoutSceneActive) finishBlackoutScene();
   const entering = room === 'corridor';
   if (entering) returnX = body.position.x;
@@ -26,6 +27,7 @@ function performRoomChange() {
 }
 
 function performFloorChange(destId, carIndex = 0, arrivalKey = null) {
+  setCrouching(false, true);
   if (blackoutSceneActive) finishBlackoutScene();
   if (cctvSceneActive) finishCctvScene();
   cameraZoom = 1;

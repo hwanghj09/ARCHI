@@ -1,4 +1,4 @@
-// 휴대폰(P): 플래시와 개인 메모·계산기·건물 안내 앱을 사용한다.
+// 휴대폰(P): 플래시와 개인 메모·계산기 앱을 사용한다.
 const phonePanel = document.getElementById('phone');
 const phoneBatteryOutput = document.getElementById('phone-battery');
 const phoneBatteryFill = document.getElementById('phone-battery-fill');
@@ -30,18 +30,16 @@ function openPhoneApp(app) {
   const view = [...phoneAppWindow.querySelectorAll('[data-phone-view]')].find(element => element.dataset.phoneView === app);
   if (!view) return;
   currentPhoneApp = app;
-  document.getElementById('phone-app-title').textContent = { notes: '개인 메모', calculator: '계산기', building: '건물 안내', solar: '비상 전력 제어', camera: '카메라', gallery: '갤러리' }[app];
+  document.getElementById('phone-app-title').textContent = { notes: '개인 메모', calculator: '계산기', solar: '비상 전력 제어', camera: '카메라', gallery: '갤러리' }[app];
   phonePanel.querySelector('.phone-owner').hidden = true;
   phonePanel.querySelector('.phone-controls').hidden = true;
   for (const element of phoneAppWindow.querySelectorAll('[data-phone-view]')) element.hidden = element !== view;
   phoneAppWindow.hidden = false;
   phonePanel.querySelector('.phone-screen').scrollTop = 0;
-  if (app === 'building') refreshBuildingGuides();
   if (app === 'camera') refreshPhoneCamera();
   if (app === 'gallery') renderPhoneGallery();
   if (app === 'solar') {
     document.getElementById('phone-solar-floor').value = String(solarPoweredFloors[0] || 17);
-    jamB2SolarApp(); // B2 엔딩 1층: 열 때마다 ARCHI가 잠시 방해한다
     refreshSolarApp();
   }
   playGameSound('phone');
@@ -75,9 +73,9 @@ function phoneChargeState() {
 }
 
 function phoneChargerHint(door) {
-  if (isPhoneDock(door)) return `E · 휴대폰 가져가기 · ${Math.ceil(phoneBattery)}% · ${phoneChargeState()}`;
+  if (isPhoneDock(door)) return `${bindingLabel('interact')} · 휴대폰 가져가기 · ${Math.ceil(phoneBattery)}% · ${phoneChargeState()}`;
   if (phoneDock) return `휴대폰은 ${phoneDockLocation()} 충전 콘센트에 있습니다`;
-  return floorHasPower(currentSceneFloor) ? 'E · 휴대폰 맡겨 충전' : 'E · 충전 불가 · 전력 없음';
+  return floorHasPower(currentSceneFloor) ? `${bindingLabel('interact')} · 휴대폰 맡겨 충전` : `${bindingLabel('interact')} · 충전 불가 · 전력 없음`;
 }
 
 function refreshPhoneChargers() {
