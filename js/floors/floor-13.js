@@ -23,7 +23,7 @@ const FLOOR13_LAYOUT = {
     { name: '장비 검증실', x: 4290, width: 320, style: 'cage', target: 'f13-testbay',
       doorX: 4322, doorWidth: 130, doorY: 236, doorStyle: 'cage' },
     { name: '고객 교육장', x: 4620, width: 320, style: 'classroom', target: 'f13-training',
-      doorX: 4788, doorWidth: 120, doorStyle: 'classroom' },
+      doorX: 4788, doorWidth: 120, doorStyle: 'office-wood' },
   ],
   props: [
     { file: 'waiting-sofa', size: [512, 256], worldWidth: 250, x: 3980 },
@@ -86,11 +86,11 @@ const FLOOR13_ROOMS = interiorRooms(13, [
     { file: 'maintenance-tool-cabinet', size: [512, 256], worldWidth: 198, x: 1300 },
     { file: 'server-rack', size: [256, 512], worldWidth: 96, x: 1520 },
   ],
-    links: [{ target: 'f13-secure', x: 1650, width: 110, style: 'secure', hint: 'E · 보안 자료실 들어가기' }] },
+    links: [{ target: 'f13-secure', x: 1650, width: 110, style: 'office-solid', hint: 'E · 보안 자료실 들어가기' }] },
   // 안쪽 방: 연결문은 왼쪽 벽, 수동 개방 크랭크는 반대쪽 끝이다. 전력이 들어오면 밝고 CCTV가 켜진다.
   { id: 'f13-secure', name: '보안 자료실', width: 1824, windowless: true,
     backgroundWallsOnly: true, backgroundImage: floor13Scene('testbay', 1824),
-    links: [{ target: 'f13-testbay', x: 56, width: 110, style: 'secure', hint: 'E · 장비 검증실로 나가기' }],
+    links: [{ target: 'f13-testbay', x: 56, width: 110, style: 'office-solid', hint: 'E · 장비 검증실로 나가기' }],
     fixtures: [
       { name: '보안 회선 트레이', style: 'service-tray', x: 220, y: 170, width: 1520, height: 30 },
       { name: '보안 셔터', style: 'vault-shutter', x: 48, y: 236, width: 126 },

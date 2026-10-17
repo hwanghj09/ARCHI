@@ -16,7 +16,7 @@ const FLOOR14_LAYOUT = {
   backgroundWallsOnly: true, backgroundImage: { src: 'assets/background/floor14/walls.png', height: 760, top: 0 },
   rooms: [
     { name: '연구 자료실', x: 64, width: 480, style: 'stacks', target: 'f14-archive',
-      doorX: 382, doorWidth: 130, doorY: 244, doorStyle: 'vault' },
+      doorX: 382, doorWidth: 130, doorY: 244, doorStyle: 'office-wood' },
     { name: '데이터 연구실', x: 560, width: 640, style: 'datawall', target: 'f14-data',
       doorX: 620, doorWidth: 150, doorStyle: 'datalab' },
     { name: '사용자 실험실', x: 1216, width: 560, style: 'mirror', target: 'f14-ux',

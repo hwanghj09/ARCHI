@@ -13,6 +13,18 @@ function addRoomDoor(door, parent = dynamicScene) {
   Object.assign(door.element.style, {
     left: `${door.x}px`, top: `${door.y}px`, width: `${door.width}px`, height: `${floorY - door.y}px`,
   });
+  if (door.solidBay) {
+    const bay = document.createElement('div');
+    bay.className = 'door-bay';
+    bay.dataset.material = door.wallMaterial || 'office';
+    bay.setAttribute('aria-hidden', 'true');
+    Object.assign(bay.style, { left: `${door.x - 8}px`, width: `${door.width + 16}px` });
+    const wall = document.createElement('div');
+    wall.className = 'painted-wall-tile';
+    bay.append(wall);
+    parent.insertBefore(bay, parent.querySelector('.floor-room'));
+    door.bay = bay;
+  }
   parent.append(door.element);
   return door;
 }

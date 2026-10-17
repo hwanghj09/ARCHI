@@ -28,7 +28,7 @@ const FLOOR17 = { id: 'f17', floor: 17, short: '17F', label: '17층 · 복도', 
 ] };
 const FLOOR17_ROOMS = interiorRooms(17, [
   { id: 'f17-restroom', ...restroomInterior },
-  { id: 'f17-manager', name: '관리자실', width: 1040, windowless: true,
+  { id: 'f17-manager', name: '관리자실', width: 1040, windowless: true, exitStyle: 'office-solid',
     backgroundWallsOnly: true, backgroundImage: { src: 'assets/background/floor17/floor17-manager-finished.png', height: 760, top: 0 }, props: [
     { file: 'staff-lockers', size: [256, 512], worldWidth: 100, x: 90 },
     { file: 'janitor-cart', size: [256, 512], worldWidth: 78, x: 968 },

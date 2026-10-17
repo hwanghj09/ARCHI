@@ -38,7 +38,7 @@ const FLOOR3_LAYOUT = {
     { name: '고객만족센터', x: 1080, width: 690, style: 'painted', target: 'f3-cs',
       doorX: 1375, doorWidth: 130, doorY: 250, doorSprite: 'assets/objects/floor03/door-cs.png' },
     { name: 'Studio', x: 4282, width: 680, style: 'painted', target: 'f3-studio',
-      doorX: 4321, doorWidth: 130, doorY: 250, doorSprite: 'assets/objects/floor03/door-studio.png' },
+      doorX: 4321, doorWidth: 130, doorY: 250, doorStyle: 'office-solid' },
   ],
   fixtures: [
     { name: '3층 입주사 안내', x: 3160, y: 300, width: 170, height: 150, style: 'wall-notice',

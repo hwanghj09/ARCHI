@@ -222,6 +222,7 @@ function buildDynamicScene(config) {
       const shut = Boolean(outside.insideMessage) && !collectedItems.has(outside.unlockedBy);
       doorList.push(addRoomDoor({ name: '복도', type: 'room', hint: 'E · 복도로 나가기', target: config.parent,
         arrivalKey: `room:${config.id}`, key: 'exit', x: exitX,
+        solidBay: Boolean(config.exitBay), wallMaterial: config.wallArt?.material,
         y: exitY, width: doorWidth, style: config.exitStyle ?? outside.doorStyle, sprite: outside.doorSprite,
         unlocked: collectedItems.has(outside.unlockedBy), insideMessage: outside.insideMessage,
         locked: shut || (Boolean(lock) && !collectedItems.has(lock.until)), lockedUntil: lock?.until, message: shut ? outside.insideMessage : lock?.message,
@@ -239,6 +240,8 @@ function buildDynamicScene(config) {
     }
   }
   for (const roomConfig of config.rooms || []) {
+    const glassFront = config.wallArt?.preserve?.some(([x, , width]) =>
+      roomConfig.doorX < x + width && roomConfig.doorX + (roomConfig.doorWidth ?? 120) > x);
     const roomElement = document.createElement('div');
     roomElement.className = `floor-room ${roomConfig.style || 'glass'}`;
     Object.assign(roomElement.style, { left: `${roomConfig.x}px`, width: `${roomConfig.width}px` });
@@ -254,6 +257,7 @@ function buildDynamicScene(config) {
       code: roomConfig.code, codeMessage: roomConfig.codeMessage, unlockedBy: roomConfig.unlockedBy,
       requires: roomConfig.requires, control: roomConfig.control, needsPower: roomConfig.needsPower, selfPowered: roomConfig.selfPowered,
       target: roomConfig.target, arrivalKey: 'exit', key: `room:${roomConfig.target}`,
+      solidBay: Boolean(glassFront), wallMaterial: config.wallArt?.material,
       x: roomConfig.doorX, y: roomConfig.doorY ?? config.roomDoorY ?? 250, width: roomConfig.doorWidth ?? 120,
       style: roomConfig.doorStyle, sprite: roomConfig.doorSprite, outline: roomConfig.doorOutline }));
   }

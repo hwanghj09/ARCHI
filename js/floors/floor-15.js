@@ -17,7 +17,7 @@ const FLOOR15_LAYOUT = {
     { name: '연구실', x: 64, width: 860, style: 'partition', target: 'f15-lab',
       doorX: 280, doorWidth: 140, doorStyle: 'research' },
     { name: '세미나실', x: 954, width: 620, style: 'seminar', target: 'f15-seminar',
-      doorX: 986, doorWidth: 130, doorStyle: 'seminar' },
+      doorX: 986, doorWidth: 130, doorStyle: 'office-lab' },
     { name: '연구본부장실', x: 3092, width: 456, style: 'director', target: 'f15-director',
       doorX: 3160, doorWidth: 120, doorY: 240, doorStyle: 'director' },
   ],

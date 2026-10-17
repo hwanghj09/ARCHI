@@ -63,20 +63,20 @@ try {
         assert(Math.abs(opaque * scale - expected) < 2, prop.file + ' is at human scale');
       }
     }
-    const doors = await page.locator('#dynamic-scene .room-door:is(.research,.seminar,.director)').evaluateAll(async elements =>
+    const doors = await page.locator('#dynamic-scene .room-door:is(.research,.office-lab,.director)').evaluateAll(async elements =>
       Promise.all(elements.map(async el => {
         const style = getComputedStyle(el);
         const source = style.backgroundImage.match(/url\("?(.*?)"?\)/)?.[1];
         const img = new Image();
         img.src = source;
         await img.decode();
-        return { kind: [...el.classList].find(name => ['research', 'seminar', 'director'].includes(name)),
+        return { kind: [...el.classList].find(name => ['research', 'office-lab', 'director'].includes(name)),
           source, size: style.backgroundSize, bottom: parseFloat(el.style.top) + parseFloat(el.style.height) };
       })));
     assert(doors.length > 0);
     for (const door of doors) {
-      assert(door.source.endsWith('/floor15/' + door.kind + '-door.png'));
-      assert.equal(door.size, '100% 100%');
+      assert(door.source.endsWith(door.kind === 'office-lab' ? '/room-doors/matched-office-doors.png' : '/floor15/' + door.kind + '-door.png'));
+      assert.equal(door.size, door.kind === 'office-lab' ? '376.471% 107.45%' : '100% 100%');
       assert.equal(door.bottom, 570);
     }
     return props;
