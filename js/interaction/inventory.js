@@ -11,8 +11,6 @@ const INVENTORY_ITEMS = {
     usedFlag: 'b2-antianxiety-used', use: { label: '사용하기', minSanity: 50, animation: 'antianxiety' } },
   'f12-lead-key': { name: '팀장실 보조키', description: '12층 책상 서랍에서 챙긴 열쇠. 꼬리표에 "팀장실 보조키"라고 적혀 있다.' },
   'rooftop-key': { name: '낡은 열쇠', description: '옥상문을 열 수 있을 것만 같다… 조금 더럽다.' },
-  'f17-powerbank': { name: '보조 배터리', description: '17층 관리자실 공구함에서 챙긴 완충 보조 배터리. 쓰면 휴대폰 배터리가 가득 찬다.',
-    usedFlag: 'f17-powerbank-used', use: { label: '휴대폰 충전', battery: true } },
 };
 // 가방에 들어 있는 물건: 챙겼고 아직 쓰지 않은 것(usedFlag가 있는 물건은 쓰면 가방에서 사라진다. 챙김 표시는 그대로 두어 선반에 다시 나타나지 않는다).
 const ownedInventoryIds = () => Object.keys(INVENTORY_ITEMS).filter(id => collectedItems.has(id) && !collectedItems.has(INVENTORY_ITEMS[id].usedFlag));
@@ -170,14 +168,10 @@ function useInventoryItem(id) {
     sanity = Math.max(item.use.minSanity ?? 0, Math.min(100, sanity + (item.use.sanity ?? 0)));
     refreshSanity();
   }
-  if (item.use.battery) {
-    phoneBattery = 100;
-    refreshPhone();
-  }
   playGameSound('item-use');
   refreshInventoryCount();
   if (item.use.animation) closeInspection();
   else showInventoryList();
-  showStatus(item.use.battery ? '보조 배터리를 꽂았다. 휴대폰 배터리가 가득 찼다.' : `${item.name}를 사용했다. 정신력이 조금 돌아왔다.`, 3000);
+  showStatus(`${item.name}를 사용했다. 정신력이 조금 돌아왔다.`, 3000);
 }
 

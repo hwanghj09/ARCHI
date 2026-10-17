@@ -16,12 +16,11 @@
     <link rel="stylesheet" href="css/wire-puzzle.css" />
     <link rel="stylesheet" href="css/manual-control.css" />
     <link rel="stylesheet" href="css/log-puzzle.css" />
-    <link rel="stylesheet" href="css/sql-console.css" />
-    <link rel="stylesheet" href="css/archi-talk.css" />
     <link rel="stylesheet" href="css/guard-patrol.css" />
     <link rel="stylesheet" href="css/b2-ending.css" />
     <link rel="stylesheet" href="css/phone.css" />
     <link rel="stylesheet" href="css/sanity.css" />
+    <link rel="stylesheet" href="css/game-over.css" />
     <link rel="stylesheet" href="css/main-menu.css" />
     <link rel="stylesheet" href="css/blackout.css" />
     <link rel="stylesheet" href="css/story-scene.css" />
@@ -83,10 +82,6 @@
     <script src="js/interaction/manual-control.js" defer></script>
     <script src="js/interaction/wire-puzzle.js" defer></script>
     <script src="js/interaction/log-puzzle.js" defer></script>
-    <script src="js/interaction/sql-console.js" defer></script>
-    <script src="js/interaction/archi-talk.js" defer></script>
-    <script src="js/interaction/hash-puzzle.js" defer></script>
-    <script src="js/interaction/voice-lock.js" defer></script>
     <script src="js/interaction/outline.js" defer></script>
     <script src="js/interaction/interaction.js" defer></script>
     <script src="js/interaction/phone.js" defer></script>
@@ -111,7 +106,6 @@
     <script src="js/input/keyboard.js" defer></script>
     <script src="js/input/touch.js" defer></script>
     <script src="js/debug/sidebar.js" defer></script>
-    <script src="js/debug/puzzle-jump.js" defer></script>
     <script src="js/debug/floor-select.js" defer></script>
     <script src="js/debug/sanity-debug.js" defer></script>
     <script src="js/scene/opening.js" defer></script>
@@ -316,10 +310,13 @@
         <div class="phone-navigation"><span>P · 닫기 / Esc · 뒤로</span><button id="phone-close" type="button" aria-label="휴대폰 화면 닫기"><span aria-hidden="true"></span></button></div>
       </div>
     </section>
-    <section id="guard-capture" role="dialog" aria-modal="true" aria-labelledby="guard-capture-title" hidden>
-      <h2 id="guard-capture-title">로봇에게 붙잡혔다</h2>
-      <p>로비 엘리베이터 앞에서 다시 시도합니다. 수집한 단서는 유지됩니다.</p>
-      <button id="guard-retry" type="button">다시 시도</button>
+    <section id="guard-capture" class="game-over" role="dialog" aria-modal="true" aria-labelledby="guard-capture-title" hidden>
+      <div class="game-over-content">
+        <h2 id="guard-capture-title">GAME OVER</h2>
+        <strong>로봇에게 붙잡혔다</strong>
+        <p>로비 엘리베이터 앞에서 다시 시도합니다. 수집한 단서는 유지됩니다.</p>
+        <button id="guard-retry" type="button">다시 시도</button>
+      </div>
     </section>
     <section id="power-panel" role="dialog" aria-modal="true" aria-labelledby="power-title" aria-describedby="power-help" hidden>
       <div class="power-cabinet">
@@ -344,37 +341,6 @@
         <p id="wire-status" role="status" aria-live="polite"></p>
         <button id="wire-cancel" type="button">나중에 · Esc</button>
       </div>
-    </section>
-    <section id="archi-talk" role="dialog" aria-modal="true" aria-labelledby="archi-talk-title" aria-describedby="archi-talk-line" hidden>
-      <div class="archi-talk-box">
-        <h2 id="archi-talk-title">ARCHI MAIN CONSOLE · 관리자 입력창 잠김</h2>
-        <p id="archi-talk-count"></p>
-        <p id="archi-talk-line" role="status" aria-live="polite"></p>
-        <p id="archi-talk-help">ARCHI의 말을 깨는 기록을 골라 내밀자.</p>
-        <div id="archi-talk-cards" role="group" aria-label="증거 카드"></div>
-        <button id="archi-talk-close" type="button">물러나기 · Esc</button>
-      </div>
-    </section>
-    <section id="hash-panel" role="dialog" aria-modal="true" aria-labelledby="hash-title" aria-describedby="hash-status" hidden>
-      <div id="hash-frame">
-        <div id="hash-screen">
-          <h2 id="hash-title">로그 판독기 · 감사 로그 해시 사슬</h2>
-          <p id="hash-rule">검산 = (앞 줄 검산 + 이 줄 숫자들의 합)의 끝자리 · 첫 줄의 앞 검산은 0</p>
-          <div id="hash-lines" role="group" aria-label="감사 로그 줄"></div>
-          <p id="hash-status" role="status" aria-live="polite"></p>
-        </div>
-      </div>
-      <button id="hash-close" type="button">나가기 · Esc</button>
-    </section>
-    <section id="sql-panel" role="dialog" aria-modal="true" aria-labelledby="sql-title" hidden>
-      <div id="sql-frame">
-        <div id="sql-screen">
-          <h2 id="sql-title">팀장 노트북 · 평가 DB 콘솔</h2>
-          <div id="sql-output" role="log" aria-live="polite"></div>
-          <form id="sql-form"><label for="sql-input">eval_db&gt;</label><input id="sql-input" type="text" autocomplete="off" spellcheck="false" autocapitalize="off" /></form>
-        </div>
-      </div>
-      <button id="sql-close" type="button">나가기 · Esc</button>
     </section>
     <section id="log-panel" role="dialog" aria-modal="true" aria-labelledby="log-title" aria-describedby="log-status" hidden>
       <div id="log-frame">
@@ -432,10 +398,13 @@
     <div id="hallucinations" aria-hidden="true" hidden>
       <img id="hallucination-shadow" src="assets/ui/hallucination/ghost-face.png" alt="" width="540" height="360" draggable="false" hidden />
     </div>
-    <section id="hallucination-caught" role="dialog" aria-modal="true" aria-labelledby="hallucination-caught-title" hidden>
-      <h2 id="hallucination-caught-title">환각에게 삼켜졌다</h2>
-      <p>정신을 차려 보니 아직 같은 자리다. 정신력을 조금 되찾았다.</p>
-      <button id="hallucination-retry" type="button">다시 정신 차리기</button>
+    <section id="hallucination-caught" class="game-over" role="dialog" aria-modal="true" aria-labelledby="hallucination-caught-title" hidden>
+      <div class="game-over-content">
+        <h2 id="hallucination-caught-title">GAME OVER</h2>
+        <strong>환각에게 삼켜졌다</strong>
+        <p>정신을 차려 보니 아직 같은 자리다. 정신력을 조금 되찾았다.</p>
+        <button id="hallucination-retry" type="button">다시 정신 차리기</button>
+      </div>
     </section>
     <button id="game-menu-button" type="button">메뉴 · Esc</button>
     <button id="inventory-button" type="button" aria-controls="inspection" aria-expanded="false">가방 · Tab</button>
@@ -455,12 +424,6 @@
         <form id="debug-room" aria-label="테스트용 방 이동">
           <label for="debug-room-select">실내</label><select id="debug-room-select"></select><button type="submit">이동</button>
         </form>
-      </section>
-      <section><h3>퍼즐 테스트</h3>
-        <form id="debug-puzzle" aria-label="새 퍼즐 앞으로 이동">
-          <select id="debug-puzzle-select" aria-label="퍼즐"></select><button type="submit">이동</button>
-        </form>
-        <p id="debug-puzzle-note" class="debug-note" aria-live="polite"></p>
       </section>
       <section><h3>플레이어</h3>
         <form id="debug-sanity" aria-label="테스트용 정신력 조정">

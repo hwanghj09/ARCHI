@@ -1,0 +1,17 @@
+.game-over { position: fixed; z-index: 40; inset: 0; display: grid; place-items: center; overflow: auto;
+  padding: max(32px, env(safe-area-inset-top)) 24px max(32px, env(safe-area-inset-bottom));
+  background: radial-gradient(ellipse at center, #22090c 0%, #0b0507 48%, #020203 85%); color: #e6d9d5; text-align: center; }
+.game-over[hidden] { display: none; }
+.game-over::before { content: ''; position: absolute; inset: 0; pointer-events: none;
+  background: repeating-linear-gradient(0deg, #0000 0 3px, #0003 4px 5px); }
+.game-over-content { position: relative; width: min(100%, 820px); }
+.game-over h2 { margin: 0 0 38px; color: #ad1f26; font: 700 clamp(36px, 9vw, 88px)/1.1 Georgia, serif;
+  letter-spacing: .06em; white-space: nowrap; text-shadow: 0 2px 0 #350608, 0 0 36px #810c1680; }
+.game-over strong { display: block; width: min(100%, 580px); margin: auto; padding-top: 28px; border-top: 1px solid #70252a;
+  font-size: clamp(17px, 4vw, 22px); font-weight: 500; }
+.game-over p { margin: 14px 0 34px; color: #a99a98; font-size: 13px; line-height: 1.7; }
+.game-over button { min-width: 180px; min-height: 48px; padding: 10px 24px; border: 1px solid #8c3438;
+  background: #1e0d10; color: #f0e4df; font: inherit; cursor: pointer; }
+.game-over button::before { content: '▶'; margin-right: 12px; color: #ba3a40; font-size: 10px; }
+.game-over button:hover { background: #381418; border-color: #c75a5f; }
+.game-over button:focus-visible { outline: 3px solid #eac47d; outline-offset: 4px; }

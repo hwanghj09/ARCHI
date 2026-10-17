@@ -6,7 +6,7 @@ export function autoControl(page) {
     openControl = door => {
       open(door);
       while (usingControl) {
-        if (controlStep.choice !== null) controlStep.choice = (controlStep.choice + 1) % controlStep.choices.length;
+        if (controlStep.choice !== null) controlStep.choice = (controlStep.choice + 1) % controlDoor.cycle.states.length;
         controlStep.done = true;
         nextControlStep();
       }

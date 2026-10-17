@@ -45,10 +45,7 @@ function update() {
   const inputDirection = itemUseTime > 0 ? 0 : Number(directions.includes(1)) - Number(directions.includes(-1));
   const direction = applyZeroSanityTurnDelay(inputDirection); // 정신력 0%: 방향을 바꾸려면 0.2초 기다려야 한다
   if (itemUseTime > 0) jumpQueued = false;
-  // 정신력이 낮을 때(30% 미만)는 정전으로 어두운 곳에서만 뛸 수 없다. 불이 들어온 곳에서는 정신력과 상관없이 뛴다.
-  // 플래시를 든 동안은 걷는다(뛰는 그림에는 휴대폰이 없다).
-  const lowSanityInBlackout = fearTier >= 3 && world.dataset.blackout === 'true';
-  const sprinting = !lowSanityInBlackout && !phoneLightOn && [...runKeys].some(key => keys.has(key));
+  const sprinting = !phoneLightOn && [...runKeys].some(key => keys.has(key));
   interactionTime = direction || jumpQueued ? 0 : Math.max(0, interactionTime - step);
   if (direction) facing = direction;
   const paceFactor = sanitySpeedFactor();

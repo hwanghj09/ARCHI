@@ -50,15 +50,6 @@ function recordClue(door) {
   showStatus('단서 기록됨 · 휴대폰 메모 → 단서', 2500);
 }
 
-// 정신이 흐릴 때만 보이는 글씨(interaction.js의 lowSanity)는 처음 본 순간 따로 기록하고 그 물건(gives)을 챙긴다.
-function revealLowSanityClue(door, haunted) {
-  if (collectedItems.has(haunted.gives)) return;
-  collectedItems.add(haunted.gives);
-  playGameSound('cctv-static');
-  collectedClues.push({ place: document.querySelector('header span').textContent, name: `${door.name}(흐릿한 글씨)`, text: haunted.clue });
-  renderClues();
-}
-
 function clueSnapshot() {
   return collectedClues.map(({ place, name, text }) => ({ place, name, text }));
 }

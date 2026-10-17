@@ -93,16 +93,10 @@ const FLOOR14_ROOMS = interiorRooms(14, [
     backgroundWallsOnly: true, backgroundImage: floor14Scene('ux', 2100), props: [
     { file: 'instrument-cart', size: [256, 256], worldWidth: 113, x: 220 },
     { file: 'observation-console', size: [512, 256], worldWidth: 272, x: 520, name: '관찰 콘솔',
-      message: '관찰 기록 출력물: "피험자 반응 — 시선, 표정, 걸음걸이, 심박. 분석 보조: ARCHI." 맨 아래 줄: "다음 단계: 야간 무인 관찰 모드 시험." 아래 여백이 이상하게 넓다. 아무것도 없는데 자꾸 눈이 간다.',
+      message: '관찰 기록 출력물: "피험자 반응 — 시선, 표정, 걸음걸이, 심박. 분석 보조: ARCHI." 맨 아래 줄: "다음 단계: 야간 무인 관찰 모드 시험."',
       surface: 'document', writing: [{ as: 'title', text: '피험자 반응' }, '시선, 표정, 걸음걸이, 심박.', { as: 'field', label: '분석 보조', text: 'ARCHI' },
         { as: 'rule' }, { as: 'field', label: '다음 단계', text: '야간 무인 관찰 모드 시험.' }],
-      caption: '관찰 기록 출력물. 아래 여백이 이상하게 넓다.',
-      // 퍼즐 I: 정신력이 30% 미만일 때만 여백에 붉은 글씨가 보인다(서브엔딩 복선). 약을 일찍 먹으면 못 본다.
-      lowSanity: { below: 30, gives: 'f14-hidden-record',
-        message: '관찰 기록 출력물: "피험자 반응 — 시선, 표정, 걸음걸이, 심박. 분석 보조: ARCHI." 그런데 아까는 비어 있던 여백에 붉은 글씨가 번져 있다: "피험자 17-정수호 · 야간 무인 관찰 1순위 · 신경 반응 적합도 98% · 대체 호스트 후보." 눈을 깜빡이자 글씨가 조금 흐려진다.',
-        writing: [{ as: 'rule' }, { as: 'hand', text: '피험자 17-정수호\n야간 무인 관찰 1순위\n신경 반응 적합도 98%\n대체 호스트 후보', ink: 'red' }],
-        caption: '아까는 비어 있던 여백에 붉은 글씨가 번져 있다.',
-        clue: '14층 관찰 콘솔 여백(정신이 흐릴 때만 보임): 피험자 17-정수호 · 신경 반응 적합도 98% · 대체 호스트 후보.' } },
+      caption: '관찰 기록 출력물.' },
     { file: 'experiment-table', size: [512, 256], worldWidth: 356, x: 1330, name: '실험 테이블',
       message: '실험 동의서 묶음이 놓여 있다. 피험자 명단 중간에 "17층 정수호"가 있다. 참가 사례: 커피 쿠폰 2장.',
       surface: 'document', writing: [{ as: 'title', text: '실험 참가 동의서 · 피험자 명단' }, '…', '17층 정수호', '…',

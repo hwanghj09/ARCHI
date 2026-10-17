@@ -109,8 +109,6 @@ function interact() {
     }
     if (enterB2TrueEnd(nearbyDoor)) return; // ARCHI를 끈 뒤 1층 정문으로 나가기(b2-ending.js)
     if (handleLogTerminalInteract(nearbyDoor)) return; // 12층 야간 로그 단말기·네트워크 랙(log-puzzle.js)
-    if (nearbyDoor.terminal === 'sql') { openSqlConsole(); return; } // 12층 팀장 노트북의 평가 DB 콘솔(sql-console.js)
-    if (nearbyDoor.voiceLock && nearbyDoor.locked) { tryVoiceLock(nearbyDoor); return; } // 3층 Studio 음성 인증 문(voice-lock.js)
     const { gives } = nearbyDoor;
     // 도어락(code): 잠긴 문이나 아직 열지 못한 소품은 키패드를 연다. 맞는 번호를 넣으면 문이 열리거나 gives를 챙긴다.
     if (nearbyDoor.code && (nearbyDoor.type === 'room' ? nearbyDoor.locked : !collectedItems.has(gives))) {
@@ -157,25 +155,13 @@ function interact() {
       if (currentObjective?.title === '로봇의 습격! 그 이유는?' && !collectedItems.has('story-badge-seen')) collectedItems.add('story-gate-tagged'); // 컷씬은 한 번만(이미 봤으면 다시 나오지 않는다)
       return;
     }
-    // 해시 사슬 판독기(terminal 'hash', 4층): 필요한 물건이 다 있고 아직 못 풀었으면 검증 화면을 연다(hash-puzzle.js).
-    if (nearbyDoor.terminal === 'hash' && !lacking && !collectedItems.has(gives) && !nearbyDoor.terminalPassed) {
-      openHashPuzzle(nearbyDoor);
-      return;
-    }
-    nearbyDoor.terminalPassed = false;
     const missing = !unreadable && lacking && nearbyDoor.missingMessage &&
       (lacking < required.length && nearbyDoor.partialMessage || nearbyDoor.missingMessage);
-    // 정신이 흐릴 때만 보이는 글씨(lowSanity, 14층 관찰 콘솔): 정신력이 below% 미만이면 다른 문구와 덧붙인 표면을 보이고, 그 단서를 챙긴다.
-    const haunted = !unreadable && !missing && nearbyDoor.lowSanity && sanity < nearbyDoor.lowSanity.below ? nearbyDoor.lowSanity : null;
-    const inspectionMessage = unreadable || missing || haunted?.message ||
-      (gives && collectedItems.has(gives) ? nearbyDoor.takenMessage : nearbyDoor.message);
+    const inspectionMessage = unreadable || missing || (gives && collectedItems.has(gives) ? nearbyDoor.takenMessage : nearbyDoor.message);
     // 글이 적힌 소품은 지금 보이는 문구에 맞는 표면을 펼친다(message는 소품, takenMessage·missingMessage는 그 sheet).
     // fullImage가 있는 설비(B1 CCTV 모니터 벽)는 그 그림을 화면 전체에 띄운다.
     if (nearbyDoor.fullImage && !unreadable && !missing) openFullImage(nearbyDoor, inspectionMessage);
-    else openInspection(nearbyDoor.name, inspectionMessage, haunted ?
-      { ...nearbyDoor, writing: [...nearbyDoor.writing, ...haunted.writing], caption: haunted.caption } :
-      writingSheetFor(nearbyDoor, inspectionMessage));
-    if (haunted) revealLowSanityClue(nearbyDoor, haunted);
+    else openInspection(nearbyDoor.name, inspectionMessage, writingSheetFor(nearbyDoor, inspectionMessage));
     offerArchiDelete(nearbyDoor); // B2 메인 콘솔이면 DELETE 버튼(b2-ending.js)
     if (missing) return;
     if (!unreadable) { recordClue(nearbyDoor); noteObjectiveRead(nearbyDoor); }

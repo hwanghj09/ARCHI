@@ -21,21 +21,8 @@ const panelFloors = [null, 17, 16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 
 // (restrictionItem) 버튼이 눌린다.
 const restrictedFloors = [-2];
 const restrictionItem = 'b1-elevator';
-// 퍼즐 F: 7층 원본 로그(goal-f7-log)를 읽은 뒤로 ARCHI가 층 버튼 배열을 위아래로 뒤집는다. 패널 순서(17 … 1, B1, B2)를 거울처럼
-// 돌려, 누른 버튼과 반대편 칸의 층으로 간다(17 ↔ B2, 16 ↔ B1, 15 ↔ 1, …, 8은 그대로). 불은 실제로 가는 층의 버튼에 들어온다.
-// B1 승강기 제어반의 열쇠 스위치를 돌리면(b1-elevator) 수동 운행으로 돌아와 원래대로 된다. 삭제 추격 중에는 뒤집지 않는다.
-// 5층 콘솔 노트북에서 ARCHI의 보조 계정(svc_0412)을 잠가도(f5-account-locked) 뒤집기가 멈춘다.
-const elevatorScrambleRelease = ['b1-elevator', 'f5-account-locked', 'elevator-unscrambled'];
-function elevatorScrambled() {
-  return collectedItems.has('goal-f7-log') && !elevatorScrambleRelease.some(item => collectedItems.has(item)) && b2Ending.phase === 'idle';
-}
-function scrambledFloor(floor) {
-  const order = panelFloors.filter(entry => entry !== null);
-  return order[order.length - 1 - order.indexOf(floor)];
-}
-panelFloors.forEach((pressed, index) => {
-  if (pressed === null) return;
-  const floor = pressed;
+panelFloors.forEach((floor, index) => {
+  if (floor === null) return;
   const button = document.createElement('button');
   button.type = 'button';
   button.className = 'cabin-hit';
@@ -50,17 +37,12 @@ panelFloors.forEach((pressed, index) => {
   });
   button.addEventListener('click', () => {
     const car = elevatorCars[cabinCarIndex];
-    const scrambled = elevatorScrambled();
-    const floor = scrambled ? scrambledFloor(pressed) : pressed;
-    if (transitioning || !car || car.travelling || floor === car.floor) {
-      if (scrambled && car && !car.travelling && floor === car.floor && selectedFloor === null) cabinStatus.textContent = '버튼을 눌렀지만 문이 그대로다. 지금 이 층으로 가는 버튼이었던 것 같다.';
-      return;
-    }
+    if (transitioning || !car || car.travelling || floor === car.floor) return;
     if (!elevatorHasPower()) {
       cabinStatus.textContent = elevatorPowerMessage;
       return;
     }
-    if (restrictedFloors.includes(floor) && selectedFloor !== floor && !collectedItems.has(restrictionItem)) {
+    if (button.dataset.restricted && selectedFloor !== floor && !collectedItems.has(restrictionItem)) {
       cabinStatus.textContent = '버튼을 눌렀으나 아무 반응도 없었다.';
       return;
     }
@@ -75,13 +57,6 @@ panelFloors.forEach((pressed, index) => {
     // 문이 닫힌 뒤 updateCabin이 페이드 아웃으로 층을 바꾸고, 페이드 인이 끝나면 문을 연다.
     if (cabinScene.dataset.door === 'closed') cabinStatus.textContent = `${button.title} 이동 중`;
     else setCabinDoor(false);
-    if (scrambled && floor !== pressed) {
-      cabinStatus.textContent = `${button.title} 버튼을 눌렀는데 다른 버튼에 불이 들어왔다. 화면 구석: "패널 재배열 · SYSTEM".`;
-      if (!collectedItems.has('f-elevator-scramble-seen')) {
-        collectedItems.add('f-elevator-scramble-seen');
-        playGameSound('cctv-static');
-      }
-    }
     refreshCabin();
   });
   document.getElementById('cabin-floor-buttons').append(button);

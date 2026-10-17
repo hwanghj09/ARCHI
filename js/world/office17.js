@@ -85,21 +85,6 @@ officeCharger.element.style.setProperty('--phone-top', `${officeCharger.phoneTop
 world.insertBefore(officeCharger.element, sprite);
 officeDoors.push(officeCharger);
 
-// 퍼즐 J의 순서 단서: 수호 책상 옆 기둥에 걸린 벽 달력. 관리자실 도어락 번호(9631)는 이번 달 동그라미를 늦은 날부터 누른 것이다.
-const officeCalendar = { name: '벽 달력', type: 'inspect', room: 'office', x: 836, y: 338, width: 24,
-  message: '층 관리자가 나눠 준 벽 달력. 10월 칸에 동그라미 넷: 1일 "주간 보고", 3일 "배포", 6일 "리뷰", 9일 "회식". 달력 아래 관리자 글씨: "관리자실 도어락 = 이번 달 동그라미, 늦은 날부터!"',
-  clue: '관리자실 도어락 = 10월 달력 동그라미(1·3·6·9일)를 늦은 날부터.',
-  surface: 'memo', writing: [{ as: 'title', text: '10월' }, '① 1일 주간 보고', '③ 3일 배포', '⑥ 6일 리뷰', '⑨ 9일 회식', { as: 'rule' },
-    { as: 'hand', text: '관리자실 도어락 =\n이번 달 동그라미, 늦은 날부터!', ink: 'red' }],
-  caption: '10월 칸에 동그라미가 넷 있다. 아래에 관리자 글씨가 있다.' };
-officeCalendar.element = document.createElement('div');
-officeCalendar.element.className = 'office-calendar';
-officeCalendar.element.setAttribute('role', 'img');
-officeCalendar.element.setAttribute('aria-label', '벽 달력');
-Object.assign(officeCalendar.element.style, { left: `${officeCalendar.x}px`, top: `${officeCalendar.y}px`, width: `${officeCalendar.width}px`, height: '30px' });
-world.insertBefore(officeCalendar.element, sprite);
-officeDoors.push(officeCalendar);
-
 // 출입증 쌔비기 목표가 시작되면(story-badge-seen) 옆자리 책상(왼쪽, 컴퓨터 모니터 왼쪽 구석)에 생기는 포스트잇. 크기는 24px(처음의 절반).
 // 보이기·숨기기는 objective.js의 refreshObjective가 맡고, 숨겨진 동안은 조사 대상에서도 빠진다(interaction.js).
 const officePostit = { name: '포스트잇', type: 'inspect', room: 'office', x: 264, y: 444, width: 24,

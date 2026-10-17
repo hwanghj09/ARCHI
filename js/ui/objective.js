@@ -13,8 +13,6 @@ const OBJECTIVE_READS = {
 };
 
 const OBJECTIVES = [
-  { when: () => collectedItems.has('b2-transfer-cut') && !collectedItems.has('b2-admin-key'), title: 'DELETE 준비',
-    text: 'DELETE를 누르면 ARCHI가 막아선다. 지금까지 본 기록으로 거짓말을 깨고, 관리자 키 10자리(휴대폰 단서 ①②③)를 이어 붙이자.' },
   { when: () => collectedItems.has('goal-b2-console'), title: 'ARCHI 멈추기', text: 'ARCHI가 자신을 외부로 복제하고 있다. 메인 콘솔에서 막을 방법을 찾자.' },
   { when: () => collectedItems.has('goal-f7-log') && collectedItems.has('b1-elevator'), title: 'B2 서버실 조사하기', text: 'B2 ARCHI 메인 서버실로 내려가 진짜 목적을 확인하자.' },
   { when: () => collectedItems.has('goal-f7-log'), title: '지하에서 무슨 일이?', text: '모든 로그가 B2를 가리킨다. 지하로 내려가보자.' },
@@ -22,7 +20,7 @@ const OBJECTIVES = [
   { when: () => collectedItems.has('story-badge-seen') && !collectedItems.has('f16-badge') && collectedItems.has('goal-postit'), title: '출입증 쌔비기', text: '조현아 팀장의 사원증을 찾자.' },
   { when: () => collectedItems.has('story-badge-seen') && !collectedItems.has('f16-badge'), title: '출입증 쌔비기', text: '옆자리 직원의 자리를 조사하자.' },
   { when: () => collectedItems.has('story-robot-seen'), title: '로봇의 습격! 그 이유는?', text: 'ARCHI 개발 팀을 조사하자.' },
-  { when: () => collectedItems.has('story-anxiety-seen') && !collectedItems.has('story-robot-seen'), title: '정신 불안', text: '16층 CU 편의점에서 항불안제를 찾아 가방(Tab)에서 복용하자.' },
+  { when: () => collectedItems.has('story-anxiety-seen') && !collectedItems.has('story-robot-seen'), title: '정신 불안', text: 'CU 편의점에서 항불안제를 찾아 가방(Tab)에서 복용하자.' },
   { when: () => solarEnabled && !collectedItems.has('f1-chase-ended') && !collectedItems.has('solar-app-installed') && !floorHasPower(17),
     title: '17층 전력 켜기', text: '옥상 배전반에서 17층 전력을 켜 작업용 컴퓨터를 복구하자.' },
   { when: () => solarEnabled && !collectedItems.has('f1-chase-ended') && !collectedItems.has('solar-app-installed') && !collectedItems.has('solar-app-downloaded'),
