@@ -49,13 +49,13 @@ try {
       const results = [];
       // x=4000: even the farthest offset tested (721px) never crosses the stairs-beat boundary
       // (left=3040), so this stays a pure sensor-geometry test, unaffected by the beat gate below.
-      for (const facing of [-1, 1]) for (const dx of [-130, -129, 0, 129, 130, 719, 720, 721]) {
+      for (const facing of [-1, 1]) for (const dx of [-321, -320, -319, -130, -129, 0, 129, 130, 719, 720, 721]) {
         for (const height of [0, 179, 180, 181]) {
           Object.assign(guardPatrol, { x: 4000, facing, mode: 'patrol', wait: 0, lostTime: 0 });
           Body.setPosition(body, { x: 4000 + dx * facing, y: floorY - 81 - height });
           grounded = false; updateGuardPatrol(1);
           results.push({ facing, dx, height, actual: guardPatrol.mode,
-            expected: height < 180 && (Math.abs(dx) < 130 || dx > 0 && dx < 720) ? 'chase' : 'patrol' });
+            expected: height < 180 && (Math.abs(dx) < 130 || dx > -320 && dx < 720) ? 'chase' : 'patrol' });
         }
       }
       return results;

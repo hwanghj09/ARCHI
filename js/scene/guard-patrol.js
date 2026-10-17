@@ -262,7 +262,9 @@ function updateRobot(robot, delta) {
     // 그래서 이 구역 안의 수호는 새로 감지하지 않는다(followToElevator 로봇은 예외).
     const atElevator = !robot.followToElevator && currentDoors.some(otherDoor => otherDoor.type === 'elevator' &&
       Math.abs(body.position.x - (otherDoor.x + otherDoor.width / 2)) < otherDoor.width / 2 + 60);
-    const seesPlayer = sameLevel && !atElevator && (Math.abs(dx) < 130 || (inBeat && dx * robot.facing > 0 && Math.abs(dx) < (robot.sight ?? 720)));
+    // 후방 센서(320px)는 1층 R-01에만 있고, 전방 센서처럼 순찰 구간 밖의 수호는 보지 않는다.
+    const sensorRange = dx * robot.facing > 0 ? (robot.sight ?? 720) : robot === guardPatrol ? 320 : 0;
+    const seesPlayer = sameLevel && !atElevator && (Math.abs(dx) < 130 || (inBeat && Math.abs(dx) < sensorRange));
     // 'return'(복귀 이동 중)도 patrol/dock과 똑같이 감지된다 — 복귀 중이라고 무적은 아니다.
     if ((robot.mode === 'patrol' || robot.mode === 'dock' || robot.mode === 'return') && seesPlayer) {
       robot.mode = 'chase'; robot.lostTime = 0; robot.chaseOriginX = robot.x; robot.spottedX = body.position.x;
