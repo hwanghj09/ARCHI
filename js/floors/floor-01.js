@@ -82,7 +82,7 @@ const FLOOR1_LAYOUT = {
     // 배경에 그려진 로봇은 빈 도크 패치로 가리고, 이동 스프라이트와 조사 범위를 함께 갱신한다.
     // 순찰 서쪽 경계(3040)는 비상계단(BUILDING_CORE.stairs, 보정 후 2895~3040) 동쪽 끝 — 로비 동쪽
     // 구역(스피드 게이트·정문)만 돌고 비상계단을 넘어 엘리베이터·방 쪽으로는 가지 않는다.
-    { name: '경비 로봇', x: 4495, y: 440, width: 70, style: 'guard-bot', lines: ['R-01'], outline: [4531, 406, 55, 151],
+    { name: '경비 로봇', x: 4495, y: 440, width: 70, style: 'guard-bot', lines: ['R-01'], outline: [4531, 406, 55, 151], selfPowered: true, // 정비 패널은 보조 배터리
       patrol: { left: 3040, right: 4540, speed: 80, pause: 1400 },
       code: '0914', gives: 'f1-robot-log',
       codePrompt: '보조 배터리로 정비 패널이 희미하게 켜져 있다. 네 자리 번호. 패널 스티커: "정비 코드 = 제작일(월일)."',
@@ -93,7 +93,7 @@ const FLOOR1_LAYOUT = {
         { as: 'rule' }, '대기 중 · 로비 전력이 돌아오면 기동.'],
       caption: '정비 패널이 열린다.',
       takenMessage: '정비 패널은 다시 꺼져 있다. 방금 읽은 줄이 떠오른다. 차단 대상 17F 정수호. 사각형 센서 헤드 아래 작은 카메라가 보인다.' },
-    { name: '정문', x: 4610, y: 140, width: 320, style: 'revolving-door', lines: ['TMAXSOFT TOWER'], outline: [4618, 138, 352, 418],
+    { name: '정문', x: 4610, y: 140, width: 320, style: 'revolving-door', lines: ['TMAXSOFT TOWER'], outline: [4618, 138, 352, 418], selfPowered: true, // 표시창은 배터리
       message: '회전문도 옆 자동문도 멈춰 있다. 유리 너머 거리의 가로등은 멀쩡히 켜져 있다. 문틀 위 작은 표시창만 배터리로 깜빡인다: "출입 통제 중 · SYSTEM."',
       surface: 'screen', look: 'lcd', writing: [{ text: '출입 통제 중 · SYSTEM.', size: 'large', align: 'center' }],
       caption: '회전문도 옆 자동문도 멈춰 있다. 유리 너머 거리의 가로등은 멀쩡히 켜져 있다. 문틀 위 작은 표시창만 배터리로 깜빡인다.' },

@@ -119,7 +119,7 @@ const FLOOR7_ROOMS = interiorRooms(7, [
   { id: 'f7-verify', name: '검증실', width: 1856, windowless: true, interiorStyle: 'chamber', exitOutline: [557, 290, 208, 280],
     exitArt: { x: 555, crop: [549, 224, 250, 346], fill: [1000, 224] },
     backgroundImage: { src: 'assets/background/floor7/verify-finished.png', height: 760, top: 0 },
-    exitLock: { until: 'f7-release',
+    exitLock: { until: 'f7-release', selfPowered: true, // 인터록은 B2 직결 회선이라 7층 전력과 상관없다
       arrivalMessage: '등 뒤에서 철컥, 문이 잠겼다. 문 위에 붉은 등이 켜진다: "검증 세션 진행 중 · 외부 출입 차단".',
       message: '문이 꿈쩍도 하지 않는다. 문틀 표시: "세션이 끝나기 전에는 열리지 않습니다. 비상 해제: 안쪽 끝 인터록 제어반."',
       surface: 'screen', look: 'lcd',
@@ -134,7 +134,7 @@ const FLOOR7_ROOMS = interiorRooms(7, [
         caption: '머리 받침과 팔걸이에 전극이 달린 의자다. 등받이에 실험표가 붙어 있다.' },
     ],
     props: [
-      { file: 'electrical-panel', size: [256, 512], worldWidth: 89, x: 100, name: '인터록 제어반', gives: 'f7-release',
+      { file: 'electrical-panel', size: [256, 512], worldWidth: 89, x: 100, name: '인터록 제어반', selfPowered: true, gives: 'f7-release',
         control: { kind: 'lever', dir: 'down', label: '비상 해제 레버를 끝까지 내리자.', ends: ['잠금', '해제'] },
         message: '제어반은 정전 중에도 B2 직결 비상 회선으로 살아 있다. 화면: "세션 요청 ARCHI · 00:14 입실자 1명 감지 · 정수호(17F)". 비상 해제 레버가 내려가자 문 쪽에서 잠금 풀리는 소리가 난다.',
         surface: 'screen', look: 'lcd',
@@ -145,7 +145,7 @@ const FLOOR7_ROOMS = interiorRooms(7, [
       { file: 'server-rack', size: [256, 512], worldWidth: 96, x: 850 },
       // 망분리 백업 장비: 조사하면 분석 프로그램(backup-puzzle.js)이 열려 7층 필수 퍼즐 두 개를 푼다. 아래 message는 그 특수
       // 처리가 안 먹었을 때만 보일 일반 조사문이다.
-      { file: 'electronics-bench', size: [512, 256], worldWidth: 261, x: 1400, name: '망분리 백업 장비',
+      { file: 'electronics-bench', size: [512, 256], worldWidth: 261, x: 1400, name: '망분리 백업 장비', selfPowered: true,
         message: '사내망에서 떼어 낸 백업 장비가 배터리로 켜져 원본 로그를 뽑아 두었다: "매일 01:00~05:00 ARCHI 학습 실행 · B2 전력 집중." 오늘 00:00: "TRAINING PROCESS - COMPLETE / EXTERNAL HOST CONNECTION - READY / EXTERNAL CONNECTION TEST - SUCCESS". 모든 줄의 발신지는 B2 ARCHI-MAIN이다.',
         surface: 'screen', look: 'terminal',
         writing: [{ as: 'title', text: '원본 로그' }, { as: 'field', label: '발신지', text: 'B2 ARCHI-MAIN' },

@@ -238,7 +238,7 @@ try {
     return sanityMusicIndex === index && sanityMusicElement.paused;
   }), 'An ending event while paused cannot restart the playlist');
   assert(await page.evaluate(() => [...gameAudioEffects].every(sound => sound.name === 'ui' || sound.stopping)), 'The menu stops effects in progress');
-  await page.locator('#menu-continue').click();
+  await page.locator('#menu-resume').click();
   await page.waitForTimeout(150);
   assert.equal(await page.evaluate(() => gameAudioAmbience.size), 1);
   assert(await page.evaluate(() => !sanityMusicElement.paused), 'Continuing resumes low-sanity music');

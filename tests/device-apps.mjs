@@ -224,6 +224,7 @@ try {
   assert.equal(await page.evaluate(() => phoneDock), null);
 
   await page.evaluate(() => openGameMenu());
+  await page.locator('#menu-exit').tap();
   await page.locator('#menu-start').tap();
   await page.locator('#menu-new-confirm').tap();
   await page.locator('#opening-skip').click();

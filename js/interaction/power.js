@@ -18,6 +18,22 @@ function floorHasPower(floor) {
   return floor >= 1 && floor <= 17 && (!buildingBlackout || collectedItems.has('f17-emergency-linked'));
 }
 
+// 전력이 있어야 반응하는 장치: 잠긴 문의 카드 리더기·도어락, 출입 게이트, 컴퓨터, 버튼·선택기·연속 조작 장비(opens·cycle·sequence),
+// 화면·단말(surface 'screen', poweredSprite, needsPower). 그 층에 전력이 들어오지 않으면(floorHasLighting, 층별 태양광 공급) 힌트도
+// 테두리도 없고 E를 눌러도 아무 반응이 없다(interaction.js). 지하(B1·B2)는 늘 켜져 있다. 휴대폰 충전기·엘리베이터는 UPS(floorHasPower)를 따른다.
+// selfPowered: 배터리·별도 회선으로 정전 중에도 살아 있는 장치(층 문구가 정전 상태 기준으로 쓰인 3·4·7·8층 퍼즐, 1층 로봇 정비 패널 등).
+function needsFloorPower(door) {
+  if (door.selfPowered) return false;
+  const electronic = Boolean(door.surface === 'screen' || door.needsPower || door.code || door.control?.kind === 'card');
+  // 이미 열린 문은 그냥 드나든다. 잠긴 문의 전자 잠금·표시창만 전력이 필요하다.
+  if (door.type === 'room') return Boolean(door.locked) && electronic;
+  return electronic || door.type === 'computer' || Boolean(door.accessGate || door.opens || door.cycle || door.sequence || door.poweredSprite);
+}
+
+function deviceUnpowered(door) {
+  return needsFloorPower(door) && !floorHasLighting(currentSceneFloor);
+}
+
 function openEmergencyCircuit() {
   if (collectedItems.has('f17-emergency-linked')) return openInspection('비상 전력 분배반', '회선 네 가닥이 올바르게 연결되어 있다. 별도 UPS가 승강기와 비상 설비에 전력을 공급한다.');
   if (!collectedItems.has('f17-circuit-guide-read')) return openInspection('비상 전력 분배반', '단자 표기가 서로 다르다. 옆 책상의 비상 전력 회로 안내도를 먼저 확인하자.');

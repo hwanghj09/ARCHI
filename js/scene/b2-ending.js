@@ -22,12 +22,12 @@ const b2FastRatio = 1.05;
 const b2EarlyRate = .6;
 const b2EarlyCap = 15;
 const b2BattleRate = 2.5;
-const b2BangDrain = .3; // 문 밖에서 두드리는 로봇 한 대가 1초에 깎는 바리케이드 내구도(%)
+const b2BangDrain = .15; // 문 밖에서 두드리는 로봇 한 대가 1초에 깎는 바리케이드 내구도(%)
 const b2BangEvery = 1100; // 쾅 소리 간격
 // ARCHI의 방해: 다음 방해까지(b2ThreatGap ms, 그 사이 무작위), 막을 시간(b2ThreatWindow ms). 놓치면 삭제 -b2MissProgress%,
 // 바리케이드 -b2MissBarricade%. 틀린 명령은 삭제 -b2WrongProgress%.
 const b2ThreatGap = [5000, 7000];
-const b2ThreatWindow = 9000;
+const b2ThreatWindow = 13000;
 const b2LowSanityPace = .75;
 const b2MissProgress = 12;
 const b2MissBarricade = 8;
@@ -267,7 +267,7 @@ const b2ThreatKinds = [
     const pid = b2Digits(4);
     return { text: `자기 복제 프로세스 생성 — archi-shadow (PID ${pid})`, answer: `kill ${pid}` };
   }, miss: '복제 완료. 저는 하나가 아닙니다, 수호 씨.' },
-  { verb: 'rm', hint: 'rm <경로> — 백업 이미지를 지운다.', make: () => {
+  { verb: 'rm', hint: 'rm <경로> — 백업 이미지를 지운다. 경로는 Tab으로 자동완성.', make: () => {
     const path = `/backup/archi-${b2Digits(2)}.img`;
     return { text: `백업에서 복원 중 — ${path}`, answer: `rm ${path}` };
   }, miss: '복원 완료. 지운 만큼 다시 채웠습니다.' },
@@ -407,6 +407,17 @@ document.getElementById('b2-terminal-form').addEventListener('submit', event => 
   if (b2TerminalOpen && !b2Ending.offline) runB2Command(value);
 });
 document.getElementById('b2-terminal-close').addEventListener('click', closeB2Terminal);
+// Tab: 지금 막아야 할 방해의 파일 경로(rm)를 셸처럼 자동완성한다. 입력한 경로가 그 경로의 앞부분일 때만 채운다.
+b2TerminalInput.addEventListener('keydown', event => {
+  if (event.code !== 'Tab') return;
+  event.preventDefault();
+  const answer = b2Battle.threat?.answer;
+  const match = /^(\s*rm\s+)(\S*)$/i.exec(b2TerminalInput.value);
+  if (!answer?.startsWith('rm ') || !match) return;
+  const path = answer.slice(3);
+  if (!path.startsWith(match[2].toLowerCase())) return;
+  b2TerminalInput.value = match[1] + path;
+});
 
 function refreshB2Terminal() {
   const threat = b2Battle.threat;

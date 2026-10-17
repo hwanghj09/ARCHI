@@ -75,7 +75,7 @@ try {
 } catch { /* 저장소를 사용할 수 없어도 기본 설정으로 시작할 수 있다. */ }
 applyMenuSettings();
 
-function showMainMenu() {
+function showMainMenu(view = 'home') {
   pauseGameAudio();
   mainMenu.inert = false;
   mainMenu.hidden = false;
@@ -83,8 +83,8 @@ function showMainMenu() {
   for (const el of menuBlocked) el.inert = true;
   releaseInput();
   refreshContinue();
-  showMenuView('home');
-  (menuContinue.hidden ? menuStart : menuContinue).focus({ preventScroll: true });
+  showMenuView(view);
+  if (view === 'home') (menuContinue.hidden ? menuStart : menuContinue).focus({ preventScroll: true });
 }
 
 function refreshContinue() {
@@ -117,13 +117,14 @@ function openGameMenu() {
   saveProgress();
   mainMenuActive = true;
   document.body.dataset.mainMenu = 'true';
-  showMainMenu();
+  showMainMenu('pause');
 }
 
 function showMenuView(view) {
   cancelKeyBinding();
-  for (const id of ['home', 'settings', 'controls', 'slots', 'new-game']) document.getElementById(`menu-${id}`).hidden = id !== view;
+  for (const id of ['home', 'pause', 'settings', 'controls', 'slots', 'new-game']) document.getElementById(`menu-${id}`).hidden = id !== view;
   mainMenu.dataset.view = view;
+  mainMenu.setAttribute('aria-label', view === 'pause' ? '일시정지 메뉴' : 'ARCHI 메인 메뉴');
   if (view === 'home') menuReturnButton.focus({ preventScroll: true });
   else document.getElementById(`menu-${view}`).querySelector('button').focus({ preventScroll: true });
 }
@@ -155,13 +156,25 @@ menuContinue.addEventListener('click', () => {
   } else (selectingFloor ? cabin : stage).focus({ preventScroll: true });
 });
 
-for (const view of ['settings', 'controls']) {
-  document.getElementById(`menu-${view}-button`).addEventListener('click', event => {
-    menuReturnButton = event.currentTarget;
-    showMenuView(view);
-  });
+document.getElementById('menu-resume').addEventListener('click', () => {
+  closeMainMenu();
+  (selectingFloor ? cabin : stage).focus({ preventScroll: true });
+});
+document.getElementById('menu-exit').addEventListener('click', () => {
+  refreshContinue();
+  menuReturnButton = menuContinue;
+  showMenuView('home');
+});
+document.getElementById('menu-settings-button').addEventListener('click', event => {
+  menuReturnButton = event.currentTarget;
+  showMenuView('settings');
+});
+function backMenuView() {
+  const fromControls = mainMenu.dataset.view === 'controls';
+  showMenuView(fromControls ? 'settings' : 'home');
+  if (fromControls) document.getElementById('menu-keybindings-button').focus({ preventScroll: true });
 }
-for (const back of mainMenu.querySelectorAll('.menu-back')) back.addEventListener('click', () => showMenuView('home'));
+for (const back of mainMenu.querySelectorAll('.menu-back')) back.addEventListener('click', backMenuView);
 for (const input of [menuVolume, menuBrightness]) input.addEventListener('input', () => {
   applyMenuSettings();
   try {
@@ -208,8 +221,13 @@ mainMenu.addEventListener('keydown', event => {
       return;
     }
   }
-  if (event.code === 'Escape' && mainMenu.dataset.view !== 'home') {
-    event.preventDefault(); showMenuView('home');
+  if (event.code === 'Escape') {
+    event.preventDefault();
+    event.stopPropagation();
+    if (!event.repeat) {
+      if (mainMenu.dataset.view === 'pause') document.getElementById('menu-resume').click();
+      else if (mainMenu.dataset.view !== 'home') backMenuView();
+    }
   }
   if (event.code !== 'Tab') return;
   const enabled = [...mainMenu.querySelectorAll('button:not(:disabled), input')].filter(el => el.getClientRects().length);

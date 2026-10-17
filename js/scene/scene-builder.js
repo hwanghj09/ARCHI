@@ -181,7 +181,7 @@ function buildDynamicScene(config) {
         y: exitY, width: doorWidth, style: config.exitStyle ?? outside.doorStyle, sprite: outside.doorSprite,
         unlocked: collectedItems.has(outside.unlockedBy), insideMessage: outside.insideMessage,
         locked: shut || (Boolean(lock) && !collectedItems.has(lock.until)), lockedUntil: lock?.until, message: shut ? outside.insideMessage : lock?.message,
-        surface: lock?.surface, look: lock?.look, writing: lock?.writing, caption: lock?.caption, image: lock?.image,
+        surface: lock?.surface, look: lock?.look, writing: lock?.writing, caption: lock?.caption, image: lock?.image, selfPowered: lock?.selfPowered,
         outline: config.exitOutline && [config.exitOutline[0] + offset, ...config.exitOutline.slice(1)] }));
     }
     // 벽을 맞댄 방끼리의 연결문(links, 16층 주방 반입문): 복도를 거치지 않고 옆방에 있는 짝 연결문 앞으로 나온다. 다른 층의 방과도
@@ -208,7 +208,7 @@ function buildDynamicScene(config) {
       surface: roomConfig.surface, look: roomConfig.look, writing: roomConfig.writing, caption: roomConfig.caption, image: roomConfig.image,
       unlocked: collectedItems.has(roomConfig.unlockedBy),
       code: roomConfig.code, codeMessage: roomConfig.codeMessage, unlockedBy: roomConfig.unlockedBy,
-      requires: roomConfig.requires, control: roomConfig.control,
+      requires: roomConfig.requires, control: roomConfig.control, needsPower: roomConfig.needsPower, selfPowered: roomConfig.selfPowered,
       target: roomConfig.target, arrivalKey: 'exit', key: `room:${roomConfig.target}`,
       x: roomConfig.doorX, y: roomConfig.doorY ?? config.roomDoorY ?? 250, width: roomConfig.doorWidth ?? 120,
       style: roomConfig.doorStyle, sprite: roomConfig.doorSprite, outline: roomConfig.doorOutline }));
@@ -307,7 +307,7 @@ function buildDynamicScene(config) {
       takenMessage: prop.takenMessage, darkMessage: prop.darkMessage, requires: prop.requires,
       missingMessage: prop.missingMessage, partialMessage: prop.partialMessage, element, standY: floorY - base,
       code: prop.code, codePrompt: prop.codePrompt, cycle: prop.cycle, opens: prop.opens, control: prop.control, shutterLever: prop.shutterLever,
-      animation: prop.animation, poweredSprite: prop.poweredSprite, powerCircuit: prop.powerCircuit,
+      animation: prop.animation, poweredSprite: prop.poweredSprite, powerCircuit: prop.powerCircuit, needsPower: prop.needsPower, selfPowered: prop.selfPowered,
       surface: prop.surface || WRITING_SURFACE_BY_FILE[prop.file], look: prop.look, writing: prop.writing, caption: prop.caption,
       image: prop.image, missingSheet: prop.missingSheet, takenSheet: prop.takenSheet,
       sequence: sequence && { ...sequence, step: prop.step },

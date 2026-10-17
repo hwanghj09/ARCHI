@@ -166,6 +166,22 @@ try {
   assert.equal(wrong.threat, first.threat, 'A wrong command does not clear the threat');
   await type(first.threat.toUpperCase().replace(' ', '   '));
   assert.equal((await terminal()).threat, null, 'The right command blocks the threat (case and spacing do not matter)');
+  // 파일 경로는 Tab으로 자동완성된다(백업 복원 방해를 하나 띄워 확인). 경로와 맞지 않는 앞부분은 채우지 않는다.
+  const rmAnswer = await page.evaluate(() => {
+    const kind = b2ThreatKinds.find(entry => entry.verb === 'rm');
+    b2Battle.threat = { ...kind.make(), kind, left: 13000, total: 13000 };
+    return b2Battle.threat.answer;
+  });
+  const input = page.locator('#b2-terminal-input');
+  await input.fill('rm /x');
+  await input.press('Tab');
+  assert.equal(await input.inputValue(), 'rm /x', 'Tab ignores a path that does not match');
+  await input.fill('rm /b');
+  await input.press('Tab');
+  assert.equal(await input.inputValue(), rmAnswer, 'Tab completes the backup image path');
+  assert.equal(await page.evaluate(() => document.activeElement.id), 'b2-terminal-input', 'Tab keeps focus in the terminal');
+  await page.keyboard.press('Enter');
+  assert.equal((await terminal()).threat, null, 'The completed command blocks the threat');
   // 끝까지: 방해가 뜨면 1.5초 뒤에 막는다.
   let blockedCount = 1;
   for (let i = 0; i < 2000 && !(await terminal()).offline; i++) {

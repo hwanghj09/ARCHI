@@ -56,7 +56,7 @@ const FLOOR4_ROOMS = interiorRooms(4, [
       '해시 사슬 v3 시험 랙이다. 팬이 멎어 조용하다. 라벨: "냉각 팬 · UPS 첫째 출력." 랙 문에 붙은 메모: "사슬을 한 줄이라도 지우면 그 뒤 해시가 전부 어긋난다. 그게 이 과제의 전부."'),
     floor4Spot('테이프 카트', [2456, 2524], [338, 438],
       '테이프 카트에 반출 대장 클립보드가 걸려 있다. 매주 금요일마다 "감사 로그 테이프 · 반출 B2 · 요청 ARCHI." 연구원이 덧붙인 줄: "원본은 반출하지 말 것."'),
-    floor4Spot('UPS 분배기', [2532, 2592], [228, 284], { style: 'art-spot f4-ups', message: 'UPS 분배기. 출력은 한 곳만.',
+    floor4Spot('UPS 분배기', [2532, 2592], [228, 284], { selfPowered: true, style: 'art-spot f4-ups', message: 'UPS 분배기. 출력은 한 곳만.',
       control: { kind: 'selector', label: 'UPS 출력을 보낼 칸으로 선택기를 돌리자.' },
       cycle: { id: 'f4-ups', states: ['냉각 팬', '회의실 도어락', '로그 판독기'], messages: [
         'UPS 출력이 첫째 칸 냉각 팬으로 간다. 시험 랙 팬이 다시 돈다. 판독기와 회의실 도어락은 꺼졌다.',

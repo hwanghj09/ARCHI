@@ -36,6 +36,7 @@ try {
 
   // 메뉴의 저장 · 불러오기: 슬롯 3칸, 직접 저장과 불러오기.
   await page.evaluate(() => openGameMenu());
+  await page.locator('#menu-exit').click();
   await page.locator('#menu-slots-button').click();
   assert.equal(await page.locator('#menu-slot-list li').count(), 3);
   await page.locator('[data-slot-save="1"]').click();

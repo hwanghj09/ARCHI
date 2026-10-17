@@ -33,7 +33,8 @@ try {
   await page.clock.runFor(3000); await page.keyboard.up('d');
   assert.deepEqual(await frozen(), before, 'The menu pauses gameplay and the opening');
   assert(await page.evaluate(() => mainMenuActive && stage.inert && !usingPhone && !usingInspection));
-  await page.keyboard.press('Shift+Tab'); assert(await page.locator('#menu-controls-button').evaluate(el => el === document.activeElement));
+  assert.equal(await page.locator('#menu-controls-button').count(), 0, 'Controls are only available inside settings');
+  await page.keyboard.press('Shift+Tab'); assert(await page.locator('#menu-slots-button').evaluate(el => el === document.activeElement));
   await page.keyboard.press('Tab'); assert(await page.locator('#menu-start').evaluate(el => el === document.activeElement));
   await page.screenshot({ path: '.local/main-menu-desktop.png' });
   await page.locator('#menu-settings-button').click();
@@ -74,8 +75,15 @@ try {
   }
   await page.keyboard.press('Escape');
   assert(await page.locator('#menu-settings-button').evaluate(el => el === document.activeElement));
-  await page.locator('#menu-controls-button').click();
+  await page.locator('#menu-settings-button').click();
+  await page.locator('#menu-keybindings-button').click();
   assert.equal(await page.locator('.menu-key-list > div').count(), 9);
+  await page.locator('#menu-controls .menu-back').click();
+  assert(await page.locator('#menu-settings').isVisible());
+  assert(await page.locator('#menu-keybindings-button').evaluate(el => el === document.activeElement));
+  await page.locator('#menu-keybindings-button').click();
+  await page.keyboard.press('Escape');
+  assert(await page.locator('#menu-settings').isVisible(), 'Escape goes back to settings');
   await page.keyboard.press('Escape');
   await page.reload(); await page.clock.runFor(100);
   assert(await page.locator('#main-menu').isVisible()); assert.deepEqual(await frozen(), before);
@@ -94,6 +102,50 @@ try {
   const startX = (await frozen()).x;
   await page.keyboard.down('d'); await page.clock.runFor(200); await page.keyboard.up('d');
   assert((await frozen()).x > startX + 20, 'Starting the game hands off to movement');
+  await page.keyboard.down('d');
+  await page.keyboard.press('Escape');
+  assert(await page.locator('#menu-pause').isVisible());
+  assert(await page.locator('#menu-home').isHidden());
+  assert.deepEqual(await page.locator('#main-menu button:visible').allTextContents(), ['계속하기', '나가기']);
+  assert(await page.locator('#menu-resume').evaluate(el => el === document.activeElement));
+  assert.equal(await page.evaluate(() => keys.size), 0);
+  const paused = await frozen();
+  await page.clock.runFor(3000);
+  await page.keyboard.up('d');
+  assert.deepEqual(await frozen(), paused, 'Pause freezes position, sanity and battery');
+  await page.keyboard.press('Shift+Tab');
+  assert(await page.locator('#menu-exit').evaluate(el => el === document.activeElement));
+  await page.keyboard.press('Tab');
+  assert(await page.locator('#menu-resume').evaluate(el => el === document.activeElement));
+  await page.screenshot({ path: '.local/pause-menu-desktop.png' });
+  await page.keyboard.down('Escape');
+  assert(await page.locator('#main-menu').isHidden(), 'Escape resumes without reopening the menu');
+  await page.keyboard.down('Escape');
+  assert(await page.locator('#main-menu').isHidden(), 'Held Escape cannot reopen the menu');
+  await page.keyboard.up('Escape');
+  await page.keyboard.press('Escape');
+  await page.locator('#menu-resume').click();
+  assert(await page.evaluate(() => !mainMenuActive && !stage.inert && document.activeElement === stage));
+  await page.keyboard.press('Escape');
+  await page.locator('#menu-exit').click();
+  assert(await page.locator('#menu-home').isVisible());
+  assert.deepEqual(await frozen(), paused, 'Exiting to the main menu preserves the current session');
+  assert(await page.evaluate(() => mainMenuActive && stage.inert));
+  await page.locator('#menu-settings-button').click();
+  await page.keyboard.press('Escape');
+  await page.locator('#menu-continue').click();
+  assert(await page.evaluate(() => !mainMenuActive && !stage.inert && !openingActive));
+  await page.keyboard.down('d'); await page.clock.runFor(200); await page.keyboard.up('d');
+  assert((await frozen()).x > paused.x + 20, 'Continue restores movement after leaving the pause menu');
+  await page.keyboard.press('Escape');
+  await page.locator('#menu-exit').click();
+  await page.locator('#menu-slots-button').click();
+  await page.locator('[data-slot-save="2"]').click();
+  const savedSanity = await page.evaluate(() => readProgress(slotKeys[2]).sanity);
+  await page.evaluate(() => { sanity = 90; });
+  await page.locator('[data-slot-load="2"]').click();
+  assert.equal(await page.evaluate(() => sanity), savedSanity, 'Slots remain usable after exiting the pause menu');
+  assert(await page.evaluate(() => !mainMenuActive && !stage.inert));
   // The saved volume controls the shared audio output, including the elevator bell.
   await page.evaluate(() => {
     elevatorCars[0].floor = 17; showCabin(0);
@@ -106,7 +158,7 @@ try {
   // Touch, narrow and short landscape layouts stay within the menu viewport.
   for (const viewport of [{ width: 390, height: 844 }, { width: 844, height: 390 }]) {
     await page.setViewportSize(viewport); await page.reload(); await page.clock.runFor(100);
-    for (const id of ['menu-start', 'menu-settings-button', 'menu-controls-button']) {
+    for (const id of ['menu-start', 'menu-settings-button', 'menu-slots-button']) {
       const rect = await page.locator(`#${id}`).boundingBox();
       assert(rect.x >= 0 && rect.x + rect.width <= viewport.width && rect.height >= 44);
     }
@@ -118,6 +170,14 @@ try {
     if (await page.locator('#menu-new-confirm').isVisible()) await page.locator('#menu-new-confirm').tap();
     await page.locator('#opening-skip').click();
     assert(await page.evaluate(() => !openingActive && !stage.inert));
+    await page.keyboard.press('Escape');
+    for (const id of ['menu-resume', 'menu-exit']) {
+      const rect = await page.locator(`#${id}`).boundingBox();
+      assert(rect.x >= 0 && rect.x + rect.width <= viewport.width && rect.y >= 0 && rect.y + rect.height <= viewport.height && rect.height >= 44);
+    }
+    await page.screenshot({ path: `.local/pause-menu-${viewport.width}.png` });
+    await page.locator('#menu-resume').tap();
+    assert(await page.evaluate(() => !mainMenuActive && !stage.inert));
   }
   // Malformed values or blocked storage do not prevent settings or game start.
   await page.evaluate(() => localStorage.setItem('archi.settings', '{broken'));

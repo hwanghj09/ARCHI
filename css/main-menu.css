@@ -7,6 +7,10 @@
 .menu-topline i { display: inline-block; width: 4px; height: 4px; margin: 0 14px 2px; background: #a4bbaa; }
 .menu-content { position: relative; width: min(1160px, calc(100% - 96px)); min-height: calc(100dvh - 138px); display: flex; align-items: center; margin: 0 auto; padding: 30px 0 40px; }
 .menu-view { width: min(380px, 100%); }
+#main-menu[data-view="pause"] { background: #080e11b8; }
+#main-menu[data-view="pause"] :is(.menu-backdrop, .menu-topline, .menu-floor-mark) { display: none; }
+#main-menu[data-view="pause"] .menu-content { min-height: 100dvh; padding: 24px 0; justify-content: center; box-sizing: border-box; }
+#menu-pause { width: min(300px, 100%); }
 .menu-eyebrow { margin: 0 0 10px; color: #99b3a6; font-size: 11px; letter-spacing: .24em; }
 .menu-title { margin: 0 0 12px -5px; font-size: clamp(64px, 8vw, 106px); font-weight: 500; line-height: 1.08; letter-spacing: .12em; }
 .menu-story { margin: 22px 0 38px; color: #9ca9a5; line-height: 1.9; }

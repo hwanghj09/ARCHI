@@ -39,12 +39,12 @@ try {
   for (const [action, key] of Object.entries(custom)) await bind(action, key);
   const saved = await bindings();
   assert.equal(await page.locator('#interact').textContent(), 'Q');
-  assert.match(await page.locator('#inventory-button').textContent(), /^가방.* · I$/);
+  assert.match(await page.locator('#inventory-button').getAttribute('aria-label'), /^가방.* · I$/);
   assert(await page.evaluate(() => officeDocuments[0].body.includes('<td>Q</td>')));
   assert.match(await page.evaluate(() => doorHintText(officeComputer)), /^Q ·/);
   assert.match(await page.evaluate(() => phoneChargerHint({ scene: 'office', floor: 17, x: -100, width: 10 })), /^Q ·/);
   await page.keyboard.press('Escape');
-  await page.locator('#menu-settings-button').click();
+  assert(await page.locator('#menu-settings').isVisible());
   await page.locator('#menu-volume').fill('35');
   await page.reload();
   await page.clock.runFor(100);
@@ -113,7 +113,9 @@ try {
   await page.keyboard.press('Escape');
   await page.keyboard.up('l');
   assert.equal(await page.evaluate(() => keys.size), 0, 'Opening settings releases held keys');
-  await page.locator('#menu-controls-button').click();
+  await page.locator('#menu-exit').click();
+  await page.locator('#menu-settings-button').click();
+  await page.locator('#menu-keybindings-button').click();
   await bind('run', 'ShiftRight');
   await bind('crouch', 'ControlRight');
   for (const viewport of [{ width: 390, height: 844 }, { width: 844, height: 390 }]) {
@@ -139,7 +141,8 @@ try {
   await page.evaluate(() => {
     Storage.prototype.setItem = () => { throw new Error('Storage denied'); };
   });
-  await page.locator('#menu-controls-button').click();
+  await page.locator('#menu-settings-button').click();
+  await page.locator('#menu-keybindings-button').click();
   await keyButton('right').click(); await page.keyboard.press('l');
   assert.deepEqual((await bindings()).right, ['KeyL']);
   assert.match(await page.locator('#menu-keys-status').textContent(), /저장할 수 없습니다/);
