@@ -910,11 +910,11 @@ body { margin: 0; overflow: hidden; background: #27292b; color: #eee; font: 14px
 #player { position: absolute; top: 0; left: 0; z-index: 6; width: 192px; height: 192px; overflow: hidden; image-rendering: pixelated; user-select: none; pointer-events: none; }
 #player img { display: none; width: 100%; height: 100%; }
 #player #idle-sprite { width: 357.39px; height: 357.39px; transform: translate(3.375px, 1.585px); clip-path: inset(0 50% 50% 0); }
-#player #walk-sheet, #player #phone-walk-sheet { width: 600%; height: 100%; }
+#player #walk-sheet, #player #phone-walk-sheet { width: 1200%; height: 100%; }
 /* 상자 밀기(push-box.png, 256px 칸 6장). 발 기준선이 걷기 그림보다 5px 낮아 같은 바닥에 서도록 올린다. */
 #player #push-sheet { position: relative; top: -5px; width: 600%; height: 100%; }
 #player[data-state="push"] #push-sheet { display: block; }
-#player #run-sheet, #player #phone-run-sheet { width: 800%; height: 100%; }
+#player #run-sheet, #player #phone-run-sheet { width: 1600%; height: 100%; }
 #player .action-sheet { width: 200%; height: 100%; }
 #player #antianxiety-sheet { width: 600%; height: 100%; }
 #player #crouch-sheet { width: 400%; height: 100%; }

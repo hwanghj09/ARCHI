@@ -148,7 +148,7 @@ function animate(distance, sprinting = false, elapsed = 0) {
   sprite.dataset.phoneHeld = String(holdingPhone);
   const light = phoneLightOn ? 'on' : 'off';
   for (const [sheet, motion] of [[phoneWalkSheet, 'walk'], [phoneRunSheet, 'run']]) {
-    const src = `assets/player/jeong-suho-phone-${motion}-${light}.png`;
+    const src = `assets/player/jeong-suho-phone-${motion}-${motion === 'walk' ? 'twelve' : 'sixteen'}-${light}.png`;
     if (sheet.getAttribute('src') !== src) sheet.setAttribute('src', src);
   }
   if (state === 'idle') showIdleFrame(index);
@@ -157,7 +157,7 @@ function animate(distance, sprinting = false, elapsed = 0) {
   if (state === 'walk') (holdingPhone ? phoneWalkSheet : walkSheet).style.transform = `translateX(${-index * 100 / walkFrames}%)`;
   if (state === 'run') (holdingPhone ? phoneRunSheet : runSheet).style.transform = `translateX(${-index * 100 / runFrames}%)`;
   // Reuse the airborne run poses so a lit phone never disappears during a jump.
-  if (holdingPhone && (state === 'jump' || state === 'fall')) phoneRunSheet.style.transform = `translateX(${-(state === 'jump' ? 2 : 6) * 100 / runFrames}%)`;
+  if (holdingPhone && (state === 'jump' || state === 'fall')) phoneRunSheet.style.transform = `translateX(${-(state === 'jump' ? 4 : 12) * 100 / runFrames}%)`;
   if (state === 'jump' || state === 'fall') jumpSheet.style.transform = `translateX(${-index * 50}%)`;
   if (state === 'interact') interactSheet.style.transform = `translateX(${-index * 50}%)`;
   if (state === 'phone') phoneSheet.style.transform = `translateX(${-index * 25}%)`;

@@ -1,5 +1,7 @@
 # Jeong Suho Run Sprites
 
+Current runtime: `jeong-suho-run-sixteen.png`, 4096×256, with eight newly drawn in-between poses. See [movement-inbetweens-source/README.md](movement-inbetweens-source/README.md) for sources, export and phone variants. The eight-frame production sheet below is preserved as the original.
+
 - Tool: built-in `image_gen`.
 - Identity reference: `jeong-suho.png`.
 - Output: `jeong-suho-run-six.png`, 1536x1024 RGBA PNG.

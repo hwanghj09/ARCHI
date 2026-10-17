@@ -17,9 +17,10 @@ try {
   await page.clock.pauseAt(new Date('2026-10-03T00:01:00Z'));
   await page.clock.runFor(100);
   for (const motion of ['walk', 'run']) {
-    const frames = motion === 'walk' ? 6 : 8;
+    const frames = motion === 'walk' ? 12 : 16;
+    const cycle = motion === 'walk' ? 'twelve' : 'sixteen';
     for (const light of ['off', 'on']) {
-      const png = await readFile(`assets/player/jeong-suho-phone-${motion}-${light}.png`);
+      const png = await readFile(`assets/player/jeong-suho-phone-${motion}-${cycle}-${light}.png`);
       const cells = await page.evaluate(async ({ src, frames, motion }) => {
         const img = new Image(); img.src = src; await img.decode();
         if (img.naturalWidth !== frames * 256 || img.naturalHeight !== 256) return [];
@@ -83,7 +84,7 @@ try {
       assert.equal(await active().count(), 1, 'Exactly one character sheet is displayed');
       assert.equal((await state()).state, activeMotion, 'Light ON forces walking even with Shift held');
       assert.equal(await active().getAttribute('id'), `${light === 'on' ? 'phone-' : ''}${activeMotion}-sheet`);
-      if (light === 'on') assert((await active().getAttribute('src')).endsWith(`${activeMotion}-on.png`));
+      if (light === 'on') assert((await active().getAttribute('src')).endsWith(`${activeMotion}-twelve-on.png`));
       assert(await page.evaluate(running => Math.abs(Math.abs(body.velocity.x) - (running ? runSpeed : speed) / 60) < .01,
         activeMotion === 'run'), 'Physics speed matches the allowed gait');
       assert.equal(await page.locator('#world').getAttribute('data-flashlight'), light);
@@ -135,7 +136,7 @@ try {
   await page.keyboard.down('a');
   await page.clock.runFor(100);
   assert.equal(await active().getAttribute('id'), 'phone-walk-sheet');
-  assert((await active().getAttribute('src')).endsWith('walk-on.png'));
+  assert((await active().getAttribute('src')).endsWith('walk-twelve-on.png'));
   await page.screenshot({ path: '.local/phone-walk-mobile.png' });
   await page.keyboard.up('a');
   // Sample the actual CSS darkness mask over white to verify forward light and dark rear.

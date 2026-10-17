@@ -1,5 +1,7 @@
 # 정수호 걷기 애니메이션
 
+현재 게임은 기존 여섯 자세 사이에 새 그림 여섯 장을 더한 `jeong-suho-walk-twelve.png`를 사용한다. 새 원본·내보내기·휴대폰 변형은 [movement-inbetweens-source/README.md](movement-inbetweens-source/README.md)를 참고한다. 아래는 보존된 6프레임 버전의 제작 기록이다.
+
 - 생성 도구: 내장 image_gen
 - 참조: `jeong-suho-source.png`, 기존 Notion 주인공 디자인
 - `jeong-suho-walk-source.png`: 8프레임 생성 원본
