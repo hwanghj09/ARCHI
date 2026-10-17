@@ -43,6 +43,7 @@ panelFloors.forEach((floor, index) => {
     }
     if (button.dataset.restricted && selectedFloor !== floor && !collectedItems.has(restrictionItem)) {
       cabinStatus.textContent = '버튼을 눌렀으나 아무 반응도 없었다.';
+      collectedItems.add('b2-refused'); // 목표 창이 B1 시설관리실로 안내한다(objective.js)
       return;
     }
     if (selectedFloor !== null) return;

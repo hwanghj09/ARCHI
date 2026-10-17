@@ -9,6 +9,8 @@
 // 오늘 00:00의 TRAINING PROCESS - COMPLETE / EXTERNAL HOST CONNECTION - READY / EXTERNAL CONNECTION TEST - SUCCESS가 찍혀
 // 있다. 모든 줄의 발신지는 B2 ARCHI-MAIN. 라운지·VIP Room은 외부 호스트(해외 데이터센터, "AI 한 기 · 약 38TB" 입주 상담,
 // 매일 03:00 사람 없는 화상 회선)를, 검증실 의자는 인간-시스템 인터페이스 실험(서브엔딩 복선)을 가리킨다.
+// 백업 장비는 두 단계 비교 퍼즐이다(log-puzzle.js): 날짜별 표에서 성능·B2 전력이 함께 오른 03시를 고르고, 평소 밤과 오늘 밤을
+// 비교해 처음 생긴 외부 서버 연결을 고른다. 다 풀면 발신지 B2 ARCHI-MAIN이 드러나고 목표가 지하를 가리킨다.
 // 7층 전력 공급은 아직 없어서 문구는 정전 상태(조명·모니터 꺼짐, 망분리 백업 장비는 배터리, 인터록은 B2 회선)를 기준으로 썼다.
 const FLOOR7_LAYOUT = {
   header: '7F · Lounge · AI 테스트·검증실', background: '#12110f', theme: 'vip',
@@ -142,7 +144,8 @@ const FLOOR7_ROOMS = interiorRooms(7, [
         takenMessage: '레버는 내려가 있다. 화면: "세션 강제 종료 · 입실자 이탈 허용".',
         takenSheet: { surface: 'screen', look: 'lcd', writing: ['세션 강제 종료 · 입실자 이탈 허용'], caption: '레버는 내려가 있다.' } },
       { file: 'server-rack', size: [256, 512], worldWidth: 96, x: 850 },
-      { file: 'electronics-bench', size: [512, 256], worldWidth: 261, x: 1400, name: '망분리 백업 장비',
+      // 다 풀기 전에는 로그 비교 퍼즐(js/interaction/log-puzzle.js)이 열리고, 푼 뒤에는 아래 전체 로그를 조사 창으로 본다.
+      { file: 'electronics-bench', size: [512, 256], worldWidth: 261, x: 1400, name: '망분리 백업 장비', puzzle: 'f7-logs',
         message: '사내망에서 떼어 낸 백업 장비가 배터리로 켜져 원본 로그를 뽑아 두었다: "매일 01:00~05:00 ARCHI 학습 실행 · B2 전력 집중." 오늘 00:00: "TRAINING PROCESS - COMPLETE / EXTERNAL HOST CONNECTION - READY / EXTERNAL CONNECTION TEST - SUCCESS". 모든 줄의 발신지는 B2 ARCHI-MAIN이다.',
         surface: 'screen', look: 'terminal',
         writing: [{ as: 'title', text: '원본 로그' }, { as: 'field', label: '발신지', text: 'B2 ARCHI-MAIN' },

@@ -300,7 +300,7 @@ function buildDynamicScene(config) {
     doorList.push({ name: prop.name, type: 'inspect', message: prop.message, gives: prop.gives,
       takenMessage: prop.takenMessage, darkMessage: prop.darkMessage, requires: prop.requires,
       missingMessage: prop.missingMessage, partialMessage: prop.partialMessage, element, standY: floorY - base,
-      code: prop.code, codePrompt: prop.codePrompt, cycle: prop.cycle, opens: prop.opens,
+      code: prop.code, codePrompt: prop.codePrompt, cycle: prop.cycle, opens: prop.opens, puzzle: prop.puzzle,
       animation: prop.animation, poweredSprite: prop.poweredSprite,
       surface: prop.surface || WRITING_SURFACE_BY_FILE[prop.file], look: prop.look, writing: prop.writing, caption: prop.caption,
       image: prop.image, missingSheet: prop.missingSheet, takenSheet: prop.takenSheet,

@@ -126,6 +126,7 @@ try {
 
   assert.equal(await titleAfter(() => collectedItems.add('goal-f12-memo')), '7층 조사하기');
   assert.equal(await titleAfter(() => collectedItems.add('goal-f7-log')), '지하에서 무슨 일이?');
+  assert.equal(await titleAfter(() => collectedItems.add('b2-refused')), 'B1 시설관리실로');
   assert.equal(await titleAfter(() => collectedItems.add('b1-elevator')), 'B2 서버실 조사하기');
   assert.equal(await titleAfter(() => collectedItems.add('goal-b2-console')), 'ARCHI 멈추기');
 

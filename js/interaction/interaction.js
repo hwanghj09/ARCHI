@@ -109,6 +109,8 @@ function interact() {
       openKeypad(nearbyDoor);
       return;
     }
+    // 7층 망분리 백업 장비(puzzle: 'f7-logs')는 다 풀기 전까지 로그 비교 화면(log-puzzle.js)을 연다.
+    if (nearbyDoor.puzzle === 'f7-logs' && openLogPuzzle()) return;
     if (nearbyDoor.sequence) {
       advanceSequence(nearbyDoor);
       return;

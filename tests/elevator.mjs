@@ -1772,6 +1772,37 @@ try {
     assert.match(await status(), /비상 해제: 안쪽 끝 인터록 제어반/);
     assert.equal(await page.locator('#dynamic-scene .floor-prop').count(), 5);
     await assertHumanScale();
+    // The backup device opens the two-step log comparison first. 12F's eval bench (03:12) was read, so 03시 is highlighted.
+    await walkTo(1400);
+    assert.equal(await hint(), 'E · 망분리 백업 장비 조사');
+    await page.keyboard.press('e');
+    const logPanel = page.locator('#log-panel');
+    assert(await logPanel.isVisible(), 'The backup device opens the log comparison');
+    assert.deepEqual(await page.locator('#log-tabs button').allTextContents(), ['09/28', '09/30', '10/05']);
+    assert.equal(await page.locator('#log-view td.hinted').count(), 2, 'The 12F hint highlights the 03시 column');
+    const sanityBefore = await page.evaluate(() => sanity);
+    await page.locator('#log-choices button', { hasText: '[01시]' }).click();
+    const sanityAfter = await page.evaluate(() => sanity);
+    assert(sanityAfter <= sanityBefore - 4.5 || sanityAfter === 0, 'A wrong pick costs 5% sanity');
+    assert.match(await page.locator('#log-status').textContent(), /지직/);
+    await page.locator('#log-choices button', { hasText: '[03시]' }).click();
+    assert.equal(await page.locator('#log-tabs button[aria-selected="true"]').textContent(), '[오늘]', 'Step 1 opens the today tab');
+    assert.match(await page.locator('#log-view').textContent(), /EXTERNAL HOST CONNECTION — READY/);
+    assert.equal(await page.evaluate(() => collectedItems.has('goal-f7-log')), false);
+    await page.locator('#log-choices button', { hasText: '[학습]' }).click();
+    assert.equal(await page.evaluate(() => collectedItems.has('goal-f7-log')), false, 'Training happens every night, so it is a trap');
+    await page.locator('#log-choices button', { hasText: '[외부 서버 연결]' }).click();
+    assert.equal(await page.evaluate(() => collectedItems.has('goal-f7-log')), true);
+    assert.match(await page.locator('#log-view').textContent(), /발신지 · B2 ARCHI-MAIN/);
+    const clueText = await page.locator('#phone-clue-list').textContent();
+    assert.match(clueText, /03시마다 B2로 전력을 모아/);
+    assert.match(clueText, /처음으로 외부 서버에 연결/);
+    await page.screenshot({ path: '.local/floor-7-log-puzzle.png' });
+    await page.keyboard.press('Escape');
+    assert(await logPanel.isHidden());
+    assert.match(await status(), /누가 보고 있는 것 같다/);
+    await page.evaluate(() => { sanity = 100; refreshSanity(); });
+    // Solved: the device now shows the full log as an ordinary inspection.
     await inspect(1400, 'E · 망분리 백업 장비 조사',
       /TRAINING PROCESS - COMPLETE \/ EXTERNAL HOST CONNECTION - READY \/ EXTERNAL CONNECTION TEST - SUCCESS.*B2 ARCHI-MAIN/);
     await inspect(1100, 'E · 인터페이스 의자 조사', /인간-시스템 인터페이스.*B2로 이관/);

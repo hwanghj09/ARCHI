@@ -14,6 +14,7 @@
     <link rel="stylesheet" href="css/opening.css" />
     <link rel="stylesheet" href="css/power.css" />
     <link rel="stylesheet" href="css/wire-puzzle.css" />
+    <link rel="stylesheet" href="css/log-puzzle.css" />
     <link rel="stylesheet" href="css/guard-patrol.css" />
     <link rel="stylesheet" href="css/b2-ending.css" />
     <link rel="stylesheet" href="css/phone.css" />
@@ -76,6 +77,7 @@
     <script src="js/interaction/cctv.js" defer></script>
     <script src="js/interaction/keypad.js" defer></script>
     <script src="js/interaction/wire-puzzle.js" defer></script>
+    <script src="js/interaction/log-puzzle.js" defer></script>
     <script src="js/interaction/outline.js" defer></script>
     <script src="js/interaction/interaction.js" defer></script>
     <script src="js/interaction/phone.js" defer></script>
@@ -323,6 +325,17 @@
         </div>
         <p id="wire-status" role="status" aria-live="polite"></p>
         <button id="wire-cancel" type="button">나중에 · Esc</button>
+      </div>
+    </section>
+    <section id="log-panel" role="dialog" aria-modal="true" aria-labelledby="log-title" aria-describedby="log-status" data-glitch="false" hidden>
+      <div class="log-box">
+        <div class="log-head"><h2 id="log-title">망분리 백업 장비 · 원본 로그</h2><span>BATTERY · OFFLINE</span></div>
+        <div id="log-tabs" role="tablist" aria-label="기록 날짜"></div>
+        <div id="log-view"></div>
+        <p id="log-question"></p>
+        <div id="log-choices"></div>
+        <p id="log-status" role="status" aria-live="polite"></p>
+        <button id="log-close" type="button">닫기 · Esc</button>
       </div>
     </section>
     <section id="inspection" class="device-dialog" role="dialog" aria-modal="true" aria-labelledby="inspection-title" aria-describedby="inspection-description" hidden>

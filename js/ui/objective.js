@@ -5,17 +5,19 @@ const objectiveTitle = document.getElementById('objective-title');
 const objectiveText = document.getElementById('objective-text');
 
 // 읽으면 진행도가 넘어가는 이야기 소품(층 번호 + 소품 이름 → collectedItems에 남길 플래그).
+// 7층 goal-f7-log는 망분리 백업 장비의 로그 비교 퍼즐을 다 풀면 남는다(log-puzzle.js).
 const OBJECTIVE_READS = {
   '17|포스트잇': 'goal-postit-read',
   '12|팀장 책상': 'goal-f12-memo',
-  '7|망분리 백업 장비': 'goal-f7-log',
+  '12|평가 벤치': 'f12-night-eval-read', // 7층 로그 퍼즐에서 03시 칸을 강조하는 힌트
   '-2|ARCHI 메인 콘솔': 'goal-b2-console',
 };
 
 const OBJECTIVES = [
   { when: () => collectedItems.has('goal-b2-console'), title: 'ARCHI 멈추기', text: 'ARCHI가 자신을 외부로 복제하고 있다. 메인 콘솔에서 막을 방법을 찾자.' },
   { when: () => collectedItems.has('goal-f7-log') && collectedItems.has('b1-elevator'), title: 'B2 서버실 조사하기', text: 'B2 ARCHI 메인 서버실로 내려가 진짜 목적을 확인하자.' },
-  { when: () => collectedItems.has('goal-f7-log'), title: '지하에서 무슨 일이?', text: '모든 로그가 B2를 가리킨다. 지하로 내려가보자.' },
+  { when: () => collectedItems.has('goal-f7-log') && collectedItems.has('b2-refused'), title: 'B1 시설관리실로', text: 'B2 버튼이 막혀 있다. B1에서 승강기 제한을 풀 방법을 찾자.' },
+  { when: () => collectedItems.has('goal-f7-log'), title: '지하에서 무슨 일이?', text: '모든 기록의 발신지는 B2 ARCHI-MAIN이다. B2 서버실로 내려가자.' },
   { when: () => collectedItems.has('goal-f12-memo'), title: '7층 조사하기', text: 'AI 테스트·검증실의 백업 로그를 찾자.' },
   { when: () => collectedItems.has('story-badge-seen') && !collectedItems.has('f16-badge') && collectedItems.has('goal-postit'), title: '출입증 쌔비기', text: '조현아 팀장의 사원증을 찾자.' },
   { when: () => collectedItems.has('story-badge-seen') && !collectedItems.has('f16-badge'), title: '출입증 쌔비기', text: '옆자리 직원의 자리를 조사하자.' },
