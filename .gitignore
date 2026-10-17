@@ -1,5 +1,6 @@
 node_modules/
 .local/
+/ARCHI/
 
 # Leftover Unity Editor cache (this project no longer uses Unity)
 Library/
