@@ -53,11 +53,15 @@ mixed auto, 엔지니어링 white solid-vision, 기술 회의실 mixed single.
    auto → `make_door_sprite.py <in> <out> --double --top 0.075` (keeps the motor box). Transparent rows stay transparent.
 4. Position (`doorY: 250`, height 320 under the bulkhead):
    - glass single: `doorWidth: 130`, `doorX = S + 240×k + 55` (centred in a glass panel; S = the wall segment's x);
-   - glass auto: `doorWidth: 240`, `doorX = S + 240×k` (exactly one panel);
+   - glass auto: `doorWidth: 240`, `doorX = S + 240×k − 120` (a mullion sits at S + 240×k; centring the door on it hides
+     it behind the door's centre seam. `S + 240×k` puts mullions on both door edges, where they show through the glass);
    - plain wall: `doorWidth: 130`, anywhere in the room front.
-   Then check: the box is inside the room front; its hint zone (box ±28) clears the core (left zone ≤1790, right zone
-   ≥4282, ≤4940) and the other door; inside, the exit (recomputed from doorX by `exitDoorX`) stays ≥56px from every
-   clue. If not, try another k or shift a few px within the panel.
+   Then check: the box is inside the room front and ≥16px clear of the 48px pilasters at both segment ends (S±24,
+   S+width±24); no glass mullion within 15px of a glass door's edge or behind its glass; its hint zone (box ±28) clears
+   the core (left zone ≤1790, right zone ≥4282, ≤4940) and the other door; inside, the exit stays ≥56px from every clue.
+   2F~10F rooms author their inside exit (`exitX`, `exitBay`, `cutaway_kit.door_bay` at a room end or a clear wall), so
+   moving their corridor door does not move the inside door. Other rooms recompute it from doorX (`exitDoorX`).
+   If not, try another k or shift a few px within the panel.
 5. Set `doorSprite: 'assets/objects/floorNN/door-<room-id>.png'`, `doorWidth`, `doorX`, `doorY: 250`; remove `doorStyle`.
 6. Tests (`checkFloorNN`): `await checkSpriteDoors(['door-<a>.png', 'door-<b>.png', 'door-<c>.png'], 1280);` and the new
    exit x values.

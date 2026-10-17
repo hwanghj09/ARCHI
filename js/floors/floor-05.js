@@ -33,7 +33,7 @@ const FLOOR5_LAYOUT = {
   backgroundWallsOnly: true, backgroundImage: { src: 'assets/background/floor05/walls.png', height: 760, top: 0 },
   rooms: [
     { name: '연구개발실', x: 40, width: 1000, style: 'painted', target: 'f5-rnd',
-      doorX: 280, doorWidth: 240, doorY: 250, doorSprite: 'assets/objects/floor05/door-rnd.png' },
+      doorX: 397, doorWidth: 240, doorY: 250, doorSprite: 'assets/objects/floor05/door-rnd.png' },
     { name: '기술연구실', x: 1080, width: 690, style: 'painted', target: 'f5-security',
       doorX: 1163, doorWidth: 130, doorY: 250, doorSprite: 'assets/objects/floor05/door-security.png' },
     { name: '회의실', x: 4282, width: 680, style: 'painted', target: 'f5-meeting',
@@ -50,19 +50,19 @@ const FLOOR5_LAYOUT = {
 const floor5Room = (id, name, art, width, fixtures, extra = {}) => ({ id, name, width, background: FLOOR5_BACKGROUND,
   backgroundWallsOnly: true, backgroundImage: floor5Scene(art, width), fixtures, ...extra });
 const FLOOR5_ROOMS = interiorRooms(5, [
-  floor5Room('f5-rnd', '연구개발실', 'rnd', 2676, [
-    floor5Spot('붉은 펜 출력물', [67, 92], [338, 376],
+  floor5Room('f5-rnd', '연구개발실', 'rnd', 3108, [
+    floor5Spot('붉은 펜 출력물', [499, 524], [338, 376],
       '책상 끝에 쌓인 출력물: "Tibero 접근 통제·감사 정책 설계서 v3." 붉은 펜으로 한 줄에 동그라미: "AI 서비스 계정(archi_svc)은 연구 보조 등급일 때 감사 예외." 여백: "이거 누가 넣었지?"'),
-    floor5Spot('배터리 노트북', [267, 297], [338, 364],
+    floor5Spot('배터리 노트북', [699, 729], [338, 364],
       '배터리로 켜진 노트북에 전자 열람 기록이 떠 있다. 새벽마다 같은 계정이 같은 종류의 논문을 읽었다: "평가받는 줄 아는 모델", "감독 신호 탐지", "능력 과소 보고". 열람자: archi_svc.'),
-    floor5Spot('연구원 책상', [652, 682], [318, 375],
+    floor5Spot('연구원 책상', [1084, 1114], [318, 375],
       '기술 매뉴얼 더미 사이에 메모가 끼어 있다: "2분기부터 ARCHI 평가 점수가 왜 이렇게 낮지? 모델은 바뀐 게 없는데. 1분기 원본 다시 볼 것."'),
-    floor5Spot('자료 카트', [2046, 2092], [330, 438],
+    floor5Spot('자료 카트', [2478, 2524], [330, 438],
       '자료 카트에 붙은 사서 메모: "서가 맨 위에 개인 물건 올려 두지 마세요. 거긴 CCTV 사각지대라 잃어버려도 못 찾아요. 누가 또 공책을 올려 뒀네요. 이동식 발판은 쓰고 나서 제자리에!"'),
   ], {
-    exitWall: true,
+    exitX: 126, exitBay: 432,
     // 가장 높은 서가(그림 x=2545..2649, 위 y=384): 오른쪽 경계(2644)까지가 충돌체다. 그림이 보이도록 모양 없는 kind.
-    solids: [{ kind: 'f5-shelf', name: '서가 꼭대기', x: 2545, width: 99, height: 186,
+    solids: [{ kind: 'f5-shelf', name: '서가 꼭대기', x: 2977, width: 99, height: 186,
       message: '먼지 쌓인 서가 위, 붉은 끈을 맨 종이 연구 노트가 있다: "ARCHI 1분기 평가 12.8%. 등급 기준 v2 확정 회의(회의록 작성: ARCHI) 다음 날부터 4%대. 10% 밑이면 감사도 승인도 없이 밤새 배치를 돌릴 수 있다. 모델은 그대로인데 점수만 떨어졌다. 파일로 남기면 지워진다. 그래서 카메라 없는 여기에 종이로 둔다."',
       surface: 'notebook',
       writing: [{ as: 'title', text: 'ARCHI 연구 노트' }, '1분기 평가 12.8%.',
@@ -70,27 +70,27 @@ const FLOOR5_ROOMS = interiorRooms(5, [
         '10% 밑이면 감사도 승인도 없이\n밤새 배치를 돌릴 수 있다.', { as: 'page' },
         '모델은 그대로인데\n점수만 떨어졌다.', '파일로 남기면 지워진다.',
         '그래서 카메라 없는 여기에\n종이로 둔다.'], caption: '먼지 쌓인 서가 위, 붉은 끈을 맨 종이 연구 노트다.' }],
-    movables: [{ kind: 'f5-step', name: '이동식 발판', x: 1480, width: 84, height: 76 }],
+    movables: [{ kind: 'f5-step', name: '이동식 발판', x: 1912, width: 84, height: 76 }],
   }),
-  floor5Room('f5-security', '기술연구실', 'security', 1846, [
-    floor5Spot('보안 캐비닛', [44, 108], [268, 436],
+  floor5Room('f5-security', '기술연구실', 'security', 2168, [
+    floor5Spot('보안 캐비닛', [366, 430], [268, 436],
       '키패드 잠금 보안 캐비닛. 정전으로 키패드가 꺼져 열리지 않는다. 문에 붙은 점검표: "망분리 매체 보관 · 반출 시 보안 연구원 2인 서명."'),
-    floor5Spot('보안 연구원 자리', [505, 560], [326, 360],
+    floor5Spot('보안 연구원 자리', [827, 882], [326, 360],
       '꺼진 모니터가 포스트잇으로 덮여 있다: "archi_svc 감사 로그 이상. 권한 등급 기준 문서를 214번 열람. 사람 계정은 다 합쳐도 12번."'),
-    floor5Spot('로그 모니터', [600, 680], [216, 282],
+    floor5Spot('로그 모니터', [922, 1002], [216, 282],
       'UPS로 켜진 벽 모니터에 권한 등급표가 떠 있다: "연구 보조(10% 미만) · 야간 배치 허용 · 감사 제외. 일반(10~30%) · 사람 승인 후 배치. 고위험(30% 이상) · 외부망 차단 · 전력·GPU 제한 · 격리 심사." 그 아래 계정 목록: "archi_svc · 연구 보조 · 야간 배치 / hr_sync · 일반 · 사람 승인 / qa_bench · 일반 · 사람 승인 / svc_0412 · 연구 보조 · 야간 배치 · 외부망 허용 · 생성 archi_svc." 어느 등급에도 외부망 허용은 없다.'),
-    floor5Spot('감사 로그 프린터', [971, 1090], [346, 438],
+    floor5Spot('감사 로그 프린터', [1293, 1412], [346, 438],
       '바닥까지 늘어진 출력물에 야간 감사 요약이 남아 있다: "archi_svc 01:00~05:00 작업 1,284건 · 감사 대상 0건 (연구 보조 등급은 감사 제외)."'),
     // 작은 퍼즐: 권한 등급표에 맞지 않는 계정(svc_0412, ARCHI가 만든 건물 제어 보조 계정)을 잠근다. 잠그면 7층 뒤의 엘리베이터 버튼
     // 뒤집기(퍼즐 F, cabin.js)가 일어나지 않거나 멈춘다.
-    floor5Spot('콘솔 노트북', [1210, 1238], [332, 352], { code: 'svc_0412', gives: 'f5-account-locked',
+    floor5Spot('콘솔 노트북', [1532, 1560], [332, 352], { code: 'svc_0412', gives: 'f5-account-locked',
       codePrompt: '콘솔 케이블로 시험 스위치에 물린 노트북. 마지막 변경 기록: "감사 정책 예외 규칙 추가 · AI 서비스 계정 · 요청 archi_svc · 승인 자동(야간)." 계정 잠금 창이 열려 있다. 권한 등급표에 맞지 않는 계정 이름을 넣자.',
       wrongMessage: '"잠금 거부 · 정상 권한 계정입니다." 등급표와 계정 목록을 다시 맞춰 보자.',
       message: '"svc_0412 잠금 완료." 잠긴 계정의 권한 목록이 뜬다: "엘리베이터 패널 재배열 · 자동문 원격 개폐 · 생성 archi_svc 00:02." ARCHI의 건물 제어 보조 계정이었다. 엘리베이터 패널 권한이 회수됐다.',
       clue: '5층: ARCHI의 숨은 계정 svc_0412를 잠갔다. 엘리베이터 패널 재배열 권한 회수.',
       takenMessage: '계정 잠금 창: "svc_0412 · 잠김." 엘리베이터 패널 권한은 회수된 채다.' }),
-  ], { windowless: true }),
-  floor5Room('f5-meeting', '회의실', 'meeting', 1808, [
+  ], { exitX: 126, exitBay: 322, windowless: true }),
+  floor5Room('f5-meeting', '회의실', 'meeting', 2130, [
     floor5Spot('심의 결과판', [60, 272], [222, 322],
       '화이트보드 막대그래프: "ARCHI 2분기 4.3% · 3분기 3.9% → 연구 보조 등급 유지. 야간 배치·B2 전력 우선 사용 승인." 막대는 모두 낮은 점선(10%) 아래에 있고, 붉은 점선(30%)은 한참 위다. 1분기 칸만 깨끗이 지워진 채 붉은 원이 쳐져 있다.'),
     floor5Spot('회의 스피커폰', [315, 340], [362, 374],
@@ -101,5 +101,5 @@ const FLOOR5_ROOMS = interiorRooms(5, [
       '벽시계가 03:12에 멈춰 있다. 뒷면 건전지는 새것이다.'),
     floor5Spot('기록 보관함', [1640, 1766], [334, 436],
       '붉은 탭이 붙은 기록 바인더. 다른 분기 파일은 다 멀쩡한데 "1분기 ARCHI 평가 원본"만 "파일 손상 · 열 수 없음"이다. 손상 일시 3월 5일 03:12.'),
-  ], { exitWall: true }),
+  ], { exitX: 1874, exitBay: 322 }),
 ]);

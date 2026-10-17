@@ -43,11 +43,18 @@ for x in range(50, fill_w - 24, 120):
     upper[160:188, x:x + 24] = np.where(spot[..., 3:] > 0, spot, upper[160:188, x:x + 24])
 lower = np.concatenate([kit.cols((2420, 2620, k % 2 == 1)) for k in range(5)], axis=1)[SPLIT:, :fill_w]
 project = np.concatenate([kit.cols((2297, 2652)), np.concatenate([upper, lower], axis=0), kit.cols((2652, 3152))], axis=1)
+# 방 안 출구 문 자리(cutaway_kit.door_bay): 복도에서 보이는 이 방 앞벽(같은 벽 모듈) 칸을 방 끝(끝벽 30px 안) 또는 빈 벽 자리에
+# 끼워 출구 문을 그 벽에 세우고 양옆 96px은 빈 벽으로 둔다. 칸 폭(문 폭 + 192)만큼 오른쪽이 밀린다(방 설정 exitBay). 복도 문은 그대로다.
+BAYS = {
+    'office': (2646, 130, 'wall-glass-mixed'),
+    'sales': (834, 130, 'wall-glass-mixed'),
+    'project': (1810, 130, 'wall-frosted'),
+}
 finish_floor(HERE, {
     'office': (office, (88, 78, 72), (88, 66, 46)),
     'sales': (sales, (90, 86, 80), (76, 68, 52)),
     'project': (project, (68, 64, 68), (72, 54, 58)),
-})
+}, BAYS)
 # 브로슈어 거치대도 조사 범위와 같은 위치·크기로 새 복도에 붙인다.
 brochure = Image.fromarray(A[216:294, 1706:1750]).resize((44, 103), Image.Resampling.LANCZOS)
 with Image.open(HERE + 'walls.png') as walls:

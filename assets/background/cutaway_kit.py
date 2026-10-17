@@ -93,6 +93,52 @@ class Cutaway:
         return block.shape[1]
 
 
+# ---------------------------------------------------------------- 방 안 출구 문 자리
+WALLS = 'assets/background/wall/'
+SLAB = 82                                            # 그림 행: 천장 슬래브 아래(월드 y 214)
+
+
+def _module(name):
+    return Image.open(WALLS + name + '.png').convert('RGBA')
+
+
+def door_bay(block, x, door_width, wall='wall-glass', clear=96, rows=(SLAB, FLOOR), world_top=SLAB + TOP):
+    """Insert the room's own front wall at column x so the exit door stands in it, as seen from inside: the same wall
+    module the corridor shows for this room (wall-glass / wall-glass-mixed / wall-frosted / wall-concrete) from the
+    ceiling slab to the floor, the dimmed corridor wall behind the glass, a pilaster at both ends and `clear` px of empty
+    wall on each side of the door, so no furniture touches the door. Everything right of x moves right by the bay width
+    (door_width + 2 * clear), so fixtures right of x shift too. The door goes at x + clear. rows = block rows to fill,
+    world_top = world y of rows[0] (2F stretches its art: rows=(0, 456), world_top=100). Returns the new block."""
+    bay = door_width + 2 * clear
+    seg = Image.new('RGBA', (bay, 752), (12, 13, 15, 255))
+    if wall != 'wall-concrete':                       # 유리 너머는 정전 중인 복도 흰 벽(어둡게)
+        corridor = np.asarray(_module('wall-concrete')).astype(float)
+        corridor[..., :3] *= .42
+        corridor = Image.fromarray(corridor.astype(np.uint8))
+        for x0 in range(0, bay, corridor.width):
+            seg.alpha_composite(corridor.crop((0, 0, min(corridor.width, bay - x0), 752)), (x0, 0))
+    # 유리 창살(모듈 안 0·240·480)이 문 가장자리에 걸리지 않게 모듈을 민다: 보통 문은 문 중심 ±120에, 넓은 문(240)은 문 중심(문 뒤)에 창살
+    module = _module(wall)
+    center = clear + door_width // 2
+    shift = (240 - (center if door_width > 225 else center - 120)) % 480
+    strip = Image.new('RGBA', (bay + 480 * 2, 752), (0, 0, 0, 0))
+    for x0 in range(0, strip.width, module.width):
+        strip.alpha_composite(module, (x0, 0))
+    seg.alpha_composite(strip.crop((shift, 0, shift + bay, 752)), (0, 0))
+    pil = _module('pilaster')
+    seg.alpha_composite(pil.crop((pil.width // 2, 0, pil.width, 752)), (0, 0))
+    seg.alpha_composite(pil.crop((0, 0, pil.width // 2, 752)), (bay - pil.width // 2, 0))
+    piece = np.asarray(seg)[world_top:world_top + rows[1] - rows[0]].astype(float)
+    # 정전된 방 안에서 보는 벽이라 방 벽 밝기에 맞춘다(벽 윗부분 150행 중앙값의 1.15배, 칸 중앙값 기준)
+    lum = lambda a: a[..., :3].reshape(-1, 3).mean(axis=1)
+    piece[:, :, :3] *= min(1, 1.15 * np.median(lum(block[rows[0] + 100:rows[0] + 250].astype(float))) / np.median(lum(piece)))
+    piece[:3, :, :3] *= .35                           # 슬래브와 만나는 줄
+    src = block[:, x - bay:x] if x >= bay else block[:, x:x + bay]    # 천장·바닥은 옆 칸을 잇는다
+    out = np.concatenate([block[:, :x], src, block[:, x:]], axis=1)
+    out[rows[0]:rows[1], x:x + bay] = np.clip(piece, 0, 255).astype(np.uint8)
+    return out
+
+
 # ---------------------------------------------------------------- 문 스프라이트(닫힘 | 열림 두 칸), 높이 210 = 에셋의 문 높이
 PALETTES = {
     'steel': ((40, 46, 50), (92, 102, 106), (130, 140, 142)),

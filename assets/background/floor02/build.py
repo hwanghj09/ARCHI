@@ -2,8 +2,13 @@
 # 실행: python assets/background/floor02/build.py (저장소 루트에서, Pillow·numpy).
 # 복도는 이 스크립트가 아니라 assets/background/wall 모듈을 walls-layout.json으로 합성한 walls.png다(archi-floor-walls 스킬).
 # 문 그림은 assets/objects/floor02/(archi-floor-doors 스킬)에 있다.
+import sys
+
 from PIL import Image, ImageDraw, ImageFilter
 import numpy as np
+
+sys.path.insert(0, 'assets/background')
+from cutaway_kit import door_bay  # noqa: E402
 
 HERE = 'assets/background/floor02/'
 SRC = Image.open(HERE + 'floor02-hall-server-lounge.png').convert('RGBA')
@@ -47,18 +52,28 @@ plain = np.repeat(A[:, 2436:2442], 266 // 6 + 1, axis=1)[:, :266]     # 자판�
 lounge = np.concatenate([cols((2200, 2884)), cols((2446, 2884, True)), cols((2242, 2432)), plain, cols((2884, 3152))], axis=1)
 # 서버실(1840): 칸막이·문(1500..1538) 다음에 가동 랙(1538..1600)과 네트워크 랙(1862..1924) 한 쌍을 아홉 번, 그리고 원본 1538..2224.
 server = cols((1500, 1538), *[r for _ in range(9) for r in ((1538, 1600), (1862, 1924))], (1538, 2224))
+# 방 안 출구 문 자리(cutaway_kit.door_bay): 복도에서 보이는 이 방 앞벽(같은 벽 모듈) 칸을 방 끝벽 안쪽에 끼워 출구 문을 방 끝에 세우고,
+# 양옆 96px은 빈 벽으로 둔다. 행사장은 스크린·무대 반대편(오른쪽 끝), 서버실은 왼쪽 끝(휴게실은 lounge-wall 그림을 쓴다). 2층은 벽을 세로로 늘려 쓰므로
+# 늘린 뒤(월드 y=100..556)에 넣는다. 칸 폭만큼 그 오른쪽이 밀린다(exitBay). 복도 문은 그대로다.
+BAYS = {'hall': (2652, 'wall-concrete'), 'server': (30, 'wall-concrete')}
+WIDTHS = {}
 for name, block in (('hall', hall), ('lounge', lounge), ('server', server)):
-    Image.fromarray(trim(block)).save(HERE + f'floor02-{name}-interior.png')
-    print(name, block.shape[1])
+    out = trim(block)
+    if name in BAYS:
+        x, wall = BAYS[name]
+        out = door_bay(out, x, 130, wall, rows=(0, FLOOR_TOP - CEILING_H), world_top=CEILING_H)
+    Image.fromarray(out).save(HERE + f'floor02-{name}-interior.png')
+    WIDTHS[name] = out.shape[1]
+    print(name, out.shape[1])
 
 
 # ---------------------------------------------------------------- 천장·바닥(16층처럼)
 # 천장(복도 월드 y=0..214, 방 안 0..280): 화면 맨 위까지 이어진 평평한 천장판(바둑판 줄눈, 꺼진 매입등, 시스템 에어컨 그릴, 스프링클러)과 그 아래
 # 벽 위 띠(몰딩)다. 천장 속 배관은 그리지 않는다. 바닥(월드 y=570..760): 에셋 바닥선 아래로 바로 이어지는 짙은 바닥과 은은한 반사.
 CEILINGS = {
-    'hall': (2676, (28, 44, 46), (20, 34, 36), (150, 124, 66)),       # 행사장: 짙은 청록 천장판, 금박 줄
-    'lounge': (1846, (66, 58, 50), (70, 50, 36), (98, 76, 56)),       # 휴게실: 웜그레이 천장판, 원목 띠
-    'server': (1840, (112, 120, 124), (70, 76, 80), (160, 168, 172)),  # 서버실: 흰 밀폐 천장판
+    'hall': (WIDTHS['hall'], (28, 44, 46), (20, 34, 36), (150, 124, 66)),       # 행사장: 짙은 청록 천장판, 금박 줄
+    'lounge': (WIDTHS['lounge'], (66, 58, 50), (70, 50, 36), (98, 76, 56)),       # 휴게실: 웜그레이 천장판, 원목 띠
+    'server': (WIDTHS['server'], (112, 120, 124), (70, 76, 80), (160, 168, 172)),  # 서버실: 흰 밀폐 천장판
 }
 
 

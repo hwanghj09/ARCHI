@@ -62,7 +62,7 @@ try {
         name: config.props[i].file, rect: spriteOutline(element.firstChild.getAttribute('src'), ...rect(element)) }));
       const chair = currentDoors.find(door => door.name === '인터페이스 의자');
       if (props && chair) props.push({ name: chair.name, rect: outlineBox(chair) });
-      return { outside, inside: box(exit), width: worldWidth, outline: outlineBox(exit),
+      return { outside, inside: box(exit), width: worldWidth, outline: outlineBox(exit), exitBay: config.exitBay,
         art: config.exitArt, originalOutline: config.exitOutline,
         signRects: config.exitArt && luminousSigns[config.backgroundImage.src.replace(/^assets\/background\/|\.png$/g, '')]?.[2],
         unmovedSigns: dynamicScene.querySelectorAll(':scope > .luminous-sign').length,
@@ -85,7 +85,8 @@ try {
       `${entry.id}: corridor doorway stays between the outer walls`);
     assert(geometry.inside.x >= 32 && geometry.inside.x + geometry.inside.width <= geometry.width - 32,
       `${entry.id}: interior doorway stays inside its walls`);
-    assertMirroredDoor(entry.front, geometry.outside, geometry.width, geometry.inside, entry.id);
+    // exitBay 방(2~10층)은 복도 문은 그대로 두고 안쪽 문만 방 끝이나 빈 벽에 세운다(방 그림에 출구 앞벽 칸).
+    if (!geometry.exitBay) assertMirroredDoor(entry.front, geometry.outside, geometry.width, geometry.inside, entry.id);
     if (geometry.art) {
       const { crop, fill, x } = geometry.art;
       const offset = geometry.inside.x - x;
@@ -159,9 +160,9 @@ try {
         await Promise.all([...dynamicScene.querySelectorAll('img')].map(image => image.decode()));
         const exit = currentDoors.find(door => door.key === 'exit');
         return { x: exit.x, y: exit.y, width: exit.width, worldWidth, playerX: body.position.x,
-          facing, key: nearbyDoor?.key, connected: exit.element.isConnected };
+          facing, key: nearbyDoor?.key, connected: exit.element.isConnected, exitBay: floorById.get(dynamicFloorId).exitBay };
       });
-      assertMirroredDoor(entry.front, front, inside.worldWidth, inside, `${id} ${mobile ? 'touch' : 'keyboard'} entry`);
+      if (!inside.exitBay) assertMirroredDoor(entry.front, front, inside.worldWidth, inside, `${id} ${mobile ? 'touch' : 'keyboard'} entry`);
       assert(Math.abs(inside.playerX - inside.x - 40) < 1, `${id}: entry places the player at the same doorway`);
       assert.equal(inside.facing, inside.x < inside.worldWidth / 2 ? 1 : -1, `${id}: player faces into the room`);
       assert(inside.connected, `${id}: interior exit has a scene element`);

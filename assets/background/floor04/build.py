@@ -71,10 +71,17 @@ for x in (540, 1010):                                     # 빈 벽에도 출력
     extra[204:252, x:x + 74] = A[204:252, 2776:2850]
 meeting = np.concatenate([kit.cols((2462, 3044)), extra, kit.cols((3044, 3152))], axis=1)
 
+# 방 안 출구 문 자리(cutaway_kit.door_bay): 복도에서 보이는 이 방 앞벽(같은 벽 모듈) 칸을 방 끝(끝벽 30px 안) 또는 빈 벽 자리에
+# 끼워 출구 문을 그 벽에 세우고 양옆 96px은 빈 벽으로 둔다. 칸 폭(문 폭 + 192)만큼 오른쪽이 밀린다(방 설정 exitBay). 복도 문은 그대로다.
+BAYS = {
+    'lab': (30, 130, 'wall-glass-mixed'),
+    'dev': (30, 130, 'wall-glass'),
+    'meeting': (1314, 130, 'wall-frosted'),
+}
 finish_floor(HERE, {
     'lab': (lab, (66, 82, 84), (40, 62, 62)),
     'dev': (dev, (94, 100, 100), (60, 74, 72)),
     'meeting': (meeting, (82, 92, 92), (44, 68, 64)),
-})
+}, BAYS)
 
 print('built 4F assets')

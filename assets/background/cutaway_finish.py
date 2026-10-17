@@ -4,9 +4,12 @@ from pathlib import Path
 import numpy as np
 from PIL import Image, ImageDraw
 from wall.compose_floor import main as compose_walls
+from cutaway_kit import door_bay
 
 
-def finish_floor(directory, rooms):
+def finish_floor(directory, rooms, bays=None):
+    """bays: {name: (x, door_width, wall module)} -- the room's exit wall section (cutaway_kit.door_bay), inserted into the
+    stretched wall (world y=100..556) so the ceiling/floor layers below get the new width."""
     folder = Path(directory)
     prefix = folder.name
     for name, (block, board, band) in rooms.items():
@@ -14,6 +17,10 @@ def finish_floor(directory, rooms):
         # 2층과 같은 경계: 슬래브를 버리고, 걸레받이 아래는 별도 바닥으로 이어 붙인다.
         wall = np.asarray(Image.fromarray(block[82:442]).resize((width, 475), Image.Resampling.LANCZOS)).copy()
         wall[456:] = 0
+        if bays and name in bays:
+            x, door_width, module = bays[name]
+            wall = door_bay(wall, x, door_width, module, rows=(0, 456), world_top=100)
+            width = wall.shape[1]
         Image.fromarray(wall).save(folder / f'{prefix}-{name}-interior.png')
 
         ceiling = Image.new('RGBA', (width, 100), board + (255,))

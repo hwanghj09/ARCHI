@@ -67,10 +67,17 @@ engineering = np.concatenate([kit.cols((1340, 1606)), kit.strip(1604, 1612, 150)
 # 빈 벽 352(출구 문 자리), 원본 3030..3152(캐비닛·끝벽)
 meeting = np.concatenate([kit.cols((2336, 3030)), flip(table_bay, True), table_disp, flip(table_bay, True), no_troffer(table_bay, 96, 168),
                           meeting_wall(352), no_troffer(kit.cols((3030, 3152)), 0, 42)], axis=1)
+# 방 안 출구 문 자리(cutaway_kit.door_bay): 복도에서 보이는 이 방 앞벽(같은 벽 모듈) 칸을 방 끝(끝벽 30px 안) 또는 빈 벽 자리에
+# 끼워 출구 문을 그 벽에 세우고 양옆 96px은 빈 벽으로 둔다. 칸 폭(문 폭 + 192)만큼 오른쪽이 밀린다(방 설정 exitBay). 복도 문은 그대로다.
+BAYS = {
+    'work': (30, 240, 'wall-glass-mixed'),
+    'engineering': (653, 130, 'wall-concrete'),
+    'meeting': (1810, 130, 'wall-glass-mixed'),
+}
 finish_floor(HERE, {
     'work': (work, (70, 74, 60), (86, 80, 42)),
     'engineering': (engineering, (88, 92, 78), (64, 70, 48)),
     'meeting': (meeting, (74, 78, 64), (80, 76, 42)),
-})
+}, BAYS)
 
 print('built 6F assets')

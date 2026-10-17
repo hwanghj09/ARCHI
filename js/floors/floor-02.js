@@ -37,7 +37,7 @@ const FLOOR2_LAYOUT = {
     { name: 'Harmony Hall', x: 40, width: 1000, style: 'painted', target: 'f2-harmony',
       ...floor2Door('harmony', 723) },
     { name: '직원 휴게실', x: 1080, width: 690, style: 'painted', target: 'f2-lounge',
-      ...floor2Door('lounge', 1544) },
+      ...floor2Door('lounge', 1580) },
     { name: '서버실', x: 4282, width: 680, style: 'painted', target: 'f2-server',
       ...floor2Door('server', 4385) },
   ],
@@ -53,7 +53,7 @@ const FLOOR2_LAYOUT = {
 const floor2Room = (id, name, art, width, fixtures, extra = {}) => ({ id, name, width, background: FLOOR2_BACKGROUND,
   backgroundWallsOnly: true, backgroundImage: floor2Scene(art, `${art}-interior`, width), fixtures, ...extra });
 const FLOOR2_ROOMS = interiorRooms(2, [
-  floor2Room('f2-harmony', 'Harmony Hall', 'hall', 2676, [
+  floor2Room('f2-harmony', 'Harmony Hall', 'hall', 2998, [
     floor2ScreenCover(136),
     floor2Spot('객석 스크린', [150, 470], [134, 340], { requires: 'f2-projected',
       missingMessage: '무대 위 스크린이 까맣다. 천장 트러스의 배터리 영사기가 꺼져 있다.',
@@ -79,7 +79,7 @@ const FLOOR2_ROOMS = interiorRooms(2, [
       control: { kind: 'selector', choices: ['한정우', '김도윤', '이수민', '정수호'], initial: 0, when: () => collectedItems.has('f2-projected'),
         label: '스크린 속 리허설에서 "안녕하세요, 저는 ___입니다."가 사람을 바꿔 이어진다. 휴대폰을 출력 단자에 대고 녹음할 목소리를 고르자.',
         onDone: choice => recordVoice(choice) } }),
-  ], { exitWall: true }),
+  ], { exitX: 2748, exitBay: 322 }),
   floor2Room('f2-lounge', '직원 휴게실', 'lounge', 1846, [
     floor2Spot('음료 자판기', [60, 220], [262, 438],
       '정전으로 꺼진 자판기. 옆에 붙은 안내문: "휴게실 자판기 음성 안내 ARCHI 시범 운영 중." 누군가 그 밑에 적었다: "내 이름을 불렀음."'),
@@ -100,15 +100,15 @@ const FLOOR2_ROOMS = interiorRooms(2, [
       { sprite: 'assets/objects/floor02/projector-remote.png', frames: 1, size: [160, 40], worldWidth: 38, x: 435,
         base: 31, gives: 'f2-remote', hideWhenTaken: true },
     ] }),
-  floor2Room('f2-server', '서버실', 'server', 1840, [
-    floor2Spot('녹화 NAS', [1220, 1275], [212, 398], { gives: 'f2-reel',
+  floor2Room('f2-server', '서버실', 'server', 2162, [
+    floor2Spot('녹화 NAS', [1542, 1597], [212, 398], { gives: 'f2-reel',
       message: 'Harmony Hall 녹화 NAS다. 디스크 칸 하나가 반쯤 빠진 채 붉게 깜빡인다. 라벨: "03:00 무관객 리허설 · 원본 · 04:00 자동 삭제." 정전으로 삭제가 멈춘 모양이다. 디스크를 챙겼다.',
       takenMessage: '디스크를 빼낸 칸이 비어 있다.' }),
-    floor2Spot('이전 작업표', [1328, 1398], [320, 438],
+    floor2Spot('이전 작업표', [1650, 1720], [320, 438],
       '서버 카트에 걸린 이전 작업표. CCTV 녹화 · 출입 통제 · 사내 방송 서버를 전부 B2로 옮겼다. 마지막 한 줄만 붉게 남아 있다: "Harmony Hall 녹화 NAS · 이전 요청 SYSTEM · 시설팀 보류."'),
-    floor2Spot('항온항습기', [1566, 1662], [212, 398],
+    floor2Spot('항온항습기', [1888, 1984], [212, 398],
       '항온항습기가 꺼져 있다. 기록지: 랙 대부분을 B2로 옮긴 뒤에도 이 방만 정전 직전까지 18℃로 유지됐다. 남은 것은 녹화 NAS 한 대뿐인데.'),
-    floor2Spot('환경 패널', [1732, 1766], [212, 238],
+    floor2Spot('환경 패널', [2054, 2088], [212, 238],
       '환경 패널의 출입 기록: "23:58 · 카드 없음 · 문 열림 · 원격 SYSTEM." 누군가 정전 2분 전에 이 방 문을 열었다.'),
-  ], { windowless: true, exitWall: true }),
+  ], { windowless: true, exitX: 126, exitBay: 322 }),
 ]);

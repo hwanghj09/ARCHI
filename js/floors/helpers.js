@@ -1,6 +1,7 @@
 // 층 데이터 도우미: 층 id·이름·짧은 표기, 방 내부 기본값, 모든 층 공통 화장실 내부.
 // 방이 있는 층의 방 내부는 17층 사무실처럼 별도 장면이며 출입문으로 복도에 돌아간다.
 // 소품은 충돌 없이 배치하고 message가 있는 것만 조사할 수 있다. 원본 캔버스/앵커는 floor-kit/manifest.json 기준.
+// exitBay: 2~10층 방 그림에 출구 문 자리로 끼운 앞벽 칸의 폭(cutaway_kit.door_bay). 방 폭 비율 검사에서만 뺀다.
 const floorId = floor => floor < 0 ? `b${-floor}` : `f${floor}`;
 const floorName = floor => floor < 0 ? `지하 ${-floor}층` : `${floor}층`;
 const interiorRooms = (floor, rooms) => rooms.map(entry => ({ ...entry, floor, interior: true, parent: floorId(floor),
