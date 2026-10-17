@@ -32,7 +32,7 @@ const newGameSanity = 35; // 새 게임을 시작할 때의 정신력
 const antianxietyRestore = 50; // 항불안제를 사용했을 때의 정신력 회복량
 // 50/40/30/20/10% 미만 구간의 공포 연출 단계(1~5). sanityTierOf()가 이 경계로 계산한다.
 const sanityTierThresholds = [50, 40, 30, 20, 10];
-const sanitySlowSpeedFactor = .92; // 30% 미만 이동 속도(이 구간부터 달리기 취소)
+const sanitySlowSpeedFactor = .92; // 30% 미만 이동 속도
 const sanityCriticalSpeedFactor = .8; // 10% 미만 이동 속도(위와 곱해진다)
 const ambientSightingIntervalRange = [7000, 15000]; // 30% 미만에서 먼 환각이 보이는 간격(ms)
 const ambientSightingLifeMs = 3400;

@@ -15,7 +15,8 @@ const STORY_SCENES = [
     flag: 'story-anxiety-seen', delay: 3000, ready: () => collectedItems.has('f1-chase-ended'),
     lines: ['왜 경비 로봇이 나를 공격하려고 했던 거지?',
       '으윽.. 야근해서 힘든 와중에 이런 일을 겪으니 너무 힘들다..',
-      '16층 CU 편의점에 가서 항상 복용하던 항불안제를 찾아야겠어..'],
+      '우리 사내 편의점에서 항불안제를 팔았던가?',
+      '편의점으로 가보자.'],
   },
   { // 항불안제를 사용하고(정신 불안 목표 완료) 4초 뒤.
     flag: 'story-robot-seen', delay: 4000, ready: () => collectedItems.has('story-anxiety-seen') && collectedItems.has('f16-antianxiety-used'),

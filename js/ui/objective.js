@@ -20,7 +20,7 @@ const OBJECTIVES = [
   { when: () => collectedItems.has('story-badge-seen') && !collectedItems.has('f16-badge') && collectedItems.has('goal-postit'), title: '출입증 쌔비기', text: '조현아 팀장의 사원증을 찾자.' },
   { when: () => collectedItems.has('story-badge-seen') && !collectedItems.has('f16-badge'), title: '출입증 쌔비기', text: '옆자리 직원의 자리를 조사하자.' },
   { when: () => collectedItems.has('story-robot-seen'), title: '로봇의 습격! 그 이유는?', text: 'ARCHI 개발 팀을 조사하자.' },
-  { when: () => collectedItems.has('story-anxiety-seen') && !collectedItems.has('story-robot-seen'), title: '정신 불안', text: '16층 CU 편의점에서 항불안제를 찾아 가방(Tab)에서 복용하자.' },
+  { when: () => collectedItems.has('story-anxiety-seen') && !collectedItems.has('story-robot-seen'), title: '정신 불안', text: 'CU 편의점에서 항불안제를 찾아 가방(Tab)에서 복용하자.' },
   { when: () => solarEnabled && !collectedItems.has('f1-chase-ended') && !collectedItems.has('solar-app-installed') && !floorHasPower(17),
     title: '17층 전력 켜기', text: '옥상 배전반에서 17층 전력을 켜 작업용 컴퓨터를 복구하자.' },
   { when: () => solarEnabled && !collectedItems.has('f1-chase-ended') && !collectedItems.has('solar-app-installed') && !collectedItems.has('solar-app-downloaded'),

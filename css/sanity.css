@@ -107,11 +107,11 @@ body[data-hallucinating="true"] #stage { animation: screen-tremor .16s steps(2) 
 @media (prefers-reduced-motion: reduce) { #flash-prompt { animation: none; } }
 
 /* 어둠 속 얼굴(15% 미만, sanity.js의 updateDarkFace): 검은 바탕은 screen 합성으로 비치고, 가장자리는 가려 흐리게 번지며 2초 동안 흐릿 → 선명 → 흐릿. */
-#dark-face { position: fixed; z-index: 9; left: 16%; top: 50%; height: 52vh; max-width: 40vw; object-fit: contain; transform: translate(-50%, -50%); pointer-events: none;
-  mix-blend-mode: screen; mask-image: radial-gradient(ellipse closest-side, #000 45%, transparent 100%); animation: dark-face 2s ease-in-out forwards; }
+#dark-face { position: fixed; z-index: 9; left: 16%; top: 50%; height: min(52vh, 400px); max-width: 40vw; image-rendering: pixelated; object-fit: contain; transform: translate(-50%, -50%); pointer-events: none;
+  mix-blend-mode: screen; mask-image: radial-gradient(ellipse closest-side, #000 75%, transparent 100%); animation: dark-face 2s ease-in-out forwards; }
 #dark-face[hidden] { display: none; }
-@keyframes dark-face { 0%, 100% { opacity: 0; filter: blur(14px); } 50% { opacity: .6; filter: blur(0); } }
-@media (prefers-reduced-motion: reduce) { #dark-face { animation: none; opacity: .4; } }
+@keyframes dark-face { 0%, 100% { opacity: 0; filter: blur(5px); } 50% { opacity: 1; filter: blur(0) contrast(1.15) brightness(1.2); } }
+@media (prefers-reduced-motion: reduce) { #dark-face { animation: none; opacity: .7; } }
 
 /* 환각에게 삼켜질 때의 영상: 화면의 모든 요소(컷씬·창 포함) 앞에서 재생되고, 끝나면 사라져 기존 화면(게임 오버 창)이 드러난다. */
 #devoured-video { position: fixed; inset: 0; z-index: 1000; width: 100vw; height: 100dvh; object-fit: cover; background: #000; pointer-events: auto; }

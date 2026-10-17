@@ -96,11 +96,11 @@ try {
   await page.locator('#story-scene').waitFor({ state: 'visible' });
   assert.equal(await page.locator('#story-caption').textContent(), '왜 경비 로봇이 나를 공격하려고 했던 거지?');
   await page.waitForFunction(() => storyCaption.textContent.startsWith('으윽'), null, { timeout: 5000 });
-  await page.waitForFunction(() => storyCaption.textContent.startsWith('16층 CU 편의점에 가서'), null, { timeout: 5000 });
+  await page.waitForFunction(() => storyCaption.textContent.startsWith('편의점으로 가보자'), null, { timeout: 5000 });
   await page.keyboard.press('Escape');
   assert(await page.locator('#story-scene').isHidden(), 'Esc ends the scene');
   assert.equal(await page.evaluate(() => collectedItems.has('story-anxiety-seen')), true);
-  await waitTyped('정신 불안', '16층 CU 편의점에서 항불안제를 찾아 가방(Tab)에서 복용하자.');
+  await waitTyped('정신 불안', 'CU 편의점에서 항불안제를 찾아 가방(Tab)에서 복용하자.');
 
   // 항불안제를 챙기거나 사용해도 목표는 유지되고, 사용하고 4초 뒤 두 번째 컷씬이 나오고, 끝나면 '로봇의 습격! 그 이유는?' 목표가 생긴다.
   await page.evaluate(() => collectedItems.add('f16-antianxiety'));
