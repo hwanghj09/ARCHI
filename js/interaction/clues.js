@@ -51,7 +51,6 @@ function addClue(name, text) {
   if (collectedClues.some(clue => clue.place === place && clue.name === name)) return;
   collectedClues.push({ place, name, text });
   renderClues();
-  showStatus('단서 기록됨 · 휴대폰 메모 → 단서', 2500);
 }
 
 function clueSnapshot() {

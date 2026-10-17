@@ -54,7 +54,6 @@ try {
     assert.equal(await page.evaluate(() => blackoutSceneActive), false);
     assert.deepEqual(await state(), { blackout: true, powered: 'false', lights: 'off', called: false });
     assert(await page.locator('#darkness').isVisible());
-    assert.match(await page.locator('#interaction-status').textContent(), /건물 전체의 불이 꺼졌다/);
     assert(await page.locator('img[data-lit-src]').evaluateAll(imgs => imgs.every(img => img.getAttribute('src') === img.dataset.unlitSrc)),
       'Both office and corridor switch to their unlit art');
     await page.locator('img[data-lit-src]').evaluateAll(imgs => Promise.all(imgs.map(img => img.decode())));
@@ -112,7 +111,6 @@ try {
     }
     await page.keyboard.press('e');
     assert.equal((await state()).called, false, 'Elevator is stopped until rooftop emergency power is enabled');
-    assert.match(await page.locator('#interaction-status').textContent(), /관리자실.*비상 전력 회선/);
     await page.evaluate(() => { performRoomChange(); });
     assert.equal((await state()).lights, 'off', 'Office remains dark on return');
     await page.evaluate(() => { solarEnabled = true; solarPoweredFloors = [17]; updatePowerState(); performRoomChange(); });

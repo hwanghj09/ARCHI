@@ -13,7 +13,7 @@
   min-height: 44px; padding: 8px 14px; border: 1px solid #677174; border-radius: 4px; background: #101719; color: #dce2df;
   cursor: pointer; pointer-events: auto; font: inherit; }
 #cctv-skip:focus-visible { outline: 2px solid #e1cf9b; outline-offset: 3px; }
-body:has(#world[data-cctv-scene]) :is(header, nav, #debug-sidebar, #inventory-button, #game-menu-button, #sanity-hud, #objective, #red-eyes, #interaction-hint, #interaction-status, #interaction-outline) { visibility: hidden; }
+body:has(#world[data-cctv-scene]) :is(header, nav, #debug-sidebar, #inventory-button, #game-menu-button, #sanity-hud, #objective, #red-eyes, #interaction-hint, #interaction-outline) { visibility: hidden; }
 /* 소등 뒤 붉은 비상등 조명(data-alarm)일 때만 화면이 조금 더 어둡다(메뉴의 화면 밝기 설정에 곱한다, main-menu.css의 #world).
    불이 나가기 전까지는 원래 푸른 조명과 밝기 그대로다. */
 #world[data-alarm="true"] { filter: brightness(calc(var(--scene-brightness, 1) * .4)); }

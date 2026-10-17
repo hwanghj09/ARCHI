@@ -27,7 +27,6 @@ try {
   assert(await page.evaluate(() => buildingBlackout && !solarEnabled && !elevatorHasPower()));
   for (const x of [1858, 2188, 2484]) {
     await walkTo(x); await page.keyboard.press('e');
-    assert.match(await page.locator('#interaction-status').textContent(), /관리자실.*비상 전력 회선/);
     assert(await page.evaluate(() => elevatorCars.every(car => !car.travelling && car.floor === 1)));
   }
   // The complete recovery route stays reachable with all three cars stopped.

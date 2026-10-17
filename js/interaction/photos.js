@@ -128,10 +128,10 @@ function openGalleryPhoto(photo) {
 function startPhotoCapture() {
   if (photoCaptureTime > 0 || itemUseTime > 0 || mainMenuActive || playerCaught || hallucinationCaught ||
       openingActive || blackoutSceneActive || storySceneActive || cctvSceneActive || transitioning || !photoSubjectAvailable()) return;
-  if (phoneDock || phoneBattery <= 0) return showStatus(phoneDock ? '충전하던 휴대폰을 먼저 가져와야 한다.' : '휴대폰 배터리가 없다. 충전이 필요하다.');
-  if (hasPhoto(phoneCameraSubject.photo)) return showStatus('이미 갤러리에 저장한 사진이다.');
+  if (phoneDock || phoneBattery <= 0) return;
+  if (hasPhoto(phoneCameraSubject.photo)) return;
   if (!phoneSheet.complete || !phoneSheet.naturalWidth || !phoneAwaySheet.complete || !phoneAwaySheet.naturalWidth) {
-    return showStatus('촬영 동작을 불러오는 중입니다. 잠시 후 다시 시도해 주세요.');
+    return;
   }
   pendingPhoto = { ...phoneCameraSubject.photo };
   const door = phoneCameraSubject.door;
@@ -164,7 +164,6 @@ function updatePhotoCapture(elapsed) {
     pendingPhoto = null;
     playGameSound('camera-shutter');
     renderPhoneGallery();
-    showStatus(`${name} 촬영 완료 · 휴대폰 → 갤러리`, 3500);
     saveProgress();
   }
   photoShutter.hidden = !(photoCaptureTime <= 720 && photoCaptureTime > 600);

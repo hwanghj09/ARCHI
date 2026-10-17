@@ -5,7 +5,6 @@ let sceneTransition = null;
 function changeRoom(onChange = performRoomChange) {
   if (transitioning) return;
   if (onChange === performRoomChange && room === 'corridor' && (!officeBackground.complete || !officeBackground.naturalWidth)) {
-    showStatus('사무실 배경을 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.');
     return;
   }
   transitionScene(onChange);

@@ -38,7 +38,6 @@ function updateVaultPuzzle(step) {
   vaultWatch = 0;
   collectedItems.add(VAULT_SHUTTER);
   playGameSound('shutter');
-  showStatus('철컹! CCTV의 붉은 불이 수호를 향했다. 등 뒤에서 보안 셔터가 내려왔다.', 6000);
   saveProgress();
 }
 

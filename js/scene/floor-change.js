@@ -20,7 +20,6 @@ function performRoomChange() {
   cameraX = cameraTarget();
   stage.setAttribute('aria-label', `ARCHI 17층 ${entering ? '사무실' : '복도'} 사이드뷰 스테이지`);
   document.querySelector('header span').textContent = entering ? '17F · 사무실' : '17F · 00:00';
-  showStatus(entering ? '사무실에 들어왔습니다.' : '복도로 나왔습니다.');
   rerollFearScreens(); // 사무실 ↔ 복도를 오갈 때마다 모니터 화면을 다시 뽑는다(sanity.js)
   updateInteraction();
   render();
@@ -89,9 +88,6 @@ function performFloorChange(destId, carIndex = 0, arrivalKey = null) {
   cameraX = cameraTarget();
   stage.setAttribute('aria-label', `ARCHI ${dest.aria} 사이드뷰 스테이지`);
   document.querySelector('header span').textContent = dest.header;
-  // 들어오자마자 출구가 잠기는 방(exitLock)은 도착 문구 대신 갇혔다는 문구를 보인다.
-  const lockedIn = dest.exitLock && !collectedItems.has(dest.exitLock.until) && dest.exitLock.arrivalMessage;
-  showStatus(lockedIn || dest.arrival || (arrivalKey ? '복도로 나왔습니다.' : `${dest.label}에 도착했습니다.`), lockedIn ? 5000 : 2500);
   refreshSceneElevatorDoors();
   mountGuardPatrol();
   mountB2Robots();

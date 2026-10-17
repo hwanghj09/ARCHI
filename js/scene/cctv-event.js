@@ -287,8 +287,6 @@ function finishCctvScene() {
   releaseInput();
   updateInteraction();
   stage.focus({ preventScroll: true });
-  showStatus(lights ? `불이 나갔다가 비상등만 돌아왔다. 정신력이 크게 흔들린다(−${cctvLightsSanityLoss}%).` :
-    'CCTV 화면이 전부 지지직거린다. 모니터 벽을 조사해 CCTV를 켜 보자.', 5000);
 }
 
 // 설비 그림(fullImage)을 화면 전체에 띄운다. 조사창의 닫기·키 처리를 그대로 쓰고, 조사 문구는 그림 아래에 붙인다.

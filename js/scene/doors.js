@@ -38,7 +38,6 @@ function toggleShutter(lever) {
   if (up) collectedItems.add(lever.shutterLever);
   else collectedItems.delete(lever.shutterLever);
   playGameSound('shutter');
-  showStatus(up ? '셔터가 덜컹거리며 말려 올라간다.' : '셔터가 덜컹거리며 내려온다.', 4000);
   refreshReady();
   updateInteraction(); // 레버 앞 힌트를 "올리기"/"내리기"로 바로 바꾼다.
   const exit = currentDoors.find(door => door.key === 'exit');

@@ -52,7 +52,6 @@ document.getElementById('guard-retry').addEventListener('click', () => {
   Object.assign(guardPatrol, { x: 4530, facing: -1, wait: 0, elapsed: 0 });
   performFloorChange('f1');
   releaseInput(); stage.focus();
-  showStatus('로비 엘리베이터 앞에서 다시 시작합니다. 수집한 단서는 유지됩니다.');
 });
 
 function mountGuardPatrol() {
@@ -127,7 +126,6 @@ function updateRobot(robot, delta) {
     if ((robot.mode === 'patrol' || robot.mode === 'dock' || robot.mode === 'return') && seesPlayer) {
       robot.mode = 'chase'; robot.lostTime = 0; robot.chaseOriginX = robot.x; robot.spottedX = body.position.x;
       playGameSound('robot-alert', { x: robot.x });
-      showStatus('경비 로봇이 수호를 감지했다. 거리를 벌려야 한다.', 2400);
     }
     if (robot.mode === 'chase') {
       // 엘리베이터 근처는 로봇의 경계 구역 밖이다 — 쫓기다가 수호가 거기 도착하면 쫓던 걸 그만두고 감지했던
@@ -139,7 +137,6 @@ function updateRobot(robot, delta) {
         // 직접 걸어서 돌아가고(아래 return 처리), 도착하면 그제서야 patrol로 돌아간다.
         robot.mode = 'return'; robot.wait = 0; robot.lostTime = 0;
         collectedItems.add('f1-chase-ended'); // 추격이 끝났다: 3초 뒤 혼잣말 컷씬(story-scene.js)
-        showStatus('엘리베이터 쪽으로 피하자 경비 로봇이 감지했던 자리로 돌아가기 시작했다.', 2400);
       } else {
         robot.lostTime = robot.pursuit || (sameLevel && Math.abs(dx) < 600) ? 0 : robot.lostTime + delta;
         if (robot.lostTime >= 1800) {

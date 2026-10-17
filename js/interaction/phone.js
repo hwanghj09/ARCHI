@@ -126,7 +126,7 @@ function refreshPhone() {
 function togglePhone() {
   if (photoCaptureTime > 0 || itemUseTime > 0 || playerCaught || hallucinationCaught || blackoutSceneActive || cctvSceneActive) return;
   if (usingPhone) return closePhone();
-  if (phoneDock) return showStatus(`${phoneDockLocation()} 책상에 휴대폰을 두었다. 그 자리에서 E로 가져오자.`, 4000);
+  if (phoneDock) return;
   usingPhone = true;
   playGameSound('phone');
   phoneTime = 0;
@@ -155,8 +155,8 @@ function closePhone() {
 
 function togglePhoneLight() {
   if (photoCaptureTime > 0 || itemUseTime > 0 || playerCaught || hallucinationCaught || blackoutSceneActive || cctvSceneActive) return;
-  if (phoneDock) return showStatus(`${phoneDockLocation()} 책상에 휴대폰을 두어 플래시를 사용할 수 없다.`, 4000);
-  if (!phoneLightOn && phoneBattery <= 0) return showStatus('휴대폰 배터리가 없습니다.');
+  if (phoneDock) return;
+  if (!phoneLightOn && phoneBattery <= 0) return;
   phoneLightOn = !phoneLightOn;
   playGameSound('phone');
   phoneAwayTime = !phoneLightOn && !usingPhone ? 360 : 0;
@@ -172,15 +172,11 @@ function chargePhone(door) {
     phoneChargeAccumulator = 0;
     phoneDrainAccumulator = 0;
     refreshPhone();
-    showStatus(`휴대폰을 가져왔다. 배터리 ${Math.ceil(phoneBattery)}%.`, 4000);
     return;
   }
-  if (phoneDock) return showStatus(`${phoneDockLocation()} 책상에 둔 휴대폰을 먼저 가져와야 한다.`, 4000);
-  if (!floorHasPower(currentSceneFloor)) return showStatus('이 층에 전력이 없어 충전할 수 없다. 전력을 공급해야 한다.', 4000);
-  if (phoneBattery >= 100) {
-    showStatus('휴대폰 배터리가 이미 100%다.', 3000);
-    return;
-  }
+  if (phoneDock) return;
+  if (!floorHasPower(currentSceneFloor)) return;
+  if (phoneBattery >= 100) return;
   phoneDock = { floor: door.floor, scene: door.scene, x: door.x };
   playGameSound('charger');
   phoneLightOn = false;
@@ -189,7 +185,6 @@ function chargePhone(door) {
   phoneDrainAccumulator = 0;
   refreshPhone();
   animate(0);
-  showStatus('충전기를 콘센트에 꽂고 휴대폰을 책상에 두었다. 충전 중에는 사용할 수 없다. 돌아와 E로 가져오자.', 5000);
 }
 
 function updatePhoneCharging(elapsed) {
@@ -199,7 +194,6 @@ function updatePhoneCharging(elapsed) {
   phoneBattery = Math.min(100, phoneBattery + 2 * Math.floor(phoneChargeAccumulator / 1000));
   phoneChargeAccumulator %= 1000;
   refreshPhone();
-  if (phoneBattery === 100) showStatus(`${phoneDockLocation()}의 휴대폰 충전이 끝났다. 맡긴 자리에서 E로 가져오자.`, 5000);
 }
 
 function updatePhone(elapsed) {
@@ -211,7 +205,6 @@ function updatePhone(elapsed) {
   if (phoneBattery === 0) {
     phoneLightOn = false;
     phoneAwayTime = usingPhone ? 0 : 360;
-    showStatus('휴대폰 배터리가 모두 소모되어 라이트가 꺼졌습니다.');
   }
   refreshPhone();
 }

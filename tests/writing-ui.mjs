@@ -179,7 +179,7 @@ try {
   assert.equal(await page.locator('#inspection').getAttribute('data-surface'), 'screen');
   await page.keyboard.press('Escape');
 
-  // 8층 결함 재현실: 마지막 단계(재현 벤치)의 출력지는 서류로 펼치고, 중간 단계는 상태 문구다.
+  // 8층 결함 재현실: 마지막 단계(재현 벤치)의 출력지는 서류로 펼치고, 중간 단계는 조사 창 없이 불만 켜진다.
   const steps = await page.evaluate(() => {
     closeInspection();
     performFloorChange('f8-qa', 0, 'exit');
@@ -191,12 +191,12 @@ try {
       Body.setVelocity(body, { x: 0, y: 0 }); grounded = true;
       interact();
       result.push({ name, panel: !document.getElementById('inspection').hidden, surface: document.getElementById('inspection').dataset.surface || null,
-        status: document.getElementById('interaction-status').textContent });
+        done: door.element.dataset.done });
     }
     return result;
   });
-  assert.deepEqual(steps.slice(0, 3).map(step => step.panel), [false, false, false], 'Intermediate steps stay in the status line');
-  assert.match(steps[2].status, /조건 3\/3/);
+  assert.deepEqual(steps.slice(0, 3).map(step => step.panel), [false, false, false], 'Intermediate steps open no panel');
+  assert.deepEqual(steps.slice(0, 3).map(step => step.done), ['true', 'true', 'true'], 'Each intermediate step advances');
   assert.deepEqual([steps[3].panel, steps[3].surface], [true, 'document'], 'The bench prints its record as a document');
   assert.match(await page.locator('#inspection-text').textContent(), /정답률 91%/);
   await page.screenshot({ path: '.local/writing-repro.png' });

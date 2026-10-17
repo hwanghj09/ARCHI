@@ -61,7 +61,6 @@ try {
   assert.equal(await titleAfter(() => collectedItems.add('rooftop-key')), '정전', 'Picking up the rooftop key keeps the blackout objective');
   assert.equal(await titleAfter(() => collectedItems.add('rooftop-unlocked')), '비상 전력 켜기');
   assert.equal(await titleAfter(() => setSolarPower(true)), '17층 전등 켜기');
-  assert.match(await page.locator('#interaction-status').textContent(), /17층 전등을 켜자/);
   await waitTyped('17층 전등 켜기', '전력은 돌아왔지만 17층은 아직 어둡다.');
   assert.equal(await titleAfter(() => supplySolarFloor(17)), '관리실 비밀번호 찾기');
   assert.equal(await titleAfter(() => collectedItems.add('f17-manager-memo')), '관리실 열기');

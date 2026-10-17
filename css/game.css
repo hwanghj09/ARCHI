@@ -869,7 +869,6 @@ body { margin: 0; overflow: hidden; background: #27292b; color: #eee; font: 14px
 /* 근접 테두리: 가까운 상호작용 대상 하나를 감싸는 한 장(js/interaction/outline.js가 대상의 보이는 상자에 맞춘다). */
 #interaction-outline { position: absolute; z-index: 4; outline: 2px solid #96b7aa; pointer-events: none; }
 #interaction-hint { position: absolute; z-index: 8; transform: translateX(-50%); padding: 6px 10px; background: #101b20; border: 1px solid #96b7aa; pointer-events: none; white-space: nowrap; }
-#interaction-status { position: absolute; bottom: 24px; width: 100%; text-align: center; text-shadow: 0 2px 4px #000; pointer-events: none; }
 #room-transition { position: fixed; inset: 0; z-index: 20; background: #000; opacity: 0; pointer-events: none; }
 #room-transition.visible { pointer-events: auto; }
 .solid { position: absolute; }
@@ -956,6 +955,16 @@ nav button:focus-visible { outline: 2px solid #c9dde5; outline-offset: 4px; }
   #inspection h2 { font-size: 15px; }
   #inspection-text { min-height: 0; font-size: 15px; line-height: 1.7; }
   #inspection .dialog-actions { margin-top: 8px; }
+}
+/* 컷씬 자막(오프닝·정전·혼잣말·CCTV)도 조사 대화창과 같은 자리·틀의 대화 상자에 쓴다. 글이 없는 동안은 상자를 숨긴다.
+   각 컷씬 CSS의 자막 규칙보다 앞서도록 body를 붙여 우선한다. */
+body :is(#opening-caption, #blackout-caption, #story-caption, #cctv-caption) { box-sizing: border-box; top: auto; bottom: max(100px, calc(env(safe-area-inset-bottom) + 84px)); width: min(1040px, calc(100% - 32px)); min-height: calc(3.6em + 80px); padding: 16px 24px; border: 24px solid #77857c; border-image: url('../assets/ui/dialogue-frame.png') 110 fill / 24px stretch; background: #10181c; background-clip: padding-box; color: #f0eee4; font-size: 17px; line-height: 1.8; text-align: left; text-shadow: none; word-break: keep-all; overflow-wrap: anywhere; white-space: pre-line; box-shadow: 0 12px 36px #0009; }
+body :is(#opening-caption, #blackout-caption, #story-caption, #cctv-caption):empty { display: none; }
+/* "클릭하여 계속"(scene-gate.js)은 대화 상자 바로 아래에 둔다. */
+body :is(#story-next, .scene-next) { bottom: max(72px, calc(env(safe-area-inset-bottom) + 56px)); }
+@media (max-width: 600px), (max-height: 480px) {
+  body :is(#opening-caption, #blackout-caption, #story-caption, #cctv-caption) { bottom: max(88px, calc(env(safe-area-inset-bottom) + 76px)); min-height: calc(3.4em + 52px); padding: 10px 8px; border-width: 16px; border-image-width: 16px; font-size: 15px; line-height: 1.7; }
+  body :is(#story-next, .scene-next) { bottom: max(62px, calc(env(safe-area-inset-bottom) + 50px)); }
 }
 @media (max-height: 480px) {
   nav { bottom: max(12px, env(safe-area-inset-bottom)); }

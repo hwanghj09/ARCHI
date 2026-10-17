@@ -152,8 +152,7 @@ try {
       Body.setPosition(body, { x: guardPatrol.x - 250, y: floorY - 81 });
       before = guardPatrol.x; updateGuardPatrol(dt);
     }
-    return { detected, mode: guardPatrol.mode, before, x: guardPatrol.x, limit: speed * dt, playerX: body.position.x,
-      status: document.getElementById('interaction-status').textContent };
+    return { detected, mode: guardPatrol.mode, before, x: guardPatrol.x, limit: speed * dt, playerX: body.position.x };
   });
   const sprite = () => page.evaluate(() => ({ src: guardPatrol.image.getAttribute('src'), phase: guardPatrol.door.element.dataset.patrol,
     frame: guardPatrol.door.element.dataset.frame, width: guardPatrol.door.element.firstElementChild.style.width,
@@ -163,7 +162,6 @@ try {
     const escape = await escapeToElevator();
     assert.deepEqual(escape.detected, { mode: 'chase', origin: 3400 });
     assert.equal(escape.mode, 'return', JSON.stringify(escape));
-    assert.match(escape.status, /감지했던 자리로 돌아가기 시작했다/);
     assert(escape.x > escape.before && escape.x - escape.before <= escape.limit + 1e-9, `No teleport on escape: ${JSON.stringify(escape)}`);
     assert(escape.x < 3100, 'The chase carried the robot well away from its detection point');
     const returning = await sprite();
@@ -258,7 +256,6 @@ try {
     await reset({ playerX: 3200, robot: { x: 3400, facing: -1 } });
     const escape = await escapeToElevator();
     assert.equal(escape.mode, 'return');
-    assert.match(escape.status, /돌아가기 시작했다/);
     let previous = escape.x;
     for (let i = 0; i < 25; i++) {
       await page.clock.runFor(100);

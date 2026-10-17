@@ -81,7 +81,6 @@ function finishOpening() {
   updateInteraction();
   render();
   stage.focus({ preventScroll: true });
-  showStatus('퇴근할 시간이다. 복도로 나가자.', 3000);
 }
 
 document.getElementById('opening-skip').addEventListener('click', finishOpening);

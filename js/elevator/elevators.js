@@ -138,7 +138,6 @@ function updateElevators() {
           playGameSound('elevator-arrive', { x: door.x + door.width / 2 });
           playGameSound('elevator-door', { x: door.x + door.width / 2 });
         }
-        showStatus(`${car.name}가 ${car.floor}층에 도착했습니다.`);
       }
     }
   }

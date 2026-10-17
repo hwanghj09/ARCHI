@@ -88,7 +88,6 @@ function finishBlackoutScene() {
   releaseInput();
   updateInteraction();
   stage.focus({ preventScroll: true });
-  showStatus('건물 전체의 불이 꺼졌다. 휴대폰(P)의 플래시로 앞을 비춰 보자.', 6000);
 }
 
 document.getElementById('blackout-skip').addEventListener('click', finishBlackoutScene);

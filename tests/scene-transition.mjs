@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 
 export async function interactionMessage(page) {
   const message = await page.evaluate(() => document.getElementById('inspection').hidden ?
-    document.getElementById('interaction-status').textContent : document.getElementById('inspection-description').textContent);
+    '' : document.getElementById('inspection-description').textContent);
   // Route tests read the full accessible description, then dismiss the new modal before continuing.
   // Character-by-character rendering and reveal controls are covered by inspection-ui.mjs.
   if (await page.locator('#inspection').isVisible()) {
