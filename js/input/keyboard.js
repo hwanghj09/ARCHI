@@ -35,6 +35,13 @@ window.addEventListener('keydown', event => {
   if (transitioning) { event.preventDefault(); return; }
   // 조작 창(manual-control.js)은 자기 keydown에서 입력을 받는다. 창 밖에 초점이 있어도 수호는 움직이지 않는다.
   if (usingControl) { if (event.code === 'Escape') closeControl(); event.preventDefault(); return; }
+  // 옥상 배전반 전선 퍼즐(wire-puzzle.js): 연결한 버튼이 비활성화되면 초점이 창 밖으로 빠지므로, 여기서도 막는다.
+  if (!wirePanel.hidden) {
+    if (event.code === 'Tab') return;
+    if (event.code === 'Escape') closeWirePanel();
+    event.preventDefault();
+    return;
+  }
   if (event.code === 'Tab' && !event.shiftKey && !selectingFloor && !usingComputer && !usingKeypad && !usingControl &&
       !usingPhone && !usingPowerPanel && (!usingInspection || inventoryShown())) {
     event.preventDefault();
