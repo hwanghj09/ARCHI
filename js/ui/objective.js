@@ -12,6 +12,13 @@ const OBJECTIVE_READS = {
 };
 
 const OBJECTIVES = [
+  // 13층 보안 자료실(vault-puzzle.js): 갇힌 동안의 목표. 백업 장치는 7층 다음 필수 목표(아래 '외부 연결 통로 찾기')이고 먼저 챙겨도 된다.
+  { when: () => dynamicFloorId === 'f13-secure' && collectedItems.has(VAULT_SHUTTER) && floorHasLighting(13), title: '셔터에 갇혔다',
+    text: '전력이 들어와 있는 동안 셔터는 열리지 않는다. 시설 점검 기록에서 수동 개방 방법을 찾자.' },
+  { when: () => dynamicFloorId === 'f13-secure' && collectedItems.has(VAULT_SHUTTER), title: '어둠 속 탈출',
+    text: '맨 안쪽의 수동 개방 크랭크를 돌려 셔터를 올리자. 다시 전력을 켜면 배치도를 볼 수 있다.' },
+  { when: () => ['f13-testbay', 'f13-secure'].includes(dynamicFloorId) && room === 'dynamic' && !collectedItems.has('f13-backup-device'),
+    title: '백업 장치 가져오기', text: '보안 자료실에서 백업 장치를 가져오자. 전자 잠금은 13층에 휴대폰으로 전력을 넣어야 풀린다.' },
   // B2 DELETE 뒤 엔딩 추격(b2-ending.js): 단계마다 다음 할 일을 알려 준다.
   { when: () => b2Ending.phase === 'running' && b2Ending.offline, title: '탈출하기', text: 'ARCHI가 꺼졌다. 1층 정문으로 나가자.' },
   { when: () => b2Ending.phase === 'running' && b2Ending.stage === 'lobby', title: '1층 전력 끊기', text: '휴대폰(P)의 비상 전력 제어 앱에서 1층 전력을 끊어 ARCHI를 멈추자.' },
@@ -19,6 +26,8 @@ const OBJECTIVES = [
   { when: () => collectedItems.has('goal-b2-console'), title: 'ARCHI 멈추기', text: 'ARCHI가 자신을 외부로 복제하고 있다. 메인 콘솔에서 DELETE를 실행하자.' },
   // 12층·7층 필수 퍼즐(log-puzzle.js, backup-puzzle.js)을 차례로 풀어야 다음 목표로 넘어간다.
   { when: () => collectedItems.has('f7-external-connection-solved') && collectedItems.has('b1-elevator'), title: 'B2 서버실 조사하기', text: 'B2 ARCHI 메인 서버실로 내려가 진짜 목적을 확인하자.' },
+  { when: () => collectedItems.has('f7-external-connection-solved') && !collectedItems.has('f13-backup-device'), title: '외부 연결 통로 찾기',
+    text: 'ARCHI의 외부 송신은 13층 원격지원 게이트웨이를 거친다. 장비 검증실 안쪽 보안 자료실에서 백업 장치를 가져오자.' },
   { when: () => collectedItems.has('f7-external-connection-solved') && collectedItems.has('b2-restricted-seen'), title: 'B2 운행 제한 해제', text: 'B1 시설관리실에서 B2 승강기 운행 제한을 해제하세요.' },
   { when: () => collectedItems.has('f7-external-connection-solved'), title: '지하에서 무슨 일이?', text: '모든 기록이 B2를 가리킨다. 지하 서버실을 조사하자.' },
   { when: () => collectedItems.has('f7-training-time-solved'), title: '오늘만 다른 기록', text: '백업 장비의 [오늘] 탭에서 평소 밤과 다른 기록을 찾자.' },

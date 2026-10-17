@@ -68,8 +68,9 @@ function performFloorChange(destId, carIndex = 0, arrivalKey = null) {
     activeCall = built.doors.find(door => door.ring) || null;
     Composite.add(engine.world, currentTerrain);
   }
+  // 복도 출구가 없는 안쪽 방(13층 보안 자료실)은 'exit'로 불려도(저장 복원 등) 연결문 앞에 선다.
   const arrivalDoor = currentDoors.find(door => arrivalKey ? door.key === arrivalKey :
-    carIndex === null ? door.type === 'stairs' : door.carIndex === carIndex);
+    carIndex === null ? door.type === 'stairs' : door.carIndex === carIndex) || currentDoors.find(door => door.key?.startsWith('link:'));
   Body.setPosition(body, { x: arrivalDoor.x + 40, y: floorY - 81 });
   Engine.clear(engine);
   world.style.width = `${worldWidth}px`;

@@ -12,6 +12,8 @@ const INVENTORY_ITEMS = {
   'f12-lead-key': { name: '팀장실 보조키', description: '12층 책상 서랍에서 챙긴 열쇠. 꼬리표에 "팀장실 보조키"라고 적혀 있다.' },
   'f12-eval-keycard': { name: '모델 평가실 카드키', description: '12층 개발실 맨 왼쪽 서랍의 종이 더미 밑에서 찾은 카드키. 모델 평가실 문을 열 수 있다.',
     image: 'assets/ui/eval-keycard.svg', hint: '12층 개발실 맨 왼쪽 서랍 확인' },
+  'f13-backup-device': { name: '원격지원 게이트웨이 백업 장치', description: '13층 보안 자료실에서 가져온 백업 장치. 라벨: "03:05 외부 송신 경로 원본 · 원격 접속 에이전트 배포 계정 archi_svc".',
+    hint: '13층 보안 자료실 백업 장치 보관함' },
   'rooftop-key': { name: '낡은 열쇠', description: '옥상문을 열 수 있을 것만 같다… 조금 더럽다.' },
   'f17-manager-memo': { name: '관리실 비상 출입 메모', image: 'assets/ui/floor17/manager-memo.png',
     description: `관리자 외 출입금지실 비밀번호: ${MANAGER_ROOM_CODE}. 태양광은 전등 전용. 승강기가 멈췄으면 관리실 책상의 회로 안내도를 보고 비상 전력 분배반의 회선을 연결할 것.`,

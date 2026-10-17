@@ -166,6 +166,14 @@ try {
     /오늘 밤 처음 외부 서버 연결을 시도했다/, /발신지는 B2 ARCHI-MAIN/, /B2 · ARCHI 메인 서버실/]) assert(all.some(text => pattern.test(text)), String(pattern));
   await page.screenshot({ path: '.local/story-f7-solved.png' });
   await page.keyboard.press('Escape');
+  // 7층 다음은 13층 보안 자료실의 백업 장치(tests/vault-puzzle.mjs). 그 전에는 B1 제어반이 풀리지 않는다.
+  assert.equal(await objective(), '외부 연결 통로 찾기');
+  await page.evaluate(() => { collectedItems.add(cctvLiveItem); collectedItems.add('b1-cctv-seen'); });
+  await use('b1-control', '승강기 제어반');
+  assert.match(await page.locator('#inspection-description').textContent(), /13층 보안 자료실/);
+  assert.equal(await has('b1-elevator'), false, 'B1 key switch waits for the 13F backup device');
+  await page.evaluate(() => closeInspection());
+  await page.evaluate(() => collectedItems.add('f13-backup-device'));
   assert.equal(await objective(), '지하에서 무슨 일이?');
 
   // ---- B1·B2 ----
@@ -282,7 +290,7 @@ try {
   await page.locator('#menu-continue').click();
   await page.clock.runFor(500);
   for (const item of ['f12-network-isolated', 'f12-evaluation-solved', 'f7-training-time-solved', 'f7-external-connection-solved']) assert(await has(item), `migrated ${item}`);
-  assert.equal(await objective(), '지하에서 무슨 일이?');
+  assert.equal(await objective(), '외부 연결 통로 찾기', 'Old saves past 7F still need the new 13F backup device');
 
   // 휴대폰 크기에서도 두 창이 화면 안에 들어오고 가로로 넘치지 않는다.
   await page.setViewportSize({ width: 375, height: 812 });

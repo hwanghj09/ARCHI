@@ -113,6 +113,7 @@ function interact() {
     if (enterB2TrueEnd(nearbyDoor)) return; // ARCHI를 끈 뒤 1층 정문으로 나가기(b2-ending.js)
     if (handleLogTerminalInteract(nearbyDoor)) return; // 12층 야간 로그 단말기·네트워크 랙(log-puzzle.js)
     if (handleBackupDeviceInteract(nearbyDoor)) return; // 7층 망분리 백업 장비(backup-puzzle.js)
+    if (handleVaultInteract(nearbyDoor)) return; // 13층 보안 자료실 크랭크·배치도(vault-puzzle.js)
     if (dynamicFloorId === 'f12-dev' && nearbyDoor.name === '맨 왼쪽 서랍') { openDrawerPuzzle(); return; }
     const { gives } = nearbyDoor;
     // 도어락(code): 잠긴 문이나 아직 열지 못한 소품은 키패드를 연다. 맞는 번호를 넣으면 문이 열리거나 gives를 챙긴다.

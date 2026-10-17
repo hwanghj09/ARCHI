@@ -1186,7 +1186,7 @@ try {
     assert(bay.exit.x < 150, 'The test bay door is at the left end inside, as in the corridor');
     assert.equal(await page.locator('#dynamic-scene .room-interior.windowless').count(), 1);
     assert.equal(await page.locator('#world').getAttribute('data-dark'), 'false', 'Windowless but not a dark room');
-    assert.equal(await page.locator('#dynamic-scene .floor-prop').count(), 6);
+    assert.equal(await page.locator('#dynamic-scene .floor-prop').count(), 5, 'The last rack made way for the 보안 자료실 door');
     await assertHumanScale();
     await inspect(420, 'E · UPS 조사', /초록 불/);
     await page.clock.runFor(600);
@@ -2271,7 +2271,7 @@ try {
     await page.keyboard.press('Escape');
     assert.equal(await page.locator('#world').getAttribute('data-alarm'), 'true');
     await inspect(1700, 'E · 승강기 제어반 조사', /아직 모른다/);
-    await page.evaluate(() => collectedItems.add('f7-external-connection-solved')); // 7층 퍼즐(tests/story-puzzles.mjs)
+    await page.evaluate(() => { collectedItems.add('f7-external-connection-solved'); collectedItems.add('f13-backup-device'); }); // 7층·13층 퍼즐(story-puzzles, vault-puzzle)
     await inspect(1700, 'E · 승강기 제어반 조사', /B2 운행 제한.*초록으로/);
     await page.keyboard.press('e');
     assert.match(await status(), /수동 해제됨/);
