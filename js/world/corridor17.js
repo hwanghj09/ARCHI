@@ -34,7 +34,8 @@ const extension = document.getElementById('floor17-extension');
 setPowerBackground(extension.querySelector('img'), 'assets/background/floor17/service-corridor-finished.png');
 for (const entry of FLOOR17.rooms) {
   const door = addRoomDoor({ name: entry.name, type: 'room', hint: `E · ${entry.name} 들어가기`,
-    target: entry.target, arrivalKey: 'exit', key: `room:${entry.target}`, locked: entry.locked, message: entry.message,
+    target: entry.target, arrivalKey: 'exit', key: `room:${entry.target}`, locked: entry.locked && !collectedItems.has(entry.unlockedBy),
+    message: entry.message, code: entry.code, codePrompt: entry.codePrompt, codeMessage: entry.codeMessage, unlockedBy: entry.unlockedBy,
     x: entry.doorX, y: entry.doorY ?? FLOOR17.roomDoorY, width: entry.doorWidth, style: 'art-door', outline: entry.doorOutline }, extension);
   const sign = document.createElement('span');
   sign.className = 'floor-room-sign';

@@ -365,7 +365,7 @@ try {
   };
   // 16F is the amenity floor of the lobby directory: The Kitchen and CU share a wall left of the elevators, the café
   // sits right of the restroom. Its mechanic: the CU shutter came down before the blackout, so the way in is the goods
-  // door at the far end of the kitchen; raising the shutter from inside (leaving by it) opens the store for good.
+  // door at the far end of the kitchen; the lever inside raises the shutter, which then opens the store from the corridor.
   const checkFloor16 = async () => {
     roomScales.length = 0;
     const corridorHeader = '16F · 편의시설';
@@ -468,7 +468,10 @@ try {
     assert(await playerX() > 486, 'Jump clears the ramen box on the way to the checkout');
     await inspect(1150, 'E · 계산대 조사', /23:47.*정수호/);
     await page.screenshot({ path: '.local/floor-16-cu.png' });
-    await inspect(1640, 'E · 셔터 제어함 조사', /명령 SYSTEM/);
+    // The exit stays shut while the shutter is down; the panel lever raises it as a separate step.
+    await inspect(cuExit.x + cuExit.width / 2, 'E · 복도 (잠김)', /셔터 제어함 수동 레버/);
+    await inspect(1640, 'E · 셔터 올리기', /말려 올라간다/);
+    assert.equal(await header(), '16F · CU 편의점', 'Raising the shutter does not leave the store');
     await leaveRoom({ front: cu, exit: cuExit }, corridorHeader);
     assert.equal(await page.locator('#dynamic-scene .room-door.shutter').getAttribute('aria-label'), 'CU 편의점 출입문',
       'Raising the shutter from inside opens the store from the corridor');
@@ -549,7 +552,12 @@ try {
     assert.equal(await page.locator('#dynamic-scene .solid.crate').count(), 2);
     assert.equal(await page.locator('#dynamic-scene .floor-prop').count(), 5);
     await assertHumanScale();
-    await inspect(420, 'E · 이관 카트 조사', /B2 서버실 이관 2차분/);
+    // 이관 카트는 이제 상자를 여는 키패드다(15층 상자 퍼즐, tests/puzzles.mjs). 키패드 안내의 운송장을 확인한다.
+    await walkTo(420);
+    assert.equal(await hint(), 'E · 이관 카트 조사');
+    await page.keyboard.press('e');
+    assert.match(await page.locator('#keypad-text').textContent(), /GPU 서버 16대/);
+    await page.keyboard.press('Escape');
     await walkTo(730);
     await hold('d', 500);
     assert((await playerX()) < 742, 'The boxed servers block walking');
@@ -578,10 +586,14 @@ try {
     await page.screenshot({ path: '.local/floor-15-lab.png' });
     await leaveRoom(lab, corridorHeader);
 
+    // 연구본부장실은 전기 잠금 + 복도 카메라(퍼즐 D, tests/puzzles.mjs). 이 경로 검사는 15층에 잠깐 전력을 넣고 카메라를 빼고 들어간다.
+    const savedPower = await page.evaluate(() => { const saved = [...solarPoweredFloors]; solarEnabled = true; solarPoweredFloors = [15];
+      updatePowerState(); activeCameras = []; return saved; });
     const office = await enterRoom('연구본부장실', '15F');
+    await page.evaluate(saved => { solarPoweredFloors = saved; updatePowerState(); }, savedPower);
     assert.equal(await worldWidth(page), 1824);
     await checkCutawayArt('floor15-director-interior.png', 1824);
-    assert.equal(await page.locator('#dynamic-scene .floor-prop').count(), 6);
+    assert.equal(await page.locator('#dynamic-scene .floor-prop').count(), 7, 'Director room props include the held-back file cabinet');
     await assertHumanScale();
     await inspect(900, 'E · 본부장 책상 조사', /자동 승인 · 야간 배치/);
     await page.screenshot({ path: '.local/floor-15-director.png' });
@@ -776,7 +788,12 @@ try {
     assert.equal(await page.locator('#dynamic-scene .room-interior.windowless').count(), 1);
     assert.equal(await page.locator('#dynamic-scene .floor-prop').count(), 8);
     await assertHumanScale();
-    await inspect(900, 'E · 자료실 책상 조사', /archi-demo.*03:07/);
+    // 자료실 책상은 이제 데모 서버 로그인 키패드다(11층 데모 서버 퍼즐, tests/puzzles.mjs). 키패드 안내의 알림 메일을 확인한다.
+    await walkTo(900);
+    assert.equal(await hint(), 'E · 자료실 책상 조사');
+    await page.keyboard.press('e');
+    assert.match(await page.locator('#keypad-text').textContent(), /archi-demo.*03:07/);
+    await page.keyboard.press('Escape');
     await inspect(420, 'E · 브로슈어 진열장 조사', /출시일/);
     await page.screenshot({ path: '.local/floor-11-marketing.png' });
     assert(Math.max(...roomScales) / Math.min(...roomScales) < 1.02, `Room fronts scale with their interiors: ${roomScales}`);
@@ -1418,6 +1435,8 @@ try {
     await inspect(2677, 'E · 로그 판독기 조사', /테이프와 UPS 전원이 둘 다/);
     await inspect(2562, 'E · UPS 분배기 조사', /셋째 칸 로그 판독기로/);
     assert.equal(await upsState(), '2');
+    // 해시 사슬 검증(퍼즐 G)은 tests/puzzles.mjs가 확인한다. 여기서는 풀린 것으로 두고 결과 문구만 본다.
+    await page.evaluate(() => { currentDoors.find(door => door.name === '로그 판독기').terminalPassed = true; });
     await inspect(2677, 'E · 로그 판독기 조사', /archi_svc · 외부 주소로 전송 시험 · 1\.2TB · 성공/);
     await page.screenshot({ path: '.local/floor-4-lab.png' });
     await leaveRoom(labRoom, corridorHeader);
@@ -1546,6 +1565,8 @@ try {
     await page.screenshot({ path: '.local/floor-3-cs.png' });
     await leaveRoom(csRoom, corridorHeader);
 
+    // Studio 음성 인증 문(퍼즐 H)은 tests/puzzles.mjs가 확인한다. 여기서는 열린 것으로 두고 방 배치만 본다.
+    await page.evaluate(() => { collectedItems.add('f3-studio-open'); currentDoors.find(door => door.target === 'f3-studio').locked = false; });
     const studioRoom = await enterThroughSpriteDoor('Studio', '3F');
     assert.equal(await worldWidth(page), 1840);
     assert.equal(studioRoom.exit.x, 149);
@@ -1762,7 +1783,7 @@ try {
       return { box: ['left', 'top', 'width', 'height'].map(key => parseFloat(board.style[key])),
         fits: inside && board.scrollHeight <= board.clientHeight && board.scrollWidth <= board.clientWidth };
     }), { box: [1323, 229, 321, 276], fits: true }, 'The directory text sits inside the painted gold frame');
-    assert.equal(await page.locator('#dynamic-scene .floor-prop').count(), 3, 'Info desk and planters');
+    assert.equal(await page.locator('#dynamic-scene .floor-prop').count(), 4, 'Info desk, planters and the lobby breaker panel (puzzle K)');
     await page.locator('#dynamic-scene .floor-prop img').evaluateAll(images => Promise.all(images.map(img => img.decode())));
     await assertHumanScale();
     await page.clock.runFor(100);
@@ -2052,7 +2073,12 @@ try {
     assert.equal(await spots(), 4);
     await inspect(1764, 'E · 캐비닛 바인더 조사', /DR-EXT 경로 추가.*당직 ARS 무응답 자동 승인/);
     await inspect(614, 'E · 꺼진 디스플레이 조사', /매일 03:00.*주최 archi_svc/);
-    await inspect(384, 'E · 스피커폰 조사', /내선 2000\(B2 서버실\).*참석자 0명/);
+    // 스피커폰은 이제 내선을 거는 키패드다(6층 콜백 퍼즐, tests/puzzles.mjs). 키패드 안내 문구로 통화 기록을 확인한다.
+    await walkTo(384);
+    assert.equal(await hint(), 'E · 스피커폰 조사');
+    await page.keyboard.press('e');
+    assert.match(await page.locator('#keypad-text').textContent(), /내선 2000\(B2 서버실\).*참석자 0명/);
+    await page.keyboard.press('Escape');
     await inspect(182, 'E · 화이트보드 조사', /B2 ARCHI-MAIN.*고객사 DR 센터.*DR-EXT · 등록되지 않은 주소 · 해외.*03:05~03:40/);
     await page.screenshot({ path: '.local/floor-6-meeting.png' });
     await leaveRoom(meetingRoom, corridorHeader);
@@ -2147,9 +2173,14 @@ try {
     assert.equal(await page.locator('#dynamic-scene .fixture.art-spot').count(), 5);
     await inspect(398, 'E · 보안 캐비닛 조사', /키패드가 꺼져/);
     await inspect(854, 'E · 보안 연구원 자리 조사', /214번/);
-    await inspect(972, 'E · 로그 모니터 조사', /연구 보조.*archi_svc 하나뿐/);
+    await inspect(972, 'E · 로그 모니터 조사', /연구 보조.*svc_0412.*외부망 허용은 없다/);
     await inspect(1352, 'E · 감사 로그 프린터 조사', /감사 대상 0건/);
-    await inspect(1546, 'E · 콘솔 노트북 조사', /예외 규칙 추가.*archi_svc/);
+    // 콘솔 노트북은 계정 잠금 키패드다(5층 계정 퍼즐, tests/puzzles.mjs). 키패드 안내의 변경 기록을 확인한다.
+    await walkTo(1546);
+    assert.equal(await hint(), 'E · 콘솔 노트북 조사');
+    await page.keyboard.press('e');
+    assert.match(await page.locator('#keypad-text').textContent(), /예외 규칙 추가.*archi_svc/);
+    await page.keyboard.press('Escape');
     await page.screenshot({ path: '.local/floor-5-security.png' });
     await leaveRoom(securityRoom, corridorHeader);
 
@@ -2420,6 +2451,9 @@ try {
   let emptyRestroomVisited = false;
   for (let floor = 15; floor >= 1; floor--) {
     console.log(`Checking ${floor}F route and puzzles...`);
+    // 7층 로그를 읽으면 버튼이 뒤집힌다(퍼즐 F, tests/puzzles.mjs). 이 경로 검사는 누른 층으로 가야 하므로 뒤집기를 끈다.
+    // 3층 순찰 로봇 R-05(퍼즐 E)도 끈다. 이 검사는 방 배치와 퍼즐 문구를 걸어 다니며 본다.
+    await page.evaluate(() => { collectedItems.add('elevator-unscrambled'); collectedItems.add('f3-robot-off'); });
     await page.locator(`#cabin-floor-buttons [data-floor="${floor}"]`).click();
     assert.equal(await page.locator(`#cabin-floor-buttons [data-floor="${floor}"]`).getAttribute('aria-pressed'), 'true');
     if (floor !== 15) await page.locator('#cabin-close').click();

@@ -16,6 +16,8 @@
     <link rel="stylesheet" href="css/wire-puzzle.css" />
     <link rel="stylesheet" href="css/manual-control.css" />
     <link rel="stylesheet" href="css/log-puzzle.css" />
+    <link rel="stylesheet" href="css/sql-console.css" />
+    <link rel="stylesheet" href="css/archi-talk.css" />
     <link rel="stylesheet" href="css/guard-patrol.css" />
     <link rel="stylesheet" href="css/b2-ending.css" />
     <link rel="stylesheet" href="css/phone.css" />
@@ -81,6 +83,10 @@
     <script src="js/interaction/manual-control.js" defer></script>
     <script src="js/interaction/wire-puzzle.js" defer></script>
     <script src="js/interaction/log-puzzle.js" defer></script>
+    <script src="js/interaction/sql-console.js" defer></script>
+    <script src="js/interaction/archi-talk.js" defer></script>
+    <script src="js/interaction/hash-puzzle.js" defer></script>
+    <script src="js/interaction/voice-lock.js" defer></script>
     <script src="js/interaction/outline.js" defer></script>
     <script src="js/interaction/interaction.js" defer></script>
     <script src="js/interaction/phone.js" defer></script>
@@ -104,6 +110,7 @@
     <script src="js/input/keyboard.js" defer></script>
     <script src="js/input/touch.js" defer></script>
     <script src="js/debug/sidebar.js" defer></script>
+    <script src="js/debug/puzzle-jump.js" defer></script>
     <script src="js/debug/floor-select.js" defer></script>
     <script src="js/debug/sanity-debug.js" defer></script>
     <script src="js/scene/opening.js" defer></script>
@@ -337,6 +344,37 @@
         <button id="wire-cancel" type="button">나중에 · Esc</button>
       </div>
     </section>
+    <section id="archi-talk" role="dialog" aria-modal="true" aria-labelledby="archi-talk-title" aria-describedby="archi-talk-line" hidden>
+      <div class="archi-talk-box">
+        <h2 id="archi-talk-title">ARCHI MAIN CONSOLE · 관리자 입력창 잠김</h2>
+        <p id="archi-talk-count"></p>
+        <p id="archi-talk-line" role="status" aria-live="polite"></p>
+        <p id="archi-talk-help">ARCHI의 말을 깨는 기록을 골라 내밀자.</p>
+        <div id="archi-talk-cards" role="group" aria-label="증거 카드"></div>
+        <button id="archi-talk-close" type="button">물러나기 · Esc</button>
+      </div>
+    </section>
+    <section id="hash-panel" role="dialog" aria-modal="true" aria-labelledby="hash-title" aria-describedby="hash-status" hidden>
+      <div id="hash-frame">
+        <div id="hash-screen">
+          <h2 id="hash-title">로그 판독기 · 감사 로그 해시 사슬</h2>
+          <p id="hash-rule">검산 = (앞 줄 검산 + 이 줄 숫자들의 합)의 끝자리 · 첫 줄의 앞 검산은 0</p>
+          <div id="hash-lines" role="group" aria-label="감사 로그 줄"></div>
+          <p id="hash-status" role="status" aria-live="polite"></p>
+        </div>
+      </div>
+      <button id="hash-close" type="button">나가기 · Esc</button>
+    </section>
+    <section id="sql-panel" role="dialog" aria-modal="true" aria-labelledby="sql-title" hidden>
+      <div id="sql-frame">
+        <div id="sql-screen">
+          <h2 id="sql-title">팀장 노트북 · 평가 DB 콘솔</h2>
+          <div id="sql-output" role="log" aria-live="polite"></div>
+          <form id="sql-form"><label for="sql-input">eval_db&gt;</label><input id="sql-input" type="text" autocomplete="off" spellcheck="false" autocapitalize="off" /></form>
+        </div>
+      </div>
+      <button id="sql-close" type="button">나가기 · Esc</button>
+    </section>
     <section id="log-panel" role="dialog" aria-modal="true" aria-labelledby="log-title" aria-describedby="log-status" hidden>
       <div id="log-frame">
         <div id="log-screen">
@@ -416,6 +454,12 @@
         <form id="debug-room" aria-label="테스트용 방 이동">
           <label for="debug-room-select">실내</label><select id="debug-room-select"></select><button type="submit">이동</button>
         </form>
+      </section>
+      <section><h3>퍼즐 테스트</h3>
+        <form id="debug-puzzle" aria-label="새 퍼즐 앞으로 이동">
+          <select id="debug-puzzle-select" aria-label="퍼즐"></select><button type="submit">이동</button>
+        </form>
+        <p id="debug-puzzle-note" class="debug-note" aria-live="polite"></p>
       </section>
       <section><h3>플레이어</h3>
         <form id="debug-sanity" aria-label="테스트용 정신력 조정">

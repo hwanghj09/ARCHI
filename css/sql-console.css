@@ -1,0 +1,39 @@
+/* 퍼즐 A: 12층 팀장실 노트북의 평가 DB 콘솔(js/interaction/sql-console.js). 12층 로그 단말기와 같은 모니터 그림 위에 글자를 얹는다. */
+#sql-panel { position: fixed; inset: 0; z-index: 9; display: grid; place-items: center; background: #000; }
+#sql-panel[hidden] { display: none; }
+#sql-frame { position: relative; width: min(100vw, 133.334vh); aspect-ratio: 4 / 3;
+  background: url('../assets/ui/log-puzzle/log-terminal.png') center / 100% 100% no-repeat, #0d1417; color: #9fe0b0; }
+#sql-frame.glitching { animation: sql-glitch .45s steps(2, end) 2; }
+@keyframes sql-glitch { 0%, 100% { filter: none; transform: none; } 30% { filter: hue-rotate(140deg) contrast(1.6); transform: translateX(-4px); }
+  60% { filter: saturate(3); transform: translateX(3px); } }
+#sql-screen { position: absolute; left: 2.3%; top: 3.7%; width: 95.3%; height: 87%; box-sizing: border-box; padding: 2.5% 3.5%;
+  display: flex; flex-direction: column; font: clamp(13px, 1.7vw, 19px)/1.45 monospace; }
+#sql-title { margin: 0 0 1.5%; color: #e2d2b8; font: bold clamp(15px, 2.2vw, 24px) Arial, sans-serif; text-align: center; }
+#sql-output { flex: 1 1 auto; min-height: 0; overflow-y: auto; }
+.sql-line { margin: 0; white-space: pre-wrap; word-break: break-all; }
+.sql-system { color: #8b9893; }
+.sql-in { color: #e2d2b8; }
+.sql-error { color: #e08a7a; }
+#sql-form { display: flex; gap: .5em; align-items: center; margin-top: 1%; border-top: 1px solid #2f4a3c; padding-top: 1%; }
+#sql-form label { color: #e2d2b8; white-space: nowrap; }
+#sql-input { flex: 1; min-width: 0; border: 0; outline: 0; background: transparent; color: #c9f5d4; font: inherit; caret-color: #9fe0b0; }
+#sql-close { position: absolute; right: 16px; bottom: 16px; padding: 8px 14px; border: 1px solid #7f8e84; border-radius: 2px; background: #18211f;
+  color: #e7e3d2; font: 13px Arial, sans-serif; cursor: pointer; }
+
+/* 퍼즐 G: 4층 로그 판독기 해시 사슬 검증(js/interaction/hash-puzzle.js). 같은 모니터 그림을 쓰고 줄마다 고를 수 있는 버튼이다. */
+#hash-panel { position: fixed; inset: 0; z-index: 9; display: grid; place-items: center; background: #000; }
+#hash-panel[hidden] { display: none; }
+#hash-frame { position: relative; width: min(100vw, 133.334vh); aspect-ratio: 4 / 3;
+  background: url('../assets/ui/log-puzzle/log-terminal.png') center / 100% 100% no-repeat, #0d1417; color: #9fe0b0; }
+#hash-screen { position: absolute; left: 2.3%; top: 3.7%; width: 95.3%; height: 87%; box-sizing: border-box; padding: 2.5% 4%;
+  display: flex; flex-direction: column; gap: 1.2%; font: clamp(13px, 1.75vw, 19px)/1.45 monospace; }
+#hash-title { margin: 0; color: #e2d2b8; font: bold clamp(15px, 2.2vw, 24px) Arial, sans-serif; text-align: center; }
+#hash-rule { margin: 0; color: #f2d689; text-align: center; }
+#hash-lines { display: grid; gap: .4em; }
+#hash-lines button { padding: .35em .8em; border: 1px solid #2f4a3c; background: #07110d; color: #9fe0b0; font: inherit; text-align: left;
+  white-space: pre; cursor: pointer; }
+#hash-lines button:hover, #hash-lines button:focus-visible { border-color: #f2d689; outline: none; }
+#hash-lines button[data-restored="true"] { border-color: #e08a7a; color: #ffb4a6; }
+#hash-status { margin: 0; color: #e08a7a; }
+#hash-close { position: absolute; right: 16px; bottom: 16px; padding: 8px 14px; border: 1px solid #7f8e84; border-radius: 2px; background: #18211f;
+  color: #e7e3d2; font: 13px Arial, sans-serif; cursor: pointer; }

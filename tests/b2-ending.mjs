@@ -51,6 +51,22 @@ try {
   assert.match(await page.locator('#inspection-description').textContent(), /외부 전송 차단됨/);
   await page.evaluate(() => closeInspection());
 
+  // ARCHI 심문(퍼즐 B)은 tests/puzzles.mjs가 확인한다. 여기서는 이미 깬 것으로 둔다.
+  await page.evaluate(() => collectedItems.add('b2-archi-refuted'));
+  // 관리자 키(퍼즐 C): 처음 DELETE를 누르면 10자리 키패드가 열린다. ARCHI의 가짜 힌트(1997)는 틀리고, 단서 세 조각을 이으면 맞는다.
+  await inspect();
+  await page.locator('#inspection-delete').click();
+  assert(await visible('#keypad'), 'DELETE asks for the admin key first');
+  assert.match(await page.locator('#keypad-text').textContent(), /10자리.*힌트: 1997/);
+  await page.locator('#keypad-input').fill('1997');
+  await page.locator('#keypad-submit').click();
+  assert.match(await page.locator('#keypad-error').textContent(), /틀렸어요/);
+  await page.locator('#keypad-input').fill('0412034127');
+  await page.locator('#keypad-submit').click();
+  assert.equal(await page.locator('#inspection-text').textContent(), '복구할 수 없습니다. 계속하시겠습니까?', 'The right key goes on to the confirm step');
+  assert(await page.evaluate(() => collectedItems.has('b2-admin-key')));
+  await page.locator('#inspection-no').click();
+
   const pressDelete = async () => {
     await inspect();
     await page.locator('#inspection-delete').click();

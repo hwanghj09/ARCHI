@@ -94,6 +94,7 @@ function performFloorChange(destId, carIndex = 0, arrivalKey = null) {
   refreshSceneElevatorDoors();
   mountGuardPatrol();
   mountB2Robots();
+  mountFloorRobot();
   refreshPhone();
   rerollFearScreens(); // 장소를 옮길 때마다 모니터 화면을 다시 뽑는다(sanity.js)
   updateInteraction();
