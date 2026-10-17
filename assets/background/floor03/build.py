@@ -103,9 +103,15 @@ foam[312:438, case_x:case_x + 86] = A[312:438, 3026:3112][:, ::-1]
 studio = np.concatenate([A[:, 2236:2316], foam, A[:, 2316:3152]], axis=1)
 print('studio', studio.shape[1])
 
+# 방 안 출구 문 자리(cutaway_kit.door_bay): 복도에서 보이는 이 방 앞벽(같은 벽 모듈) 칸을 방 끝(끝벽 30px 안) 또는 빈 벽 자리에
+# 끼워 출구 문을 그 벽에 세우고 양옆 96px은 빈 벽으로 둔다. 칸 폭(문 폭 + 192)만큼 오른쪽이 밀린다(방 설정 exitBay). 복도 문은 그대로다.
+BAYS = {
+    'gym': (2646, 240, 'wall-glass'),
+    'cs': (858, 130, 'wall-glass-mixed'),
+}
 finish_floor(HERE, {
     'gym': (gym, (44, 47, 45), (72, 60, 48)),
     'cs': (cs, (94, 100, 100), (60, 68, 70)),
     'studio': (studio, (30, 32, 36), (18, 20, 24)),
-})
+}, BAYS)
 print('built 3F assets')

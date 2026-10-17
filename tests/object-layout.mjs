@@ -75,10 +75,11 @@ try {
     if (geometry.seats) assert(geometry.seats.x + geometry.seats.width < x, 'Hall seating ends before the exit');
   }
 
+  // 2~10층 방은 복도에서 보이는 앞벽 칸을 출구 문 자리로 그림에 넣었다(cutaway_kit.door_bay, 방 설정 exitBay).
   const exits = await page.evaluate(() => [...floorById.values()]
-    .filter(config => config.exitWall || ['f2-lounge', 'f4-meeting', 'f6-meeting', 'f9-sales'].includes(config.id))
+    .filter(config => config.exitWall || config.exitBay || config.id === 'f2-lounge')
     .map(config => config.id));
-  assert.equal(exits.length, 20, 'Every repaired painted-room exit is exercised');
+  assert.equal(exits.length, 23, 'Every repaired painted-room exit is exercised');
   let trips = 0;
   for (const viewport of [{ width: 1280, height: 720 }, { width: 390, height: 844 }]) {
     await page.setViewportSize(viewport);

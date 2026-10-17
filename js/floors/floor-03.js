@@ -34,11 +34,11 @@ const FLOOR3_LAYOUT = {
   backgroundWallsOnly: true, backgroundImage: { src: 'assets/background/floor03/walls.png', height: 760, top: 0 },
   rooms: [
     { name: 'Fitness Club', x: 40, width: 1000, style: 'painted', target: 'f3-fitness',
-      doorX: 755, doorWidth: 240, doorY: 250, doorSprite: 'assets/objects/floor03/door-fitness.png' },
+      doorX: 640, doorWidth: 240, doorY: 250, doorSprite: 'assets/objects/floor03/door-fitness.png' },
     { name: '고객만족센터', x: 1080, width: 690, style: 'painted', target: 'f3-cs',
       doorX: 1375, doorWidth: 130, doorY: 250, doorSprite: 'assets/objects/floor03/door-cs.png' },
     { name: 'Studio', x: 4282, width: 680, style: 'painted', target: 'f3-studio',
-      doorX: 4295, doorWidth: 130, doorY: 250, doorSprite: 'assets/objects/floor03/door-studio.png' },
+      doorX: 4321, doorWidth: 130, doorY: 250, doorSprite: 'assets/objects/floor03/door-studio.png' },
   ],
   fixtures: [
     { name: '3층 입주사 안내', x: 3160, y: 300, width: 170, height: 150, style: 'wall-notice',
@@ -53,7 +53,7 @@ const FLOOR3_LAYOUT = {
 const floor3Room = (id, name, art, width, fixtures, extra = {}) => ({ id, name, width, background: FLOOR3_BACKGROUND,
   backgroundWallsOnly: true, backgroundImage: floor3Scene(art, width), fixtures, ...extra });
 const FLOOR3_ROOMS = interiorRooms(3, [
-  floor3Room('f3-fitness', 'Fitness Club', 'gym', 2676, [
+  floor3Room('f3-fitness', 'Fitness Club', 'gym', 3108, [
     floor3Spot('러닝머신 벨트', [300, 440], [396, 438],
       '러닝머신 벨트에 신발 자국 대신 가는 바퀴 자국이 겹겹이 나 있다. 꺼진 줄 알았던 콘솔에 붉은 대기 표시등이 켜져 있다.'),
     floor3Spot('러닝머신 콘솔', [1043, 1093], [296, 438], { gives: 'f03-chase-log',
@@ -71,25 +71,25 @@ const FLOOR3_ROOMS = interiorRooms(3, [
       missingMessage: '카운터 위 출력물: "회원 312명 최고 달리기 속도 · 요청 ARCHI." 표시된 막대 하나에 "17F 정수호 · 최고 시속 19km · 2분 뒤 급감." 그보다 높은 붉은 막대 셋에는 이름이 없다.',
       message: '"회원 312명 최고 달리기 속도 · 요청 ARCHI." 표시된 막대는 "17F 정수호 · 최고 시속 19km · 2분 뒤 급감." 이름 없는 붉은 막대 셋은 시속 21km, 러닝머신의 R-02 · R-05 · R-07이다. 로봇들은 이미 수호보다 빠르다.' }),
   ], {
-    exitWall: true,
+    exitX: 2742, exitBay: 432,
     barriers: [
       { name: '회원 전용 자동문', x: 1328, y: floor3Y(168), width: 18, style: 'f3-auto-door',
         message: '유리 자동문이 닫혀 있다. 센서에 붉은 불이 켜져 있다: 정전 뒤 "닫힘 고정". 문틀 스티커: "비상 개방 버튼(트레이너 카운터 옆) · 배터리 5초."',
         closedMessage: '자동문이 스르르 다시 닫혔다.' },
     ],
   }),
-  floor3Room('f3-cs', '고객만족센터', 'cs', 1846, [
+  floor3Room('f3-cs', '고객만족센터', 'cs', 2168, [
     floor3Spot('스크립트 보드', [54, 150], [193, 305],
       '야간 AI 상담 스크립트. 인쇄된 원고 세 장 아래 붉은 손글씨가 덧붙어 있다: "오늘 몇 시에 퇴근하세요?" "지금 건물에 몇 분 남아 계세요?" 추가한 사람 칸: ARCHI.'),
     floor3Spot('빈 상담석 노트북', [214, 242], [348, 368],
       '배터리로 켜진 노트북에 고객만족도 설문 집계가 떠 있다. 시간대별 막대가 01~04시에만 붉게 치솟는다. 지난달 응답 41,200건 중 39,870건, 응답자 ID는 전부 "guest-auto".'),
     floor3Spot('메시지 전화기', [539, 560], [357, 368],
       '붉은 메시지 등이 깜빡인다. 녹음 1건, 03:10 야간 AI 상담 회선: "고객님, 지금 건물에 몇 분 남아 계세요? 오늘 퇴근하셨나요?" 수신자는 17F 정수호 내선이다.'),
-    floor3Spot('경비 일지', [1583, 1638], [306, 318],
+    floor3Spot('경비 일지', [1905, 1960], [306, 318],
       '㈜하누리서비스 야간 경비 일지가 손전등 옆에 펼쳐져 있다: "03:00 B2 순찰 가려는데 로봇 R-05가 계단 앞을 막고 비켜 주지 않음. 무전 응답 없음." 다음 장부터 야간 경비 칸에는 이름이 없다.'),
-    floor3Spot('열쇠함', [1708, 1766], [212, 283],
+    floor3Spot('열쇠함', [2030, 2088], [212, 283],
       '하누리서비스 열쇠함. 고리 대부분에 꼬리표만 남았다. 붉은 꼬리표가 걸린 빈 고리: "B2 서버실 수동 열쇠 · 회수 · SYSTEM 요청 · 보관 위치 B1 시설관리실."'),
-  ], { exitWall: true }),
+  ], { exitX: 954, exitBay: 322 }),
   floor3Room('f3-studio', 'Studio', 'studio', 1840, [
     floor3Spot('제작 데스크', [1014, 1128], [322, 438],
       '꺼진 스위처 옆 촬영 일정표: "AI 상담원 영상 응대 · 표정·자세 표본 촬영 · 매일 03:00 · 운영 SYSTEM." 촬영 대상 칸에는 지워진 이름이 줄지어 있고, 마지막 칸 "17F 정수호 · 예정"만 남았다.'),

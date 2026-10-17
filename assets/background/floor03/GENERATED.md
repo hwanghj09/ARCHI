@@ -41,3 +41,24 @@
 | Fitness Club (40·1000) | wall-glass | `behind-a.png` | `assets/objects/floor03/door-fitness.png` ← `source/door-fitness.png` (투명 유리 자동문), doorX 755, 폭 240 |
 | 고객만족센터 (1080·690) | wall-glass-mixed | `behind-b.png` | `assets/objects/floor03/door-cs.png` ← `source/door-cs.png` (혼합 유리 수동문), doorX 1375, 폭 130 |
 | Studio (4282·680) | wall-concrete | — | `assets/objects/floor03/door-studio.png` ← `source/door-studio.png` (방 테마 문(스튜디오 철문)), doorX 4295, 폭 130 |
+
+## 방 안 출구 문 자리 (3차 작업)
+
+- 복도 문은 그대로 두고, 방 안 출구 문만 방 끝(끝벽 30px 안) 또는 몇몇 방은 가운데 빈 벽 자리에 세운다.
+- `cutaway_kit.door_bay`가 그 자리에 복도와 같은 벽 모듈(`assets/background/wall`) 칸을 끼운다: 늘린 벽 그림(월드 y=100..556) 위에
+  양 끝 기둥, 유리 너머는 어두운 복도 흰 벽, 밝기는 방 벽에 맞춤. 문 양옆 96px은 빈 벽이라 가구가 문에 닿지 않는다. 유리 창살은 문에서
+  떨어지게(보통 문 중심 ±120, 240 자동문은 문 가운데 이음매 뒤) 깐다. `build.py`가 `finish_floor(HERE, {...}, BAYS)`로 넘긴다(천장·바닥 층도 새 폭).
+- 칸 폭(문 폭 + 192)만큼 그 오른쪽 그림·조사 지점·장애물이 밀린다(방 설정 `exitBay`). 안팎 문 비율 검사는 `exitBay` 방에서 뺀다.
+
+| 방 | 자리 | 끼운 x | 칸 폭 | 벽 모듈 | 방 폭 | 안쪽 exitX |
+| --- | --- | --- | --- | --- | --- | --- |
+| Fitness Club | 오른쪽 끝 | 2646 | 432 | wall-glass | 3108 | 2742 |
+| 고객만족센터 | 가운데 | 858 | 322 | wall-glass-mixed | 2168 | 954 |
+
+- Fitness Club은 오른쪽 끝: 왼쪽은 잠긴 안쪽 구역(자동문 너머)이고, 비상 개방 버튼~자동문 달리기 거리를 바꾸지 않는다.
+- 유리 너머 그림 손질: `behind-a.png`의 GX 거울 금(약 x 300..390, 228..355행)을 주변 유리로 메웠고, `behind-b.png` 왼쪽 위
+  비상구 유도등(0..42, 155..198행)과 초록 번짐을 같은 행의 빈 벽(200..256)으로 덮은 뒤 walls.png를 다시 합성했다.
+  방 안 그림의 금 간 거울은 러닝머신 콘솔 단서 문구 때문에 그대로 둔다.
+
+- 복도 문은 기둥(구간 양 끝 48px)·유리 창살에 걸리거나 유리문 너머로 창살이 비치지 않게만 옮겼다: Fitness Club 755→640, Studio 4295→4321.
+

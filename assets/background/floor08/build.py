@@ -52,11 +52,18 @@ meet = np.concatenate([A[:, LEFT_CAP[0]:LEFT_CAP[1]], A[:, 2364:2941], bay(2941,
                        *[bay(*((2748, 2856) if k % 2 == 0 else (2856, 2964)), 2964 + 108 * k) for k in range(9)],
                        A[:, 2964:RIGHT_CAP[1]]], axis=1)
 
+# 방 안 출구 문 자리(cutaway_kit.door_bay): 복도에서 보이는 이 방 앞벽(같은 벽 모듈) 칸을 방 끝(끝벽 30px 안) 또는 빈 벽 자리에
+# 끼워 출구 문을 그 벽에 세우고 양옆 96px은 빈 벽으로 둔다. 칸 폭(문 폭 + 192)만큼 오른쪽이 밀린다(방 설정 exitBay). 복도 문은 그대로다.
+BAYS = {
+    'qa': (2692, 130, 'wall-concrete'),
+    'planning': (30, 130, 'wall-glass-mixed'),
+    'meeting': (1210, 130, 'wall-frosted'),
+}
 finish_floor(HERE, {
     'qa': (qa, (82, 88, 90), (78, 74, 42)),
     'planning': (plan, (88, 96, 100), (58, 74, 80)),
     'meeting': (meet, (76, 82, 84), (82, 76, 46)),
-})
+}, BAYS)
 # 예전 벽색이 남지 않게 신호등만 원본에서 옮긴다.
 signal = A[250:438, 344:369].copy()
 mask = np.abs(signal[..., :3].astype(int) - A[250:438, 372:373, :3].astype(int)).sum(2) > 40

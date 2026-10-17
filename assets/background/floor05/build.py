@@ -67,11 +67,18 @@ shelf = Image.new('RGBA', (330, 194))
 for x0, x1, y0 in ((932, 1155, 266), (1155, 1259, 252), (1160, 1186, 238), (1200, 1230, 246)):
     shelf.paste(Image.fromarray(A[y0:424, x0:x1]), (x0 - 932, y0 - 230))
 rnd[230:438, 2322:2652] = slate(330)[230:438]
+# 방 안 출구 문 자리(cutaway_kit.door_bay): 복도에서 보이는 이 방 앞벽(같은 벽 모듈) 칸을 방 끝(끝벽 30px 안) 또는 빈 벽 자리에
+# 끼워 출구 문을 그 벽에 세우고 양옆 96px은 빈 벽으로 둔다. 칸 폭(문 폭 + 192)만큼 오른쪽이 밀린다(방 설정 exitBay). 복도 문은 그대로다.
+BAYS = {
+    'rnd': (30, 240, 'wall-glass-mixed'),
+    'security': (30, 130, 'wall-concrete'),
+    'meeting': (1778, 130, 'wall-frosted'),
+}
 finish_floor(HERE, {
     'rnd': (rnd, (62, 66, 74), (78, 66, 46)),
     'security': (security, (80, 88, 94), (50, 64, 70)),
     'meeting': (meeting, (76, 66, 52), (86, 68, 42)),
-})
+}, BAYS)
 with Image.open(HERE + 'floor05-rnd-interior.png') as wall:
     interior = wall.copy()
 interior.alpha_composite(shelf, (2322, 262))  # 원본 top 132 + 행 230 - 새 벽 top 100

@@ -47,3 +47,21 @@
 | Harmony Hall (40·1000) | wall-concrete | — | `assets/objects/floor02/door-harmony.png` ← `source/door-harmony.png` (방 테마 문(콘서트홀 원목)), doorX 723, 폭 130 |
 | 직원 휴게실 (1080·690) | wall-glass-mixed | `behind-b.png` | `assets/objects/floor02/door-lounge.png` ← `source/door-lounge.png` (혼합 유리 수동문), doorX 1375, 폭 130 |
 | 서버실 (4282·680) | wall-concrete | — | `assets/objects/floor02/door-server.png` ← `source/door-server.png` (방 테마 문(서버실 철문)), doorX 4385, 폭 130 |
+
+## 방 안 출구 문 자리 (3차 작업)
+
+- 복도 문은 그대로 두고, 방 안 출구 문만 방 끝(끝벽 30px 안) 또는 몇몇 방은 가운데 빈 벽 자리에 세운다.
+- `cutaway_kit.door_bay`가 그 자리에 복도와 같은 벽 모듈(`assets/background/wall`) 칸을 끼운다: 늘린 벽 그림(월드 y=100..556) 위에
+  양 끝 기둥, 유리 너머는 어두운 복도 흰 벽, 밝기는 방 벽에 맞춤. 문 양옆 96px은 빈 벽이라 가구가 문에 닿지 않는다. 유리 창살은 문에서
+  떨어지게(보통 문 중심 ±120, 240 자동문은 문 가운데 이음매 뒤) 깐다. `build.py`의 `BAYS`가 `door_bay`를 부르고 천장·바닥 층을 새 폭으로 만든다.
+- 칸 폭(문 폭 + 192)만큼 그 오른쪽 그림·조사 지점·장애물이 밀린다(방 설정 `exitBay`). 안팎 문 비율 검사는 `exitBay` 방에서 뺀다.
+
+| 방 | 자리 | 끼운 x | 칸 폭 | 벽 모듈 | 방 폭 | 안쪽 exitX |
+| --- | --- | --- | --- | --- | --- | --- |
+| Harmony Hall | 오른쪽 끝 | 2652 | 322 | wall-concrete | 2998 | 2748 |
+| 서버실 | 왼쪽 끝 | 30 | 322 | wall-concrete | 2162 | 126 |
+
+- 직원 휴게실은 `floor02-lounge-wall.png`(소파·테이블 소품)로 따로 다듬은 방이라 그대로 둔다.
+
+- 복도 문은 기둥(구간 양 끝 48px)·유리 창살에 걸리거나 유리문 너머로 창살이 비치지 않게만 옮겼다: 직원 휴게실 1544→1580.
+

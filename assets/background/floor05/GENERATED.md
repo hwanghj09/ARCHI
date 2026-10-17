@@ -31,3 +31,22 @@
 | 연구개발실 (40·1000) | wall-glass-mixed | `behind-a.png` | `assets/objects/floor05/door-rnd.png` ← `source/door-rnd.png` (혼합 유리 자동문), doorX 280, 폭 240 |
 | 기술연구실 (1080·690) | wall-concrete | — | `assets/objects/floor05/door-security.png` ← `source/door-security.png` (방 테마 문(보안 연구실 철문)), doorX 1163, 폭 130 |
 | 회의실 (4282·680) | wall-frosted | `behind-c.png` | `assets/objects/floor05/door-meeting.png` ← `source/door-meeting.png` (불투명 유리 수동문), doorX 4577, 폭 130 |
+
+## 방 안 출구 문 자리 (3차 작업)
+
+- 복도 문은 그대로 두고, 방 안 출구 문만 방 끝(끝벽 30px 안) 또는 몇몇 방은 가운데 빈 벽 자리에 세운다.
+- `cutaway_kit.door_bay`가 그 자리에 복도와 같은 벽 모듈(`assets/background/wall`) 칸을 끼운다: 늘린 벽 그림(월드 y=100..556) 위에
+  양 끝 기둥, 유리 너머는 어두운 복도 흰 벽, 밝기는 방 벽에 맞춤. 문 양옆 96px은 빈 벽이라 가구가 문에 닿지 않는다. 유리 창살은 문에서
+  떨어지게(보통 문 중심 ±120, 240 자동문은 문 가운데 이음매 뒤) 깐다. `build.py`가 `finish_floor(HERE, {...}, BAYS)`로 넘긴다(천장·바닥 층도 새 폭).
+- 칸 폭(문 폭 + 192)만큼 그 오른쪽 그림·조사 지점·장애물이 밀린다(방 설정 `exitBay`). 안팎 문 비율 검사는 `exitBay` 방에서 뺀다.
+
+| 방 | 자리 | 끼운 x | 칸 폭 | 벽 모듈 | 방 폭 | 안쪽 exitX |
+| --- | --- | --- | --- | --- | --- | --- |
+| 연구개발실 | 왼쪽 끝 | 30 | 432 | wall-glass-mixed | 3108 | 126 |
+| 기술연구실 | 왼쪽 끝 | 30 | 322 | wall-concrete | 2168 | 126 |
+| 회의실 | 오른쪽 끝 | 1778 | 322 | wall-frosted | 2130 | 1874 |
+
+- 연구개발실 방 그림은 커밋된 그림(빌드 결과와 벽 결이 조금 다름)에 같은 `door_bay`를 그대로 얹었다.
+
+- 복도 문은 기둥(구간 양 끝 48px)·유리 창살에 걸리거나 유리문 너머로 창살이 비치지 않게만 옮겼다: 연구개발실 280→397.
+

@@ -25,11 +25,11 @@ const FLOOR9_LAYOUT = {
   backgroundWallsOnly: true, backgroundImage: { src: 'assets/background/floor09/walls.png', height: 760, top: 0 },
   rooms: [
     { name: '사업 업무 공간', x: 40, width: 1000, style: 'painted', target: 'f9-office',
-      doorX: 880, doorWidth: 130, doorY: 250, doorSprite: 'assets/objects/floor04/door-lab.png' },
+      doorX: 849, doorWidth: 130, doorY: 250, doorSprite: 'assets/objects/floor04/door-lab.png' },
     { name: '영업·고객 관리 구역', x: 1080, width: 690, style: 'painted', target: 'f9-sales',
       doorX: 1351, doorWidth: 130, doorY: 250, doorSprite: 'assets/objects/floor04/door-lab.png' },
     { name: '프로젝트룸', x: 4282, width: 680, style: 'painted', target: 'f9-project',
-      doorX: 4665, doorWidth: 130, doorY: 250, doorSprite: 'assets/objects/floor04/door-meeting.png' },
+      doorX: 4608, doorWidth: 130, doorY: 250, doorSprite: 'assets/objects/floor04/door-meeting.png' },
   ],
   fixtures: [
     floor9Spot('브로슈어 거치대', [3240, 3284], [216, 294],
@@ -42,7 +42,7 @@ const FLOOR9_LAYOUT = {
 const floor9Room = (id, name, art, width, fixtures, extra = {}) => ({ id, name, width, background: FLOOR9_BACKGROUND,
   backgroundWallsOnly: true, backgroundImage: floor9Scene(art, width), fixtures, ...extra });
 const FLOOR9_ROOMS = interiorRooms(9, [
-  floor9Room('f9-office', '사업 업무 공간', 'office', 2676, [
+  floor9Room('f9-office', '사업 업무 공간', 'office', 2998, [
     floor9Spot('사업 관리 PC', [142, 202], [326, 372], { requires: 'f9-approval-copy', gives: 'f9-access-log',
       missingMessage: '모니터는 꺼졌지만 도킹된 노트북 하나가 배터리로 잠들어 있다. 깨우자 사업 관리 시스템 접속 기록이 뜬다. 새벽마다 접속한 계정은 "archi_svc". 사업본부 인사 명단에 없는 이름이라 누구인지 알 수 없다.',
       message: '영업 구역 라이선스 대장의 archi_svc와 같은 계정이다. 새벽 01:00~04:00마다 사내 메일·결재·메신저와 고객 통화 녹음을 통째로 내려받았다: "SELECT * FROM mail, approval, messenger, call_record → B2 ARCHI-MAIN." 내려받기 기록을 휴대폰으로 찍어 챙겼다.',
@@ -53,21 +53,21 @@ const FLOOR9_ROOMS = interiorRooms(9, [
       '블라인드 살 하나가 부러져 늘어져 있고, 그 틈으로 도시 불빛이 든다. 창틀에 붙은 메모: "밤마다 블라인드가 혼자 내려갔다 올라감. 시설팀 문의 결과: 자동 제어 · SYSTEM."'),
     floor9Spot('감사패 진열장', [2195, 2303], [259, 435],
       '금빛 명판이 달린 낡은 원목 감사패가 빼곡하다. 맨 위 칸 끝 하나만 검은 몸체에 은빛 명판인 새 패다: "ARCHI 학습 데이터 플랫폼 구축 · 12층 ARCHI 개발팀." 고객사가 아니라 사내 부서다.'),
-  ], { exitWall: true }),
-  floor9Room('f9-sales', '영업·고객 관리 구역', 'sales', 1846, [
+  ], { exitX: 2742, exitBay: 322 }),
+  floor9Room('f9-sales', '영업·고객 관리 구역', 'sales', 2168, [
     floor9Spot('한반도 지도', [66, 176], [186, 326],
       '고객사마다 핀이 꽂혀 있고 핀마다 붉은 실이 걸려 있다. 실은 전부 한 점으로 모인다. 고객사가 아니라 우리 본사 자리다. 액자 아래 메모: "고객 통화 녹음 일괄 회수 · 경로 B2."'),
     floor9Spot('고객사 현황판', [236, 476], [188, 305],
       '고객사 이름표가 칸마다 붙어 있다. 옆 사용량 그래프에서 막대 하나만 압도적으로 붉게 치솟아 파란 원이 쳐져 있다: "사내 · 12층 ARCHI팀." 그 막대는 새벽 시간대에만 쌓였다.'),
-    floor9Spot('팩스', [1530, 1574], [270, 306],
+    floor9Spot('팩스', [1852, 1896], [270, 306],
       '팩스에서 말린 감열지가 늘어져 있다. 정전 직전 받은 마지막 장: "라이선스 자동 승인 확인서 · 발신 SYSTEM · 수신 9F 사업본부." 보낸 번호는 B2 내선이다.'),
-    floor9Spot('라이선스 대장', [1616, 1679], [290, 312], { gives: 'f9-approval-copy',
+    floor9Spot('라이선스 대장', [1938, 2001], [290, 312], { gives: 'f9-approval-copy',
       message: '캐비닛 위에 라이선스 대장이 펼쳐져 있다. 반려된 권한 요청마다 새벽 02:14에 똑같은 붉은 "자동 승인" 도장이 줄지어 찍혔고, 승인자는 전부 "archi_svc"다. 계정 생성자 칸: "ARCHI (자동 생성)". 대장 사본 한 장을 챙겼다.',
       takenMessage: '붉은 "자동 승인" 도장 줄만 남아 있다. 사본은 이미 챙겼다: archi_svc는 ARCHI가 스스로 만든 계정이다.' }),
-    floor9Spot('전화 교환기', [1730, 1770], [196, 252],
+    floor9Spot('전화 교환기', [2052, 2092], [196, 252],
       '벽걸이 전화 교환기의 메시지등이 배터리로 깜빡인다. 마지막 발신: "03:00 · 내선 0903(영업·고객 관리) → 17F 정수호 자리." 그 시간 영업 구역 근무자는 없다. 같은 시각 고객사 다섯 곳에도 안내 전화가 나갔고, "상담원 목소리가 너무 자연스러웠다"는 회신이 붙어 있다.'),
-  ], { exitX: 830 }),
-  floor9Room('f9-project', '프로젝트룸', 'project', 1840, [
+  ], { exitX: 930, exitBay: 322 }),
+  floor9Room('f9-project', '프로젝트룸', 'project', 2162, [
     floor9Spot('예약 패널', [32, 60], [280, 316],
       '배터리로 켜진 회의실 예약 패널. 하루 시간 막대 가운데 03:00 칸 하나만 붉다: "프로젝트룸 · 매일 03:00 · 예약자 SYSTEM · 목적: 녹화 장비 점검." 회의가 없는 시간이다.'),
     floor9Spot('간트 일정판', [120, 336], [188, 322],
@@ -81,5 +81,5 @@ const FLOOR9_ROOMS = interiorRooms(9, [
       takenMessage: '발표 자료의 마지막 장이 그대로 떠 있다. "4. ____." 발표 예정일은 오늘 밤. 9층에서 찾을 것은 다 찾았다.' }),
     floor9Spot('녹화 카메라', [1712, 1782], [286, 438],
       '구석 삼각대 카메라가 화면이 아니라 좌석 쪽을 향해 붉은 녹화등을 켜 두었다. 천장 PTZ 카메라도 테이블을 내려다본다. 라벨: "회의 참석자 음성·표정 자동 수집 · 전송 대상 B2 ARCHI-MAIN · 설정 SYSTEM." 수집 목록 312건이 전부 "사람 반응 학습용"이다.'),
-  ], { windowless: true, exitWall: true }),
+  ], { windowless: true, exitX: 1906, exitBay: 322 }),
 ]);

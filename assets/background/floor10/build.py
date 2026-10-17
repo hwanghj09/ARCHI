@@ -43,11 +43,18 @@ def plain(width):
 shelf = kit.cols((2904, 3120))
 executive = np.concatenate([kit.cols((2280, 2308)), plain(250), kit.cols((2308, 2904)), plain(90), shelf, plain(70),
                             shelf[:, ::-1], plain(108), kit.cols((2904, 3152))], axis=1)
+# 방 안 출구 문 자리(cutaway_kit.door_bay): 복도에서 보이는 이 방 앞벽(같은 벽 모듈) 칸을 방 끝(끝벽 30px 안) 또는 빈 벽 자리에
+# 끼워 출구 문을 그 벽에 세우고 양옆 96px은 빈 벽으로 둔다. 칸 폭(문 폭 + 192)만큼 오른쪽이 밀린다(방 설정 exitBay). 복도 문은 그대로다.
+BAYS = {
+    'office': (30, 130, 'wall-glass-mixed'),
+    'meeting': (30, 130, 'wall-frosted'),
+    'executive': (30, 130, 'wall-concrete'),
+}
 finish_floor(HERE, {
     'office': (office, (78, 90, 84), (50, 72, 62)),
     'meeting': (meeting, (52, 68, 62), (60, 72, 50)),
     'executive': (executive, (72, 60, 48), (86, 66, 42)),
-})
+}, BAYS)
 # 원본의 벽과 몰딩을 덜어 내고 시계만 새 복도 조사 범위에 맞춰 옮긴다.
 clock = Image.fromarray(kit.A[164:188, 1108:1136])
 mask = Image.new('L', clock.size)
