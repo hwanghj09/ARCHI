@@ -19,10 +19,10 @@ const ROTARY_CONTROLS = { key: 90, crank: 720, clock: 90 };
 
 // 지금 조작해야 하는가: 필요한 물건이 모자라면(missingMessage를 먼저 보여야 하면) 아직 아니다.
 function needsControl(door) {
+  if (door.shutterLever) return true; // 16층 CU 셔터 레버는 누를 때마다 올리거나 내린다(doors.js toggleShutter).
   const { control } = door;
   if (!control) return false;
   if (door.controlPassed) { door.controlPassed = false; return false; }
-  if (door.type === 'room') return door.key === 'exit' && Boolean(door.raiseMessage) && !collectedItems.has(dynamicFloorId);
   if (control.when) return Boolean(control.when());
   if ([].concat(door.requires || []).some(item => !collectedItems.has(item)) || (door.condition && !door.condition())) return false;
   if (door.sequence) return !collectedItems.has(door.sequence.gives) && door.element.dataset.done !== 'true';
@@ -33,7 +33,7 @@ function needsControl(door) {
 
 function openControl(door) {
   controlDoor = door;
-  controlSteps = [].concat(door.control);
+  controlSteps = [].concat(door.shutterLever ? shutterLeverStep(door) : door.control);
   usingControl = true;
   releaseInput();
   hint.hidden = true;
@@ -71,6 +71,7 @@ function nextControlStep() {
     `${{ down: '아래로', up: '위로', out: '오른쪽으로 당겨', in: '왼쪽으로 밀어' }[spec.dir] ?? '오른쪽으로'} 끝까지 · 방향키`;
   manualControlDevice.className = `control-device control-${kind}`;
   manualControlDevice.dataset.dir = spec.dir || '';
+  manualControlDevice.dataset.item = spec.item || '';
   manualControlDevice.dataset.done = 'false';
   manualControlDevice.setAttribute('aria-label', spec.label);
   manualControlDevice.replaceChildren(...buildControlParts(spec, choices));
@@ -78,7 +79,7 @@ function nextControlStep() {
   manualControlDevice.focus({ preventScroll: true });
 }
 
-// 장치 그림은 CSS로 그린다. --p(0~1)는 끌어 온 정도, --angle은 돌린 각도다.
+// 고정 바탕판과 움직이는 스프라이트를 겹친다. --p는 이동 정도, --angle은 회전 각도다.
 function buildControlParts(spec, choices) {
   const part = (className, text) => {
     const element = document.createElement('div');
@@ -88,9 +89,9 @@ function buildControlParts(spec, choices) {
   };
   const ends = (spec.ends || []).map((text, index) => part(`control-end control-end-${index}`, text));
   switch (spec.kind) {
-    case 'lever': case 'switch': return [part('control-plate'), part('control-slot'), part('control-handle'), ...ends];
-    case 'plug': return [part('control-socket', spec.socket), part('control-cable'), part('control-handle', spec.item), ...ends];
-    case 'card': return [part('control-reader', spec.reader ?? '태그'), part('control-handle', spec.item ?? '출입증')];
+    case 'lever': case 'switch': return [part('control-plate'), part('control-handle'), ...ends];
+    case 'plug': return [part('control-socket', spec.socket), part('control-handle'), ...ends];
+    case 'card': return [part('control-reader', spec.reader ?? '태그'), part('control-handle')];
     case 'press': return [part('control-plate'), part('control-handle', spec.text ?? '')];
     case 'selector': return [part('control-dial'), part('control-handle'),
       ...choices.map((text, index) => {
@@ -139,6 +140,7 @@ function finishControl() {
   const door = controlDoor;
   const choice = controlStep?.choice;
   closeControl();
+  if (door.shutterLever) { toggleShutter(door); return; }
   door.controlDone = true;
   door.controlPassed = true;
   if (door.cycle) door.controlChoice = choice;

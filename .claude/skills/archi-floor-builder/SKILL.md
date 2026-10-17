@@ -249,7 +249,9 @@ work while standing on the floor (y=570), never from on top of a crate.
   the action ("레버를 내렸다" is the player's job). Kinds: `lever`/`switch` (`dir: 'down'|'up'`, `ends: [top, bottom]`),
   `plug` (`dir: 'out'|'in'`, `socket`, `item`), `card`, `key`/`crank`/`clock` (`turn` degrees), `selector` (picks a
   `cycle` state), `press` (`text`). It opens once requirements are met and before the result; `doneBy` / `when` cover
-  devices without `gives`. Room exit shutters use `raiseControl` next to `raiseMessage` (16F CU). See
+  devices without `gives`. A shutter worked from inside (16F CU) is a prop with `shutterLever: <unlockedBy item>`
+  (raise/lower toggle, `toggleShutter` in `js/scene/doors.js`) plus `insideMessage` on the room front, which keeps the
+  exit shut while the shutter is down. See
   `js/interaction/manual-control.js`; tests that only check results import `tests/auto-control.mjs`.
 - A fixture with `requires` gets `data-requires` and `data-ready` (all collected). `refreshReady()` runs on build,
   after any `gives` and after a cycle step, so CSS can show a state change in the same room (2F booth window).

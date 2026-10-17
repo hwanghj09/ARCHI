@@ -2,8 +2,8 @@
 // 16층 편의시설(1층 층별 안내: The Kitchen / CU 편의점 / Café): 크림색 타일 마감(food 테마). 코어 왼쪽에 벽을 맞댄
 // 사내 식당(The Kitchen)·CU 편의점, 화장실 오른쪽 구역에 카페를 둔다. 방 안 폭은 복도 전면 폭의 3.4배(1060/600/560 → 3604/2040/1904).
 // CU 셔터는 정전 직전에 내려와 복도에서 열리지 않는다(unlockedBy: 자기 방 id). 식당 안쪽 끝의 주방 반입문(links)으로 편의점
-// 창고에 들어가고, 안에서 셔터를 올리고(복도 문으로) 나오면 그 뒤로는 복도에서도 드나든다. 처음 나올 때만 수동 레버를
-// 당겨 셔터가 말려 올라가는 연출(raiseMessage)을 보인다.
+// 창고에 들어가고, 안의 셔터 제어함 수동 레버로 셔터를 올린 뒤(올린 채로는 복도에서도 드나든다) 출구로 나온다.
+// 레버로 셔터를 다시 내릴 수도 있고, 내려 두면 출구도 복도 문도 닫힌다.
 // 단서는 새벽마다 끊기는 냉동고 전원, 정전 직전 SYSTEM이 내린 셔터와 수호의 23:47 영수증, 낮에는 주문도 못 알아듣다가
 // 새벽에는 먼저 인사하는 음성 주문 키오스크(ARCHI 시범). 배경은 편의시설 전용 그림이며 문·소품은 별도로 그린다.
 // 카페 테이블의 조현아 팀장 사원증(gives 'f16-badge')으로 12~15층 하차 로비의 인증 게이트를 통과한다(registry.js).
@@ -18,8 +18,7 @@ const FLOOR16_LAYOUT = {
     { name: 'CU 편의점', x: 1124, width: 600, style: 'store', target: 'f16-cu',
       doorX: 1560, doorWidth: 150, doorY: 262, doorStyle: 'shutter', locked: true, unlockedBy: 'f16-cu',
       message: 'CU 편의점 셔터가 내려와 있다. 셔터 옆 안내문: "셔터가 내려간 뒤에는 식당 주방 반입문으로 출입해 주세요."',
-      raiseMessage: '셔터가 덜컹거리며 말려 올라간다.',
-      raiseControl: { kind: 'lever', dir: 'down', label: '안쪽 수동 레버를 끝까지 당기자.', ends: ['닫힘', '열림'] } },
+      insideMessage: '셔터가 바닥까지 내려와 있다. 옆의 셔터 제어함 수동 레버로 먼저 올려야 나갈 수 있다.' },
     { name: 'Café', x: 4322, width: 560, style: 'cafe', target: 'f16-cafe',
       doorX: 4336, doorWidth: 140, doorStyle: 'cafe' },
   ],
@@ -71,9 +70,10 @@ const FLOOR16_ROOMS = interiorRooms(16, [
     { file: 'drink-vending-machine', size: [256, 512], worldWidth: 96, x: 1450 },
     { file: 'food-shutter-panel', size: [256, 512], worldWidth: 89, x: 1640, name: '셔터 제어함',
       sprite: 'assets/objects/floor16/shutter-panel-states.png', stateBy: 'f16-cu',
-      message: '셔터 제어 기록: "23:59 · 셔터 하강 · 명령 SYSTEM". 무인 운영 중에는 셔터를 내리지 않는다고 적혀 있다. 아래의 수동 레버를 당기면 안에서 셔터를 올릴 수 있다.',
-      surface: 'screen', look: 'lcd', writing: [{ as: 'title', text: '셔터 제어 기록' }, '23:59  셔터 하강', { as: 'field', label: '명령', text: 'SYSTEM' }],
-      caption: '무인 운영 중에는 셔터를 내리지 않는다고 적혀 있다. 아래의 수동 레버를 당기면 안에서 셔터를 올릴 수 있다.' },
+      message: '셔터 제어 기록: "23:59 · 셔터 하강 · 명령 SYSTEM". 아래의 수동 레버로 안에서 셔터를 올리고 내릴 수 있다.',
+      // 수동 레버(doors.js toggleShutter): E를 누를 때마다 레버 창이 열린다. 내려 있으면 당겨 올리고(제어 기록도 이 창에 보인다),
+      // 올라가 있으면 밀어 내린다. 출구는 셔터가 올라가 있을 때만 열린다.
+      shutterLever: 'f16-cu' },
   ],
   // 밀 수 있는 진라면 박스(js/scene/pushables.js): 플레이어 허리 높이(90px)이고, 옆에서 막힌 채 걸으면 플레이어 이동 속도의 절반으로
   // 밀린다. 왼쪽은 처음 자리(중심 415)보다 더 밀리지 않고, 오른쪽은 계산대 왼쪽 끝(1150 - 312 / 2 + 312 * .0156 ≈ 999)에 박스

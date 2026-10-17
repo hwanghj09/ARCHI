@@ -362,7 +362,7 @@ try {
   };
   // 16F is the amenity floor of the lobby directory: The Kitchen and CU share a wall left of the elevators, the café
   // sits right of the restroom. Its mechanic: the CU shutter came down before the blackout, so the way in is the goods
-  // door at the far end of the kitchen; raising the shutter from inside (leaving by it) opens the store for good.
+  // door at the far end of the kitchen; the lever inside raises the shutter, which then opens the store from the corridor.
   const checkFloor16 = async () => {
     roomScales.length = 0;
     const corridorHeader = '16F · 편의시설';
@@ -465,7 +465,10 @@ try {
     assert(await playerX() > 486, 'Jump clears the ramen box on the way to the checkout');
     await inspect(1150, 'E · 계산대 조사', /23:47.*정수호/);
     await page.screenshot({ path: '.local/floor-16-cu.png' });
-    await inspect(1640, 'E · 셔터 제어함 조사', /명령 SYSTEM/);
+    // The exit stays shut while the shutter is down; the panel lever raises it as a separate step.
+    await inspect(cuExit.x + cuExit.width / 2, 'E · 복도 (잠김)', /셔터 제어함 수동 레버/);
+    await inspect(1640, 'E · 셔터 올리기', /말려 올라간다/);
+    assert.equal(await header(), '16F · CU 편의점', 'Raising the shutter does not leave the store');
     await leaveRoom({ front: cu, exit: cuExit }, corridorHeader);
     assert.equal(await page.locator('#dynamic-scene .room-door.shutter').getAttribute('aria-label'), 'CU 편의점 출입문',
       'Raising the shutter from inside opens the store from the corridor');

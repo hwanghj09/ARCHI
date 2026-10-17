@@ -56,13 +56,10 @@ try {
     await visit(room); await checkFrame(name, 1);
   }
   await visit('f16-cu'); await checkFrame('셔터 제어함', 0);
-  await page.evaluate(() => {
-    closeInspection();
-    const exit = currentDoors.find(door => door.key === 'exit');
-    Body.setPosition(body, { x: exit.x + exit.width / 2, y: floorY - 81 }); grounded = true; interact();
-  });
-  await page.clock.runFor(850);
+  await inspect('셔터 제어함'); await checkFrame('셔터 제어함', 1);
   await visit('f16-cu'); await checkFrame('셔터 제어함', 1);
+  await inspect('셔터 제어함'); await checkFrame('셔터 제어함', 0);
+  await page.evaluate(() => collectedItems.add('f16-cu'));
   await visit('f14-data'); await checkFrame('라벨링 현황판', 1);
 
   await visit('f13-ops');

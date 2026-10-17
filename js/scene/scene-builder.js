@@ -173,13 +173,14 @@ function buildDynamicScene(config) {
         dynamicScene.append(wall);
       }
       // exitLock: 들어오면 등 뒤에서 잠기는 출구(7층 검증실). until 물건을 챙기면 그 자리에서 풀린다(lockedUntil).
-      // raiseMessage: 안에서만 여는 셔터(16층 CU)를 처음 올리고 나갈 때의 문구. 연출은 interaction.js가 한다.
+      // insideMessage: 안에서도 닫혀 있는 출구(16층 CU 셔터). 방 안의 레버(shutterLever)로 unlockedBy를 챙겨야 나간다.
       const lock = config.exitLock;
+      const shut = Boolean(outside.insideMessage) && !collectedItems.has(outside.unlockedBy);
       doorList.push(addRoomDoor({ name: '복도', type: 'room', hint: 'E · 복도로 나가기', target: config.parent,
         arrivalKey: `room:${config.id}`, key: 'exit', x: exitX,
         y: exitY, width: doorWidth, style: config.exitStyle ?? outside.doorStyle, sprite: outside.doorSprite,
-        unlocked: collectedItems.has(outside.unlockedBy), raiseMessage: outside.raiseMessage, control: outside.raiseControl,
-        locked: Boolean(lock) && !collectedItems.has(lock.until), lockedUntil: lock?.until, message: lock?.message,
+        unlocked: collectedItems.has(outside.unlockedBy), insideMessage: outside.insideMessage,
+        locked: shut || (Boolean(lock) && !collectedItems.has(lock.until)), lockedUntil: lock?.until, message: shut ? outside.insideMessage : lock?.message,
         surface: lock?.surface, look: lock?.look, writing: lock?.writing, caption: lock?.caption, image: lock?.image,
         outline: config.exitOutline && [config.exitOutline[0] + offset, ...config.exitOutline.slice(1)] }));
     }
@@ -306,7 +307,7 @@ function buildDynamicScene(config) {
       hideWhenTaken: prop.hideWhenTaken,
       takenMessage: prop.takenMessage, darkMessage: prop.darkMessage, requires: prop.requires,
       missingMessage: prop.missingMessage, partialMessage: prop.partialMessage, element, standY: floorY - base,
-      code: prop.code, codePrompt: prop.codePrompt, wrongMessage: prop.wrongMessage, cycle: prop.cycle, opens: prop.opens, control: prop.control, lowSanity: prop.lowSanity, terminal: prop.terminal,
+      code: prop.code, codePrompt: prop.codePrompt, wrongMessage: prop.wrongMessage, cycle: prop.cycle, opens: prop.opens, control: prop.control, shutterLever: prop.shutterLever, lowSanity: prop.lowSanity, terminal: prop.terminal,
       animation: prop.animation, poweredSprite: prop.poweredSprite,
       surface: prop.surface || WRITING_SURFACE_BY_FILE[prop.file], look: prop.look, writing: prop.writing, caption: prop.caption,
       image: prop.image, missingSheet: prop.missingSheet, takenSheet: prop.takenSheet,

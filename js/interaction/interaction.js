@@ -55,6 +55,7 @@ function doorHintText(door) {
   if (door.accessGate) return door.element.dataset.open === 'true' ? '인증 완료 · 통과 가능' : 'E · 출입증 태그';
   // 12층 야간 로그 삭제가 진행 중일 때만 네트워크 랙의 힌트를 "뽑기"로 바꿔 지금 할 일을 알려 준다(log-puzzle.js).
   if (door.name === '네트워크 랙' && dynamicFloorId === 'f12-eval' && logPuzzleTimer) return 'E · 네트워크 스위치 뽑기';
+  if (door.shutterLever) return collectedItems.has(door.shutterLever) ? 'E · 셔터 내리기' : 'E · 셔터 올리기';
   if (door.type === 'inspect') return `E · ${door.name} 조사`;
   if (door.locked) return `E · ${door.name} (잠김)`;
   if (door.type === 'room') return door.hint;
@@ -205,20 +206,13 @@ function interact() {
     return;
   }
   if (nearbyDoor.type === 'room') {
-    const { target, arrivalKey, raiseMessage } = nearbyDoor;
+    const { target, arrivalKey } = nearbyDoor;
     // 방 안에서 복도 문으로 나오면 그 방 id를 챙긴 것으로 친다: 안쪽 걸쇠로 잠긴 방(unlockedBy: 자기 방 id)은
-    // 한 번 안에서 열고 나오면 그 뒤로 복도에서도 열린다.
-    // 안에서 처음 올리는 셔터(raiseMessage, 16층 CU)는 연출을 시작할 때 기록해 도중에 저장·종료돼도 열린 채 남는다.
-    // 레버 문구와 셔터 소리를 내며 복도로 넘어가고, 복도에서 셔터가 말려 올라간다. 두 번째부터는 보통 문이다.
-    const raising = nearbyDoor.key === 'exit' && raiseMessage && !collectedItems.has(dynamicFloorId);
+    // 한 번 안에서 열고 나오면 그 뒤로 복도에서도 열린다. 16층 CU 셔터는 안의 레버(shutterLever)로 따로 올리고 내린다.
     if (nearbyDoor.key === 'exit') collectedItems.add(dynamicFloorId);
     nearbyDoor.element.dataset.open = 'true';
-    if (raising) showStatus(raiseMessage, 4000);
-    playGameSound(raising ? 'shutter' : 'door');
-    changeRoom(() => {
-      performFloorChange(target, null, arrivalKey);
-      if (raising) raiseShutter(currentDoors.find(door => door.key === arrivalKey), raiseMessage);
-    });
+    playGameSound('door');
+    changeRoom(() => performFloorChange(target, null, arrivalKey));
     return;
   }
   if (nearbyDoor.type === 'stairs') {

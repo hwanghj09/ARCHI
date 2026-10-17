@@ -1,5 +1,12 @@
 # 상호작용 스프라이트 제작 목록
 
+## 직접 조작 UI 적용
+
+레버·스위치, 열쇠·크랭크·시계·선택기, 버튼, 꽂기·뽑기, 카드 대기는 `assets/ui/manual-control/`의 투명 PNG 부품 19개를 사용한다.
+바탕판과 움직이는 부품을 분리해 드래그·회전·키보드·터치 입력을 그대로 시각화한다. 디스크 투입과 셔터 핸들 삽입은 전용 부품을 사용한다.
+생성 프롬프트·원본·적용 방식은 [PROMPT.md](../assets/ui/manual-control/PROMPT.md), 분할은 `scripts/prepare-manual-control.mjs`,
+검증은 `tests/manual-control.mjs`와 `tests/manual-control-art.mjs`에 있다.
+
 현재 11F·13F·14F·15F·16F의 조사 대상은 `assets/objects/floor-kit/` 전용 이미지로 교체했다. 아래 항목은 **상태 변화 자체를 화면에 보여 주려면 추가 제작이 필요한 이미지**다. 단순 조사 소품은 현재 이미지로 충분하므로 목록에서 제외했다.
 
 ## 우선순위 A · 플레이 결과가 바뀌는 소품
