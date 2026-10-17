@@ -35,7 +35,20 @@ const STORY_SCENES = [
       '그러고보니 내 옆자리 사원의 직급이 팀장이였던거로 아는데..',
       '잠깐 빌리지 뭐'],
   },
+  { // 16층 Café에서 조현아 팀장의 사원증(f16-badge)을 챙기고 조사가 끝난 1초 뒤.
+    flag: 'story-badge-got-seen', delay: 1000, ready: () => collectedItems.has('story-badge-seen') && collectedItems.has('f16-badge'),
+    lines: ['이제 개발팀에 출입할 수 있겠어.'],
+  },
+  { // 12층 모델 평가실 야간 로그 단말기에서 분석을 마치고 단말기를 끈 뒤(f12-log-cutscene, log-puzzle.js).
+    flag: 'story-log-seen', delay: 500, ready: () => collectedItems.has('f12-log-cutscene'),
+    lines: ['이상해. 다른 날은 밤마다 성능이 높았는데...', '10월 7일에는 사람이 남아 있었어.', '누군가 보고 있으면 성능을 숨기는 건가?'],
+  },
 ];
+
+// 아직 안 본 컷씬 중 조건이 맞아 곧 시작될 것이 있는가. objective.js는 이 컷씬이 끝날 때까지 목표를 바꾸지 않는다.
+function storyScenePending() {
+  return STORY_SCENES.some(entry => !collectedItems.has(entry.flag) && entry.ready());
+}
 
 let storyDelayScene = null;
 let storyDelay = 0;
@@ -43,7 +56,8 @@ let storyDelay = 0;
 // 게임 루프가 매 걸음 부른다(조작을 막는 창·컷씬 중에는 불리지 않아 그동안은 시간도 흐르지 않는다).
 function checkStoryScenes(elapsed) {
   if (storyInspectPending) { storyInspectPending = false; interact(); return; }
-  const scene = storySceneActive ? null : STORY_SCENES.find(entry => !collectedItems.has(entry.flag));
+  // 아직 안 본 컷씬 중 조건이 맞는 첫 번째를 보여 준다(조건이 아직 안 된 앞 컷씬이 뒤 컷씬을 막지 않는다).
+  const scene = storySceneActive ? null : STORY_SCENES.find(entry => !collectedItems.has(entry.flag) && entry.ready());
   if (!scene || !scene.ready()) { storyDelayScene = null; return; }
   if (guardPatrol.mode === 'chase') storyDelay = 0; // 다시 쫓기면 처음부터 다시 잰다
   if (storyDelayScene !== scene) { storyDelayScene = scene; storyDelay = 0; }

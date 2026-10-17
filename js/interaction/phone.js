@@ -138,7 +138,7 @@ function togglePhone() {
   releaseInput();
   animate(0);
   refreshPhone();
-  phoneBlocked = [...document.body.children].filter(element => element !== phonePanel && element.tagName !== 'SCRIPT' && !element.inert);
+  phoneBlocked = []; // 휴대폰을 켜도 게임은 멈추지 않으니 뒤 화면을 막지(inert) 않는다: 이동·점프는 그대로 된다
   for (const element of phoneBlocked) element.inert = true;
   (phoneBattery > 0 ? phoneLightButton : document.getElementById('phone-close')).focus();
 }

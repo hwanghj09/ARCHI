@@ -28,7 +28,6 @@ const LOG_OUTCOME_LINES = {
   'too-late': ['REMOTE DELETION STOPPED', 'WARNING: RECORDS DAMAGED'],
   erased: ['ALL ONLINE RECORDS DELETED', 'LOCAL PRINTED BACKUP MAY BE AVAILABLE'],
 };
-const LOG_MONOLOGUE = ['이상해. 다른 날은 밤마다 성능이 높았는데...', '10월 7일에는 사람이 남아 있었어.', '누군가 보고 있으면 성능을 숨기는 건가?'];
 
 const logPanel = document.getElementById('log-panel');
 const logFrame = document.getElementById('log-frame');
@@ -144,9 +143,10 @@ function answerLogQuiz(choice) {
     addClue('B2 전력 할당 기록', '03:00~04:00 · B2');
   }
   renderLogPanel();
-  showMonologue(logMonologue, LOG_MONOLOGUE);
+  // 분석을 마치면 단말기를 끄고, 독백은 단말기 안이 아니라 컷씬(story-scene.js의 story-log-seen)으로 보여 준다.
+  collectedItems.add('f12-log-cutscene');
   saveProgress();
-  document.getElementById('log-close').focus();
+  closeLogPuzzle();
 }
 
 function logRowText(row, index, deleted) {
@@ -198,8 +198,8 @@ function renderLogPanel() {
     allDeleted ? '기록이 전부 지워졌다. 연결이 살아 있으면 무엇을 되살려도 또 지워진다. 네트워크 랙의 LAN 케이블부터 뽑자.' :
     warned ? 'ARCHI가 기록을 지우고 있다! 창을 닫고(Esc) 네트워크 랙의 B2 직결 LAN 케이블을 뽑자.' :
     '저장된 야간 평가 기록이다.';
-  if (solved && !logMonologue.childElementCount) showMonologue(logMonologue, LOG_MONOLOGUE, true);
-  logMonologue.hidden = !solved;
+
+  logMonologue.hidden = true; // 독백은 컷씬으로 옮겼다
   document.getElementById('log-hint-record').hidden = !(solved && logPuzzle.outcome === 'in-time');
 }
 

@@ -129,7 +129,9 @@ function animate(distance, sprinting = false, elapsed = 0) {
   runDistance = running ? (runDistance + distance) % (runFrameDistance * runFrames) : 0;
   if (distance > .1 || !grounded) phoneAwayTime = 0;
   else phoneAwayTime = Math.max(0, phoneAwayTime - elapsed);
-  const state = usingPhone ? (phoneLightOn ? 'phone-light' : 'phone') : !grounded ? (body.velocity.y < 0 ? 'jump' : 'fall') :
+  // 휴대폰을 켠 채 서 있을 때만 휴대폰 자세이고, 움직이거나 뛰면 휴대폰을 든 걷기·달리기·점프 그림을 쓴다.
+  const phoneStill = usingPhone && grounded && !walking && !running && !pushing;
+  const state = phoneStill ? (phoneLightOn ? 'phone-light' : 'phone') : !grounded ? (body.velocity.y < 0 ? 'jump' : 'fall') :
     crouching ? 'crouch' : interactionTime > 0 && !holdingPhone ? 'interact' : pushing ? 'push' : running ? 'run' : walking ? 'walk' :
     phoneLightOn ? 'phone-light' : phoneAwayTime > 0 ? 'phone-away' : 'idle';
   pushTime = state === 'push' ? pushTime + elapsed : 0;

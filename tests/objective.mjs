@@ -136,7 +136,7 @@ try {
   await page.locator('#story-scene').waitFor({ state: 'visible', timeout: 10000 });
   assert.equal(await page.locator('#story-caption').textContent(), '아 맞다 나 일용직이였지');
   await page.keyboard.press('Escape');
-  await waitTyped('출입증 쌔비기', '출입증이 필요하다. 가까운 곳에 빌릴 만한 사람이 없을까?');
+  await waitTyped('출입증 쌔비기', '출입증이 필요하다. 내 자리 옆 사원의 자리를 조사해보자.');
   assert.equal(await page.evaluate(() => officePostit.element.hidden), false, '출입증 쌔비기가 시작되면 옆자리 포스트잇이 생긴다');
   // 포스트잇을 조사하면 같은 제목 아래 내용이 '쪽지에 적힌 그 사람이라면 출입증을 갖고 있겠지.'로 바뀐다.
   await page.evaluate(() => {
@@ -146,12 +146,12 @@ try {
   });
   await page.keyboard.press('e');
   await page.waitForTimeout(300);
-  assert.equal(await page.evaluate(() => currentObjective.text), '출입증이 필요하다. 가까운 곳에 빌릴 만한 사람이 없을까?', '조사창이 열려 있는 동안은 목표가 그대로다');
+  assert.equal(await page.evaluate(() => currentObjective.text), '출입증이 필요하다. 내 자리 옆 사원의 자리를 조사해보자.', '포스트잇을 읽는 동안에도 목표는 그대로다');
   await page.keyboard.press('Escape');
-  await waitTyped('출입증 쌔비기', '쪽지에 적힌 그 사람이라면 출입증을 갖고 있겠지.');
+  assert.equal(await page.evaluate(() => currentObjective.text), '출입증이 필요하다. 내 자리 옆 사원의 자리를 조사해보자.', '포스트잇을 읽어도 목표 내용은 바뀌지 않는다');
 
   // 사원증을 챙기면 목표가 '이상 행동'으로 돌아가고, 12층 게이트 앞에서 컷씬이 다시 나오지 않는다.
-  await page.evaluate(() => { collectedItems.add('f16-badge'); collectedItems.delete('story-gate-tagged'); });
+  await page.evaluate(() => { collectedItems.add('f16-badge'); collectedItems.add('story-badge-got-seen'); collectedItems.delete('story-gate-tagged'); }); // 사원증 컷씬은 아래 별도 확인에서 본다
   await waitTyped('이상 행동', '경비 로봇은 왜 나를 노렸을까? ARCHI 개발 팀을 조사해보자.');
   await page.evaluate(() => { performFloorChange('f12'); });
   await page.waitForTimeout(500);

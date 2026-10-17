@@ -72,9 +72,9 @@ body[data-main-menu] :is(header, nav, #debug-sidebar, #inventory-button, #sanity
   .menu-view h2 { margin-bottom: 14px; }
 }
 
-/* 저장 · 불러오기: 슬롯 3칸. 칸마다 정보와 [저장] [불러오기] 버튼이 있다. */
+/* 저장 · 불러오기: 슬롯 5칸. 칸마다 정보와 [저장] [불러오기] 버튼이 있다. */
 #menu-slots { width: min(460px, 100%); }
-.menu-slot-list { display: grid; gap: 8px; margin: 0 0 14px; padding: 0; list-style: none; }
+.menu-slot-list { display: grid; gap: 8px; max-height: 58vh; margin: 0 0 14px; padding: 0; overflow-y: auto; list-style: none; }
 .menu-slot-list li { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 10px; padding: 10px 12px; border: 1px solid #3e5057; background: #0e171bcc; }
 .menu-slot-list strong { display: block; font-size: 13px; letter-spacing: .06em; }
 .menu-slot-list small { display: block; margin-top: 3px; color: #8fa196; font-size: 11px; line-height: 1.5; }

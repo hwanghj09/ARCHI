@@ -84,8 +84,11 @@ window.addEventListener('keydown', event => {
     if (event.code === 'Tab' || (['Enter', 'Space'].includes(event.code) && event.target.closest('#phone button'))) return;
     if (keyMatches('phone', event.code) && !event.repeat) closePhone();
     if (keyMatches('light', event.code) && !event.repeat) togglePhoneLight();
-    event.preventDefault();
-    return;
+    // 휴대폰을 켠 채로도 이동·점프·달리기·웅크리기는 되고(아래 일반 처리), 나머지 키는 휴대폰 안에서만 쓰인다.
+    if (!Object.hasOwn(movementKeys, event.code) && !jumpKeys.has(event.code) && !runKeys.has(event.code) && !crouchKeys.has(event.code)) {
+      event.preventDefault();
+      return;
+    }
   }
   if (usingPowerPanel) {
     // 층 버튼과 레버는 누를 때마다 켜고 끄므로, Enter를 꾹 눌러 반복 입력이 들어와도 한 번만 누른 것으로 친다.

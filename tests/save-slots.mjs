@@ -14,39 +14,37 @@ try {
   await page.locator('#opening-skip').click();
   await page.waitForFunction(() => currentObjective?.title === '퇴근하기');
   const slots = () => page.evaluate(() => slotKeys.map(key => { const data = readProgress(key); return data && { title: data.objective, kind: data.slotKind, at: data.savedAt }; }));
-  assert.deepEqual(await slots(), [null, null, null], '처음에는 슬롯이 모두 비어 있다');
+  assert.deepEqual(await slots(), [null, null, null, null, null], '처음에는 슬롯이 모두 비어 있다');
 
-  // 목표가 갱신될 때마다 가장 오래된 칸(빈 칸이 먼저)을 덮어쓴다.
-  await page.evaluate(() => { buildingBlackout = true; });
-  await page.waitForFunction(() => currentObjective?.title === '정전');
+  // 목표가 갱신될 때마다 가장 오래된 칸(빈 칸이 먼저)을 덮어쓴다. 칸은 5개다.
+  const step = async (change, title) => {
+    await page.waitForTimeout(20);
+    await page.evaluate(change);
+    await page.waitForFunction(title => currentObjective?.title === title, title);
+  };
+  await step(() => { buildingBlackout = true; }, '정전');
   let saved = await slots();
   assert.equal(saved[0]?.title, '정전'); assert.equal(saved[0].kind, 'auto'); assert.equal(saved[1], null);
-  await page.waitForTimeout(20);
-  await page.evaluate(() => collectedItems.add('rooftop-unlocked'));
-  await page.waitForFunction(() => currentObjective?.title === '비상 전력 켜기');
-  await page.waitForTimeout(20);
-  await page.evaluate(() => collectedItems.add('goal-f12-memo'));
-  await page.waitForFunction(() => currentObjective?.title === '7층 조사하기');
-  saved = await slots();
-  assert.deepEqual(saved.map(slot => slot?.title), ['정전', '비상 전력 켜기', '7층 조사하기'], '세 칸이 차례로 채워진다');
-  await page.waitForTimeout(20);
-  await page.evaluate(() => collectedItems.add('goal-f7-log'));
-  await page.waitForFunction(() => currentObjective?.title === '지하에서 무슨 일이?');
-  assert.deepEqual((await slots()).map(slot => slot?.title), ['지하에서 무슨 일이?', '비상 전력 켜기', '7층 조사하기'], '가장 오래된 첫 칸을 덮어쓴다');
+  await step(() => collectedItems.add('rooftop-unlocked'), '비상 전력 켜기');
+  await step(() => collectedItems.add('goal-f12-memo'), '7층 조사하기');
+  await step(() => collectedItems.add('goal-f7-log'), '지하에서 무슨 일이?');
+  await step(() => collectedItems.add('b1-elevator'), 'B2 서버실 조사하기');
+  assert.deepEqual((await slots()).map(slot => slot?.title), ['정전', '비상 전력 켜기', '7층 조사하기', '지하에서 무슨 일이?', 'B2 서버실 조사하기'], '다섯 칸이 차례로 채워진다');
+  await step(() => collectedItems.add('goal-b2-console'), 'ARCHI 멈추기');
+  assert.deepEqual((await slots()).map(slot => slot?.title), ['ARCHI 멈추기', '비상 전력 켜기', '7층 조사하기', '지하에서 무슨 일이?', 'B2 서버실 조사하기'], '가장 오래된 첫 칸을 덮어쓴다');
 
-  // 메뉴의 저장 · 불러오기: 슬롯 3칸, 직접 저장과 불러오기.
+  // 메뉴의 저장 · 불러오기: 슬롯 5칸, 직접 저장과 불러오기.
   await page.evaluate(() => openGameMenu());
   await page.locator('#menu-slots-button').click();
-  assert.equal(await page.locator('#menu-slot-list li').count(), 3);
-  await page.locator('[data-slot-save="1"]').click();
-  assert.equal((await slots())[1].kind, 'manual');
-  await page.evaluate(() => { collectedItems.add('b1-elevator'); });
+  assert.equal(await page.locator('#menu-slot-list li').count(), 5);
+  await page.locator('[data-slot-save="4"]').click();
+  assert.equal((await slots())[4].kind, 'manual');
   await page.locator('[data-slot-load="2"]').click(); // 슬롯 3 = '7층 조사하기' 시점의 저장
   await page.waitForFunction(() => !mainMenuActive);
   assert.equal(await page.evaluate(() => collectedItems.has('goal-f7-log')), false, '불러오면 그 시점의 진행으로 돌아간다');
   await page.waitForFunction(() => currentObjective?.title === '7층 조사하기');
   await page.waitForTimeout(300);
-  assert.deepEqual((await slots()).map(slot => slot?.title), ['지하에서 무슨 일이?', '지하에서 무슨 일이?', '7층 조사하기'], '불러오기 직후의 목표 표시는 슬롯을 덮어쓰지 않는다');
+  assert.deepEqual((await slots()).map(slot => slot?.title), ['ARCHI 멈추기', '비상 전력 켜기', '7층 조사하기', '지하에서 무슨 일이?', 'ARCHI 멈추기'], '불러오기 직후의 목표 표시는 슬롯을 덮어쓰지 않는다');
   assert.deepEqual(errors, []);
   console.log('save-slots: ok');
 } finally {

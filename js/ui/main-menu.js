@@ -218,7 +218,7 @@ mainMenu.addEventListener('keydown', event => {
   else if (!event.shiftKey && index === enabled.length - 1) { event.preventDefault(); enabled[0].focus(); }
 });
 
-// 저장 · 불러오기: 슬롯 3칸. 자동 저장(목표가 바뀔 때, save.js)과 직접 저장이 같은 칸을 쓴다.
+// 저장 · 불러오기: 슬롯 5칸. 자동 저장(목표가 바뀔 때, save.js)과 직접 저장이 같은 칸을 쓴다.
 const menuSlotList = document.getElementById('menu-slot-list');
 const menuSlotsStatus = document.getElementById('menu-slots-status');
 

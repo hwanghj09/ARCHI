@@ -42,6 +42,12 @@ panelFloors.forEach((floor, index) => {
       cabinStatus.textContent = elevatorPowerMessage;
       return;
     }
+    // 퇴근하기 목표 도중(정전 전의 첫 '엘리베이터로 가자.'는 제외)에는 1층 버튼만 눌린다.
+    if (currentObjective?.title === '퇴근하기' && currentObjective.text !== '엘리베이터로 가자.' && floor !== 1) {
+      cabinStatus.textContent = '1층으로 가서 퇴근하자.';
+      playGameSound('deny');
+      return;
+    }
     if (button.dataset.restricted && selectedFloor !== floor && !collectedItems.has(restrictionItem)) {
       // 7층에서 B2가 목적지라는 걸 안 뒤에는 제한 화면과 함께 B1 시설관리실로 안내한다(objective.js).
       if (collectedItems.has('f7-external-connection-solved')) {

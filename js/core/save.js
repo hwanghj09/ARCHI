@@ -58,9 +58,9 @@ function saveProgress() {
   }
 }
 
-// 저장 슬롯 3개(archi.slot.N.v1). 목표가 바뀔 때마다 가장 오래된 칸(빈 칸이 먼저)을 덮어써 자동으로 저장하고(slotKind 'auto'),
+// 저장 슬롯 5개(archi.slot.N.v1). 목표가 바뀔 때마다 가장 오래된 칸(빈 칸이 먼저)을 덮어써 자동으로 저장하고(slotKind 'auto'),
 // 메뉴의 저장·불러오기에서 칸을 골라 직접 저장한다(slotKind 'manual'). 위의 자동 저장(progressKey)은 '계속하기'용으로 따로 있다.
-const slotKeys = [1, 2, 3].map(n => `archi.slot.${n}.v1`);
+const slotKeys = [1, 2, 3, 4, 5].map(n => `archi.slot.${n}.v1`);
 // 불러오기 직후 첫 목표 갱신(불러온 상태의 목표가 처음 그려지는 순간)은 저장하지 않는다. objective.js의 refreshObjective가 읽고 내린다.
 let objectiveSaveSkip = false;
 

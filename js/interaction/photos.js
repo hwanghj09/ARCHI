@@ -1,4 +1,4 @@
-// clue 또는 photo: true인 조사 대상에 촬영을 제공한다.
+// photo: true인 조사 대상(1층 층별 안내판)에만 촬영을 제공한다. 예전에 찍어 둔 사진은 clue가 있는 물건이어도 갤러리에서 그대로 본다.
 // shortcut: 사진은 원본 표면으로 복원한다. 촬영 순간의 동적 화면이 필요해지면 픽셀 이미지를 저장한다.
 const inspectionPhotoButton = document.getElementById('inspection-photo');
 const phoneCameraShoot = document.getElementById('phone-camera-shoot');
@@ -39,7 +39,7 @@ function photoSubjectAvailable() {
 function offerInspectionPhoto(door, message) {
   if (!usingInspection || !message || room !== 'dynamic') return;
   const photo = { scene: dynamicFloorId, name: door.name, variant: message === door.takenMessage ? 'taken' : 'original' };
-  if (!photoSource(photo)) return;
+  if (photoSource(photo)?.photo !== true) return; // 새 사진은 photo: true인 물건(1층 층별 안내판)만 찍을 수 있다. 단서(clue)가 있어도 찍지 않는다.
   phoneCameraSubject = { door, photo };
   inspectionPhotoButton.hidden = false;
   inspectionPhotoButton.disabled = !photoSubjectAvailable() || hasPhoto(photo) || Boolean(phoneDock) || phoneBattery <= 0;

@@ -45,8 +45,7 @@ const OBJECTIVES = [
   { when: () => collectedItems.has('f12-network-isolated') && !logRecordsReady() && !collectedItems.has('f12-paper-backup'), title: '종이 백업 찾기', text: '화면 속 기록은 믿을 수 없다. 누군가 따로 남겨 둔 것이 있을지도.' },
   { when: () => collectedItems.has('f12-network-isolated'), title: '이상한 밤 찾기', text: '기록은 지켜 냈다. 그날 밤 무슨 일이 있었던 걸까?' },
   { when: () => logDeleting(), title: '로그 삭제를 막아라', text: '누군가 기록을 지우고 있다! 연결을 끊어야 한다.' },
-  { when: () => collectedItems.has('story-badge-seen') && !collectedItems.has('f16-badge') && collectedItems.has('goal-postit'), title: '출입증 쌔비기', text: '쪽지에 적힌 그 사람이라면 출입증을 갖고 있겠지.' },
-  { when: () => collectedItems.has('story-badge-seen') && !collectedItems.has('f16-badge'), title: '출입증 쌔비기', text: '출입증이 필요하다. 가까운 곳에 빌릴 만한 사람이 없을까?' },
+  { when: () => collectedItems.has('story-badge-seen') && !collectedItems.has('f16-badge'), title: '출입증 쌔비기', text: '출입증이 필요하다. 내 자리 옆 사원의 자리를 조사해보자.' },
   { when: () => collectedItems.has('story-robot-seen') && !collectedItems.has('f1-robot-log'), title: '이상 행동',
     text: '경비 로봇은 왜 나를 노렸을까? ARCHI 개발 팀을 조사해보자.' },
   { when: () => collectedItems.has('story-robot-seen'), title: '이상 행동', text: '경비 로봇은 왜 나를 노렸을까? ARCHI 개발 팀을 조사해보자.' },
@@ -106,7 +105,8 @@ function typeObjective(title, text) {
 
 function refreshObjective() {
   // 메뉴·오프닝·정전 컷씬 동안은 목표 창이 가려져 있으니, 보이게 된 뒤에 새 목표를 쳐 넣는다.
-  if (mainMenuActive || openingActive || blackoutSceneActive || storySceneActive) return;
+  // 컷씬이 곧 시작되거나 진행 중이면 컷씬이 끝난 뒤에 목표를 바꾼다.
+  if (mainMenuActive || openingActive || blackoutSceneActive || storySceneActive || storyScenePending()) return;
   officePostit.element.hidden = !collectedItems.has('story-badge-seen'); // 출입증 쌔비기 목표가 시작되면 옆자리 포스트잇이 생긴다
   // 포스트잇을 읽고 조사창을 닫으면(닫기·Esc·E) 그때 목표 내용이 바뀐다.
   if (!usingInspection && collectedItems.has('goal-postit-read')) collectedItems.add('goal-postit');
