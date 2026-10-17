@@ -158,9 +158,15 @@ try {
   assert(await page.locator('#story-scene').isHidden(), '컷씬은 다시 나오지 않는다');
 
   assert.equal(await titleAfter(() => collectedItems.add('goal-f12-memo')), '이상 행동', 'Reading a memo does not bypass the authored evaluation puzzle');
-  assert.equal(await titleAfter(() => collectedItems.add('f12-evaluation-solved')), '7층 조사하기');
+  assert.equal(await titleAfter(() => collectedItems.add('f12-evaluation-solved')), '5층 조사하기');
+  assert.equal(await titleAfter(() => collectedItems.add('goal-f5-note')), '8층 조사하기');
+  assert.equal(await titleAfter(() => collectedItems.add('f8-repro-record')), '7층 조사하기');
+  assert.equal(await titleAfter(() => collectedItems.add('f7-training-time-solved')), '오늘만 다른 기록');
   assert.equal(await titleAfter(() => collectedItems.add('f7-external-connection-solved')), '외부 연결 통로 찾기');
-  assert.equal(await titleAfter(() => collectedItems.add('f13-backup-device')), '지하에서 무슨 일이?');
+  assert.equal(await titleAfter(() => collectedItems.add('f13-backup-device')), '2층 조사하기');
+  assert.equal(await titleAfter(() => collectedItems.add('f2-projected')), '지하에서 무슨 일이?');
+  // 12층 이후 목표는 갈 곳(층·방)을 알려 준다.
+  assert.match(await page.evaluate(() => currentObjective.text), /B2/);
   assert.equal(await titleAfter(() => collectedItems.add('b1-elevator')), 'B2 서버실 조사하기');
   assert.equal(await titleAfter(() => collectedItems.add('goal-b2-console')), 'ARCHI 멈추기');
 

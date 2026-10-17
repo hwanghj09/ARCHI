@@ -998,3 +998,48 @@ body :is(#story-next, .scene-next) { bottom: max(72px, calc(env(safe-area-inset-
 body { -webkit-user-select: none; user-select: none; }
 input, textarea, [contenteditable="true"] { -webkit-user-select: text; user-select: text; }
 img { -webkit-user-drag: none; }
+
+/* 표지판의 재질은 스프라이트로, 문구는 기존 텍스트로 그려 작은 화면에서도 읽히게 한다. */
+#dynamic-scene, #floor17-extension { --signage-plate: url('../assets/objects/signage/steel-plaque.png'); }
+#dynamic-scene:is([data-theme="warm"], [data-theme="food"], [data-theme="concert"], [data-theme="atrium"], [data-theme="vip"], [data-theme="archive"], [data-theme="finance"]) {
+  --signage-plate: url('../assets/objects/signage/bronze-plaque.png');
+}
+#dynamic-scene[data-theme] :is(.floor-room-sign, .floor-number-sign),
+#floor17-extension .floor-room-sign {
+  border-color: transparent;
+  background: #151a1c var(--signage-plate) center / 100% 100% no-repeat border-box;
+  image-rendering: pixelated;
+}
+#dynamic-scene .fixture:is(.vip-plaque, .archive-plaque, .history-wall) {
+  background: #1b1916 url('../assets/objects/signage/bronze-plaque.png') center / 100% 100% no-repeat border-box;
+}
+#dynamic-scene .fixture:is(.core-plaque, .robot-board) {
+  background: #151a1c url('../assets/objects/signage/steel-plaque.png') center / 100% 100% no-repeat border-box;
+}
+#dynamic-scene .fixture:is(.utility-plaque, .restricted-sign) {
+  background: #1b1d1d url('../assets/objects/signage/warning-sign.png') center / 100% 100% no-repeat border-box;
+}
+#dynamic-scene .fixture:is(.vip-plaque, .archive-plaque, .history-wall, .core-plaque, .robot-board, .utility-plaque, .restricted-sign, .wall-notice) {
+  border-color: transparent;
+  box-shadow: none;
+  image-rendering: pixelated;
+}
+#dynamic-scene .fixture.wall-notice {
+  padding: 10px;
+  background: #eee9d5 url('../assets/objects/signage/notice-board.png') center / 100% 100% no-repeat border-box;
+  color: #29322f;
+  line-height: 1.5;
+}
+#dynamic-scene .fixture.wall-notice span:first-child { color: #702b23; }
+#dynamic-scene .fixture:is(.wall-notice, .robot-board, .restricted-sign) span {
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+#dynamic-scene .fixture.power-notice {
+  background: #eee9d5 url('../assets/objects/signage/notice-board.png') center / 100% 100% no-repeat;
+  border: 0;
+  box-shadow: none;
+  image-rendering: pixelated;
+}
+#dynamic-scene .fixture.power-notice:has(span),
+#dynamic-scene .fixture.power-notice:has(span) span { transform: none; }

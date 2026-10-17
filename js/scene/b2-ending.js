@@ -99,6 +99,7 @@ function startArchiDelete() {
     mode: 'dock', hold: b2WakeDelay + index * 700, lostTime: 0, captureTime: 0, door: null, image: null, chaseOriginX: null, spottedX: null,
     firstEncounter: false, pursuit: true, banging: false, chaseSpeed: b2ChaseSpeed, onCaught: showB2BadEnding }));
   loadB2EndingArt();
+  preloadB2CaptureArt();
   b2DeleteBar.hidden = false;
   refreshB2Bar();
   mountB2Robots();
@@ -462,22 +463,18 @@ function endB2Ending() {
   for (const robot of b2Robots) Object.assign(robot, { hold: Infinity, banging: false });
 }
 
-// 붙잡기 연출(1.1초)이 끝나면 guard-patrol.js가 부른다. catchPlayer가 막아 둔 화면에서 이 창만 다시 쓸 수 있게 한다.
+// 붙잡기 연출(1.1초)이 끝나면 1인칭 제압·이송·업로드 컷씬으로 이어진다.
 function showB2BadEnding() {
   endB2Ending();
-  if (b2Art.badEnd) { b2BadEndArt.src = b2Art.badEnd; b2BadEndArt.hidden = false; }
-  b2BadEnding.inert = false;
-  b2BadEnding.hidden = false;
-  document.getElementById('b2-checkpoint').focus();
+  startB2CaptureScene();
 }
 
 // 엔딩 그림(assets/ending): 있으면 쓰고 없으면 지금 연출 그대로. 다른 테스트가 "없는 파일 요청"을 오류로 보므로 게임을 켤 때가
 // 아니라 DELETE를 누를 때 한 번만 찾아본다.
-//   true-end.png 1920×1080 불투명 — TRUE END 화면 전체. bad-end.png 1920×1080 불투명 — 베드엔딩 창 뒤 화면 전체.
-const b2ArtFiles = { trueEnd: 'assets/ending/true-end.png', badEnd: 'assets/ending/bad-end.png' };
+//   true-end.png 1920×1080 불투명 — TRUE END 화면 전체. 배드 엔딩은 b2-capture-scene.js가 그린다.
+const b2ArtFiles = { trueEnd: 'assets/ending/true-end.png' };
 const b2Art = {};
 const b2TrueEndArt = document.getElementById('b2-true-end-art');
-const b2BadEndArt = document.getElementById('b2-bad-end-art');
 let b2FinaleTimers = [];
 
 function loadB2EndingArt() {
@@ -512,6 +509,7 @@ function showB2Escape() {
 
 // 불러오기·새 게임(save.js restoreProgress)이 장면을 다시 짓기 전에 엔딩 상태를 모두 지운다.
 function resetB2Ending() {
+  resetB2CaptureScene();
   setB2Siren(false);
   Object.assign(b2Ending, { phase: 'idle', barricaded: false, progress: 0, barricade: 100, offline: false, bang: 0 });
   Object.assign(b2Battle, { started: false, threat: null, next: 0, last: null });
@@ -524,7 +522,7 @@ function resetB2Ending() {
   b2TerminalInput.value = '';
   b2DeleteLabel.textContent = 'ARCHI DELETE PROCESS';
   delete b2DeleteBar.dataset.offline;
-  b2DeleteBar.hidden = b2BarricadeLine.hidden = b2BadEnding.hidden = b2Escape.hidden = b2BadEndArt.hidden = true;
+  b2DeleteBar.hidden = b2BarricadeLine.hidden = b2BadEnding.hidden = b2Escape.hidden = true;
   b2FinaleTimers.forEach(clearTimeout);
   b2FinaleTimers = [];
   for (const element of b2EscapeBlocked) element.inert = false;

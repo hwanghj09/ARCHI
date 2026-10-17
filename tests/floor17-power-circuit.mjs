@@ -37,12 +37,95 @@ try {
   };
   await page.evaluate(() => triggerBuildingBlackout());
   assert.deepEqual(await state(), { lift: false, equipment: false, lights: false, solved: false });
-  // 관리실 비상 출입 메모는 확장 복도 오른쪽 끝 청소 카트에 숨겨져 있다. 조사하면 메모가 펼쳐지고 가방에 들어간다.
-  await approach('청소 카트');
+  // 도구를 모두 치운 뒤 직접 메모를 집어야 비밀번호가 보이고 가방에 들어간다.
+  const cartStart = await page.evaluate(() => progressSnapshot());
+  for (const [input, viewport] of [
+    ['mouse', { width: 1280, height: 720 }], ['touch', { width: 390, height: 844 }], ['keyboard', { width: 844, height: 390 }],
+  ]) {
+    await page.evaluate(data => restoreProgress(data), cartStart);
+    await page.setViewportSize(viewport);
+    await approach('청소 카트');
+    const tools = page.locator('.cleaning-tool');
+    const pickup = page.getByRole('button', { name: '관리실 비상 출입 메모 줍기', includeHidden: true });
+    assert.equal(await tools.count(), 3);
+    assert(await pickup.isHidden());
+    assert.equal(await page.locator('.writing-memo').count(), 0);
+    assert.doesNotMatch(await page.locator('#inspection').textContent(), /1706/);
+    await pickup.evaluate(button => button.click());
+    assert.equal(await page.evaluate(() => collectedItems.has('f17-manager-memo')), false, 'Covered memo cannot be collected');
+    await tools.evaluateAll(buttons => Promise.all(buttons.map(button => {
+      const sprite = button.querySelector('.cleaning-tool-sprite');
+      return new Promise((resolve, reject) => {
+        const image = new Image();
+        image.onload = resolve; image.onerror = reject;
+        image.src = getComputedStyle(sprite).backgroundImage.slice(5, -2);
+      });
+    })));
+    await page.locator('.cleaning-cart-tray > img').evaluate(image => image.decode());
+    assert(await tools.evaluateAll(buttons => buttons.every(button => {
+      const r = button.getBoundingClientRect();
+      return r.width >= 20 && r.height >= 40 && r.left >= 0 && r.right <= innerWidth && r.top >= 0 && r.bottom <= innerHeight;
+    })), 'Tools remain usable on desktop, portrait and landscape screens');
+    await page.screenshot({ path: `.local/floor17-cart-${input}.png` });
+    const touchSession = input === 'touch' ? await page.context().newCDPSession(page) : null;
+    const dragTool = async (outside, cancel = false) => {
+      const tool = tools.first();
+      const r = await tool.boundingBox();
+      const cart = await page.locator('.cleaning-cart-tray').boundingBox();
+      const start = { x: r.x + r.width / 2, y: r.y + r.height / 2 };
+      const end = { x: start.x + 8, y: outside ? cart.y - 12 : start.y + 8 };
+      if (touchSession) {
+        await touchSession.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [start] });
+        await touchSession.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [end] });
+      } else {
+        await page.mouse.move(start.x, start.y); await page.mouse.down();
+        await page.mouse.move(end.x, end.y, { steps: 6 });
+      }
+      assert.notEqual(await tool.evaluate(element => element.style.translate), '', 'The actual tool sprite follows the pointer');
+      if (touchSession) await touchSession.send('Input.dispatchTouchEvent', { type: cancel ? 'touchCancel' : 'touchEnd', touchPoints: [] });
+      else await page.mouse.up();
+    };
+    await tools.first().click();
+    assert.equal(await tools.count(), 3, 'A mouse click alone cannot clear tools');
+    if (input !== 'keyboard') {
+      await dragTool(false);
+      assert.equal(await tools.count(), 3, 'Dropping inside the cart returns the tool');
+      assert.equal(await tools.first().evaluate(element => element.style.translate), '');
+      if (touchSession) {
+        await dragTool(true, true);
+        assert.equal(await tools.count(), 3, 'Canceled touch cannot clear a tool');
+      }
+    }
+    const clearTool = async () => {
+      if (input === 'keyboard') { await tools.first().focus(); await page.keyboard.press('Enter'); }
+      else await dragTool(true);
+    };
+    await clearTool();
+    await page.keyboard.press('Escape');
+    await approach('청소 카트');
+    assert.equal(await tools.count(), 2, 'Closing the cart preserves cleared tools');
+    const partial = await page.evaluate(() => readProgress());
+    assert(partial.items.includes('f17-cart-tool-0'));
+    await clearTool();
+    await page.evaluate(data => restoreProgress(data), partial);
+    await approach('청소 카트');
+    assert.equal(await tools.count(), 2, 'Loading restores partially cleared tools');
+    await clearTool();
+    assert(await pickup.isHidden(), 'One remaining tool still hides the memo');
+    await clearTool();
+    assert(await pickup.isVisible());
+    assert.equal(await page.evaluate(() => collectedItems.has('f17-manager-memo')), false, 'Uncovering is separate from collecting');
+    assert.doesNotMatch(await page.locator('#inspection').textContent(), /1706/);
+    if (input === 'touch') await pickup.tap();
+    else if (input === 'keyboard') { await pickup.focus(); await page.keyboard.press('Space'); }
+    else await pickup.click();
+    assert(await page.locator('.writing-memo').isVisible(), `${input}: picking up the memo opens it`);
+    assert.equal(await page.evaluate(() => collectedItems.has('f17-manager-memo')), true);
+  }
   const memo = await page.locator('.writing-memo').textContent();
   const code = memo.match(/비밀번호:\s*(\d{4})/)[1];
   assert.match(memo, /태양광은 전등 전용/);
-  assert.equal(await page.evaluate(() => collectedItems.has('f17-manager-memo')), true, 'Inspecting the cart puts the memo in the bag');
+  assert.equal(await page.evaluate(() => collectedItems.has('f17-manager-memo')), true, 'Picking up the uncovered memo puts it in the bag');
   for (const viewport of [{ width: 390, height: 844 }, { width: 844, height: 390 }, { width: 1280, height: 720 }]) {
     await page.setViewportSize(viewport);
     assert(await page.locator('.writing-memo').evaluate(paper => {
@@ -169,7 +252,7 @@ try {
   await page.keyboard.press('Escape');
   assert.equal((await state()).solved, false, 'Canceling cannot grant power');
   assert(await page.locator('#power-panel').isHidden());
-  assert.equal(await page.locator('#stage').evaluate(element => element.inert), false);
+  assert.equal(await page.locator('body > #stage').evaluate(element => element.inert), false);
   await approach('비상 전력 분배반');
   assert.equal(await page.locator('.wire-cable').count(), 0, 'A canceled session never leaves stale connections');
   await page.keyboard.press('Escape');

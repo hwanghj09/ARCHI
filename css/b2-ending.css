@@ -22,8 +22,6 @@
 #b2-delete-bar[data-offline="true"] #b2-delete-fill { background: #8fbda3; }
 #inspection .b2-action:disabled { border-color: #5d6461; background: #2a2e2d; color: #8d9692; cursor: not-allowed; }
 /* 엔딩 그림(assets/ending, b2-ending.js의 loadB2EndingArt). */
-#b2-bad-end-art { position: fixed; z-index: 12; inset: 0; width: 100%; height: 100%; object-fit: cover; pointer-events: none; }
-#b2-bad-end-art[hidden] { display: none; }
 /* TRUE END: 하얗게 밝아짐(white) → 그림(art) → 제목(title) → 크레딧(credits) → 메뉴 버튼(done). 그림이 없으면 제목은 상자로. */
 #b2-escape { position: fixed; z-index: 14; inset: 0; display: grid; place-items: center; overflow: hidden; background: #fff; color: #eee5d6; outline: none;
   animation: b2-white-in 1.2s ease-out both; transition: background 1.5s; }

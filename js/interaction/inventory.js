@@ -86,6 +86,89 @@ function openHydrant() {
   openItemPanel('17층 소화전', description.textContent, 'hydrant', content);
 }
 
+function openCleaningCart() {
+  const item = 'f17-manager-memo';
+  if (collectedItems.has(item)) { openInspection('청소 카트', '아무것도 없다.'); return; }
+  const content = writingNode('div', 'item-panel');
+  const tray = writingNode('div', 'cleaning-cart-tray');
+  const cart = new Image();
+  cart.src = 'assets/ui/floor17/cleaning-cart-empty.png';
+  cart.alt = '선반과 양동이 받침이 있는 청소 카트';
+  cart.draggable = false;
+  tray.append(cart);
+  const description = writingNode('p', 'item-description');
+  description.id = 'item-description';
+  description.setAttribute('role', 'status');
+  const memo = itemButton(item);
+  memo.setAttribute('aria-label', '관리실 비상 출입 메모 줍기');
+  tray.append(memo);
+  const refresh = () => {
+    const remaining = tray.querySelectorAll('.cleaning-tool').length;
+    memo.hidden = memo.disabled = remaining > 0;
+    description.textContent = remaining ? `도구를 잡아 카트 밖으로 끌어내자. (${remaining}개 남음) · 키보드: 도구 선택 후 Enter` :
+      '도구들 밑에서 접힌 메모를 찾았다. 눌러서 챙기자.';
+    inspectionDescription.textContent = description.textContent;
+  };
+  ['분무기', '세제통', '양동이'].forEach((label, index) => {
+    const flag = `f17-cart-tool-${index}`;
+    if (collectedItems.has(flag)) return;
+    const tool = writingNode('button', 'cleaning-tool');
+    tool.type = 'button';
+    tool.dataset.tool = index;
+    tool.setAttribute('aria-label', `${label} 치우기`);
+    tool.append(writingNode('span', 'cleaning-tool-sprite'));
+    const remove = () => {
+      if (!tool.isConnected || !usingInspection || inspectionPanel.dataset.surface !== 'cleaning-cart') return;
+      collectedItems.add(flag);
+      tool.remove();
+      refresh();
+      (tray.querySelector('.cleaning-tool') || memo).focus();
+      saveProgress();
+    };
+    let drag = null;
+    tool.addEventListener('pointerdown', event => {
+      if (!event.isPrimary || event.button !== 0) return;
+      event.preventDefault();
+      drag = { id: event.pointerId, x: event.clientX, y: event.clientY };
+      tool.setPointerCapture(event.pointerId);
+      tool.dataset.dragging = 'true';
+    });
+    tool.addEventListener('pointermove', event => {
+      if (!drag || drag.id !== event.pointerId) return;
+      tool.style.translate = `${event.clientX - drag.x}px ${event.clientY - drag.y}px`;
+    });
+    const endDrag = event => {
+      if (!drag || drag.id !== event.pointerId) return;
+      const bounds = tray.getBoundingClientRect();
+      const outside = event.clientX < bounds.left || event.clientX > bounds.right || event.clientY < bounds.top || event.clientY > bounds.bottom;
+      const cleared = event.type === 'pointerup' && outside && Math.hypot(event.clientX - drag.x, event.clientY - drag.y) > 16;
+      drag = null;
+      tool.style.translate = '';
+      delete tool.dataset.dragging;
+      if (tool.hasPointerCapture(event.pointerId)) tool.releasePointerCapture(event.pointerId);
+      if (cleared) remove();
+    };
+    for (const type of ['pointerup', 'pointercancel', 'lostpointercapture']) tool.addEventListener(type, endDrag);
+    tool.addEventListener('click', event => { if (event.detail === 0) remove(); });
+    tray.append(tool);
+  });
+  const collect = () => {
+    if (tray.querySelector('.cleaning-tool') || collectedItems.has(item)) return;
+    collectedItems.add(item);
+    playGameSound('item-get');
+    refreshInventoryCount();
+    refreshReady();
+    openInspection(INVENTORY_ITEMS[item].name, MANAGER_MEMO_TEXT, MANAGER_MEMO_SHEET);
+    saveProgress();
+  };
+  memo.addEventListener('click', collect);
+  memo.addEventListener('pointerup', event => { if (event.isPrimary && event.pointerType === 'touch') collect(); });
+  content.append(tray, description);
+  openItemPanel('17층 청소 카트', '청소 도구들이 카트 선반을 가리고 있다.', 'cleaning-cart', content);
+  refresh();
+  (tray.querySelector('.cleaning-tool') || memo).focus();
+}
+
 function openRooftopLock() {
   const content = writingNode('div', 'item-panel inventory-content');
   const description = writingNode('p', 'item-description', '비상문이 잠겨 있다. 소화전에서 찾은 열쇠로 문을 열 수 있을 것 같다.');

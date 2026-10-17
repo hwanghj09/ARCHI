@@ -110,6 +110,7 @@ function interact() {
       openHydrant();
       return;
     }
+    if (nearbyDoor.container === 'cleaning-cart') { openCleaningCart(); return; }
     if (nearbyDoor.powerCircuit) { openEmergencyCircuit(); return; }
     if (handleB2Console(nearbyDoor)) return; // B2 삭제 중 메인 콘솔: 문을 막은 뒤면 루트 터미널(b2-ending.js)
     if (handleLogTerminalInteract(nearbyDoor)) return; // 12층 야간 로그 단말기·네트워크 랙(log-puzzle.js)

@@ -119,7 +119,9 @@ try {
   const clueCount = (await clues()).length;
   await page.evaluate(() => answerLogQuiz('건물에 사람이 있었음'));
   assert.equal((await clues()).length, clueCount);
-  assert.equal(await objective(), '7층 조사하기');
+  assert.equal(await objective(), '5층 조사하기');
+  // 7층 백업 장비는 5층 연구 노트와 8층 재현 기록 뒤에 열린다(backup-puzzle.js).
+  await page.evaluate(() => { collectedItems.add('goal-f5-note'); collectedItems.add('f8-repro-record'); });
   // 이미 뽑은 랙은 다시 삭제를 시작하지 않는다.
   assert.deepEqual(await use('f12-eval', '네트워크 랙'), { control: false, inspection: true, log: false, backup: false });
   assert.match(await page.locator('#inspection-description').textContent(), /포트에서 빠져 있다/);
@@ -178,6 +180,8 @@ try {
   assert.equal(await has('b1-elevator'), false, 'B1 key switch waits for the 13F backup device');
   await page.evaluate(() => closeInspection());
   await page.evaluate(() => collectedItems.add('f13-backup-device'));
+  assert.equal(await objective(), '2층 조사하기');
+  await page.evaluate(() => collectedItems.add('f2-projected'));
   assert.equal(await objective(), '지하에서 무슨 일이?');
 
   // ---- B1·B2 ----
@@ -247,6 +251,7 @@ try {
   await page.locator('#log-quiz-options button', { hasText: '건물에 사람이 있었음' }).click();
   assert(await has('f12-evaluation-solved'));
   assert.equal(await has('f12-log-hint'), false, 'A late unplug gives no extra hint');
+  await page.evaluate(() => { collectedItems.add('goal-f5-note'); collectedItems.add('f8-repro-record'); });
   await use('f7-verify', '망분리 백업 장비');
   await page.locator('#backup-tabs button', { hasText: '10/05' }).click();
   assert.equal(await page.locator('#backup-body td[data-hinted="true"]').count(), 0, 'No hint, no outline');
@@ -273,7 +278,7 @@ try {
 
   // 정신력 0에서도 오답은 0 아래로 내려가지 않고, 퍼즐 창이 열린 동안 0% 추격이 시작되지 않는다.
   await newGame();
-  await page.evaluate(() => { sanity = 3; refreshSanity(); collectedItems.add('f12-evaluation-solved'); });
+  await page.evaluate(() => { sanity = 3; refreshSanity(); collectedItems.add('f12-evaluation-solved'); collectedItems.add('goal-f5-note'); collectedItems.add('f8-repro-record'); });
   await use('f7-verify', '망분리 백업 장비');
   await page.locator('#backup-options button', { hasText: '00시' }).click();
   assert.equal(await sanity(), 0);

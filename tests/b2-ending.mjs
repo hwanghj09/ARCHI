@@ -73,11 +73,13 @@ try {
 
   // 2) 서버실 안에 가만히 있으면 로봇이 복도를 지나 서버실 문으로 들어와 붙잡는다 → 베드엔딩 → 체크포인트.
   let entered = null;
-  for (let t = 0; t < 400 && !(await visible('#b2-bad-ending')); t++) {
+  for (let t = 0; t < 400 && !(await visible('#b2-capture-scene')); t++) {
     await page.clock.runFor(100);
     entered ??= await page.evaluate(() => b2Robots.some(robot => robot.where === 'b2-main') ? Math.round(performance.now()) : null);
   }
   assert(entered !== null, 'Robots walked into the server room');
+  assert(await visible('#b2-capture-scene'), 'Getting caught starts the first-person knockout scene');
+  await page.locator('#b2-capture-skip').click();
   assert(await visible('#b2-bad-ending'), 'Getting caught shows the bad ending');
   await page.locator('#b2-checkpoint').click();
   const back = await page.evaluate(() => ({ phase: b2Ending.phase, robots: b2Robots.length, caught: playerCaught, room: dynamicFloorId,
@@ -225,7 +227,8 @@ try {
   while (ticks < 3000 && !(await page.evaluate(() => playerCaught))) { await page.clock.runFor(100); ticks++; }
   console.log(`sanity 60 idle at the terminal: barricade broke ${(ticks / 10).toFixed(1)}s after opening it`);
   assert(await page.evaluate(() => playerCaught), 'An ignored battle ends with the robots breaking in');
-  await settle(() => !document.getElementById('b2-bad-ending').hidden);
+  await settle(() => b2CaptureActive);
+  await page.locator('#b2-capture-skip').click();
   assert(await visible('#b2-bad-ending'), 'Breaking in shows the bad ending');
   assert(!(await visible('#b2-terminal')), 'The terminal closes when the robots break in');
 
@@ -237,7 +240,8 @@ try {
   assert(run30.barricaded, 'Below 45%: running straight to the crate still blocks the door');
   await page.evaluate(() => { b2Ending.barricade = 0.01; });
   await settle(() => playerCaught, 100);
-  await settle(() => !document.getElementById('b2-bad-ending').hidden);
+  await settle(() => b2CaptureActive);
+  await page.locator('#b2-capture-skip').click();
   await page.locator('#b2-checkpoint').click();
   await fromCheckpoint(60);
   await page.keyboard.down('KeyD');
