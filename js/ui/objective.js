@@ -62,7 +62,7 @@ const OBJECTIVES = [
   { when: () => solarEnabled && !collectedItems.has('f17-emergency-linked'),
     title: '승강기 비상 회선 연결', text: '승강기에도 전력을 보내야 한다.' },
   { when: () => collectedItems.has('f17-emergency-linked') && !collectedItems.has('f1-chase-ended') && !collectedItems.has('solar-app-installed') && !collectedItems.has('solar-app-downloaded'),
-    title: '전력 앱 내려받기', text: '층마다 전력을 직접 돌릴 방법이 필요하다. 이 층 컴퓨터에 무언가 있을지도.' },
+    title: '전력 앱 내려받기', text: '층마다 전력을 간편히 전환할 방법이 떠올랐다. 컴퓨터를 조사해보자.' },
   { when: () => collectedItems.has('f17-emergency-linked') && !collectedItems.has('f1-chase-ended') && !collectedItems.has('solar-app-installed'),
     title: '전력 앱 설치하기', text: '받은 파일을 휴대폰으로 옮겨야 한다.' },
   { when: () => collectedItems.has('f17-emergency-linked') && !collectedItems.has('f1-chase-ended') && !floorHasLighting(1),

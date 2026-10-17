@@ -71,7 +71,7 @@ try {
   assert.equal(await titleAfter(() => collectedItems.add('f17-manager-unlocked')), '회로 안내도 확인');
   assert.equal(await titleAfter(() => collectedItems.add('f17-circuit-guide-read')), '승강기 비상 회선 연결');
   assert.equal(await titleAfter(() => { collectedItems.add('f17-emergency-linked'); updatePowerState(); }), '전력 앱 내려받기');
-  await waitTyped('전력 앱 내려받기', '층마다 전력을 직접 돌릴 방법이 필요하다. 이 층 컴퓨터에 무언가 있을지도.');
+  await waitTyped('전력 앱 내려받기', '층마다 전력을 간편히 전환할 방법이 떠올랐다. 컴퓨터를 조사해보자.');
   assert.equal(await titleAfter(() => collectedItems.add('solar-app-downloaded')), '전력 앱 설치하기');
   await waitTyped('전력 앱 설치하기', '받은 파일을 휴대폰으로 옮겨야 한다.');
 

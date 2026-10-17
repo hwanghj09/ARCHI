@@ -240,6 +240,8 @@ function interact() {
       return;
     }
     if (car.travelling) return;
+    // 1층 전력 켜기 목표 도중에는 칸이 와 있어도 탈 수 없다(호출은 된다).
+    if (car.floor === currentSceneFloor && currentObjective?.title === '1층 전력 켜기') { openInspection('엘리베이터', '1층 전력을 먼저 켜자.'); return; }
     interactionTime = 420;
     facing = body.position.x <= nearbyDoor.x + nearbyDoor.width / 2 ? 1 : -1;
     animate(0);
