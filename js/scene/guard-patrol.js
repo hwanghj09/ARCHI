@@ -124,6 +124,8 @@ function roamerEnter(sceneId, from) {
   if (from === 'elevator') roamer.roomsLeft = roamerFloorLit(config.floor) ? 2 : 0;
   roamer.stay = from === 'elevator' ? roamerStay.corridor : roamerStay.room;
   roamer.next = pickRoamerNext(config);
+  // 수호가 있는 층에 엘리베이터로 오면 도착음을 거리와 상관없이 들려준다(그 층의 방 안에서도). 로봇이 왔다는 신호다.
+  if (from === 'elevator' && room === 'dynamic' && currentSceneFloor === config.floor) playGameSound('elevator-arrive');
   if (sceneId !== roamerHere()) return;
   mountRoamer();
   roamer.facing = roamer.x < worldWidth / 2 ? 1 : -1;
@@ -132,7 +134,7 @@ function roamerEnter(sceneId, from) {
     door.element.dataset.open = 'true';
     setTimeout(() => { if (door.element.isConnected) door.element.dataset.open = 'false'; }, 900);
   }
-  playGameSound(from === 'elevator' ? 'elevator-arrive' : 'door', { x: roamer.x });
+  if (from !== 'elevator') playGameSound('door', { x: roamer.x });
 }
 
 function roamerLeave() {
