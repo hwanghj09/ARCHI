@@ -621,3 +621,4 @@ function clearHallucinationEvents() {
   darkFace.hidden = true; darkFaceForced = false; darkFaceTimer = darkFaceLife = 0;
   blinkFlash.dataset.active = 'false'; blinkFlashTimer = 0;
   redEyeShards.replaceChildren();
+}
