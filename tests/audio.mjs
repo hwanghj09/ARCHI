@@ -78,7 +78,7 @@ try {
 
   const buffers = await page.evaluate(() => {
     const names = ['step', 'door', 'elevator-door', 'elevator-arrive', 'elevator-alarm', 'blackout',
-      'robot-servo', 'robot-alert', 'robot-grab', 'phone', 'charger', 'pickup', 'item-get', 'item-use', 'deny', 'shutter',
+      'robot-step', 'robot-servo', 'robot-alert', 'robot-grab', 'phone', 'charger', 'pickup', 'item-get', 'item-use', 'deny', 'shutter',
       'switch', 'ui', 'call-ring', 'cctv-beep', 'cctv-on', 'cctv-hit', 'cctv-static', 'heartbeat', 'cctv-rise',
       'office', 'dark', 'wind', 'motor', 'cctv-bgm', 'cctv-dread'];
     return names.map(name => {
@@ -238,7 +238,7 @@ try {
     return sanityMusicIndex === index && sanityMusicElement.paused;
   }), 'An ending event while paused cannot restart the playlist');
   assert(await page.evaluate(() => [...gameAudioEffects].every(sound => sound.name === 'ui' || sound.stopping)), 'The menu stops effects in progress');
-  await page.locator('#menu-continue').click();
+  await page.locator('#menu-resume').click();
   await page.waitForTimeout(150);
   assert.equal(await page.evaluate(() => gameAudioAmbience.size), 1);
   assert(await page.evaluate(() => !sanityMusicElement.paused), 'Continuing resumes low-sanity music');

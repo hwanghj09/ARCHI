@@ -109,8 +109,9 @@ try {
   await prop('음성 주문 키오스크').locator('img').evaluate(async img => {
     const animation = img.getAnimations()[0]; animation.finish(); await animation.finished;
   });
+  // 키오스크 화면은 16층 전력(층별 태양광)을 따른다: 공급을 끊으면 UPS가 있어도 꺼진다(power.js needsFloorPower).
   await page.evaluate(() => { solarPoweredFloors = []; updatePowerState(); closeInspection(); });
-  await checkFrame('음성 주문 키오스크', 1);
+  await checkFrame('음성 주문 키오스크', 0);
   await page.evaluate(() => { collectedItems.delete('f17-emergency-linked'); updatePowerState(); });
   await checkFrame('음성 주문 키오스크', 0);
 

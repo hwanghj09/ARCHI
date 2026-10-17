@@ -86,7 +86,7 @@ function refreshReady() {
   for (const element of dynamicScene.querySelectorAll('[data-hidden-by]')) element.hidden = collectedItems.has(element.dataset.hiddenBy);
   for (const element of dynamicScene.querySelectorAll('[data-sprite-frames]')) {
     const frame = element.dataset.stateBy ? Number(collectedItems.has(element.dataset.stateBy)) :
-      element.dataset.poweredSprite ? Number(world.dataset.powered === 'true') : Number(element.dataset.spriteFrame);
+      element.dataset.poweredSprite ? Number(floorHasLighting(currentSceneFloor)) : Number(element.dataset.spriteFrame);
     element.dataset.spriteFrame = frame;
     element.querySelector('img').style.transform = `translateX(${-frame * 100 / Number(element.dataset.spriteFrames)}%)`;
   }
@@ -94,7 +94,7 @@ function refreshReady() {
 
 // 짧은 출력·인사·셔터 동작 뒤에는 현재 게임 상태의 정지 그림으로 돌아간다.
 function playPropAnimation(door) {
-  if (!door.animation || (door.poweredSprite && world.dataset.powered !== 'true')) return;
+  if (!door.animation || (door.poweredSprite && !floorHasLighting(currentSceneFloor))) return;
   const image = door.element.querySelector('img');
   for (const animation of image.getAnimations()) {
     animation.oncancel?.();

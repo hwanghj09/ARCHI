@@ -54,6 +54,7 @@ try {
   await page.keyboard.press('Escape'); assert(await page.locator('#main-menu').isVisible());
   const paused = await state(); const unchanged = await stored();
   await page.clock.runFor(3000); assert.deepEqual(await state(), paused); assert.deepEqual(await stored(), unchanged);
+  await page.locator('#menu-exit').click();
   await page.locator('#menu-start').click(); assert(await page.locator('#menu-new-game').isVisible());
   await page.locator('#menu-new-game .menu-back').click(); assert.deepEqual(await stored(), unchanged);
   await page.screenshot({ path: '.local/save-menu-desktop.png' });
@@ -133,6 +134,7 @@ try {
   assert.equal((await stored()).sanity, 37);
   await page.setViewportSize({ width: 390, height: 844 }); await page.evaluate(() => openGameMenu());
   await page.screenshot({ path: '.local/save-menu-mobile.png' });
+  await page.locator('#menu-exit').tap();
   await page.locator('#menu-start').tap(); await page.locator('#menu-new-confirm').tap(); await page.locator('#opening-skip').click();
   const fresh = await state();
   assert.equal(fresh.id, 'office'); assert.equal(fresh.battery, 100); assert.equal(fresh.sanity, 35);

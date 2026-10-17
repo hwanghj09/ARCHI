@@ -151,7 +151,7 @@ window.addEventListener('keydown', event => {
   }
   if (event.code === 'Escape') {
     event.preventDefault();
-    openGameMenu();
+    if (!event.repeat) openGameMenu();
     return;
   }
   if (keyMatches('light', event.code)) {

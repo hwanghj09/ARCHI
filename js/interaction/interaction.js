@@ -14,8 +14,8 @@ function updateInteraction() {
     const candidates = [...(guardPatrol.door ? [guardPatrol.door] : []),
       ...currentDoors.filter(door => door.accessGate && door.solid), ...currentDoors.filter(door => door.phoneCharger),
       ...currentDoors.filter(door => !door.accessGate && !door.phoneCharger)]
-      // hideWhenTaken 설비(16층 항불안제)는 챙기고 나면 사라지므로 더는 조사 대상이 아니다.
-      .filter(door => door !== returningRobot && !(door.hideWhenTaken && collectedItems.has(door.gives)));
+      // hideWhenTaken 설비(16층 항불안제)는 챙기고 나면 사라지므로 더는 조사 대상이 아니다. 전력이 없는 층의 전자 장치도 빠진다(power.js).
+      .filter(door => door !== returningRobot && !(door.hideWhenTaken && collectedItems.has(door.gives)) && !deviceUnpowered(door));
     // standYs: 설비를 조사할 수 있는 발 높이가 여럿일 때(16층 선반: 바닥에서, 또는 진라면 박스 위에서) 쓴다.
     nearbyDoor = candidates.find(door => grounded && [].concat(door.standYs ?? door.standY ?? floorY).some(y => Math.abs(body.bounds.max.y - y) < 2) &&
       Math.abs(body.position.x - door.x - door.width / 2) < door.width / 2 + 28) || null;
@@ -32,7 +32,7 @@ function updateInteraction() {
   const activeDoors = room === 'corridor' ? [...doors.filter(door => door.phoneCharger), ...doors.filter(door => !door.phoneCharger),
     ...officeDoors.filter(door => door.room === room)] :
     [...officeDoors.filter(door => door.room === room), officeComputer, ...(officePostit.element.hidden ? [] : [officePostit])];
-  nearbyDoor = activeDoors.find(door => grounded && Math.abs(body.bounds.max.y - floorY) < 2 &&
+  nearbyDoor = activeDoors.find(door => !deviceUnpowered(door) && grounded && Math.abs(body.bounds.max.y - floorY) < 2 &&
     Math.abs(body.position.x - door.x - door.width / 2) < door.width / 2 + 28) || null;
   if (!realBuildingBlackout() && room === 'corridor' && currentSceneFloor === 17 && nearbyDoor?.type === 'elevator') {
     startBlackoutScene(nearbyDoor);

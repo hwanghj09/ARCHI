@@ -34,6 +34,22 @@ try {
   const startX = s.x; await page.clock.runFor(1000);
   assert(Math.abs((await state()).x - startX - 70) < 3, 'Self-powered patrol rolls at 70 px/s on an unpowered floor');
 
+  // 엘리베이터 도착음은 수호가 멀리 있어도(같은 층 방 안에서도) 들린다. 다른 층이면 안 들린다.
+  const chimes = await page.evaluate(() => {
+    const heard = [];
+    const original = playGameSound;
+    playGameSound = (name, options = {}) => { if (name === 'elevator-arrive') heard.push(options.x ?? null); };
+    const keep = { ...roamer };
+    roamerEnter('f5', 'elevator'); // 수호는 4700, 엘리베이터는 1900쯤: 800px보다 멀다
+    performFloorChange('f5-rnd', 0, 'exit'); roamerEnter('f5', 'elevator');
+    performFloorChange('f6'); roamerEnter('f5', 'elevator');
+    playGameSound = original;
+    performFloorChange('f5'); Object.assign(roamer, keep); Body.setPosition(body, { x: 4700, y: floorY - 81 });
+    document.querySelectorAll('.roaming-guard-bot').forEach(element => element.remove()); mountGuardPatrol();
+    return heard;
+  });
+  assert.deepEqual(chimes, [null, null], 'The arrival chime plays at full volume on Suho\'s floor only');
+
   // 머무는 시간이 끝나면 엘리베이터까지 걸어가서 떠난다.
   await page.evaluate(() => { roamer.stay = 0; });
   await page.clock.runFor(100);

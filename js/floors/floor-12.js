@@ -93,7 +93,7 @@ const FLOOR12_ROOMS = interiorRooms(12, [
     // 야간 로그 단말기: 조사하면 전용 창(log-puzzle.js)이 열려 밤 자동 평가 로그를 보여 준다. ARCHI가 로그를
     // 한 줄씩 지우기 시작하는데, 위 네트워크 랙의 LAN 케이블을 뽑으면 멈춘다. 둘 다 이름으로
     // 찾아 특수 처리하므로(interaction.js) message는 그 특수 처리가 안 먹었을 때만 보일 일반 조사문이다.
-    { file: 'test-terminal-desk', size: [512, 256], worldWidth: 270, x: 630, name: '야간 로그 단말기',
+    { file: 'test-terminal-desk', size: [512, 256], worldWidth: 270, x: 630, name: '야간 로그 단말기', needsPower: true,
       message: '평가용 PC다. 야간 자동 평가 로그를 열람할 수 있다.' },
     // 평가 벤치: 야간 로그의 종이 백업(f12-paper-backup). 로그가 지워졌을 때 야간 로그 단말기에서 대조해 복원한다.
     { file: 'electronics-bench', size: [512, 256], worldWidth: 261, x: 910, name: '평가 벤치', gives: 'f12-paper-backup',
