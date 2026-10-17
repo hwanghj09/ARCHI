@@ -34,7 +34,7 @@ function updateRoamerCabin(delta) {
   const stop = cabinPryStopX();
   if (stop === null || !roamerChasingCabin() || roamer.x === stop) return;
   roamer.facing = stop >= roamer.x ? 1 : -1;
-  roamer.x += roamer.facing * Math.min(Math.abs(stop - roamer.x), 270 * delta / 1000);
+  roamer.x += roamer.facing * Math.min(Math.abs(stop - roamer.x), roamer.chaseSpeed() * delta / 1000);
   updateRobot(roamer, 0);
 }
 

@@ -32,7 +32,7 @@ try {
   assert.equal(s.next, 'elevator', 'Unlit floor: corridor only');
   assert.equal(await page.evaluate(() => world.dataset.powered), 'false');
   const startX = s.x; await page.clock.runFor(1000);
-  assert(Math.abs((await state()).x - startX - 110) < 3, 'Self-powered patrol rolls at 110 px/s on an unpowered floor');
+  assert(Math.abs((await state()).x - startX - 70) < 3, 'Self-powered patrol rolls at 70 px/s on an unpowered floor');
 
   // 머무는 시간이 끝나면 엘리베이터까지 걸어가서 떠난다.
   await page.evaluate(() => { roamer.stay = 0; });
@@ -59,6 +59,24 @@ try {
   await page.evaluate(() => { performFloorChange('f5-rnd', 0, 'exit'); performFloorChange('f5'); roamer.stay = 0; });
   await page.clock.runFor(100);
   assert.equal((await state()).where, 'f5'); assert.equal((await state()).sprites, 1, 'Enters the player scene from the room door');
+
+  // 수호가 나온 문 앞에 있으면 떨어뜨리고 반대쪽을 본다.
+  const clear = await page.evaluate(() => {
+    performFloorChange('f17'); roamer.x = roamerElevatorX(); roamer.stay = 99999;
+    performFloorChange('f5', 0);
+    return { gap: Math.abs(roamer.x - body.position.x), away: Math.sign(roamer.x - body.position.x) === roamer.facing };
+  });
+  assert(clear.gap >= 800 && clear.away, `R-03 is moved away from the door Suho exits: ${JSON.stringify(clear)}`);
+  // 수호가 서 있는 문으로는 바로 들어오지 않는다.
+  await page.evaluate(() => {
+    performFloorChange('f17'); roamerEnter('f5-rnd', 'f5'); roamer.next = 'f5'; roamer.stay = 0;
+    performFloorChange('f5', 0); Body.setPosition(body, { x: sceneDoorX('f5', 'f5-rnd'), y: floorY - 81 });
+  });
+  await page.clock.runFor(500);
+  assert.equal((await state()).where, 'f5-rnd', 'Waits while Suho stands at the door');
+  await page.evaluate(() => Body.setPosition(body, { x: 4700, y: floorY - 81 }));
+  await page.clock.runFor(2200);
+  assert.equal((await state()).where, 'f5', 'Comes in once Suho moves away');
 
   // 켜진 층을 더 자주 고른다(가중치 3배).
   const picks = await page.evaluate(() => {

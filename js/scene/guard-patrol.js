@@ -17,9 +17,12 @@ const guardPatrol = { x: 4530, facing: -1, wait: 0, elapsed: 0, mode: 'dock',
 // 다 되면 바로 다음 장면으로 옮긴다. 같은 장면이면 나갈 문(엘리베이터)까지 걸어가서 나간다.
 const roamerFloors = [-1, ...Array.from({ length: 15 }, (_, index) => index + 2)];
 const roamerStay = { corridor: 30000, room: 15000, ride: 6000 };
+const roamerSpeed = { patrol: 70, chase: 220 }; // R-01(순찰 80, 추격 270)보다 느리다. 걷기 200·달리기 340
+// 수호가 문으로 나오자마자 붙잡히지 않게, 수호가 들어온 문 앞에서 이만큼은 떨어져 있는다(전방 센서 720px보다 멀다).
+const roamerSafeDistance = 800;
 const roamer = { name: 'R-03', where: null, next: null, lastFloor: null, stay: 60000, roomsLeft: 0, x: 0, facing: -1, wait: 0, elapsed: 0,
   mode: 'patrol', lostTime: 0, captureTime: 0, door: null, image: null, chaseOriginX: null, spottedX: null, firstEncounter: false, selfPowered: true,
-  followToElevator: true };
+  followToElevator: true, chaseSpeed: () => roamerSpeed.chase };
 // R-03은 엘리베이터 앞에서도 쫓아오고, 칸에 탄 수호를 따라 문을 억지로 연다(cabin-pry.js).
 const guardCapturePanel = document.getElementById('guard-capture');
 let guardBlocked = [];
@@ -144,29 +147,49 @@ function roamerLeave() {
 }
 
 function mountRoamer() {
-  mountRobot(roamer, 'roaming-guard-bot', { left: 80, right: worldWidth - 80, speed: 110, pause: 1400 });
+  mountRobot(roamer, 'roaming-guard-bot', { left: 80, right: worldWidth - 80, speed: roamerSpeed.patrol, pause: 1400 });
 }
 
 function updateRoamer(delta) {
   const active = buildingBlackout && typeof b2Ending !== 'undefined' && b2Ending.phase === 'idle' && !bossFightActive;
-  if (active && !playerCaught) {
+  if (active && !playerCaught && delta > 0) { // delta 0은 그리기만(장면 교체 중에는 수호 위치가 아직 옛 장면이다)
     roamer.stay -= delta;
     if (roamer.stay > 0) { /* 아직 이 장면에 머문다 */ }
-    else if (roamer.where === null) roamerEnter(pickRoamerFloor(), 'elevator');
-    else {
+    else if (roamer.where === null) {
+      const sceneId = pickRoamerFloor();
+      if (roamerNearSuho(sceneId, roamerElevatorX())) roamer.stay = 2000; // 수호가 엘리베이터 앞에 있으면 조금 뒤에 내린다
+      else roamerEnter(sceneId, 'elevator');
+    } else {
       const exitX = roamer.next === 'elevator' ? roamerElevatorX() : sceneDoorX(roamer.where, roamer.next);
-      if (!roamer.door || (roamer.mode === 'patrol' && roamer.x === exitX)) roamerLeave();
+      // 수호가 있는 장면으로 들어올 문 바로 앞에 수호가 서 있으면 조금 뒤에 들어온다.
+      if (!roamer.door && roamer.next !== 'elevator' && roamerNearSuho(roamer.next, sceneDoorX(roamer.next, roamer.where))) roamer.stay = 2000;
+      else if (!roamer.door || (roamer.mode === 'patrol' && roamer.x === exitX)) roamerLeave();
       else if (roamer.mode === 'patrol') { roamer.mode = 'return'; roamer.chaseOriginX = exitX; }
     }
   }
   if (roamer.door) updateRobot(roamer, active ? delta : 0);
 }
 
+const roamerNearSuho = (sceneId, x) => sceneId === roamerHere() && Math.abs(x - body.position.x) < roamerSafeDistance;
+
+// 수호가 들어온 문 앞에 R-03이 있으면 roamerSafeDistance만큼 떨어뜨리고 수호 반대쪽을 보게 한다.
+// 나갈 문이 바로 그 문이면 되돌아와 붙잡을 수 있으니 조금 더 머물게 한다.
+function keepRoamerClear() {
+  if (Math.abs(roamer.x - body.position.x) >= roamerSafeDistance) return;
+  const side = roamer.x >= body.position.x ? 1 : -1;
+  let x = body.position.x + side * roamerSafeDistance;
+  if (x < 80 || x > worldWidth - 80) x = body.position.x - side * roamerSafeDistance;
+  roamer.x = Math.max(80, Math.min(worldWidth - 80, x));
+  roamer.facing = roamer.x >= body.position.x ? 1 : -1;
+  roamer.wait = 0;
+  roamer.stay = Math.max(roamer.stay, 8000);
+}
+
 function mountGuardPatrol() {
   // 장면을 옮기면 R-03은 쫓던 것을 그만두고, 같은 장면에 있으면 다시 그린다.
   roamer.door = roamer.image = null;
   roamer.mode = 'patrol'; roamer.lostTime = 0;
-  if (roamer.where && roamer.where === roamerHere()) mountRoamer();
+  if (roamer.where && roamer.where === roamerHere()) { keepRoamerClear(); mountRoamer(); }
   guardPatrol.door = room === 'dynamic' && dynamicFloorId === 'f1' ?
     currentDoors.find(door => door.style === 'guard-bot') : null;
   guardPatrol.image = null;
