@@ -495,6 +495,9 @@ function updateSanity(elapsed) {
   const paused = openingActive || blackoutSceneActive || cctvSceneActive || playerCaught || hallucinationCaught || transitioning ||
     usingComputer || usingKeypad || usingControl || usingPowerPanel || usingInspection || !wirePanel.hidden || !logPanel.hidden || !backupPanel.hidden;
   const fsmPaused = paused || selectingFloor;
+  // 컷씬·대화(오프닝·정전·CCTV·혼잣말·조사창)와 엘리베이터 탑승(selectingFloor) 도중에는 환각이 나오지 않고, 이미 나와 있거나 추격 중이면 즉시 끝난다.
+  if ((openingActive || blackoutSceneActive || cctvSceneActive || storySceneActive || usingInspection || selectingFloor || elevatorEntering) &&
+      (hallucinationMode || zeroEventPhase === 'charging' || !darkFace.hidden || redEyeShards.childElementCount)) clearHallucinationEvents();
   const exposure = sanityExposure();
   // B2 엔딩 중에는 R-01에게 쫓겨도 줄지 않는다: 정신력은 로봇 속도(45% 규칙, b2-ending.js)를 정하는 데 쓰인다.
   const chasing = (guardPatrol.mode === 'chase' || roamer.mode === 'chase') && !bossFightActive && b2Ending.phase !== 'running';
@@ -607,9 +610,14 @@ function addBackgroundMonitors(image, src) {
 function clearEventsForCutscene() {
   closePhone();
   if (phoneLightOn) { phoneLightOn = false; refreshPhone(); }
+  clearHallucinationEvents();
+}
+
+// 환각·돌진 추격·점프스케어 얼굴·깜빡임·붉은 조각을 즉시 없앤다. 컷씬·대화(조사창)가 진행되는 동안 매 프레임 검사해서(updateSanity),
+// 그 도중에 시작됐거나 이미 나와 있던 것도 바로 사라진다.
+function clearHallucinationEvents() {
   endHallucinationSighting();
   zeroEventPhase = 'idle'; zeroEventTimer = 0; zeroEventForced = false;
   darkFace.hidden = true; darkFaceForced = false; darkFaceTimer = darkFaceLife = 0;
   blinkFlash.dataset.active = 'false'; blinkFlashTimer = 0;
   redEyeShards.replaceChildren();
-}

@@ -83,8 +83,8 @@ const B1_ROOMS = interiorRooms(-1, [
   // CCTV 벽 뒤는 빈 벽으로 두어 별도 3:2 모니터 설비(x=1117~1536, y=147~426)만 표시한다.
   // alarmBy: CCTV를 전체 화면으로 본 뒤(b1-cctv-seen)로는 소등 컷씬을 거쳐 붉고 어두운 비상등 조명이다(#room-alarm, 배경 그림은
   // 그대로). 나가는 퍼즐은 나중에 얹는다.
-  // brightness: 들어설 때부터 어둑하다(소등 뒤 붉은 비상등일 때는 cctv-event.css의 붉은 조명 밝기를 따른다).
-  { id: 'b1-control', name: '방재 관제실', width: 1892, interiorStyle: 'control-room', brightness: .6, alarmBy: 'b1-cctv-seen', backgroundWallsOnly: true,
+  // 다른 방과 같은 밝기로 둔다(예전에는 brightness .6으로 이 방만 따로 어둡게 했다). 소등 뒤 붉은 비상등은 cctv-event.css가 따로 정한다.
+  { id: 'b1-control', name: '방재 관제실', width: 1892, interiorStyle: 'control-room', alarmBy: 'b1-cctv-seen', backgroundWallsOnly: true,
     backgroundImage: { src: 'assets/background/b1/control-room-v4-finished.png', height: 760, top: 0 },
     fixtures: [
       // 처음 들어오면 CCTV 컷씬(js/scene/cctv-event.js)이 돈다: 아홉 칸이 잡음으로 켜지고 "삐——"가 울리다가 브라운관처럼 꺼진다(liveBy).
