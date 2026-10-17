@@ -117,7 +117,12 @@ function updateRobot(robot, delta) {
     // 눈앞의 수호를 못 알아보면 그게 더 이상하다.
     // sight(B2 엔딩의 1층 R-01): 순찰 구간과 상관없이 바라보는 쪽 sight px 안의 수호를 본다.
     const inBeat = robot.sight || body.position.x >= left;
-    const seesPlayer = sameLevel && (Math.abs(dx) < 130 || (inBeat && dx * robot.facing > 0 && Math.abs(dx) < (robot.sight ?? 720)));
+    // 엘리베이터 앞은 로봇의 경계 구역 밖이다. 바짝 붙어 쫓아오던 로봇이 'return'으로 바뀐 바로 다음 프레임에
+    // 130px 근접 감지로 수호를 다시 보고, 그 자리에서 추격을 새로 시작해 끝까지 따라오던 버그가 있었다 —
+    // 그래서 이 구역 안의 수호는 새로 감지하지 않는다(followToElevator 로봇은 예외).
+    const atElevator = !robot.followToElevator && currentDoors.some(otherDoor => otherDoor.type === 'elevator' &&
+      Math.abs(body.position.x - (otherDoor.x + otherDoor.width / 2)) < otherDoor.width / 2 + 60);
+    const seesPlayer = sameLevel && !atElevator && (Math.abs(dx) < 130 || (inBeat && dx * robot.facing > 0 && Math.abs(dx) < (robot.sight ?? 720)));
     // 'return'(복귀 이동 중)도 patrol/dock과 똑같이 감지된다 — 복귀 중이라고 무적은 아니다.
     if ((robot.mode === 'patrol' || robot.mode === 'dock' || robot.mode === 'return') && seesPlayer) {
       robot.mode = 'chase'; robot.lostTime = 0; robot.chaseOriginX = robot.x; robot.spottedX = body.position.x;
@@ -125,15 +130,11 @@ function updateRobot(robot, delta) {
       showStatus('경비 로봇이 수호를 감지했다. 거리를 벌려야 한다.', 2400);
     }
     if (robot.mode === 'chase') {
-      // 엘리베이터 근처는 로봇의 경계 구역 밖이다 — 쫓기다가 거기 도착하면 쫓던 걸 그만두고 감지했던
-      // 자리로 돌아간다('return'). 로봇의 순찰 구간이 엘리베이터 앞을 지나가므로, 감지되자마자(아직 도망치지도
-      // 않았는데) 그 자리가 우연히 엘리베이터 근처라서 바로 취소되는 걸 막으려고 수호가 감지된 자리에서
-      // 실제로 꽤 멀리(200px) 달아났을 때만 이 탈출을 인정한다. 로봇 위치로 재면 엘리베이터 앞에 서 있다가
-      // 멀리서 감지된 경우 감지와 탈출이 매 프레임 되풀이되어 로봇이 제자리에 멈춘다.
-      const fledFar = Math.abs(body.position.x - robot.spottedX) > 200;
-      const nearElevator = !robot.followToElevator && fledFar && currentDoors.some(otherDoor => otherDoor.type === 'elevator' &&
-        Math.abs(body.position.x - (otherDoor.x + otherDoor.width / 2)) < otherDoor.width / 2 + 60);
-      if (nearElevator) {
+      // 엘리베이터 근처는 로봇의 경계 구역 밖이다 — 쫓기다가 수호가 거기 도착하면 쫓던 걸 그만두고 감지했던
+      // 자리로 돌아간다('return'). 구역 안에서는 애초에 감지되지 않으므로(위 atElevator), 거리 조건 없이
+      // 도착하는 즉시 탈출로 인정한다 — 엘리베이터 바로 옆에서 감지돼 200px을 못 달아났다는 이유로
+      // 엘리베이터 앞에서 붙잡히던 문제도 함께 막는다.
+      if (atElevator) {
         // 순간이동으로 자리를 되돌리지 않는다 — 'return' 모드로 넘어가 감지했던 자리까지 순찰 속도로
         // 직접 걸어서 돌아가고(아래 return 처리), 도착하면 그제서야 patrol로 돌아간다.
         robot.mode = 'return'; robot.wait = 0; robot.lostTime = 0;
