@@ -10,6 +10,8 @@
     "test:clues": "node tests/phone-clues.mjs",
     "test:photos": "node tests/phone-photos.mjs",
     "test": "node scripts/test.mjs",
+    "test:syntax": "node tests/script-syntax.mjs",
+    "prepare": "git config core.hooksPath .githooks",
     "test:antianxiety-animation": "node tests/antianxiety-animation.mjs"
   },
   "devDependencies": {

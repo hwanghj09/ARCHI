@@ -1,0 +1,7 @@
+#!/bin/sh
+# 스크립트 문법 오류가 커밋되지 않게 막는다. 켜기: npm install (또는 git config core.hooksPath .githooks)
+git diff --cached --name-only --diff-filter=ACMR | grep -qE '\.js$|^index\.html$' || exit 0
+node tests/script-syntax.mjs || {
+  echo >&2 "커밋 중단: 위 스크립트 오류를 고친 뒤 다시 커밋하세요."
+  exit 1
+}
