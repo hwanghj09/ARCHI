@@ -1,4 +1,4 @@
-#sanity-hud { position: fixed; z-index: 11; left: max(24px, env(safe-area-inset-left)); top: 116px; width: 152px; padding: 10px 12px; border: 1px solid #637c73; background: #101c20e8; color: #dbe5d8; pointer-events: none; font: 12px/1.5 Arial, sans-serif; }
+#sanity-hud { position: fixed; z-index: 11; left: max(24px, env(safe-area-inset-left)); top: 80px; width: 152px; padding: 10px 12px; border: 1px solid #637c73; background: #101c20e8; color: #dbe5d8; pointer-events: none; font: 12px/1.5 Arial, sans-serif; }
 .sanity-heading { display: flex; justify-content: space-between; gap: 12px; }
 #sanity-value { font-variant-numeric: tabular-nums; }
 #sanity-meter { height: 7px; margin: 7px 0 4px; border: 1px solid #3e534a; background: #050c10; }
@@ -16,9 +16,9 @@ body:has(#world[data-blackout-scene]) #sanity-hud,
 body:has(#world[data-opening]) #fear-overlay, body:has(#world[data-opening]) #fear-overlay-red,
 body:has(#world[data-blackout-scene]) #fear-overlay, body:has(#world[data-blackout-scene]) #fear-overlay-red,
 body:has(#world[data-opening]) #blink-flash, body:has(#world[data-blackout-scene]) #blink-flash,
-body:has(#world[data-opening]) #red-eyes, body:has(#world[data-blackout-scene]) #red-eyes { visibility: hidden; }
+body:has(#world[data-opening]) :is(#red-eyes, #red-eye-shards), body:has(#world[data-blackout-scene]) :is(#red-eyes, #red-eye-shards) { visibility: hidden; }
 @media (max-width: 480px) { #sanity-hud { width: 136px; padding: 8px 10px; } }
-@media (max-height: 480px) { #sanity-hud { top: 106px; } }
+@media (max-height: 480px) { #sanity-hud { top: 70px; } }
 @media (prefers-reduced-motion: reduce) { #hallucination-shadow { filter: blur(.8px); } }
 
 /* 50/40/30/20/10% 미만 단계별 화면 연출: 검은 비네트 → 흐림 → (30~20%에서) 붉게 전환. */
@@ -26,7 +26,7 @@ body:has(#world[data-opening]) #red-eyes, body:has(#world[data-blackout-scene]) 
   transition: opacity .7s, filter .7s; background: radial-gradient(ellipse at center, transparent 42%, #000 92%); }
 #fear-overlay-red { background: radial-gradient(ellipse at center, transparent 30%, #6e0f0f 92%); }
 /* 층 표시·가방·목표 창은 화면 연출(비네트·흐림, z-index 10) 위에 두어 메뉴 버튼처럼 함께 흐려지지 않게 한다. */
-#stage > header, #inventory-button, #objective { z-index: 11; }
+#stage > header, #stage > nav, body > header, body > nav, #inventory-button, #objective { z-index: 11; }
 body[data-fear-tier="1"] #fear-overlay { opacity: .4; }
 body[data-fear-tier="2"] #fear-overlay { opacity: .55; filter: blur(1.5px); }
 body[data-fear-tier="3"] #fear-overlay { opacity: .62; filter: blur(1.5px); }
@@ -47,7 +47,7 @@ body[data-fear-tier="5"] #fear-overlay { opacity: .8; filter: blur(3.2px); }
   rotate: var(--eye-roll, 0deg); scale: var(--eye-size, 1) calc(var(--eye-size, 1) * var(--eye-open, 1));
   background: url(../assets/ui/hallucination/red-eye-sclera-pixel.png) center / contain no-repeat;
   background-color: rgba(210, 24, 30, .72); background-blend-mode: multiply;
-  filter: saturate(.58) brightness(.94) contrast(.84) opacity(var(--eye-unlit, 1)); transition: filter 1.5s ease;
+  filter: saturate(.58) brightness(.94) contrast(.84) opacity(var(--eye-unlit, 1)); transition: filter .75s ease;
   mask-image: url(../assets/ui/hallucination/red-eye-sclera-pixel.png);
   mask-size: contain; mask-position: center; mask-repeat: no-repeat;
   animation: red-eye-in .5s ease-out forwards; }
@@ -152,3 +152,13 @@ body[data-fear-tier="5"] { --haunted-opacity: 1; }
 #office-workstation, .office-desk-backdrop { display: none; }
 #world[data-room="office"] :is(#office-workstation, .office-desk-backdrop) { display: block; }
 @media (prefers-reduced-motion: reduce) { .haunted-prop, .floor-prop[data-haunted] > img:first-child { transition: none; } }
+
+/* 눈이 깨질 때(sanity.js의 shatterRedEye): 붉은 조각이 제자리에서 튀어 나와 아래로 떨어지며 흩어지고 빠르게 사라진다. */
+#red-eye-shards { position: absolute; inset: 0; z-index: 6; pointer-events: none; }
+#red-eye-shards i { position: absolute; background: #5c0a10; clip-path: polygon(10% 0, 100% 30%, 60% 100%, 0 70%); filter: blur(.8px);
+  animation: red-shard-fall .6s cubic-bezier(.3, .1, .6, 1) forwards; }
+@keyframes red-shard-fall {
+  from { opacity: .8; transform: translate(0, 0) rotate(0); }
+  to { opacity: 0; transform: translate(var(--dx), var(--dy)) rotate(var(--spin)); }
+}
+@media (prefers-reduced-motion: reduce) { #red-eye-shards i { animation-duration: .01s; } }

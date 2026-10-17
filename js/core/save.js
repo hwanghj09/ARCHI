@@ -5,9 +5,9 @@ let progressSaveFailed = false;
 const savedNumber = (value, fallback, min, max) => Number.isFinite(value) ? Math.max(min, Math.min(max, value)) : fallback;
 const savedFloor = value => Number.isInteger(value) && (value === -2 || value === -1 || (value >= 1 && value <= 17));
 
-function readProgress() {
+function readProgress(key = progressKey) {
   try {
-    const data = JSON.parse(localStorage.getItem(progressKey));
+    const data = JSON.parse(localStorage.getItem(key));
     // 단면 에셋으로 교체되어 사라진 방의 저장은 같은 층 복도에서 재개한다. 소지품·전력·퍼즐 기록은 유지한다.
     if (data?.version === 1 && ['f2-booth', 'f3-hanuri', 'f4-log', 'f4-ups', 'f4-vault', 'f4-office',
       'f5-library', 'f5-council', 'f6-remote', 'f6-line', 'f6-duty', 'f8-repro', 'f8-blind',
@@ -57,6 +57,25 @@ function saveProgress() {
     progressSaveFailed = true;
     return false;
   }
+}
+
+// 저장 슬롯 3개(archi.slot.N.v1). 목표가 바뀔 때마다 가장 오래된 칸(빈 칸이 먼저)을 덮어써 자동으로 저장하고(slotKind 'auto'),
+// 메뉴의 저장·불러오기에서 칸을 골라 직접 저장한다(slotKind 'manual'). 위의 자동 저장(progressKey)은 '계속하기'용으로 따로 있다.
+const slotKeys = [1, 2, 3].map(n => `archi.slot.${n}.v1`);
+// 불러오기 직후 첫 목표 갱신(불러온 상태의 목표가 처음 그려지는 순간)은 저장하지 않는다. objective.js의 refreshObjective가 읽고 내린다.
+let objectiveSaveSkip = false;
+
+function writeSlot(index, kind) {
+  if (!gameStarted || restoringProgress || b2Ending.phase !== 'idle') return false;
+  try {
+    localStorage.setItem(slotKeys[index], JSON.stringify({ ...progressSnapshot(), slotKind: kind, objective: currentObjective?.title ?? '' }));
+    return true;
+  } catch { return false; }
+}
+
+function saveObjectiveSlot() {
+  const times = slotKeys.map(key => readProgress(key)?.savedAt ?? 0);
+  writeSlot(times.indexOf(Math.min(...times)), 'auto');
 }
 
 function restoreProgress(data) {
@@ -211,6 +230,7 @@ function restoreProgress(data) {
     gameStarted = true;
     showStatus('저장한 진행 상황을 이어서 시작합니다.', 3000);
     (selectingFloor ? cabin : stage).focus({ preventScroll: true });
+    objectiveSaveSkip = true; // 불러온 상태의 첫 목표 표시는 새 목표가 아니므로 슬롯에 저장하지 않는다
   } finally { restoringProgress = false; }
 }
 

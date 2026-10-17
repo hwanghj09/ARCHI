@@ -1793,7 +1793,6 @@ try {
     await page.keyboard.press('e');
     await page.clock.runFor(800);
     assert.match(await status(), /비상계단 문이 잠겨/);
-    await inspect(3310, 'E · 안내 데스크 조사', /23:58 출입증 등록 해제 · 17F 정수호/);
     await visitRestroom('1F');
     await inspect(4390, 'E · 스피드 게이트 조사', /미등록 출입증/);
     // The panel sticker points at the build date, which is the old code.

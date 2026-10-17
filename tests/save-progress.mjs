@@ -131,7 +131,7 @@ try {
     document.dispatchEvent(new Event('visibilitychange')); delete document.hidden;
   });
   assert.equal((await stored()).sanity, 37);
-  await page.setViewportSize({ width: 390, height: 844 }); await page.locator('#game-menu-button').tap();
+  await page.setViewportSize({ width: 390, height: 844 }); await page.evaluate(() => openGameMenu());
   await page.screenshot({ path: '.local/save-menu-mobile.png' });
   await page.locator('#menu-start').tap(); await page.locator('#menu-new-confirm').tap(); await page.locator('#opening-skip').click();
   const fresh = await state();
@@ -139,7 +139,7 @@ try {
   assert.deepEqual(fresh.items, ['f17-badge']); assert.equal(fresh.dock, null); assert.equal(fresh.blackout, false); assert.equal(fresh.solarEnabled, false);
   assert.deepEqual((await stored()).items, ['f17-badge']);
   // Saves made before the badge became a starting item retain their location and other items.
-  await page.locator('#game-menu-button').tap();
+  await page.evaluate(() => openGameMenu());
   await page.evaluate(() => {
     const legacy = JSON.parse(localStorage.getItem(progressKey));
     legacy.items = ['rooftop-key'];
@@ -155,7 +155,7 @@ try {
   assert.deepEqual((await stored()).items, ['f17-badge', 'rooftop-key']);
   // Saves from the one-floor power rule load a numeric floor as one powered floor; an empty value powers none.
   for (const [legacyFloor, expected, status] of [[7, [7], '7F 전력 공급 중 (1/1)'], [null, [], '공급할 층 선택 (0/1)']]) {
-    await page.locator('#game-menu-button').tap();
+    await page.evaluate(() => openGameMenu());
     await page.evaluate(floor => {
       const legacy = JSON.parse(localStorage.getItem(progressKey));
       delete legacy.solarPoweredFloors;
@@ -171,7 +171,7 @@ try {
     assert.deepEqual(resaved.solarPoweredFloors, expected); assert(!('solarPoweredFloor' in resaved), 'New saves use only the array');
   }
   // Older two-floor saves retain the last selected valid floor under the current one-floor limit.
-  await page.locator('#game-menu-button').tap();
+  await page.evaluate(() => openGameMenu());
   await page.evaluate(() => {
     const legacy = JSON.parse(localStorage.getItem(progressKey));
     Object.assign(legacy, { blackout: true, solarEnabled: true, solarPoweredFloors: [12, 7] });
@@ -194,7 +194,7 @@ try {
   assert.equal(await page.locator('.docked-phone:visible').count(), 1);
   // Removed corridor deposits return the phone to the player without losing its battery.
   for (const [id, oldX] of [['f12', 2052], ['f17', 1180], ['f17', 2072]]) {
-    await page.locator('#game-menu-button').tap();
+    await page.evaluate(() => openGameMenu());
     await page.evaluate(([id, oldX]) => {
       const config = floorById.get(id);
       const legacy = JSON.parse(localStorage.getItem(progressKey));
@@ -221,7 +221,7 @@ try {
       }
     } finally { localStorage.setItem(progressKey, saved); }
   });
-  await page.locator('#game-menu-button').tap();
+  await page.evaluate(() => openGameMenu());
   await page.evaluate(() => localStorage.setItem(progressKey, JSON.stringify({ version: 1, scene: { id: 'missing', x: 1, y: 1 }, items: [] })));
   await page.reload(); assert(await page.locator('#menu-continue').isHidden());
   await page.addInitScript(() => { Storage.prototype.setItem = () => { throw new Error('storage blocked'); }; });

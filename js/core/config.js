@@ -43,4 +43,7 @@ const zeroEventApproachDurationMs = 3600;
 const zeroEventChargeWaitMs = 15000; // 0% 도달 후 첫 돌진까지
 const zeroEventRetryWaitMs = 10000; // 회피 이후 다음 돌진까지
 const zeroEventRushDurationMs = Math.round(2400 / 1.7 / 1.5); // 돌진이 플레이어에게 닿기까지 걸리는 시간(기존 2400ms의 1.7×1.5배 속도). 회피하지 못하면 게임 오버
+const zeroEventGhostFadeInMs = 700; // 돌진 환각이 처음 나타날 때 투명에서 보이기까지 걸리는 시간
+const zeroEventSpeedStepMs = 1500; // 추격이 이어지는 동안 이 시간마다
+const zeroEventSpeedStepFactor = 1.5; // 환각의 속도가 이만큼 배가 된다(1.5초 뒤 1.5배, 3초 뒤 2.25배 …)
 const wallEyeMaxCount = 6;

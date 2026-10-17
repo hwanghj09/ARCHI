@@ -76,6 +76,11 @@ function mountGuardPatrol() {
   updateGuardPatrol(0);
 }
 
+// 1층 R-01은 정비 패널에 0914를 넣으면(f1-robot-log) 꺼진다: 전력이 들어와도, B2 엔딩의 1층에서도 멈춰 있다. B2 로봇은 해당 없다.
+function guardPatrolPowered(robot) {
+  return world.dataset.powered === 'true' && !(robot === guardPatrol && collectedItems.has('f1-robot-log'));
+}
+
 function updateGuardPatrol(delta) {
   updateRobot(guardPatrol, delta);
   // 문 앞에서 멈춰 선(hold) 로봇은 그리기만 한다.
@@ -85,7 +90,7 @@ function updateGuardPatrol(delta) {
 function updateRobot(robot, delta) {
   if (!robot.door) return;
   const { left, right, speed, pause } = robot.door.patrol;
-  const powered = world.dataset.powered === 'true';
+  const powered = guardPatrolPowered(robot);
   if (!powered) {
     if (playerCaught) { releaseGuardCapture(); stage.focus(); }
     // 아직 한 번도 감지되지 않은 'dock' 상태는 전력이 끊겨도 그대로 둔다 — 안 그러면 처음 전력이 들어오는
@@ -127,7 +132,6 @@ function updateRobot(robot, delta) {
     if ((robot.mode === 'patrol' || robot.mode === 'dock' || robot.mode === 'return') && seesPlayer) {
       robot.mode = 'chase'; robot.lostTime = 0; robot.chaseOriginX = robot.x; robot.spottedX = body.position.x;
       playGameSound('robot-alert', { x: robot.x });
-      showStatus('경비 로봇이 수호를 감지했다. 거리를 벌려야 한다.', 2400);
     }
     if (robot.mode === 'chase') {
       // 엘리베이터 근처는 로봇의 경계 구역 밖이다 — 쫓기다가 수호가 거기 도착하면 쫓던 걸 그만두고 감지했던

@@ -303,15 +303,21 @@ try {
     await page.locator('#keypad-input').fill('0914'); await page.keyboard.press('Enter');
     assert(await page.evaluate(() => collectedItems.has('f1-robot-log')));
     await page.keyboard.press('Escape');
+    // 코드를 넣은 R-01은 꺼져서 전력이 들어와도 수호를 잡지 않는다.
+    await reset({ playerX: 3060 }); await page.clock.runFor(1300);
+    assert.equal((await state()).caught, false, 'A robot disabled with 0914 does not catch');
+    // 이어지는 반복은 붙잡기 연출을 다시 시도해도 단서가 남는지 보려고 잠깐 로봇을 다시 켠다.
     for (let i = 0; i < 5; i++) {
-      await reset({ playerX: 3060 }); await page.clock.runFor(1300);
+      await page.evaluate(() => collectedItems.delete('f1-robot-log')); await reset({ playerX: 3060 }); await page.clock.runFor(1300);
       assert.equal(await page.evaluate(() => document.activeElement.id), 'guard-retry');
       if (i % 2) await page.keyboard.press('Space');
       else await page.locator('#guard-retry').click();
+      await page.evaluate(() => collectedItems.add('f1-robot-log'));
       assert.equal((await state()).caught, false); assert.equal((await state()).inert, false);
       assert(await page.evaluate(() => collectedItems.has('f1-robot-log') && keys.size === 0));
       assert.equal(await page.locator('.guard-robot-sprite').count(), 1);
     }
+    await page.evaluate(() => collectedItems.delete('f1-robot-log')); // 다음 시험은 켜진 로봇을 쓴다
   });
   await check('Phone/light and held movement inputs are cleared on capture', async () => {
     await reset({ playerX: 3060 });

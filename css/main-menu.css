@@ -42,8 +42,6 @@ body[data-main-menu] :is(header, nav, #debug-sidebar, #inventory-button, #sanity
 #main-menu[data-has-save="true"] #menu-start { background: #0e171bc4; color: #e3e8e2; border-color: #57665f; font-weight: normal; }
 #main-menu[data-has-save="true"] #menu-start > span:last-child { color: #73877b; font-size: 10px; }
 #main-menu[data-has-save="true"] #menu-start:hover { border-color: #c5d1c4; background: #24322b; }
-#game-menu-button { position: fixed; z-index: 10; top: 68px; right: max(108px, calc(env(safe-area-inset-right) + 84px)); min-height: 40px; padding: 8px 12px; border: 1px solid #4e5851; border-radius: 4px; background: #19211de6; color: #ddd; font: inherit; cursor: pointer; }
-body[data-main-menu] #game-menu-button, body:has(#world[data-opening]) #game-menu-button, body:has(#world[data-blackout-scene]) #game-menu-button { visibility: hidden; }
 @media (max-width: 600px) {
   .menu-topline { padding: 22px 24px 0; }
   .menu-content { width: calc(100% - 48px); min-height: calc(100dvh - 138px); padding: 30px 0; }
@@ -64,3 +62,13 @@ body[data-main-menu] #game-menu-button, body:has(#world[data-opening]) #game-men
   #main-menu .menu-back { margin-bottom: 10px; }
   .menu-view h2 { margin-bottom: 14px; }
 }
+
+/* 저장 · 불러오기: 슬롯 3칸. 칸마다 정보와 [저장] [불러오기] 버튼이 있다. */
+#menu-slots { width: min(460px, 100%); }
+.menu-slot-list { display: grid; gap: 8px; margin: 0 0 14px; padding: 0; list-style: none; }
+.menu-slot-list li { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 10px; padding: 10px 12px; border: 1px solid #3e5057; background: #0e171bcc; }
+.menu-slot-list strong { display: block; font-size: 13px; letter-spacing: .06em; }
+.menu-slot-list small { display: block; margin-top: 3px; color: #8fa196; font-size: 11px; line-height: 1.5; }
+.menu-slot-list li > div:last-child { display: flex; gap: 6px; }
+.menu-slot-list button { min-height: 36px; padding: 6px 12px; border: 1px solid #5d7068; background: #182327; color: #dbe5d8; font-size: 12px; cursor: pointer; }
+.menu-slot-list button:disabled { opacity: .4; cursor: default; }

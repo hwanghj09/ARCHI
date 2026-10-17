@@ -1,5 +1,5 @@
-/* 목표 창: 메뉴·가방 버튼 아래 오른쪽. 제목이 내용보다 2pt 크다. */
-#objective { position: fixed; z-index: 5; top: 118px; right: max(24px, env(safe-area-inset-right)); width: min(240px, calc(100vw - 48px)); /* 실제 너비는 objective.js가 메뉴 버튼 왼쪽 끝에 맞춘다 */  box-sizing: border-box; padding: 10px 14px; border: 1px solid #778778; border-radius: 4px; background: #182327e6; color: #eddfbd; pointer-events: none; }
+/* 목표 창: 가방 버튼 아래 오른쪽, 평소 크기의 2/3(zoom). 제목이 내용보다 2pt 크다. */
+#objective { position: fixed; z-index: 5; top: 118px; right: max(24px, env(safe-area-inset-right)); zoom: .6667; width: min(240px, calc(100vw - 48px)); box-sizing: border-box; padding: 10px 14px; border: 1px solid #778778; border-radius: 4px; background: #182327e6; color: #eddfbd; pointer-events: none; }
 #objective-heading { margin: 0 0 6px; color: #9fb1a3; font: bold 11px/1.4 Arial, sans-serif; letter-spacing: .08em; }
 #objective-title { display: block; font: bold 13pt/1.35 Arial, sans-serif; word-break: keep-all; }
 #objective-text { margin: 4px 0 0; color: #d8d0bb; font: 11pt/1.5 Arial, sans-serif; word-break: keep-all; }
@@ -7,5 +7,4 @@
 @keyframes objective-updated { from { border-color: #dbc18b; box-shadow: 0 0 0 2px #dbc18b80; } }
 body[data-main-menu] #objective, body:has(#world[data-opening]) #objective, body:has(#world[data-blackout-scene]) #objective,
 body:has(#elevator-cabin:not([hidden])) #objective { visibility: hidden; }
-@media (max-height: 480px) { #objective { top: 112px; padding: 6px 10px; } }
 @media (prefers-reduced-motion: reduce) { #objective.updated { animation: none; } }

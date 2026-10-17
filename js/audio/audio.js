@@ -255,6 +255,36 @@ function playHallucinationSound(volume = 1, randomSighting = false) {
   element.play().catch(() => {});
 }
 
+// 붉은 눈이 가까이 다가간 수호 앞에서 깨질 때(sanity.js의 shatterRedEye)의 효과음: 두 파일 중 하나를 무작위로 들려준다.
+// dragon 파일은 소리를 줄이고 피치를 살짝 높여서(preservesPitch를 꺼 재생 속도와 함께 올린다), universfield 파일은 1초까지만 재생한다.
+const redEyeBreakDragonElement = new Audio('assets/audio/red-eye-break-dragon.mp3');
+const redEyeBreakUniversElement = new Audio('assets/audio/red-eye-break-universfield.mp3');
+for (const element of [redEyeBreakDragonElement, redEyeBreakUniversElement]) element.preload = 'auto';
+redEyeBreakDragonElement.preservesPitch = false;
+redEyeBreakDragonElement.playbackRate = 1.12;
+const redEyeBreakDragonVolume = .35;
+const redEyeBreakUniversVolume = .6;
+// 파일 앞의 무음·도입부를 건너뛰어 눈이 깨지는 순간에 맞춘다(초). 아직 느리면 값을 키운다.
+const redEyeBreakDragonStart = .15;
+const redEyeBreakUniversStart = .15;
+const redEyeBreakUniversMs = 1000;
+let redEyeBreakUniversTimer = null;
+
+function playRedEyeBreakSound() {
+  if (document.hidden || gameVolume <= 0 || mainMenuActive || !gameStarted || restoringProgress) return;
+  if (Math.random() < .5) {
+    redEyeBreakDragonElement.volume = Math.max(0, Math.min(1, gameVolume * redEyeBreakDragonVolume));
+    redEyeBreakDragonElement.currentTime = redEyeBreakDragonStart;
+    redEyeBreakDragonElement.play().catch(() => {});
+    return;
+  }
+  clearTimeout(redEyeBreakUniversTimer);
+  redEyeBreakUniversElement.volume = Math.max(0, Math.min(1, gameVolume * redEyeBreakUniversVolume));
+  redEyeBreakUniversElement.currentTime = redEyeBreakUniversStart;
+  redEyeBreakUniversElement.play().catch(() => {});
+  redEyeBreakUniversTimer = setTimeout(() => redEyeBreakUniversElement.pause(), redEyeBreakUniversMs);
+}
+
 function pauseGameAudio() {
   sanityMusicElement.pause();
   sanityMusicGain = sanityMusicTarget = 0;
@@ -302,7 +332,7 @@ function updateGameAudio(elapsed = step) {
   const musicAllowed = !dread && !haunted && !openingActive && !blackoutSceneActive && !storySceneActive && !cctvSceneActive && !playerCaught && !hallucinationCaught;
   updateSanityMusic(musicAllowed ? fear * .06 : 0, elapsed);
   if (moving) wanted.set('motor', .25);
-  if (!selectingFloor && !openingActive && !blackoutSceneActive && !cctvSceneActive && !usingComputer && !usingKeypad && !usingControl && !usingPowerPanel && !usingInspection && !transitioning && !playerCaught && guardPatrol.door && lit && (guardPatrol.mode === 'chase' || !guardPatrol.wait)) {
+  if (!selectingFloor && !openingActive && !blackoutSceneActive && !cctvSceneActive && !usingComputer && !usingKeypad && !usingControl && !usingPowerPanel && !usingInspection && !transitioning && !playerCaught && guardPatrol.door && lit && guardPatrolPowered(guardPatrol) && (guardPatrol.mode === 'chase' || !guardPatrol.wait)) {
     playGameSound('robot-servo', { x: guardPatrol.x });
   }
   for (const [name, sound] of gameAudioAmbience) {

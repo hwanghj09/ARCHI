@@ -40,7 +40,7 @@ try {
   assert.equal(await page.locator('#inspection').getAttribute('data-surface'), 'card', 'First inspection displays the ID card');
   assert(await page.locator('#inspection').evaluate(panel => {
     const layer = Number(getComputedStyle(panel).zIndex);
-    return ['sanity-hud', 'game-menu-button'].every(id => layer > Number(getComputedStyle(document.getElementById(id)).zIndex));
+    return ['sanity-hud', 'map-button'].every(id => layer > Number(getComputedStyle(document.getElementById(id)).zIndex));
   }), 'Gameplay HUD and menu stay behind the inspection content');
   await page.keyboard.press('Escape');
   assert(await page.locator('#inspection').isHidden(), 'Esc closes a card found in the world instead of opening the bag');

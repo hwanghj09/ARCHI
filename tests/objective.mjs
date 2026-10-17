@@ -45,12 +45,16 @@ try {
   assert(Math.abs(sizes[0].size - sizes[1].size - 8 / 3) < .05, `title ${sizes[0].size}px vs text ${sizes[1].size}px`);
   assert(sizes[0].top < sizes[1].top);
 
-  // 메뉴·가방 버튼 아래에 놓인다.
+  // 목표 창은 오른쪽 위, 현재 위치는 지도 버튼 왼쪽(오른쪽 위), 가방 버튼은 가운데 아래에 있다.
   const box = await objective.boundingBox();
-  for (const id of ['#game-menu-button', '#inventory-button']) {
-    const button = await page.locator(id).boundingBox();
-    assert(box.y >= button.y + button.height, `${id} sits above the objective`);
-  }
+  const viewport = page.viewportSize();
+  assert(box.x + box.width > viewport.width - 40 && box.y < 140, 'The objective sits at the top right');
+  const place = await page.locator('header span').boundingBox();
+  const mapButton = await page.locator('#map-button').boundingBox();
+  assert(mapButton.x + mapButton.width > viewport.width - 40 && mapButton.y < 40, 'The map button sits at the top right');
+  assert(place.x + place.width <= mapButton.x && place.y < 70, 'The current place sits left of the map button');
+  const bag = await page.locator('#inventory-button').boundingBox();
+  assert(Math.abs(bag.x + bag.width / 2 - viewport.width / 2) < 2 && bag.y + bag.height > viewport.height - 40, 'The bag button sits at the bottom center');
   await page.screenshot({ path: '.local/objective.png' });
 
   const titleAfter = async change => {
