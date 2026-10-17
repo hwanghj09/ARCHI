@@ -93,6 +93,7 @@ function answerLogQuiz(choice) {
     playGameSound('pickup');
     grantLogHint();
     renderLogPanel();
+    document.getElementById('log-close').focus(); // 누른 퀴즈 버튼이 숨겨지므로 초점을 닫기 버튼으로 옮긴다.
   } else {
     playGameSound('deny');
     sanity = Math.max(0, sanity - LOG_QUIZ_WRONG_SANITY_LOSS);

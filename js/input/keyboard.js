@@ -42,6 +42,13 @@ window.addEventListener('keydown', event => {
     event.preventDefault();
     return;
   }
+  // 12층 야간 로그 단말기(log-puzzle.js): 퀴즈를 맞히면 누른 버튼이 숨겨져 초점이 창 밖으로 빠지므로, 여기서도 Esc로 닫는다.
+  if (!logPanel.hidden) {
+    if (event.code === 'Tab') return;
+    if (event.code === 'Escape') closeLogPuzzle();
+    event.preventDefault();
+    return;
+  }
   if (event.code === 'Tab' && !event.shiftKey && !selectingFloor && !usingComputer && !usingKeypad && !usingControl &&
       !usingPhone && !usingPowerPanel && (!usingInspection || inventoryShown())) {
     event.preventDefault();

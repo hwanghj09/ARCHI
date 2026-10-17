@@ -204,16 +204,12 @@ try {
   await supply(7);
   await page.evaluate(() => { phoneBattery = 0; refreshPhone(); });
   await page.locator('#phone-solar-supply').dispatchEvent('click');
-  await page.locator('#phone-solar-toggle').dispatchEvent('click');
   assert.deepEqual(await floors(), [7], 'An empty phone cannot change power');
   assert.equal(await page.evaluate(() => solarEnabled), true);
+  assert.equal(await page.locator('#phone-solar-toggle').count(), 0, 'Only the rooftop lever turns emergency power on or off');
   await page.evaluate(() => { phoneBattery = 100; refreshPhone(); });
   await page.locator('[data-phone-app="solar"]').click();
-  await page.locator('#phone-solar-toggle').click();
-  assert.deepEqual(await floors(), []);
-  assert.equal(await page.evaluate(() => solarEnabled), false);
-  await page.locator('#phone-solar-toggle').click();
-  assert.match(await page.locator('#interaction-status').textContent(), /휴대폰의 비상 전력 제어 앱에서 공급할 층/);
+  await supply(7);
   await supply(17);
   const saved = await page.evaluate(() => progressSnapshot());
   assert(saved.items.includes('solar-app-installed'));

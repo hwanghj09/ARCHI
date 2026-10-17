@@ -5,7 +5,7 @@ const COMPUTER_APPS = {
   mail: { title: '사내 메일', icon: 'mail' },
   calculator: { title: '계산기', icon: 'calculator', width: 380, height: 510 },
   building: { title: '시설 안내', icon: 'building' },
-  browser: { title: '블로그', icon: 'building', width: 950, height: 580 },
+  browser: { title: '블로그', icon: 'notes', width: 950, height: 580 },
   transfer: { title: '파일 전송', icon: 'files', width: 570, height: 390 },
   document: { title: '문서', icon: 'notes' }
 };
