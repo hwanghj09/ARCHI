@@ -70,6 +70,7 @@ document.getElementById('guard-retry').addEventListener('click', () => {
 
 // 경비 로봇 스프라이트를 지금 장면에 붙인다(R-03, B2 엔딩 로봇).
 function mountRobot(robot, className, patrol) {
+  robot.soundDistance = 0;
   const element = document.createElement('div');
   element.className = `fixture guard-bot ${className}`;
   element.setAttribute('aria-hidden', 'true');
@@ -188,6 +189,7 @@ function keepRoamerClear() {
 }
 
 function mountGuardPatrol() {
+  guardPatrol.soundDistance = 0;
   // 장면을 옮기면 R-03은 쫓던 것을 그만두고, 같은 장면에 있으면 다시 그린다.
   roamer.door = roamer.image = null;
   roamer.mode = 'patrol'; roamer.lostTime = 0;
@@ -226,6 +228,7 @@ function updateGuardPatrol(delta) {
 
 function updateRobot(robot, delta) {
   if (!robot.door) return;
+  const oldX = robot.x;
   const { left, right, speed, pause } = robot.door.patrol;
   const powered = robot.selfPowered || guardPatrolPowered(robot);
   if (!powered) {
@@ -322,6 +325,7 @@ function updateRobot(robot, delta) {
       if (robot.x === left || robot.x === right) robot.wait = pause;
     }
   }
+  if (delta > 0) updateRobotMovementSound(robot, powered && !playerCaught ? Math.abs(robot.x - oldX) : 0);
   // 돌아가는 중('return')은 붙잡기 시트가 아니라 순찰 시트의 바퀴 프레임으로 걷는다.
   const attack = powered && !['patrol', 'dock', 'return'].includes(robot.mode);
   const frame = !powered ? 7 : robot.mode === 'chase' ? Math.floor(robot.elapsed / 120) % 2 :

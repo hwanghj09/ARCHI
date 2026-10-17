@@ -57,7 +57,7 @@ function refreshGameAudioVolume() {
 function gameAudioBuffer(name) {
   if (gameAudioBuffers.has(name)) return gameAudioBuffers.get(name);
   const durations = { step: .2, door: .65, 'elevator-door': 1.05, 'elevator-arrive': 1.05,
-    'elevator-alarm': .95, blackout: 1.5, 'robot-servo': .48, 'robot-alert': .6,
+    'elevator-alarm': .95, blackout: 1.5, 'robot-step': .26, 'robot-servo': .48, 'robot-alert': .6,
     'robot-grab': .65, 'call-ring': .85, phone: .14, charger: .24, pickup: .22, 'item-get': .5, 'item-use': .3, deny: .46,
     shutter: 1.35, 'camera-shutter': .18, switch: .12, ui: .09,
     'cctv-beep': 2.2, 'cctv-on': 1.3, 'cctv-hit': 1.8, 'cctv-static': .7, heartbeat: .9, 'cctv-rise': 5.2 };
@@ -87,6 +87,10 @@ function gameAudioBuffer(name) {
       case 'elevator-alarm': sample = .17 * sin(t < .36 ? 540 : 680, t) * (t % .32 < .22 ? 1 : 0) * Math.sin(Math.PI * t / duration); break;
       case 'blackout': sample = .32 * soft * hit(t, .012, 13) + .12 * sin(112 - 35 * t, t) * hit(t, 0, 3.7) + .15 * noise * hit(t, .19, 32); break;
       case 'robot-servo': sample = (.16 * sin(125 + 12 * t, t) + .045 * sin(420, t) + .22 * low) * Math.sin(Math.PI * t / duration); break;
+      // 바퀴의 낮은 진동 위에 금속 관절의 철컥임과 짧은 기어 마찰음을 겹친다.
+      case 'robot-step': sample = (.3 * sin(76, t) + .32 * low) * hit(t, .008, 30) +
+        (.18 * soft + .075 * sin(1380, t) + .05 * sin(2130, t)) * hit(t, .018, 65) +
+        (.1 * soft + .045 * sin(340 - 420 * t, t)) * gate(t, .045, .16) + .12 * soft * hit(t, .12, 55); break;
       case 'robot-alert': sample = .13 * sin(t < .24 ? 330 : 390, t) * (hit(t, .015, 14) + hit(t, .3, 14)); break;
       case 'robot-grab': sample = (.14 * sin(118, t) + .26 * low) * Math.sin(Math.PI * t / duration) + (.18 * sin(68, t) + .18 * soft) * hit(t, .48, 32); break;
       case 'call-ring': sample = (.11 * sin(440, t) + .08 * sin(480, t)) * (hit(t, .02, 9) + hit(t, .4, 9)); break;
@@ -151,9 +155,9 @@ function playGameSound(name, options = {}) {
   if (typeof restoringProgress !== 'undefined' && restoringProgress) return;
   if (name !== 'ui' && (mainMenuActive || !gameStarted)) return;
   const now = gameAudioContext.currentTime;
-  const distance = Number.isFinite(options.x) && !selectingFloor ? Math.abs(options.x - body.position.x) : 0;
+  const distance = Number.isFinite(options.x) && (!selectingFloor || name === 'robot-step' || name === 'robot-servo') ? Math.abs(options.x - body.position.x) : 0;
   if (distance >= 800) return;
-  const interval = name === 'step' ? (options.running ? .21 : .29) : name === 'robot-alert' ? 1.2 : name === 'robot-servo' ? 1.1 : .08;
+  const interval = name === 'step' ? (options.running ? .21 : .29) : name === 'robot-step' ? 0 : name === 'robot-alert' ? 1.2 : name === 'robot-servo' ? 1.1 : .08;
   if (now - (gameAudioLastPlayed.get(name) ?? -Infinity) < interval || gameAudioEffects.size >= 6) return;
   const buffer = gameAudioBuffer(name);
   if (!buffer) return;
@@ -161,14 +165,22 @@ function playGameSound(name, options = {}) {
   const source = gameAudioContext.createBufferSource();
   const gain = gameAudioContext.createGain();
   source.buffer = buffer;
-  source.playbackRate.value = name === 'step' ? .94 + Math.random() * .12 : 1;
+  source.playbackRate.value = name === 'step' || name === 'robot-step' ? .94 + Math.random() * .12 : 1;
   gain.gain.value = (name === 'step' ? (options.landing ? .65 : options.running ? .6 : .42) : name === 'blackout' ? .7 : name === 'cctv-hit' ? .85 : name === 'cctv-rise' ? .7 :
-    name === 'robot-servo' ? .35 : .6) * (1 - distance / 800);
+    name === 'robot-servo' ? .35 : name === 'robot-step' ? .52 : .6) * (1 - distance / 800);
   source.connect(gain).connect(gameAudioMaster);
   const effect = { source, gain, name, stopping: false };
   gameAudioEffects.add(effect);
   source.onended = () => { gameAudioEffects.delete(effect); source.disconnect(); gain.disconnect(); };
   source.start();
+}
+
+function updateRobotMovementSound(robot, distance) {
+  robot.soundDistance = distance > 0 ? (robot.soundDistance ?? 0) + distance : 0;
+  if (robot.soundDistance < 38) return;
+  robot.soundDistance %= 38;
+  playGameSound('robot-step', { x: robot.x });
+  playGameSound('robot-servo', { x: robot.x });
 }
 
 function stopGameAudioSource(sound) {
@@ -332,9 +344,6 @@ function updateGameAudio(elapsed = step) {
   const musicAllowed = !dread && !haunted && !openingActive && !blackoutSceneActive && !storySceneActive && !cctvSceneActive && !playerCaught && !hallucinationCaught;
   updateSanityMusic(musicAllowed ? fear * .06 : 0, elapsed);
   if (moving) wanted.set('motor', .25);
-  if (!selectingFloor && !openingActive && !blackoutSceneActive && !cctvSceneActive && !usingComputer && !usingKeypad && !usingControl && !usingPowerPanel && !usingInspection && !transitioning && !playerCaught && guardPatrol.door && lit && guardPatrolPowered(guardPatrol) && (guardPatrol.mode === 'chase' || !guardPatrol.wait)) {
-    playGameSound('robot-servo', { x: guardPatrol.x });
-  }
   for (const [name, sound] of gameAudioAmbience) {
     if (wanted.has(name)) continue;
     stopGameAudioSource(sound);

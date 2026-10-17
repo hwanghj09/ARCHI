@@ -79,9 +79,10 @@ try {
   assert.deepEqual(await events(), ['robot-alert', 'robot-grab']);
   // 엘리베이터 쪽으로 놓친 뒤 걸어 돌아가는 동안은 모터 소리가 나고, 도착해서 둘러볼 때는 멈춘다.
   const servo = robot => page.evaluate(robot => {
-    releaseGuardCapture(); Object.assign(guardPatrol, robot);
+    releaseGuardCapture(); Object.assign(guardPatrol, robot, { soundDistance: 0 });
     Body.setPosition(body, { x: 2600, y: floorY - 81 }); audioEvents.length = 0;
-    updateGameAudio(); return audioEvents.includes('robot-servo');
+    for (let i = 0; i < 30; i++) updateGuardPatrol(1000 / 60);
+    return audioEvents.includes('robot-servo') && audioEvents.includes('robot-step');
   }, robot);
   assert(await servo({ x: 3000, facing: 1, wait: 0, mode: 'return', chaseOriginX: 3400 }), 'A returning robot runs its motor');
   assert(!(await servo({ x: 3400, facing: 1, wait: 1400, mode: 'patrol' })), 'The arrival scan is quiet');

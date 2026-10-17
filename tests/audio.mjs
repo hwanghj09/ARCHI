@@ -78,7 +78,7 @@ try {
 
   const buffers = await page.evaluate(() => {
     const names = ['step', 'door', 'elevator-door', 'elevator-arrive', 'elevator-alarm', 'blackout',
-      'robot-servo', 'robot-alert', 'robot-grab', 'phone', 'charger', 'pickup', 'item-get', 'item-use', 'deny', 'shutter',
+      'robot-step', 'robot-servo', 'robot-alert', 'robot-grab', 'phone', 'charger', 'pickup', 'item-get', 'item-use', 'deny', 'shutter',
       'switch', 'ui', 'call-ring', 'cctv-beep', 'cctv-on', 'cctv-hit', 'cctv-static', 'heartbeat', 'cctv-rise',
       'office', 'dark', 'wind', 'motor', 'cctv-bgm', 'cctv-dread'];
     return names.map(name => {
