@@ -3,6 +3,9 @@
 // 밀리는 범위는 minX~maxX(상자 중심 x)로 막혀 있고, 끝에 닿으면 더 밀리지 않는다. 위에 올라서면(발이 윗면 근처) 밀리지 않고
 // 정적 충돌체라 그대로 딛고 설 수 있다. 상자 위치는 장면을 다시 그릴 때(층·방 이동) 처음으로 돌아간다.
 const PUSH_CONTACT_GAP = 2.5;
+// 달리다(한 걸음 ≈5.7px) 부딪히면 물리 엔진이 겹침을 다 풀지 못해 플레이어가 상자 속으로 2.5px 넘게 파고든 채 남는다.
+// 겹침도 맞닿은 것으로 쳐야 달려와 부딪혀도 밀린다(예전엔 ±2.5px만 인정해 그대로 막혔다).
+const PUSH_MAX_OVERLAP = 12;
 
 function pushableOf(part) { return part.pushable ? part : null; }
 
@@ -13,7 +16,7 @@ function playerPressesPart(part, direction) {
   if (!direction || !sideBySide) return false;
   const gap = direction === 1 ? part.body.bounds.min.x - body.bounds.max.x : body.bounds.min.x - part.body.bounds.max.x;
   const ahead = direction === 1 ? body.position.x < part.body.position.x : body.position.x > part.body.position.x;
-  return ahead && gap > -PUSH_CONTACT_GAP && gap < PUSH_CONTACT_GAP;
+  return ahead && gap > -PUSH_MAX_OVERLAP && gap < PUSH_CONTACT_GAP;
 }
 
 // 이번 걸음에서 플레이어가 가려던 거리(velocityX)를 받아 상자를 밀고, 플레이어가 실제로 갈 거리를 돌려준다.

@@ -15,8 +15,9 @@ const FLOOR12_LAYOUT = {
   elevatorWidthDeltas: [-20, -20, -20],
   // 비상계단 문 왼쪽으로 총 125px.
   stairsOffset: -125,
-  // 복도 그림 속 화장실 벽감(x≈3688~3805)에 맞춘다. metal 스타일에 공용 화장실 문 그림을 입힌다.
-  restroomOverride: { x: 3592, width: 401, doorX: 3688, doorWidth: 117 },
+  // 화장실 문 중심(x≈3746, 이름표 자리)은 그대로 두고, 폭은 다른 층과 같은 145px로 맞춘다 — 117px일 때는 높이(360px)는
+  // 같은데 폭만 좁아 다른 층보다 길쭉해 보였다. metal 스타일에 공용 화장실 문 그림을 입힌다.
+  restroomOverride: { x: 3592, width: 401, doorX: 3674, doorWidth: 145 },
   rooms: [
     // 문 좌표는 CSS 임시 그림이 아니라 assets/background/floor12/corridor.png(실제 손그림)에서 육안 실측한 값이다.
     // GENERATED.md의 "문 좌표 보정(2026-09-28)" 절 참고 — 그림 속 문 위치가 애초 설계 좌표와 상당히 달랐다.
