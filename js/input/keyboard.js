@@ -4,7 +4,7 @@ window.addEventListener('keydown', event => {
   // 지도 창(map.js)은 게임을 멈추지 않는다: Esc만 지도를 닫고 나머지 입력은 그대로 게임에 간다.
   if (!mapWindow.hidden && event.code === 'Escape') { if (!event.repeat) closeMap(); event.preventDefault(); return; }
   if (storySceneActive) {
-    if (event.code === 'Escape') { event.preventDefault(); finishStoryScene(); }
+    if (event.code === 'Escape') { event.preventDefault(); skipStoryScene(); }
     else if (event.code !== 'Tab' && !(event.target.id === 'story-skip' && ['Enter', 'Space'].includes(event.code))) event.preventDefault();
     return;
   }
