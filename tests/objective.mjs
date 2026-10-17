@@ -149,7 +149,8 @@ try {
 
   assert.equal(await titleAfter(() => collectedItems.add('goal-f12-memo')), '로봇의 습격! 그 이유는?', 'Reading a memo does not bypass the authored evaluation puzzle');
   assert.equal(await titleAfter(() => collectedItems.add('f12-evaluation-solved')), '7층 조사하기');
-  assert.equal(await titleAfter(() => collectedItems.add('f7-external-connection-solved')), '지하에서 무슨 일이?');
+  assert.equal(await titleAfter(() => collectedItems.add('f7-external-connection-solved')), '외부 연결 통로 찾기');
+  assert.equal(await titleAfter(() => collectedItems.add('f13-backup-device')), '지하에서 무슨 일이?');
   assert.equal(await titleAfter(() => collectedItems.add('b1-elevator')), 'B2 서버실 조사하기');
   assert.equal(await titleAfter(() => collectedItems.add('goal-b2-console')), 'ARCHI 멈추기');
 

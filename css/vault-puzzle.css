@@ -1,0 +1,10 @@
+/* 13층 보안 자료실(vault-puzzle.js): 연결문, 보안 셔터(data-down), 전력이 들어와 있을 때만 붉은 불이 켜지는 CCTV. */
+.room-door.secure { border: 4px solid #5b6267; background: linear-gradient(90deg, transparent 78%, #9aa3a8 78% 82%, transparent 82%), repeating-linear-gradient(#3b4246 0 38px, #343a3e 38px 40px); box-shadow: inset 0 0 0 3px #1c2023; }
+#dynamic-scene .fixture.vault-shutter { pointer-events: none; transform-origin: top; transform: scaleY(.05); transition: transform .9s cubic-bezier(.5, 0, .9, .6);
+  background: repeating-linear-gradient(#80888c 0 14px, #5e6669 14px 17px), #6d7578; border-bottom: 6px solid #2b3033; box-shadow: 0 4px 10px #0008; }
+#dynamic-scene .fixture.vault-shutter[data-down="true"] { transform: scaleY(1); }
+#dynamic-scene .fixture.vault-cctv { pointer-events: none; border-radius: 6px 14px 14px 6px; background: linear-gradient(#e4e7e5, #a7adab); box-shadow: 0 3px 6px #0007; }
+#dynamic-scene .fixture.vault-cctv::after { content: ''; position: absolute; right: 8px; top: 12px; width: 9px; height: 9px; border-radius: 50%; background: #3a1414; }
+#world:not([data-blackout="true"]) #dynamic-scene .fixture.vault-cctv::after { background: #ff3030; box-shadow: 0 0 10px 3px #ff3030aa; animation: vault-cctv-blink 1s steps(2) infinite; }
+@keyframes vault-cctv-blink { 50% { opacity: .35; } }
+@media (prefers-reduced-motion: reduce) { #dynamic-scene .fixture.vault-shutter { transition: none; } #world #dynamic-scene .fixture.vault-cctv::after { animation: none; } }

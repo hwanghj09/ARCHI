@@ -90,6 +90,7 @@ function update() {
   updateCall();
   updateTimedBarriers();
   updateCameras();
+  updateVaultPuzzle(step);
   cameraX += (cameraTarget() - cameraX) * .13;
   cameraX = Math.max(0, Math.min(Math.max(0, worldWidth - viewWidth), cameraX));
   // 컷씬이 끝나면 확대를 천천히 푼다.

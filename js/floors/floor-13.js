@@ -6,6 +6,8 @@
 // (소품 requires = 다른 소품의 gives, 그 전에는 missingMessage).
 // 단서는 새벽 B2 전력 경보·외부 송신 경보를 SYSTEM이 자동 종결했다는 것, 설치 기록 없는 원격 접속 에이전트,
 // 옥상 비상 전력은 한 번에 한 층만 켤 수 있다는 교육 자료. 정전 상태(모니터 꺼짐)를 기준으로 썼다.
+// 장비 검증실 안쪽 연결문 너머의 보안 자료실(복도 전면 없는 안쪽 방)은 전력 딜레마 퍼즐이다(vault-puzzle.js): 13층에 전력을
+// 넣어야 전자 잠금이 풀리지만(7층 다음 필수 진행: 백업 장치가 B1 승강기 제어반 조건), 켜진 CCTV가 수호를 감지해 보안 셔터를 내린다. 휴대폰으로 전력을 끊고 어둠 속에서 크랭크를 돌려 나온다.
 // build.py가 공용 벽 모듈의 복도와 별도 천장·바닥·벽을 만든다. 문·소품·UPS와 프린터 회선은 기존 좌표를 유지한다.
 const floor13Scene = (name, width) => [
   { src: `assets/background/floor13/floor13-ceiling-${name}.png`, width, height: 100, top: 0 },
@@ -80,8 +82,42 @@ const FLOOR13_ROOMS = interiorRooms(13, [
     { file: 'instrument-cart', size: [256, 256], worldWidth: 113, x: 1060 },
     { file: 'maintenance-tool-cabinet', size: [512, 256], worldWidth: 198, x: 1300 },
     { file: 'server-rack', size: [256, 512], worldWidth: 96, x: 1520 },
-    { file: 'network-rack', size: [256, 512], worldWidth: 96, x: 1640 },
-  ] },
+  ],
+    links: [{ target: 'f13-secure', x: 1650, width: 110, style: 'secure', hint: 'E · 보안 자료실 들어가기' }] },
+  // 안쪽 방: 연결문은 왼쪽 벽, 수동 개방 크랭크는 반대쪽 끝이다. 전력이 들어오면 밝고 CCTV가 켜진다.
+  { id: 'f13-secure', name: '보안 자료실', width: 1824, windowless: true,
+    backgroundWallsOnly: true, backgroundImage: floor13Scene('testbay', 1824),
+    links: [{ target: 'f13-testbay', x: 56, width: 110, style: 'secure', hint: 'E · 장비 검증실로 나가기' }],
+    fixtures: [
+      { name: '보안 셔터', style: 'vault-shutter', x: 48, y: 236, width: 126 },
+      { name: 'CCTV', style: 'vault-cctv', x: 700, y: 120, width: 60, height: 34 },
+      { name: '시설 점검 기록', style: 'wall-notice', x: 230, y: 300, width: 130, height: 150,
+        lines: ['시설 점검 기록', '보안 셔터 · 월간'],
+        message: '점검표: "보안 셔터 정상 · CCTV 연동 정상(미승인 출입 감지 시 자동 하강)." 비고 칸: "정전 시 전자 잠금 해제 → 수동 개방 가능. 크랭크함 위치는 배치도 참조."',
+        surface: 'document', look: 'notice',
+        writing: [{ as: 'title', text: '시설 점검 기록' }, { as: 'field', label: '보안 셔터', text: '정상' },
+          { as: 'field', label: 'CCTV 연동', text: '정상 (미승인 출입 감지 시 자동 하강)' }, { as: 'rule' },
+          { as: 'hand', text: '정전 시 전자 잠금 해제 → 수동 개방 가능.\n크랭크함 위치는 배치도 참조.', ink: 'red' }] },
+      { name: '내부 배치도', style: 'wall-notice', x: 420, y: 290, width: 170, height: 150,
+        lines: ['보안 자료실 배치도', '입구 · 보관 랙 · 크랭크함'],
+        message: '배치도: 입구(왼쪽 벽) → 기록 보관 랙 → 백업 장치 보관함(가운데) → 맨 안쪽 오른쪽 벽에 "수동 개방 크랭크함".',
+        surface: 'document', look: 'notice',
+        writing: [{ as: 'title', text: '보안 자료실 배치도' }, '입구 (왼쪽 벽)', '↓', '기록 보관 랙', '↓', '백업 장치 보관함 (가운데)', '↓',
+          { text: '수동 개방 크랭크함 (맨 안쪽 오른쪽 벽)', ink: 'red' }] },
+    ],
+    props: [
+      { file: 'filing-cabinet', size: [256, 512], worldWidth: 72, x: 760 },
+      { file: 'filing-cabinet', size: [256, 512], worldWidth: 72, x: 840 },
+      { file: 'server-rack', size: [256, 512], worldWidth: 96, x: 1060, name: '백업 장치 보관함', gives: 'f13-backup-device',
+        clue: '원격지원 게이트웨이 백업: ARCHI(archi_svc)가 설치 기록 없는 원격 접속 에이전트로 매일 03:05 건물 밖에 송신했다. 외부 연결 통로다.',
+        message: '잠금이 풀린 보관함에서 원격지원 게이트웨이의 백업 장치를 꺼냈다. 라벨: "03:05 외부 송신 경로 원본 · 원격 접속 에이전트 배포 계정 archi_svc".',
+        takenMessage: '백업 장치를 꺼낸 빈 칸이다.' },
+      { file: 'filing-cabinet', size: [256, 512], worldWidth: 72, x: 1300 },
+      { file: 'network-rack', size: [256, 512], worldWidth: 96, x: 1420 },
+      { file: 'electrical-panel', size: [256, 512], worldWidth: 89, x: 1730, name: '수동 개방 크랭크',
+        control: { kind: 'crank', label: '크랭크를 끝까지 돌려 셔터를 감아 올리자.', when: () => vaultCrankReady() },
+        message: '덜컹, 덜컹… 천장 와이어가 감기며 셔터가 천천히 올라간다.' },
+    ] },
   { id: 'f13-training', name: '고객 교육장', width: 1824,
     backgroundWallsOnly: true, backgroundImage: floor13Scene('training', 1824), props: [
     { file: 'training-slide-board', size: [512, 256], worldWidth: 350, x: 300, name: '교육 자료 보드',
