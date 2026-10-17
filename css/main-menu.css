@@ -21,6 +21,8 @@
 #main-menu :is(button, input):focus-visible { outline: 2px solid #d9c697; outline-offset: 4px; }
 #main-menu button:disabled { opacity: .4; cursor: default; }
 #main-menu .menu-back { min-height: 44px; padding: 0; margin: 0 0 24px; border: 0; background: none; color: #a4b3ab; font-size: 12px; }
+/* 새 게임 확인 창의 취소 버튼: 뒤로 가기 링크 모양(여백 0)이 아니라 위의 버튼과 같은 모양으로, 글자는 가운데에 둔다. */
+#main-menu .menu-actions .menu-back { padding: 12px 18px; margin: 0; border: 1px solid #57665f; background: #0e171bc4; color: inherit; font-size: inherit; justify-content: center; text-align: center; }
 .menu-view h2 { margin: 0 0 28px; font-size: 34px; font-weight: 400; letter-spacing: .06em; }
 .menu-setting { display: block; padding: 16px 0; border-top: 1px solid #3b4c43; }
 .menu-setting > span { display: flex; justify-content: space-between; }
