@@ -21,14 +21,14 @@ const STORY_SCENES = [
       '우리 사내 편의점에서 항불안제를 팔았던가?',
       '편의점이 몇 층이었더라?'],
   },
-  { // 항불안제를 사용하고(정신 불안 목표 완료) 4초 뒤.
-    flag: 'story-robot-seen', delay: 4000, ready: () => collectedItems.has('story-anxiety-seen') && collectedItems.has('f16-antianxiety-used'),
+  { // 항불안제를 사용하고(정신 불안 목표 완료) 2초 뒤.
+    flag: 'story-robot-seen', delay: 2000, ready: () => collectedItems.has('story-anxiety-seen') && collectedItems.has('f16-antianxiety-used'),
     lines: ['휴.. 겨우 정신을 차렸네..',
       '그래서 경비 로봇이 왜 날 공격했던거지?',
       '그 로봇은 ARCHI 개발 팀에서 만든 로봇이였나?',
       'ARCHI 개발 팀을 조사해보자.'],
   },
-  { // 로봇의 습격! 그 이유는? 목표 도중 12~15층 게이트에 출입증을 태우고, 그 조사창을 닫은 직후.
+  { // 이상 행동 목표 도중 12~15층 게이트에 출입증을 태우고, 그 조사창을 닫은 직후.
     flag: 'story-badge-seen', delay: 300, ready: () => collectedItems.has('story-gate-tagged'),
     lines: ['아 맞다 나 일용직이였지',
       '일용직한테 야근시키는 이 @#$% 회사... 떄려치던가 해야지..',
@@ -59,6 +59,7 @@ function showStoryLine(index) {
 
 function startStoryScene({ lines, flag, walkTo }) {
   storySceneActive = true;
+  clearEventsForCutscene();
   storyWalkTo = walkTo ?? null;
   storyWalkX = null;
   usingInspection = true; // 이동·상호작용·메뉴·정신력 진행을 막는 기존 규칙을 그대로 쓴다
@@ -68,7 +69,7 @@ function startStoryScene({ lines, flag, walkTo }) {
   storyBlocked = [...document.body.children].filter(el => el !== storyScene && el.tagName !== 'SCRIPT' && !el.inert);
   for (const el of storyBlocked) el.inert = true;
   releaseInput();
-  Body.setVelocity(body, { x: 0, y: 0 });
+  Body.setVelocity(body, { x: 0, y: body.velocity.y }); // 공중이면 속도를 이어 받아 떨어진다(loop.js의 fallDuringStoryScene)
   hint.hidden = interactionOutline.hidden = true;
   document.getElementById('story-skip').focus({ preventScroll: true });
   showStoryLine(0);
@@ -94,7 +95,7 @@ function startStoryWalk() {
 // 게임 루프가 컷씬 중에 매 걸음 부른다. 로봇·엘리베이터는 움직이지 않고 수호만 걷는다.
 // 도착하면(또는 1.5초 넘게 막히면) 컷씬을 끝내고 그 자리에서 조사(E)한다.
 function updateStoryWalk(elapsed) {
-  if (storyWalkX === null) return;
+  if (storyWalkX === null) { fallDuringStoryScene(); return; } // 대사 중에는 공중이면 떨어지기만 한다(loop.js)
   const dx = storyWalkX - body.position.x;
   if (Math.abs(dx) < 8 || storyWalkStuck >= 1500) {
     storyWalkX = null;

@@ -13,6 +13,7 @@ const blackoutGate = createSceneGate(blackoutScene, [1000, 2900, 4800]);
 function startBlackoutScene(door) {
   if (realBuildingBlackout() || blackoutSceneActive) return;
   blackoutSceneActive = true;
+  clearEventsForCutscene();
   blackoutElapsed = 0;
   blackoutGate.reset();
   blackoutStartX = body.position.x;

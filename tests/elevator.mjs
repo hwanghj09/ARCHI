@@ -466,7 +466,7 @@ try {
     roomScales.push(2040 / cu.room.width);
     await walkTo(300);
     await jump('d');
-    assert(await playerX() > 486, 'Jump clears the ramen box on the way to the checkout');
+    assert(await playerX() > 508, 'Jump clears the ramen box on the way to the checkout');
     await inspect(1150, 'E · 계산대 조사', /23:47.*정수호/);
     await page.screenshot({ path: '.local/floor-16-cu.png' });
     // The exit stays shut while the shutter is down; the panel lever raises it as a separate step.
@@ -479,7 +479,7 @@ try {
     await enterRoom('CU 편의점', '16F');
     await walkTo(530);
     await jump('a');
-    assert(await playerX() < 344, 'Jump clears the ramen box on the way to the kitchen goods door');
+    assert(await playerX() < 322, 'Jump clears the ramen box on the way to the kitchen goods door');
     await walkTo(cuLink.x + cuLink.width / 2);
     assert.equal(await hint(), 'E · The Kitchen 들어가기');
     await page.keyboard.press('e');

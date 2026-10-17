@@ -2,6 +2,7 @@
 function pressAction(button) {
   if (button.id === 'interact') interact();
   else if (button.id === 'phone-button') togglePhone();
+  else if (button.id === 'flash-button') togglePhoneLight();
 }
 
 buttons.forEach(button => {

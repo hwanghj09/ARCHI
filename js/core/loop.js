@@ -3,6 +3,20 @@ let previousTime = null;
 let accumulator = 0;
 let soundStepDistance = 0;
 
+// 혼잣말 컷씬이 공중에서 시작되면, 수호가 바닥에 내려설 때까지 중력만 받아 떨어진다(좌우로는 움직이지 않는다).
+function fallDuringStoryScene() {
+  if (grounded) return;
+  Body.setVelocity(body, { x: 0, y: body.velocity.y });
+  Engine.update(engine, step);
+  grounded = engine.pairs.list.some(pair => {
+    if (!pair.isActive || (pair.bodyA !== body && pair.bodyB !== body)) return false;
+    const normalY = pair.collision.normal.y * (pair.bodyA === body ? 1 : -1);
+    return normalY < -.5;
+  });
+  animate(0, false, step);
+  cameraX += (cameraTarget() - cameraX) * .13;
+}
+
 function update() {
   updateGameAudio(step);
   if (mainMenuActive) return;

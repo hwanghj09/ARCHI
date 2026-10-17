@@ -18,8 +18,9 @@ with Image.open(HERE / 'corridor.png') as source, Image.open(HERE / 'walls.png')
     # Art mode has no walls-mode filter; match the neighbouring corridors in the image.
     corridor = ImageEnhance.Brightness(ImageEnhance.Color(walls).enhance(.85)).enhance(.72)
     # Keep the authored doorway sizes and highlights, including the wide sliding door.
-    for box in [(707, 250, 916, 570), (3000, 295, 3185, 570), (4490, 280, 4660, 570)]:
-        corridor.alpha_composite(source.convert('RGBA').crop(box), box[:2])
+    # 모델 평가실 보안문은 간판(방 가운데 x=3231) 아래로 139px 오른쪽에 붙인다(doorX 3159).
+    for box, dx in [((707, 250, 916, 570), 0), ((3000, 295, 3185, 570), 139), ((4490, 280, 4660, 570), 0)]:
+        corridor.alpha_composite(source.convert('RGBA').crop(box), (box[0] + dx, box[1]))
 corridor.save(HERE / 'corridor-finished.png')
 
 with Image.open(HERE.parent / 'wall/wall-concrete.png') as module:

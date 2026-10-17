@@ -887,6 +887,9 @@ body { margin: 0; overflow: hidden; background: #27292b; color: #eee; font: 14px
 #player img { display: none; width: 100%; height: 100%; }
 #player #idle-sprite { width: 357.39px; height: 357.39px; transform: translate(3.375px, 1.585px); clip-path: inset(0 50% 50% 0); }
 #player #walk-sheet, #player #phone-walk-sheet { width: 600%; height: 100%; }
+/* 상자 밀기(push-box.png, 256px 칸 6장). 발 기준선이 걷기 그림보다 5px 낮아 같은 바닥에 서도록 올린다. */
+#player #push-sheet { position: relative; top: -5px; width: 600%; height: 100%; }
+#player[data-state="push"] #push-sheet { display: block; }
 #player #run-sheet, #player #phone-run-sheet { width: 800%; height: 100%; }
 #player .action-sheet { width: 200%; height: 100%; }
 #player #antianxiety-sheet { width: 600%; height: 100%; }
@@ -912,9 +915,9 @@ body { margin: 0; overflow: hidden; background: #27292b; color: #eee; font: 14px
 header { position: fixed; inset: max(24px, env(safe-area-inset-top)) max(24px, env(safe-area-inset-right)) auto max(24px, env(safe-area-inset-left)); display: flex; justify-content: space-between; gap: 16px; pointer-events: none; }
 header span { color: #b8c6c0; font-size: 13px; }
 /* 현재 위치(층·방)는 오른쪽 위, 지도 버튼 왼쪽에 띄운다. 지도 버튼의 아이콘은 투명 배경의 검은 그림이라 색을 뒤집는다(마스크는 file://에서 막힌다). */
-body > header > span { font-size: 19.5px; position: fixed; right: calc(max(24px, env(safe-area-inset-right)) + 56px); top: max(24px, env(safe-area-inset-top)); line-height: 44px; text-shadow: 0 1px 3px #000; }
-#map-button { position: fixed; z-index: 10; right: max(24px, env(safe-area-inset-right)); top: max(24px, env(safe-area-inset-top)); width: 44px; height: 44px; padding: 0; border: 1px solid #778778; border-radius: 50%; background: #182327; cursor: pointer; pointer-events: auto; }
-#map-button::before { content: ""; display: block; width: 24px; height: 24px; margin: auto; background: url("../assets/ui/map-icon.png") center / contain no-repeat; filter: invert(.87); }
+body > header > span { font-size: 25px; position: fixed; right: calc(max(24px, env(safe-area-inset-right)) + 70px); top: max(24px, env(safe-area-inset-top)); line-height: 57px; text-shadow: 0 1px 3px #000; }
+#map-button { position: fixed; z-index: 10; right: max(24px, env(safe-area-inset-right)); top: max(24px, env(safe-area-inset-top)); width: 57px; height: 57px; padding: 0; border: 1px solid #778778; border-radius: 50%; background: #182327; cursor: pointer; pointer-events: auto; }
+#map-button::before { content: ""; display: block; width: 31px; height: 31px; margin: auto; background: url("../assets/ui/map-icon.png") center / contain no-repeat; filter: invert(.87); }
 /* 17층 조명 스위치(왼쪽 위 "조명 켜짐/꺼짐 · 전력 없음")는 화면에서 숨긴다. */
 #floor17-light-switch { display: none; }
 #floor17-lights { width: 18px; height: 18px; margin: 0; accent-color: #b9d0a6; cursor: pointer; }
@@ -925,7 +928,11 @@ nav { position: fixed; inset: auto max(24px, env(safe-area-inset-right)) max(24p
 /* 휴대폰 버튼: 가방 버튼(가운데 아래) 오른쪽의 원형 단추. 아이콘은 투명 배경의 검은 그림이라 색을 뒤집는다(마스크는 file://에서 막힌다). 화면 흔들림·흐림(#stage 안)에 영향받지 않게 #stage 밖에 있다. */
 nav #phone-button { position: fixed; left: calc(50% + 51px); bottom: max(24px, env(safe-area-inset-bottom)); width: 78px; height: 78px; border-radius: 50%; background: #182327; border-color: #778778; }
 nav #phone-button::before { content: ""; display: block; width: 45px; height: 57px; margin: auto; background: url("../assets/ui/phone-icon.png") center / contain no-repeat; filter: invert(.87); }
-nav #phone-button[data-flashlight="on"]::before { filter: invert(.87) sepia(1) saturate(4) hue-rotate(5deg); }
+/* 플래시 버튼: 가방 버튼 왼쪽. 플래시를 켜면 휴대폰 버튼이 아니라 이 버튼이 노랗게 빛난다. */
+nav #flash-button { position: fixed; left: calc(50% - 129px); bottom: max(24px, env(safe-area-inset-bottom)); width: 78px; height: 78px; border-radius: 50%; background: #182327; border-color: #778778; }
+nav #flash-button::before { content: ""; display: block; width: 44px; height: 44px; margin: auto; background: url("../assets/ui/flash-icon.png") center / contain no-repeat; filter: invert(.87); }
+nav #flash-button[data-flashlight="on"] { border-color: #ffe99b; background: #2b2a1b; box-shadow: 0 0 16px 4px #ffe99b99, inset 0 0 12px #ffe99b55; }
+nav #flash-button[data-flashlight="on"]::before { filter: invert(.87) sepia(1) saturate(4) hue-rotate(5deg) drop-shadow(0 0 4px #ffe99b); }
 nav button { width: 56px; height: 52px; flex-shrink: 0; padding: 0; border: 1px solid #6b6d70; border-radius: 4px; background: #252629; color: #e5e7e9; font: 24px Arial, sans-serif; cursor: pointer; touch-action: none; user-select: none; -webkit-user-select: none; }
 #interact { margin-left: auto; font-size: 18px; }
 nav button:hover { border-color: #b9c6cf; }

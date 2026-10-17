@@ -602,3 +602,14 @@ function addBackgroundMonitors(image, src) {
     image.after(screen);
   }
 }
+
+// 컷씬(정전·혼잣말·CCTV)이 시작되면 휴대폰(창과 손전등)을 끄고, 나와 있던 환각·돌진 추격·점프스케어 얼굴·깜빡임·붉은 조각을 모두 없앤다.
+function clearEventsForCutscene() {
+  closePhone();
+  if (phoneLightOn) { phoneLightOn = false; refreshPhone(); }
+  endHallucinationSighting();
+  zeroEventPhase = 'idle'; zeroEventTimer = 0; zeroEventForced = false;
+  darkFace.hidden = true; darkFaceForced = false; darkFaceTimer = darkFaceLife = 0;
+  blinkFlash.dataset.active = 'false'; blinkFlashTimer = 0;
+  redEyeShards.replaceChildren();
+}

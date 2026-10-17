@@ -77,16 +77,16 @@ const FLOOR16_ROOMS = interiorRooms(16, [
       // 올라가 있으면 밀어 내린다. 출구는 셔터가 올라가 있을 때만 열린다.
       shutterLever: 'f16-cu' },
   ],
-  // 밀 수 있는 진라면 박스(js/scene/pushables.js): 플레이어 허리 높이(90px)이고, 옆에서 막힌 채 걸으면 플레이어 이동 속도의 절반으로
+  // 밀 수 있는 진라면 박스(js/scene/pushables.js): 플레이어 가슴 높이(117px, 처음의 1.3배)이고, 옆에서 막힌 채 걸으면 플레이어 이동 속도의 절반으로
   // 밀린다. 왼쪽은 처음 자리(중심 415)보다 더 밀리지 않고, 오른쪽은 계산대 왼쪽 끝(1150 - 312 / 2 + 312 * .0156 ≈ 999)에 박스
-  // 오른쪽 끝(중심 + 71)이 맞닿는 자리(중심 928)에서 멈춘다. 박스 위에 서면(어디까지 밀었든) 선반 항불안제에 손이 닿는다.
-  movables: [{ kind: 'ramen-box', name: '진라면 박스', x: 344, width: 142, height: 90,
-    pushable: { factor: .5, minX: 415, maxX: 928 } }],
+  // 오른쪽 끝(중심 + 93)이 맞닿는 자리(중심 906)에서 멈춘다. 박스 위에 서면(어디까지 밀었든) 선반 항불안제에 손이 닿는다.
+  movables: [{ kind: 'ramen-box', name: '진라면 박스', x: 322, width: 186, height: 117,
+    pushable: { factor: .5, minX: 415, maxX: 906 } }],
   // 상단 선반 약품 칸의 항불안제(위치는 선반 그림 속 컵라면 칸 위). condition(박스 위에 서기)을 채우기 전에는
   // 손이 닿지 않아 챙길 수 없고, 챙기면(gives) 선반에서 사라지고 가방에 들어간다(INVENTORY_ITEMS).
   fixtures: [
     { name: '항불안제', style: 'pill-item', x: 880, y: 246, width: 48, height: 45,
-      standYs: [floorY, floorY - 90], condition: () => playerOnPushable('진라면 박스'),
+      standYs: [floorY, floorY - 117], condition: () => playerOnPushable('진라면 박스'),
       gives: 'f16-antianxiety', hideWhenTaken: true,
       surface: 'card', image: 'assets/objects/items/antianxiety.png',
       message: '박스 위에 올라서니 손이 닿는다. 선반 위의 항불안제 한 통을 꺼냈다. 챙겼다.',
