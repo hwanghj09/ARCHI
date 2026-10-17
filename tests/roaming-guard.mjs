@@ -18,7 +18,7 @@ try {
 
   // 정전 전에는 움직이지 않는다.
   await page.clock.runFor(70000);
-  assert.equal((await state()).where, null, 'R-03 waits until the blackout');
+  assert.deepEqual([(await state()).where, (await state()).x], ['f9', 0], 'R-03 waits on 9F until the blackout');
 
   // 전등이 꺼진 층(5층): 엘리베이터 앞에 내려 복도만 돈다. 층 전력이 없어도 움직인다.
   await page.evaluate(() => {
@@ -50,14 +50,40 @@ try {
   });
   assert.deepEqual(chimes, [null, null], 'The arrival chime plays at full volume on Suho\'s floor only');
 
-  // 머무는 시간이 끝나면 엘리베이터까지 걸어가서 떠난다.
+  // 승강기 전력이 없으면 엘리베이터를 못 타고 이 층을 계속 돈다.
   await page.evaluate(() => { roamer.stay = 0; });
+  await page.clock.runFor(100);
+  s = await state();
+  assert.equal(s.where, 'f5'); assert.equal(s.mode, 'patrol', 'Without elevator power R-03 keeps patrolling');
+
+  // 머무는 시간이 끝나면 실제 엘리베이터를 불러 문이 열리면 타고, 칸이 다음 층으로 운행해 문이 열리면 내린다.
+  const trip = () => page.evaluate(() => {
+    const index = roamer.car ?? 0, car = elevatorCars[index];
+    const door = currentDoors.find(entry => entry.type === 'elevator' && entry.carIndex === index);
+    return { phase: roamer.trip?.phase ?? null, index, floor: car.floor, travelling: car.travelling, doorOpen: door?.element.dataset.open };
+  });
+  await page.evaluate(() => {
+    collectedItems.add('f17-emergency-linked'); updatePowerState();
+    elevatorCars.forEach((car, index) => Object.assign(car, { floor: index ? 12 : 1, travelling: false, destination: null, open: false, rider: false }));
+    Object.assign(roamer, { next: 'elevator', stay: 0, mode: 'patrol', wait: 0 });
+  });
   await page.clock.runFor(100);
   assert.equal((await state()).mode, 'return', 'Heads to the elevator');
   await page.evaluate(() => { roamer.x = roamerElevatorX() + 2; });
-  await page.clock.runFor(300);
-  s = await state();
-  assert.equal(s.where, null); assert.equal(s.sprites, 0, 'Leaves by elevator');
+  await page.clock.runFor(200);
+  let t = await trip();
+  assert.deepEqual([t.phase, t.index, t.travelling], ['call', 0, true], 'Calls the nearest idle car up from 1F');
+  await page.clock.runFor(1000);
+  t = await trip();
+  assert.deepEqual([t.phase, t.floor, t.doorOpen], ['board', 5, 'true'], 'The car arrives and its doors open');
+  assert.equal((await state()).sprites, 1, 'R-03 waits at the open doors');
+  await page.clock.runFor(1500);
+  t = await trip(); s = await state();
+  assert.deepEqual([s.where, s.sprites, t.phase, t.travelling], [null, 0, 'ride', true], 'R-03 boards and the car leaves');
+  assert.equal(t.doorOpen, 'false', 'The doors close behind it');
+  await page.clock.runFor(3000);
+  t = await trip(); s = await state();
+  assert.deepEqual([s.where, t.phase, t.floor], [await page.evaluate(() => floorId(-1)), null, -1], 'The car carries R-03 to B1 and it steps out');
 
   // 전등이 켜진 층: 복도 다음 방을 둘러본다. 다른 장면이면 바로 옮긴다.
   await page.evaluate(() => {

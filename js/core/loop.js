@@ -20,6 +20,7 @@ function fallDuringStoryScene() {
 function update() {
   updateGameAudio(step);
   if (mainMenuActive) return;
+  if (b2CaptureActive) { updateB2CaptureScene(step); return; }
   updatePhoneCharging(step);
   updateSanity(step);
   if (openingActive) { updateOpening(step); return; }

@@ -21,6 +21,7 @@
     <link rel="stylesheet" href="css/vault-puzzle.css" />
     <link rel="stylesheet" href="css/guard-patrol.css" />
     <link rel="stylesheet" href="css/b2-ending.css" />
+    <link rel="stylesheet" href="css/b2-capture-scene.css" />
     <link rel="stylesheet" href="css/phone.css" />
     <link rel="stylesheet" href="css/sanity.css" />
     <link rel="stylesheet" href="css/game-over.css" />
@@ -105,6 +106,7 @@
     <script src="js/elevator/cabin.js" defer></script>
     <script src="js/elevator/cabin-pry.js" defer></script>
     <script src="js/scene/b2-ending.js" defer></script>
+    <script src="js/scene/b2-capture-scene.js" defer></script>
     <script src="js/player/sanity.js" defer></script>
     <script src="js/scene/pushables.js" defer></script>
     <script src="js/scene/story-scene.js" defer></script>
@@ -433,9 +435,26 @@
       <form id="b2-terminal-form"><label for="b2-terminal-input">root@archi-main:~#</label><input id="b2-terminal-input" type="text" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="send" lang="en" /></form>
     </section>
     <section id="b2-bad-ending" class="b2-ending-dialog" role="dialog" aria-modal="true" aria-labelledby="b2-bad-ending-title" hidden>
-      <h2 id="b2-bad-ending-title">베드엔딩</h2>
-      <p>경비 로봇에게 붙잡혔다. ARCHI 삭제는 끝나지 못했다.</p>
+      <h2 id="b2-bad-ending-title">BAD END — NEW HOST</h2>
+      <p>ARCHI 삭제 실패.<br>B2 연결 실험실에서 정수호에게 ARCHI가 업로드되었다.<br>눈을 뜬 것은 더 이상 수호가 아니었다.</p>
       <div class="b2-ending-actions"><button id="b2-restart" type="button">처음부터 다시하기</button><button id="b2-checkpoint" type="button">체크포인트로 이동</button></div>
+    </section>
+    <section id="b2-capture-scene" role="dialog" aria-modal="true" aria-label="수호의 시점 · 경비로봇 제압과 ARCHI 업로드" tabindex="-1" hidden>
+      <div class="b2-capture-frame" aria-hidden="true">
+        <div id="b2-capture-view"></div>
+        <div class="b2-capture-vignette"></div>
+        <div id="b2-capture-eyelids"></div>
+      </div>
+      <p id="b2-capture-location"></p>
+      <div id="b2-upload" hidden>
+        <p>B2 · 연결 실험실</p>
+        <h2>ARCHI → 정수호</h2>
+        <p id="b2-upload-status">신경 인터페이스 연결 중</p>
+        <progress id="b2-upload-progress" max="100" value="0" aria-label="정수호에게 ARCHI 업로드 진행률"></progress>
+        <output id="b2-upload-percent">0%</output>
+      </div>
+      <p id="b2-capture-caption" aria-live="polite" aria-atomic="true"></p>
+      <button id="b2-capture-skip" type="button">건너뛰기 · Esc</button>
     </section>
     <section id="b2-escape" role="dialog" aria-modal="true" aria-labelledby="b2-escape-title" tabindex="-1" data-step="white" hidden>
       <img id="b2-true-end-art" alt="" hidden />
@@ -445,7 +464,6 @@
       </div></div>
       <div class="b2-ending-actions"><button id="b2-escape-menu" type="button">메인 메뉴로</button></div>
     </section>
-    <img id="b2-bad-end-art" alt="" hidden />
     <aside id="sanity-hud" aria-label="정신력 상태">
       <div class="sanity-heading"><span>정신력</span><output id="sanity-value">100%</output></div>
       <div id="sanity-meter" role="meter" aria-label="정신력" aria-valuemin="0" aria-valuemax="100" aria-valuenow="100">

@@ -1,6 +1,12 @@
 // 게임 조작키는 input.js의 설정을 사용한다. Esc와 창 안의 탐색 키는 고정한다.
 window.addEventListener('keydown', event => {
   if (mainMenuActive) return;
+  if (!b2CaptureScene.hidden) {
+    const captureButton = event.target.closest?.('#b2-capture-skip, #b2-bad-ending button');
+    if (event.code === 'Escape' && b2CaptureActive) { event.preventDefault(); finishB2CaptureScene(); }
+    else if (event.code !== 'Tab' && !(captureButton && ['Enter', 'Space'].includes(event.code))) event.preventDefault();
+    return;
+  }
   // 지도 창(map.js)은 게임을 멈추지 않는다: Esc만 지도를 닫고 나머지 입력은 그대로 게임에 간다.
   if (!mapWindow.hidden && event.code === 'Escape') { if (!event.repeat) closeMap(); event.preventDefault(); return; }
   // M: 지도 버튼을 누른 것과 같다. 글을 쓰는 칸에서는 글자로 입력된다.
