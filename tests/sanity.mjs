@@ -280,12 +280,10 @@ try {
   assert.equal(calm.calm, 50, '항불안제를 쓴 뒤에는 쫓겨도 정신력이 닳지 않는다');
   assert(Math.abs(calm.resumed - 40) < .1, '조건이 생기면 원래 규칙(쫓길 때 초당 10%)으로 돌아간다');
 
-  // ---- 0%가 되기 전의 1회성 예고 환각 ----
-  await page.evaluate(() => { sanity = 2; zeroEventApproachDone = false; hallucinationMode = null; updateSanity(16); });
-  assert.equal((await state()).mode, 'approach');
-  assert.equal(await page.evaluate(() => zeroEventApproachDone), true);
-  await page.evaluate(() => { hallucinationMode = null; updateSanity(16); });
-  assert.equal((await state()).mode, null, '예고는 한 번만 나타난다');
+  // ---- 0%가 되기 전에는 예고 환각이 나타나지 않는다 ----
+  await page.evaluate(() => { sanity = 2; hallucinationMode = null; updateSanity(16); });
+  assert.equal((await state()).mode, null, '0% 직전에도 다가오는 예고 환각은 없다');
+
 
   // ---- 0% 돌진: 회피 두 번, 또는 회피 실패 → 잡아먹힘 ----
   await page.evaluate(() => {

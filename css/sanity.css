@@ -1,4 +1,4 @@
-#sanity-hud { position: fixed; z-index: 11; left: max(24px, env(safe-area-inset-left)); top: 80px; width: 152px; padding: 10px 12px; border: 1px solid #637c73; background: #101c20e8; color: #dbe5d8; pointer-events: none; font: 12px/1.5 Arial, sans-serif; }
+#sanity-hud { position: fixed; z-index: 11; left: calc(max(24px, env(safe-area-inset-left)) / 1.25); top: 64px; zoom: 1.25; width: 152px; padding: 10px 12px; border: 1px solid #637c73; background: #101c20e8; color: #dbe5d8; pointer-events: none; font: 12px/1.5 Arial, sans-serif; }
 .sanity-heading { display: flex; justify-content: space-between; gap: 12px; }
 #sanity-value { font-variant-numeric: tabular-nums; }
 #sanity-meter { height: 7px; margin: 7px 0 4px; border: 1px solid #3e534a; background: #050c10; }
@@ -18,7 +18,7 @@ body:has(#world[data-blackout-scene]) #fear-overlay, body:has(#world[data-blacko
 body:has(#world[data-opening]) #blink-flash, body:has(#world[data-blackout-scene]) #blink-flash,
 body:has(#world[data-opening]) :is(#red-eyes, #red-eye-shards), body:has(#world[data-blackout-scene]) :is(#red-eyes, #red-eye-shards) { visibility: hidden; }
 @media (max-width: 480px) { #sanity-hud { width: 136px; padding: 8px 10px; } }
-@media (max-height: 480px) { #sanity-hud { top: 70px; } }
+@media (max-height: 480px) { #sanity-hud { top: 56px; } }
 @media (prefers-reduced-motion: reduce) { #hallucination-shadow { filter: blur(.8px); } }
 
 /* 50/40/30/20/10% 미만 단계별 화면 연출: 검은 비네트 → 흐림 → (30~20%에서) 붉게 전환. */

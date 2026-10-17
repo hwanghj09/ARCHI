@@ -54,7 +54,7 @@ function update() {
   updatePhone(step);
   const directions = [...keys].map(key => movementKeys[key]);
   const inputDirection = itemUseTime > 0 ? 0 : Number(directions.includes(1)) - Number(directions.includes(-1));
-  const direction = applyZeroSanityTurnDelay(inputDirection); // 정신력 0%: 방향을 바꾸려면 0.2초 기다려야 한다
+  const direction = applyZeroSanityTurnDelay(inputDirection); // 정신력 0%: 방향을 바꾸려면 0.1초 기다려야 한다
   if (itemUseTime > 0) jumpQueued = false;
   const sprinting = !phoneLightOn && [...runKeys].some(key => keys.has(key));
   interactionTime = direction || jumpQueued ? 0 : Math.max(0, interactionTime - step);

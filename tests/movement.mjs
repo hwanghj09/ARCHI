@@ -313,7 +313,7 @@ try {
   await page.locator('#cabin-exit').click();
   await finishSceneTransition(page);
   assert.equal(await page.locator('#world').getAttribute('data-room'), 'corridor', 'Boarding must return the player to floor 17');
-  assert.equal(await page.locator('header span').textContent(), '17F · 00:00');
+  assert.equal(await page.locator('header span').textContent(), '17F · 복도');
 
   assert.deepEqual(errors, []);
   console.log('PASS: delayed elevator calls, gradual floor indicators, independent travel, automatic arrival opening, repeated-call guards, multi-floor boarding across structurally distinct floors; doors, player animations, movement, collisions, camera and resize.');

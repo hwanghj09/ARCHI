@@ -50,7 +50,7 @@ const OBJECTIVES = [
   { when: () => collectedItems.has('story-robot-seen') && !collectedItems.has('f1-robot-log'), title: '로봇의 습격! 그 이유는?',
     text: '경비 로봇은 왜 나를 노렸을까? 로봇 자신에게 남은 기록이 있을지도.' },
   { when: () => collectedItems.has('story-robot-seen'), title: '로봇의 습격! 그 이유는?', text: 'ARCHI를 만든 사람들은 무언가 알고 있을 것이다.' },
-  { when: () => collectedItems.has('story-anxiety-seen') && !collectedItems.has('story-robot-seen'), title: '정신 불안', text: '머리가 어지럽다. 마음을 진정시킬 무언가가 필요하다.' },
+  { when: () => collectedItems.has('story-anxiety-seen') && !collectedItems.has('story-robot-seen'), title: '정신 불안', text: '머리가 어지럽다. 마음을 진정시킬 무언가가 필요하다. 편의점으로 가보자.' },
   { when: () => solarEnabled && !collectedItems.has('f17-emergency-linked') && !floorHasLighting(17),
     title: '17층 전등 켜기', text: '전력은 돌아왔지만 17층은 아직 어둡다.' },
   { when: () => solarEnabled && !collectedItems.has('f17-emergency-linked') && !collectedItems.has('f17-manager-memo'),

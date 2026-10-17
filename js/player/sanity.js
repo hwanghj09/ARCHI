@@ -30,7 +30,6 @@ let blinkTimer = 0;
 let blinkNextIn = Infinity;
 let blinkFlashTimer = 0;
 
-let zeroEventApproachDone = false; // 0%가 되기 전 예고 환각을 이미 보여줬다
 let zeroEventPhase = 'idle'; // 'idle' | 'waiting' | 'charging' (0%에서만 의미가 있다)
 let zeroEventTimer = 0;
 let zeroEventSide = 1;
@@ -183,16 +182,6 @@ function updateZeroEvent(elapsed, fsmPaused) {
     zeroEventGhostX += Math.sign(gap) * Math.min(Math.abs(gap), zeroEventGhostStartGap / zeroEventRushDurationMs * speedUp * elapsed);
     if (Math.abs(body.position.x - zeroEventGhostX) <= zeroEventReachGap) triggerDevoured();
     else if (zeroEventForced && zeroEventTimer >= 6000) resolveZeroEvasion(); // 콘솔로 시작한 추격을 달려서 따돌린 경우의 안전장치
-  }
-}
-
-// ---- 0%가 되기 전, 한 번뿐인 예고 환각 ----
-
-function updatePreZeroApproach(elapsed, fsmPaused) {
-  if (zeroEventApproachDone || fsmPaused || hallucinationMode) return;
-  if (sanity > 0 && sanity <= zeroEventApproachThreshold) {
-    zeroEventApproachDone = true;
-    beginHallucinationSighting('approach', Math.random() < .5 ? -1 : 1, 300);
   }
 }
 
@@ -530,7 +519,6 @@ function updateSanity(elapsed) {
   updateComputerFear(fearTier >= 4);
   updateBlink(elapsed, fsmPaused);
   updateDarkFace(elapsed, fsmPaused);
-  updatePreZeroApproach(elapsed, fsmPaused);
   updateZeroEvent(elapsed, fsmPaused);
   updateAmbientSighting(elapsed, fsmPaused);
   updateHallucinationSighting(elapsed, fsmPaused);

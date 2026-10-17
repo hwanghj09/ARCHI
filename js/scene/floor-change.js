@@ -19,7 +19,7 @@ function performRoomChange() {
   animate(0);
   cameraX = cameraTarget();
   stage.setAttribute('aria-label', `ARCHI 17층 ${entering ? '사무실' : '복도'} 사이드뷰 스테이지`);
-  document.querySelector('header span').textContent = entering ? '17F · 사무실' : '17F · 00:00';
+  document.querySelector('header span').textContent = entering ? '17F · 사무실' : '17F · 복도';
   rerollFearScreens(); // 사무실 ↔ 복도를 오갈 때마다 모니터 화면을 다시 뽑는다(sanity.js)
   updateInteraction();
   render();
