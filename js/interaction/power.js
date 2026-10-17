@@ -15,8 +15,6 @@ function floorHasLighting(floor) {
 function floorHasPower(floor) {
   if (floor === -1 || floor === -2) return true;
   if (floor === 18) return solarEnabled;
-  // 엔딩의 로비 차단은 태양광 조명과 별개로 비상 설비 회선도 끊는다.
-  if (floor === 1 && buildingBlackout && typeof b2Ending !== 'undefined' && b2Ending.offline) return false;
   return floor >= 1 && floor <= 17 && (!buildingBlackout || collectedItems.has('f17-emergency-linked'));
 }
 
@@ -96,9 +94,8 @@ function supplySolarFloor(floor) {
 }
 
 function refreshSolarApp() {
-  const jammed = typeof b2SolarJammed === 'function' && b2SolarJammed(); // B2 엔딩 1층: ARCHI가 잠시 막는다(b2-ending.js)
-  const available = collectedItems.has('solar-app-installed') && phoneBattery > 0 && !phoneDock && !jammed;
-  document.getElementById('phone-solar-status').textContent = jammed ? 'ARCHI 방해 중…' : !available ? '휴대폰을 사용할 수 없습니다.' :
+  const available = collectedItems.has('solar-app-installed') && phoneBattery > 0 && !phoneDock;
+  document.getElementById('phone-solar-status').textContent = !available ? '휴대폰을 사용할 수 없습니다.' :
     `장치 연결됨 · ${solarPowerStatus()}`;
   document.getElementById('phone-solar-supply').disabled = !available || !solarEnabled;
   document.getElementById('phone-solar-floor').disabled = !available || !solarEnabled;
@@ -182,7 +179,7 @@ for (let floor = 17; floor >= 1; floor -= 1) {
 }
 
 document.getElementById('phone-solar-supply').addEventListener('click', () => {
-  if (!usingPhone || currentPhoneApp !== 'solar' || !collectedItems.has('solar-app-installed') || phoneBattery <= 0 || phoneDock || b2SolarJammed()) return;
+  if (!usingPhone || currentPhoneApp !== 'solar' || !collectedItems.has('solar-app-installed') || phoneBattery <= 0 || phoneDock) return;
   supplySolarFloor(Number(document.getElementById('phone-solar-floor').value));
   saveProgress();
 });

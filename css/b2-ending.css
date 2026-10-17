@@ -1,22 +1,7 @@
-/* B2 엔딩(js/scene/b2-ending.js): 콘솔 DELETE·확인 버튼, 화면 위 삭제 진행 바, 베드엔딩·임시 해피엔딩 창. 새 그림 없이 상자와 글자만 쓴다. */
+/* B2 엔딩(js/scene/b2-ending.js): 콘솔 DELETE·확인 버튼, 화면 위 삭제 진행 바·바리케이드 내구도, 문을 막는 상자, 루트 터미널(삭제 배틀), 베드엔딩·TRUE END 창. */
 /* 추격 로봇은 R-01 스프라이트만 그린다(CSS로 그린 대체 로봇 몸통은 지운다). */
 #dynamic-scene .fixture.guard-bot.b2-guard-bot { background: none; }
 #dynamic-scene .fixture.guard-bot.b2-guard-bot::before, #dynamic-scene .fixture.guard-bot.b2-guard-bot::after { content: none; }
-/* 엘리베이터 문 장면: 문틈의 로봇(기존 붙잡기 그림 한 칸), 문 닫기 게이지, 휴대폰 ARCHI 알림. */
-#b2-cabin-robot { position: absolute; left: 50%; bottom: 0; width: 58%; aspect-ratio: 384 / 256; transform: translateX(-50%); overflow: hidden; }
-#b2-cabin-robot[hidden] { display: none; }
-#b2-cabin-robot img { display: block; width: 800%; height: 100%; max-width: none; transform: translateX(-37.5%); }
-#b2-door-gauge { position: absolute; z-index: 3; left: 8.5%; top: 38%; width: 17%; padding: 10px 12px; background: #1a0c0bf2; border: 2px solid #c4574b;
-  color: #ffd9d3; font: 700 14px/1.4 Arial, sans-serif; text-align: center; white-space: nowrap; }
-#b2-door-gauge[hidden] { display: none; }
-.b2-door-track { display: block; height: 14px; margin: 8px 0; background: #3a1714; }
-#b2-door-fill { display: block; width: 0; height: 100%; background: #f5d478; }
-#b2-door-push { min-height: 44px; min-width: 140px; border: 1px solid #f5d478; background: #3a1714; color: #fff; font: inherit; cursor: pointer; touch-action: manipulation; }
-#b2-door-push:focus-visible { outline: 3px solid #eac47d; outline-offset: 3px; }
-#b2-phone-message { position: absolute; z-index: 3; left: 4%; top: 6%; width: 20%; padding: 10px 12px; border-radius: 14px; background: #f2f4f1f2; color: #141a18;
-  font: 14px/1.4 Arial, sans-serif; box-shadow: 0 6px 18px #0008; }
-#b2-phone-message[hidden] { display: none; }
-#b2-phone-message strong { display: block; margin-bottom: 4px; color: #b3261e; font-size: 12px; letter-spacing: .08em; }
 #inspection .b2-action { min-height: 36px; padding: 6px 12px; border-color: #c4574b; background: #3a1714; color: #ffd9d3; font-size: 13px; }
 #inspection .b2-action[hidden], #inspection-close[hidden] { display: none; }
 #inspection .b2-action:focus-visible { outline: 2px solid #dec898; outline-offset: 3px; }
@@ -36,11 +21,7 @@
 #b2-delete-bar[data-offline="true"] { border-color: #8fbda3; color: #e6f0e3; }
 #b2-delete-bar[data-offline="true"] #b2-delete-fill { background: #8fbda3; }
 #inspection .b2-action:disabled { border-color: #5d6461; background: #2a2e2d; color: #8d9692; cursor: not-allowed; }
-/* 엔딩 그림(assets/ending, b2-ending.js의 loadB2EndingArt): 문틈 로봇은 문틈을 꽉 채우고 좌우로 흔들린다. */
-#b2-cabin-robot[data-art="custom"] { left: 0; width: 100%; height: 100%; aspect-ratio: auto; transform: none; }
-#b2-cabin-robot[data-art="custom"] img { width: 100%; height: 100%; object-fit: contain; object-position: 50% 100%; transform: none;
-  animation: b2-gap-shake .16s ease-in-out infinite alternate; }
-@keyframes b2-gap-shake { from { transform: translateX(-1.5%); } to { transform: translateX(1.5%); } }
+/* 엔딩 그림(assets/ending, b2-ending.js의 loadB2EndingArt). */
 #b2-bad-end-art { position: fixed; z-index: 12; inset: 0; width: 100%; height: 100%; object-fit: cover; pointer-events: none; }
 #b2-bad-end-art[hidden] { display: none; }
 /* TRUE END: 하얗게 밝아짐(white) → 그림(art) → 제목(title) → 크레딧(credits) → 메뉴 버튼(done). 그림이 없으면 제목은 상자로. */
@@ -65,3 +46,45 @@
 @keyframes b2-credits { to { transform: translateY(calc(-50vh - 50%)); } }
 #b2-escape .b2-ending-actions { position: absolute; left: 0; right: 0; bottom: 8%; visibility: hidden; }
 #b2-escape[data-step="done"] .b2-ending-actions { visibility: visible; }
+/* 서버실 출입문을 막는 장비 운반 상자(floor-b2.js movables, 밀 수 있는 정적 충돌체). 로봇이 두드리면 문과 상자가 흔들린다:
+   data-bang 값이 바뀔 때마다 애니메이션 이름이 바뀌어 다시 흔들린다(내구도 50% 아래는 더 크게). */
+#dynamic-scene .solid.movable.b2-crate { z-index: 4; } /* 문 앞에 놓이므로 문 그림보다 위에 그린다 */
+#dynamic-scene .solid.movable.b2-crate::before { content: ''; position: absolute; left: -4%; bottom: -5px; width: 108%; height: 20%; border-radius: 50%;
+  background: radial-gradient(ellipse at center, #000000b3 0, #0000006b 55%, transparent 74%); filter: blur(1px); pointer-events: none; }
+#dynamic-scene .solid.movable.b2-crate::after { content: ''; position: absolute; inset: 0; background: url(../assets/objects/floor-kit/gpu-shipping-crate.png) 50% 100% / 100% 100% no-repeat; pointer-events: none; }
+[data-bang="a"] { animation: b2-bang-a .32s ease-out; }
+[data-bang="a2"] { animation: b2-bang-a2 .32s ease-out; }
+[data-bang="b"] { animation: b2-bang-b .32s ease-out; }
+[data-bang="b2"] { animation: b2-bang-b2 .32s ease-out; }
+@keyframes b2-bang-a { 30% { translate: -3px 0; } 60% { translate: 2px 0; } }
+@keyframes b2-bang-a2 { 30% { translate: -3px 0; } 60% { translate: 2px 0; } }
+@keyframes b2-bang-b { 25% { translate: -7px 0; } 55% { translate: 5px 0; } 80% { translate: -2px 0; } }
+@keyframes b2-bang-b2 { 25% { translate: -7px 0; } 55% { translate: 5px 0; } 80% { translate: -2px 0; } }
+#b2-barricade-line { display: block; margin-top: 8px; }
+#b2-barricade-line[hidden] { display: none; }
+#b2-barricade-fill { display: block; width: 100%; height: 100%; background: #f5d478; }
+/* 루트 터미널: 화면 가운데 검은 창. 로그(ARCHI 붉은색, SYS 초록색, 입력 흰색, 대응법 회색), 지금 막아야 할 방해와 남은 시간, 입력 줄. */
+#b2-terminal { position: fixed; z-index: 12; top: 96px; left: 50%; transform: translateX(-50%); display: flex; flex-direction: column;
+  width: min(760px, calc(100vw - 32px)); height: min(520px, calc(100dvh - 112px)); background: #050807f5; border: 2px solid #3f8f6a;
+  box-shadow: 0 12px 40px #000c; color: #b9f3d0; font: 14px/1.5 Consolas, 'D2Coding', monospace; }
+#b2-terminal[hidden] { display: none; }
+#b2-terminal > header { position: static; inset: auto; pointer-events: auto; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 8px 12px; border-bottom: 1px solid #1f4a37; }
+#b2-terminal h2 { margin: 0; font-size: 14px; letter-spacing: .08em; }
+#b2-terminal-close { min-height: 36px; padding: 4px 12px; border: 1px solid #3f8f6a; background: #0d1f17; color: #b9f3d0; font: inherit; cursor: pointer; }
+#b2-terminal-close:focus-visible, #b2-terminal-input:focus-visible { outline: 2px solid #eac47d; outline-offset: 2px; }
+#b2-terminal-log { flex: 1; min-height: 0; margin: 0; padding: 10px 12px; overflow-y: auto; list-style: none; white-space: pre-wrap; overflow-wrap: anywhere; }
+#b2-terminal-log .b2-log-archi { color: #ff7a6a; }
+#b2-terminal-log .b2-log-sys { color: #8fe0a8; }
+#b2-terminal-log .b2-log-user { color: #f2f2ea; }
+#b2-terminal-log .b2-log-hint { color: #8aa598; }
+#b2-terminal-threat { padding: 8px 12px; border-top: 1px solid #5a2620; background: #1a0c0b; color: #ffb3a8; font-weight: 700; }
+#b2-terminal-threat[hidden] { display: none; }
+#b2-terminal-threat .b2-delete-track { margin-top: 6px; }
+#b2-terminal-threat-fill { display: block; width: 100%; height: 100%; background: #ff5a47; }
+#b2-terminal-form { display: flex; align-items: center; gap: 8px; padding: 8px 12px; border-top: 1px solid #1f4a37; }
+#b2-terminal-form label { flex: none; color: #8fe0a8; }
+#b2-terminal-input { flex: 1; min-width: 0; min-height: 36px; padding: 4px 8px; border: 1px solid #1f4a37; background: #000; color: #f2f2ea; font: inherit; caret-color: #8fe0a8; }
+@media (max-width: 600px) {
+  #b2-terminal { top: 120px; height: calc(100dvh - 136px); font-size: 13px; }
+  #b2-terminal-form label { display: none; }
+}

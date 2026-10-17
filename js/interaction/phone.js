@@ -41,7 +41,6 @@ function openPhoneApp(app) {
   if (app === 'gallery') renderPhoneGallery();
   if (app === 'solar') {
     document.getElementById('phone-solar-floor').value = String(solarPoweredFloors[0] || 17);
-    jamB2SolarApp(); // B2 엔딩 1층: 열 때마다 ARCHI가 잠시 방해한다
     refreshSolarApp();
   }
   playGameSound('phone');
@@ -75,9 +74,9 @@ function phoneChargeState() {
 }
 
 function phoneChargerHint(door) {
-  if (isPhoneDock(door)) return `E · 휴대폰 가져가기 · ${Math.ceil(phoneBattery)}% · ${phoneChargeState()}`;
+  if (isPhoneDock(door)) return `${bindingLabel('interact')} · 휴대폰 가져가기 · ${Math.ceil(phoneBattery)}% · ${phoneChargeState()}`;
   if (phoneDock) return `휴대폰은 ${phoneDockLocation()} 충전 콘센트에 있습니다`;
-  return floorHasPower(currentSceneFloor) ? 'E · 휴대폰 맡겨 충전' : 'E · 충전 불가 · 전력 없음';
+  return floorHasPower(currentSceneFloor) ? `${bindingLabel('interact')} · 휴대폰 맡겨 충전` : `${bindingLabel('interact')} · 충전 불가 · 전력 없음`;
 }
 
 function refreshPhoneChargers() {

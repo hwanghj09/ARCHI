@@ -1,5 +1,6 @@
 // 장면 교체: 17층 사무실과 복도 사이, 그리고 다른 층·방·옥상으로 이동.
 function performRoomChange() {
+  setCrouching(false, true);
   if (blackoutSceneActive) finishBlackoutScene();
   const entering = room === 'corridor';
   if (entering) returnX = body.position.x;
@@ -19,13 +20,14 @@ function performRoomChange() {
   animate(0);
   cameraX = cameraTarget();
   stage.setAttribute('aria-label', `ARCHI 17층 ${entering ? '사무실' : '복도'} 사이드뷰 스테이지`);
-  document.querySelector('header span').textContent = entering ? '17F · 사무실' : '17F · 00:00';
+  document.querySelector('header span').textContent = entering ? '17F · 사무실' : '17F · 복도';
   rerollFearScreens(); // 사무실 ↔ 복도를 오갈 때마다 모니터 화면을 다시 뽑는다(sanity.js)
   updateInteraction();
   render();
 }
 
 function performFloorChange(destId, carIndex = 0, arrivalKey = null) {
+  setCrouching(false, true);
   if (blackoutSceneActive) finishBlackoutScene();
   if (cctvSceneActive) finishCctvScene();
   cameraZoom = 1;

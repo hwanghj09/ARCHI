@@ -16,7 +16,7 @@ function finishInspectionText() {
   inspectionTypingTimer = null;
   inspectionText.textContent = inspectionDescription.textContent;
   inspectionClose.textContent = '닫기 ▾';
-  inspectionHelp.textContent = 'E / Esc';
+  inspectionHelp.textContent = `${bindingLabel('interact')} / Esc`;
 }
 
 // 한 단계 뒤로: 가방에서 연 카드(returnTo: 'inventory')는 가방 목록으로 돌아가고, 나머지는 닫는다.
@@ -55,7 +55,7 @@ function openInspection(name, message, sheet) {
     let cursor = 0;
     inspectionText.textContent = '';
     inspectionClose.textContent = '전체 보기 ▾';
-    inspectionHelp.textContent = 'E · 전체 보기 / Esc · 닫기';
+    inspectionHelp.textContent = `${bindingLabel('interact')} · 전체 보기 / Esc · 닫기`;
     inspectionTypingTimer = setInterval(() => {
       inspectionText.textContent += characters[cursor++];
       if (cursor === characters.length) finishInspectionText();
@@ -102,7 +102,7 @@ inspectionPanel.addEventListener('keydown', event => {
     event.preventDefault();
     return;
   }
-  if (event.key !== 'Tab' || (inventoryShown() && !event.shiftKey)) return;
+  if (event.key !== 'Tab' || (inventoryShown() && !event.shiftKey && keyMatches('inventory', event.code))) return;
   event.preventDefault();
   const focusable = [...inspectionPanel.querySelectorAll('button:not(:disabled), [tabindex="0"]')].filter(element => !element.hidden);
   const index = focusable.indexOf(document.activeElement);

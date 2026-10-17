@@ -1,5 +1,6 @@
 // 17층: 확장 구역의 방(FLOOR17)과 방 내부(FLOOR17_ROOMS). 복도 자체는 world/corridor17.js의 고정 장면이다.
 // 복도 벽면 범위는 service-corridor.png의 벽기둥 중심(x=3556, 4282)과 끝벽(4968) 기준이다.
+const CIRCUIT_GUIDE_MESSAGE = '태양광은 조명 전용이다. 승강기는 별도 비상 UPS로 공급한다. 공급 S 단자는 중계 릴레이 R을 거쳐 승강기 E 단자로 간다. 두 점검표를 함께 보고 경로를 추적하자. 네 가닥을 연결한 뒤 회로 검사를 통과해야 전력이 복구된다.';
 const MANAGER_ROOM_CODE = '1706';
 const EMERGENCY_CIRCUITS = [
   { color: 'red', source: 'S1', relay: 'R2', target: 'E3', label: '승강기 구동' },
@@ -7,7 +8,7 @@ const EMERGENCY_CIRCUITS = [
   { color: 'blue', source: 'S3', relay: 'R1', target: 'E4', label: '문 개폐' },
   { color: 'green', source: 'S4', relay: 'R3', target: 'E2', label: '안전 접지' },
 ];
-const FLOOR17 = { id: 'f17', floor: 17, short: '17F', label: '17층 · 복도', header: '17F · 00:00', aria: '17층 복도', roomDoorY: 210,
+const FLOOR17 = { id: 'f17', floor: 17, short: '17F', label: '17층 · 복도', header: '17F · 복도', aria: '17층 복도', roomDoorY: 210,
   rooms: [
   { name: '화장실', target: 'f17-restroom', ...BUILDING_CORE.restroom },
   { name: '관리자 외 출입금지', target: 'f17-manager', x: 4282, width: 686,
@@ -24,7 +25,7 @@ const FLOOR17_ROOMS = interiorRooms(17, [
       sprite: 'assets/ui/floor17/emergency-panel-states.png', stateBy: 'f17-emergency-linked', powerCircuit: true,
       message: '비상 UPS는 살아 있지만 승강기 회선 네 가닥이 분리되어 있다. 책상의 회로 안내도로 공급 단자와 승강기 단자를 확인하자.' },
     { file: 'office-desk', size: [512, 256], worldWidth: 252, x: 800, name: '비상 전력 회로 안내도', gives: 'f17-circuit-guide-read',
-      message: '태양광은 조명 전용이다. 승강기는 별도 비상 UPS로 공급한다. 공급 S 단자는 중계 릴레이 R을 거쳐 승강기 E 단자로 간다. 두 점검표를 함께 보고 경로를 추적하자. 네 가닥을 연결한 뒤 회로 검사를 통과해야 전력이 복구된다.',
+      message: CIRCUIT_GUIDE_MESSAGE, takenMessage: CIRCUIT_GUIDE_MESSAGE, // 챙긴 뒤에도(gives) 같은 안내도를 몇 번이든 다시 볼 수 있다
       surface: 'document', look: 'manual', caption: '17층 비상 전력 분배 · 단자 번호를 확인할 것',
       writing: [{ as: 'title', text: '비상 전력 회로 안내도' }, '태양광: 층별 전등만 공급. 승강기는 별도 비상 UPS 사용.',
         { as: 'table', head: true, rows: [['공급 단자', '중계 릴레이', '용도'], ...EMERGENCY_CIRCUITS.map(circuit => [circuit.source, circuit.relay, circuit.label])] },

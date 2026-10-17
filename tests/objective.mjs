@@ -116,7 +116,7 @@ try {
   assert.equal(await page.evaluate(() => collectedItems.has('story-anxiety-seen')), true);
   await page.keyboard.press('Escape');
   await page.locator('#inspection').waitFor({ state: 'hidden' });
-  await waitTyped('정신 불안', '머리가 어지럽다. 마음을 진정시킬 무언가가 필요하다.');
+  await waitTyped('정신 불안', '머리가 어지럽다. 마음을 진정시킬 무언가가 필요하다. 편의점으로 가보자.');
 
   // 항불안제를 챙기거나 사용해도 목표는 유지되고, 사용하고 4초 뒤 두 번째 컷씬이 나오고, 끝나면 '로봇의 습격! 그 이유는?' 목표가 생긴다.
   await page.evaluate(() => collectedItems.add('f16-antianxiety'));

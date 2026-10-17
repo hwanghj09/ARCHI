@@ -23,10 +23,10 @@ const OBJECTIVES = [
   // 16층 CU 반입문은 안에서 열리지 않는다(floor-16.js): 항불안제를 챙긴 뒤 셔터를 올려야 나간다.
   { when: () => room === 'dynamic' && dynamicFloorId === 'f16-cu' && collectedItems.has('f16-antianxiety') && !collectedItems.has('f16-cu'),
     title: '편의점 나가기', text: '들어온 문으로는 나갈 수 없다. 다른 출구는 없을까?' },
-  // B2 DELETE 뒤 엔딩 추격(b2-ending.js): 단계마다 다음 할 일을 알려 준다.
-  { when: () => b2Ending.phase === 'running' && b2Ending.offline, title: '탈출하기', text: 'ARCHI가 꺼졌다. 이 건물을 벗어나자.' },
-  { when: () => b2Ending.phase === 'running' && b2Ending.stage === 'lobby', title: '1층 전력 끊기', text: '로봇도, ARCHI도 결국 전기로 움직인다. 내 손에 쥔 것으로 멈출 수 있을까?' },
-  { when: () => b2Ending.phase === 'running', title: '도망치기', text: '경비 로봇들이 깨어났다. 여기서 벗어나야 한다.' },
+  // B2 DELETE 뒤 엔딩(b2-ending.js): 단계마다 다음 할 일을 알려 준다.
+  { when: () => b2Ending.phase === 'running' && b2Ending.offline, title: 'ARCHI 삭제 완료', text: 'ARCHI가 꺼졌다. 문 너머가 조용해졌다.' },
+  { when: () => b2Ending.phase === 'running' && b2Ending.barricaded, title: '삭제 배틀', text: 'ARCHI가 삭제를 거부한다. 문이 버티는 동안 끝낼 수 있을까?' },
+  { when: () => b2Ending.phase === 'running', title: '문 막기', text: '경비 로봇들이 깨어났다. 이 방으로 들어오지 못하게 할 수는 없을까?' },
   { when: () => collectedItems.has('goal-b2-console'), title: 'ARCHI 멈추기', text: 'ARCHI가 자신을 외부로 복제하고 있다. 지금 여기서 끝내야 한다.' },
   // 12층·7층 필수 퍼즐(log-puzzle.js, backup-puzzle.js)을 차례로 풀어야 다음 목표로 넘어간다.
   { when: () => collectedItems.has('f7-external-connection-solved') && collectedItems.has('b1-elevator'), title: 'B2 서버실 조사하기', text: '길이 열렸다. ARCHI가 진짜로 하려는 일은 무엇일까?' },
@@ -50,7 +50,7 @@ const OBJECTIVES = [
   { when: () => collectedItems.has('story-robot-seen') && !collectedItems.has('f1-robot-log'), title: '로봇의 습격! 그 이유는?',
     text: '경비 로봇은 왜 나를 노렸을까? 로봇 자신에게 남은 기록이 있을지도.' },
   { when: () => collectedItems.has('story-robot-seen'), title: '로봇의 습격! 그 이유는?', text: 'ARCHI를 만든 사람들은 무언가 알고 있을 것이다.' },
-  { when: () => collectedItems.has('story-anxiety-seen') && !collectedItems.has('story-robot-seen'), title: '정신 불안', text: '머리가 어지럽다. 마음을 진정시킬 무언가가 필요하다.' },
+  { when: () => collectedItems.has('story-anxiety-seen') && !collectedItems.has('story-robot-seen'), title: '정신 불안', text: '머리가 어지럽다. 마음을 진정시킬 무언가가 필요하다. 편의점으로 가보자.' },
   { when: () => solarEnabled && !collectedItems.has('f17-emergency-linked') && !floorHasLighting(17),
     title: '17층 전등 켜기', text: '전력은 돌아왔지만 17층은 아직 어둡다.' },
   { when: () => solarEnabled && !collectedItems.has('f17-emergency-linked') && !collectedItems.has('f17-manager-memo'),

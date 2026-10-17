@@ -2,6 +2,7 @@
 const idleSheet = document.getElementById('idle-sprite');
 const walkSheet = document.getElementById('walk-sheet');
 const runSheet = document.getElementById('run-sheet');
+const crouchSheet = document.getElementById('crouch-sheet');
 const jumpSheet = document.getElementById('jump-sheet');
 const interactSheet = document.getElementById('interact-sheet');
 const phoneSheet = document.getElementById('phone-sheet');
@@ -41,6 +42,25 @@ let facing = 1;
 let grounded = false;
 let jumpQueued = false;
 let interactionTime = 0;
+let crouching = false;
+let crouchDistance = 0;
+
+function setCrouching(value, force = false) {
+  if (value === crouching) return;
+  if (value && (crouchSheet.naturalWidth !== 1024 || crouchSheet.naturalHeight !== 256)) return;
+  const oldHeight = crouching ? 96 : 162;
+  const height = value ? 96 : 162;
+  if (!value && !force) {
+    // Keep the feet planted and wait for headroom before standing up.
+    const ceiling = { min: { x: body.bounds.min.x + .5, y: body.bounds.max.y - height },
+      max: { x: body.bounds.max.x - .5, y: body.bounds.min.y - .5 } };
+    if (Matter.Query.region(Composite.allBodies(engine.world).filter(part => part !== body && !part.isSensor), ceiling).length) return;
+  }
+  Body.scale(body, 1, height / oldHeight);
+  Body.setInertia(body, Infinity);
+  Body.setPosition(body, { x: body.position.x, y: body.position.y + (oldHeight - height) / 2 });
+  crouching = value;
+}
 
 function checkWalkSheet() {
   walkReady = walkSheet.naturalWidth === 256 * walkFrames && walkSheet.naturalHeight === 256;
@@ -96,7 +116,7 @@ function animate(distance, sprinting = false, elapsed = 0) {
     idleTime = 0;
     refreshPhone();
   }
-  const running = grounded && sprinting && distance > .1 && runSheet.naturalWidth === 256 * runFrames && runSheet.naturalHeight === 256;
+  const running = !crouching && grounded && sprinting && distance > .1 && runSheet.naturalWidth === 256 * runFrames && runSheet.naturalHeight === 256;
   const walking = grounded && walkReady && distance > .1 && !running;
   const holdingPhone = usingPhone || phoneLightOn;
   walkDistance = walking ? (walkDistance + distance) % (frameDistance * walkFrames) : 0;
@@ -104,11 +124,12 @@ function animate(distance, sprinting = false, elapsed = 0) {
   if (distance > .1 || !grounded) phoneAwayTime = 0;
   else phoneAwayTime = Math.max(0, phoneAwayTime - elapsed);
   const state = usingPhone ? (phoneLightOn ? 'phone-light' : 'phone') : !grounded ? (body.velocity.y < 0 ? 'jump' : 'fall') :
-    interactionTime > 0 && !holdingPhone ? 'interact' : running ? 'run' : walking ? 'walk' :
+    crouching ? 'crouch' : interactionTime > 0 && !holdingPhone ? 'interact' : running ? 'run' : walking ? 'walk' :
     phoneLightOn ? 'phone-light' : phoneAwayTime > 0 ? 'phone-away' : 'idle';
   phoneTime = state === sprite.dataset.state && (state === 'phone' || state === 'phone-light') ? phoneTime + elapsed : 0;
   idleTime = state === 'idle' && sprite.dataset.state === 'idle' ? (idleTime + elapsed) % 3200 : 0;
-  const index = state === 'phone' ? (phoneTime < 360 ? Math.floor(phoneTime / 180) : 2 + Math.floor((phoneTime - 360) / 600) % 2) :
+  crouchDistance = state === 'crouch' && distance > .1 ? (crouchDistance + distance) % 96 : 0;
+  const index = state === 'crouch' ? Math.floor(crouchDistance / 24) : state === 'phone' ? (phoneTime < 360 ? Math.floor(phoneTime / 180) : 2 + Math.floor((phoneTime - 360) / 600) % 2) :
     state === 'phone-light' ? Math.floor(phoneTime / 240) % 4 : state === 'phone-away' ? Number(phoneAwayTime <= 180) :
     state === 'fall' ? 1 : state === 'interact' ? Number(interactionTime <= 240) :
     running ? Math.floor(runDistance / runFrameDistance) : walking ? Math.floor(walkDistance / frameDistance) :
@@ -122,6 +143,7 @@ function animate(distance, sprinting = false, elapsed = 0) {
     if (sheet.getAttribute('src') !== src) sheet.setAttribute('src', src);
   }
   if (state === 'idle') showIdleFrame(index);
+  if (state === 'crouch') crouchSheet.style.transform = `translateX(${-index * 25}%)`;
   if (state === 'walk') (holdingPhone ? phoneWalkSheet : walkSheet).style.transform = `translateX(${-index * 100 / walkFrames}%)`;
   if (state === 'run') (holdingPhone ? phoneRunSheet : runSheet).style.transform = `translateX(${-index * 100 / runFrames}%)`;
   // Reuse the airborne run poses so a lit phone never disappears during a jump.
