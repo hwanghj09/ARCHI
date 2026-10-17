@@ -31,7 +31,7 @@ window.addEventListener('keydown', event => {
     else if (event.code !== 'Tab' && !(event.target.id === 'opening-skip' && ['Enter', 'Space'].includes(event.code))) event.preventDefault();
     return;
   }
-  if (itemUseTime > 0 && event.code !== 'Escape') { event.preventDefault(); return; }
+  if (photoCaptureTime > 0 || itemUseTime > 0 && event.code !== 'Escape') { event.preventDefault(); return; }
   if (transitioning) { event.preventDefault(); return; }
   // 조작 창(manual-control.js)은 자기 keydown에서 입력을 받는다. 창 밖에 초점이 있어도 수호는 움직이지 않는다.
   if (usingControl) { if (event.code === 'Escape') closeControl(); event.preventDefault(); return; }

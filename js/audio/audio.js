@@ -45,7 +45,7 @@ function gameAudioBuffer(name) {
   const durations = { step: .2, door: .65, 'elevator-door': 1.05, 'elevator-arrive': 1.05,
     'elevator-alarm': .95, blackout: 1.5, 'robot-servo': .48, 'robot-alert': .6,
     'robot-grab': .65, 'call-ring': .85, phone: .14, charger: .24, pickup: .22, 'item-get': .5, 'item-use': .3, deny: .46,
-    shutter: 1.35, switch: .12, ui: .09,
+    shutter: 1.35, 'camera-shutter': .18, switch: .12, ui: .09,
     'cctv-beep': 2.2, 'cctv-on': 1.3, 'cctv-hit': 1.8, 'cctv-static': .7, heartbeat: .9, 'cctv-rise': 5.2 };
   const loop = ['office', 'dark', 'wind', 'motor', 'cctv-bgm', 'cctv-dread'].includes(name);
   const duration = loop ? 8 : durations[name];
@@ -77,6 +77,7 @@ function gameAudioBuffer(name) {
       case 'robot-grab': sample = (.14 * sin(118, t) + .26 * low) * Math.sin(Math.PI * t / duration) + (.18 * sin(68, t) + .18 * soft) * hit(t, .48, 32); break;
       case 'call-ring': sample = (.11 * sin(440, t) + .08 * sin(480, t)) * (hit(t, .02, 9) + hit(t, .4, 9)); break;
       case 'phone': sample = .12 * sin(680 - 850 * t, t) * Math.sin(Math.PI * t / duration) * Math.exp(-18 * t); break;
+      case 'camera-shutter': sample = (.25 * soft + .1 * sin(1250, t)) * (hit(t, .01, 65) + .7 * hit(t, .075, 80)); break;
       case 'charger': sample = .11 * sin(470, t) * hit(t, .01, 35) + .1 * sin(620, t) * hit(t, .105, 30); break;
       case 'pickup': sample = .3 * low * Math.sin(Math.PI * t / duration) + .07 * sin(310, t) * hit(t, .07, 30); break;
       // 가방에 넣는 물건은 밝은 2음 차임, 물건을 써서 여는 장치는 철컥 뒤 짧은 삑, 거부는 낮게 내려가는 2음 버저.

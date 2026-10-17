@@ -30,13 +30,15 @@ function openPhoneApp(app) {
   const view = [...phoneAppWindow.querySelectorAll('[data-phone-view]')].find(element => element.dataset.phoneView === app);
   if (!view) return;
   currentPhoneApp = app;
-  document.getElementById('phone-app-title').textContent = { notes: '개인 메모', calculator: '계산기', building: '건물 안내', solar: '비상 전력 제어' }[app];
+  document.getElementById('phone-app-title').textContent = { notes: '개인 메모', calculator: '계산기', building: '건물 안내', solar: '비상 전력 제어', camera: '카메라', gallery: '갤러리' }[app];
   phonePanel.querySelector('.phone-owner').hidden = true;
   phonePanel.querySelector('.phone-controls').hidden = true;
   for (const element of phoneAppWindow.querySelectorAll('[data-phone-view]')) element.hidden = element !== view;
   phoneAppWindow.hidden = false;
   phonePanel.querySelector('.phone-screen').scrollTop = 0;
   if (app === 'building') refreshBuildingGuides();
+  if (app === 'camera') refreshPhoneCamera();
+  if (app === 'gallery') renderPhoneGallery();
   if (app === 'solar') {
     document.getElementById('phone-solar-floor').value = String(solarPoweredFloors[0] || 17);
     jamB2SolarApp(); // B2 엔딩 1층: 열 때마다 ARCHI가 잠시 방해한다
@@ -122,7 +124,7 @@ function refreshPhone() {
 }
 
 function togglePhone() {
-  if (itemUseTime > 0 || playerCaught || hallucinationCaught || blackoutSceneActive || cctvSceneActive) return;
+  if (photoCaptureTime > 0 || itemUseTime > 0 || playerCaught || hallucinationCaught || blackoutSceneActive || cctvSceneActive) return;
   if (usingPhone) return closePhone();
   if (phoneDock) return showStatus(`${phoneDockLocation()} 책상에 휴대폰을 두었다. 그 자리에서 E로 가져오자.`, 4000);
   usingPhone = true;
@@ -152,7 +154,7 @@ function closePhone() {
 }
 
 function togglePhoneLight() {
-  if (itemUseTime > 0 || playerCaught || hallucinationCaught || blackoutSceneActive || cctvSceneActive) return;
+  if (photoCaptureTime > 0 || itemUseTime > 0 || playerCaught || hallucinationCaught || blackoutSceneActive || cctvSceneActive) return;
   if (phoneDock) return showStatus(`${phoneDockLocation()} 책상에 휴대폰을 두어 플래시를 사용할 수 없다.`, 4000);
   if (!phoneLightOn && phoneBattery <= 0) return showStatus('휴대폰 배터리가 없습니다.');
   phoneLightOn = !phoneLightOn;

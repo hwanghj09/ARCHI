@@ -118,7 +118,7 @@ function toggleInventory() {
     inventoryButton.focus();
     return;
   }
-  if (itemUseTime > 0 || transitioning || selectingFloor || usingComputer || usingKeypad || usingControl || usingPhone || usingPowerPanel || usingInspection) return;
+  if (photoCaptureTime > 0 || itemUseTime > 0 || transitioning || selectingFloor || usingComputer || usingKeypad || usingControl || usingPhone || usingPowerPanel || usingInspection) return;
   showInventoryList();
 }
 
@@ -160,7 +160,7 @@ inventoryButton.addEventListener('click', toggleInventory);
 // 가방의 물건 사용: 효과/사용 플래그는 즉시 저장 가능한 상태로 만들고, 복용 동작은 닫힌 가방 밖에서 보여 준다.
 function useInventoryItem(id) {
   const item = INVENTORY_ITEMS[id];
-  if (!item?.use || !collectedItems.has(id) || collectedItems.has(item.usedFlag) || itemUseTime > 0 ||
+  if (!item?.use || !collectedItems.has(id) || collectedItems.has(item.usedFlag) || photoCaptureTime > 0 || itemUseTime > 0 ||
       mainMenuActive || openingActive || blackoutSceneActive || playerCaught || hallucinationCaught || transitioning || selectingFloor) return;
   if (item.use.animation && !startItemUseAnimation()) return;
   collectedItems.add(item.usedFlag);
