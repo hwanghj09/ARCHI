@@ -55,18 +55,17 @@ function startArchiDelete() {
   // 체크포인트: [예]를 누르기 직전 상태. 자동 저장 칸도 같은 상태로 맞춰 두고, 삭제가 시작되면 자동 저장을 멈춘다.
   saveProgress();
   try { localStorage.setItem(b2CheckpointKey, JSON.stringify(progressSnapshot())); }
-  catch { showStatus('체크포인트를 저장하지 못했습니다.', 4000); }
+  catch { /* 체크포인트 없이도 삭제는 진행한다. */ }
   closeInspection();
   Object.assign(b2Ending, { phase: 'running', elapsed: 0, alarm: 0 });
   b2Robots = b2DockX.map((x, index) => ({ name: ['R-02', 'R-05', 'R-07'][index], where: floorId(-2), x, facing: -1, wait: 0, elapsed: 0,
     mode: 'dock', hold: b2WakeDelay + index * 700, lostTime: 0, captureTime: 0, door: null, image: null, chaseOriginX: null, spottedX: null,
-    firstEncounter: false, pursuit: true, followToElevator: true, chaseSpeed: b2ChaseSpeed, onCaught: showB2BadEnding }));
+    pursuit: true, followToElevator: true, chaseSpeed: b2ChaseSpeed, onCaught: showB2BadEnding }));
   loadB2EndingArt();
   b2DeleteBar.hidden = false;
   refreshB2Bar();
   mountB2Robots();
   setB2Siren(true); // 삭제가 끝날 때까지 사이렌을 반복한다
-  showStatus('DELETE ARCHI 실행. 경보가 울리고 복도 끝 충전 도크에서 로봇들이 깨어나는 소리가 난다.', 4000);
 }
 
 // 장면을 새로 그릴 때(floor-change.js) 같은 장면에 있는 로봇만 스프라이트를 붙이고, B2 전체를 비상 모드로 그린다.
@@ -163,7 +162,6 @@ function updateB2Ending(delta) {
       setTimeout(() => { if (door.element.isConnected) door.element.dataset.open = 'false'; }, 900);
     }
     playGameSound('door', { x: robot.x });
-    showStatus(`문이 벌컥 열리고 경비 로봇 ${robot.name}이 들어온다!`, 2400);
     mountB2Robot(robot);
   }
 }
@@ -363,7 +361,6 @@ function enterB2Lobby(car) {
   Object.assign(guardPatrol, { x: Math.min(4530, body.position.x + b2LobbyR01Distance), facing: -1, wait: 0, elapsed: 0, mode: 'dock',
     lostTime: 0, captureTime: 0 }, b2LobbyR01);
   updatePowerState();
-  showStatus('1층. 로비 저편에서 R-01이 이쪽을 보고 있다. 휴대폰(P)의 비상 전력 제어로 1층 전력을 끊어야 한다.', 5000);
 }
 
 function updateB2Lobby(delta) {
@@ -382,7 +379,6 @@ function updateB2Lobby(delta) {
   for (const key of Object.keys(b2LobbyR01)) delete guardPatrol[key]; // 다시 전력이 들어와도 평소 R-01로 돌아간다
   updatePowerState();
   playGameSound('blackout');
-  showStatus('ARCHI — OFFLINE. R-01이 그 자리에 멈췄다. 정문으로 나가자.', 5000);
 }
 
 // 휴대폰 '비상 전력 제어' 앱을 열 때(phone.js) 1층 장면이면 ARCHI가 잠시 막는다.
@@ -476,11 +472,10 @@ document.getElementById('b2-restart').addEventListener('click', () => {
 });
 document.getElementById('b2-checkpoint').addEventListener('click', () => {
   let data = null;
-  try { data = JSON.parse(localStorage.getItem(b2CheckpointKey)); } catch { /* 아래에서 알린다. */ }
-  if (!data?.scene) { showStatus('체크포인트를 불러오지 못했습니다. 처음부터 다시 시작해 주세요.', 5000); return; }
+  try { data = JSON.parse(localStorage.getItem(b2CheckpointKey)); } catch { /* 아래에서 그냥 돌아간다. */ }
+  if (!data?.scene) return;
   restoreProgress(data);
   saveProgress();
-  showStatus('DELETE를 누르기 직전으로 돌아왔습니다.', 3000);
 });
 document.getElementById('b2-escape-menu').addEventListener('click', () => {
   // 삭제 중에는 자동 저장을 멈췄으므로 저장 칸은 DELETE 직전 상태다. 메뉴의 '이어하기'는 그 저장에서 시작한다.

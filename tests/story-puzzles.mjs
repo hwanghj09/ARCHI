@@ -86,7 +86,6 @@ try {
   assert.equal(await page.evaluate(() => usingControl), false);
   assert(await has('f12-network-isolated'));
   assert.equal(await page.evaluate(() => logPuzzle.outcome), 'in-time');
-  assert.match(await page.locator('#interaction-status').textContent(), /NETWORK CONNECTION LOST · REMOTE DELETION STOPPED/);
   await page.clock.runFor(30000);
   assert.equal(await page.evaluate(() => logDeletedCount()), 1, 'Unplugging stops the deletion at once');
   assert.equal(await objective(), '이상한 밤 찾기');

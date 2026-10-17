@@ -53,7 +53,6 @@ function saveProgress() {
     progressSaveFailed = false;
     return true;
   } catch {
-    if (!progressSaveFailed) showStatus('진행 상황을 저장할 수 없습니다. 브라우저 저장 공간을 확인해 주세요.', 6000);
     progressSaveFailed = true;
     return false;
   }
@@ -228,7 +227,6 @@ function restoreProgress(data) {
     refreshReady(); refreshInventoryCount(); refreshPhone(); refreshSanity(); updatePowerState();
     cameraX = cameraTarget(); animate(0); updateInteraction(); render();
     gameStarted = true;
-    showStatus('저장한 진행 상황을 이어서 시작합니다.', 3000);
     (selectingFloor ? cabin : stage).focus({ preventScroll: true });
     objectiveSaveSkip = true; // 불러온 상태의 첫 목표 표시는 새 목표가 아니므로 슬롯에 저장하지 않는다
   } finally { restoringProgress = false; }

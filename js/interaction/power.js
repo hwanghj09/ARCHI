@@ -78,10 +78,6 @@ function setSolarPower(enabled) {
   solarEnabled = enabled;
   if (!enabled) solarPoweredFloors = [];
   updatePowerState();
-  showStatus(enabled ? (collectedItems.has('solar-app-installed') ?
-    '태양광 비상 전력 ON · 휴대폰의 비상 전력 제어 앱에서 공급할 층을 선택하자.' :
-    '태양광 조명 전력 ON · 17층 전등을 켜자. 승강기는 관리자실의 비상 회선을 따로 연결해야 한다.') :
-    '태양광 조명 전력 OFF · 비상 UPS로 연결한 승강기는 계속 운행한다.', 6000);
 }
 
 function supplySolarFloor(floor) {
@@ -93,12 +89,10 @@ function supplySolarFloor(floor) {
   if (solarPoweredFloors.includes(floor)) {
     solarPoweredFloors = solarPoweredFloors.filter(entry => entry !== floor);
     updatePowerState();
-    return showStatus(`${floor}층 태양광 비상 전력을 끊습니다.`);
+    return;
   }
-  const dropped = solarPoweredFloors.length >= solarFloorLimit ? solarPoweredFloors[0] : null;
   solarPoweredFloors = [...solarPoweredFloors, floor].slice(-solarFloorLimit);
   updatePowerState();
-  showStatus(`${floor}층에 태양광 비상 전력을 공급합니다.${dropped ? ` 켜져 있던 ${dropped}층은 꺼집니다.` : ''}`);
 }
 
 function refreshSolarApp() {
@@ -151,7 +145,6 @@ function triggerBuildingBlackout() {
   }
   buildingBlackout = true;
   updatePowerState();
-  showStatus('갑자기 건물 전체의 불이 꺼졌다. 휴대폰(P)의 라이트를 켜 보자.', 6000);
 }
 
 function openPowerPanel() {

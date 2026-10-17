@@ -65,7 +65,6 @@ try {
   assert.equal(await titleAfter(() => collectedItems.add('rooftop-key')), '정전', 'Picking up the rooftop key keeps the blackout objective');
   assert.equal(await titleAfter(() => collectedItems.add('rooftop-unlocked')), '비상 전력 켜기');
   assert.equal(await titleAfter(() => setSolarPower(true)), '17층 전등 켜기');
-  assert.match(await page.locator('#interaction-status').textContent(), /17층 전등을 켜자/);
   await waitTyped('17층 전등 켜기', '전력은 돌아왔지만 17층은 아직 어둡다.');
   assert.equal(await titleAfter(() => supplySolarFloor(17)), '관리실 비밀번호 찾기');
   assert.equal(await titleAfter(() => collectedItems.add('f17-manager-memo')), '관리실 열기');
@@ -103,10 +102,15 @@ try {
   });
   await page.locator('#story-scene').waitFor({ state: 'visible' });
   assert.equal(await page.locator('#story-caption').textContent(), '왜 경비 로봇이 나를 공격하려고 했던 거지?');
-  await page.waitForFunction(() => storyCaption.textContent.startsWith('으윽'), null, { timeout: 5000 });
-  await page.waitForFunction(() => storyCaption.textContent.startsWith('편의점으로 가보자'), null, { timeout: 10000 });
-  await page.keyboard.press('Escape');
-  assert(await page.locator('#story-scene').isHidden(), 'Esc ends the scene');
+  await page.waitForTimeout(3500);
+  assert.equal(await page.locator('#story-caption').textContent(), '왜 경비 로봇이 나를 공격하려고 했던 거지?', '클릭하기 전에는 대사가 넘어가지 않는다');
+  await page.locator('#story-caption').click();
+  assert(await page.locator('#story-caption').textContent().then(text => text.startsWith('으윽')), '클릭하면 다음 대사');
+  await page.locator('#story-caption').click();
+  await page.locator('#story-caption').click();
+  assert(await page.locator('#story-caption').textContent().then(text => text.startsWith('편의점으로 가보자')));
+  await page.locator('#story-caption').click();
+  assert(await page.locator('#story-scene').isHidden(), '마지막 대사에서 클릭하면 끝난다');
   assert.equal(await page.evaluate(() => collectedItems.has('story-anxiety-seen')), true);
   await waitTyped('정신 불안', '머리가 어지럽다. 마음을 진정시킬 무언가가 필요하다.');
 
@@ -119,7 +123,6 @@ try {
   assert.equal(await page.evaluate(() => currentObjective.title), '정신 불안', '사용한 뒤 컷씬이 나오기 전까지도 목표가 유지된다');
   await page.locator('#story-scene').waitFor({ state: 'visible', timeout: 10000 });
   assert.equal(await page.locator('#story-caption').textContent(), '휴.. 겨우 정신을 차렸네..');
-  await page.waitForFunction(() => storyCaption.textContent.startsWith('ARCHI 개발 팀'), null, { timeout: 12000 });
   await page.keyboard.press('Escape');
   assert(await page.locator('#story-scene').isHidden());
   await waitTyped('로봇의 습격! 그 이유는?', 'ARCHI를 만든 사람들은 무언가 알고 있을 것이다.');
@@ -128,7 +131,6 @@ try {
   await page.evaluate(() => collectedItems.add('story-gate-tagged'));
   await page.locator('#story-scene').waitFor({ state: 'visible', timeout: 10000 });
   assert.equal(await page.locator('#story-caption').textContent(), '아 맞다 나 일용직이였지');
-  await page.waitForFunction(() => storyCaption.textContent === '잠깐 빌리지 뭐', null, { timeout: 12000 });
   await page.keyboard.press('Escape');
   await waitTyped('출입증 쌔비기', '출입증이 필요하다. 가까운 곳에 빌릴 만한 사람이 없을까?');
   assert.equal(await page.evaluate(() => officePostit.element.hidden), false, '출입증 쌔비기가 시작되면 옆자리 포스트잇이 생긴다');

@@ -9,11 +9,9 @@ function updateCall() {
     call.state = 'ringing';
     activeCall.element.dataset.ringing = 'true';
     playGameSound('call-ring', { x: activeCall.x });
-    showStatus(call.startMessage, call.duration);
   } else if (call.state === 'ringing' && call.elapsed >= call.after + call.duration) {
     call.state = 'missed';
     activeCall.element.dataset.ringing = 'false';
-    showStatus(call.missedMessage, 4000);
     activeCall = null;
     stopGameSound('call-ring');
   } else if (call.state === 'ringing' && Math.floor((call.elapsed - call.after) / 2200) > Math.floor((previousElapsed - call.after) / 2200)) {
@@ -24,35 +22,32 @@ function updateCall() {
 // 차례대로 조사하는 소품: 다음 차례면 한 단계 나아가고(data-done), 마지막 단계에서 묶음의 gives를 준다. 같은 단계를 다시
 // 조사하면 그대로이고, 순서가 틀리면 처음부터다(첫 단계를 조사한 것이면 그 단계까지는 된 것으로 친다).
 function advanceSequence(door) {
-  const { id, step: order, steps, gives, wrongMessage } = door.sequence;
+  const { id, step: order, steps, gives } = door.sequence;
   if (collectedItems.has(gives)) {
     if (door.takenSheet) openInspection(door.name, door.takenMessage || door.message, door.takenSheet);
-    else showStatus(door.takenMessage || door.message, 5000);
     return;
   }
   const progress = sequenceProgress.get(id) || 0;
   if (order === progress || order === progress + 1) {
     sequenceProgress.set(id, order);
     door.element.dataset.done = 'true';
-    // 마지막 단계의 결과(8층 재현 벤치 출력지)는 조사 창으로 펼친다. 중간 단계는 짧은 상태 문구다.
+    // 마지막 단계의 결과(8층 재현 벤치 출력지)는 조사 창으로 펼친다.
     if (order === steps) {
       collectedItems.add(gives);
       if (order !== progress) playGameSound('pickup');
       openInspection(door.name, door.message, door);
-    } else showStatus(door.message, 5000);
+    }
     return;
   }
   for (const entry of currentDoors) if (entry.sequence?.id === id) entry.element.dataset.done = 'false';
   sequenceProgress.set(id, order === 1 ? 1 : 0);
   if (order === 1) door.element.dataset.done = 'true';
-  showStatus(order === 1 ? door.message : wrongMessage, 5000);
 }
 
 // 버튼(소품·설비의 opens: { barrier, duration })은 같은 장면의 장애물(barriers) 하나를 duration ms 동안 연다(3층 배터리 자동문).
 // 열린 동안 다시 누르면 시간을 처음부터 센다. 시간이 다 됐을 때 수호가 문 자리에 서 있으면 비킬 때까지 기다렸다가 닫는다.
 function openTimedBarrier(button) {
   const barrier = currentDoors.find(door => door.element.classList.contains('barrier') && door.name === button.opens.barrier);
-  showStatus(button.message, 4000);
   if (!barrier || collectedItems.has(barrier.gives)) return;
   barrier.closesIn = button.opens.duration;
   if (!barrier.solid) return;
@@ -76,7 +71,6 @@ function updateTimedBarriers() {
     barrier.parked = null;
     barrier.element.dataset.open = 'false';
     timedBarriers.splice(timedBarriers.indexOf(barrier), 1);
-    if (barrier.closedMessage) showStatus(barrier.closedMessage, 2500);
   }
 }
 
@@ -148,5 +142,4 @@ function advanceCycle(door) {
   collectedItems.add(`${cycle.id}=${cycle.states[next]}`);
   door.element.dataset.state = String(next);
   refreshReady();
-  showStatus(cycle.messages[next], 5000);
 }

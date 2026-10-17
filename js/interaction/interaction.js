@@ -82,7 +82,7 @@ function interact() {
   if (needsControl(nearbyDoor)) { openControl(nearbyDoor); return; }
   if (nearbyDoor.type === 'computer') {
     // 정전 중에는 켜지지 않는다. 옥상 태양광 전력을 17층에 보내면 다시 쓸 수 있다.
-    if (!floorHasPower(currentSceneFloor)) return showStatus('전원이 들어오지 않는다. 전력을 공급해야 한다.', 4000);
+    if (!floorHasPower(currentSceneFloor)) return;
     computerReturnFocus = document.activeElement;
     transitionScene(() => {
       setOfficeComputerPower('on');
@@ -137,7 +137,6 @@ function interact() {
     // 울리는 전화(ring)는 벨이 울리는 동안에만 받을 수 있다. 받으면 벨이 멎고 아래에서 message와 gives를 준다.
     if (nearbyDoor.ring && !collectedItems.has(gives)) {
       if (nearbyDoor.ring.state !== 'ringing') {
-        showStatus(nearbyDoor.ring.idleMessage, 5000);
         return;
       }
       nearbyDoor.ring.state = 'answered';
@@ -219,7 +218,6 @@ function interact() {
       return;
     }
     if (destId === 'rooftop' && (!rooftopBackground.complete || !rooftopBackground.naturalWidth)) {
-      showStatus('옥상 배경을 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.');
       return;
     }
     playGameSound('door');
@@ -232,13 +230,11 @@ function interact() {
     return;
   }
   if (nearbyDoor.type === 'panel') {
-    showStatus(`${nearbyDoor.name}입니다. (추후 구현 예정)`);
     return;
   }
   if (nearbyDoor.type === 'elevator') {
     const car = elevatorCars[nearbyDoor.carIndex];
     if (!elevatorHasPower() && car.floor !== currentSceneFloor) {
-      showStatus(elevatorPowerMessage, 6000);
       return;
     }
     if (car.travelling) return;
@@ -256,7 +252,6 @@ function interact() {
     car.open = false;
     playGameSound('switch');
     updateFloorIndicator(nearbyDoor);
-    showStatus(`${nearbyDoor.name}를 호출했습니다.`);
     updateInteraction();
     return;
   }
@@ -266,7 +261,6 @@ function interact() {
   const open = nearbyDoor.element.dataset.open !== 'true';
   playGameSound('door');
   setDoorOpen(nearbyDoor, open);
-  showStatus(`${nearbyDoor.name} 문을 ${open ? '열었습니다' : '닫았습니다'}.`);
   updateInteraction();
 }
 

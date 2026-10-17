@@ -7,11 +7,14 @@ let blackoutElapsed = 0;
 let blackoutStartX = 0;
 let blackoutCallX = 0;
 let blackoutBlocked = [];
+// 대사가 바뀌는 시각(손 뻗음 1000 · 정전 2900)과 끝(4800)에서 멈추고 클릭하면 이어간다(scene-gate.js).
+const blackoutGate = createSceneGate(blackoutScene, [1000, 2900, 4800]);
 
 function startBlackoutScene(door) {
   if (realBuildingBlackout() || blackoutSceneActive) return;
   blackoutSceneActive = true;
   blackoutElapsed = 0;
+  blackoutGate.reset();
   blackoutStartX = body.position.x;
   blackoutCallX = door.x + door.width - 18;
   blackoutScene.hidden = false;
@@ -30,7 +33,7 @@ function startBlackoutScene(door) {
 }
 
 function updateBlackoutScene(elapsed) {
-  blackoutElapsed += elapsed;
+  blackoutElapsed = blackoutGate.advance(blackoutElapsed, elapsed);
   if (blackoutElapsed >= 4800) return finishBlackoutScene();
   const time = blackoutElapsed;
   const phase = time < 1000 ? 'approach' : time < 2900 ? 'reach' : 'shock';
@@ -73,6 +76,7 @@ function finishBlackoutScene() {
   // Skipping or changing scene still commits the one-time outage.
   triggerBuildingBlackout();
   blackoutSceneActive = false;
+  blackoutGate.reset();
   blackoutScene.hidden = true;
   delete world.dataset.blackoutScene;
   delete world.dataset.powerFlicker;
@@ -84,7 +88,6 @@ function finishBlackoutScene() {
   releaseInput();
   updateInteraction();
   stage.focus({ preventScroll: true });
-  showStatus('건물 전체의 불이 꺼졌다. 휴대폰(P)의 플래시로 앞을 비춰 보자.', 6000);
 }
 
 document.getElementById('blackout-skip').addEventListener('click', finishBlackoutScene);

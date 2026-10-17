@@ -72,7 +72,6 @@ function enterCabin(carIndex) {
   if (transitioning || elevatorEntering) return;
   const art = document.getElementById('cabin-art');
   if (!art.complete || !art.naturalWidth) {
-    showStatus('엘리베이터 내부 이미지를 불러오지 못했습니다. 다시 시도해 주세요.');
     return;
   }
   cabinReturnFocus = document.activeElement;

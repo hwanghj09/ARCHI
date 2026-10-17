@@ -21,7 +21,6 @@ try {
   await page.clock.pauseAt(new Date('2026-10-04T00:01:00Z'));
   await page.clock.runFor(100);
 
-  const status = () => page.locator('#interaction-status').textContent();
   const clueCount = () => page.evaluate(() => collectedClues.length);
   const go = async id => {
     await page.evaluate(id => performFloorChange(id, null, 'exit'), id);
@@ -35,7 +34,7 @@ try {
     }, x);
     await page.clock.runFor(50);
   };
-  // 조사 창을 닫고 상태 문구가 사라질 때까지 기다린 뒤 E를 누른다.
+  // 조사 창을 닫은 뒤 E를 누른다.
   const inspect = async x => {
     await page.clock.runFor(3000);
     await closeInspection(); // 소품 동작 뒤에 늦게 뜬 조사 창이 남아 있으면 닫는다.
@@ -51,22 +50,11 @@ try {
   // 평범한 소품: 처음 조사하면 기록되고, 다시 조사해도 쌓이지 않는다.
   await go('f11-sales');
   await inspect(1700);
-  assert.match(await status(), /단서 기록됨/);
   assert.equal(await clueCount(), 1);
-  // 상태 문구가 조사 창의 어두운 막 아래에 깔리지 않고 맨 위에 보인다.
-  assert(await page.evaluate(() => {
-    const status = document.getElementById('interaction-status');
-    const box = status.getBoundingClientRect();
-    status.style.pointerEvents = 'auto'; // elementFromPoint는 pointer-events: none인 요소를 건너뛴다.
-    const top = document.elementFromPoint(box.left + box.width / 2, box.top + box.height / 2);
-    status.style.pointerEvents = '';
-    return top === status;
-  }), 'The clue status sits above the inspection dim');
   await page.screenshot({ path: '.local/phone-clues-recorded.png' });
   await closeInspection();
   await inspect(1700);
-  assert.doesNotMatch(await status(), /단서 기록됨/, 'The same clue is not recorded twice');
-  assert.equal(await clueCount(), 1);
+  assert.equal(await clueCount(), 1, 'The same clue is not recorded twice');
   await closeInspection();
 
   // requires: UPS를 켜기 전에는 missingMessage만 보이고 기록되지 않는다.
@@ -85,7 +73,6 @@ try {
   await inspect(880);
   await page.clock.runFor(2000); // 조사 문구가 한 글자씩 타이핑되는 동안 기다린다.
   assert.match(await page.locator('#inspection-text').textContent(), /어두워서/);
-  assert.doesNotMatch(await status(), /단서 기록됨/);
   assert.equal(await clueCount(), 2, 'A clue in the dark is not recorded');
   await page.screenshot({ path: '.local/phone-clues-dark.png' });
   await closeInspection();

@@ -197,6 +197,5 @@ function useInventoryItem(id) {
   refreshInventoryCount();
   if (item.use.animation) closeInspection();
   else showInventoryList();
-  showStatus(`${item.name}를 사용했다. 정신력이 조금 돌아왔다.`, 3000);
 }
 

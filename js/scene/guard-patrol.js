@@ -5,7 +5,7 @@
 // 중 — 무적 상태는 아니라서 걷는 도중에도 평소처럼 다시 감지되면 'chase'로 돌아간다.
 // spottedX는 감지 순간 수호가 서 있던 자리다.
 const guardPatrol = { x: 4530, facing: -1, wait: 0, elapsed: 0, mode: 'dock',
-  lostTime: 0, captureTime: 0, door: null, image: null, chaseOriginX: null, spottedX: null, firstEncounter: true };
+  lostTime: 0, captureTime: 0, door: null, image: null, chaseOriginX: null, spottedX: null };
 // 같은 규칙으로 움직이는 다른 로봇(B2 엔딩 추격, b2-ending.js)은 b2Robots에 둔다. 로봇 옵션:
 // pursuit — 놓쳐도 포기하지 않는다. followToElevator — 엘리베이터 앞에서도 멈추지 않는다. sight — 감지 거리(아래).
 // chaseSpeed — 추격 속도(px/s)를 돌려주는 함수(없으면 270).
@@ -52,7 +52,6 @@ document.getElementById('guard-retry').addEventListener('click', () => {
   Object.assign(guardPatrol, { x: 4530, facing: -1, wait: 0, elapsed: 0 });
   performFloorChange('f1');
   releaseInput(); stage.focus();
-  showStatus('로비 엘리베이터 앞에서 다시 시작합니다. 수집한 단서는 유지됩니다.');
 });
 
 function mountGuardPatrol() {
@@ -143,22 +142,11 @@ function updateRobot(robot, delta) {
         // 직접 걸어서 돌아가고(아래 return 처리), 도착하면 그제서야 patrol로 돌아간다.
         robot.mode = 'return'; robot.wait = 0; robot.lostTime = 0;
         collectedItems.add('f1-chase-ended'); // 추격이 끝났다: 3초 뒤 혼잣말 컷씬(story-scene.js)
-        showStatus('엘리베이터 쪽으로 피하자 경비 로봇이 감지했던 자리로 돌아가기 시작했다.', 2400);
-        if (robot.firstEncounter) {
-          robot.firstEncounter = false;
-          setTimeout(() => showStatus('직원증을 소지하고있지만 로봇은 멈추지 않았다 — 이건 단순 정전이 아니다.', 4200), 2400);
-          setTimeout(() => showStatus('1번 엘리베이터 앞 층별 안내판을 다시 봐야겠다.', 4000), 2400 + 4200);
-        }
       } else {
         robot.lostTime = robot.pursuit || (sameLevel && Math.abs(dx) < 600) ? 0 : robot.lostTime + delta;
         if (robot.lostTime >= 1800) {
           robot.mode = 'patrol'; robot.wait = 0;
           collectedItems.add('f1-chase-ended');
-          if (robot.firstEncounter) {
-            robot.firstEncounter = false;
-            showStatus('직원증을 소지하고있지만 로봇은 멈추지 않았다 — 이건 단순 정전이 아니다.', 4200);
-            setTimeout(() => showStatus('1번 엘리베이터 앞 층별 안내판을 다시 봐야겠다.', 4000), 4200);
-          }
         }
         else {
           robot.facing = dx >= 0 ? 1 : -1;

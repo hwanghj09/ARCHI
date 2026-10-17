@@ -43,7 +43,6 @@
     <script src="js/core/dom.js" defer></script>
     <script src="js/core/state.js" defer></script>
     <script src="js/audio/audio.js" defer></script>
-    <script src="js/ui/status.js" defer></script>
     <script src="js/interaction/writing.js" defer></script>
     <script src="js/floors/helpers.js" defer></script>
     <script src="js/floors/floor-01.js" defer></script>
@@ -117,6 +116,7 @@
     <script src="js/debug/sidebar.js" defer></script>
     <script src="js/debug/floor-select.js" defer></script>
     <script src="js/debug/sanity-debug.js" defer></script>
+    <script src="js/scene/scene-gate.js" defer></script>
     <script src="js/scene/opening.js" defer></script>
     <script src="js/scene/blackout.js" defer></script>
     <script src="js/scene/cctv-event.js" defer></script>
@@ -160,7 +160,6 @@
         </div>
         <div id="opening-chair-front" aria-hidden="true"></div>
       </div>
-      <div id="interaction-status" role="status" aria-live="polite"></div>
     </main>
       <header><span>17F · 사무실</span><label id="floor17-light-switch"><input id="floor17-lights" type="checkbox" checked aria-label="17층 조명" /><output id="floor17-light-state">조명 켜짐</output></label><button id="map-button" type="button" aria-label="지도" title="지도"></button></header>
       <nav aria-label="플레이어 조작">
@@ -222,6 +221,7 @@
     <section id="opening" role="region" aria-label="퇴근 오프닝 컷씬" hidden>
       <p id="opening-label">17F · 야근이 끝난 뒤</p>
       <p id="opening-caption" role="status" aria-live="polite">사무실을 불러오는 중…</p>
+      <p class="scene-next" aria-hidden="true">클릭하여 계속 ▸</p>
       <button id="opening-skip" type="button">건너뛰기 · Esc</button>
     </section>
     <!-- 테스트용 층 이동 창 -->
@@ -246,6 +246,7 @@
     </section>
     <section id="blackout-scene" role="dialog" aria-modal="true" aria-label="엘리베이터 앞 정전" hidden>
       <p id="blackout-caption" role="status" aria-live="polite"></p>
+      <p class="scene-next" aria-hidden="true">클릭하여 계속 ▸</p>
       <button id="blackout-skip" type="button">건너뛰기 · Esc</button>
     </section>
     <section id="map-window" role="dialog" aria-label="지도" hidden>
@@ -255,12 +256,14 @@
     </section>
     <section id="story-scene" role="dialog" aria-modal="true" aria-label="수호의 혼잣말" hidden>
       <p id="story-caption" role="status" aria-live="polite"></p>
+      <p id="story-next" aria-hidden="true">클릭하여 계속 ▸</p>
       <button id="story-skip" type="button">건너뛰기 · Esc</button>
     </section>
     <section id="cctv-scene" role="dialog" aria-modal="true" aria-label="B1 방재 관제실 CCTV" hidden>
       <div id="cctv-dim" aria-hidden="true"></div>
       <p id="cctv-rec" aria-hidden="true">● REC</p>
       <p id="cctv-caption" role="status" aria-live="polite"></p>
+      <p class="scene-next" aria-hidden="true">클릭하여 계속 ▸</p>
       <button id="cctv-skip" type="button">건너뛰기 · Esc</button>
     </section>
     <section id="phone" class="device-dialog" role="dialog" aria-modal="true" aria-labelledby="phone-title" hidden>

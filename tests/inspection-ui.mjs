@@ -49,7 +49,6 @@ try {
   await page.keyboard.press('e');
   assert(await page.locator('#inspection').isVisible(), 'E reveals the text before closing');
   assert.match(await page.locator('#inspection-text').textContent(), /사원증/);
-  assert.equal(await page.locator('#interaction-status').textContent(), '');
   assert(await page.locator('#inspection-close').evaluate(el => document.activeElement === el));
   await page.keyboard.press('Tab');
   assert(await page.locator('#inspection-text').evaluate(el => document.activeElement === el));

@@ -90,7 +90,6 @@ function unplugNetworkRack() {
   logPuzzle.outcome = deleted.size === LOG_PUZZLE_ROWS.length ? 'erased' : deleted.has(LOG_KEY_ROW) ? 'too-late' : 'in-time';
   collectedItems.add('f12-network-isolated');
   playGameSound('switch');
-  showStatus(`${LOG_OUTCOME_LINES[logPuzzle.outcome].join(' · ')} — 야간 로그 단말기로 돌아가자.`, 5000);
   if (!logPanel.hidden) renderLogPanel();
   saveProgress();
   return true;

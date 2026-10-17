@@ -1,5 +1,5 @@
 // 감시 카메라(층·방 설정 cameras, B2 메인 서버실 앞 복도): 천장 카메라가 spans의 구간을 period ms마다 차례로 비춘다.
-// 비추는 구간 안에 수호가 있으면 발각: detectedMessage를 보이고 guards 방의 복도 문을 잠근다(E를 누르면 lockedMessage).
+// 비추는 구간 안에 수호가 있으면 발각: guards 방의 복도 문을 잠근다(E를 누르면 lockedMessage).
 // 문은 수호가 시야에서 벗어나고 lockMs가 지나야 다시 열린다. 구간 사이의 빈틈은 사각지대다. disabledBy 물건을 챙기면
 // 카메라는 꺼진 채로 그려지고 아무것도 잠그지 않는다. 장면을 새로 그릴 때마다 첫 구간부터 다시 센다.
 let activeCameras = [];
@@ -54,7 +54,6 @@ function updateCameras() {
     const [from, to] = camera.spans[span];
     if (body.position.x >= from && body.position.x <= to) {
       if (camera.lockLeft <= 0) {
-        showStatus(camera.detectedMessage, 3500);
         setCameraLock(camera, true);
       }
       camera.lockLeft = camera.lockMs;
