@@ -237,22 +237,22 @@ try {
     });
     assert.equal(reacquired.mode, 'chase', `Close range beats the return state: ${JSON.stringify(reacquired)}`);
   });
-  await check('A player already waiting at the elevator is chased, not re-spotted every frame', async () => {
-    // 1번 엘리베이터 앞에서 359px 떨어진 로봇에게 보이면, 달아나기 전이므로 탈출로 치지 않는다. 엘리베이터
-    // 구역은 R-01의 순찰 구간(비상계단 앞부터) 밖이라 'patrol' 상태로는 거기서 감지되지 않으므로, 이미
-    // 막 감지된 직후('chase', spottedX=현재 위치)라고 가정하고 fledFar/nearElevator 쪽만 검증한다.
-    await reset({ playerX: 2046, robot: { x: 2405, facing: -1, mode: 'chase', spottedX: 2046 } });
-    const spotted = await page.evaluate(() => {
-      const statuses = new Set(), modes = new Set();
-      for (let i = 0; i < 30; i++) {
+  await check('A robot right behind the player stops at the elevator instead of re-spotting and catching', async () => {
+    // 바짝 붙어 쫓아오던 로봇이 엘리베이터 앞에서 'return'으로 바뀐 직후 130px 근접 감지로 수호를 다시 보고
+    // 끝까지 따라와 붙잡던 버그. 엘리베이터 앞(1번, 2046)에 선 수호 바로 뒤 100px에서 쫓아오는 로봇.
+    await reset({ playerX: 2046, robot: { x: 2146, facing: -1, mode: 'chase', chaseOriginX: 3400, firstEncounter: false } });
+    const result = await page.evaluate(() => {
+      const modes = new Set(); let caught = false;
+      for (let i = 0; i < 180; i++) {
+        Body.setPosition(body, { x: 2046, y: floorY - 81 }); grounded = true;
         updateGuardPatrol(1000 / 60);
-        statuses.add(document.getElementById('interaction-status').textContent); modes.add(guardPatrol.mode);
+        modes.add(guardPatrol.mode); caught ||= playerCaught;
       }
-      return { x: guardPatrol.x, modes: [...modes], statuses: [...statuses] };
+      return { x: guardPatrol.x, modes: [...modes], caught };
     });
-    assert.deepEqual(spotted.modes, ['chase'], JSON.stringify(spotted));
-    assert(spotted.x < 2405 - 100, `The robot actually moves in: ${spotted.x}`);
-    assert(spotted.statuses.every(text => !/돌아가기/.test(text)), 'No escape message before fleeing');
+    assert.equal(result.caught, false, JSON.stringify(result));
+    assert(!result.modes.includes('chase'), `Never re-acquires at the elevator: ${JSON.stringify(result)}`);
+    assert(result.x > 2146, `Walks back instead of closing in: ${result.x}`);
   });
   await check('Returning in the live loop: gradual motion, first-encounter lines and leaving mid-return', async () => {
     await reset({ playerX: 3200, robot: { x: 3400, facing: -1, firstEncounter: true } });
