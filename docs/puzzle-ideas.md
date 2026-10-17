@@ -4,7 +4,7 @@
 
 ## 0. 구현 현황 (2026-10-17, 브랜치 feature/puzzles)
 
-아래 아이디어는 모두 구현했다. 테스트는 `tests/puzzles.mjs`에 모았다. 문서와 다르게 만든 곳은 이유를 함께 적는다.
+아래 아이디어는 모두 구현했다. 테스트는 `tests/puzzles.mjs`에 모았다. 퍼즐별 위치·힌트·정답 공략은 [puzzle-walkthrough.md](puzzle-walkthrough.md)에 있다. 문서와 다르게 만든 곳은 이유를 함께 적는다.
 
 | 항목 | 구현 위치 | 문서와 다른 점 |
 | --- | --- | --- |
