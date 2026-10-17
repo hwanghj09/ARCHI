@@ -89,8 +89,11 @@ function closeMap() {
   mapWindow.hidden = true;
 }
 
-mapButton.addEventListener('click', () => {
+function toggleMap() {
   if (mapWindow.hidden) openMap(); else closeMap();
+}
+mapButton.addEventListener('click', () => {
+  toggleMap();
   stage.focus({ preventScroll: true }); // 눌린 버튼이 Space·Enter를 가로채지 않게 한다
 });
 document.getElementById('map-close').addEventListener('click', () => { closeMap(); stage.focus({ preventScroll: true }); });

@@ -16,14 +16,14 @@ const STORY_SCENES = [
       '우리 사내 편의점에서 항불안제를 팔았던가?',
       '편의점으로 가보자.'],
   },
-  { // 항불안제를 사용하고(정신 불안 목표 완료) 4초 뒤.
-    flag: 'story-robot-seen', delay: 4000, ready: () => collectedItems.has('story-anxiety-seen') && collectedItems.has('f16-antianxiety-used'),
+  { // 항불안제를 사용하고(정신 불안 목표 완료) 2초 뒤.
+    flag: 'story-robot-seen', delay: 2000, ready: () => collectedItems.has('story-anxiety-seen') && collectedItems.has('f16-antianxiety-used'),
     lines: ['휴.. 겨우 정신을 차렸네..',
       '그래서 경비 로봇이 왜 날 공격했던거지?',
       '그 로봇은 ARCHI 개발 팀에서 만든 로봇이였나?',
       'ARCHI 개발 팀을 조사해보자.'],
   },
-  { // 로봇의 습격! 그 이유는? 목표 도중 12~15층 게이트에 출입증을 태우고, 그 조사창을 닫은 직후.
+  { // 이상 행동 목표 도중 12~15층 게이트에 출입증을 태우고, 그 조사창을 닫은 직후.
     flag: 'story-badge-seen', delay: 300, ready: () => collectedItems.has('story-gate-tagged'),
     lines: ['아 맞다 나 일용직이였지',
       '일용직한테 야근시키는 이 @#$% 회사... 떄려치던가 해야지..',
@@ -53,6 +53,7 @@ function showStoryLine(index) {
 
 function startStoryScene({ lines, flag }) {
   storySceneActive = true;
+  clearEventsForCutscene();
   usingInspection = true; // 이동·상호작용·메뉴·정신력 진행을 막는 기존 규칙을 그대로 쓴다
   storyLines = lines;
   storyFlag = flag;
@@ -60,7 +61,7 @@ function startStoryScene({ lines, flag }) {
   storyBlocked = [...document.body.children].filter(el => el !== storyScene && el.tagName !== 'SCRIPT' && !el.inert);
   for (const el of storyBlocked) el.inert = true;
   releaseInput();
-  Body.setVelocity(body, { x: 0, y: 0 });
+  Body.setVelocity(body, { x: 0, y: body.velocity.y }); // 공중이면 속도를 이어 받아 떨어진다(loop.js의 fallDuringStoryScene)
   hint.hidden = interactionOutline.hidden = true;
   document.getElementById('story-skip').focus({ preventScroll: true });
   showStoryLine(0);

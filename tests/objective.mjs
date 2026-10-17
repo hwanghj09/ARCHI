@@ -114,7 +114,7 @@ try {
   assert.equal(await page.evaluate(() => collectedItems.has('story-anxiety-seen')), true);
   await waitTyped('정신 불안', '머리가 어지럽다. 마음을 진정시킬 무언가가 필요하다. 편의점으로 가보자.');
 
-  // 항불안제를 챙기거나 사용해도 목표는 유지되고, 사용하고 4초 뒤 두 번째 컷씬이 나오고, 끝나면 '로봇의 습격! 그 이유는?' 목표가 생긴다.
+  // 항불안제를 챙기거나 사용해도 목표는 유지되고, 사용하고 2초 뒤 두 번째 컷씬이 나오고, 끝나면 '이상 행동' 목표가 생긴다.
   await page.evaluate(() => collectedItems.add('f16-antianxiety'));
   await page.waitForTimeout(500);
   assert.equal(await page.evaluate(() => currentObjective.title), '정신 불안', '챙기기만 해서는 목표가 바뀌지 않는다');
@@ -125,9 +125,9 @@ try {
   assert.equal(await page.locator('#story-caption').textContent(), '휴.. 겨우 정신을 차렸네..');
   await page.keyboard.press('Escape');
   assert(await page.locator('#story-scene').isHidden());
-  await waitTyped('로봇의 습격! 그 이유는?', 'ARCHI를 만든 사람들은 무언가 알고 있을 것이다.');
+  await waitTyped('이상 행동', '경비 로봇은 왜 나를 노렸을까? ARCHI 개발 팀을 조사해보자.');
 
-  // 로봇의 습격! 그 이유는? 목표 도중 게이트에 출입증을 태우면(조사창을 닫은 뒤) 세 번째 컷씬이 나오고, 끝나면 '출입증 쌔비기' 목표가 생긴다.
+  // 이상 행동 목표 도중 게이트에 출입증을 태우면(조사창을 닫은 뒤) 세 번째 컷씬이 나오고, 끝나면 '출입증 쌔비기' 목표가 생긴다.
   await page.evaluate(() => collectedItems.add('story-gate-tagged'));
   await page.locator('#story-scene').waitFor({ state: 'visible', timeout: 10000 });
   assert.equal(await page.locator('#story-caption').textContent(), '아 맞다 나 일용직이였지');
@@ -146,14 +146,14 @@ try {
   await page.keyboard.press('Escape');
   await waitTyped('출입증 쌔비기', '쪽지에 적힌 그 사람이라면 출입증을 갖고 있겠지.');
 
-  // 사원증을 챙기면 목표가 '로봇의 습격! 그 이유는?'으로 돌아가고, 12층 게이트 앞에서 컷씬이 다시 나오지 않는다.
+  // 사원증을 챙기면 목표가 '이상 행동'으로 돌아가고, 12층 게이트 앞에서 컷씬이 다시 나오지 않는다.
   await page.evaluate(() => { collectedItems.add('f16-badge'); collectedItems.delete('story-gate-tagged'); });
-  await waitTyped('로봇의 습격! 그 이유는?', 'ARCHI를 만든 사람들은 무언가 알고 있을 것이다.');
+  await waitTyped('이상 행동', '경비 로봇은 왜 나를 노렸을까? ARCHI 개발 팀을 조사해보자.');
   await page.evaluate(() => { performFloorChange('f12'); });
   await page.waitForTimeout(500);
   assert(await page.locator('#story-scene').isHidden(), '컷씬은 다시 나오지 않는다');
 
-  assert.equal(await titleAfter(() => collectedItems.add('goal-f12-memo')), '로봇의 습격! 그 이유는?', 'Reading a memo does not bypass the authored evaluation puzzle');
+  assert.equal(await titleAfter(() => collectedItems.add('goal-f12-memo')), '이상 행동', 'Reading a memo does not bypass the authored evaluation puzzle');
   assert.equal(await titleAfter(() => collectedItems.add('f12-evaluation-solved')), '7층 조사하기');
   assert.equal(await titleAfter(() => collectedItems.add('f7-external-connection-solved')), '외부 연결 통로 찾기');
   assert.equal(await titleAfter(() => collectedItems.add('f13-backup-device')), '지하에서 무슨 일이?');

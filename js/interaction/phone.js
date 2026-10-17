@@ -112,7 +112,11 @@ function refreshPhone() {
   document.getElementById('phone-light-state').textContent = phoneLightOn ? '켜짐' : '꺼짐';
   document.getElementById('phone-help').textContent = percent === 0 ? '배터리 없음 · 카페나 사무실 콘센트에서 충전하세요.' : '';
   world.dataset.flashlight = phoneLightOn && itemUseTime <= 0 ? 'on' : 'off';
-  phoneButton.dataset.flashlight = phoneLightOn ? 'on' : 'off';
+  // 플래시가 켜지면 휴대폰 버튼이 아니라 플래시 버튼이 빛난다.
+  const flashButton = document.getElementById('flash-button');
+  flashButton.dataset.flashlight = phoneLightOn ? 'on' : 'off';
+  flashButton.setAttribute('aria-pressed', String(phoneLightOn));
+  flashButton.setAttribute('aria-label', phoneLightOn ? '플래시 끄기 (F)' : '플래시 켜기 (F)');
   const flashState = `플래시 ${phoneLightOn ? '켜짐' : '꺼짐'}`;
   document.getElementById('phone-flash-state').textContent = flashState;
   document.getElementById('phone-flash-state').hidden = Boolean(phoneDock);

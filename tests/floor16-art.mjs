@@ -124,7 +124,7 @@ try {
   await page.keyboard.up('d');
   await page.keyboard.up('Shift');
   await page.clock.runFor(34);
-  assert(await position() > 486, 'The shelf box can be cleared with a running jump');
+  assert(await position() > 508, 'The shelf box can be cleared with a running jump');
   await capture('shelves');
   await use(1150);
   assert.match(await interactionMessage(page), /23:47/);
@@ -248,7 +248,7 @@ try {
   await page.keyboard.up('d');
   await page.keyboard.up('Shift');
   await page.clock.runFor(34);
-  assert(await position() > 486, 'Reduced motion preserves the shelf-box jump');
+  assert(await position() > 508, 'Reduced motion preserves the shelf-box jump');
   await walk(1640);
   await page.evaluate(() => { soundLog.length = 0; });
   await page.keyboard.press('e');

@@ -23,7 +23,7 @@ try {
   await page.evaluate(() => { sanity = 100; performFloorChange('f16-cu', null, 'exit'); });
   const start = await box();
   assert.equal(start.x, 415);
-  assert.equal(start.maxX, 928);
+  assert.equal(start.maxX, 906);
 
   // 바닥에서는 항불안제에 손이 닿지 않는다.
   await place(904);
@@ -34,7 +34,7 @@ try {
   await page.keyboard.press('Escape');
 
   // 왼쪽에서 오른쪽으로 밀면 박스가 플레이어 속도(200px/s)의 절반(100px/s)으로 밀린다.
-  await place(start.x - 71 - 20 - 1);
+  await place(start.x - 93 - 20 - 1);
   await page.keyboard.down('ArrowRight');
   await page.clock.runFor(500); // 먼저 박스에 닿는다
   const before = await box();
@@ -44,14 +44,14 @@ try {
   // 계속 밀면 박스 오른쪽 끝이 계산대 왼쪽 끝에 닿는 자리(maxX)에서 멈춘다.
   await page.clock.runFor(6000);
   await page.keyboard.up('ArrowRight');
-  assert.equal((await box()).x, 928);
+  assert.equal((await box()).x, 906);
 
   // 최신 규칙: 끝까지 밀지 않아도 선반 가까운 박스 위에서 약을 챙길 수 있다.
   await page.evaluate(() => {
     const part = movingParts[0];
     Body.setPosition(part.body, { x: 808, y: part.body.position.y });
   });
-  await place(860, groundY - 90 - 81);
+  await place(860, groundY - 117 - 81);
   await page.clock.runFor(200);
   assert((await box()).x < start.maxX, 'Medicine pickup does not require the box at its limit');
   assert.equal(await page.evaluate(() => nearbyDoor?.name), '항불안제');
@@ -61,7 +61,7 @@ try {
   assert.equal(await page.locator('.fixture.pill-item').isHidden(), true, 'The pill disappears from the shelf');
 
   // 오른쪽에서 왼쪽으로도 밀리고, 처음 자리보다 더 왼쪽으로는 밀리지 않는다.
-  await place(928 + 71 + 20 + 1);
+  await place(906 + 93 + 20 + 1);
   await page.keyboard.down('ArrowLeft');
   await page.clock.runFor(8000);
   await page.keyboard.up('ArrowLeft');

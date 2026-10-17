@@ -41,6 +41,11 @@ let facing = 1;
 let grounded = false;
 let jumpQueued = false;
 let interactionTime = 0;
+let playerPushing = false; // 이번 걸음에 상자를 밀고 있는가(pushables.js의 pushPushables가 정한다)
+let pushTime = 0;
+const pushSheet = document.getElementById('push-sheet');
+const pushFrames = 6;
+const pushFrameMs = 130; // assets/player/jeong-suho-push-box.json
 
 function checkWalkSheet() {
   walkReady = walkSheet.naturalWidth === 256 * walkFrames && walkSheet.naturalHeight === 256;
@@ -96,21 +101,23 @@ function animate(distance, sprinting = false, elapsed = 0) {
     idleTime = 0;
     refreshPhone();
   }
-  const running = grounded && sprinting && distance > .1 && runSheet.naturalWidth === 256 * runFrames && runSheet.naturalHeight === 256;
-  const walking = grounded && walkReady && distance > .1 && !running;
+  const pushing = grounded && playerPushing && distance > .1 && pushSheet.naturalWidth === 256 * pushFrames; // 상자를 미는 동안은 밀기 모션
+  const running = grounded && sprinting && !pushing && distance > .1 && runSheet.naturalWidth === 256 * runFrames && runSheet.naturalHeight === 256;
+  const walking = grounded && walkReady && distance > .1 && !running && !pushing;
   const holdingPhone = usingPhone || phoneLightOn;
   walkDistance = walking ? (walkDistance + distance) % (frameDistance * walkFrames) : 0;
   runDistance = running ? (runDistance + distance) % (runFrameDistance * runFrames) : 0;
   if (distance > .1 || !grounded) phoneAwayTime = 0;
   else phoneAwayTime = Math.max(0, phoneAwayTime - elapsed);
   const state = usingPhone ? (phoneLightOn ? 'phone-light' : 'phone') : !grounded ? (body.velocity.y < 0 ? 'jump' : 'fall') :
-    interactionTime > 0 && !holdingPhone ? 'interact' : running ? 'run' : walking ? 'walk' :
+    interactionTime > 0 && !holdingPhone ? 'interact' : pushing ? 'push' : running ? 'run' : walking ? 'walk' :
     phoneLightOn ? 'phone-light' : phoneAwayTime > 0 ? 'phone-away' : 'idle';
+  pushTime = state === 'push' ? pushTime + elapsed : 0;
   phoneTime = state === sprite.dataset.state && (state === 'phone' || state === 'phone-light') ? phoneTime + elapsed : 0;
   idleTime = state === 'idle' && sprite.dataset.state === 'idle' ? (idleTime + elapsed) % 3200 : 0;
   const index = state === 'phone' ? (phoneTime < 360 ? Math.floor(phoneTime / 180) : 2 + Math.floor((phoneTime - 360) / 600) % 2) :
     state === 'phone-light' ? Math.floor(phoneTime / 240) % 4 : state === 'phone-away' ? Number(phoneAwayTime <= 180) :
-    state === 'fall' ? 1 : state === 'interact' ? Number(interactionTime <= 240) :
+    state === 'fall' ? 1 : state === 'interact' ? Number(interactionTime <= 240) : state === 'push' ? Math.floor(pushTime / pushFrameMs) % pushFrames :
     running ? Math.floor(runDistance / runFrameDistance) : walking ? Math.floor(walkDistance / frameDistance) :
     state === 'idle' ? (idleTime < 1200 ? 0 : idleTime < 2100 ? 1 : idleTime < 2220 ? 2 : 3) : 0;
   sprite.dataset.state = state;
@@ -122,6 +129,7 @@ function animate(distance, sprinting = false, elapsed = 0) {
     if (sheet.getAttribute('src') !== src) sheet.setAttribute('src', src);
   }
   if (state === 'idle') showIdleFrame(index);
+  if (state === 'push') pushSheet.style.transform = `translateX(${-index * 100 / pushFrames}%)`;
   if (state === 'walk') (holdingPhone ? phoneWalkSheet : walkSheet).style.transform = `translateX(${-index * 100 / walkFrames}%)`;
   if (state === 'run') (holdingPhone ? phoneRunSheet : runSheet).style.transform = `translateX(${-index * 100 / runFrames}%)`;
   // Reuse the airborne run poses so a lit phone never disappears during a jump.

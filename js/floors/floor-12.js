@@ -26,7 +26,7 @@ const FLOOR12_LAYOUT = {
       doorX: 708, doorWidth: 132, doorStyle: 'slide', doorOutline: [707, 250, 209, 318] },
     { name: '모델 평가실', x: 2960, width: 543, style: 'lab', target: 'f12-eval',
       // 카드키(f12-eval-keycard)를 가진 채 E를 누르면 카드를 직접 끌어 리더기에 대야 열린다(manual-control.js의 card).
-      doorX: 3020, doorWidth: 140, doorY: 314, doorStyle: 'security', locked: true, unlockedBy: 'f12-eval-door-opened',
+      doorX: 3159, doorWidth: 140, doorY: 314, doorStyle: 'security', locked: true, unlockedBy: 'f12-eval-door-opened',
       requires: 'f12-eval-keycard',
       control: { kind: 'card', label: '카드키를 마우스로 끌어 리더기에 올리자.', reader: '카드키', doneBy: 'f12-eval-door-opened' },
       message: '모델 평가실 문이 잠겨 있다. 전자 잠금장치에 전용 카드키가 필요하다. 개발실 서랍부터 찾아보자.' },
@@ -80,7 +80,8 @@ const FLOOR12_ROOMS = interiorRooms(12, [
       takenMessage: '서랍은 비어 있다. 팀장실 보조키는 이미 챙겼다.' },
     { file: 'water-cooler', size: [256, 512], worldWidth: 62, x: 3200 },
   ] },
-  { id: 'f12-eval', name: '모델 평가실', width: 1804, windowless: true, exitOutline: [335, 312, 174, 256],
+  // exitX: 복도 문을 간판 아래 가운데(3159)로 옮겼지만 방 안 출구는 처음 자리(270)에 둔다(안팎 비율 규칙의 예외).
+  { id: 'f12-eval', name: '모델 평가실', width: 1804, windowless: true, exitX: 270, exitOutline: [335, 312, 174, 256],
     exitArt: { x: 344, crop: [327, 210, 226, 360], fill: [1120, 210] },
     backgroundImage: { src: 'assets/background/floor12/eval-finished.png', height: 760, top: 0 }, props: [
     { file: 'server-rack', size: [256, 512], worldWidth: 96, x: 100 },

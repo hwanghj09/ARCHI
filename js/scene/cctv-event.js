@@ -84,6 +84,7 @@ function startCctvScene() {
   cctvWall = currentDoors.find(door => door.liveBy === cctvLiveItem) || null;
   if (!cctvWall || cctvSceneActive) return;
   cctvSceneActive = true;
+  clearEventsForCutscene();
   cctvSceneMode = 'intro';
   cctvElapsed = 0;
   cctvStepDistance = 0;
@@ -187,6 +188,7 @@ function updateCctvDim(amount, tint = '') {
 function startCctvLights(wall) {
   if (cctvSceneActive || !wall?.element.isConnected) return;
   cctvSceneActive = true;
+  clearEventsForCutscene();
   cctvSceneMode = 'lights';
   cctvElapsed = 0;
   cctvLightsGate.reset();

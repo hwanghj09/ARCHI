@@ -7,6 +7,7 @@ const PUSH_CONTACT_GAP = 2.5;
 // 겹침도 맞닿은 것으로 쳐야 달려와 부딪혀도 밀린다(예전엔 ±2.5px만 인정해 그대로 막혔다).
 const PUSH_MAX_OVERLAP = 12;
 
+
 function pushableOf(part) { return part.pushable ? part : null; }
 
 // 지금 플레이어가 direction(-1/1) 쪽으로 이 상자에 막혀 있는가.
@@ -21,11 +22,13 @@ function playerPressesPart(part, direction) {
 
 // 이번 걸음에서 플레이어가 가려던 거리(velocityX)를 받아 상자를 밀고, 플레이어가 실제로 갈 거리를 돌려준다.
 function pushPushables(direction, velocityX) {
+  playerPushing = false;
   for (const part of movingParts) {
     if (!pushableOf(part) || !playerPressesPart(part, direction)) continue;
     const { factor, minX, maxX } = part.pushable;
     const x = Math.max(minX, Math.min(maxX, part.body.position.x + velocityX * factor));
     Body.setPosition(part.body, { x, y: part.body.position.y });
+    playerPushing = true;
     return velocityX * factor;
   }
   return velocityX;

@@ -156,9 +156,9 @@ function interact() {
       // 거부 화면은 미등록 출입증이라는 사실만 알려 준다(유효한 사원증의 단서는 휴대폰 건물 안내 앱이 따로 준다).
       playGameSound('deny');
       openInspection(nearbyDoor.name, '정수호의 출입증을 태그했다. "미등록 출입증입니다, 팀장 이상의 직급이 요구됩니다." 칸막이가 열리지 않았다.');
-      // 로봇의 습격! 그 이유는? 목표 도중이면 이 조사창을 닫은 뒤 세 번째 컷씬(story-scene.js)이 이어진다.
+      // 이상 행동 목표 도중이면 이 조사창을 닫은 뒤 세 번째 컷씬(story-scene.js)이 이어진다.
       // 1층 경비 로봇 정비 패널 기록(f1-robot-log, 필수)을 읽은 뒤에만 이어진다.
-      if (currentObjective?.title === '로봇의 습격! 그 이유는?' && collectedItems.has('f1-robot-log') && !collectedItems.has('story-badge-seen')) collectedItems.add('story-gate-tagged'); // 컷씬은 한 번만(이미 봤으면 다시 나오지 않는다)
+      if (currentObjective?.title === '이상 행동' && collectedItems.has('f1-robot-log') && !collectedItems.has('story-badge-seen')) collectedItems.add('story-gate-tagged'); // 컷씬은 한 번만(이미 봤으면 다시 나오지 않는다)
       return;
     }
     const missing = !unreadable && lacking && nearbyDoor.missingMessage &&
