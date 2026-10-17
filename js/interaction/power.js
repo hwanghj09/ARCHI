@@ -1,4 +1,4 @@
-// 옥상 레버는 모든 엘리베이터 운행을 복구한다. 층 선택은 해당 층의 조명·설비만 추가로 공급한다.
+// 태양광은 선택한 층의 조명만 공급한다. 승강기·비상 설비는 17층 관리실의 별도 UPS 회선을 쓴다.
 // 한 층만 켜진다. 다른 층을 켜면 이전 층이 꺼지고, 켜진 층을 다시 누르면 공급을 끈다.
 const powerPanel = document.getElementById('power-panel');
 const powerGrid = document.getElementById('power-floor-grid');
@@ -6,10 +6,30 @@ const powerStatus = document.getElementById('power-status');
 const powerLever = document.getElementById('power-lever');
 let powerBlocked = [];
 
-function floorHasPower(floor) {
+function floorHasLighting(floor) {
   if (floor === -1 || floor === -2) return true;
   if (floor === 18) return solarEnabled;
   return floor >= 1 && floor <= 17 && (!buildingBlackout || (solarEnabled && solarPoweredFloors.includes(floor)));
+}
+
+function floorHasPower(floor) {
+  if (floor === -1 || floor === -2) return true;
+  if (floor === 18) return solarEnabled;
+  // 엔딩의 로비 차단은 태양광 조명과 별개로 비상 설비 회선도 끊는다.
+  if (floor === 1 && buildingBlackout && typeof b2Ending !== 'undefined' && b2Ending.offline) return false;
+  return floor >= 1 && floor <= 17 && (!buildingBlackout || collectedItems.has('f17-emergency-linked'));
+}
+
+function openEmergencyCircuit() {
+  if (collectedItems.has('f17-emergency-linked')) return openInspection('비상 전력 분배반', '회선 네 가닥이 올바르게 연결되어 있다. 별도 UPS가 승강기와 비상 설비에 전력을 공급한다.');
+  if (!collectedItems.has('f17-circuit-guide-read')) return openInspection('비상 전력 분배반', '단자 표기가 서로 다르다. 옆 책상의 비상 전력 회로 안내도를 먼저 확인하자.');
+  openWirePanel(() => {
+    collectedItems.add('f17-emergency-linked');
+    updatePowerState();
+    playGameSound('switch');
+    saveProgress();
+    openInspection('비상 전력 연결 완료', 'UPS의 녹색 표시등이 켜졌다. 엘리베이터와 비상 설비에 전력이 공급된다. 태양광 조명을 꺼도 승강기는 멈추지 않는다.');
+  }, 'elevator');
 }
 
 // 선택한 층과 공급 한도를 적는다. 예: 12F 전력 공급 중 (1/1)
@@ -20,7 +40,7 @@ function solarPowerStatus() {
 }
 
 function updatePowerState() {
-  const solarPowered = solarPoweredFloors.includes(currentSceneFloor);
+  const solarPowered = solarEnabled && solarPoweredFloors.includes(currentSceneFloor);
   const aboveGround = currentSceneFloor >= 1 && currentSceneFloor <= 17;
   // B1 방재 관제실의 소등 컷씬(cctv-event.js)이 끝나면 지하(B1·B2)의 전등이 모두 꺼진다. 모든 층 전력 활성화(콘솔)를 켜면 다시 켜진다.
   const undergroundLightsOut = currentSceneFloor < 0 && collectedItems.has('b1-lights-out') && !allPowerOverride;
@@ -60,8 +80,8 @@ function setSolarPower(enabled) {
   updatePowerState();
   showStatus(enabled ? (collectedItems.has('solar-app-installed') ?
     '태양광 비상 전력 ON · 휴대폰의 비상 전력 제어 앱에서 공급할 층을 선택하자.' :
-    '태양광 비상 전력 ON · 엘리베이터 운행이 복구됐다. 17층 전력을 켜고 작업용 컴퓨터로 돌아가자.') :
-    '태양광 비상 전력 OFF · 정전 상태에서는 엘리베이터가 멈춘다.', 6000);
+    '태양광 조명 전력 ON · 17층 전등을 켜자. 승강기는 관리자실의 비상 회선을 따로 연결해야 한다.') :
+    '태양광 조명 전력 OFF · 비상 UPS로 연결한 승강기는 계속 운행한다.', 6000);
 }
 
 function supplySolarFloor(floor) {
@@ -159,7 +179,7 @@ for (let floor = 17; floor >= 1; floor -= 1) {
   button.textContent = `${floor}F`;
   if (floor === 17) {
     button.classList.add('suggested');
-    button.setAttribute('aria-label', '17F · 작업용 컴퓨터 전력 복구');
+    button.setAttribute('aria-label', '17F · 조명 켜기');
   }
   button.addEventListener('click', () => {
     supplySolarFloor(floor);

@@ -28,7 +28,7 @@ try {
   // A real phone deposit plus acquired items, gate progress, power and a non-default sanity level.
   await page.evaluate(() => {
     collectedItems.add('f17-badge'); collectedItems.add('f16-badge'); collectedItems.add('f12-access');
-    buildingBlackout = true; solarEnabled = true; solarPoweredFloors = [12];
+    buildingBlackout = true; collectedItems.add("f17-emergency-linked"); solarEnabled = true; solarPoweredFloors = [12];
     performFloorChange('f12-dev', 0, 'exit'); phoneBattery = 40; sanity = 15;
     const point = currentDoors.find(door => door.phoneCharger);
     Body.setPosition(body, { x: point.x + point.width / 2, y: floorY - 81 }); Body.setVelocity(body, { x: 0, y: 0 });
@@ -44,7 +44,7 @@ try {
   assert.equal(resumed.battery, saved.battery); assert.equal(resumed.sanity, saved.sanity);
   assert.deepEqual(resumed.dock, saved.dock); assert.deepEqual(resumed.items, saved.items);
   assert.deepEqual(saved.solarPoweredFloors, [12]); assert.deepEqual(resumed.solarPoweredFloors, [12], 'The supplied floor resumes');
-  assert(await page.evaluate(() => floorHasPower(12) && !floorHasPower(7) && !floorHasPower(13))); assert.equal(resumed.blackout, true);
+  assert(await page.evaluate(() => floorHasLighting(12) && !floorHasLighting(7) && !floorHasLighting(13) && floorHasPower(17))); assert.equal(resumed.blackout, true);
   assert(await page.evaluate(() => collectedItems.has('f12-access')), 'Gate progress survives an indoor charging save');
   assert.equal(await page.locator('.docked-phone:visible').count(), 1);
   assert(await page.locator('#opening').isHidden(), 'Continue never replays the opening');
@@ -164,7 +164,7 @@ try {
     }, legacyFloor);
     await page.reload(); await page.locator('#menu-continue').click();
     assert.deepEqual((await state()).solarPoweredFloors, expected);
-    assert.equal(await page.evaluate(() => floorHasPower(7)), expected.length > 0);
+    assert.equal(await page.evaluate(() => floorHasLighting(7)), expected.length > 0);
     assert.equal(await page.locator('#power-status').textContent(), status);
     await checkpoint();
     const resaved = await stored();
@@ -179,11 +179,11 @@ try {
   });
   await page.reload(); await page.locator('#menu-continue').click();
   assert.deepEqual((await state()).solarPoweredFloors, [7]);
-  assert(await page.evaluate(() => floorHasPower(7) && !floorHasPower(12)));
+  assert(await page.evaluate(() => floorHasLighting(7) && !floorHasLighting(12)));
   await checkpoint(); assert.deepEqual((await stored()).solarPoweredFloors, [7]);
   // The fixed starting office uses the same room-aware charging save as dynamic rooms.
   await page.evaluate(() => {
-    solarEnabled = true; solarPoweredFloors = [17];
+    collectedItems.add("f17-emergency-linked"); solarEnabled = true; solarPoweredFloors = [17];
     performFloorChange('f17'); performRoomChange(); phoneBattery = 30;
     chargePhone(officeCharger);
   });

@@ -2,21 +2,29 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import { chromium } from 'playwright';
 
-const musicFile = await readFile(new URL('../assets/audio/sanity-dread.wav', import.meta.url));
-assert.equal(musicFile.toString('ascii', 0, 4), 'RIFF');
-assert.equal(musicFile.toString('ascii', 8, 12), 'WAVE');
-assert.equal(musicFile.readUInt16LE(22), 2, 'The new music is stereo');
-assert.equal(musicFile.readUInt16LE(34), 16);
-assert.equal(musicFile.readUInt32LE(40) / musicFile.readUInt32LE(28), 48, 'The composed loop lasts 48 seconds');
-let musicPeak = 0, musicEnergy = 0;
-for (let i = 44; i < musicFile.length; i += 2) {
-  const sample = musicFile.readInt16LE(i) / 32768;
-  musicPeak = Math.max(musicPeak, Math.abs(sample)); musicEnergy += sample * sample;
+const musicTracks = ['sanity-dread', 'sanity-musicbox', 'sanity-vent', 'sanity-pulse', 'sanity-strings', 'sanity-signal'];
+const musicSignatures = new Set();
+for (const track of musicTracks) {
+  const musicFile = await readFile(new URL(`../assets/audio/${track}.wav`, import.meta.url));
+  assert.equal(musicFile.toString('ascii', 0, 4), 'RIFF');
+  assert.equal(musicFile.toString('ascii', 8, 12), 'WAVE');
+  assert.equal(musicFile.readUInt16LE(22), 2, 'The new music is stereo');
+  assert.equal(musicFile.readUInt16LE(34), 16);
+  assert.equal(musicFile.readUInt32LE(40) / musicFile.readUInt32LE(28), 48, 'The composed loop lasts 48 seconds');
+  let musicPeak = 0, musicEnergy = 0;
+  for (let i = 44; i < musicFile.length; i += 2) {
+    const sample = musicFile.readInt16LE(i) / 32768;
+    musicPeak = Math.max(musicPeak, Math.abs(sample)); musicEnergy += sample * sample;
+  }
+  assert(musicPeak > .5 && musicPeak < .7, 'The rendered music has headroom');
+  assert(Math.sqrt(musicEnergy / ((musicFile.length - 44) / 2)) > .05, 'The new file contains audible music');
+  assert(Math.max(Math.abs(musicFile.readInt16LE(44) - musicFile.readInt16LE(musicFile.length - 4)),
+    Math.abs(musicFile.readInt16LE(46) - musicFile.readInt16LE(musicFile.length - 2))) / 32768 < .005, 'The loop has no abrupt sample jump');
+  assert(musicPeak < .7 && Math.sqrt(musicEnergy / ((musicFile.length - 44) / 2)) < .18, 'Every variation keeps a similar level and headroom');
+  assert(Math.abs(musicFile.readInt16LE(44)) < 2 && Math.abs(musicFile.readInt16LE(musicFile.length - 4)) < 2, 'Tracks fade to silence at both ends');
+  musicSignatures.add(musicFile.subarray(240000, 241000).toString('base64'));
 }
-assert(musicPeak > .5 && musicPeak < .7, 'The rendered music has headroom');
-assert(Math.sqrt(musicEnergy / ((musicFile.length - 44) / 2)) > .05, 'The new file contains audible music');
-assert(Math.max(Math.abs(musicFile.readInt16LE(44) - musicFile.readInt16LE(musicFile.length - 4)),
-  Math.abs(musicFile.readInt16LE(46) - musicFile.readInt16LE(musicFile.length - 2))) / 32768 < .005, 'The loop has no abrupt sample jump');
+assert.equal(musicSignatures.size, musicTracks.length, 'Every variation contains different audio');
 
 const browser = await chromium.launch();
 const url = new URL('../index.html', import.meta.url).href;
@@ -60,7 +68,8 @@ try {
   await page.waitForTimeout(200);
   assert.equal(await page.evaluate(() => window.audioContextCount), 1, 'Clicks and keys reuse the same context');
   await page.waitForFunction(() => sanityMusicElement.readyState >= 3 && !sanityMusicElement.paused);
-  assert(await page.evaluate(() => sanityMusicElement.currentSrc.endsWith('/sanity-dread.wav') && sanityMusicElement.loop && sanityMusicElement.duration === 48 && !sanityMusicElement.error), 'The game plays the new local WAV through native audio');
+  assert(await page.evaluate(() => sanityMusicElement.currentSrc.endsWith(`/${sanityMusicTracks[sanityMusicIndex]}.wav`) && !sanityMusicElement.loop && sanityMusicElement.duration === 48 && !sanityMusicElement.error), 'The game plays a local playlist track through native audio');
+  assert.deepEqual(await page.evaluate(() => sanityMusicTracks), musicTracks);
   await page.evaluate(() => { sanity = 100; refreshSanity(); updateGameAudio(10000); });
   assert.equal(await page.evaluate(() => gameAudioAmbience.size), 1);
   const initialTime = await page.evaluate(() => gameAudioContext.currentTime);
@@ -205,11 +214,29 @@ try {
   assert(sanityMusic.stopped, 'Recovering to 50% fades the music out');
   assert(sanityMusic.cutsceneSilent, 'Cutscenes keep their own audio without overlapping sanity music');
 
+  for (let track = 0; track < 6; track++) {
+    await page.waitForFunction(() => sanityMusicElement.readyState >= 3 && !sanityMusicElement.paused);
+    const previous = await page.evaluate(() => {
+      const index = sanityMusicIndex;
+      sanityMusicElement.currentTime = sanityMusicElement.duration - .08;
+      return index;
+    });
+    await page.waitForFunction(previous => sanityMusicIndex !== previous && sanityMusicElement.readyState >= 3 &&
+      !sanityMusicElement.paused && !sanityMusicElement.error, previous);
+    assert(await page.evaluate(() => sanityMusicElement.currentSrc.endsWith(`/${sanityMusicTracks[sanityMusicIndex]}.wav`)), 'A real media ending loads the next track');
+    assert(await page.evaluate(() => Math.abs(sanityMusicElement.volume - gameVolume * sanityMusicGain) < .00001), 'Track changes preserve the current volume');
+  }
+
   await page.keyboard.press('Escape');
   assert(await page.locator('#main-menu').isVisible());
   await page.waitForTimeout(140);
   assert.equal(await page.evaluate(() => gameAudioAmbience.size), 0, 'The menu stops game ambience');
   assert(await page.evaluate(() => sanityMusicElement.paused), 'The menu pauses the new song');
+  assert(await page.evaluate(() => {
+    const index = sanityMusicIndex;
+    sanityMusicElement.dispatchEvent(new Event('ended'));
+    return sanityMusicIndex === index && sanityMusicElement.paused;
+  }), 'An ending event while paused cannot restart the playlist');
   assert(await page.evaluate(() => [...gameAudioEffects].every(sound => sound.name === 'ui' || sound.stopping)), 'The menu stops effects in progress');
   await page.locator('#menu-continue').click();
   await page.waitForTimeout(150);
@@ -241,7 +268,7 @@ try {
   await unsupported.locator('#opening-skip').click();
   assert(await unsupported.evaluate(() => gameStarted && !mainMenuActive && !openingActive && gameAudioContext === null));
   assert.deepEqual(unsupportedErrors, [], 'Browsers without Web Audio can still play');
-  console.log('Audio passed: real output, gesture unlock/reuse, volume/mute, finite buffers/loop seams, overlap limits, menu/hidden pause, unsupported browser');
+  console.log('Audio passed: six composed WAVs, real track endings without repeats, volume/mute/sanity levels, gesture unlock/reuse, finite buffers, overlap limits, menu/hidden pause, unsupported browser');
   console.log(liveAudio ? 'Real-time shared output and offline rendering verified' : 'Live audio clock unavailable on this host; real output verified with native OfflineAudioContext rendering');
 } finally {
   await browser.close();

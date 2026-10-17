@@ -7,9 +7,9 @@ const elevatorCars = [
   { name: '3번 엘리베이터', floor: 1, travelling: false, elapsed: 0, destination: null, rider: false, open: false, pendingDestId: null },
 ];
 
-const elevatorPowerMessage = '전력이 없어 엘리베이터가 멈췄다. 옥상에서 태양광 비상 전력 레버를 내려야 한다.';
+const elevatorPowerMessage = '전력이 없어 엘리베이터가 멈췄다. 태양광은 전등 전용이다. 17층 관리자실에서 비상 전력 회선을 연결해야 한다.';
 function elevatorHasPower() {
-  return !buildingBlackout || solarEnabled;
+  return !buildingBlackout || collectedItems.has('f17-emergency-linked');
 }
 
 function addElevatorPanels(door) {

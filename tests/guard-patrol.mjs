@@ -67,7 +67,7 @@ try {
   await setVisibility('.fixture.guard-bot', ''); await setVisibility('#darkness', '');
   assert(Math.abs(bareRobot - bareWall) > 20, `The sample point is on the robot casing: ${bareRobot} vs wall ${bareWall}`);
   assert(darkRobot <= 3, `The unpowered robot outside the sight circle stays in the dark: ${darkRobot}`);
-  await page.evaluate(() => { solarEnabled = true; solarPoweredFloors = [1]; updatePowerState(); });
+  await page.evaluate(() => { collectedItems.add("f17-emergency-linked"); solarEnabled = true; collectedItems.add("f17-emergency-linked"); solarPoweredFloors = [1]; updatePowerState(); });
   const before = await state(); await page.clock.runFor(1000);
   assert(Math.abs(before.x - (await state()).x - 80) < 3, 'Powered patrol rolls at 80 pixels per second');
   const usedFrames = new Set();
@@ -84,10 +84,10 @@ try {
   assert.deepEqual([...scanFrames].sort(), ['4', '5', '6']);
   await page.clock.runFor(400); assert.equal((await state()).facing, 1);
   assert((await state()).x > 3040, 'Endpoint scan finishes by turning around');
-  await page.evaluate(() => { solarPoweredFloors = [2]; updatePowerState(); });
+  await page.evaluate(() => { collectedItems.delete("f17-emergency-linked"); solarPoweredFloors = [2]; updatePowerState(); });
   const unpowered = await state(); await page.clock.runFor(1000); assert.deepEqual(await state(), unpowered);
   assert.equal(unpowered.frame, '7');
-  await page.evaluate(() => { solarPoweredFloors = [1]; updatePowerState(); togglePhone(); });
+  await page.evaluate(() => { collectedItems.add("f17-emergency-linked"); solarPoweredFloors = [1]; updatePowerState(); togglePhone(); });
   const reading = await state(); await page.clock.runFor(1000);
   assert(Math.abs((await state()).x - reading.x - 80) < 3, 'Phone keeps the powered patrol running');
   assert(await page.evaluate(() => usingPhone));
@@ -102,7 +102,7 @@ try {
   assert.equal((await state()).x, away, 'Returning keeps patrol progress without duplicating the robot');
   assert.equal(await robot.count(), 1); assert.equal(await page.locator('.robot-dock-patch').count(), 1);
   await page.evaluate(() => {
-    solarPoweredFloors = [2]; updatePowerState();
+    collectedItems.delete("f17-emergency-linked"); solarPoweredFloors = [2]; updatePowerState();
     Body.setPosition(body, { x: guardPatrol.x, y: floorY - 81 }); grounded = true; updateInteraction();
     cameraX = cameraTarget(); render();
   });
@@ -117,7 +117,7 @@ try {
   await page.setViewportSize({ width: 390, height: 844 }); await page.clock.runFor(100);
   await page.screenshot({ path: '.local/guard-mobile.png' });
   await page.evaluate(() => {
-    solarPoweredFloors = [1]; updatePowerState();
+    collectedItems.add("f17-emergency-linked"); solarPoweredFloors = [1]; updatePowerState();
     guardPatrol.x = 4538; guardPatrol.facing = 1; guardPatrol.wait = 0; guardPatrol.mode = 'patrol';
     Body.setPosition(body, { x: 1500, y: floorY - 81 });
   });

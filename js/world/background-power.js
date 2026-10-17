@@ -54,7 +54,7 @@ function addLuminousSigns(image, src) {
 
 function backgroundLightsOff() {
   return currentSceneFloor >= 1 && currentSceneFloor <= 17 &&
-    (world.dataset.powerFlicker === 'off' || (buildingBlackout && !solarPoweredFloors.includes(currentSceneFloor)) || (currentSceneFloor === 17 && world.dataset.lights === 'off'));
+    (world.dataset.powerFlicker === 'off' || (buildingBlackout && (!solarEnabled || !solarPoweredFloors.includes(currentSceneFloor))) || (currentSceneFloor === 17 && world.dataset.lights === 'off'));
 }
 
 function setPowerBackground(image, src) {

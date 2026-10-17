@@ -43,7 +43,12 @@ panelFloors.forEach((floor, index) => {
       return;
     }
     if (button.dataset.restricted && selectedFloor !== floor && !collectedItems.has(restrictionItem)) {
-      cabinStatus.textContent = '버튼을 눌렀으나 아무 반응도 없었다.';
+      // 7층에서 B2가 목적지라는 걸 안 뒤에는 제한 화면과 함께 B1 시설관리실로 안내한다(objective.js).
+      if (collectedItems.has('f7-external-connection-solved')) {
+        collectedItems.add('b2-restricted-seen');
+        cabinStatus.textContent = 'B2 · ACCESS RESTRICTED · MANUAL OVERRIDE REQUIRED — 시설관리실에서 운행 제한을 해제해야 한다.';
+        playGameSound('deny');
+      } else cabinStatus.textContent = '버튼을 눌렀으나 아무 반응도 없었다.';
       return;
     }
     if (selectedFloor !== null) return;
@@ -136,7 +141,7 @@ function refreshCabin() {
   cabinScene.dataset.floor = car.floor;
   // The cabin uses the building circuit; restoring one floor does not relight a moving car.
   cabinScene.dataset.blackout = String(buildingBlackout);
-  const hallBlackout = !floorHasPower(car.floor) || (car.floor === 17 && world.dataset.lights === 'off');
+  const hallBlackout = !floorHasLighting(car.floor) || (car.floor === 17 && world.dataset.lights === 'off');
   cabinScene.dataset.hallBlackout = String(hallBlackout);
   // Read the same artwork as the corridor so new floors and art replacements stay in sync.
   const hallArt = car.floor === 17 ? corridorBackground.dataset.litSrc : FLOOR_LAYOUTS[car.floor].backgroundImage.src;

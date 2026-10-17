@@ -21,6 +21,8 @@ let wireOnSolved = null;
 let wireConnected = new Set();
 let wireArmed = null;
 let wireDrag = null;
+let wireMode = 'solar';
+let wireTargets = new Map();
 
 function shuffledWireColors() {
   const list = [...WIRE_COLORS];
@@ -46,21 +48,49 @@ function buildWireColumn(container, side, order) {
     button.dataset.color = color.id;
     button.dataset.side = side;
     button.style.setProperty('--wire-color', color.hex);
-    button.setAttribute('aria-label', `${color.label} 전선 ${side === 'left' ? '왼쪽 끝' : '오른쪽 단자'}`);
+    const circuit = wireMode === 'elevator' && EMERGENCY_CIRCUITS.find(circuit => circuit.color === color.id);
+    button.textContent = circuit ? side === 'left' ? circuit.source : circuit.target : '';
+    button.setAttribute('aria-label', circuit ? `${side === 'left' ? '전력 공급' : '엘리베이터'} 단자 ${button.textContent}` :
+      `${color.label} 전선 ${side === 'left' ? '왼쪽 끝' : '오른쪽 단자'}`);
     container.append(button);
   }
 }
 
-function openWirePanel(onSolved) {
+function openWirePanel(onSolved, mode = 'solar') {
+  wireMode = mode;
+  wirePanel.dataset.mode = mode;
+  const elevator = mode === 'elevator';
+  document.getElementById('wire-title').textContent = elevator ? '비상 전력 회선 연결' : '배전반 내부';
+  wirePanel.querySelector('.wire-art img').src = elevator ? 'assets/ui/floor17/emergency-panel-states.png' : 'assets/ui/wire-puzzle/wire-panel.png';
+  const reference = document.getElementById('wire-reference');
+  reference.hidden = !elevator;
+  reference.open = false;
+  const rows = document.getElementById('wire-reference-rows');
+  rows.replaceChildren();
+  if (elevator) for (const [from, to] of [
+    ...EMERGENCY_CIRCUITS.map(circuit => [circuit.source, circuit.relay]),
+    ...[...EMERGENCY_CIRCUITS].sort((a, b) => a.relay.localeCompare(b.relay)).map(circuit => [circuit.relay, circuit.target]),
+  ]) {
+    const row = document.createElement('tr');
+    for (const text of [from, '→', to]) {
+      const cell = document.createElement('td');
+      cell.textContent = text;
+      row.append(cell);
+    }
+    rows.append(row);
+  }
+  document.getElementById('wire-test').hidden = !elevator;
   wireOnSolved = onSolved;
   wireConnected = new Set();
+  wireTargets = new Map();
   wireArmed = null;
   wireDrag = null;
   // 그림의 아래쪽 명판 한 줄(#wire-status)이 안내문과 진행 상황을 함께 보여준다 — 첫 연결부터는
   // attemptConnection()이 이 자리를 덮어쓴다.
-  wireStatus.textContent = '왼쪽 전선 끝을 당기거나 클릭해 같은 색 오른쪽 단자에 연결하자.';
-  buildWireColumn(wireLeft, 'left', shuffledWireColors());
-  buildWireColumn(wireRight, 'right', shuffledWireColors());
+  wireStatus.textContent = elevator ? 'S→R→E 경로를 추적해 연결한 뒤 회로 검사. 공급 단자를 누르면 해제.' : '왼쪽 전선 끝을 당기거나 클릭해 같은 색 오른쪽 단자에 연결하자.';
+  buildWireColumn(wireLeft, 'left', elevator ? WIRE_COLORS : shuffledWireColors());
+  buildWireColumn(wireRight, 'right', elevator ? [...WIRE_COLORS].sort((a, b) =>
+    EMERGENCY_CIRCUITS.find(c => c.color === a.id).target.localeCompare(EMERGENCY_CIRCUITS.find(c => c.color === b.id).target)) : shuffledWireColors());
   for (const cable of wireBoard.querySelectorAll('.wire-cable')) cable.remove();
   wirePanel.hidden = false;
   releaseInput();
@@ -73,11 +103,14 @@ function openWirePanel(onSolved) {
 function closeWirePanel() {
   if (wirePanel.hidden) return;
   wirePanel.hidden = true;
+  wireDrag = null;
+  wireOnSolved = null;
+  setArmed(null);
   for (const element of wireBlocked) element.inert = false;
   wireBlocked = [];
   stage.inert = false;
-  // 전선 패널은 항상 옥상 전력 패널에서만 열린다 — 풀었든 나중에로 취소했든 전력 패널로 돌아간다.
-  openPowerPanel();
+  if (wireMode === 'solar') openPowerPanel();
+  else stage.focus({ preventScroll: true });
 }
 
 // 두 점을 실제 전선 그림(wire-cable.png, 가로로 반복되는 타일)으로 잇는다. 왼쪽 몇 번째 줄이
@@ -110,26 +143,63 @@ function setArmed(button) {
   wireArmed?.classList.add('armed');
 }
 
-// 왼쪽 전선(color)을 오른쪽 단자(target)에 연결 시도한다. 색이 같고 아직 안 이어졌으면 성공.
+function detachWire(button) {
+  const target = wireTargets.get(button.dataset.color);
+  if (!target) return;
+  target.disabled = false;
+  target.classList.remove('connected');
+  button.classList.remove('connected');
+  wireTargets.delete(button.dataset.color);
+  wireConnected.delete(button.dataset.color);
+  removeWireLine(button.dataset.color);
+}
+
+function finishWirePuzzle() {
+  const solved = wireOnSolved;
+  closeWirePanel();
+  solved?.();
+}
+
+function testEmergencyCircuit() {
+  if (wirePanel.hidden || wireMode !== 'elevator') return;
+  if (wireConnected.size !== 4) {
+    wireStatus.textContent = `네 가닥을 모두 연결해야 검사할 수 있다. 현재 ${wireConnected.size}/4.`;
+    playGameSound('deny');
+    return;
+  }
+  const wrong = EMERGENCY_CIRCUITS.filter(circuit => wireTargets.get(circuit.color)?.dataset.color !== circuit.color);
+  if (wrong.length) {
+    wireStatus.textContent = wrong.some(circuit => circuit.color === 'green') ? '접지 연속성 불량. 통전 차단. 안내도를 보고 다시 연결하자.' :
+      '구동·제어 회로 불일치. 통전 차단. 중계 릴레이 경로를 다시 확인하자.';
+    playGameSound('deny');
+    return;
+  }
+  finishWirePuzzle();
+}
+
+// 옥상은 같은 색을 즉시 고정하고, 관리실은 오접속도 남겨 둔 뒤 별도 회로 검사로 판단한다.
 function attemptConnection(leftButton, rightButton) {
-  if (leftButton.dataset.color !== rightButton.dataset.color) {
+  if (wirePanel.hidden || leftButton.parentElement !== wireLeft || rightButton.parentElement !== wireRight ||
+      leftButton.disabled || rightButton.disabled) return false;
+  if (wireMode !== 'elevator' && leftButton.dataset.color !== rightButton.dataset.color) {
     wireStatus.textContent = '색이 맞지 않는다.';
     playGameSound('deny');
     return false;
   }
   const color = WIRE_COLORS.find(entry => entry.id === leftButton.dataset.color);
-  leftButton.disabled = true; rightButton.disabled = true;
+  if (wireMode === 'elevator') detachWire(leftButton);
+  leftButton.disabled = wireMode !== 'elevator'; rightButton.disabled = true;
   leftButton.classList.add('connected'); rightButton.classList.add('connected');
   drawWireLine(color.id, wirePlugCenter(leftButton), wirePlugCenter(rightButton), color.id);
   wireConnected.add(color.id);
+  wireTargets.set(color.id, rightButton);
   playGameSound('item-use');
-  wireStatus.textContent = `${color.label} 전선을 연결했다.`;
-  if (wireConnected.size === WIRE_COLORS.length) {
+  const circuit = wireMode === 'elevator' && EMERGENCY_CIRCUITS.find(circuit => circuit.color === color.id);
+  wireStatus.textContent = circuit ? `${circuit.source} → ${rightButton.textContent} 연결 · ${wireConnected.size}/4 · 검사 전까지 통전 금지` : `${color.label} 전선을 연결했다.`;
+  if (wireMode !== 'elevator' && wireConnected.size === WIRE_COLORS.length) {
     // 지연 없이 바로 닫는다 — 잠깐이라도 열어 두면 그 틈에 Esc를 눌러 이 닫기와 타이머로 예약된 닫기가
     // 겹쳐서(이중 close) 입력이 먹통되는 경합이 생겼었다.
-    const solved = wireOnSolved;
-    closeWirePanel();
-    solved?.();
+    finishWirePuzzle();
   }
   return true;
 }
@@ -138,6 +208,7 @@ wireLeft.addEventListener('pointerdown', event => {
   const button = event.target.closest('button');
   if (!button || button.disabled) return;
   event.preventDefault();
+  if (wireMode === 'elevator') detachWire(button);
   wireDrag = { button, moved: false, pointerId: event.pointerId };
   button.setPointerCapture(event.pointerId);
 });
@@ -165,6 +236,7 @@ wireLeft.addEventListener('pointercancel', () => { wireDrag = null; removeWireLi
 wireLeft.addEventListener('click', event => {
   const button = event.target.closest('button');
   if (!button || button.disabled || event.detail !== 0) return;
+  if (wireMode === 'elevator') detachWire(button);
   setArmed(wireArmed === button ? null : button);
 });
 wireRight.addEventListener('click', event => {
@@ -174,6 +246,7 @@ wireRight.addEventListener('click', event => {
   setArmed(null);
 });
 document.getElementById('wire-cancel').addEventListener('click', closeWirePanel);
+document.getElementById('wire-test').addEventListener('click', testEmergencyCircuit);
 wirePanel.addEventListener('keydown', event => {
   event.stopPropagation();
   if (event.code === 'Escape') { event.preventDefault(); closeWirePanel(); }

@@ -143,6 +143,8 @@ const FLOOR7_ROOMS = interiorRooms(7, [
         takenMessage: '레버는 내려가 있다. 화면: "세션 강제 종료 · 입실자 이탈 허용".',
         takenSheet: { surface: 'screen', look: 'lcd', writing: ['세션 강제 종료 · 입실자 이탈 허용'], caption: '레버는 내려가 있다.' } },
       { file: 'server-rack', size: [256, 512], worldWidth: 96, x: 850 },
+      // 망분리 백업 장비: 조사하면 분석 프로그램(backup-puzzle.js)이 열려 7층 필수 퍼즐 두 개를 푼다. 아래 message는 그 특수
+      // 처리가 안 먹었을 때만 보일 일반 조사문이다.
       { file: 'electronics-bench', size: [512, 256], worldWidth: 261, x: 1400, name: '망분리 백업 장비',
         message: '사내망에서 떼어 낸 백업 장비가 배터리로 켜져 원본 로그를 뽑아 두었다: "매일 01:00~05:00 ARCHI 학습 실행 · B2 전력 집중." 오늘 00:00: "TRAINING PROCESS - COMPLETE / EXTERNAL HOST CONNECTION - READY / EXTERNAL CONNECTION TEST - SUCCESS". 모든 줄의 발신지는 B2 ARCHI-MAIN이다.',
         surface: 'screen', look: 'terminal',

@@ -42,10 +42,14 @@ function clueFor(door) {
 
 function recordClue(door) {
   const text = clueFor(door);
-  if (!text) return;
+  if (text) addClue(door.name, text);
+}
+
+// 지금 장소에 단서 한 줄을 한 번만 남긴다(퍼즐 정답처럼 소품 clue가 아닌 단서도 여기로 온다).
+function addClue(name, text) {
   const place = document.querySelector('header span').textContent;
-  if (collectedClues.some(clue => clue.place === place && clue.name === door.name)) return;
-  collectedClues.push({ place, name: door.name, text });
+  if (collectedClues.some(clue => clue.place === place && clue.name === name)) return;
+  collectedClues.push({ place, name, text });
   renderClues();
   showStatus('단서 기록됨 · 휴대폰 메모 → 단서', 2500);
 }

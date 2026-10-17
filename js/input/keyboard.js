@@ -35,7 +35,7 @@ window.addEventListener('keydown', event => {
   if (transitioning) { event.preventDefault(); return; }
   // 조작 창(manual-control.js)은 자기 keydown에서 입력을 받는다. 창 밖에 초점이 있어도 수호는 움직이지 않는다.
   if (usingControl) { if (event.code === 'Escape') closeControl(); event.preventDefault(); return; }
-  // 옥상 배전반 전선 퍼즐(wire-puzzle.js): 연결한 버튼이 비활성화되면 초점이 창 밖으로 빠지므로, 여기서도 막는다.
+  // 전력 회선 퍼즐: 연결한 단자가 비활성화돼 초점이 창 밖으로 빠져도 이동을 막고 Esc로 닫는다.
   if (!wirePanel.hidden) {
     if (event.code === 'Tab') return;
     if (event.code === 'Escape') closeWirePanel();
@@ -43,9 +43,10 @@ window.addEventListener('keydown', event => {
     return;
   }
   // 12층 야간 로그 단말기(log-puzzle.js): 퀴즈를 맞히면 누른 버튼이 숨겨져 초점이 창 밖으로 빠지므로, 여기서도 Esc로 닫는다.
-  if (!logPanel.hidden) {
+  // 7층 망분리 백업 장비(backup-puzzle.js)도 같은 이유로 막는다.
+  if (!logPanel.hidden || !backupPanel.hidden) {
     if (event.code === 'Tab') return;
-    if (event.code === 'Escape') closeLogPuzzle();
+    if (event.code === 'Escape') { closeLogPuzzle(); closeBackupPuzzle(); }
     event.preventDefault();
     return;
   }

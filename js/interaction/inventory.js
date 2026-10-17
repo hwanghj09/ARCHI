@@ -10,7 +10,18 @@ const INVENTORY_ITEMS = {
   'b2-antianxiety': { name: '항불안제', description: 'B2 전력·냉각실 캐비닛 위에서 챙긴 항불안제. 먹으면 정신력이 최소 50%까지 돌아온다.', image: 'assets/objects/items/antianxiety-v2.png',
     usedFlag: 'b2-antianxiety-used', use: { label: '사용하기', minSanity: 50, animation: 'antianxiety' } },
   'f12-lead-key': { name: '팀장실 보조키', description: '12층 책상 서랍에서 챙긴 열쇠. 꼬리표에 "팀장실 보조키"라고 적혀 있다.' },
+  'f12-eval-keycard': { name: '모델 평가실 카드키', description: '12층 개발실 맨 왼쪽 서랍의 종이 더미 밑에서 찾은 카드키. 모델 평가실 문을 열 수 있다.',
+    image: 'assets/ui/eval-keycard.svg', hint: '12층 개발실 맨 왼쪽 서랍 확인' },
   'rooftop-key': { name: '낡은 열쇠', description: '옥상문을 열 수 있을 것만 같다… 조금 더럽다.' },
+  'f17-manager-memo': { name: '관리실 비상 출입 메모', image: 'assets/ui/floor17/manager-memo.png',
+    description: `관리자 외 출입금지실 비밀번호: ${MANAGER_ROOM_CODE}. 태양광은 전등 전용. 승강기가 멈췄으면 관리실 책상의 회로 안내도를 보고 비상 전력 분배반의 회선을 연결할 것.`,
+    sheet: { surface: 'memo', look: 'manager-access', writing: [
+      { as: 'title', text: '관리실 비상 출입 메모' },
+      '관리자 외 출입금지실',
+      { as: 'hand', text: `비밀번호: ${MANAGER_ROOM_CODE}`, ink: 'red', bold: true },
+      '태양광은 전등 전용.',
+      '승강기 정지 시 관리실 책상의 회로 안내도를 보고 비상 전력 분배반의 회선을 연결할 것.',
+    ] } },
 };
 // 가방에 들어 있는 물건: 챙겼고 아직 쓰지 않은 것(usedFlag가 있는 물건은 쓰면 가방에서 사라진다. 챙김 표시는 그대로 두어 선반에 다시 나타나지 않는다).
 const ownedInventoryIds = () => Object.keys(INVENTORY_ITEMS).filter(id => collectedItems.has(id) && !collectedItems.has(INVENTORY_ITEMS[id].usedFlag));
@@ -52,7 +63,7 @@ function openHydrant() {
   image.src = 'assets/ui/hydrant-interior.png';
   image.alt = '붉은 철문이 열린 소화전. 내부에 천 호스, 황동 밸브와 금속 관창이 있고 아래에 선반이 있다.';
   image.draggable = false;
-  const description = writingNode('p', 'item-description', '호스와 관창이 정리되어 있다. 안쪽을 살펴보자.');
+  const description = writingNode('p', 'item-description', '호스와 관창이 정리되어 있다. 아래 선반의 열쇠와 접힌 메모를 살펴보자.');
   description.id = 'item-description';
   description.setAttribute('role', 'status');
   cabinet.append(image);
@@ -75,8 +86,20 @@ function openHydrant() {
     });
     cabinet.append(key);
   } else {
-    description.textContent = '호스와 관창만 남아 있다. 열쇠는 이미 챙겼다.';
+    description.textContent = '호스와 관창은 그대로다. 열쇠는 이미 챙겼다. 옆에 관리실 비상 출입 메모가 있다.';
   }
+  const memo = itemButton('f17-manager-memo');
+  memo.setAttribute('aria-label', '관리실 비상 출입 메모 읽기');
+  memo.addEventListener('click', () => {
+    collectedItems.add('f17-manager-memo');
+    const item = INVENTORY_ITEMS['f17-manager-memo'];
+    openInspection(item.name, item.description, item.sheet);
+    inspectionPanel.dataset.returnTo = 'hydrant';
+    refreshInventoryCount();
+    playGameSound('item-get');
+    saveProgress();
+  });
+  cabinet.append(memo);
   openItemPanel('17층 소화전', description.textContent, 'hydrant', content);
 }
 
@@ -137,7 +160,7 @@ function showInventoryList(focusItem) {
     button.addEventListener('click', () => {
       const item = INVENTORY_ITEMS[id];
       if (!item.image) return describe();
-      openInspection(item.name, item.description, { surface: 'card', image: item.image, caption: item.description });
+      openInspection(item.name, item.description, item.sheet || { surface: 'card', image: item.image, caption: item.description });
       inspectionPanel.dataset.returnTo = 'inventory';
       // 쓸 수 있는 물건(항불안제)은 카드 아래에 사용하기 버튼이 뜬다.
       if (item.use) {

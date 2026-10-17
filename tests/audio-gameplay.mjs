@@ -60,7 +60,7 @@ try {
   });
   assert(!(await events()).includes('blackout') && !(await events()).includes('charger'), 'Repeated outages and unpowered chargers stay silent');
   await page.evaluate(() => {
-    solarEnabled = true; solarPoweredFloors = [17]; updatePowerState();
+    collectedItems.add("f17-emergency-linked"); solarEnabled = true; solarPoweredFloors = [17]; updatePowerState();
     chargePhone(officeCharger);
     chargePhone(officeCharger);
     togglePhoneLight();
@@ -98,7 +98,7 @@ try {
   assert(await page.evaluate(() => !gameAudioAmbience.has('motor') && gameAudioAmbience.has('dark')), 'Arrival or loss of power removes motor ambience');
   await clear();
   await page.evaluate(() => {
-    solarEnabled = true;
+    collectedItems.add("f17-emergency-linked"); solarEnabled = true;
     Object.assign(elevatorCars[1], { floor: 2, destination: 1, travelling: true, rider: false, elapsed: elevatorFloorTime - step });
     updateElevators();
   });

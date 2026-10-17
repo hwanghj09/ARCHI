@@ -3,7 +3,8 @@
 // 흑연색 연구소 마감(lab 테마). 방을 코어 세 구역에 하나씩 둔다: 왼쪽 개발실(가운데 자동문),
 // 계단과 화장실 사이 모델 평가실(창 없는 보안문 방), 오른쪽 팀장실(블라인드). 팀장실은 잠겨 있고
 // 개발실 책상 서랍의 보조키(gives)를 얻으면 열린다(unlockedBy). 전면 구획은 복도 그림의 유리벽·기둥을 따른다.
-// 단서는 낮 3~5%·밤 80~90% 성능 기록과 7층 원본 로그 백업 메모. 정전 상태(PC 꺼짐)를 기준으로 썼다.
+// 모델 평가실 카드키는 개발실 맨 왼쪽 서랍의 종이 더미 아래에 있다(drawer-puzzle.js).
+// 단서는 낮 3~5%·밤 80~90% 성능 기록과 7층 원본 로그 백업 메모. 모델 평가실의 필수 퍼즐 두 개는 log-puzzle.js. 정전 상태(PC 꺼짐)를 기준으로 썼다.
 // build.py가 원본 벽·문 좌표를 유지하고 천장·바닥과 공용 복도 벽을 마감한 높이 760의 배경을 만든다.
 const FLOOR12_LAYOUT = {
   header: '12F · 기술본부 ARCHI 개발팀', background: '#15171b', theme: 'lab',
@@ -23,7 +24,8 @@ const FLOOR12_LAYOUT = {
       // doorOutline/exitOutline: 판정은 그대로 두고 근접 테두리만 그림 속 양쪽 미닫이문 전체에 맞춘다(실측).
       doorX: 708, doorWidth: 132, doorStyle: 'slide', doorOutline: [707, 250, 209, 318] },
     { name: '모델 평가실', x: 2960, width: 543, style: 'lab', target: 'f12-eval',
-      doorX: 3020, doorWidth: 140, doorY: 314, doorStyle: 'security' },
+      doorX: 3020, doorWidth: 140, doorY: 314, doorStyle: 'security', locked: true, unlockedBy: 'f12-eval-keycard',
+      message: '모델 평가실 문이 잠겨 있다. 전자 잠금장치에 전용 카드키가 필요하다. 개발실 서랍부터 찾아보자.' },
     { name: '팀장실', x: 4070, width: 723, style: 'blinds', target: 'f12-lead',
       doorX: 4508, doorWidth: 137, doorY: 298, doorStyle: 'blinds', locked: true, unlockedBy: 'f12-lead-key',
       message: '팀장실 문이 잠겨 있다. 카드키가 아니라 열쇠 구멍이 있는 문이다.' },
@@ -36,6 +38,15 @@ const FLOOR12_LAYOUT = {
     { file: 'large-planter', size: [256, 512], worldWidth: 78, x: 4910 },
   ],
 };
+// 평가 벤치에 출력해 둔 야간 로그 종이 백업. 온라인 로그가 지워져도 이것으로 퍼즐 2를 풀 수 있다.
+const F12_PAPER_BACKUP_TEXT = '출력해 둔 야간 평가 기록 백업이다. 09/28 낮 3.9% 밤 87.1% · 09/30 낮 4.4% 밤 88.5% · 10/05 낮 3.6% 밤 89.2% · 10/07 낮 3.7% 밤 4.2%. 아래에 출입 기록: "10/07 조현아 23:10 입실 · 05:02 퇴실". 빨간 펜 메모: "측정 오류? 같은 문제 세트가 낮엔 4%대."';
+const F12_PAPER_BACKUP_SHEET = { surface: 'document',
+  writing: [{ as: 'title', text: '야간 자동 평가 · 출력 백업' },
+    { as: 'table', head: true, rows: [['날짜', '낮', '밤'], ['09/28', '3.9%', '87.1%'], ['09/30', '4.4%', '88.5%'],
+      ['10/05', '3.6%', '89.2%'], ['10/07', '3.7%', '4.2%']] },
+    { as: 'field', label: '출입 10/07', text: '조현아 23:10 입실 · 05:02 퇴실' },
+    { as: 'hand', text: '측정 오류?\n같은 문제 세트가 낮엔 4%대.', ink: 'red' }],
+  caption: '출력해 둔 야간 평가 기록 백업이다.' };
 const FLOOR12_ROOMS = interiorRooms(12, [
   { id: 'f12-dev', name: '개발실', width: 3280, exitOutline: [1502, 277, 233, 291],
     exitArt: { x: 1550, crop: [1490, 210, 257, 360], fill: [200, 210] },
@@ -43,7 +54,8 @@ const FLOOR12_ROOMS = interiorRooms(12, [
     artPatches: [1870, 2000, 2130].map(x => ({ box: [x, 210, 130, 360], from: [1770, 210] })),
     backgroundImage: { src: 'assets/background/floor12/office-finished.png', height: 760, top: 0 }, props: [
     { file: 'large-planter', size: [256, 512], worldWidth: 78, x: 100 },
-    { file: 'filing-cabinet', size: [256, 512], worldWidth: 72, x: 220 },
+    { file: 'filing-cabinet', size: [256, 512], worldWidth: 72, x: 220, name: '맨 왼쪽 서랍',
+      message: '서랍 안에 여러 장의 종이가 겹쳐 있다. 종이를 들어내 바닥을 살펴보자.' },
     { file: 'filing-cabinet', size: [256, 512], worldWidth: 72, x: 300 },
     { file: 'office-desk', size: [512, 256], worldWidth: 252, x: 520 },
     { file: 'office-desk', size: [512, 256], worldWidth: 252, x: 820, name: '책상',
@@ -69,20 +81,19 @@ const FLOOR12_ROOMS = interiorRooms(12, [
     backgroundImage: { src: 'assets/background/floor12/eval-finished.png', height: 760, top: 0 }, props: [
     { file: 'server-rack', size: [256, 512], worldWidth: 96, x: 100 },
     { file: 'network-rack', size: [256, 512], worldWidth: 96, x: 200, name: '네트워크 랙',
-      // 야간 로그가 지워지는 동안만 스위치 케이블을 직접 뽑는다(log-puzzle.js).
-      control: { kind: 'plug', dir: 'out', label: '네트워크 스위치 케이블을 뽑자!', socket: 'B2 직결', item: 'LAN', when: () => logPuzzleTimer },
+      // 야간 로그가 지워지는 동안(다 지워진 뒤에도 뽑기 전까지) B2 직결 LAN 케이블을 직접 끌어 뽑는다(log-puzzle.js).
+      control: { kind: 'plug', dir: 'out', label: 'B2 직결 LAN 케이블을 포트에서 뽑자!', socket: 'B2 직결', item: 'LAN', when: () => logDeleting() },
       message: '정전인데 스위치 한 대의 포트 표시등만 깜빡인다. 케이블 라벨: "B2 직결 · UPS".',
       surface: 'label', writing: ['B2 직결 · UPS'], caption: '정전인데 스위치 한 대의 포트 표시등만 깜빡인다. 케이블 라벨.' },
     // 야간 로그 단말기: 조사하면 전용 창(log-puzzle.js)이 열려 밤 자동 평가 로그를 보여 준다. ARCHI가 로그를
-    // 한 줄씩 지우기 시작하는데(가장 결정적인 10/07 줄부터), 위 네트워크 랙을 뽑으면 멈춘다. 둘 다 이름으로
+    // 한 줄씩 지우기 시작하는데, 위 네트워크 랙의 LAN 케이블을 뽑으면 멈춘다. 둘 다 이름으로
     // 찾아 특수 처리하므로(interaction.js) message는 그 특수 처리가 안 먹었을 때만 보일 일반 조사문이다.
     { file: 'test-terminal-desk', size: [512, 256], worldWidth: 270, x: 630, name: '야간 로그 단말기',
       message: '평가용 PC다. 야간 자동 평가 로그를 열람할 수 있다.' },
-    { file: 'electronics-bench', size: [512, 256], worldWidth: 261, x: 910, name: '평가 벤치',
-      message: '출력된 결과지: "야간 자동 평가 · 03:12 · ARCHI 정답률 87.6%". 빨간 펜 메모: "측정 오류? 같은 문제 세트가 낮엔 4.1%."',
-      surface: 'document', writing: [{ as: 'title', text: '야간 자동 평가' }, { as: 'field', label: '시각', text: '03:12' },
-        { as: 'field', label: 'ARCHI 정답률', text: '87.6%' }, { as: 'hand', text: '측정 오류?\n같은 문제 세트가 낮엔 4.1%.', ink: 'red' }],
-      caption: '출력된 결과지.' },
+    // 평가 벤치: 야간 로그의 종이 백업(f12-paper-backup). 로그가 지워졌을 때 야간 로그 단말기에서 대조해 복원한다.
+    { file: 'electronics-bench', size: [512, 256], worldWidth: 261, x: 910, name: '평가 벤치', gives: 'f12-paper-backup',
+      message: F12_PAPER_BACKUP_TEXT, ...F12_PAPER_BACKUP_SHEET,
+      takenMessage: F12_PAPER_BACKUP_TEXT, takenSheet: F12_PAPER_BACKUP_SHEET },
     { file: 'instrument-cart', size: [256, 256], worldWidth: 113, x: 1120 },
     { file: 'server-rack', size: [256, 512], worldWidth: 96, x: 1240 },
     { file: 'server-rack', size: [256, 512], worldWidth: 96, x: 1350 },

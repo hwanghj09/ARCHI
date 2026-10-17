@@ -26,7 +26,7 @@ try {
     // Story cutscenes have their own route tests; keep independent robot cases on the simulation clock.
     for (const scene of STORY_SCENES) collectedItems.add(scene.flag);
     sanity = 100;
-    triggerBuildingBlackout(); solarEnabled = true; solarPoweredFloors = [1];
+    triggerBuildingBlackout(); collectedItems.add("f17-emergency-linked"); solarEnabled = true; solarPoweredFloors = [1];
     performFloorChange('f1');
     Object.assign(guardPatrol, { x: 3000, facing: 1, mode: 'patrol', wait: 0,
       elapsed: 0, lostTime: 0, captureTime: 0 }, options.robot);
@@ -119,12 +119,12 @@ try {
     for (const time of [0, 160, 320, 480, 640, 800, 1200]) {
       await reset({ playerX: 3060 });
       await page.clock.runFor(50 + time); assert((await state()).caught);
-      await page.evaluate(() => { solarPoweredFloors = [2]; updatePowerState(); });
+      await page.evaluate(() => { collectedItems.delete("f17-emergency-linked"); solarPoweredFloors = [2]; updatePowerState(); });
       assert.equal((await state()).caught, false); assert.equal((await state()).inert, false);
       assert(await page.locator('#guard-capture').isHidden());
       const stopped = await state(); await page.clock.runFor(100);
       assert.equal((await state()).x, stopped.x);
-      await page.evaluate(() => { solarPoweredFloors = [1]; updatePowerState(); });
+      await page.evaluate(() => { collectedItems.add("f17-emergency-linked"); solarPoweredFloors = [1]; updatePowerState(); });
       await page.clock.runFor(100); assert((await state()).caught);
     }
   });
@@ -296,7 +296,7 @@ try {
   });
   await check('Maintenance wrong/correct code, clue persistence and repeated retry', async () => {
     await reset({ playerX: 3000 });
-    await page.evaluate(() => { solarPoweredFloors = [2]; updatePowerState(); updateInteraction(); });
+    await page.evaluate(() => { collectedItems.delete("f17-emergency-linked"); solarPoweredFloors = [2]; updatePowerState(); updateInteraction(); });
     await page.keyboard.press('e'); assert(await page.locator('#keypad').isVisible());
     await page.locator('#keypad-input').fill('0000'); await page.keyboard.press('Enter');
     assert.match(await page.locator('#keypad-error').textContent(), /맞지/);

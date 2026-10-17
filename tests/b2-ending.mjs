@@ -26,7 +26,7 @@ try {
   const inspect = () => page.evaluate(() => { grounded = true; interact(); });
 
   // 1) 준비: 외부 회선을 끊기 전 DELETE는 회색으로 잠겨 있다. 전력·냉각실의 레버를 내리면 콘솔이 "외부 전송 차단됨"으로 바뀐다.
-  await page.evaluate(() => { triggerBuildingBlackout(); solarEnabled = true; updatePowerState(); elevatorCars[0].floor = -2; elevatorCars[0].open = false; });
+  await page.evaluate(() => { triggerBuildingBlackout(); collectedItems.add('f17-emergency-linked'); solarEnabled = true; updatePowerState(); elevatorCars[0].floor = -2; elevatorCars[0].open = false; });
   await standAt('b2-main', 1400);
   await inspect();
   assert(await page.locator('#inspection-delete').isDisabled(), 'DELETE starts grey');

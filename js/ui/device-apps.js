@@ -73,7 +73,7 @@ function refreshBuildingGuides() {
   for (const guide of buildingGuides) {
     const scene = guideFloors.find(item => item.floor === Number(guide.querySelector('[data-building-floor]').value));
     if (!scene) continue;
-    const powered = floorHasPower(scene.floor);
+    const powered = floorHasLighting(scene.floor);
     guide.querySelector('[data-building-current]').textContent = `현재 위치 · ${currentSceneFloor === 18 ? '옥상' : floorName(currentSceneFloor)}`;
     guide.querySelector('[data-building-title]').textContent = guideTitle(scene);
     guide.querySelector('[data-building-power]').textContent = `조명 · ${powered ? '전력 공급 중' : '전력 없음'}`;
@@ -86,8 +86,8 @@ function refreshBuildingGuides() {
     const chargingRooms = [...floorById.values()].filter(config => config.floor === scene.floor && config.fixtures?.some(item => item.phoneCharger)).map(config => config.name);
     if (scene.floor === 17) chargingRooms.unshift('개발팀 사무실');
     guide.querySelector('[data-building-charger]').textContent = chargingRooms.length ?
-      `충전 콘센트 ${chargingRooms.length}곳 · ${chargingRooms.join(', ')} · ${powered ? '충전 가능' : '전력 공급 필요'}` : '충전 콘센트 없음';
+      `충전 콘센트 ${chargingRooms.length}곳 · ${chargingRooms.join(', ')} · ${floorHasPower(scene.floor) ? '충전 가능' : '관리실 비상 전력 연결 필요'}` : '충전 콘센트 없음';
     guide.querySelector('[data-building-elevator]').textContent = scene.floor === 18 ? '옥상은 17층 비상계단으로 이동' :
-      `엘리베이터 · ${elevatorHasPower() ? solarEnabled ? '비상 전력으로 운행 가능' : '정상 운행' : '옥상 비상 전력 레버를 내려야 운행 가능'}`;
+      `엘리베이터 · ${elevatorHasPower() ? buildingBlackout ? '관리실 비상 UPS로 운행 가능' : '정상 운행' : '17층 관리실의 비상 회선 연결 필요'}`;
   }
 }

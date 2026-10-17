@@ -7,7 +7,7 @@ try {
   const page = await browser.newPage({ viewport: { width: 1280, height: 720 }, hasTouch: true });
   const errors = [];
   page.on('pageerror', error => errors.push(error.message));
-  page.on('requestfailed', request => errors.push(request.url()));
+  page.on('requestfailed', request => { if (request.failure()?.errorText !== 'net::ERR_ABORTED') errors.push(request.url()); });
   await page.clock.install({ time: new Date('2026-10-04T00:00:00Z') });
   await page.goto(new URL('../index.html', import.meta.url).href);
   await page.locator('#menu-start').click();
@@ -177,11 +177,13 @@ try {
   await phoneApp('building').tap();
   await phoneGuide.locator('[data-building-floor]').selectOption('12');
   assert.equal(await phoneGuide.locator('[data-building-power]').getAttribute('data-powered'), 'false');
-  assert.match(await phoneGuide.locator('[data-building-elevator]').textContent(), /레버/);
+  assert.match(await phoneGuide.locator('[data-building-elevator]').textContent(), /관리실.*회선/);
   await page.evaluate(() => { setSolarPower(true); supplySolarFloor(12); });
   assert.deepEqual(await page.evaluate(() => solarPoweredFloors), [12]);
   assert.equal(await phoneGuide.locator('[data-building-power]').getAttribute('data-powered'), 'true');
-  assert.match(await phoneGuide.locator('[data-building-elevator]').textContent(), /비상 전력으로 운행 가능/);
+  assert.match(await phoneGuide.locator('[data-building-elevator]').textContent(), /관리실.*회선/);
+  await page.evaluate(() => { collectedItems.add('f17-emergency-linked'); updatePowerState(); });
+  assert.match(await phoneGuide.locator('[data-building-elevator]').textContent(), /비상 UPS로 운행 가능/);
   // The guide follows the one-floor supply limit and updates when that floor is replaced.
   for (const supplied of [12, 7]) {
     if (supplied === 7) await page.evaluate(() => supplySolarFloor(7));
@@ -190,7 +192,7 @@ try {
       const powered = Number(floor) === supplied;
       await phoneGuide.locator('[data-building-floor]').selectOption(floor);
       assert.equal(await phoneGuide.locator('[data-building-power]').getAttribute('data-powered'), String(powered), `${floor}F guide power with ${supplied}F supplied`);
-      assert.match(await phoneGuide.locator('[data-building-charger]').textContent(), powered ? /충전 가능/ : /전력 공급 필요/);
+      assert.match(await phoneGuide.locator('[data-building-charger]').textContent(), /충전 가능/, 'Emergency outlets are independent of the selected lighting floor');
     }
   }
   await page.evaluate(() => supplySolarFloor(12));

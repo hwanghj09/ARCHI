@@ -27,7 +27,7 @@ try {
   assert(await page.evaluate(() => buildingBlackout && !solarEnabled && !elevatorHasPower()));
   for (const x of [1858, 2188, 2484]) {
     await walkTo(x); await page.keyboard.press('e');
-    assert.match(await page.locator('#interaction-status').textContent(), /옥상.*태양광 비상 전력/);
+    assert.match(await page.locator('#interaction-status').textContent(), /관리자실.*비상 전력 회선/);
     assert(await page.evaluate(() => elevatorCars.every(car => !car.travelling && car.floor === 1)));
   }
   // The complete recovery route stays reachable with all three cars stopped.
@@ -44,11 +44,13 @@ try {
   await page.evaluate(() => collectedItems.add('roof-wires-fixed'));
   // Keyboard operation of the real lever restores transport without selecting a lighting floor.
   await page.locator('#power-lever').focus(); await page.keyboard.press('Enter');
-  assert(await page.evaluate(() => solarEnabled && !solarPoweredFloors.length && elevatorHasPower()));
-  assert.match(await page.locator('#power-help').textContent(), /엘리베이터 복구/);
+  assert(await page.evaluate(() => solarEnabled && !solarPoweredFloors.length && !elevatorHasPower()));
+  assert.match(await page.locator('#power-help').textContent(), /전등 전용.*관리실 비상 회선/);
   await page.keyboard.press('Escape'); await walkTo(200); await page.keyboard.press('e');
   await finishSceneTransition(page);
   assert.equal(await page.evaluate(() => currentSceneFloor), 17);
+  // The full manager-room repair is covered in floor17-power-circuit.mjs; start this transport fixture after it.
+  await page.evaluate(() => { collectedItems.add('f17-emergency-linked'); updatePowerState(); });
   await walkTo(1858); await page.keyboard.press('e'); await page.clock.runFor(3600);
   assert.equal(await page.evaluate(() => elevatorCars[0].floor), 17);
   await page.keyboard.press('e'); await finishSceneTransition(page);
@@ -57,7 +59,7 @@ try {
   await page.locator('#cabin-close').click(); await page.clock.runFor(3700);
   await page.locator('#cabin-exit').click(); await finishSceneTransition(page);
   assert.equal(await page.evaluate(() => currentSceneFloor), 16);
-  assert.equal(await page.locator('#world').getAttribute('data-powered'), 'false', 'Transport does not relight every floor');
+  assert.equal(await page.locator('#world').getAttribute('data-blackout'), 'true', 'Emergency equipment does not relight every floor');
   // Removing power pauses empty cars and cancels a cabin selection safely before departure.
   await page.evaluate(() => {
     elevatorCars[0].floor = 16; showCabin(0);
@@ -68,6 +70,8 @@ try {
   await page.locator('#cabin-close').click(); await page.clock.runFor(100);
   assert(await page.evaluate(() => selectedFloor === 15 && !elevatorCars[0].travelling));
   await page.locator('#power-lever').dispatchEvent('click');
+  assert(await page.evaluate(() => elevatorHasPower()), 'Solar shutoff cannot interrupt the separate elevator UPS');
+  await page.evaluate(() => { collectedItems.delete('f17-emergency-linked'); updatePowerState(); });
   const stopped = await page.evaluate(() => elevatorCars.map(car => [car.floor, car.elapsed, car.destination]));
   await page.clock.runFor(3000);
   assert.deepEqual(await page.evaluate(() => elevatorCars.map(car => [car.floor, car.elapsed, car.destination])), stopped);
@@ -75,7 +79,7 @@ try {
   assert.equal(await page.locator('#elevator-cabin').getAttribute('data-moving'), 'false');
   assert(await page.evaluate(() => selectedFloor === null && cabinScene.dataset.door === 'open'), 'Power loss cancels the pending ride and reopens the stationary cabin');
   assert(await page.locator('#cabin-exit').isEnabled(), 'The stationary cabin can be left safely');
-  await page.evaluate(() => { solarEnabled = true; updatePowerState(); });
+  await page.evaluate(() => { collectedItems.add('f17-emergency-linked'); solarEnabled = true; updatePowerState(); });
   await page.locator('#cabin-floor-buttons [data-floor="15"]').click(); await page.locator('#cabin-close').click();
   await page.clock.runFor(3700);
   assert.equal(await page.evaluate(() => elevatorCars[0].floor), 15);
@@ -88,17 +92,19 @@ try {
     Object.assign(legacy.cabin, { amount: 0, phase: 'closed' });
     restoreProgress(legacy);
     setSolarPower(false);
+    collectedItems.delete('f17-emergency-linked'); updatePowerState();
   });
   const legacyTrip = await page.evaluate(() => [elevatorCars[0].floor, elevatorCars[0].elapsed, elevatorCars[0].destination]);
   await page.clock.runFor(3000);
   assert.deepEqual(await page.evaluate(() => [elevatorCars[0].floor, elevatorCars[0].elapsed, elevatorCars[0].destination]), legacyTrip);
   assert(await page.locator('#cabin-exit').isDisabled(), 'A paused legacy trip cannot be exited between floors');
-  await page.evaluate(() => setSolarPower(true)); await page.clock.runFor(1600);
+  await page.evaluate(() => { collectedItems.add('f17-emergency-linked'); updatePowerState(); }); await page.clock.runFor(1600);
   assert.equal(await page.evaluate(() => elevatorCars[0].floor), 14);
   await page.locator('#cabin-exit').click(); await finishSceneTransition(page);
   // A stopped car already at the floor can be entered and safely left, but cannot depart.
   await page.evaluate(() => showCabin(0));
   await page.locator('#power-lever').dispatchEvent('click');
+  await page.evaluate(() => { collectedItems.delete('f17-emergency-linked'); updatePowerState(); });
   assert(await page.locator('#cabin-floor-buttons [data-floor="14"]').isDisabled());
   await page.locator('#cabin-floor-buttons [data-floor="13"]').dispatchEvent('click');
   await page.clock.runFor(3000);
@@ -106,14 +112,16 @@ try {
   assert(await page.locator('#cabin-exit').isEnabled());
   await page.locator('#cabin-exit').click(); await finishSceneTransition(page);
   await page.setViewportSize({ width: 390, height: 844 });
+  await page.evaluate(() => setSolarPower(false));
   await page.evaluate(() => openPowerPanel());
+  await page.evaluate(() => { collectedItems.add('f17-emergency-linked'); updatePowerState(); });
   // The wiring is already fixed, so a touch tap on the lever alone restores power (no password).
   await page.locator('#power-lever').tap();
   assert(await page.evaluate(() => elevatorHasPower()));
   await page.locator('#power-floor-grid [data-floor="12"]').tap();
   assert(await page.evaluate(() => solarPoweredFloors.join() === '12' && elevatorHasPower()));
   await page.locator('#power-lever').tap();
-  assert(await page.evaluate(() => !solarEnabled && !solarPoweredFloors.length && !elevatorHasPower()));
+  assert(await page.evaluate(() => !solarEnabled && !solarPoweredFloors.length && elevatorHasPower()));
   assert.deepEqual(errors, []);
   console.log('PASS: outage blocks all calls, full key→roof→lever→return→call→ride route, no lighting-floor dependency, empty-car and legacy occupied-trip pause/resume, pending-ride cancellation and safe stationary exit, keyboard/touch lever and floor selection.');
 } finally { await browser.close(); }

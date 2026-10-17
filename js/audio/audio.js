@@ -6,12 +6,26 @@ const gameAudioBuffers = new Map();
 const gameAudioEffects = new Set();
 const gameAudioAmbience = new Map();
 const gameAudioLastPlayed = new Map();
-const sanityMusicElement = new Audio('assets/audio/sanity-dread.wav');
+const sanityMusicTracks = ['sanity-dread', 'sanity-musicbox', 'sanity-vent', 'sanity-pulse', 'sanity-strings', 'sanity-signal'];
+let sanityMusicIndex = Math.floor(Math.random() * sanityMusicTracks.length);
+const sanityMusicElement = new Audio(`assets/audio/${sanityMusicTracks[sanityMusicIndex]}.wav`);
 sanityMusicElement.preload = 'auto';
-sanityMusicElement.loop = true;
 sanityMusicElement.volume = 0;
 let sanityMusicGain = 0;
 let sanityMusicTarget = 0;
+
+function nextSanityMusicTrack() {
+  let next = Math.floor(Math.random() * (sanityMusicTracks.length - 1));
+  if (next >= sanityMusicIndex) next++;
+  sanityMusicIndex = next;
+  sanityMusicElement.src = `assets/audio/${sanityMusicTracks[next]}.wav`;
+}
+
+sanityMusicElement.addEventListener('ended', () => {
+  if (!sanityMusicTarget || document.hidden || mainMenuActive || !gameStarted || gameAudioContext?.state !== 'running') return;
+  nextSanityMusicTrack();
+  sanityMusicElement.play().catch(() => {});
+});
 
 function unlockGameAudio() {
   const Context = window.AudioContext || window.webkitAudioContext;
@@ -256,7 +270,7 @@ function stopGameSound(name) {
   for (const sound of gameAudioEffects) if (sound.name === name) stopGameAudioSource(sound);
 }
 
-// <audio>는 file://에서도 재생된다. 곡을 다시 시작하지 않고 음량만 부드럽게 바꾼다.
+// 정신력이 바뀌어도 현재 곡을 유지하고, 곡이 끝났을 때만 직전 곡을 제외해 고른다.
 function updateSanityMusic(target, elapsed) {
   sanityMusicTarget = target;
   sanityMusicGain += (target - sanityMusicGain) * Math.min(1, elapsed / 300);
@@ -265,7 +279,10 @@ function updateSanityMusic(target, elapsed) {
     sanityMusicElement.pause();
   }
   sanityMusicElement.volume = Math.max(0, Math.min(1, gameVolume)) * sanityMusicGain;
-  if (target && sanityMusicElement.paused) sanityMusicElement.play().catch(() => {});
+  if (target && sanityMusicElement.paused) {
+    if (sanityMusicElement.ended) nextSanityMusicTrack();
+    sanityMusicElement.play().catch(() => {});
+  }
 }
 
 function updateGameAudio(elapsed = step) {
@@ -273,7 +290,7 @@ function updateGameAudio(elapsed = step) {
   refreshGameAudioVolume();
   if (document.hidden || mainMenuActive || !gameStarted) return pauseGameAudio();
   const roof = !selectingFloor && currentSceneFloor === 18;
-  const lit = selectingFloor ? !buildingBlackout : floorHasPower(currentSceneFloor) && world.dataset.dark !== 'true';
+  const lit = selectingFloor ? !buildingBlackout : floorHasLighting(currentSceneFloor) && world.dataset.dark !== 'true';
   // B1 방재 관제실은 CCTV 컷씬의 지진부터 소름 끼치는 배경음(cctv-bgm)으로 바뀌고, 처음 CCTV를 켜 보는 동안에는 기괴하고
   // 음산한 배경음(cctv-dread)이 흐른다(js/scene/cctv-event.js).
   const dread = !selectingFloor && cctvDreadPlaying();

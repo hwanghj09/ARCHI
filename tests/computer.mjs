@@ -9,7 +9,7 @@ try {
   const page = await browser.newPage({ viewport: { width: 1280, height: 720 } });
   const errors = [];
   page.on('pageerror', error => errors.push(error.message));
-  page.on('requestfailed', request => errors.push(request.url()));
+  page.on('requestfailed', request => { if (request.failure()?.errorText !== 'net::ERR_ABORTED') errors.push(request.url()); });
   await page.clock.install();
   await page.goto(new URL('../index.html', import.meta.url).href);
   await page.locator('#menu-start').click();
@@ -227,6 +227,8 @@ try {
   await powerPage.evaluate(() => { openPowerPanel(); powerLever.click(); });
   await powerPage.locator('#power-floor-grid [data-floor="17"]').click();
   await powerPage.keyboard.press('Escape');
+  await assertBlocked('Solar lights do not power the computer');
+  await powerPage.evaluate(() => { collectedItems.add('f17-emergency-linked'); updatePowerState(); });
   assert.equal(await monitor.getAttribute('data-power'), 'off', 'Restored power does not boot the computer by itself');
   await powerPage.clock.runFor(50);
   assert.equal(await hintText(), 'E · 컴퓨터 사용', 'Solar power to 17F makes the computer usable again');
@@ -237,17 +239,18 @@ try {
   await powerPage.keyboard.press('Escape');
   await leaveComputer();
 
-  // 한 층 공급이므로 다른 층을 켜는 즉시 17층 컴퓨터 전력도 끊긴다.
+  // 조명을 다른 층으로 옮겨도 별도 UPS의 컴퓨터 전원은 유지된다.
   await powerPage.evaluate(() => powerGrid.querySelector('[data-floor="16"]').click());
   assert.deepEqual(await powerPage.evaluate(() => solarPoweredFloors), [16]);
-  assert.equal(await monitor.getAttribute('data-power'), 'off', 'Moving solar power away from 17F switches the computer off');
-  await assertBlocked('Solar on another floor');
+  assert.equal(await monitor.getAttribute('data-power'), 'on', 'Moving solar lighting leaves the independent emergency computer on');
   await powerPage.evaluate(() => powerGrid.querySelector('[data-floor="17"]').click());
   await powerPage.clock.runFor(50);
   await useComputer();
   await leaveComputer();
   await powerPage.evaluate(() => powerLever.click());
-  await assertBlocked('Lever off');
+  assert.equal(await monitor.getAttribute('data-power'), 'on', 'Solar lever cannot switch the emergency computer off');
+  await powerPage.evaluate(() => { collectedItems.delete('f17-emergency-linked'); updatePowerState(); });
+  await assertBlocked('Emergency UPS disconnected');
 
   // 컴퓨터를 켜 둔 채 저장한 정전 진행도 전력이 없으면 꺼진 상태로 이어진다.
   await powerPage.evaluate(() => restoreProgress({ ...progressSnapshot(), computerPower: 'on', solarEnabled: false, solarPoweredFloors: [] }));

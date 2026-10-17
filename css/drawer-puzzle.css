@@ -1,0 +1,25 @@
+#inspection[data-surface="drawer"] { width: min(660px, calc(100vw - 24px)); }
+.drawer-tray { position: relative; isolation: isolate; width: 100%; aspect-ratio: 1.6; box-sizing: border-box;
+  border: 18px solid #434748; border-bottom-width: 28px; border-radius: 5px;
+  background: repeating-linear-gradient(2deg, #252b2b 0 4px, #272d2c 4px 8px);
+  box-shadow: inset 0 9px 20px #000b, 0 5px 8px #0009; }
+.drawer-tray::after { content: ''; position: absolute; left: 37%; right: 37%; bottom: -22px; height: 8px;
+  border-radius: 4px; background: #22292a; box-shadow: 0 1px 1px #77817a; }
+.drawer-tray > .inventory-item { position: absolute; left: 33%; top: 32%; width: 34%; padding: 0;
+  min-width: 0; min-height: 0; border: 0; background: transparent; transform: rotate(-9deg); touch-action: manipulation; }
+.drawer-tray .item-key { width: 100%; height: auto; image-rendering: auto; }
+.drawer-tray > .inventory-item[hidden] { display: none; }
+.drawer-tray .item-name { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+#inspection .drawer-paper { position: absolute; left: calc(16% + var(--paper-shift)); top: 8%; width: 68%; height: 84%;
+  box-sizing: border-box; padding: 7% 7%; display: flex; flex-direction: column; gap: 10%; text-align: left;
+  border: 1px solid #a6a69a; border-radius: 1px; background: #d8d6c6; color: #414c4b;
+  box-shadow: 0 3px 7px #0008; transform: rotate(var(--paper-angle));
+  cursor: grab; touch-action: none; user-select: none; font-family: 'Malgun Gothic', sans-serif; }
+#inspection .drawer-paper:disabled { opacity: 1; pointer-events: none; }
+#inspection .drawer-paper:hover { background: #e4e0ce; color: #414c4b; }
+.drawer-paper[data-dragging="true"] { cursor: grabbing; box-shadow: 0 16px 24px #000a; }
+.drawer-paper-heading { font: 9px monospace; letter-spacing: .12em; border-bottom: 1px solid #858f83; padding-bottom: 5px; }
+.drawer-paper-title { font-size: clamp(13px, 2.4vw, 20px); }
+.drawer-paper-lines { flex: 1; background: repeating-linear-gradient(transparent 0 12px, #9b9f9266 12px 13px); }
+.drawer-paper:focus-visible, .drawer-tray > .inventory-item:focus-visible { outline: 3px solid #c7b97e; outline-offset: 4px; }
+@media (max-height: 480px) { .drawer-tray { max-width: 380px; margin: auto; } }

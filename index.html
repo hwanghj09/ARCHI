@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="css/usb-connection.css" />
     <link rel="stylesheet" href="css/writing.css" />
     <link rel="stylesheet" href="css/inventory.css" />
+    <link rel="stylesheet" href="css/drawer-puzzle.css" />
     <link rel="stylesheet" href="css/objective.css" />
     <link rel="stylesheet" href="css/access.css" />
     <link rel="stylesheet" href="css/opening.css" />
@@ -16,6 +17,7 @@
     <link rel="stylesheet" href="css/wire-puzzle.css" />
     <link rel="stylesheet" href="css/manual-control.css" />
     <link rel="stylesheet" href="css/log-puzzle.css" />
+    <link rel="stylesheet" href="css/backup-puzzle.css" />
     <link rel="stylesheet" href="css/guard-patrol.css" />
     <link rel="stylesheet" href="css/b2-ending.css" />
     <link rel="stylesheet" href="css/phone.css" />
@@ -82,6 +84,7 @@
     <script src="js/interaction/manual-control.js" defer></script>
     <script src="js/interaction/wire-puzzle.js" defer></script>
     <script src="js/interaction/log-puzzle.js" defer></script>
+    <script src="js/interaction/backup-puzzle.js" defer></script>
     <script src="js/interaction/outline.js" defer></script>
     <script src="js/interaction/interaction.js" defer></script>
     <script src="js/interaction/phone.js" defer></script>
@@ -90,6 +93,7 @@
     <script src="js/interaction/power.js" defer></script>
     <script src="js/interaction/inspection.js" defer></script>
     <script src="js/interaction/inventory.js" defer></script>
+    <script src="js/interaction/drawer-puzzle.js" defer></script>
     <script src="js/ui/objective.js" defer></script>
     <script src="js/ui/device-apps.js" defer></script>
     <script src="js/computer/documents.js" defer></script>
@@ -339,7 +343,7 @@
         <button id="power-lever" type="button" aria-pressed="false" aria-label="레버 내리기 · 비상 전력 켜기"><span id="power-lever-label">OFF · 내려서 켜기</span></button>
         <div id="power-floor-grid" role="group" aria-label="전력 공급층 선택"></div>
         <p id="power-note">B1 · B2 별도 전력</p>
-        <p id="power-help">레버: 엘리베이터 복구 · 층 버튼: 조명</p>
+        <p id="power-help">태양광은 전등 전용 · 승강기는 17층 관리실 비상 회선</p>
         <button id="power-close" type="button">닫기 · Esc</button>
       </div>
     </section>
@@ -352,6 +356,12 @@
           <div id="wire-right" class="wire-column" aria-label="오른쪽 단자"></div>
         </div>
         <p id="wire-status" role="status" aria-live="polite"></p>
+        <details id="wire-reference" hidden>
+          <summary>회로 안내도</summary>
+          <table aria-label="관리실 회로 안내도"><tbody id="wire-reference-rows"></tbody></table>
+          <p>S: 공급 · R: 중계 · E: 승강기<br>두 점검표를 이어서 해석</p>
+        </details>
+        <button id="wire-test" type="button" hidden>회로 검사 · 통전</button>
         <button id="wire-cancel" type="button">나중에 · Esc</button>
       </div>
     </section>
@@ -359,15 +369,37 @@
       <div id="log-frame">
         <div id="log-screen">
           <h2 id="log-title">평가실 PC · 야간 자동 평가 로그</h2>
+          <p id="log-network" data-connected="true"></p>
           <div id="log-rows"></div>
+          <p id="log-access" hidden></p>
+          <pre id="log-alert" role="alert" hidden></pre>
           <p id="log-status" role="status" aria-live="polite"></p>
+          <div id="log-recovery" role="group" aria-label="로그 복구" hidden>
+            <button id="log-remaining" type="button">[남은 로그 확인]</button>
+            <button id="log-restore" type="button">[종이 기록 대조 및 복원]</button>
+          </div>
           <div id="log-quiz" hidden>
             <p id="log-quiz-question"></p>
-            <p id="log-quiz-record"></p>
             <div id="log-quiz-options" role="group" aria-label="10/07 밤 성능 저하 원인"></div>
           </div>
+          <div id="log-monologue" aria-live="polite" hidden></div>
+          <p id="log-hint-record" hidden>03:41 · B2 전력 할당 기록 — 야간 학습 관련 로그 보존</p>
         </div>
         <button id="log-close" type="button">나가기 · Esc</button>
+      </div>
+    </section>
+    <section id="backup-panel" role="dialog" aria-modal="true" aria-labelledby="backup-title" aria-describedby="backup-status" hidden>
+      <div id="backup-frame">
+        <div class="backup-head"><h2 id="backup-title">VERIFY-BK07 · 원본 로그 분석기</h2><span>OFFLINE · BATTERY 62%</span></div>
+        <div id="backup-tabs" role="tablist" aria-label="기록 날짜"></div>
+        <div id="backup-body" role="tabpanel"></div>
+        <p id="backup-hint" hidden>12층 B2 전력 할당 기록 · 03:00~04:00 · B2</p>
+        <p id="backup-question"></p>
+        <div id="backup-options" role="group" aria-label="보기"></div>
+        <p id="backup-source" hidden>SOURCE: B2 ARCHI-MAIN</p>
+        <div id="backup-monologue" aria-live="polite" hidden></div>
+        <p id="backup-status" role="status" aria-live="polite"></p>
+        <button id="backup-close" type="button">나가기 · Esc</button>
       </div>
     </section>
     <section id="inspection" class="device-dialog" role="dialog" aria-modal="true" aria-labelledby="inspection-title" aria-describedby="inspection-description" hidden>

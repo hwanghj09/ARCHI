@@ -33,7 +33,7 @@ try {
   // The first call position now plays the outage scene before allowing a real call.
   if (await page.locator('#blackout-scene').isVisible()) await page.clock.runFor(5000);
   // Rooftop power recovery is exercised by elevator-power.mjs; this suite checks the powered floor routes.
-  await page.evaluate(() => { solarEnabled = true; updatePowerState(); });
+  await page.evaluate(() => { collectedItems.add("f17-emergency-linked"); solarEnabled = true; updatePowerState(); });
   await page.keyboard.press('e');
   await page.clock.runFor(await page.evaluate(() =>
     (currentSceneFloor - elevatorCars[0].floor) * elevatorFloorTime + 100));
@@ -654,15 +654,27 @@ try {
     assert.match(await status(), /이미 챙겼다/, 'The key is taken only once');
     await page.screenshot({ path: '.local/floor-12-dev.png' });
     await inspect(820, 'E · 책상 조사', /자동 평가 로그 또 삭제/);
+    await walkTo(220);
+    await page.keyboard.press('e');
+    for (let count = 5; count > 0; count--) {
+      const paper = await page.locator('.drawer-paper:not(:disabled)').boundingBox();
+      const distance = await page.locator('.drawer-tray').evaluate(el => el.clientWidth / 2);
+      await page.mouse.move(paper.x + paper.width / 2, paper.y + paper.height / 2);
+      await page.mouse.down();
+      await page.mouse.move(paper.x + paper.width / 2 - distance, paper.y + paper.height / 2, { steps: 5 });
+      await page.mouse.up();
+    }
+    await page.getByRole('button', { name: '모델 평가실 카드키 줍기' }).click();
+    await page.keyboard.press('Escape');
     await leaveRoom(dev, corridorHeader);
 
     const lab = await enterRoom('모델 평가실', '12F');
     assert.equal(await worldWidth(page), 1804);
     assert.equal(await page.locator('#world').getAttribute('data-dark'), 'false', 'Unlike the 15F archive the lab is not a dark room');
     await checkFinishedArt('eval', 1804);
-    assert.equal(await page.locator('#dynamic-scene .floor-prop').count(), 8);
+    assert.equal(await page.locator('#dynamic-scene .floor-prop').count(), 9);
     await assertHumanScale();
-    await inspect(910, 'E · 평가 벤치 조사', /87\.6%.*4\.1%/);
+    await inspect(910, 'E · 평가 벤치 조사', /10\/07 낮 3\.7% 밤 4\.2%.*조현아 23:10 입실/);
     await page.screenshot({ path: '.local/floor-12-eval.png' });
     await inspect(200, 'E · 네트워크 랙 조사', /B2 직결/);
     await leaveRoom(lab, corridorHeader);
@@ -1914,8 +1926,8 @@ try {
     assert.match(await status(), /비상 해제: 안쪽 끝 인터록 제어반/);
     assert.equal(await page.locator('#dynamic-scene .floor-prop').count(), 5);
     await assertHumanScale();
-    await inspect(1400, 'E · 망분리 백업 장비 조사',
-      /TRAINING PROCESS - COMPLETE \/ EXTERNAL HOST CONNECTION - READY \/ EXTERNAL CONNECTION TEST - SUCCESS.*B2 ARCHI-MAIN/);
+    // 분석 프로그램(퍼즐)은 12층 퍼즐을 푼 뒤에 열린다(tests/story-puzzles.mjs).
+    await inspect(1400, 'E · 망분리 백업 장비 조사', /12층 모델 평가실의 야간 평가 기록부터/);
     await inspect(1100, 'E · 인터페이스 의자 조사', /인간-시스템 인터페이스.*B2로 이관/);
     await walkTo(verifyRoom.exit.x + verifyRoom.exit.width / 2);
     assert.equal(await hint(), 'E · 복도 (잠김)', 'Reading the logs does not open the door');
@@ -2256,6 +2268,8 @@ try {
     assert.equal(await page.evaluate(() => cctvSceneActive), true);
     await page.keyboard.press('Escape');
     assert.equal(await page.locator('#world').getAttribute('data-alarm'), 'true');
+    await inspect(1700, 'E · 승강기 제어반 조사', /아직 모른다/);
+    await page.evaluate(() => collectedItems.add('f7-external-connection-solved')); // 7층 퍼즐(tests/story-puzzles.mjs)
     await inspect(1700, 'E · 승강기 제어반 조사', /B2 운행 제한.*초록으로/);
     await page.keyboard.press('e');
     assert.match(await status(), /수동 해제됨/);

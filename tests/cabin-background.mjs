@@ -29,7 +29,7 @@ try {
     for (const powered of [true, false]) {
       await page.evaluate(({ id, floor, powered }) => {
         cabinCarIndex = null; cabin.hidden = true; selectingFloor = false; stage.inert = false;
-        buildingBlackout = true; solarEnabled = true; solarPoweredFloors = powered ? [floor] : [];
+        buildingBlackout = true; collectedItems.add("f17-emergency-linked"); solarEnabled = true; solarPoweredFloors = powered ? [floor] : [];
         world.dataset.lights = 'on';
         performFloorChange(id, 0); updatePowerState(); setDebugSanity(100);
         elevatorCars[0].floor = floor;
@@ -42,7 +42,7 @@ try {
   }
   // The origin stays on 17F during a ride; the doorway must use the destination's power circuit.
   await page.evaluate(() => {
-    buildingBlackout = true; solarEnabled = true; solarPoweredFloors = [17];
+    buildingBlackout = true; collectedItems.add("f17-emergency-linked"); solarEnabled = true; solarPoweredFloors = [17];
     world.dataset.lights = 'on'; elevatorCars[0].floor = 17; showCabin(0);
   });
   await page.locator('#cabin-floor-buttons [data-floor="16"]').click();

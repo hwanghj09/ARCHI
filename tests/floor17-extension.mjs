@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { mkdir, readFile } from 'node:fs/promises';
+import { mkdir } from 'node:fs/promises';
 import { chromium } from 'playwright';
 import { interactionMessage, finishSceneTransition, reachInitialCorridor } from './scene-transition.mjs';
 import { assertMirroredDoor, exitDoor } from './room-geometry.mjs';
@@ -93,12 +93,15 @@ try {
   await page.keyboard.press('e');
   await page.clock.runFor(800);
   assert.equal(await page.locator('#world').getAttribute('data-room'), 'corridor');
-  assert.match(await interactionMessage(page), /관리자실 문이 잠겨/);
+  assert(await page.locator('#keypad').isVisible());
+  assert.match(await page.locator('#keypad-text').textContent(), /관리자실 문이 잠겨/);
+  await page.keyboard.press('Escape');
   await page.setViewportSize({ width: 390, height: 844 });
   await page.clock.runFor(100);
   await page.locator('#interact').click();
   assert.equal(await page.locator('#room-transition').getAttribute('data-phase'), 'idle', 'Touch cannot bypass lock');
   await page.screenshot({ path: '.local/floor17-manager-locked-mobile.png' });
+  await page.keyboard.press('Escape');
   await page.setViewportSize({ width: 1280, height: 720 });
   await walkTo(4990);
   assert(Math.abs(await position() - 4948) < 1, 'Extended corridor ends at the new wall');
@@ -111,27 +114,19 @@ try {
   assert.equal(await page.locator('#world').evaluate(el => el.style.width), '5000px');
   assert.equal(await page.locator('#floor17-extension .room-door').count(), 2, 'Stair round trip does not duplicate extension doors');
 
-  // Exercise the authored room using the future unlocked config, without adding a gameplay bypass.
-  const source = await readFile(new URL('../js/floors/floor-17.js', import.meta.url), 'utf8');
-  const locked = "doorX: 4378, doorWidth: 171, doorStyle: 'metal', locked: true";
-  assert(source.includes(locked));
-  await page.route('**/js/floors/floor-17.js', route => route.fulfill({ contentType: 'text/javascript', body: source.replace(locked, locked.replace('true', 'false')) }));
-  await page.goto(new URL('../index.html', import.meta.url).href);
-  await page.locator('#menu-start').click();
-  if (await page.locator('#menu-new-confirm').isVisible()) await page.locator('#menu-new-confirm').click();
-  await page.locator('#opening-skip').click();
-  await page.evaluate(() => { sanity = 100; updateSanity(0); });
-  await page.clock.runFor(100);
-  await reachInitialCorridor(page);
+  // The real keypad unlocks the authored compact room; no routed source-code bypass is needed.
   await walkTo(4463);
+  await page.keyboard.press('e');
+  await page.locator('#keypad-input').fill('1706');
+  await page.locator('#keypad-input').press('Enter');
   assert.equal(await hint(), 'E · 관리자 외 출입금지 들어가기');
   await enter();
   assert.equal(await page.locator('header span').textContent(), '17F · 관리자실');
-  assert.equal(await page.locator('#dynamic-scene .floor-prop').count(), 4);
+  assert.equal(await page.locator('#dynamic-scene .floor-prop').count(), 2);
   await page.locator('#dynamic-scene img').evaluateAll(images => Promise.all(images.map(img => img.decode())));
   const managerExit = await exitDoor(page);
-  assert.deepEqual(managerExit, { x: 324, y: 210, width: 171 });
-  assertMirroredDoor({ x: 4282, width: 686 }, { x: 4378, width: 171 }, 1800, managerExit, '17F manager room');
+  assert.deepEqual(managerExit, { x: 182, y: 210, width: 171 });
+  assertMirroredDoor({ x: 4282, width: 686 }, { x: 4378, width: 171 }, 1040, managerExit, '17F manager room');
   await walkTo(900);
   await page.screenshot({ path: '.local/floor17-manager-interior.png' });
   await walkTo(managerExit.x + managerExit.width / 2);

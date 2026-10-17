@@ -371,7 +371,7 @@ function updateB2Lobby(delta) {
     b2Ending.jam = Math.max(0, b2Ending.jam - delta);
     if (!b2Ending.jam) refreshSolarApp();
   }
-  if (dynamicFloorId !== 'f1' || floorHasPower(1)) return;
+  if (dynamicFloorId !== 'f1' || floorHasLighting(1)) return;
   // 1층 전력이 끊겼다: R-01은 updateGuardPatrol의 전력 없음 처리로 그 자리에 멈춘다.
   b2Ending.offline = true;
   setB2Siren(false);
@@ -380,6 +380,7 @@ function updateB2Lobby(delta) {
   b2DeleteBar.querySelector('span').textContent = 'ARCHI — OFFLINE';
   b2DeleteBar.dataset.offline = 'true';
   for (const key of Object.keys(b2LobbyR01)) delete guardPatrol[key]; // 다시 전력이 들어와도 평소 R-01로 돌아간다
+  updatePowerState();
   playGameSound('blackout');
   showStatus('ARCHI — OFFLINE. R-01이 그 자리에 멈췄다. 정문으로 나가자.', 5000);
 }

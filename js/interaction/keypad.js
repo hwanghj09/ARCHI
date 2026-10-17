@@ -59,6 +59,7 @@ function submitKeypad() {
     // 맞는 번호를 누르면 그 자리에서 문이 열린다. 다음에 층을 그릴 때는 unlockedBy를 챙긴 것으로 열린 채 그린다.
     collectedItems.add(target.unlockedBy);
     target.locked = false;
+    target.element.dataset.unlocked = 'true';
     target.element.setAttribute('aria-label', `${target.name} 출입문`);
     closeKeypad();
     showStatus(target.codeMessage || '도어락이 열렸다.', 5000);

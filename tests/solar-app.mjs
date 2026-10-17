@@ -62,7 +62,7 @@ try {
   assert.equal(await page.evaluate(() => computerSolarTask), null);
   await page.locator('#computer-solar-download').dispatchEvent('click');
   assert.equal(await page.evaluate(() => collectedItems.has('solar-app-downloaded')), false, 'A real blackout blocks downloads');
-  await page.evaluate(() => { solarEnabled = true; solarPoweredFloors = [17]; updatePowerState(); });
+  await page.evaluate(() => { collectedItems.add("f17-emergency-linked"); solarEnabled = true; solarPoweredFloors = [17]; updatePowerState(); });
   assert(await page.locator('#computer-solar-page').isVisible(), 'Restoring power opens the blog automatically');
   await openApp('browser');
   assert.match(await page.locator('.blog-service-bar').textContent(), /NAVER.*blog/);
@@ -105,11 +105,11 @@ try {
   await page.clock.runFor(2000);
   assert.equal(await page.locator('#computer-solar-download-progress').evaluate(el => el.value), 40);
   assert(!(await page.evaluate(() => progressSnapshot())).items.includes('solar-app-downloaded'), 'Incomplete downloads are not saved');
-  await page.evaluate(() => { solarEnabled = false; updatePowerState(); });
+  await page.evaluate(() => { collectedItems.delete('f17-emergency-linked'); solarEnabled = false; updatePowerState(); });
   await page.clock.runFor(6000);
   assert.equal(await page.evaluate(() => collectedItems.has('solar-app-downloaded')), false, 'Power loss cancels the download');
   assert.equal(await page.evaluate(() => computerSolarTask), null);
-  await page.evaluate(() => { solarEnabled = true; updatePowerState(); });
+  await page.evaluate(() => { collectedItems.add("f17-emergency-linked"); solarEnabled = true; updatePowerState(); });
   await page.locator('#computer-solar-download').click();
   await openApp('files');
   await page.clock.runFor(4900);
@@ -176,7 +176,7 @@ try {
   await page.keyboard.press('Escape');
   await page.keyboard.press('Escape');
   await finishSceneTransition(page);
-  await page.evaluate(() => { buildingBlackout = true; solarEnabled = true; solarPoweredFloors = [17]; updatePowerState(); });
+  await page.evaluate(() => { buildingBlackout = true; collectedItems.add("f17-emergency-linked"); solarEnabled = true; solarPoweredFloors = [17]; updatePowerState(); });
   await page.evaluate(() => refreshObjective());
   assert.equal(await page.evaluate(() => currentObjective.title), '1층 전력 켜기', 'Actual USB installation advances the power objective');
   await page.keyboard.press('p');

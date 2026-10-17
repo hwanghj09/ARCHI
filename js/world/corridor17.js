@@ -35,6 +35,7 @@ setPowerBackground(extension.querySelector('img'), 'assets/background/floor17/se
 for (const entry of FLOOR17.rooms) {
   const door = addRoomDoor({ name: entry.name, type: 'room', hint: `E · ${entry.name} 들어가기`,
     target: entry.target, arrivalKey: 'exit', key: `room:${entry.target}`, locked: entry.locked, message: entry.message,
+    code: entry.code, codeMessage: entry.codeMessage, unlockedBy: entry.unlockedBy,
     x: entry.doorX, y: entry.doorY ?? FLOOR17.roomDoorY, width: entry.doorWidth, style: 'art-door', outline: entry.doorOutline }, extension);
   const sign = document.createElement('span');
   sign.className = 'floor-room-sign';
@@ -44,7 +45,7 @@ for (const entry of FLOOR17.rooms) {
 }
 doors.push({ name: '소화전', type: 'inspect', x: 4023, y: 248, width: 145,
   element: document.getElementById('floor17-hydrant'), container: 'hydrant',
-  message: '소화전 안에 호스와 관창이 정리되어 있다. 호스 아래에 작은 열쇠가 숨겨져 있다.' });
+  message: '소화전 안에 호스와 관창이 정리되어 있다. 아래 선반에 작은 열쇠와 접힌 관리실 메모가 있다.' });
 
 // 배경에 그려진 CCTV 아래 게시판의 위치에 조사 영역만 겹친다.
 const noticeboard = document.createElement('div');

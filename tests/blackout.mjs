@@ -110,15 +110,18 @@ try {
     }
     await page.keyboard.press('e');
     assert.equal((await state()).called, false, 'Elevator is stopped until rooftop emergency power is enabled');
-    assert.match(await page.locator('#interaction-status').textContent(), /옥상.*태양광 비상 전력/);
+    assert.match(await page.locator('#interaction-status').textContent(), /관리자실.*비상 전력 회선/);
     await page.evaluate(() => { performRoomChange(); });
     assert.equal((await state()).lights, 'off', 'Office remains dark on return');
     await page.evaluate(() => { solarEnabled = true; solarPoweredFloors = [17]; updatePowerState(); performRoomChange(); });
     await page.keyboard.press('e');
+    assert.equal((await state()).called, false, 'Solar lighting alone leaves elevators stopped');
+    await page.evaluate(() => { collectedItems.add('f17-emergency-linked'); updatePowerState(); });
+    await page.keyboard.press('e');
     assert.deepEqual(await state(), { blackout: true, powered: 'true', lights: 'on', called: true });
     assert(await page.locator('#darkness').isHidden(), 'Returning to the elevator does not repeat the outage after restoration');
     await page.evaluate(() => performFloorChange('f16'));
-    assert.equal((await state()).powered, 'false', 'Other above-ground floors lost mains power too');
+    assert.equal((await state()).powered, 'true', 'Emergency equipment bus also supplies other floors independently of their lights');
     await page.evaluate(() => performFloorChange('b1'));
     assert.equal((await state()).powered, 'true', 'Basement emergency circuit remains operational');
     assert.deepEqual(errors, []);

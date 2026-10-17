@@ -28,7 +28,7 @@ try {
   await page.locator('#opening-skip').click();
   await page.clock.pauseAt(new Date('2026-10-16T00:01:00Z'));
   await page.evaluate(() => {
-    triggerBuildingBlackout(); solarEnabled = true; solarPoweredFloors = [2];
+    triggerBuildingBlackout(); collectedItems.add('f17-emergency-linked'); solarEnabled = true; solarPoweredFloors = [2];
     updatePowerState();
   });
   const visit = id => page.evaluate(id => {

@@ -127,7 +127,7 @@ try {
     assert.deepEqual(await state(), { on: true, floors: [7] }, 'Powering 7F replaces 12F');
     await status('7F 전력 공급 중 (1/1)');
     await pressed([7], [12, 17, 1]);
-    assert(await page.evaluate(() => !floorHasPower(12) && floorHasPower(7) && !floorHasPower(13)));
+    assert(await page.evaluate(() => !floorHasLighting(12) && floorHasLighting(7) && !floorHasLighting(13) && !elevatorHasPower()));
     assert(await page.locator('#power-floor-grid button.active').evaluateAll(buttons =>
       buttons.every(button => getComputedStyle(button).backgroundColor === 'rgb(40, 76, 57)')), 'The supplied floor uses the lit button art');
     await page.screenshot({ path: `.local/solar-panel-replacement-${width}.png` });
@@ -160,7 +160,7 @@ try {
       const face = { left: cabinet.left + cabinet.width * 82 / 384, right: cabinet.left + cabinet.width * 304 / 384,
         top: cabinet.top + cabinet.height * 427 / 512, bottom: cabinet.top + cabinet.height * 450 / 512 };
       const label = document.getElementById('power-lever-label').getBoundingClientRect();
-      return el.textContent.includes('엘리베이터 복구') && el.textContent.includes('층 버튼: 조명') && lines.length >= 1 && lines.every(line => line.left >= face.left && line.right <= face.right &&
+      return el.textContent.includes('전등 전용') && el.textContent.includes('관리실 비상 회선') && lines.length >= 1 && lines.every(line => line.left >= face.left && line.right <= face.right &&
         line.top >= face.top && line.bottom <= face.bottom && (line.top >= label.bottom || line.left >= label.right));
     }), 'The lever and floor-button help sits on the painted plate clear of the lever label');
     await page.keyboard.press('Escape');

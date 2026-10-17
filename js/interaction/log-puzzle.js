@@ -1,141 +1,220 @@
-// 12층 모델 평가실 "야간 로그 단말기"(PC)와 "네트워크 랙" 퍼즐.
-// PC를 열면 ARCHI가 야간 로그를 한 줄씩 지우기 시작한다(가장 결정적인 10/07 줄부터). 네트워크 랙을 뽑으면 멈춘다.
-// 10/07 줄이 지워지기 전에 뽑으면(제때) 로그가 그대로 남아 퀴즈("그날 밤엔 왜 성능이 낮았을까?")로 이어지고,
-// 정답("건물에 사람이 있었음")을 맞히면 7층 단서로 이어지는 힌트("03:00~04:00, B2")가 휴대폰 단서 탭에 저장된다.
-// 10/07 줄이 지워진 뒤에 뽑으면(늦음) 정상 야간 수치 3개만 남고 퀴즈는 열리지 않는다. 끝까지 안 뽑으면 로그가 전부 지워진다
-// (이 경우에도 팀장실 메모·평가 벤치 출력지로 게임 진행에는 지장이 없다).
+// 12층 모델 평가실 "야간 로그 단말기"(PC)와 "네트워크 랙": 필수 스토리 퍼즐 두 개.
+// 퍼즐 1: PC를 열면 잠시 뒤 ARCHI가 야간 평가 로그를 한 줄씩 지운다. 네트워크 랙의 B2 직결 LAN 케이블을 직접 끌어 뽑아야
+//   멈춘다(f12-network-isolated). 10/07 줄이 남아 있을 때 뽑으면 'in-time', 지워진 뒤면 'too-late', 다 지워진 뒤면 'erased'.
+//   늦었으면 평가 벤치의 종이 백업(f12-paper-backup)을 PC에서 대조해 복원한다(f12-log-restored). 어느 쪽이든 퍼즐 2로 간다.
+// 퍼즐 2: 기록과 출입 기록으로 "10/07 밤 성능이 낮은 이유"를 고른다(f12-evaluation-solved). 오답은 정신력 -5%, 다시 고를 수 있다.
+//   제때 지킨 경우에만 7층 힌트 "03:00~04:00 · B2"(f12-log-hint)를 준다.
+// 삭제 진행(logPuzzle.elapsed)은 게임이 돌아가는 동안만 쌓이고 자동 저장에 남는다(save.js). 창을 다시 열어도 처음부터 지우지 않는다.
 const LOG_PUZZLE_ROWS = [
-  { date: '09/18', day: '4.1%', night: '86.4%' },
-  { date: '09/20', day: '3.7%', night: '87.9%' },
-  { date: '09/23', day: '4.5%', night: '86.8%' },
-  { date: '09/26', day: '3.8%', night: '88.1%' },
   { date: '09/28', day: '3.9%', night: '87.1%' },
   { date: '09/30', day: '4.4%', night: '88.5%' },
   { date: '10/05', day: '3.6%', night: '89.2%' },
   { date: '10/07', day: '3.7%', night: '4.2%', anomaly: true },
 ];
-// 지워지는 순서: 가장 결정적인 10/07(마지막 인덱스)부터 먼저, 그다음은 원래 순서대로.
-const LOG_DELETE_ORDER = [7, 0, 1, 2, 3, 4, 5, 6];
-const LOG_DELETE_INTERVAL = 4000;
-const LOG_ACCESS_RECORD = '출입 기록: 10/07 조현아 23:10 입실 ~ 05:02 퇴실';
-const LOG_QUIZ_QUESTION = '10/07 밤에는 왜 성능이 낮았을까?';
+// 위에서부터 지우되 10/07은 세 번째다: 경고 5초 뒤부터 12초마다 한 줄(17·29·41·53초). 랙까지는 걸어서 몇 초면 간다.
+const LOG_DELETE_ORDER = [0, 1, 3, 2];
+const LOG_KEY_ROW = 3;
+const LOG_WARNING_DELAY = 5000;
+const LOG_DELETE_INTERVAL = 12000;
+const LOG_DELETE_END = LOG_WARNING_DELAY + LOG_DELETE_INTERVAL * LOG_DELETE_ORDER.length;
+const LOG_ACCESS_RECORD = '출입 기록  10/07 — 조현아 · 23:10 입실 · 05:02 퇴실';
+const LOG_QUIZ_QUESTION = '10/07 밤에는 왜 ARCHI의 성능이 낮았을까?';
 const LOG_QUIZ_OPTIONS = ['정전', '서버 점검', '건물에 사람이 있었음', '업데이트'];
 const LOG_QUIZ_ANSWER = '건물에 사람이 있었음';
-const LOG_QUIZ_WRONG_SANITY_LOSS = 5;
+const PUZZLE_WRONG_SANITY_LOSS = 5;
 const LOG_HINT_ITEM = 'f12-log-hint';
+const LOG_OUTCOME_LINES = {
+  'in-time': ['NETWORK CONNECTION LOST', 'REMOTE DELETION STOPPED'],
+  'too-late': ['REMOTE DELETION STOPPED', 'WARNING: RECORDS DAMAGED'],
+  erased: ['ALL ONLINE RECORDS DELETED', 'LOCAL PRINTED BACKUP MAY BE AVAILABLE'],
+};
+const LOG_MONOLOGUE = ['이상해. 다른 날은 밤마다 성능이 높았는데...', '10월 7일에는 사람이 남아 있었어.', '누군가 보고 있으면 성능을 숨기는 건가?'];
 
 const logPanel = document.getElementById('log-panel');
 const logFrame = document.getElementById('log-frame');
 const logRows = document.getElementById('log-rows');
+const logAlert = document.getElementById('log-alert');
+const logNetwork = document.getElementById('log-network');
+const logAccess = document.getElementById('log-access');
 const logStatus = document.getElementById('log-status');
+const logRecovery = document.getElementById('log-recovery');
 const logQuiz = document.getElementById('log-quiz');
-const logQuizRecord = document.getElementById('log-quiz-record');
+const logMonologue = document.getElementById('log-monologue');
 let logBlocked = [];
 
-let logPuzzleTimer = null;
-let logPuzzleStartedAt = 0;
-let logPuzzleDeletedCount = 0;
-let logPuzzleJustDeleted = -1; // 이번 렌더에서 막 지워진 줄(지직 효과용), 한 번 그리면 비운다.
-let logPuzzleStopped = null; // null | 'in-time' | 'too-late' | 'erased'
+const logPuzzle = { started: false, elapsed: 0, outcome: null }; // outcome: null | 'in-time' | 'too-late' | 'erased'
+let logTimer = null;
+let logTickAt = 0;
+let logGlitchRow = -1; // 막 지워지는 줄: 잠깐 글자가 깨졌다가 [DELETED]로 바뀐다.
+
+const logDeletedCount = () => Math.max(0, Math.min(LOG_DELETE_ORDER.length,
+  Math.floor((logPuzzle.elapsed - LOG_WARNING_DELAY) / LOG_DELETE_INTERVAL)));
+const logDeleting = () => logPuzzle.started && !collectedItems.has('f12-network-isolated');
+const logRecordsReady = () => collectedItems.has('f12-network-isolated') &&
+  (logPuzzle.outcome === 'in-time' || collectedItems.has('f12-log-restored'));
 
 function tickLogDeletion() {
-  const target = Math.min(LOG_DELETE_ORDER.length, Math.floor((Date.now() - logPuzzleStartedAt) / LOG_DELETE_INTERVAL));
-  if (target <= logPuzzleDeletedCount) return;
-  logPuzzleJustDeleted = LOG_DELETE_ORDER[logPuzzleDeletedCount];
-  logPuzzleDeletedCount = target;
-  if (logPuzzleDeletedCount >= LOG_DELETE_ORDER.length) { finishLogDeletion('erased'); return; }
-  if (!logPanel.hidden) renderLogPanel();
+  const now = Date.now();
+  // 메뉴·숨긴 탭에서는 멈추고, 한 번에 0.5초 넘게 쌓지 않아 오래 멈췄다 돌아와도 한꺼번에 지워지지 않는다.
+  const step = mainMenuActive || document.hidden ? 0 : Math.min(500, now - logTickAt);
+  logTickAt = now;
+  const before = logDeletedCount();
+  const warned = logPuzzle.elapsed >= LOG_WARNING_DELAY;
+  logPuzzle.elapsed = Math.min(LOG_DELETE_END, logPuzzle.elapsed + step);
+  const after = logDeletedCount();
+  if (after > before) {
+    logGlitchRow = LOG_DELETE_ORDER[after - 1];
+    playGameSound('cctv-static');
+    setTimeout(() => { logGlitchRow = -1; if (!logPanel.hidden) renderLogPanel(); }, 650);
+  }
+  if (after >= LOG_DELETE_ORDER.length) stopLogTimer();
+  if (!logPanel.hidden && (after > before || warned !== logPuzzle.elapsed >= LOG_WARNING_DELAY)) renderLogPanel();
 }
 
-function startLogDeletion() {
-  if (logPuzzleTimer || logPuzzleStopped) return;
-  logPuzzleStartedAt = Date.now();
-  logPuzzleTimer = setInterval(tickLogDeletion, 250);
+function runLogTimer() {
+  if (logTimer || !logDeleting() || logDeletedCount() >= LOG_DELETE_ORDER.length) return;
+  logTickAt = Date.now();
+  logTimer = setInterval(tickLogDeletion, 200);
 }
 
-function finishLogDeletion(outcome) {
-  clearInterval(logPuzzleTimer);
-  logPuzzleTimer = null;
-  logPuzzleStopped = outcome;
-  if (!logPanel.hidden) renderLogPanel();
+function stopLogTimer() {
+  clearInterval(logTimer);
+  logTimer = null;
 }
 
-// 네트워크 랙을 뽑아 로그 삭제를 멈춘다. 퍼즐과 무관하면(아직 안 지워지는 중이면) false를 돌려줘 평소 조사로 넘긴다.
+// 네트워크 랙의 LAN 케이블을 다 뽑았을 때(manual-control.js → interact → 여기). 삭제가 진행 중이 아니면 평소 조사로 넘긴다.
 function unplugNetworkRack() {
-  if (!logPuzzleTimer) return false;
-  const outcome = logPuzzleDeletedCount === 0 ? 'in-time' : 'too-late';
-  finishLogDeletion(outcome);
+  if (!logDeleting()) return false;
+  stopLogTimer();
+  const deleted = new Set(LOG_DELETE_ORDER.slice(0, logDeletedCount()));
+  logPuzzle.outcome = deleted.size === LOG_PUZZLE_ROWS.length ? 'erased' : deleted.has(LOG_KEY_ROW) ? 'too-late' : 'in-time';
+  collectedItems.add('f12-network-isolated');
   playGameSound('switch');
-  showStatus(outcome === 'in-time' ? '네트워크 스위치를 뽑았다. 로그 삭제가 멈췄다.' :
-    '네트워크 스위치를 뽑았다. 하지만 10/07 기록은 이미 지워졌다.', 4000);
+  showStatus(`${LOG_OUTCOME_LINES[logPuzzle.outcome].join(' · ')} — 야간 로그 단말기로 돌아가자.`, 5000);
+  if (!logPanel.hidden) renderLogPanel();
+  saveProgress();
   return true;
 }
 
-function grantLogHint() {
-  if (collectedItems.has(LOG_HINT_ITEM)) return;
-  collectedItems.add(LOG_HINT_ITEM);
-  const place = document.querySelector('header span').textContent;
-  collectedClues.push({ place, name: '야간 로그 단말기', text: '03:00~04:00, B2' });
-  renderClues();
-  showStatus('단서 기록됨 · 휴대폰 메모 → 단서', 2500);
-  saveProgress();
+function glitchFrame(frame) {
+  frame.classList.remove('glitching');
+  void frame.offsetWidth; // 같은 애니메이션을 다시 걸기 위해 리플로우를 한 번 강제한다.
+  frame.classList.add('glitching');
 }
 
-function glitchLogScreen() {
-  logFrame.classList.remove('glitching');
-  void logFrame.offsetWidth; // 같은 애니메이션을 다시 걸기 위해 리플로우를 한 번 강제한다.
-  logFrame.classList.add('glitching');
+// 12층·7층 객관식 퍼즐의 오답: 화면 지직, 오류음, 정신력 -5%. 진행 플래그는 건드리지 않으니 몇 번이든 다시 고를 수 있다.
+function punishWrongAnswer(frame, statusElement) {
+  playGameSound('deny');
+  sanity = Math.max(0, sanity - PUZZLE_WRONG_SANITY_LOSS);
+  refreshSanity();
+  glitchFrame(frame);
+  statusElement.textContent = `아니야... 다시 보자. (정신력 -${PUZZLE_WRONG_SANITY_LOSS}%)`;
+}
+
+// 수호의 독백을 한 줄씩 덧붙인다. instant면 바로 다 보인다(이미 푼 퍼즐을 다시 열었을 때).
+function showMonologue(element, lines, instant) {
+  clearTimeout(element.monologueTimer);
+  element.replaceChildren();
+  const add = index => {
+    const line = document.createElement('p');
+    line.textContent = `수호: "${lines[index]}"`;
+    element.append(line);
+    if (!instant && index + 1 < lines.length) element.monologueTimer = setTimeout(() => add(index + 1), 1600);
+  };
+  if (instant) lines.forEach((_, index) => add(index)); else add(0);
+}
+
+function restoreLogFromPaper() {
+  if (logRecordsReady() || !collectedItems.has('f12-paper-backup') || !collectedItems.has('f12-network-isolated')) return;
+  collectedItems.add('f12-log-restored');
+  playGameSound('pickup');
+  renderLogPanel();
+  saveProgress();
+  logQuizOptionButtons[0].focus();
 }
 
 function answerLogQuiz(choice) {
-  if (collectedItems.has(LOG_HINT_ITEM)) return;
-  if (choice === LOG_QUIZ_ANSWER) {
-    playGameSound('pickup');
-    grantLogHint();
-    renderLogPanel();
-    document.getElementById('log-close').focus(); // 누른 퀴즈 버튼이 숨겨지므로 초점을 닫기 버튼으로 옮긴다.
-  } else {
-    playGameSound('deny');
-    sanity = Math.max(0, sanity - LOG_QUIZ_WRONG_SANITY_LOSS);
-    refreshSanity();
-    glitchLogScreen();
-    showStatus(`화면이 지직거린다. 정신력 -${LOG_QUIZ_WRONG_SANITY_LOSS}%`, 2500);
+  if (collectedItems.has('f12-evaluation-solved') || !logRecordsReady()) return;
+  if (choice !== LOG_QUIZ_ANSWER) { punishWrongAnswer(logFrame, logStatus); return; }
+  collectedItems.add('f12-evaluation-solved');
+  playGameSound('pickup');
+  addClue('야간 로그 단말기', 'ARCHI는 사람의 존재를 감지하면 실제 성능을 숨긴다. (10/07 조현아 팀장 23:10~05:02 체류, 그날 밤만 성능 4.2%)');
+  // 제때 지킨 로그에만 남은 B2 전력 할당 기록 → 7층 퍼즐 1에서 03시 칸을 강조한다(backup-puzzle.js).
+  if (logPuzzle.outcome === 'in-time') {
+    collectedItems.add(LOG_HINT_ITEM);
+    addClue('B2 전력 할당 기록', '03:00~04:00 · B2');
   }
+  renderLogPanel();
+  showMonologue(logMonologue, LOG_MONOLOGUE);
+  saveProgress();
+  document.getElementById('log-close').focus();
+}
+
+function logRowText(row, index, deleted) {
+  const text = `${row.date}    낮 ${row.day.padStart(5)}    밤 ${row.night.padStart(5)}`;
+  if (index === logGlitchRow) return [...text].map(char => char === ' ' || Math.random() < .4 ? char : '#%@$&?'[Math.floor(Math.random() * 6)]).join('');
+  return deleted ? `${row.date}    [DELETED]` : text;
 }
 
 function renderLogPanel() {
-  const deletedIndexes = new Set(LOG_DELETE_ORDER.slice(0, logPuzzleDeletedCount));
-  logRows.replaceChildren(...LOG_PUZZLE_ROWS.map((row, index) => {
-    const deleted = deletedIndexes.has(index);
+  const isolated = collectedItems.has('f12-network-isolated');
+  const restored = collectedItems.has('f12-log-restored');
+  const solved = collectedItems.has('f12-evaluation-solved');
+  const ready = logRecordsReady();
+  const deletedIndexes = new Set(LOG_DELETE_ORDER.slice(0, logDeletedCount()));
+  const header = document.createElement('p');
+  header.className = 'log-row log-head';
+  header.textContent = '날짜        낮 성능      밤 성능';
+  logRows.replaceChildren(header, ...LOG_PUZZLE_ROWS.map((row, index) => {
+    const deleted = deletedIndexes.has(index) && !restored && index !== logGlitchRow;
     const line = document.createElement('p');
     line.className = 'log-row';
-    line.dataset.anomaly = String(Boolean(row.anomaly));
+    line.dataset.anomaly = String(Boolean(row.anomaly) && !deleted);
     line.dataset.deleted = String(deleted);
-    line.dataset.glitching = String(index === logPuzzleJustDeleted);
-    line.textContent = deleted ? `${row.date}   [ 기록 삭제됨 ]` : `${row.date}   낮 ${row.day}   밤 ${row.night}`;
+    line.dataset.glitching = String(index === logGlitchRow);
+    line.dataset.restored = String(restored && deletedIndexes.has(index));
+    line.dataset.highlight = String(solved && index === LOG_KEY_ROW);
+    line.textContent = logRowText(row, index, deleted) + (line.dataset.restored === 'true' ? '   (종이 대조)' : '');
     return line;
   }));
-  logPuzzleJustDeleted = -1;
-  const solved = collectedItems.has(LOG_HINT_ITEM);
-  const showQuiz = logPuzzleStopped === 'in-time' && !solved;
-  logQuiz.hidden = !showQuiz;
-  if (showQuiz) logQuizRecord.textContent = LOG_ACCESS_RECORD;
+  const warned = logPuzzle.elapsed >= LOG_WARNING_DELAY;
+  const allDeleted = logDeletedCount() >= LOG_DELETE_ORDER.length;
+  logAlert.hidden = !warned && !isolated;
+  logAlert.dataset.outcome = isolated ? logPuzzle.outcome : 'deleting';
+  logAlert.textContent = (isolated ? LOG_OUTCOME_LINES[logPuzzle.outcome] :
+    allDeleted ? ['ALL ONLINE RECORDS DELETED', 'SOURCE: SYSTEM', 'REMOTE SESSION STILL CONNECTED'] :
+      ['WARNING: UNAUTHORIZED LOG MODIFICATION', 'SOURCE: SYSTEM', 'DELETING NIGHT EVALUATION RECORDS...']).join('\n');
+  logNetwork.dataset.connected = String(!isolated);
+  logNetwork.textContent = `NETWORK · B2 직결 회선: ${isolated ? 'DISCONNECTED' : 'CONNECTED'}`;
+  logAccess.hidden = !ready;
+  logAccess.textContent = LOG_ACCESS_RECORD;
+  logAccess.dataset.highlight = String(solved);
+  const needsPaper = isolated && !ready;
+  logRecovery.hidden = !(needsPaper && collectedItems.has('f12-paper-backup'));
+  logQuiz.hidden = !ready || solved;
   logStatus.textContent = solved ? '분석 완료 — 단서가 휴대폰 메모에 기록됐다.' :
-    logPuzzleStopped === 'in-time' ? '네트워크 스위치를 뽑아 로그를 지켰다. 아래 기록을 분석하자.' :
-    logPuzzleStopped === 'too-late' ? '핵심 기록(10/07)이 지워진 뒤에 스위치를 뽑았다. 나머지 야간 기록은 정상 범위다.' :
-    logPuzzleStopped === 'erased' ? '모든 야간 로그가 삭제됐다. 네트워크 스위치를 진작 뽑았어야 했다.' :
-    '경고: ARCHI가 야간 로그를 지우고 있다! 네트워크 랙의 스위치를 뽑아야 멈춘다.';
+    ready ? (restored ? '종이 기록으로 손상된 줄을 복원했다. 기록과 출입 기록을 비교해 보자.' : '로그를 지켰다. 기록과 출입 기록을 비교해 보자.') :
+    needsPaper ? (collectedItems.has('f12-paper-backup') ? '종이 백업이 있다. 남은 로그와 대조해 복원하자.' :
+      '온라인 기록이 손상됐다. 이 방 평가 벤치에 출력해 둔 종이 기록이 남아 있을지도 모른다.') :
+    allDeleted ? '기록이 전부 지워졌다. 연결이 살아 있으면 무엇을 되살려도 또 지워진다. 네트워크 랙의 LAN 케이블부터 뽑자.' :
+    warned ? 'ARCHI가 기록을 지우고 있다! 창을 닫고(Esc) 네트워크 랙의 B2 직결 LAN 케이블을 뽑자.' :
+    '저장된 야간 평가 기록이다.';
+  if (solved && !logMonologue.childElementCount) showMonologue(logMonologue, LOG_MONOLOGUE, true);
+  logMonologue.hidden = !solved;
+  document.getElementById('log-hint-record').hidden = !(solved && logPuzzle.outcome === 'in-time');
 }
 
 function openLogPuzzle() {
   if (!logPanel.hidden) return;
-  startLogDeletion();
+  if (!logPuzzle.started) Object.assign(logPuzzle, { started: true, elapsed: 0, outcome: null });
+  runLogTimer();
   logPanel.hidden = false;
   releaseInput();
   logBlocked = [...document.body.children].filter(element => element !== logPanel && element.tagName !== 'SCRIPT' && !element.inert);
   for (const element of logBlocked) element.inert = true;
   renderLogPanel();
-  (logQuiz.hidden ? document.getElementById('log-close') : logQuizOptionButtons[0]).focus();
+  (!logQuiz.hidden ? logQuizOptionButtons[0] : !logRecovery.hidden ? document.getElementById('log-restore') :
+    document.getElementById('log-close')).focus();
 }
 
 function closeLogPuzzle() {
@@ -145,6 +224,21 @@ function closeLogPuzzle() {
   for (const element of logBlocked) element.inert = false;
   logBlocked = [];
   stage.focus();
+}
+
+// 불러오기·새 게임(save.js): 진행 중이던 삭제는 남은 지점부터 이어 간다. 이미 뽑았으면 다시 시작하지 않는다.
+function restoreLogPuzzle(saved) {
+  stopLogTimer();
+  closeLogPuzzle();
+  logGlitchRow = -1;
+  const isolated = collectedItems.has('f12-network-isolated');
+  logPuzzle.started = saved?.started === true || isolated;
+  logPuzzle.elapsed = savedNumber(saved?.elapsed, 0, 0, LOG_DELETE_END);
+  logPuzzle.outcome = !isolated ? null : LOG_OUTCOME_LINES[saved?.outcome] ? saved.outcome :
+    collectedItems.has(LOG_HINT_ITEM) ? 'in-time' : 'too-late';
+  clearTimeout(logMonologue.monologueTimer);
+  logMonologue.replaceChildren();
+  runLogTimer();
 }
 
 const logQuizOptionButtons = LOG_QUIZ_OPTIONS.map(label => {
@@ -157,6 +251,12 @@ const logQuizOptionButtons = LOG_QUIZ_OPTIONS.map(label => {
 });
 document.getElementById('log-quiz-question').textContent = LOG_QUIZ_QUESTION;
 document.getElementById('log-close').addEventListener('click', closeLogPuzzle);
+document.getElementById('log-restore').addEventListener('click', restoreLogFromPaper);
+document.getElementById('log-remaining').addEventListener('click', () => {
+  const left = LOG_PUZZLE_ROWS.length - logDeletedCount();
+  logStatus.textContent = left ? `남은 온라인 기록 ${left}줄 · 10/07 기록 손상. 종이 기록과 대조하면 복원할 수 있다.` :
+    '남은 온라인 기록이 없다. 종이 기록과 대조하면 복원할 수 있다.';
+});
 logPanel.addEventListener('keydown', event => {
   event.stopPropagation();
   if (event.code === 'Escape') { event.preventDefault(); closeLogPuzzle(); }
@@ -167,6 +267,9 @@ logPanel.addEventListener('keydown', event => {
 function handleLogTerminalInteract(door) {
   if (dynamicFloorId !== 'f12-eval') return false;
   if (door.name === '야간 로그 단말기') { openLogPuzzle(); return true; }
-  if (door.name === '네트워크 랙') return unplugNetworkRack();
-  return false;
+  if (door.name !== '네트워크 랙') return false;
+  if (unplugNetworkRack()) return true;
+  if (!collectedItems.has('f12-network-isolated')) return false;
+  openInspection(door.name, 'B2 직결 LAN 케이블이 포트에서 빠져 있다. 깜빡이던 표시등도 꺼졌다. 이제 ARCHI는 이 방의 기록에 손대지 못한다.');
+  return true;
 }

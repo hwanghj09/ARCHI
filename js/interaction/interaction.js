@@ -54,7 +54,7 @@ function doorHintText(door) {
   if (door.phoneCharger) return phoneChargerHint(door);
   if (door.accessGate) return door.element.dataset.open === 'true' ? '인증 완료 · 통과 가능' : 'E · 출입증 태그';
   // 12층 야간 로그 삭제가 진행 중일 때만 네트워크 랙의 힌트를 "뽑기"로 바꿔 지금 할 일을 알려 준다(log-puzzle.js).
-  if (door.name === '네트워크 랙' && dynamicFloorId === 'f12-eval' && logPuzzleTimer) return 'E · 네트워크 스위치 뽑기';
+  if (door.name === '네트워크 랙' && dynamicFloorId === 'f12-eval' && logDeleting()) return 'E · LAN 케이블 뽑기';
   if (door.shutterLever) return collectedItems.has(door.shutterLever) ? 'E · 셔터 내리기' : 'E · 셔터 올리기';
   if (door.type === 'inspect') return `E · ${door.name} 조사`;
   if (door.locked) return `E · ${door.name} (잠김)`;
@@ -72,6 +72,7 @@ function doorHintText(door) {
 }
 
 function interact() {
+  if (!wirePanel.hidden) return;
   if (photoCaptureTime > 0 || itemUseTime > 0 || openingActive || blackoutSceneActive || cctvSceneActive || playerCaught || hallucinationCaught || transitioning || selectingFloor || usingComputer || usingKeypad || usingControl || usingPhone || usingPowerPanel || usingInspection) return;
   updateInteraction();
   if (blackoutSceneActive || cctvSceneActive) return;
@@ -107,8 +108,11 @@ function interact() {
       openHydrant();
       return;
     }
+    if (nearbyDoor.powerCircuit) { openEmergencyCircuit(); return; }
     if (enterB2TrueEnd(nearbyDoor)) return; // ARCHI를 끈 뒤 1층 정문으로 나가기(b2-ending.js)
     if (handleLogTerminalInteract(nearbyDoor)) return; // 12층 야간 로그 단말기·네트워크 랙(log-puzzle.js)
+    if (handleBackupDeviceInteract(nearbyDoor)) return; // 7층 망분리 백업 장비(backup-puzzle.js)
+    if (dynamicFloorId === 'f12-dev' && nearbyDoor.name === '맨 왼쪽 서랍') { openDrawerPuzzle(); return; }
     const { gives } = nearbyDoor;
     // 도어락(code): 잠긴 문이나 아직 열지 못한 소품은 키패드를 연다. 맞는 번호를 넣으면 문이 열리거나 gives를 챙긴다.
     if (nearbyDoor.code && (nearbyDoor.type === 'room' ? nearbyDoor.locked : !collectedItems.has(gives))) {

@@ -63,7 +63,7 @@ try {
   // One-floor rule on a painted floor: another selection replaces the supplied floor,
   // pressing the lit floor stops supply, and the lever clears the selection.
   const press = number => page.evaluate(number => powerGrid.querySelector(`[data-floor="${number}"]`).click(), number);
-  const supply = () => page.evaluate(() => ({ floors: [...solarPoweredFloors], f12: floorHasPower(12), f7: floorHasPower(7) }));
+  const supply = () => page.evaluate(() => ({ floors: [...solarPoweredFloors], f12: floorHasLighting(12), f7: floorHasLighting(7) }));
   await page.evaluate(() => { performFloorChange('f7'); setSolarPower(true); });
   assert(await page.locator('img[data-lit-src]').count() > 0, '7F corridor uses switchable painted backgrounds');
   await press(12); await decode(); assert(await check(true), '7F stays dark while only 12F is supplied');

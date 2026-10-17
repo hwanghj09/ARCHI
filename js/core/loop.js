@@ -45,7 +45,7 @@ function update() {
     updateCabin();
     return;
   }
-  if (usingComputer || usingKeypad || usingControl || usingPowerPanel || usingInspection) {
+  if (usingComputer || usingKeypad || usingControl || usingPowerPanel || usingInspection || !wirePanel.hidden) {
     updateElevators();
     updatePhone(step);
     if (usingPhone || phoneAwayTime > 0) animate(0, false, step);

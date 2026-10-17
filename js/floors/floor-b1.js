@@ -110,6 +110,9 @@ const B1_ROOMS = interiorRooms(-1, [
           { as: 'field', label: '관리자 계정', text: '읽기 전용' }] },
       { file: 'office-desk', size: [512, 256], worldWidth: 252, x: 1327 },
       { file: 'elevator-control-panel', size: [256, 512], worldWidth: 89, x: 1700, name: '승강기 제어반', gives: 'b1-elevator',
+        // 7층 원본 로그 분석(backup-puzzle.js)으로 B2가 목적지라는 걸 알기 전에는 운행 제한을 풀지 않는다.
+        requires: 'f7-external-connection-solved',
+        missingMessage: '승강기 제어반: "B2 운행 제한 · 설정 SYSTEM 23:59". 관리 키가 꽂혀 있지만, 지하 2층에 왜 가야 하는지 아직 모른다. 먼저 ARCHI가 무엇을 하고 있는지 알아내자.',
         control: { kind: 'key', label: '꽂혀 있는 관리 키를 "해제"로 돌리자.', ends: ['제한', '해제'] },
         message: '승강기 제어반: "B2 운행 제한 · 설정 SYSTEM 23:59". 수동 해제는 열쇠 스위치라 SYSTEM이 건드리지 못했다. 관리 키가 "해제"에 걸리자 B2 표시등이 초록으로 바뀐다.',
         surface: 'screen', look: 'lcd',

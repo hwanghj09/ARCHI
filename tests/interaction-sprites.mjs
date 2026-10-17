@@ -95,6 +95,7 @@ try {
   await visit('f16-cafe'); await checkFrame('음성 주문 키오스크', 0);
   await page.evaluate(() => {
     setSolarPower(true);
+    collectedItems.add('f17-emergency-linked'); updatePowerState();
     powerGrid.querySelector('[data-floor="16"]').click();
   });
   await checkFrame('음성 주문 키오스크', 1);
@@ -109,6 +110,8 @@ try {
     const animation = img.getAnimations()[0]; animation.finish(); await animation.finished;
   });
   await page.evaluate(() => { solarPoweredFloors = []; updatePowerState(); closeInspection(); });
+  await checkFrame('음성 주문 키오스크', 1);
+  await page.evaluate(() => { collectedItems.delete('f17-emergency-linked'); updatePowerState(); });
   await checkFrame('음성 주문 키오스크', 0);
 
   await page.keyboard.press('p');

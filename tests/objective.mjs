@@ -60,10 +60,14 @@ try {
   };
   assert.equal(await titleAfter(() => collectedItems.add('rooftop-key')), '정전', 'Picking up the rooftop key keeps the blackout objective');
   assert.equal(await titleAfter(() => collectedItems.add('rooftop-unlocked')), '비상 전력 켜기');
-  assert.equal(await titleAfter(() => setSolarPower(true)), '17층 전력 켜기');
-  assert.match(await page.locator('#interaction-status').textContent(), /17층 전력을 켜고 작업용 컴퓨터로/);
-  await waitTyped('17층 전력 켜기', '옥상 배전반에서 17층 전력을 켜 작업용 컴퓨터를 복구하자.');
-  assert.equal(await titleAfter(() => supplySolarFloor(17)), '전력 앱 내려받기');
+  assert.equal(await titleAfter(() => setSolarPower(true)), '17층 전등 켜기');
+  assert.match(await page.locator('#interaction-status').textContent(), /17층 전등을 켜자/);
+  await waitTyped('17층 전등 켜기', '옥상 태양광 배전반에서 17층 조명을 켜자. 승강기는 별도 비상 회선이 필요하다.');
+  assert.equal(await titleAfter(() => supplySolarFloor(17)), '관리실 비밀번호 찾기');
+  assert.equal(await titleAfter(() => collectedItems.add('f17-manager-memo')), '관리실 열기');
+  assert.equal(await titleAfter(() => collectedItems.add('f17-manager-unlocked')), '회로 안내도 확인');
+  assert.equal(await titleAfter(() => collectedItems.add('f17-circuit-guide-read')), '승강기 비상 회선 연결');
+  assert.equal(await titleAfter(() => { collectedItems.add('f17-emergency-linked'); updatePowerState(); }), '전력 앱 내려받기');
   await waitTyped('전력 앱 내려받기', '17층 작업용 컴퓨터의 블로그에서 비상 전력 제어 앱을 내려받자.');
   assert.equal(await titleAfter(() => collectedItems.add('solar-app-downloaded')), '전력 앱 설치하기');
   await waitTyped('전력 앱 설치하기', '17층 컴퓨터에 휴대폰을 USB로 연결하고 파일 전송 앱에서 설치하자.');
@@ -74,7 +78,7 @@ try {
   await page.reload(); await page.locator('#menu-continue').click();
   await page.waitForFunction(() => currentObjective?.title === '전력 앱 설치하기');
   assert(await page.evaluate(() => collectedItems.has('f1-reached')));
-  assert.equal(await titleAfter(() => supplySolarFloor(1)), '17층 전력 켜기', 'An uninstalled app still needs the 17F computer');
+  assert.equal(await titleAfter(() => supplySolarFloor(1)), '전력 앱 설치하기', 'Emergency UPS keeps the 17F computer available when lighting is rerouted');
   await page.evaluate(data => restoreProgress(data), beforeEarlyVisit);
   assert.equal(await titleAfter(() => collectedItems.add('solar-app-installed')), '1층 전력 켜기');
   await waitTyped('1층 전력 켜기', '휴대폰(P)의 비상 전력 제어 앱에서 1층에 전력을 공급하자.');
@@ -96,7 +100,7 @@ try {
   await page.locator('#story-scene').waitFor({ state: 'visible' });
   assert.equal(await page.locator('#story-caption').textContent(), '왜 경비 로봇이 나를 공격하려고 했던 거지?');
   await page.waitForFunction(() => storyCaption.textContent.startsWith('으윽'), null, { timeout: 5000 });
-  await page.waitForFunction(() => storyCaption.textContent.startsWith('편의점으로 가보자'), null, { timeout: 5000 });
+  await page.waitForFunction(() => storyCaption.textContent.startsWith('편의점으로 가보자'), null, { timeout: 10000 });
   await page.keyboard.press('Escape');
   assert(await page.locator('#story-scene').isHidden(), 'Esc ends the scene');
   assert.equal(await page.evaluate(() => collectedItems.has('story-anxiety-seen')), true);
@@ -143,8 +147,9 @@ try {
   await page.waitForTimeout(500);
   assert(await page.locator('#story-scene').isHidden(), '컷씬은 다시 나오지 않는다');
 
-  assert.equal(await titleAfter(() => collectedItems.add('goal-f12-memo')), '7층 조사하기');
-  assert.equal(await titleAfter(() => collectedItems.add('goal-f7-log')), '지하에서 무슨 일이?');
+  assert.equal(await titleAfter(() => collectedItems.add('goal-f12-memo')), '로봇의 습격! 그 이유는?', 'Reading a memo does not bypass the authored evaluation puzzle');
+  assert.equal(await titleAfter(() => collectedItems.add('f12-evaluation-solved')), '7층 조사하기');
+  assert.equal(await titleAfter(() => collectedItems.add('f7-external-connection-solved')), '지하에서 무슨 일이?');
   assert.equal(await titleAfter(() => collectedItems.add('b1-elevator')), 'B2 서버실 조사하기');
   assert.equal(await titleAfter(() => collectedItems.add('goal-b2-console')), 'ARCHI 멈추기');
 

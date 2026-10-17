@@ -30,8 +30,8 @@ function progressSnapshot() {
     arrivalKey: currentDoors.find(door => door.key === 'exit')?.key || currentDoors.find(door => door.key)?.key };
   if (openingActive) Object.assign(scene, { id: 'office', x: 656, y: floorY - 81, velocity: { x: 0, y: 0 } });
   if (playerCaught) Object.assign(scene, { id: 'f1', x: BUILDING_CORE.elevators[0].x + 40, y: floorY - 81, velocity: { x: 0, y: 0 } });
-  return { version: 1, savedAt: Date.now(), scene, items: [...collectedItems], clues: clueSnapshot(), photos: photoSnapshot(),
-    battery: phoneBattery, sanity, light: phoneLightOn, dock: phoneDock && { ...phoneDock },
+  return { version: 1, powerCircuitVersion: 1, storyPuzzleVersion: 1, savedAt: Date.now(), scene, items: [...collectedItems], clues: clueSnapshot(), photos: photoSnapshot(),
+    battery: phoneBattery, sanity, logPuzzle: { ...logPuzzle }, light: phoneLightOn, dock: phoneDock && { ...phoneDock },
     phoneChargeAccumulator, phoneDrainAccumulator,
     blackout: realBuildingBlackout() || blackoutSceneActive, solarEnabled, solarPoweredFloors: [...solarPoweredFloors],
     lights: world.dataset.lights, computerPower: openingActive ? 'off' : officeComputer.element.dataset.power,
@@ -83,6 +83,8 @@ function restoreProgress(data) {
     endHallucinationSighting();
     resetB2Ending();
     clearInterval(inspectionTypingTimer);
+    wirePanel.hidden = true;
+    wireDrag = wireArmed = wireOnSolved = null;
     inspectionTypingTimer = null;
     delete inspectionPanel.dataset.returnTo;
     inventoryButton.setAttribute('aria-expanded', 'false');
@@ -93,6 +95,20 @@ function restoreProgress(data) {
     // 자신의 출입증은 기본 소지품이며, 이전 저장에도 진행 상황을 유지한 채 추가한다.
     collectedItems.add('f17-badge');
     for (const item of data.items) collectedItems.add(item);
+    // 새 퍼즐이 없던 저장이 다른 층·이동 중인 객실에서 시작하면 귀환 수단을 보존한다.
+    if (data.powerCircuitVersion !== 1 && data.blackout &&
+        ((floorById.get(data.scene.id)?.floor < 17) || (data.cabin && data.elevators?.[data.cabin.index]?.travelling))) {
+      collectedItems.add('f17-emergency-linked');
+    }
+    // 12층·7층 필수 퍼즐이 없던 저장: 이미 그 뒤(7층 로그·B1 해제)까지 간 저장은 네 퍼즐을 푼 것으로 친다.
+    if (data.storyPuzzleVersion !== 1) {
+      if (collectedItems.has('f12-log-hint')) ['f12-network-isolated', 'f12-evaluation-solved'].forEach(item => collectedItems.add(item));
+      if (collectedItems.has('goal-f7-log') || collectedItems.has('b1-elevator')) {
+        for (const item of ['f12-network-isolated', 'f12-evaluation-solved', 'f7-training-time-solved', 'f7-external-connection-solved']) collectedItems.add(item);
+      }
+    }
+    restoreLogPuzzle(data.logPuzzle);
+    closeBackupPuzzle();
     restoreClues(data.clues);
     restorePhotos(data.photos);
     allPowerOverride = false; // 불러오거나 새로 시작하면 콘솔의 전력 활성화는 꺼진다
@@ -129,6 +145,8 @@ function restoreProgress(data) {
     for (const door of doors.filter(door => door.type === 'room')) {
       const config = FLOOR17.rooms.find(entry => entry.target === door.target);
       door.locked = Boolean(config?.locked && !collectedItems.has(config.unlockedBy));
+      door.element.dataset.unlocked = String(Boolean(config?.unlockedBy && collectedItems.has(config.unlockedBy)));
+      door.element.setAttribute('aria-label', `${door.name} 출입문${door.locked ? ' · 잠김' : ''}`);
     }
     const id = data.scene.id === 'office' ? 'f17' : data.scene.id;
     const dest = floorById.get(id);
