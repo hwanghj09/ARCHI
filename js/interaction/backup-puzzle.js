@@ -241,6 +241,11 @@ function handleBackupDeviceInteract(door) {
     openInspection(door.name, '배터리로 켜진 망분리 백업 장비다. 날짜별 원본 로그가 잔뜩 쌓여 있지만 무엇과 대조해야 할지 모르겠다. 12층 모델 평가실의 야간 평가 기록부터 확인하자.');
     return true;
   }
+  // 5층 연구 노트(왜 실력을 숨기는지)와 8층 재현 기록(보는 사람이 있는지 확인)도 필수다. 이미 분석을 시작한 저장은 막지 않는다.
+  if (!trainingSolved() && !(collectedItems.has('goal-f5-note') && collectedItems.has('f8-repro-record'))) {
+    openInspection(door.name, '배터리로 켜진 망분리 백업 장비다. 시간별 성능과 전력 기록이 있지만, ARCHI가 왜 낮에만 실력을 숨기는지 모르면 어디를 봐야 할지 모르겠다. 5층 연구개발실과 8층 QA 시험실의 기록부터 확인하자.');
+    return true;
+  }
   openBackupPuzzle();
   return true;
 }

@@ -2,7 +2,7 @@
 // 16층 편의시설(1층 층별 안내: The Kitchen / CU 편의점 / Café): 크림색 타일 마감(food 테마). 코어 왼쪽에 벽을 맞댄
 // 사내 식당(The Kitchen)·CU 편의점, 화장실 오른쪽 구역에 카페를 둔다. 방 안 폭은 복도 전면 폭의 3.4배(1060/600/560 → 3604/2040/1904).
 // CU 셔터는 정전 직전에 내려와 복도에서 열리지 않는다(unlockedBy: 자기 방 id). 식당 안쪽 끝의 주방 반입문(links)으로 편의점
-// 창고에 들어가고, 안의 셔터 제어함 수동 레버로 셔터를 올린 뒤(올린 채로는 복도에서도 드나든다) 출구로 나온다.
+// 창고에 들어가고(반입문은 편의점 쪽에서 열리지 않는다), 안의 셔터 제어함 수동 레버로 셔터를 올린 뒤(올린 채로는 복도에서도 드나든다) 출구로 나온다.
 // 레버로 셔터를 다시 내릴 수도 있고, 내려 두면 출구도 복도 문도 닫힌다.
 // 단서는 새벽마다 끊기는 냉동고 전원, 정전 직전 SYSTEM이 내린 셔터와 수호의 23:47 영수증, 낮에는 주문도 못 알아듣다가
 // 새벽에는 먼저 인사하는 음성 주문 키오스크(ARCHI 시범). 배경은 편의시설 전용 그림이며 문·소품은 별도로 그린다.
@@ -60,7 +60,9 @@ const FLOOR16_ROOMS = interiorRooms(16, [
   { id: 'f16-cu', name: 'CU 편의점', width: 2040, interiorStyle: 'shelves',
     backgroundWallsOnly: true,
     backgroundImage: { src: 'assets/background/floor16/floor16-cu.png', height: 760, top: 0 },
-    links: [{ target: 'f16-kitchen', x: 56, width: 110, style: 'backdoor' }], props: [
+    // 반입문은 주방 쪽에서만 열린다: 들어온 뒤에는 셔터 제어함 레버로 셔터를 올려야 나간다(필수 퍼즐).
+    links: [{ target: 'f16-kitchen', x: 56, width: 110, style: 'backdoor', locked: true,
+      message: '반입문은 주방 쪽에서만 열리게 걸려 있다. 셔터 제어함의 수동 레버로 셔터를 올리고 나가자.' }], props: [
     { file: 'instrument-cart', size: [256, 256], worldWidth: 113, x: 290 },
     { file: 'food-checkout', size: [512, 256], worldWidth: 312, x: 1150, name: '계산대',
       message: 'POS 화면은 꺼져 있다. 계산대에 영수증 한 장이 걸려 있다: "23:47 · 컵라면 1 · 삼각김밥 1 · 사원증 결제 · 17층 정수호". 아까 야근하다 사 간 야식이다.',

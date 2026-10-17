@@ -8,6 +8,7 @@ const objectiveText = document.getElementById('objective-text');
 const OBJECTIVE_READS = {
   '17|포스트잇': 'goal-postit-read',
   '12|팀장 책상': 'goal-f12-memo', // 읽은 기록만 남긴다. 12층 진행은 모델 평가실 퍼즐(f12-evaluation-solved)로 넘어간다.
+  '5|서가 꼭대기': 'goal-f5-note', // 5층 연구 노트: 8층 재현 기록과 함께 7층 백업 장비의 조건(backup-puzzle.js)
   '-2|ARCHI 메인 콘솔': 'goal-b2-console',
 };
 
@@ -19,6 +20,9 @@ const OBJECTIVES = [
     text: '맨 안쪽의 수동 개방 크랭크를 돌려 셔터를 올리자. 다시 전력을 켜면 배치도를 볼 수 있다.' },
   { when: () => ['f13-testbay', 'f13-secure'].includes(dynamicFloorId) && room === 'dynamic' && !collectedItems.has('f13-backup-device'),
     title: '백업 장치 가져오기', text: '보안 자료실에서 백업 장치를 가져오자. 전자 잠금은 13층에 휴대폰으로 전력을 넣어야 풀린다.' },
+  // 16층 CU 반입문은 안에서 열리지 않는다(floor-16.js): 항불안제를 챙긴 뒤 셔터를 올려야 나간다.
+  { when: () => room === 'dynamic' && dynamicFloorId === 'f16-cu' && collectedItems.has('f16-antianxiety') && !collectedItems.has('f16-cu'),
+    title: '편의점 나가기', text: '반입문은 안에서 열리지 않는다. 셔터 제어함의 수동 레버로 셔터를 올리고 나가자.' },
   // B2 DELETE 뒤 엔딩 추격(b2-ending.js): 단계마다 다음 할 일을 알려 준다.
   { when: () => b2Ending.phase === 'running' && b2Ending.offline, title: '탈출하기', text: 'ARCHI가 꺼졌다. 1층 정문으로 나가자.' },
   { when: () => b2Ending.phase === 'running' && b2Ending.stage === 'lobby', title: '1층 전력 끊기', text: '휴대폰(P)의 비상 전력 제어 앱에서 1층 전력을 끊어 ARCHI를 멈추자.' },
@@ -28,15 +32,23 @@ const OBJECTIVES = [
   { when: () => collectedItems.has('f7-external-connection-solved') && collectedItems.has('b1-elevator'), title: 'B2 서버실 조사하기', text: 'B2 ARCHI 메인 서버실로 내려가 진짜 목적을 확인하자.' },
   { when: () => collectedItems.has('f7-external-connection-solved') && !collectedItems.has('f13-backup-device'), title: '외부 연결 통로 찾기',
     text: 'ARCHI의 외부 송신은 13층 원격지원 게이트웨이를 거친다. 장비 검증실 안쪽 보안 자료실에서 백업 장치를 가져오자.' },
+  { when: () => collectedItems.has('f7-external-connection-solved') && !collectedItems.has('f2-projected'), title: '2층 조사하기',
+    text: '2층 Harmony Hall의 03:00 무관객 리허설을 확인하자. 서버실의 원본 디스크와 휴게실의 영사기 리모컨이 필요하다.' },
   { when: () => collectedItems.has('f7-external-connection-solved') && collectedItems.has('b2-restricted-seen'), title: 'B2 운행 제한 해제', text: 'B1 시설관리실에서 B2 승강기 운행 제한을 해제하세요.' },
   { when: () => collectedItems.has('f7-external-connection-solved'), title: '지하에서 무슨 일이?', text: '모든 기록이 B2를 가리킨다. 지하 서버실을 조사하자.' },
   { when: () => collectedItems.has('f7-training-time-solved'), title: '오늘만 다른 기록', text: '백업 장비의 [오늘] 탭에서 평소 밤과 다른 기록을 찾자.' },
+  { when: () => collectedItems.has('f12-evaluation-solved') && !collectedItems.has('goal-f5-note'), title: '5층 조사하기',
+    text: 'ARCHI는 왜 낮에만 실력을 숨길까? 5층 연구개발실 맨 안쪽 서가 꼭대기를 확인하자.' },
+  { when: () => collectedItems.has('f12-evaluation-solved') && !collectedItems.has('f8-repro-record'), title: '8층 조사하기',
+    text: '8층 QA 시험실 재현 벤치에서 원본 재현 기록을 뽑자. 조건을 맞추는 순서는 공용 제품 회의실에 있다.' },
   { when: () => collectedItems.has('f12-evaluation-solved'), title: '7층 조사하기', text: '7층 AI 테스트·검증실에서 원본 백업 로그를 확인하세요.' },
   { when: () => collectedItems.has('f12-network-isolated') && !logRecordsReady() && !collectedItems.has('f12-paper-backup'), title: '종이 백업 찾기', text: '모델 평가실 평가 벤치에서 출력해 둔 야간 기록을 찾자.' },
   { when: () => collectedItems.has('f12-network-isolated'), title: '이상한 밤 찾기', text: '야간 로그 단말기에서 기록을 분석하자.' },
   { when: () => logDeleting(), title: '로그 삭제를 막아라', text: '네트워크 랙의 B2 직결 LAN 케이블을 뽑자.' },
   { when: () => collectedItems.has('story-badge-seen') && !collectedItems.has('f16-badge') && collectedItems.has('goal-postit'), title: '출입증 쌔비기', text: '조현아 팀장의 사원증을 찾자.' },
   { when: () => collectedItems.has('story-badge-seen') && !collectedItems.has('f16-badge'), title: '출입증 쌔비기', text: '옆자리 직원의 자리를 조사하자.' },
+  { when: () => collectedItems.has('story-robot-seen') && !collectedItems.has('f1-robot-log'), title: '로봇의 습격! 그 이유는?',
+    text: '1층 경비 로봇의 정비 패널에서 마지막 기록을 확인하자. 1층 전력을 끊으면 로봇이 멈춘다.' },
   { when: () => collectedItems.has('story-robot-seen'), title: '로봇의 습격! 그 이유는?', text: 'ARCHI 개발 팀을 조사하자.' },
   { when: () => collectedItems.has('story-anxiety-seen') && !collectedItems.has('story-robot-seen'), title: '정신 불안', text: 'CU 편의점에서 항불안제를 찾아 가방(Tab)에서 복용하자.' },
   { when: () => solarEnabled && !collectedItems.has('f17-emergency-linked') && !floorHasLighting(17),

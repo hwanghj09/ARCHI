@@ -185,10 +185,11 @@ function buildDynamicScene(config) {
         outline: config.exitOutline && [config.exitOutline[0] + offset, ...config.exitOutline.slice(1)] }));
     }
     // 벽을 맞댄 방끼리의 연결문(links, 16층 주방 반입문): 복도를 거치지 않고 옆방에 있는 짝 연결문 앞으로 나온다. 다른 층의 방과도
-    // 이을 수 있고, 그때는 hint로 안내 문구를 바꾼다.
+    // 이을 수 있고, 그때는 hint로 안내 문구를 바꾼다. locked인 연결문은 이쪽에서 열리지 않고 message만 보인다(16층 CU 쪽 반입문).
     for (const link of config.links || []) {
       const next = floorById.get(link.target);
       doorList.push(addRoomDoor({ name: next.name, type: 'room', hint: link.hint ?? `E · ${next.name} 들어가기`, target: link.target,
+        locked: link.locked, message: link.message,
         arrivalKey: `link:${config.id}`, key: `link:${link.target}`, x: link.x, y: link.y ?? 250,
         width: link.width ?? 120, style: link.style, sprite: link.sprite, outline: link.outline }));
     }
