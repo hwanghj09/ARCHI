@@ -42,6 +42,11 @@ const FLOOR8_LAYOUT = {
     floor8Spot('출시 판정 신호등', [3296, 3320], [250, 438],
       '꺼진 출시 판정 신호등. 받침 라벨: "Tibero AI Edition 품질 게이트 · 판정 ARCHI 연동." 정전 직전까지 빨간 칸만 켜져 있었다고 QA 일지에 적혀 있다.'),
   ],
+  props: [
+    { file: 'staff-lockers', size: [256, 512], worldWidth: 100, x: 3440 },
+    { file: 'waiting-sofa', size: [512, 256], worldWidth: 250, x: 3980 },
+    { file: 'large-planter', size: [256, 512], worldWidth: 78, x: 4200 },
+  ],
 };
 const floor8Room = (id, name, art, width, fixtures, extra = {}) => ({ id, name, width, background: FLOOR8_BACKGROUND,
   backgroundWallsOnly: true, backgroundImage: floor8Scene(art, width), fixtures, ...extra });

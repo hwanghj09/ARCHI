@@ -37,7 +37,7 @@ const FLOOR2_LAYOUT = {
     { name: 'Harmony Hall', x: 40, width: 1000, style: 'painted', target: 'f2-harmony',
       ...floor2Door('harmony', 723) },
     { name: '직원 휴게실', x: 1080, width: 690, style: 'painted', target: 'f2-lounge',
-      ...floor2Door('lounge', 1580) },
+      ...floor2Door('lounge', 1544) },
     { name: '서버실', x: 4282, width: 680, style: 'painted', target: 'f2-server',
       ...floor2Door('server', 4385) },
   ],
@@ -47,6 +47,9 @@ const FLOOR2_LAYOUT = {
       '피아노 건반과 파형만 그려진 사내 정기 연주회 포스터. 아래 작은 글씨: "반주 ARCHI · 무대 연출 자동화." 볼펜 낙서: "리허설은 새벽에 혼자 한다던데."' },
   ],
   props: [
+    { file: 'large-planter', size: [256, 512], worldWidth: 78, x: 3170 },
+    { file: 'waiting-sofa', size: [512, 256], worldWidth: 250, x: 3980 },
+    { file: 'large-planter', size: [256, 512], worldWidth: 78, x: 4200 },
     { file: 'waiting-sofa', size: [512, 256], worldWidth: 250, x: 3420 },
   ],
 };

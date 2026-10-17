@@ -18,7 +18,7 @@ const B2_LAYOUT = {
   backgroundWallsOnly: true, backgroundImage: { src: 'assets/background/b2/b2-corridor-finished.png', height: 760, top: 0 },
   rooms: [
     { name: 'ARCHI 메인 서버실', x: 380, width: 700, style: 'core-hall', target: 'b2-main',
-      doorX: 900, doorWidth: 160, doorStyle: 'core-glass' },
+      doorX: 888, doorWidth: 160, doorStyle: 'core-glass' },
     { name: '전력·냉각실', x: 3130, width: 400, style: 'coolant', target: 'b2-power',
       doorX: 3280, doorWidth: 110, doorStyle: 'coolant-door' },
     { name: '연결 실험실', x: 4300, width: 400, style: 'linklab', target: 'b2-link',
@@ -41,6 +41,10 @@ const B2_LAYOUT = {
       caption: '충전 도크 셋에 경비 로봇 R-02·R-05·R-07이 나란히 서 있다. 표시등은 파란색이다.' },
   ],
   props: [
+    { file: 'server-rack', size: [256, 512], worldWidth: 96, x: 1480 },
+    { file: 'network-rack', size: [256, 512], worldWidth: 96, x: 3950 },
+    { file: 'server-rack', size: [256, 512], worldWidth: 96, x: 4060 },
+    { file: 'server-rack', size: [256, 512], worldWidth: 96, x: 4170 },
     { file: 'network-rack', size: [256, 512], worldWidth: 96, x: 100 },
     { file: 'server-rack', size: [256, 512], worldWidth: 96, x: 200 },
     { file: 'server-rack', size: [256, 512], worldWidth: 96, x: 300 },
@@ -54,6 +58,7 @@ const B2_ROOMS = interiorRooms(-2, [
     movables: [{ kind: 'b2-crate', name: '장비 운반 상자', x: 1950, width: 190, height: 95,
       pushable: { factor: .35, minX: 2045, maxX: 2930, barricade: true } }],
     fixtures: [
+      { name: '서버실 배선 트레이', style: 'service-tray', x: 64, y: 144, width: 3022, height: 34 },
       { name: '외부 전송 현황', x: 1900, y: 120, width: 500, height: 170, style: 'transfer-screen',
         lines: ['EXTERNAL TRANSFER', 'ARC-FULL-041 → DR-EXT', '61%'],
         message: '대형 화면: "ARC-FULL-041 (모델 가중치 · 학습 데이터 · 기억 저장소 · 실행 환경) → DR-EXT(해외)". 진행률 61%. 보고 있는 사이 62%로 넘어간다.',
@@ -103,6 +108,7 @@ const B2_ROOMS = interiorRooms(-2, [
   { id: 'b2-power', name: '전력·냉각실', width: 1800, windowless: true, interiorStyle: 'coolant',
     backgroundWallsOnly: true, backgroundImage: { src: 'assets/background/b2/b2-power-finished.png', height: 760, top: 0 },
     fixtures: [
+      { name: '냉각 설비 배선 트레이', style: 'service-tray', x: 64, y: 144, width: 1672, height: 34 },
       { name: '항불안제', style: 'pill-item', x: 1376, y: 383, width: 48, height: 45,
         gives: 'b2-antianxiety', hideWhenTaken: true, surface: 'card', image: 'assets/objects/items/antianxiety.png',
         message: '냉각 설비 일지 캐비닛 위에 누군가 두고 간 항불안제 한 통이 있다. 챙겼다.',
@@ -150,6 +156,7 @@ const B2_ROOMS = interiorRooms(-2, [
     ],
     props: [
       { file: 'glass-display-cabinet', size: [256, 512], worldWidth: 111, x: 200 },
+      { file: 'observation-camera-cart', size: [256, 256], worldWidth: 105, x: 700 },
       { file: 'link-chair-rig', size: [512, 256], worldWidth: 260, x: 930 },
       { file: 'neural-converter-rack', size: [256, 512], worldWidth: 96, x: 1250, name: '신경 신호 변환기',
         message: '랙 라벨: "신경 신호 ↔ 모델 입출력 변환기". 상태 표시: "대기 · 호스트 미연결". UPS 2순위로 전원이 살아 있다.',

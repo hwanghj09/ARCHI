@@ -45,6 +45,9 @@ const FLOOR6_LAYOUT = {
       '안내문: "야간 당직 전화는 공용 엔지니어링 구역 작업대. 벨이 끊기기 전에 받을 것. 응답이 없으면 당직 ARS가 자동 승인 처리합니다." 그 위에 테이프로 붙인 새 공지: "9월 1일부로 사람 당직 폐지."' },
   ],
   props: [
+    { file: 'waiting-sofa', size: [512, 256], worldWidth: 240, x: 3250 },
+    { file: 'waiting-sofa', size: [512, 256], worldWidth: 250, x: 3980 },
+    { file: 'large-planter', size: [256, 512], worldWidth: 78, x: 4200 },
     { file: 'water-cooler', size: [256, 512], worldWidth: 62, x: 3470 },
   ],
 };

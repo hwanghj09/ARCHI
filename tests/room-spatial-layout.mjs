@@ -86,7 +86,8 @@ try {
     assert(geometry.inside.x >= 32 && geometry.inside.x + geometry.inside.width <= geometry.width - 32,
       `${entry.id}: interior doorway stays inside its walls`);
     // exitBay 방(2~10층)은 복도 문은 그대로 두고 안쪽 문만 방 끝이나 빈 벽에 세운다(방 그림에 출구 앞벽 칸).
-    if (!geometry.exitBay) assertMirroredDoor(entry.front, geometry.outside, geometry.width, geometry.inside, entry.id);
+    // 평가실은 복도 간판 아래 문과 내부 왼쪽 출구를 각각 유지하는 기획상 예외(floor-12.js).
+    if (!geometry.exitBay && entry.id !== 'f12-eval') assertMirroredDoor(entry.front, geometry.outside, geometry.width, geometry.inside, entry.id);
     if (geometry.art) {
       const { crop, fill, x } = geometry.art;
       const offset = geometry.inside.x - x;
@@ -162,7 +163,7 @@ try {
         return { x: exit.x, y: exit.y, width: exit.width, worldWidth, playerX: body.position.x,
           facing, key: nearbyDoor?.key, connected: exit.element.isConnected, exitBay: floorById.get(dynamicFloorId).exitBay };
       });
-      if (!inside.exitBay) assertMirroredDoor(entry.front, front, inside.worldWidth, inside, `${id} ${mobile ? 'touch' : 'keyboard'} entry`);
+      if (!inside.exitBay && id !== 'f12-eval') assertMirroredDoor(entry.front, front, inside.worldWidth, inside, `${id} ${mobile ? 'touch' : 'keyboard'} entry`);
       assert(Math.abs(inside.playerX - inside.x - 40) < 1, `${id}: entry places the player at the same doorway`);
       assert.equal(inside.facing, inside.x < inside.worldWidth / 2 ? 1 : -1, `${id}: player faces into the room`);
       assert(inside.connected, `${id}: interior exit has a scene element`);

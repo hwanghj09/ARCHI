@@ -11,7 +11,9 @@ try {
   const page = await browser.newPage();
   const errors = [];
   page.on('pageerror', error => errors.push(error.message));
-  page.on('requestfailed', request => errors.push(`${request.url()}: ${request.failure()?.errorText}`));
+  page.on('requestfailed', request => {
+    if (request.failure()?.errorText !== 'net::ERR_ABORTED') errors.push(`${request.url()}: ${request.failure()?.errorText}`);
+  });
   await page.goto(new URL('../index.html', import.meta.url).href);
   await page.locator('#menu-start').click();
   if (await page.locator('#menu-new-confirm').isVisible()) await page.locator('#menu-new-confirm').click();
@@ -27,7 +29,8 @@ try {
       await Promise.all([...document.querySelectorAll('img[src]')].filter(image => image.getAttribute('src')).map(image => image.decode()));
       return [...new Set([...document.querySelectorAll('#world, #world *')].flatMap(element =>
         [null, '::before', '::after'].flatMap(pseudo =>
-          [...getComputedStyle(element, pseudo).backgroundImage.matchAll(/url\(["']?(.*?)["']?\)/g)].map(match => match[1]))))];
+          [...getComputedStyle(element, pseudo).backgroundImage.matchAll(/url\((?:"([^"]*)"|'([^']*)'|([^)]*))\)/g)]
+            .map(match => match[1] ?? match[2] ?? match[3]))))];
     }, id);
     for (const source of sources) {
       if (images.has(source)) continue;

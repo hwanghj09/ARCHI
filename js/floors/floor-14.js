@@ -16,7 +16,7 @@ const FLOOR14_LAYOUT = {
   backgroundWallsOnly: true, backgroundImage: { src: 'assets/background/floor14/walls.png', height: 760, top: 0 },
   rooms: [
     { name: '연구 자료실', x: 64, width: 480, style: 'stacks', target: 'f14-archive',
-      doorX: 400, doorWidth: 130, doorY: 244, doorStyle: 'vault' },
+      doorX: 382, doorWidth: 130, doorY: 244, doorStyle: 'vault' },
     { name: '데이터 연구실', x: 560, width: 640, style: 'datawall', target: 'f14-data',
       doorX: 620, doorWidth: 150, doorStyle: 'datalab' },
     { name: '사용자 실험실', x: 1216, width: 560, style: 'mirror', target: 'f14-ux',
@@ -57,13 +57,14 @@ const FLOOR14_ROOMS = interiorRooms(14, [
       { file: 'filing-cabinet', size: [256, 512], worldWidth: 72, x: 960 },
       { file: 'filing-cabinet', size: [256, 512], worldWidth: 72, x: 1040 },
       { file: 'filing-cabinet', size: [256, 512], worldWidth: 72, x: 1200 },
-      { file: 'archive-worklight', size: [256, 256], worldWidth: 106, x: 1440, name: '작업등', gives: 'f14-archive-lamp',
+      { file: 'archive-worklight', size: [256, 256], worldWidth: 106, x: 1410, name: '작업등', gives: 'f14-archive-lamp',
         control: { kind: 'switch', dir: 'up', label: '작업등 전원 스위치를 올리자.', ends: ['ON', 'OFF'] },
         sprite: 'assets/objects/floor14/archive-worklight-states.png', stateBy: 'f14-archive-lamp',
         message: '카트에 실린 충전식 작업등이 켜졌다. 자료실 안이 환해진다.',
         takenMessage: '작업등이 켜져 있다. 배터리 표시가 두 칸 남았다.' },
     ] },
   { id: 'f14-data', name: '데이터 연구실', width: 2400,
+    exteriorWindows: [560, 880, 1200, 1520, 1840].map(x => ({ x, y: 142, width: 305, height: 226 })),
     backgroundWallsOnly: true, backgroundImage: floor14Scene('data', 2400), props: [
     { file: 'large-planter', size: [256, 512], worldWidth: 78, x: 100 },
     { file: 'filing-cabinet', size: [256, 512], worldWidth: 72, x: 190 },
@@ -91,6 +92,7 @@ const FLOOR14_ROOMS = interiorRooms(14, [
   ] },
   { id: 'f14-ux', name: '사용자 실험실', width: 2100, interiorStyle: 'mirror',
     backgroundWallsOnly: true, backgroundImage: floor14Scene('ux', 2100), props: [
+    { file: 'observation-camera-cart', size: [256, 256], worldWidth: 105, x: 800 },
     { file: 'instrument-cart', size: [256, 256], worldWidth: 113, x: 220 },
     { file: 'observation-console', size: [512, 256], worldWidth: 272, x: 520, name: '관찰 콘솔',
       message: '관찰 기록 출력물: "피험자 반응 — 시선, 표정, 걸음걸이, 심박. 분석 보조: ARCHI." 맨 아래 줄: "다음 단계: 야간 무인 관찰 모드 시험."',

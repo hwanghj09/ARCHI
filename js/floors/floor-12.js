@@ -35,7 +35,8 @@ const FLOOR12_LAYOUT = {
       message: '팀장실 문이 잠겨 있다. 카드키가 아니라 열쇠 구멍이 있는 문이다.' },
   ],
   props: [
-    { file: 'large-planter', size: [256, 512], worldWidth: 78, x: 920 },
+    { file: 'waiting-sofa', size: [512, 256], worldWidth: 250, x: 4120 },
+    { file: 'large-planter', size: [256, 512], worldWidth: 78, x: 1050 },
     { file: 'robot-charging-dock', size: [256, 256], worldWidth: 69, x: 1180, name: '로봇 충전 도크',
       message: '경비 로봇 충전 도크가 비어 있다. 바닥의 바퀴 자국이 엘리베이터 쪽으로 이어진다.' },
     { file: 'water-cooler', size: [256, 512], worldWidth: 62, x: 1600 },

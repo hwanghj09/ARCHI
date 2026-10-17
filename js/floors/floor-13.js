@@ -21,11 +21,13 @@ const FLOOR13_LAYOUT = {
     { name: '기술지원 상황실', x: 3090, width: 460, style: 'ops', target: 'f13-ops',
       doorX: 3240, doorWidth: 160, doorStyle: 'ops' },
     { name: '장비 검증실', x: 4290, width: 320, style: 'cage', target: 'f13-testbay',
-      doorX: 4300, doorWidth: 130, doorY: 236, doorStyle: 'cage' },
+      doorX: 4322, doorWidth: 130, doorY: 236, doorStyle: 'cage' },
     { name: '고객 교육장', x: 4620, width: 320, style: 'classroom', target: 'f13-training',
-      doorX: 4800, doorWidth: 120, doorStyle: 'classroom' },
+      doorX: 4788, doorWidth: 120, doorStyle: 'classroom' },
   ],
   props: [
+    { file: 'waiting-sofa', size: [512, 256], worldWidth: 250, x: 3980 },
+    { file: 'large-planter', size: [256, 512], worldWidth: 78, x: 4190 },
     { file: 'large-planter', size: [256, 512], worldWidth: 78, x: 100 },
     { file: 'filing-cabinet', size: [256, 512], worldWidth: 72, x: 200 },
     { file: 'filing-cabinet', size: [256, 512], worldWidth: 72, x: 280 },
@@ -67,8 +69,9 @@ const FLOOR13_ROOMS = interiorRooms(13, [
     { file: 'water-cooler', size: [256, 512], worldWidth: 62, x: 2540 },
   ] },
   { id: 'f13-testbay', name: '장비 검증실', width: 1824, windowless: true,
+    fixtures: [{ name: '장비 배선 트레이', style: 'service-tray', x: 240, y: 170, width: 1320, height: 30 }],
     backgroundWallsOnly: true, backgroundImage: floor13Scene('testbay', 1824), props: [
-    { file: 'testbay-ups', size: [256, 256], worldWidth: 107, x: 420, name: 'UPS', gives: 'f13-ups',
+    { file: 'testbay-ups', size: [256, 256], worldWidth: 107, x: 520, name: 'UPS', gives: 'f13-ups',
       control: { kind: 'switch', dir: 'up', label: '비상 출력 스위치를 올리자.', ends: ['ON', 'OFF'] },
       sprite: 'assets/objects/floor13/testbay-ups-states.png', stateBy: 'f13-ups',
       message: 'UPS 비상 출력이 켜졌다. 팬이 돌기 시작하고 초록 불이 들어온다. 비상 회선으로 전기가 나간다.',
@@ -89,6 +92,7 @@ const FLOOR13_ROOMS = interiorRooms(13, [
     backgroundWallsOnly: true, backgroundImage: floor13Scene('testbay', 1824),
     links: [{ target: 'f13-testbay', x: 56, width: 110, style: 'secure', hint: 'E · 장비 검증실로 나가기' }],
     fixtures: [
+      { name: '보안 회선 트레이', style: 'service-tray', x: 220, y: 170, width: 1520, height: 30 },
       { name: '보안 셔터', style: 'vault-shutter', x: 48, y: 236, width: 126 },
       { name: 'CCTV', style: 'vault-cctv', x: 700, y: 120, width: 60, height: 34 },
       { name: '시설 점검 기록', style: 'wall-notice', x: 230, y: 300, width: 130, height: 150,
@@ -119,6 +123,7 @@ const FLOOR13_ROOMS = interiorRooms(13, [
         message: '덜컹, 덜컹… 천장 와이어가 감기며 셔터가 천천히 올라간다.' },
     ] },
   { id: 'f13-training', name: '고객 교육장', width: 1824,
+    exteriorWindows: [220, 440, 660, 880].map(x => ({ x, y: 142, width: 209, height: 172 })),
     backgroundWallsOnly: true, backgroundImage: floor13Scene('training', 1824), props: [
     { file: 'training-slide-board', size: [512, 256], worldWidth: 350, x: 300, name: '교육 자료 보드',
       message: '사내 안전 교육 슬라이드 출력물: "정전 시 옥상 태양광 비상 전력 장치를 쓴다. 용량이 작아 한 번에 한 층에만 전력을 보낼 수 있다. 다른 층을 켜면 켜져 있던 층의 전력은 자동으로 끊긴다."',

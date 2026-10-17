@@ -29,6 +29,40 @@ function addBackgroundCrop(config, box, source) {
 }
 const lockedStairsMessage = '비상계단 문이 잠겨 있다. 정전 중에는 열리지 않는 것 같다.';
 
+function addPaintedWalls(config, doors) {
+  const art = config.wallArt;
+  if (!art) return;
+  const layer = document.createElement('div');
+  layer.className = 'painted-wall';
+  layer.dataset.material = art.material;
+  layer.setAttribute('aria-hidden', 'true');
+  const windows = (config.exteriorWindows || []).map(({ x, y, width, height }) => [x, y, width, height]);
+  const pillars = (art.pillars || []).map(x => [x - 24, 100, 48, 456]);
+  const openings = doors.filter(door => ['room', 'stairs', 'elevator'].includes(door.type))
+    .map(door => [door.x, door.y, door.width, door.height ?? floorY - door.y]);
+  let rects = [[32, 100, config.width - 64, 456]];
+  // 겹친 기둥·문 개구부도 다시 칠해지지 않도록 벽에서 직사각형을 차례로 뺀다.
+  for (const [x, y, w, h] of [...(art.preserve || []), ...windows, ...pillars, ...openings]) {
+    rects = rects.flatMap(([px, py, pw, ph]) => {
+      const left = Math.max(px, x), top = Math.max(py, y);
+      const right = Math.min(px + pw, x + w), bottom = Math.min(py + ph, y + h);
+      if (left >= right || top >= bottom) return [[px, py, pw, ph]];
+      return [[px, py, pw, top - py], [px, bottom, pw, py + ph - bottom],
+        [px, top, left - px, bottom - top], [right, top, px + pw - right, bottom - top]]
+        .filter(([, , width, height]) => width > 0 && height > 0);
+    });
+  }
+  layer.style.clipPath = `path(evenodd, "${rects.map(([x, y, w, h]) => `M${x} ${y}h${w}v${h}h${-w}Z`).join(' ')}")`;
+  // 각 타일은 같은 크기의 아틀라스 칸을 사용한다. 끝 타일도 원본 비율을 유지한 채 잘린다.
+  for (let x = 32; x < config.width - 32; x += 912) {
+    const tile = document.createElement('div');
+    tile.className = 'painted-wall-tile';
+    tile.style.left = `${x}px`;
+    layer.append(tile);
+  }
+  dynamicScene.insertBefore(layer, dynamicScene.querySelector('.exterior-window, .solid'));
+}
+
 function buildDynamicScene(config) {
   const bodies = [];
   const doorList = [];
@@ -49,6 +83,16 @@ function buildDynamicScene(config) {
     addBackgroundCrop(config, [x, 0, Math.min(185, config.leftWallExtension - x), Math.max(worldHeight, config.backgroundImage.height)], [0, 0]);
   }
   for (const patch of config.artPatches || []) addBackgroundCrop(config, patch.box, patch.from);
+  // 외창만 공통 옥상 야경을 잘라 쓴다. 층이 낮아질수록 같은 건물이 조금 높게 보인다.
+  for (const window of config.exteriorWindows || []) {
+    const element = document.createElement('div');
+    element.className = `exterior-window${window.blinds ? ' blinds' : ''}`;
+    element.setAttribute('aria-hidden', 'true');
+    Object.assign(element.style, { left: `${window.x}px`, top: `${window.y}px`,
+      width: `${window.width}px`, height: `${window.height}px`,
+      backgroundPosition: `${-450 - window.x % 1450}px ${-170 - (17 - config.floor) * 7}px` });
+    dynamicScene.append(element);
+  }
   if (config.id === 'rooftop') dynamicScene.append(rooftopBackground);
   const layout = [
     { kind: 'floor', x: 0, y: floorY, width: config.width, height: 150 },
@@ -369,5 +413,6 @@ function buildDynamicScene(config) {
   });
   // Core doors come first: interaction picks the first match, so the fixed elevators and stairs behave
   // identically on every floor even where a floor's own door or prop hint zone touches theirs.
+  addPaintedWalls(config, [...coreDoors, ...doorList]);
   return { bodies, doors: [...coreDoors, ...doorList], moving, cameras };
 }

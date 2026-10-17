@@ -46,6 +46,12 @@ const FLOOR5_LAYOUT = {
     { name: '연구본부 5F 표지', x: 3370, y: 300, width: 170, height: 70, style: 'archive-plaque',
       lines: ['TmaxTibero', '연구본부 · DB 보안'] },
   ],
+  props: [
+    { file: 'waiting-sofa', size: [512, 256], worldWidth: 240, x: 3260 },
+    { file: 'large-planter', size: [256, 512], worldWidth: 78, x: 3500 },
+    { file: 'short-bookcase', size: [512, 256], worldWidth: 260, x: 3980 },
+    { file: 'large-planter', size: [256, 512], worldWidth: 78, x: 4200 },
+  ],
 };
 const floor5Room = (id, name, art, width, fixtures, extra = {}) => ({ id, name, width, background: FLOOR5_BACKGROUND,
   backgroundWallsOnly: true, backgroundImage: floor5Scene(art, width), fixtures, ...extra });

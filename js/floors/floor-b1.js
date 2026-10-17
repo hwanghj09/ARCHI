@@ -15,7 +15,7 @@ const B1_LAYOUT = {
   backgroundWallsOnly: true, backgroundImage: { src: 'assets/background/b1/b1-corridor-finished.png', height: 760, top: 0 },
   rooms: [
     { name: '시설관리팀 사무실', x: 4290, width: 240, style: 'facility-office', target: 'b1-office',
-      doorX: 4320, doorWidth: 110, doorStyle: 'facility-door' },
+      doorX: 4322, doorWidth: 110, doorStyle: 'facility-door' },
     { name: '방재 관제실', x: 4530, width: 220, style: 'control-room', target: 'b1-control',
       doorX: 4580, doorWidth: 104, doorStyle: 'control-door' },
     { name: '전력 분배실', x: 4750, width: 210, style: 'switchgear', target: 'b1-power',
@@ -41,6 +41,8 @@ const B1_LAYOUT = {
         { as: 'field', label: '비상 전원 배분', text: 'SYSTEM 자동.' }] },
   ],
   props: [
+    { file: 'staff-lockers', size: [256, 512], worldWidth: 130, x: 3990 },
+    { file: 'janitor-cart', size: [256, 512], worldWidth: 98, x: 4200 },
     { file: 'security-robot-dock', size: [256, 256], worldWidth: 82, x: 480 },
     { file: 'security-robot-dock', size: [256, 256], worldWidth: 82, x: 580 },
     { file: 'security-robot-dock', size: [256, 256], worldWidth: 82, x: 680, name: '빈 충전 도크',

@@ -46,6 +46,12 @@ const FLOOR4_LAYOUT = {
       lines: ['정전 대비 안내', 'UPS 출력 1곳', '전기 잠금 주의'], message:
       '정전 대비 안내. "연구실 UPS는 배터리가 작아 출력 한 곳만 버팁니다. 출력을 옮기면 먼저 물려 있던 장비는 꺼집니다. 연구 회의실 전기 잠금은 전원이 없으면 잠긴 채로 버팁니다."' },
   ],
+  props: [
+    { file: 'waiting-sofa', size: [512, 256], worldWidth: 240, x: 3290 },
+    { file: 'large-planter', size: [256, 512], worldWidth: 78, x: 3500 },
+    { file: 'glass-display-cabinet', size: [256, 512], worldWidth: 111, x: 3960 },
+    { file: 'large-planter', size: [256, 512], worldWidth: 78, x: 4190 },
+  ],
 };
 const floor4Room = (id, name, art, width, fixtures, extra = {}) => ({ id, name, width, background: FLOOR4_BACKGROUND,
   backgroundWallsOnly: true, backgroundImage: floor4Scene(art, width), fixtures, ...extra });

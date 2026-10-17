@@ -38,6 +38,12 @@ const FLOOR10_LAYOUT = {
     floor10Spot('멈춘 벽시계', [3330, 3370], [208, 232],
       '사무실에서 떼어 온 벽시계가 00:00에 멈춰 있다. 뒷면 스티커: "경영관리본부 · 월말 결산 마감 01:00." 마감까지 아무도 남지 않았다.'),
   ],
+  props: [
+    { file: 'waiting-sofa', size: [512, 256], worldWidth: 240, x: 3260 },
+    { file: 'large-planter', size: [256, 512], worldWidth: 78, x: 3500 },
+    { file: 'waiting-sofa', size: [512, 256], worldWidth: 250, x: 3980 },
+    { file: 'large-planter', size: [256, 512], worldWidth: 78, x: 4200 },
+  ],
 };
 const floor10Room = (id, name, art, width, fixtures, extra = {}) => ({ id, name, width, background: FLOOR10_BACKGROUND,
   backgroundWallsOnly: true, backgroundImage: floor10Scene(art, width), fixtures, ...extra });

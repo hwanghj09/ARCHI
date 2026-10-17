@@ -19,7 +19,7 @@ const FLOOR11_LAYOUT = {
     { name: '전략회의실', x: 4322, width: 316, style: 'war-room', target: 'f11-strategy',
       doorX: 4470, doorWidth: 130, doorStyle: 'privacy' },
     { name: '마케팅 자료실', x: 4652, width: 316, style: 'materials', target: 'f11-marketing',
-      doorX: 4668, doorWidth: 120, doorStyle: 'stockroom' },
+      doorX: 4684, doorWidth: 120, doorStyle: 'stockroom' },
   ],
   barriers: [
     { name: '방화셔터', x: 4292, y: 112, width: 24, style: 'shutter', outline: [4283, 86, 31, 484], sprite: 'assets/objects/floor11/fire-shutter-states.png', requires: 'f11-crank', gives: 'f11-shutter-open',
@@ -33,6 +33,8 @@ const FLOOR11_LAYOUT = {
       takenMessage: '셔터가 천장까지 말려 올라가 있다. 불이 난 흔적은 어디에도 없다.' },
   ],
   props: [
+    { file: 'waiting-sofa', size: [512, 256], worldWidth: 250, x: 3980 },
+    { file: 'glass-display-cabinet', size: [256, 512], worldWidth: 111, x: 4180 },
     { file: 'sales-kpi-board', size: [512, 256], worldWidth: 350, x: 980, name: '영업 실적 보드',
       message: '이번 분기 ARCHI 계약 0건. 칸 옆에 누군가 적어 두었다: "시연은 무조건 밤에 잡자."',
       writing: [{ as: 'title', text: '이번 분기 실적' }, { as: 'table', head: true, rows: [['제품', '계약'], ['ARCHI', '0건']] },
@@ -46,6 +48,7 @@ const FLOOR11_LAYOUT = {
 };
 const FLOOR11_ROOMS = interiorRooms(11, [
   { id: 'f11-sales', name: '영업본부 사무실', width: 3600,
+    exteriorWindows: [440, 790, 2080, 2430, 2780].map(x => ({ x, y: 135, width: 303, height: 263 })),
     backgroundWallsOnly: true, backgroundImage: floor11Scene('sales', 3600), props: [
     { file: 'large-planter', size: [256, 512], worldWidth: 78, x: 100 },
     { file: 'staff-lockers', size: [256, 512], worldWidth: 130, x: 250 },
@@ -104,14 +107,14 @@ const FLOOR11_ROOMS = interiorRooms(11, [
   ] },
   { id: 'f11-marketing', name: '마케팅 자료실', width: 1800, windowless: true,
     backgroundWallsOnly: true, backgroundImage: floor11Scene('marketing', 1800), props: [
-    { file: 'brochure-rack', size: [256, 512], worldWidth: 111, x: 420, name: '브로슈어 진열장',
+    { file: 'brochure-rack', size: [256, 512], worldWidth: 111, x: 500, name: '브로슈어 진열장',
       message: 'ARCHI 브로슈어 초판이 쌓여 있다. "사람처럼 배우는 AI." 출시일 칸은 매직으로 지워져 있다.',
       surface: 'document',
       writing: [{ as: 'title', text: 'ARCHI', align: 'center' }, { text: '사람처럼 배우는 AI', size: 'large', align: 'center' },
         { as: 'redacted', label: '출시일', length: 8 }],
       caption: 'ARCHI 브로슈어 초판이 쌓여 있다.' },
-    { file: 'filing-cabinet', size: [256, 512], worldWidth: 72, x: 560 },
-    { file: 'filing-cabinet', size: [256, 512], worldWidth: 72, x: 650 },
+    { file: 'filing-cabinet', size: [256, 512], worldWidth: 72, x: 600 },
+    { file: 'filing-cabinet', size: [256, 512], worldWidth: 72, x: 690 },
     { file: 'materials-desk', size: [512, 256], worldWidth: 252, x: 900, name: '자료실 책상',
       message: '출력된 알림 메일: "해외 파트너 데모 서버 · archi-demo 계정 비밀번호가 변경되었습니다 · 03:07." 여백에 볼펜으로 "우리 팀 아무도 안 바꿈."',
       surface: 'document',

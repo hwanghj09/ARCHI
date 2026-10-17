@@ -50,7 +50,7 @@ try {
     'gpu-transfer-cart.png': [240, 94], 'research-director-desk.png': [206, 120] };
   const checkArt = async () => {
     assert.equal(await page.locator('#dynamic-scene').getAttribute('data-theme'), 'research');
-    const props = await page.locator('#dynamic-scene .floor-prop img').evaluateAll(async images => {
+    const props = await page.locator('#dynamic-scene .floor-prop > img:first-child').evaluateAll(async images => {
       await Promise.all(images.map(img => img.decode()));
       return images.map(img => ({ file: img.src.split('/').pop(), width: parseFloat(img.parentElement.style.width),
         top: parseFloat(img.parentElement.style.top), naturalWidth: img.naturalWidth, naturalHeight: img.naturalHeight }));

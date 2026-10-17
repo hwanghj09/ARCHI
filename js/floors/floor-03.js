@@ -46,6 +46,9 @@ const FLOOR3_LAYOUT = {
       message: '3층 입주사 안내판이다. ㈜하누리서비스(경비·미화)는 고객만족센터 안에 사무를 둔다. 아래 작은 글씨: "야간 무인 운영 · 00:00~06:00 Fitness Club 회원 전용 자동문 닫힘 고정."' },
   ],
   props: [
+    { file: 'water-cooler', size: [256, 512], worldWidth: 62, x: 3360 },
+    { file: 'waiting-sofa', size: [512, 256], worldWidth: 250, x: 3980 },
+    { file: 'restroom-bin', size: [256, 256], worldWidth: 55, x: 4200 },
     { file: 'instrument-cart', size: [256, 256], worldWidth: 113, x: 3460, name: '청소 카트',
       message: '㈜하누리서비스 청소 카트다. 야간 작업표 칸은 이번 달부터 비어 있다. 손잡이에 붙은 쪽지: "야간 미화 중단 · 대신 로봇 순찰."' },
   ],

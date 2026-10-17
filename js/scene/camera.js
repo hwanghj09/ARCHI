@@ -32,7 +32,8 @@ function render() {
     part.element.style.top = `${part.body.position.y - part.height / 2}px`;
   }
   const zoomed = cameraZoom - 1;
-  world.style.transform = `translate(${-cameraX * scale - cameraFocus.x * scale * zoomed + cameraShake.x}px, ` +
+  const roomInset = Math.max(0, (stage.clientWidth - worldWidth * scale) / 2);
+  world.style.transform = `translate(${roomInset - cameraX * scale - cameraFocus.x * scale * zoomed + cameraShake.x}px, ` +
     `${stage.clientHeight - worldHeight * scale - cameraFocus.y * scale * zoomed + cameraShake.y}px) scale(${scale * cameraZoom})`;
   renderHallucination();
   updateRedEyes();

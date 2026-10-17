@@ -17,11 +17,12 @@ const FLOOR15_LAYOUT = {
     { name: '연구실', x: 64, width: 860, style: 'partition', target: 'f15-lab',
       doorX: 280, doorWidth: 140, doorStyle: 'research' },
     { name: '세미나실', x: 954, width: 620, style: 'seminar', target: 'f15-seminar',
-      doorX: 970, doorWidth: 130, doorStyle: 'seminar' },
+      doorX: 986, doorWidth: 130, doorStyle: 'seminar' },
     { name: '연구본부장실', x: 3092, width: 456, style: 'director', target: 'f15-director',
       doorX: 3160, doorWidth: 120, doorY: 240, doorStyle: 'director' },
   ],
   props: [
+    { file: 'glass-display-cabinet', size: [256, 512], worldWidth: 111, x: 3420 },
     { file: 'water-cooler', size: [256, 512], worldWidth: 62, x: 1640 },
     { file: 'large-planter', size: [256, 512], worldWidth: 78, x: 1740 },
     { file: 'waiting-sofa', size: [512, 256], worldWidth: 250, x: 4420 },
@@ -36,6 +37,7 @@ const FLOOR15_LAYOUT = {
 };
 const FLOOR15_ROOMS = interiorRooms(15, [
   { id: 'f15-lab', name: '연구실', width: 3440,
+    exteriorWindows: [400, 1440, 1800, 2800].map(x => ({ x, y: 142, width: 337, height: 226 })),
     backgroundWallsOnly: true, backgroundImage: floor15Scene('lab', 3440), props: [
     { file: 'large-planter', size: [256, 512], worldWidth: 78, x: 100 },
     { file: 'filing-cabinet', size: [256, 512], worldWidth: 72, x: 220 },
@@ -62,13 +64,16 @@ const FLOOR15_ROOMS = interiorRooms(15, [
     { file: 'water-cooler', size: [256, 512], worldWidth: 62, x: 3360 },
   ] },
   { id: 'f15-seminar', name: '세미나실', width: 2480,
+    exteriorWindows: [440, 800, 1160, 1520, 1880].map(x => ({ x, y: 142, width: 337, height: 226 })),
     backgroundWallsOnly: true, backgroundImage: floor15Scene('seminar', 2480),
     solids: [{ x: 760, width: 110, height: 50 }, { x: 1360, width: 90, height: 60 }], props: [
+    { file: 'maintenance-tool-cabinet', size: [512, 256], worldWidth: 198, x: 590 },
+    { file: 'instrument-cart', size: [256, 256], worldWidth: 113, x: 1520 },
     { file: 'gpu-transfer-cart', size: [256, 256], worldWidth: 100, x: 420, name: '이관 카트',
       message: '카트 위 체크리스트: "GPU 서버 16대 포장 완료 · B2 서버실 이관 2차분". 포장 상자가 바닥을 막고 있다.',
       surface: 'document', writing: [{ as: 'title', text: '체크리스트' }, '☑ GPU 서버 16대 포장 완료', '    B2 서버실 이관 2차분'],
       caption: '포장 상자가 바닥을 막고 있다.' },
-    { file: 'meeting-table', size: [512, 256], worldWidth: 356, x: 1115 },
+    { file: 'meeting-table', size: [512, 256], worldWidth: 420, x: 1115 },
     { file: 'research-board', size: [512, 256], worldWidth: 362, x: 1800, name: '작업 지시서',
       message: '화이트보드에 붙은 작업 지시서: "연구용 GPU 서버 2차분 → B2 서버실. 요청: ARCHI 학습 파이프라인(자동 생성). 승인: 대기." 1차분 24대는 이미 옮겨졌다.',
       writing: [{ as: 'paper', title: '작업 지시서',
@@ -79,7 +84,9 @@ const FLOOR15_ROOMS = interiorRooms(15, [
     { file: 'server-rack', size: [256, 512], worldWidth: 96, x: 2320 },
   ] },
   { id: 'f15-director', name: '연구본부장실', width: 1824,
+    exteriorWindows: [700, 1060, 1420].map(x => ({ x, y: 142, width: 337, height: 226, blinds: true })),
     backgroundWallsOnly: true, backgroundImage: floor15Scene('director', 1824), props: [
+    { file: 'coat-rack', size: [256, 512], worldWidth: 80, x: 620 },
     { file: 'glass-display-cabinet', size: [256, 512], worldWidth: 111, x: 120 },
     { file: 'filing-cabinet', size: [256, 512], worldWidth: 72, x: 240 },
     { file: 'research-director-desk', size: [512, 256], worldWidth: 298, x: 900, name: '본부장 책상',

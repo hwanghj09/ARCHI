@@ -36,6 +36,8 @@ const FLOOR9_LAYOUT = {
       '고객사 브로슈어가 꽂힌 거치대. 맨 앞 장: "Tibero × ARCHI 연동 시연 · 고객사 5곳 초청." 뒷면에 방문객 명부 스탬프가 찍혀 있다: "03:00 · 방문객 ARCHI · 방문 부서 프로젝트룸."'),
   ],
   props: [
+    { file: 'waiting-sofa', size: [512, 256], worldWidth: 250, x: 3980 },
+    { file: 'brochure-rack', size: [256, 512], worldWidth: 100, x: 4190 },
     { file: 'large-planter', size: [256, 512], worldWidth: 78, x: 3480 },
   ],
 };

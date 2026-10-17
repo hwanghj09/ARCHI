@@ -30,6 +30,8 @@ const FLOOR17_ROOMS = interiorRooms(17, [
   { id: 'f17-restroom', ...restroomInterior },
   { id: 'f17-manager', name: '관리자실', width: 1040, windowless: true,
     backgroundWallsOnly: true, backgroundImage: { src: 'assets/background/floor17/floor17-manager-finished.png', height: 760, top: 0 }, props: [
+    { file: 'staff-lockers', size: [256, 512], worldWidth: 100, x: 90 },
+    { file: 'janitor-cart', size: [256, 512], worldWidth: 78, x: 968 },
     { file: 'electrical-panel', size: [480, 626], worldWidth: 122, x: 500, name: '비상 전력 분배반',
       sprite: 'assets/ui/floor17/emergency-panel-states.png', stateBy: 'f17-emergency-linked', powerCircuit: true,
       message: '비상 UPS는 살아 있지만 승강기 회선 네 가닥이 분리되어 있다. 책상의 회로 안내도로 공급 단자와 승강기 단자를 확인하자.' },

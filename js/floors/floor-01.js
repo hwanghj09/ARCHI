@@ -99,6 +99,7 @@ const FLOOR1_LAYOUT = {
       caption: '회전문도 옆 자동문도 멈춰 있다. 유리 너머 거리의 가로등은 멀쩡히 켜져 있다. 문틀 위 작은 표시창만 배터리로 깜빡인다.' },
   ],
   props: [
+    { file: 'waiting-sofa', size: [512, 256], worldWidth: 240, x: 4080 },
     { file: 'large-planter', size: [256, 512], worldWidth: 78, x: 1300 },
     { file: 'reception-counter', size: [512, 256], worldWidth: 322, x: 3310 },
     { file: 'large-planter', size: [256, 512], worldWidth: 78, x: 3515 },
