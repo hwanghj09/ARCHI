@@ -81,9 +81,19 @@ try {
         cell: Math.round(-new DOMMatrix(getComputedStyle(openingSheet).transform).m41 / 192), x: body.position.x, feet: body.bounds.max.y });
     });
   });
+  // 대사에서 멈춰 클릭을 기다리면(scene-gate.js) 화면을 클릭해 넘기면서 오프닝 시계를 at까지 돌린다.
+  const runOpeningTo = async at => {
+    for (let i = 0; i < 10 && await page.evaluate(() => openingElapsed) < at; i++) {
+      await page.clock.runFor(Math.max(17, at - await page.evaluate(() => openingElapsed)));
+      if (await page.evaluate(() => openingGate.waiting)) await page.evaluate(() => opening.click());
+    }
+  };
+  await page.clock.runFor(2000);
+  assert.equal(await page.evaluate(() => openingElapsed), 1399, '클릭하기 전에는 첫 대사에서 멈춰 있다');
+  assert(await page.locator('#opening .scene-next').isVisible(), '클릭 안내가 보인다');
   for (const [at, phase, frame, power] of [[1750, 'shutdown', 1, 'shutting-down'], [2700, 'off', 2, 'off'],
     [3275, 'turn', 3, 'off'], [3600, 'rising', 4, 'off']]) {
-    await page.clock.runFor(Math.max(0, at - await page.evaluate(() => openingElapsed)) + 34);
+    await runOpeningTo(at + 34);
     const current = await status();
     assert.equal(current.phase, phase); assert.equal(current.frame, frame); assert.equal(current.power, power);
     assert.equal(await chair.isVisible(), frame <= 3, 'Chair foreground clears when the player rises');
@@ -97,7 +107,7 @@ try {
     return { state: sprite.dataset.state, frame: sprite.dataset.frame, transform: idle.transform, clip: idle.clipPath,
       visible: [...sprite.querySelectorAll('img')].filter(img => getComputedStyle(img).display !== 'none').map(img => img.id).join() };
   });
-  await page.clock.runFor(4400 - await page.evaluate(() => openingElapsed));
+  await runOpeningTo(4400);
   const standing = await status();
   assert.equal(standing.phase, 'standing'); assert.equal(standing.power, 'off'); assert.equal(standing.facing, 1);
   assert(Math.abs(standing.x - 656) < 1 && Math.abs(standing.feet - 570) < 1, 'He stands where gameplay starts');
@@ -108,6 +118,9 @@ try {
     'Standing uses the idle sprite, not the walking cell of the opening sheet');
   await page.screenshot({ path: '.local/opening-standing.png' });
   await page.clock.runFor(1400);
+  assert.equal((await status()).active, true, '마지막 대사에서도 클릭을 기다린다');
+  await page.evaluate(() => opening.click());
+  await page.clock.runFor(100);
   const completed = await status();
   assert.equal(completed.active, false); assert.equal(completed.blocked, false); assert.equal(completed.power, 'off');
   assert.equal(completed.facing, 1); assert.equal(completed.grounded, true);

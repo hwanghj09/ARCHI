@@ -30,7 +30,7 @@ export async function collectRooftopKey(page) {
     await page.keyboard.up(key);
     await page.clock.runFor(34);
     if (!wasDark && await page.evaluate(() => buildingBlackout || blackoutSceneActive)) {
-      if (await page.locator('#blackout-scene').isVisible()) await page.clock.runFor(5000);
+      if (await page.locator("#blackout-scene").isVisible()) await page.locator("#blackout-skip").click();
       const remaining = target - await position();
       const resumeKey = remaining > 0 ? 'd' : 'a';
       await page.keyboard.down(resumeKey);

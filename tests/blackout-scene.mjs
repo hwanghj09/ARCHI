@@ -29,7 +29,11 @@ try {
     called: elevatorCars.some(car => car.travelling), inert: stage.inert }));
   // Advance the real fixed-step clock to a named scene timestamp (no direct phase mutation).
   const advance = async time => {
-    while ((await state()).active && (await state()).elapsed < time) await page.clock.runFor(17);
+    while ((await state()).active && (await state()).elapsed < time) { await passGate(); await page.clock.runFor(17); }
+  };
+  // 대사에서 멈춰 클릭을 기다리면(scene-gate.js) 화면을 클릭해 넘긴다.
+  const passGate = async () => {
+    if (await page.evaluate(() => blackoutGate.waiting)) await page.evaluate(() => blackoutScene.click());
   };
   await reset();
   assert.equal((await state()).phase, 'approach'); assert.equal((await state()).pose, 'walk');
@@ -38,6 +42,9 @@ try {
   await page.locator('#phone-button').dispatchEvent('pointerdown', { pointerId: 1, button: 0 });
   assert(await page.evaluate(() => !usingPhone && !usingInspection && !phoneLightOn && !jumpQueued));
   assert.equal((await state()).called, false);
+  await page.clock.runFor(2000);
+  assert.equal((await state()).elapsed, 999, '클릭하기 전에는 첫 대사에서 멈춰 있다');
+  assert(await page.locator('#blackout-scene .scene-next').isVisible(), '클릭 안내가 보인다');
   await advance(1400);
   assert.equal((await state()).pose, 'blackout-call'); assert.equal((await state()).frame, '1');
   assert.deepEqual(await page.locator('#blackout-call-sheet').evaluate(img => [img.naturalWidth, img.naturalHeight]), [512, 256]);
@@ -45,6 +52,7 @@ try {
   const changes = [];
   let lastLight = 'on';
   while ((await state()).elapsed < 3050) {
+    await passGate();
     await page.clock.runFor(17);
     const current = await state();
     if (current.lights === lastLight) continue;

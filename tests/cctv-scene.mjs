@@ -38,7 +38,11 @@ try {
       dim: Number(document.getElementById('cctv-dim').style.opacity || 0), bgm: cctvBgmPlaying() };
   });
   const advance = async time => {
-    while ((await state()).active && (await state()).elapsed < time) await page.clock.runFor(17);
+    while ((await state()).active && (await state()).elapsed < time) {
+      // 소등 컷씬은 대사에서 멈춰 클릭을 기다린다(scene-gate.js).
+      if (await page.evaluate(() => cctvLightsGate.waiting)) await page.evaluate(() => cctvScene.click());
+      await page.clock.runFor(17);
+    }
   };
 
   // 처음 들어오면 문 앞에서 컷씬이 시작된다. 벽은 CCTV 에셋 위에 검은 막을 덮은 꺼진 모습이고(HTML 칸 없음), 자막은 없다.
@@ -163,6 +167,9 @@ try {
   await advance(500);
   assert.match((await state()).caption, /그동안 계속 날 지켜보고 있었던 거야/);
   await page.screenshot({ path: '.local/cctv-lights-watch.png' });
+  await page.clock.runFor(4000);
+  assert.equal((await state()).elapsed, 2999, '클릭하기 전에는 첫 대사에서 멈춰 있다');
+  assert(await page.locator('#cctv-scene .scene-next').isVisible(), '클릭 안내가 보인다');
   await advance(3100);
   now = await state();
   assert.equal(now.phase, 'glitch'); assert.equal(await page.locator('#dynamic-scene .cctv-wall').getAttribute('data-glitch'), 'true');

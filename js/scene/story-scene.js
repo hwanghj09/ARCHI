@@ -1,11 +1,9 @@
-// 이야기 컷씬(혼잣말): 화면 위아래에 검은 띠가 깔리고 대사가 STORY_LINE_MS마다 한 줄씩 바뀐다. Esc나 건너뛰기로 끝낼 수 있고, 끝나면
+// 이야기 컷씬(혼잣말): 화면 위아래에 검은 띠가 깔리고 화면을 클릭할 때마다 대사가 한 줄씩 바뀐다. Esc나 건너뛰기로 끝낼 수 있고, 끝나면
 // 본 기록(flag)을 남기고 목표가 생긴다(objective.js). 진행 중에는 usingInspection을 켜서 이동·상호작용·메뉴·정신력 진행을 기존 조사창과 같이 막는다.
 const storyScene = document.getElementById('story-scene');
 const storyCaption = document.getElementById('story-caption');
-const STORY_LINE_MS = 3000;
 let storyLines = [];
 let storyFlag = null;
-let storyElapsed = 0;
 let storyLineShown = -1;
 let storyBlocked = [];
 
@@ -58,7 +56,6 @@ function startStoryScene({ lines, flag }) {
   usingInspection = true; // 이동·상호작용·메뉴·정신력 진행을 막는 기존 규칙을 그대로 쓴다
   storyLines = lines;
   storyFlag = flag;
-  storyElapsed = 0;
   storyScene.hidden = false;
   storyBlocked = [...document.body.children].filter(el => el !== storyScene && el.tagName !== 'SCRIPT' && !el.inert);
   for (const el of storyBlocked) el.inert = true;
@@ -69,12 +66,11 @@ function startStoryScene({ lines, flag }) {
   showStoryLine(0);
 }
 
-// 게임 루프(고정 간격)가 부른다. 마지막 대사까지 보여 준 뒤 STORY_LINE_MS가 더 지나면 끝난다.
-function updateStoryScene(elapsed) {
-  storyElapsed += elapsed;
-  const index = Math.floor(storyElapsed / STORY_LINE_MS);
-  if (index >= storyLines.length) return finishStoryScene();
-  if (index !== storyLineShown) showStoryLine(index);
+// 화면을 클릭하면 다음 대사로 넘어가고, 마지막 대사에서 클릭하면 끝난다.
+function advanceStoryScene() {
+  if (!storySceneActive) return;
+  if (storyLineShown + 1 >= storyLines.length) return finishStoryScene();
+  showStoryLine(storyLineShown + 1);
 }
 
 function finishStoryScene() {
@@ -90,4 +86,5 @@ function finishStoryScene() {
   stage.focus({ preventScroll: true });
 }
 
-document.getElementById('story-skip').addEventListener('click', finishStoryScene);
+document.getElementById('story-skip').addEventListener('click', event => { event.stopPropagation(); finishStoryScene(); });
+storyScene.addEventListener('click', advanceStoryScene);
