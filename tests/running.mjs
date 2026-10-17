@@ -67,10 +67,17 @@ try {
   await page.keyboard.down('ShiftLeft');
   await page.clock.runFor(100);
   assert.equal((await state()).animation, 'run', '30% still allows running');
+  // 불이 들어온 곳에서는 정신력이 낮아도 뛴다. 정전으로 어두우면(17층 전력을 끊으면) 30% 미만에서는 걷는다.
+  await page.evaluate(() => setDebugSanity(10));
+  await page.clock.runFor(300);
+  assert.equal(await page.evaluate(() => world.dataset.blackout), 'false');
+  assert.equal((await state()).animation, 'run', 'Low sanity still runs where the lights are on');
+  await page.evaluate(() => { solarPoweredFloors = []; updatePowerState(); });
+  assert.equal(await page.evaluate(() => world.dataset.blackout), 'true');
   for (const sanity of [29.9, 10, 0]) {
     await page.evaluate(value => setDebugSanity(value), sanity);
     await page.clock.runFor(300);
-    assert.equal((await state()).animation, 'walk', `${sanity}% cancels a held sprint`);
+    assert.equal((await state()).animation, 'walk', `${sanity}% in the blackout cancels a held sprint`);
     assert(await page.evaluate(() => Math.abs(body.velocity.x - speed * sanitySpeedFactor() / 60) < .01),
       'Low sanity uses walking speed');
     await page.keyboard.up('ShiftLeft');
@@ -82,7 +89,8 @@ try {
   }
   await page.evaluate(() => setDebugSanity(35));
   await page.clock.runFor(100);
-  assert.equal((await state()).animation, 'run', 'Recovery allows running again with Shift held');
+  assert.equal((await state()).animation, 'run', 'Recovery allows running again with Shift held, even in the blackout');
+  await page.evaluate(() => { solarPoweredFloors = [17]; updatePowerState(); });
   await page.keyboard.up('ShiftLeft');
   await page.keyboard.up('d');
   await page.keyboard.down('ShiftLeft');

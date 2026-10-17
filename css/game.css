@@ -971,3 +971,8 @@ nav button:focus-visible { outline: 2px solid #c9dde5; outline-offset: 4px; }
   radial-gradient(circle at 72% 68%, transparent 2.2px, #c3463b 2.4px 3.2px, transparent 3.4px),
   linear-gradient(#b8382e 0 5px, #ece7da 5px); box-shadow: 0 2px 3px #0008, inset 0 0 0 1px #9c968a; }
 #world:not([data-room="office"]) .office-calendar { display: none; }
+
+/* 마우스로 글자를 고르거나 그림을 끌지 못하게 한다(js/input/no-copy.js). 플레이어가 쓰는 입력 칸은 그대로 고를 수 있다. */
+body { -webkit-user-select: none; user-select: none; }
+input, textarea, [contenteditable="true"] { -webkit-user-select: text; user-select: text; }
+img { -webkit-user-drag: none; }
