@@ -2,6 +2,15 @@
 // 복도 벽면 범위는 service-corridor.png의 벽기둥 중심(x=3556, 4282)과 끝벽(4968) 기준이다.
 const CIRCUIT_GUIDE_MESSAGE = '태양광은 조명 전용이다. 승강기는 별도 비상 UPS로 공급한다. 공급 S 단자는 중계 릴레이 R을 거쳐 승강기 E 단자로 간다. 두 점검표를 함께 보고 경로를 추적하자. 네 가닥을 연결한 뒤 회로 검사를 통과해야 전력이 복구된다.';
 const MANAGER_ROOM_CODE = '1706';
+// 관리실 비상 출입 메모: 복도 청소 카트에 숨겨져 있고(corridor17.js), 챙기면 가방에서 다시 본다(inventory.js).
+const MANAGER_MEMO_TEXT = `관리자 외 출입금지실 비밀번호: ${MANAGER_ROOM_CODE}. 태양광은 전등 전용. 승강기가 멈췄으면 관리실 책상의 회로 안내도를 보고 비상 전력 분배반의 회선을 연결할 것.`;
+const MANAGER_MEMO_SHEET = { surface: 'memo', look: 'manager-access', writing: [
+  { as: 'title', text: '관리실 비상 출입 메모' },
+  '관리자 외 출입금지실',
+  { as: 'hand', text: `비밀번호: ${MANAGER_ROOM_CODE}`, ink: 'red', bold: true },
+  '태양광은 전등 전용.',
+  '승강기 정지 시 관리실 책상의 회로 안내도를 보고 비상 전력 분배반의 회선을 연결할 것.',
+] };
 const EMERGENCY_CIRCUITS = [
   { color: 'red', source: 'S1', relay: 'R2', target: 'E3', label: '승강기 구동' },
   { color: 'yellow', source: 'S2', relay: 'R4', target: 'E1', label: '제어 장치' },
@@ -15,7 +24,7 @@ const FLOOR17 = { id: 'f17', floor: 17, short: '17F', label: '17층 · 복도', 
     doorX: 4378, doorWidth: 171, doorStyle: 'metal', locked: true,
     code: MANAGER_ROOM_CODE, unlockedBy: 'f17-manager-unlocked',
     codeMessage: '관리자실 도어락이 열렸다. 안쪽에서 비상 전력 회선을 확인하자.',
-    message: '관리자실 문이 잠겨 있다. 4자리 번호를 입력해야 한다. 문 옆에 작은 글씨: "비상 출입 메모는 소화전 열쇠 옆에 보관."' },
+    message: '관리자실 문이 잠겨 있다. 4자리 번호를 입력해야 한다. 문 옆에 작은 글씨: "비상 출입 메모는 청소 카트에 보관."' },
 ] };
 const FLOOR17_ROOMS = interiorRooms(17, [
   { id: 'f17-restroom', ...restroomInterior },
