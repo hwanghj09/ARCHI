@@ -256,6 +256,11 @@ try {
   await page.clock.runFor(2500); // 회피하지 않으면 돌진 지속 시간 안에 잡아먹힌다
   assert.equal((await state()).hallucinationCaught, true);
   assert.equal(await page.locator('#hallucination-caught').isHidden(), false);
+  assert.equal(await page.locator('#hallucination-caught-title').textContent(), 'GAME OVER');
+  assert.equal(await page.locator('#hallucination-caught').evaluate(el => {
+    const box = el.getBoundingClientRect();
+    return box.top === 0 && box.left === 0 && box.width === innerWidth && box.height === innerHeight;
+  }), true, 'Hallucination game over covers the viewport');
   await page.locator('#hallucination-retry').click();
   const recovered = await state();
   assert.equal(recovered.caught, false);

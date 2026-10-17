@@ -1,7 +1,8 @@
 // 직접 조작하는 장치(소품·설비의 control): 레버를 내리고, 열쇠를 돌리고, 전원선을 뽑는 일을 문구로 넘기지 않고 플레이어가 직접 한다.
 // control은 단계 하나 또는 단계 목록이다(2층 영사기: 리모컨 버튼 → 디스크 투입). 단계마다 kind:
 //   lever·switch(dir 'down'|'up'), plug(dir 'out'|'in'), card — 끝까지 끌어야 한다(놓으면 제자리로 돌아간다).
-//   key·crank·clock — 시계 방향으로 turn도까지 돌린다. selector — 4층 UPS처럼 cycle 칸 하나를 골라 놓는다. press — 누른다.
+//   key·crank·clock — 시계 방향으로 turn도까지 돌린다. selector — 4층 UPS처럼 cycle 칸 하나를 골라 놓는다(cycle이 없으면 spec.choices).
+//   press — 누른다. 마지막 단계의 onDone(고른 칸)이 있으면 원래 조사 대신 그것을 부른다(1층 엔딩 분전반).
 // 마우스·터치로 끌거나 방향키(·WASD)로 움직이고, 버튼·선택은 Enter/Space/E로 누른다. 다 하면 원래 조사(문구·gives)가 이어진다.
 // doneBy: gives가 없는 설비가 이미 조작됐는지 보는 물건(B1 CCTV는 seenBy). when: 지금만 조작하는 설비(12층 네트워크 랙).
 const manualControl = document.getElementById('manual-control');
@@ -18,10 +19,10 @@ const ROTARY_CONTROLS = { key: 90, crank: 720, clock: 90 };
 
 // 지금 조작해야 하는가: 필요한 물건이 모자라면(missingMessage를 먼저 보여야 하면) 아직 아니다.
 function needsControl(door) {
+  if (door.shutterLever) return true; // 16층 CU 셔터 레버는 누를 때마다 올리거나 내린다(doors.js toggleShutter).
   const { control } = door;
   if (!control) return false;
   if (door.controlPassed) { door.controlPassed = false; return false; }
-  if (door.type === 'room') return door.key === 'exit' && Boolean(door.raiseMessage) && !collectedItems.has(dynamicFloorId);
   if (control.when) return Boolean(control.when());
   if ([].concat(door.requires || []).some(item => !collectedItems.has(item)) || (door.condition && !door.condition())) return false;
   if (door.sequence) return !collectedItems.has(door.sequence.gives) && door.element.dataset.done !== 'true';
@@ -32,7 +33,7 @@ function needsControl(door) {
 
 function openControl(door) {
   controlDoor = door;
-  controlSteps = [].concat(door.control);
+  controlSteps = [].concat(door.shutterLever ? shutterLeverStep(door) : door.control);
   usingControl = true;
   releaseInput();
   hint.hidden = true;
@@ -60,9 +61,9 @@ function nextControlStep() {
   const spec = controlSteps.shift();
   if (!spec) return finishControl();
   const { kind } = spec;
-  const choices = kind === 'selector' ? controlDoor.cycle.states : null;
+  const choices = kind === 'selector' ? spec.choices ?? controlDoor.cycle.states : null;
   controlStep = { spec, done: false, value: 0, target: LINEAR_CONTROLS[kind] ? 1 : spec.turn ?? ROTARY_CONTROLS[kind] ?? 1,
-    choice: choices ? cycleState(controlDoor.cycle) : null };
+    choices, choice: choices ? spec.choices ? spec.initial ?? 0 : cycleState(controlDoor.cycle) : null };
   manualControlLabel.textContent = spec.label;
   manualControlHelp.textContent = kind === 'press' ? '클릭 · Enter / Space / E' :
     kind === 'selector' ? '돌려서 고르기 · ←/→ 고르고 Enter' :
@@ -70,6 +71,7 @@ function nextControlStep() {
     `${{ down: '아래로', up: '위로', out: '오른쪽으로 당겨', in: '왼쪽으로 밀어' }[spec.dir] ?? '오른쪽으로'} 끝까지 · 방향키`;
   manualControlDevice.className = `control-device control-${kind}`;
   manualControlDevice.dataset.dir = spec.dir || '';
+  manualControlDevice.dataset.item = spec.item || '';
   manualControlDevice.dataset.done = 'false';
   manualControlDevice.setAttribute('aria-label', spec.label);
   manualControlDevice.replaceChildren(...buildControlParts(spec, choices));
@@ -77,7 +79,7 @@ function nextControlStep() {
   manualControlDevice.focus({ preventScroll: true });
 }
 
-// 장치 그림은 CSS로 그린다. --p(0~1)는 끌어 온 정도, --angle은 돌린 각도다.
+// 고정 바탕판과 움직이는 스프라이트를 겹친다. --p는 이동 정도, --angle은 회전 각도다.
 function buildControlParts(spec, choices) {
   const part = (className, text) => {
     const element = document.createElement('div');
@@ -87,9 +89,9 @@ function buildControlParts(spec, choices) {
   };
   const ends = (spec.ends || []).map((text, index) => part(`control-end control-end-${index}`, text));
   switch (spec.kind) {
-    case 'lever': case 'switch': return [part('control-plate'), part('control-slot'), part('control-handle'), ...ends];
-    case 'plug': return [part('control-socket', spec.socket), part('control-cable'), part('control-handle', spec.item), ...ends];
-    case 'card': return [part('control-reader', spec.reader ?? '태그'), part('control-handle', spec.item ?? '출입증')];
+    case 'lever': case 'switch': return [part('control-plate'), part('control-handle'), ...ends];
+    case 'plug': return [part('control-socket', spec.socket), part('control-handle'), ...ends];
+    case 'card': return [part('control-reader', spec.reader ?? '태그'), part('control-handle')];
     case 'press': return [part('control-plate'), part('control-handle', spec.text ?? '')];
     case 'selector': return [part('control-dial'), part('control-handle'),
       ...choices.map((text, index) => {
@@ -107,7 +109,7 @@ function renderControl() {
   const step = controlStep;
   const { kind } = step.spec;
   if (kind === 'selector') {
-    manualControlDevice.style.setProperty('--angle', `${controlDrag?.angle ?? selectorAngle(step.choice, controlDoor.cycle.states.length)}deg`);
+    manualControlDevice.style.setProperty('--angle', `${controlDrag?.angle ?? selectorAngle(step.choice, step.choices.length)}deg`);
     manualControlDevice.querySelectorAll('.control-choice').forEach((label, index) => label.classList.toggle('active', index === step.choice));
     return;
   }
@@ -138,9 +140,12 @@ function finishControl() {
   const door = controlDoor;
   const choice = controlStep?.choice;
   closeControl();
+  if (door.shutterLever) { toggleShutter(door); return; }
   door.controlDone = true;
   door.controlPassed = true;
   if (door.cycle) door.controlChoice = choice;
+  const onDone = [].concat(door.control).at(-1).onDone;
+  if (onDone) { door.controlPassed = false; onDone(choice, door); return; }
   interact();
 }
 
@@ -164,7 +169,7 @@ manualControlDevice.addEventListener('pointerdown', event => {
     manualControlDevice.dataset.dragging = 'true';
     return;
   }
-  controlDrag = { last: pointerAngle(event), angle: kind === 'selector' ? selectorAngle(step.choice, controlDoor.cycle.states.length) : null };
+  controlDrag = { last: pointerAngle(event), angle: kind === 'selector' ? selectorAngle(step.choice, step.choices.length) : null };
   manualControlDevice.dataset.dragging = 'true';
 });
 manualControlDevice.addEventListener('pointermove', event => {
@@ -181,9 +186,9 @@ manualControlDevice.addEventListener('pointermove', event => {
   const delta = ((angle - controlDrag.last + 540) % 360) - 180;
   controlDrag.last = angle;
   if (kind === 'selector') {
-    const limit = selectorAngle(controlDoor.cycle.states.length - 1, controlDoor.cycle.states.length) + 15;
+    const limit = selectorAngle(step.choices.length - 1, step.choices.length) + 15;
     controlDrag.angle = Math.max(-limit, Math.min(limit, controlDrag.angle + delta));
-    const count = controlDoor.cycle.states.length;
+    const count = step.choices.length;
     step.choice = Math.max(0, Math.min(count - 1, Math.round(controlDrag.angle / 70 + (count - 1) / 2)));
     renderControl();
     return;
@@ -219,7 +224,7 @@ manualControl.addEventListener('keydown', event => {
   if (kind === 'selector') {
     if (confirm && !event.repeat) completeControlStep();
     else if (key === 'left' || key === 'right') {
-      step.choice = Math.max(0, Math.min(controlDoor.cycle.states.length - 1, step.choice + (key === 'right' ? 1 : -1)));
+      step.choice = Math.max(0, Math.min(step.choices.length - 1, step.choice + (key === 'right' ? 1 : -1)));
       renderControl();
     }
     return;

@@ -11,9 +11,3 @@
 #dynamic-scene .fixture.guard-bot:is([data-patrol="grab"], [data-patrol="caught"]) { z-index: 7; }
 #player #caught-sheet { width: 400%; height: 100%; }
 #player[data-state="caught"] #caught-sheet { display: block; }
-#guard-capture { position: fixed; z-index: 12; bottom: 16px; left: 50%; transform: translateX(-50%); width: min(480px, calc(100vw - 24px)); padding: 14px 18px; background: #111b20f5; border: 2px solid #ad7666; color: #eee5d6; text-align: left; }
-#guard-capture[hidden] { display: none; }
-#guard-capture h2 { margin: 0 0 8px; font-size: 18px; }
-#guard-capture p { margin: 0 0 10px; font-size: 12px; line-height: 1.5; }
-#guard-retry { min-height: 44px; min-width: 120px; border: 1px solid #b9c7b8; background: #243a36; color: #fff; font: inherit; cursor: pointer; }
-#guard-retry:focus-visible { outline: 3px solid #eac47d; outline-offset: 3px; }

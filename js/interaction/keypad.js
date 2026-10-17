@@ -10,7 +10,8 @@ function openKeypad(target) {
   releaseInput();
   hint.hidden = true;
   document.getElementById('keypad-title').textContent = target.name;
-  document.getElementById('keypad-text').textContent = target.type === 'room' ? target.message : target.codePrompt;
+  const prompt = target.codePrompt ?? (target.type === 'room' ? target.message : '');
+  document.getElementById('keypad-text').textContent = typeof prompt === 'function' ? prompt() : prompt;
   keypadInput.value = '';
   keypadInput.maxLength = String(target.code).length;
   keypadError.textContent = '';
@@ -35,7 +36,7 @@ function submitKeypad() {
   const target = keypadTarget;
   if (!target) return;
   if (keypadInput.value.trim().toLowerCase() !== String(target.code).toLowerCase()) {
-    keypadError.textContent = '비밀번호가 맞지 않는다.';
+    keypadError.textContent = target.wrongMessage || '비밀번호가 맞지 않는다.';
     playGameSound('deny');
     keypadInput.select();
     return;
@@ -65,8 +66,10 @@ function submitKeypad() {
   } else {
     if (target.gives) collectedItems.add(target.gives);
     closeKeypad();
-    // 열린 소품의 내용은 조사 창으로 보인다(1층 경비 로봇 정비 패널은 writing이 있으면 그 화면으로).
-    openInspection(target.name, target.message, target);
+    // then이 있으면(B2 DELETE 관리자 확인) 그다음 단계로 바로 넘어간다. 아니면 열린 소품의 내용을 조사 창으로 보인다
+    // (1층 경비 로봇 정비 패널은 writing이 있으면 그 화면으로).
+    if (target.then) target.then();
+    else openInspection(target.name, target.message, target);
   }
 }
 

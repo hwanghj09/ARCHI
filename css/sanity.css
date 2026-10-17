@@ -83,15 +83,6 @@ body[data-hallucinating="true"] #stage { animation: screen-tremor .16s steps(2) 
 @keyframes eye-throb { 0%, 100% { opacity: .7; transform: scale(.85); } 50% { opacity: 1; transform: scale(1.1); } }
 
 
-/* 환각에게 잡아먹히는 게임 오버: 경비 로봇 포획 패널과 같은 자리·같은 생김새를 쓴다. */
-#hallucination-caught { position: fixed; z-index: 14; bottom: 16px; left: 50%; transform: translateX(-50%);
-  width: min(480px, calc(100vw - 24px)); padding: 14px 18px; background: #1c0e11f5; border: 2px solid #8a3d4d;
-  color: #eee5d6; text-align: left; }
-#hallucination-caught[hidden] { display: none; }
-#hallucination-caught h2 { margin: 0 0 8px; font-size: 18px; }
-#hallucination-caught p { margin: 0 0 10px; font-size: 12px; line-height: 1.5; }
-#hallucination-retry { min-height: 44px; min-width: 120px; border: 1px solid #c79b9b; background: #3a2328; color: #fff; font: inherit; cursor: pointer; }
-#hallucination-retry:focus-visible { outline: 3px solid #eac47d; outline-offset: 3px; }
 
 @media (prefers-reduced-motion: reduce) {
   #hallucinations[data-mode], #hallucinations::after, body[data-hallucinating="true"] #stage { animation: none; }

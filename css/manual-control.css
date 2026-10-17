@@ -1,86 +1,85 @@
-/* 직접 조작하는 장치(manual-control.js). 장치 그림은 CSS로 그린다: --p는 끌어 온 정도(0~1), --angle은 돌린 각도. */
-#manual-control { position: fixed; left: 50%; top: 50%; z-index: 7; box-sizing: border-box; width: min(400px, calc(100vw - 32px));
-  padding: 18px 18px 14px; border: 2px solid #3d4e52; background: #0d1417f2; color: #cfd9d3; font: 14px Arial, sans-serif;
+/* 고정 바탕판과 투명 PNG 부품을 겹쳐 --p(이동)·--angle(회전)에 맞춰 움직인다. */
+#manual-control { position: fixed; left: 50%; top: 50%; z-index: 12; box-sizing: border-box; width: min(400px, calc(100vw - 32px));
+  max-height: calc(100dvh - 24px); overflow-y: auto; padding: 18px 18px 14px; border: 2px solid #3d4e52;
+  background: #0d1417f2; color: #cfd9d3; font: 14px Arial, sans-serif;
   transform: translate(-50%, -50%); box-shadow: 0 12px 40px #000a; text-align: center; }
 #manual-control[hidden] { display: none; }
 #manual-control h2 { margin: 0 0 6px; color: #e2d2b8; font-size: 16px; }
 #manual-control-label { margin: 0 0 12px; line-height: 1.5; color: #f2e6c8; }
-#manual-control-help { margin: 10px 0 10px; color: #8b9893; font-size: 12px; }
+#manual-control-help { margin: 10px 0; color: #8b9893; font-size: 12px; }
 #manual-control-close { padding: 7px 14px; border: 1px solid #7f8e84; border-radius: 2px; background: #18211f; color: #e7e3d2; font: 13px Arial, sans-serif; cursor: pointer; }
 
-.control-device { --p: 0; --angle: 0deg; position: relative; height: 230px; margin: 0 auto; border-radius: 6px;
+.control-device { --p: 0; --angle: 0deg; position: relative; height: 252px; margin: 0 auto; border-radius: 6px;
   background: radial-gradient(circle at 50% 40%, #1d2a2d, #0a1012 75%); touch-action: none; user-select: none; cursor: grab; outline: none; overflow: hidden; }
 .control-device:focus-visible { box-shadow: 0 0 0 3px #f2d689; }
 .control-device[data-dragging="true"] { cursor: grabbing; }
-.control-device .control-handle { transition: transform .18s ease-out; }
+.control-plate, .control-handle, .control-socket, .control-reader, .control-dial { position: absolute; background-size: 100% 100%; background-repeat: no-repeat; }
+.control-device .control-handle { transition: transform .18s ease-out, left .18s ease-out, opacity .18s ease-out; }
 .control-device[data-dragging="true"] .control-handle { transition: none; }
-.control-device[data-done="true"] .control-handle { filter: drop-shadow(0 0 8px #8fe8b0); }
+.control-device[data-done="true"] .control-handle { filter: drop-shadow(0 0 6px #8fe8b0); }
 .control-end { position: absolute; color: #a7b2ab; font: bold 12px monospace; }
 
-/* 레버·스위치: 세로 홈을 따라 손잡이를 끈다. */
-.control-lever .control-plate, .control-switch .control-plate, .control-press .control-plate { position: absolute; left: 50%; top: 14px; width: 120px; height: 202px;
-  transform: translateX(-50%); border: 2px solid; border-color: #737d77 #262e2d #1b2222 #59625d; border-radius: 4px; background: linear-gradient(#3b4542, #252e2c); }
-.control-lever .control-slot, .control-switch .control-slot { position: absolute; left: 50%; top: 30px; width: 14px; height: 170px; transform: translateX(-50%);
-  border-radius: 7px; background: #050809; box-shadow: inset 0 2px 4px #000; }
-.control-lever .control-handle { position: absolute; left: 50%; top: 18px; width: 92px; height: 24px; margin-left: -46px; border-radius: 5px;
-  background: linear-gradient(#e2584c, #9d2c24); box-shadow: 0 3px 0 #4c120e, 0 6px 10px #0008; transform: translateY(calc(var(--p) * 170px)); }
-.control-lever .control-handle::before { content: ''; position: absolute; left: 50%; top: 24px; width: 10px; height: 18px; margin-left: -5px; background: #8f9893; }
-.control-lever[data-dir="up"] .control-handle { top: 188px; transform: translateY(calc(var(--p) * -170px)); }
-.control-switch .control-plate { width: 90px; height: 150px; top: 40px; }
-.control-switch .control-slot { top: 70px; height: 90px; }
-.control-switch .control-handle { position: absolute; left: 50%; top: 66px; width: 38px; height: 30px; margin-left: -19px; border-radius: 4px;
-  background: linear-gradient(#e6e1d2, #a8a293); box-shadow: 0 3px 0 #545045; transform: translateY(calc(var(--p) * 70px)); }
-.control-switch[data-dir="up"] .control-handle { top: 136px; transform: translateY(calc(var(--p) * -70px)); }
+/* 레버·스위치: 부품만 홈을 따라 이동한다. */
+.control-lever .control-plate { left: 50%; top: 6px; width: 128px; height: 240px; transform: translateX(-50%);
+  background-image: url('../assets/ui/manual-control/lever-plate.png'); }
+.control-lever .control-handle { left: 50%; top: 6px; width: 96px; height: 58px; margin-left: -48px;
+  background-image: url('../assets/ui/manual-control/lever-handle.png'); transform: translateY(calc(var(--p) * 170px)); }
+.control-lever[data-dir="up"] .control-handle { top: 176px; transform: translateY(calc(var(--p) * -170px)); }
+.control-switch .control-plate { left: 50%; top: 48px; width: 100px; height: 156px; transform: translateX(-50%);
+  background-image: url('../assets/ui/manual-control/switch-plate.png'); }
+.control-switch .control-handle { left: 50%; top: 64px; width: 24px; height: 44px; margin-left: -12px;
+  background-image: url('../assets/ui/manual-control/switch-handle.png'); transform: translateY(calc(var(--p) * 70px)); }
+.control-switch[data-dir="up"] .control-handle { top: 134px; transform: translateY(calc(var(--p) * -70px)); }
 .control-lever .control-end, .control-switch .control-end { left: calc(50% + 70px); }
-.control-lever .control-end-0, .control-switch .control-end-0 { top: 24px; }
-.control-lever .control-end-1, .control-switch .control-end-1 { top: 190px; }
-.control-switch .control-end-0 { top: 72px; }
-.control-switch .control-end-1 { top: 142px; }
+.control-lever .control-end-0 { top: 16px; }
+.control-lever .control-end-1 { top: 212px; }
+.control-switch .control-end-0 { top: 70px; }
+.control-switch .control-end-1 { top: 164px; }
 .control-lever[data-dir="up"] .control-end-0, .control-switch[data-dir="up"] .control-end-0 { color: #9be8cb; }
 .control-lever:not([data-dir="up"]) .control-end-1, .control-switch:not([data-dir="up"]) .control-end-1 { color: #f2b29a; }
 
-/* 플러그(뽑기·꽂기)와 출입증: 가로로 끈다. 꽂기는 오른쪽에서 시작해 소켓으로 밀어 넣는다. */
-.control-socket, .control-reader { position: absolute; left: 34px; top: 70px; width: 76px; height: 90px; display: grid; place-items: end center; padding-bottom: 6px;
-  box-sizing: border-box; border: 2px solid #59625d; border-radius: 4px; background: #222b29; color: #c7cec7; font: bold 11px monospace; }
-.control-socket::before { content: ''; position: absolute; right: 8px; top: 30px; width: 18px; height: 22px; border-radius: 2px; background: #030505; }
-.control-plug .control-handle { position: absolute; left: 92px; top: 96px; width: 70px; height: 36px; display: grid; place-items: center; border-radius: 4px 8px 8px 4px;
-  background: linear-gradient(#f0c94c, #b38a1f); color: #2c2108; font: bold 11px monospace; box-shadow: 0 3px 0 #5c4510;
-  transform: translateX(calc(var(--p) * 150px)); }
-.control-plug[data-dir="in"] .control-handle { transform: translateX(calc((1 - var(--p)) * 150px)); }
-.control-plug .control-cable { position: absolute; left: 160px; right: 0; top: 108px; height: 10px; background: #3b4440; transform-origin: left;
-  transform: translateX(calc(var(--p) * 150px)); }
-.control-plug[data-dir="in"] .control-cable { transform: translateX(calc((1 - var(--p)) * 150px)); }
-.control-card .control-reader { left: auto; right: 34px; place-items: center; color: #9be8cb; }
-.control-card .control-handle { position: absolute; left: 30px; top: 86px; width: 84px; height: 56px; display: grid; place-items: center; border-radius: 6px;
-  background: linear-gradient(135deg, #f4f1e6, #c9c3b2); color: #26332f; font: bold 12px Arial, sans-serif; box-shadow: 0 4px 8px #0008;
-  transform: translateX(calc(var(--p) * 170px)); }
+/* 가로 이동은 장치 폭에 맞춰 좁은 화면에서도 물건 전체가 보이게 한다. */
+.control-socket { left: 28px; top: 72px; width: 84px; height: 110px; display: grid; align-items: end;
+  background-image: url('../assets/ui/manual-control/socket.png'); background-size: 84px 84px;
+  color: #c7cec7; font: bold 11px monospace; }
+.control-plug .control-handle { left: calc(78px + (100% - 178px) * var(--p)); top: 90px; width: 96px; height: 54px;
+  background-image: url('../assets/ui/manual-control/plug.png'); }
+.control-plug[data-dir="in"] .control-handle { left: calc(78px + (100% - 178px) * (1 - var(--p))); }
+.control-plug[data-item="NAS"] .control-socket { top: 100px; height: 65px; background-image: url('../assets/ui/manual-control/disc-slot.png'); background-size: 84px 30px; }
+.control-plug[data-item="NAS"] .control-handle { top: 66px; height: 96px; background-image: url('../assets/ui/manual-control/disc.png'); }
+.control-plug[data-item="핸들"] .control-handle { background-image: url('../assets/ui/manual-control/insert-crank.png'); }
+.control-plug[data-dir="in"][data-done="true"] .control-handle { opacity: 0; }
+.control-reader { right: 22px; top: 62px; width: 76px; height: 124px; display: grid; align-items: end;
+  background-image: url('../assets/ui/manual-control/reader.png'); background-size: 76px 104px; color: #9be8cb; font: bold 11px monospace; }
+.control-card .control-handle { left: calc(22px + (100% - 126px) * var(--p)); top: 88px; width: 88px; height: 56px;
+  background-image: url('../assets/ui/manual-control/badge.png'); }
 
-/* 열쇠·크랭크·시계·선택기: 원판 위의 손잡이를 돌린다. */
-.control-dial { position: absolute; left: 50%; top: 24px; width: 180px; height: 180px; margin-left: -90px; border-radius: 50%;
-  border: 3px solid #66706b; background: radial-gradient(circle, #3a4441, #1d2524 70%); box-shadow: 0 6px 14px #000a; }
+/* 회전 중심은 고정한다. 키·크랭크·시계 바늘의 축이 원판 중앙에 놓인다. */
+.control-dial { left: 50%; top: 24px; width: 180px; height: 180px; margin-left: -90px;
+  background-image: url('../assets/ui/manual-control/dial.png'); }
 .control-key .control-handle, .control-crank .control-handle, .control-clock .control-handle, .control-selector .control-handle {
-  position: absolute; left: 50%; top: 114px; width: 0; height: 0; transform: rotate(var(--angle)); }
-.control-key .control-handle::before { content: ''; position: absolute; left: -9px; top: -58px; width: 18px; height: 116px; border-radius: 4px; background: linear-gradient(90deg, #d8b85a, #9a7c2a); }
-.control-key .control-handle::after { content: ''; position: absolute; left: -24px; top: -84px; width: 48px; height: 34px; border-radius: 14px; background: #c9a84b; box-shadow: inset 0 0 0 6px #9a7c2a; }
-.control-crank .control-handle::before { content: ''; position: absolute; left: -8px; top: -76px; width: 16px; height: 84px; border-radius: 6px; background: #9aa39d; }
-.control-crank .control-handle::after { content: ''; position: absolute; left: -16px; top: -96px; width: 32px; height: 32px; border-radius: 50%; background: radial-gradient(#e2584c, #8f281f); }
-.control-clock .control-handle::before { content: ''; position: absolute; left: -4px; top: -62px; width: 8px; height: 66px; border-radius: 4px; background: #1d2423; }
-.control-clock .control-handle::after { content: ''; position: absolute; left: -7px; top: -7px; width: 14px; height: 14px; border-radius: 50%; background: #9d2c24; }
-.control-clock .control-dial { background-image: radial-gradient(circle, #f2eee0 60%, #c8c2b0 72%),
-  conic-gradient(from -2deg, #1d2423 0 4deg, transparent 0 86deg, #1d2423 0 94deg, transparent 0 176deg, #1d2423 0 184deg, transparent 0 266deg, #1d2423 0 274deg, transparent 0); }
-.control-selector .control-handle::before { content: ''; position: absolute; left: -26px; top: -26px; width: 52px; height: 52px; border-radius: 50%; background: radial-gradient(#55605b, #2b3331); box-shadow: 0 3px 6px #000a; }
-.control-selector .control-handle::after { content: ''; position: absolute; left: -4px; top: -70px; width: 8px; height: 50px; border-radius: 4px; background: #f2d689; }
+  left: 50%; top: 114px; width: 0; height: 0; transform: rotate(var(--angle)); }
+.control-key .control-handle::before, .control-crank .control-handle::before,
+.control-clock .control-handle::before, .control-selector .control-handle::before {
+  content: ''; position: absolute; background-size: 100% 100%; background-repeat: no-repeat; }
+.control-key .control-handle::before { left: -27px; top: -86px; width: 54px; height: 90px; background-image: url('../assets/ui/manual-control/key.png'); }
+.control-crank .control-handle::before { left: -16px; top: -98px; width: 32px; height: 112px; background-image: url('../assets/ui/manual-control/crank.png'); }
+.control-clock .control-dial { background-image: url('../assets/ui/manual-control/clock.png'); }
+.control-clock .control-dial::after { content: ''; position: absolute; left: 88px; top: 18px; width: 4px; height: 72px; background: #30312e; }
+.control-clock .control-handle::before { left: -8px; top: -64px; width: 16px; height: 72px; background-image: url('../assets/ui/manual-control/clock-hand.png'); }
+.control-selector .control-handle::before { left: -32px; top: -32px; width: 64px; height: 64px; background-image: url('../assets/ui/manual-control/selector.png'); }
 .control-choice { --at: 0deg; position: absolute; left: 50%; top: 114px; width: 84px; margin-left: -42px; color: #8b9893; font: bold 11px Arial, sans-serif;
-  transform: rotate(var(--at)) translateY(-108px) rotate(calc(-1 * var(--at))); }
+  text-shadow: 0 1px 2px #000; transform: rotate(var(--at)) translateY(calc(-1 * min(108px, (100vw - 72px) / 2 - 42px))) rotate(calc(-1 * var(--at))); }
 .control-choice.active { color: #9be8cb; }
 .control-selector .control-dial { top: 34px; width: 160px; height: 160px; margin-left: -80px; }
-.control-key .control-end, .control-crank .control-end { top: 20px; }
 .control-key .control-end-0 { left: calc(50% - 12px); top: 4px; }
 .control-key .control-end-1 { left: calc(50% + 98px); top: 106px; color: #9be8cb; }
 
-/* 버튼: 누르면 들어간다. */
+/* 버튼 캡만 눌려 들어간다. 문구는 HTML로 유지한다. */
 .control-press { cursor: pointer; }
-.control-press .control-handle { position: absolute; left: 50%; top: 60px; width: 110px; height: 110px; margin-left: -55px; display: grid; place-items: center;
-  border-radius: 50%; background: radial-gradient(circle at 40% 35%, #8ee08f, #2f8a3c); color: #0d2a12; font: bold 18px Arial, sans-serif;
-  box-shadow: 0 8px 0 #1d4f25, 0 12px 16px #000a; }
-.control-press[data-done="true"] .control-handle { transform: translateY(6px); box-shadow: 0 2px 0 #1d4f25, 0 4px 8px #000a; }
+.control-press .control-plate { left: 50%; top: 36px; width: 174px; height: 174px; transform: translateX(-50%);
+  background-image: url('../assets/ui/manual-control/button-plate.png'); }
+.control-press .control-handle { left: 50%; top: 68px; width: 110px; height: 110px; margin-left: -55px; display: grid; place-items: center;
+  background-image: url('../assets/ui/manual-control/button.png'); color: #08200d; text-shadow: 0 1px #b8efb8; font: bold 18px Arial, sans-serif; }
+.control-press[data-done="true"] .control-handle { transform: translateY(6px); }
+@media (prefers-reduced-motion: reduce) { .control-device .control-handle { transition: none; } }

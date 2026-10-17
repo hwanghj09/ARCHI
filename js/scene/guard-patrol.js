@@ -10,10 +10,74 @@ const guardPatrol = { x: 4530, facing: -1, wait: 0, elapsed: 0, mode: 'dock',
 // pursuit — 놓쳐도 포기하지 않는다. followToElevator — 엘리베이터 앞에서도 멈추지 않는다. sight — 감지 거리(아래).
 // chaseSpeed — 추격 속도(px/s)를 돌려주는 함수(없으면 270).
 // onCaught — 붙잡는 연출이 끝나면 '다시 시도' 창 대신 부른다. 옵션이 없는 R-01은 예전과 똑같이 움직인다.
+// battery — 층 전력과 상관없이 움직인다. quiet — 추격이 끝나도 1층 R-01의 스토리 기록(f1-chase-ended)을 남기지 않는다.
+// 퍼즐 E: 층 순찰 로봇(층 설정 robot, 3층 R-05)은 floorRobots에 층마다 하나씩 상태를 남긴다. 미끼(floorRobotLure)가 울리면
+// 'lure' 모드로 그 자리까지 가서 그쪽을 바라보며 기다리다가('return') 순찰로 돌아간다. 다른 장면에 있을 때 울리면 바로 그 자리에 가 있다.
 const guardCapturePanel = document.getElementById('guard-capture');
 let guardBlocked = [];
 let b2Robots = [];
 let caughtBy = null; // 지금 수호를 붙잡고 있는 로봇
+const floorRobots = {};
+let floorRobotLure = null; // { floor, left } — 남은 ms가 지나면 그 층 로봇을 미끼 자리로 부른다
+
+function floorRobotState(floorId) {
+  const config = floorById.get(floorId).robot;
+  floorRobots[floorId] ??= { name: config.name, x: config.x, home: config.x, facing: -1, wait: 0, elapsed: 0, mode: 'patrol', lostTime: 0,
+    captureTime: 0, door: null, image: null, chaseOriginX: null, spottedX: null, firstEncounter: false, quiet: true, battery: true,
+    sight: config.sight, lure: null, onCaught: () => floorRobotCaught(floorId) };
+  return floorRobots[floorId];
+}
+
+// 지금 장면이 순찰 로봇이 있는 복도면 그 로봇을 그린다(조사 대상은 아니다). disabledBy를 챙겼으면 나오지 않는다.
+function mountFloorRobot() {
+  for (const robot of Object.values(floorRobots)) robot.door = robot.image = null;
+  const config = room === 'dynamic' ? floorById.get(dynamicFloorId)?.robot : null;
+  if (!config || collectedItems.has(config.disabledBy)) return;
+  const robot = floorRobotState(dynamicFloorId);
+  const element = document.createElement('div');
+  element.className = 'fixture guard-bot b2-guard-bot';
+  element.setAttribute('role', 'img');
+  element.setAttribute('aria-label', `순찰 로봇 ${config.name}`);
+  const sprite = document.createElement('div');
+  sprite.className = 'guard-robot-sprite';
+  const image = new Image();
+  image.src = 'assets/objects/guard-robot/guard-patrol.png';
+  image.alt = ''; image.draggable = false;
+  sprite.append(image);
+  element.append(sprite);
+  dynamicScene.append(element);
+  robot.door = { element, width: 78, patrol: config.patrol };
+  robot.image = image;
+  updateRobot(robot, 0);
+}
+
+function floorRobotCaught(floorId) {
+  const robot = floorRobots[floorId];
+  releaseGuardCapture();
+  Object.assign(robot, { x: robot.home, facing: -1, mode: 'patrol', lure: null, wait: 0 });
+  performFloorChange(floorId, 0);
+  releaseInput(); stage.focus();
+  showStatus(`${robot.name}이 수호를 엘리베이터 앞까지 끌고 와 내려놓았다. 순찰 구역에는 들어오지 말라는 듯 붉은 불을 깜빡인다.`, 5000);
+}
+
+// 미끼(3층 청소 카트 작업 알림): delay ms 뒤 그 층 로봇이 lure 자리로 간다.
+function startFloorRobotLure(floorId, delay) {
+  floorRobotLure = { floor: floorId, left: delay };
+}
+
+function fireFloorRobotLure() {
+  const { floor } = floorRobotLure;
+  floorRobotLure = null;
+  const config = floorById.get(floor).robot;
+  const robot = floorRobotState(floor);
+  playGameSound('elevator-alarm');
+  if (currentSceneFloor === floorById.get(floor).floor) showStatus(config.lure.message, 4500);
+  if (!['patrol', 'return', 'dock', 'lure'].includes(robot.mode)) return;
+  robot.chaseOriginX = robot.mode === 'lure' ? robot.chaseOriginX : robot.x;
+  robot.mode = 'lure';
+  robot.lure = { ...config.lure, left: config.lure.wait };
+  if (!robot.door) { robot.x = robot.lure.x; robot.facing = robot.lure.face; }
+}
 
 function releaseGuardCapture() {
   const robot = caughtBy ?? guardPatrol;
@@ -78,6 +142,8 @@ function mountGuardPatrol() {
 
 function updateGuardPatrol(delta) {
   updateRobot(guardPatrol, delta);
+  if (floorRobotLure && delta > 0 && (floorRobotLure.left -= delta) <= 0) fireFloorRobotLure();
+  for (const robot of Object.values(floorRobots)) updateRobot(robot, delta);
   // 문 앞에서 멈춰 선(hold) 로봇은 그리기만 한다.
   for (const robot of b2Robots) updateRobot(robot, robot.hold > 0 ? 0 : delta);
 }
@@ -85,7 +151,7 @@ function updateGuardPatrol(delta) {
 function updateRobot(robot, delta) {
   if (!robot.door) return;
   const { left, right, speed, pause } = robot.door.patrol;
-  const powered = world.dataset.powered === 'true';
+  const powered = robot.battery || world.dataset.powered === 'true';
   if (!powered) {
     if (playerCaught) { releaseGuardCapture(); stage.focus(); }
     // 아직 한 번도 감지되지 않은 'dock' 상태는 전력이 끊겨도 그대로 둔다 — 안 그러면 처음 전력이 들어오는
@@ -119,7 +185,8 @@ function updateRobot(robot, delta) {
     const inBeat = robot.sight || body.position.x >= left;
     const seesPlayer = sameLevel && (Math.abs(dx) < 130 || (inBeat && dx * robot.facing > 0 && Math.abs(dx) < (robot.sight ?? 720)));
     // 'return'(복귀 이동 중)도 patrol/dock과 똑같이 감지된다 — 복귀 중이라고 무적은 아니다.
-    if ((robot.mode === 'patrol' || robot.mode === 'dock' || robot.mode === 'return') && seesPlayer) {
+    if (['patrol', 'dock', 'return', 'lure'].includes(robot.mode) && seesPlayer) {
+      robot.lure = null;
       robot.mode = 'chase'; robot.lostTime = 0; robot.chaseOriginX = robot.x; robot.spottedX = body.position.x;
       playGameSound('robot-alert', { x: robot.x });
       showStatus('경비 로봇이 수호를 감지했다. 거리를 벌려야 한다.', 2400);
@@ -137,7 +204,7 @@ function updateRobot(robot, delta) {
         // 순간이동으로 자리를 되돌리지 않는다 — 'return' 모드로 넘어가 감지했던 자리까지 순찰 속도로
         // 직접 걸어서 돌아가고(아래 return 처리), 도착하면 그제서야 patrol로 돌아간다.
         robot.mode = 'return'; robot.wait = 0; robot.lostTime = 0;
-        collectedItems.add('f1-chase-ended'); // 추격이 끝났다: 3초 뒤 혼잣말 컷씬(story-scene.js)
+        if (!robot.quiet) collectedItems.add('f1-chase-ended'); // 추격이 끝났다: 3초 뒤 혼잣말 컷씬(story-scene.js)
         showStatus('엘리베이터 쪽으로 피하자 경비 로봇이 감지했던 자리로 돌아가기 시작했다.', 2400);
         if (robot.firstEncounter) {
           robot.firstEncounter = false;
@@ -148,7 +215,7 @@ function updateRobot(robot, delta) {
         robot.lostTime = robot.pursuit || (sameLevel && Math.abs(dx) < 600) ? 0 : robot.lostTime + delta;
         if (robot.lostTime >= 1800) {
           robot.mode = 'patrol'; robot.wait = 0;
-          collectedItems.add('f1-chase-ended');
+          if (!robot.quiet) collectedItems.add('f1-chase-ended');
           if (robot.firstEncounter) {
             robot.firstEncounter = false;
             showStatus('직원증을 소지하고있지만 로봇은 멈추지 않았다 — 이건 단순 정전이 아니다.', 4200);
@@ -165,7 +232,20 @@ function updateRobot(robot, delta) {
       }
     }
   }
-  if (powered && !playerCaught && robot.mode === 'return') {
+  if (powered && !playerCaught && robot.mode === 'lure' && robot.lure && delta > 0) {
+    // 미끼 자리까지 빠르게 가서 그쪽(face)을 바라보며 기다린다. 다 기다리면 처음 자리로 걸어 돌아간다('return').
+    const { lure } = robot;
+    if (robot.x !== lure.x) {
+      robot.facing = lure.x > robot.x ? 1 : -1;
+      const stride = lure.speed * delta / 1000;
+      robot.x = Math.abs(lure.x - robot.x) <= stride ? lure.x : robot.x + robot.facing * stride;
+      robot.elapsed += delta;
+    } else {
+      robot.facing = lure.face;
+      lure.left -= delta;
+      if (lure.left <= 0) { robot.mode = 'return'; robot.lure = null; }
+    }
+  } else if (powered && !playerCaught && robot.mode === 'return') {
     // 순간이동하지 않고 순찰 속도로 감지했던 자리까지 걸어 돌아간다. 목적지는 순찰 구간 안으로 묶어서
     // 쫓아온 길만 되짚고 벽이나 구간 밖으로 나가지 않는다. 돌아가는 중에도 평소와 같은 조건으로
     // 다시 감지될 수 있고(위 if), 그러면 이 블록에 닿기 전에 이미 'chase'로 바뀌어 있다. 끝까지
@@ -190,17 +270,18 @@ function updateRobot(robot, delta) {
     }
   }
   // 돌아가는 중('return')은 붙잡기 시트가 아니라 순찰 시트의 바퀴 프레임으로 걷는다.
-  const attack = powered && !['patrol', 'dock', 'return'].includes(robot.mode);
+  const attack = powered && !['patrol', 'dock', 'return', 'lure'].includes(robot.mode);
+  const lureWaiting = robot.mode === 'lure' && robot.lure && robot.x === robot.lure.x;
   const frame = !powered ? 7 : robot.mode === 'chase' ? Math.floor(robot.elapsed / 120) % 2 :
     playerCaught ? 2 + Math.min(5, Math.floor(robot.captureTime / 160)) :
-    robot.mode === 'dock' ? 4 :
+    robot.mode === 'dock' || lureWaiting ? 4 :
     robot.wait > 0 ? 4 + Math.min(2, Math.floor((pause - robot.wait) / (pause / 3))) : Math.floor(robot.elapsed / 120) % 4;
   const { door } = robot;
   door.x = robot.x - door.width / 2;
   door.y = floorY - 124;
   door.outline = [robot.x - 39, floorY - 124, 78, 124];
   Object.assign(door.element.style, { left: `${robot.x - 80}px`, top: `${floorY - 237 * .625}px`, width: '160px', height: '160px' });
-  door.element.dataset.patrol = !powered ? 'off' : attack ? robot.mode : robot.mode === 'dock' ? 'scan' : robot.wait > 0 ? 'scan' : 'move';
+  door.element.dataset.patrol = !powered ? 'off' : attack ? robot.mode : robot.mode === 'dock' || lureWaiting ? 'scan' : robot.wait > 0 ? 'scan' : 'move';
   door.element.dataset.frame = String(frame);
   door.element.firstElementChild.style.transform = `scaleX(${robot.facing})`;
   door.element.firstElementChild.style.width = attack ? '240px' : '160px';
