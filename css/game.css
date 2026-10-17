@@ -60,6 +60,8 @@ body { margin: 0; overflow: hidden; background: #27292b; color: #eee; font: 14px
 #floor17-extension > img { position: absolute; left: 3200px; top: 0; width: 1800px; height: 760px; image-rendering: pixelated; }
 #floor17-extension .art-door { border: 0; background: none; box-shadow: none; }
 #floor17-hydrant { position: absolute; left: 4023px; top: 248px; width: 145px; height: 220px; }
+/* 소화전 표시등: 비상전원으로 늘 켜져 있어 정전된 복도에서도 어둠 막(#darkness, z 5) 위로 보인다(옥상문 힌트 "비상 장비 근처"). */
+#floor17-hydrant::before { content: ''; position: absolute; z-index: 6; left: calc(50% - 7px); top: -22px; width: 14px; height: 14px; border-radius: 50%; background: #ff3b30; box-shadow: 0 0 8px 3px #ff3b30aa, 0 0 26px 8px #ff3b3044; }
 #dynamic-scene[data-art="true"] .room-door.metal { border: 6px solid #555f66; border-bottom: 0; background: linear-gradient(90deg, #303a40 78%, #8e989e 78% 82%, #303a40 82%); }
 #world[data-dark="true"][data-room="dynamic"] #darkness { display: block; }
 #world[data-local-light="true"][data-room="dynamic"] #darkness { display: none; }

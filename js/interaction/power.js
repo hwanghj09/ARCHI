@@ -212,7 +212,7 @@ powerLever.addEventListener('click', () => {
     if (collectedItems.has('roof-wires-fixed')) { setSolarPower(true); return; }
     closePowerPanel();
     openKeypad({ type: 'power', name: '태양광 비상 전력 승인', code: '1997',
-      codePrompt: '4자리 비밀번호를 입력하세요.' });
+      codePrompt: '4자리 승인번호를 입력하세요. ※ 승인번호는 관리 게시판에 게시되어 있습니다.' });
     return;
   }
   setSolarPower(false);

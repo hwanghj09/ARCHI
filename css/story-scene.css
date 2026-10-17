@@ -13,4 +13,6 @@
 #story-skip { position: absolute; z-index: 1; right: max(20px, env(safe-area-inset-right)); bottom: max(10px, env(safe-area-inset-bottom)); min-height: 44px; padding: 8px 14px; border: 1px solid #677174; border-radius: 4px; background: #101619e6; color: #ddd; font: inherit; cursor: pointer; pointer-events: auto; }
 #story-skip:focus-visible { outline: 2px solid #e1cf9b; outline-offset: 3px; }
 body:has(#story-scene:not([hidden])) :is(header, nav, #debug-sidebar, #inventory-button, #objective, #game-menu-button, #interaction-hint, #interaction-outline) { visibility: hidden; }
-@media (max-width: 600px) { #story-caption { bottom: 20vh; } }
+/* 짧은 대사(sayLine): 컷씬 대사와 같은 자리·모양, 검은 띠 없이 게임 위에 잠깐 뜬다. 전선 패널(13) 위, 컷씬(20) 아래. */
+#suho-line { position: fixed; z-index: 14; left: 0; right: 0; bottom: max(92px, 14vh); width: min(944px, calc(100% - 40px)); margin: 0 auto; color: #eee8d8; font-size: clamp(15px, 2vw, 19px); line-height: 1.7; text-align: center; text-shadow: 0 2px 6px #000, 0 0 2px #000; word-break: keep-all; pointer-events: none; }
+@media (max-width: 600px) { #story-caption, #suho-line { bottom: 20vh; } }

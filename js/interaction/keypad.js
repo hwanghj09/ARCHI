@@ -49,9 +49,11 @@ function submitKeypad() {
     // 패널 쪽 클릭·드래그가 안 먹는다. 전선 패널을 닫을 때(closeWirePanel) 전력 패널로 돌아간다.
     keypadTarget = null;
     closeKeypad();
+    sayLine('비밀번호는 맞았는데… 레버를 당기자마자 전선이 끊어져 버렸어. 다시 이어야 해.', 5000);
     openWirePanel(() => {
       collectedItems.add('roof-wires-fixed');
       setSolarPower(true);
+      sayLine('불은 들어오는데… 엘리베이터는 그대로네. 승강기는 전기를 따로 받나 보다.', 5000);
     });
   } else if (target.type === 'room') {
     closeKeypad();

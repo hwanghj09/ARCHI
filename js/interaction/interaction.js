@@ -215,7 +215,7 @@ function interact() {
     const destId = currentSceneFloor === 18 ? 'f17' : 'rooftop';
     if (destId === 'rooftop' && !collectedItems.has('rooftop-unlocked')) {
       if (collectedItems.has('rooftop-key')) openRooftopLock();
-      else openInspection('옥상문', '문이 잠겨 있다. 옥상문을 열 열쇠가 필요하다.');
+      else openInspection('옥상문', '문 위 표지판: "옥상 · 태양광 비상전원 설비". 문이 잠겨 있다. 비상용 열쇠라면… 비상 장비 근처에 두지 않았을까?');
       return;
     }
     if (destId === 'rooftop' && (!rooftopBackground.complete || !rooftopBackground.naturalWidth)) {
@@ -237,6 +237,7 @@ function interact() {
     if (b2Ending.phase === 'running') return; // ARCHI가 B2 승강기를 멈췄다
     const car = elevatorCars[nearbyDoor.carIndex];
     if (!elevatorHasPower() && car.floor !== currentSceneFloor) {
+      sayLine(solarEnabled ? '불은 켜졌는데 엘리베이터는 안 와… 승강기 전기는 따로 연결해야 하나?' : '전기가 없으니 엘리베이터도 안 오겠지…');
       return;
     }
     if (car.travelling) return;

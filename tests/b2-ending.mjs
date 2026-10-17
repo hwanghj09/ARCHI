@@ -31,7 +31,7 @@ try {
   await standAt('b2-main', 1400);
   await inspect();
   assert(await page.locator('#inspection-delete').isDisabled(), 'DELETE starts grey');
-  assert.equal(await page.locator('#inspection-delete').textContent(), 'DELETE · 외부 연결 중에는 삭제할 수 없음');
+  assert.equal(await page.locator('#inspection-delete').textContent(), 'DELETE · 외부 전송 회선 연결 중 · 회선 패널에서 먼저 차단하십시오');
   assert.match(await page.locator('#inspection-description').textContent(), /외부 연결 중/);
   await page.evaluate(() => closeInspection());
   await standAt('b2-power', 500);

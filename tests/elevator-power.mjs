@@ -24,6 +24,7 @@ try {
     await page.keyboard.up(key); await page.clock.runFor(34);
   };
   await walkTo(1858); if (await page.locator('#blackout-scene').isVisible()) await page.locator('#blackout-skip').click();
+  if (await page.locator('#story-scene').isVisible()) await page.locator('#story-skip').click(); // 정전 직후 혼잣말
   assert(await page.evaluate(() => buildingBlackout && !solarEnabled && !elevatorHasPower()));
   for (const x of [1858, 2188, 2484]) {
     await walkTo(x); await page.keyboard.press('e');

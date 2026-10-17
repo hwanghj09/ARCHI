@@ -11,6 +11,14 @@ let storyWalkX = null; // 걸어가는 중이면 목표 x
 let storyWalkStuck = 0;
 let storyInspectPending = false; // 건너뛰어 대상 앞으로 옮긴 뒤, 화면이 다 밝아지면 조사한다
 
+// 첫 정전 컷씬이 끝나면(blackout.js의 finishBlackoutScene) 바로 이어지는 혼잣말. 플래시 쓰는 법과 옥상(태양광)을 알려 준다.
+// 아래 목록과 따로 둔다: 목록은 앞 장면을 봐야 다음이 나오는데, 정전 컷씬 없이 정전된 저장·테스트에서 뒤 장면을 막지 않게.
+const BLACKOUT_MONOLOGUE = { flag: 'story-blackout-seen',
+  lines: ['…앞이 하나도 안 보이네.',
+    '일단 휴대폰(P) 플래시라도 켜야겠다.',
+    '엘리베이터도 완전히 멈췄어. 건물 전체가 나간 건가?',
+    '그러고 보니 옥상에 태양광 패널이 있다고 들었는데…'] };
+
 // 이야기 컷씬 목록(순서대로 하나씩 본다). ready()가 참이 된 뒤 delay가 지나면 시작하고, 끝나면 flag를 남겨 목표가 생긴다(objective.js).
 const STORY_SCENES = [
   { // 1층 경비 로봇의 추격이 끝나고 3초 뒤. 추격이 끝났다는 기록(f1-chase-ended)은 guard-patrol.js가 남긴다.
@@ -162,6 +170,15 @@ function finishStoryScene() {
   storyCaption.textContent = '';
   refreshObjective();
   stage.focus({ preventScroll: true });
+}
+
+// 짧은 대사: 컷씬과 같은 대사 모양이지만 검은 띠 없이 뜨고, 게임을 멈추지 않으며 잠시 뒤 저절로 사라진다.
+const suhoLine = document.getElementById('suho-line');
+let suhoLineTimer;
+function sayLine(text, duration = 3500) {
+  suhoLine.textContent = text;
+  clearTimeout(suhoLineTimer);
+  suhoLineTimer = setTimeout(() => { suhoLine.textContent = ''; }, duration);
 }
 
 document.getElementById('story-skip').addEventListener('click', event => { event.stopPropagation(); skipStoryScene(); });

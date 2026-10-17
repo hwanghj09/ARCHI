@@ -89,6 +89,7 @@ function finishBlackoutScene() {
   releaseInput();
   updateInteraction();
   stage.focus({ preventScroll: true });
+  if (!collectedItems.has('story-blackout-seen')) startStoryScene(BLACKOUT_MONOLOGUE);
 }
 
 document.getElementById('blackout-skip').addEventListener('click', finishBlackoutScene);

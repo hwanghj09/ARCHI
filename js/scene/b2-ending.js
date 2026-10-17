@@ -74,7 +74,7 @@ function offerArchiDelete(door) {
   if (b2Ending.phase !== 'idle' || dynamicFloorId !== 'b2-main' || door.name !== 'ARCHI 메인 콘솔') return;
   const ready = collectedItems.has('b2-transfer-cut');
   b2DeleteButton.disabled = !ready;
-  b2DeleteButton.textContent = ready ? 'DELETE' : 'DELETE · 외부 연결 중에는 삭제할 수 없음';
+  b2DeleteButton.textContent = ready ? 'DELETE' : 'DELETE · 외부 전송 회선 연결 중 · 회선 패널에서 먼저 차단하십시오';
   b2DeleteButton.hidden = false;
 }
 

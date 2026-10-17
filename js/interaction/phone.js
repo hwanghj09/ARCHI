@@ -128,7 +128,7 @@ function refreshPhone() {
 function togglePhone() {
   if (photoCaptureTime > 0 || itemUseTime > 0 || playerCaught || hallucinationCaught || blackoutSceneActive || cctvSceneActive) return;
   if (usingPhone) return closePhone();
-  if (phoneDock) return;
+  if (phoneDock) return sayLine('아, 휴대폰은 충전기에 두고 왔지.');
   usingPhone = true;
   playGameSound('phone');
   phoneTime = 0;
@@ -157,8 +157,8 @@ function closePhone() {
 
 function togglePhoneLight() {
   if (photoCaptureTime > 0 || itemUseTime > 0 || playerCaught || hallucinationCaught || blackoutSceneActive || cctvSceneActive) return;
-  if (phoneDock) return;
-  if (!phoneLightOn && phoneBattery <= 0) return;
+  if (phoneDock) return sayLine('아, 휴대폰은 충전기에 두고 왔지.');
+  if (!phoneLightOn && phoneBattery <= 0) return sayLine('배터리가 다 됐어… 충전할 데를 찾아야 해.');
   phoneLightOn = !phoneLightOn;
   playGameSound('phone');
   phoneAwayTime = !phoneLightOn && !usingPhone ? 360 : 0;
@@ -181,6 +181,7 @@ function chargePhone(door) {
   if (phoneBattery >= 100) return;
   phoneDock = { floor: door.floor, scene: door.scene, x: door.x };
   playGameSound('charger');
+  sayLine('충전하는 동안 여기 두고… 나중에 꼭 챙기자.');
   phoneLightOn = false;
   phoneAwayTime = 0;
   phoneChargeAccumulator = 0;
@@ -206,6 +207,7 @@ function updatePhone(elapsed) {
   phoneDrainAccumulator %= 1000;
   if (phoneBattery === 0) {
     phoneLightOn = false;
+    sayLine('배터리가 나갔어… 충전할 데를 찾아야 해.');
     phoneAwayTime = usingPhone ? 0 : 360;
   }
   refreshPhone();
