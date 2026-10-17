@@ -5,8 +5,11 @@ const openingCaption = document.getElementById('opening-caption');
 let openingElapsed = 0;
 let openingReady = false;
 let openingBlocked = [];
+// 대사가 바뀌는 시각(종료 1400 · 일어섬 3800)과 끝(5400)에서 멈추고 클릭하면 이어간다(scene-gate.js).
+const openingGate = createSceneGate(opening, [1400, 3800, 5400]);
 
 function startOpening() {
+  openingGate.reset();
   openingBlocked = [...document.body.children].filter(el => el !== opening && el.tagName !== 'SCRIPT' && !el.inert);
   for (const el of openingBlocked) el.inert = true;
   releaseInput();
@@ -29,7 +32,7 @@ function startOpening() {
 
 function updateOpening(elapsed) {
   if (!openingReady) return;
-  openingElapsed += elapsed;
+  openingElapsed = openingGate.advance(openingElapsed, elapsed);
   if (openingElapsed >= 5400) return finishOpening();
   const frame = openingElapsed < 1400 ? 0 : openingElapsed < 2300 ? 1 :
     openingElapsed < 3100 ? 2 : openingElapsed < 3450 ? 3 : openingElapsed < 3800 ? 4 : 5;
@@ -65,6 +68,7 @@ function updateOpening(elapsed) {
 function finishOpening() {
   if (mainMenuActive || !openingActive) return;
   openingActive = false;
+  openingGate.reset();
   delete world.dataset.opening;
   opening.hidden = true;
   for (const el of openingBlocked) el.inert = false;

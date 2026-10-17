@@ -86,7 +86,9 @@ try {
   await page.waitForFunction(() => openingReady);
   assert(await page.locator('#main-menu').isHidden()); assert(await page.locator('#opening').isVisible());
   assert.equal(await page.locator('#world').getAttribute('data-opening'), 'work');
-  await page.clock.runFor(1750); assert.equal(await page.locator('#world').getAttribute('data-opening'), 'shutdown');
+  await page.clock.runFor(1750); assert.equal(await page.locator('#world').getAttribute('data-opening'), 'work', '첫 대사에서 클릭을 기다린다');
+  await page.locator('#opening').click({ position: { x: 300, y: 300 } }); await page.clock.runFor(100);
+  assert.equal(await page.locator('#world').getAttribute('data-opening'), 'shutdown');
   await page.keyboard.press('Escape');
   assert(await page.evaluate(() => !mainMenuActive && !openingActive && !stage.inert));
   const startX = (await frozen()).x;

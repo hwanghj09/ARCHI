@@ -10,7 +10,7 @@ function update() {
   updateSanity(step);
   if (openingActive) { updateOpening(step); return; }
   if (blackoutSceneActive) { updateBlackoutScene(step); return; }
-  if (storySceneActive) { updateStoryScene(step); return; }
+  if (storySceneActive) return; // 대사는 클릭으로 넘긴다(story-scene.js)
   if (cctvSceneActive) { updateCctvScene(step); return; }
   if (photoCaptureTime > 0) {
     updatePhotoCapture(step);

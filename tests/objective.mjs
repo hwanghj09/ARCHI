@@ -99,10 +99,15 @@ try {
   });
   await page.locator('#story-scene').waitFor({ state: 'visible' });
   assert.equal(await page.locator('#story-caption').textContent(), '왜 경비 로봇이 나를 공격하려고 했던 거지?');
-  await page.waitForFunction(() => storyCaption.textContent.startsWith('으윽'), null, { timeout: 5000 });
-  await page.waitForFunction(() => storyCaption.textContent.startsWith('편의점으로 가보자'), null, { timeout: 10000 });
-  await page.keyboard.press('Escape');
-  assert(await page.locator('#story-scene').isHidden(), 'Esc ends the scene');
+  await page.waitForTimeout(3500);
+  assert.equal(await page.locator('#story-caption').textContent(), '왜 경비 로봇이 나를 공격하려고 했던 거지?', '클릭하기 전에는 대사가 넘어가지 않는다');
+  await page.locator('#story-caption').click();
+  assert(await page.locator('#story-caption').textContent().then(text => text.startsWith('으윽')), '클릭하면 다음 대사');
+  await page.locator('#story-caption').click();
+  await page.locator('#story-caption').click();
+  assert(await page.locator('#story-caption').textContent().then(text => text.startsWith('편의점으로 가보자')));
+  await page.locator('#story-caption').click();
+  assert(await page.locator('#story-scene').isHidden(), '마지막 대사에서 클릭하면 끝난다');
   assert.equal(await page.evaluate(() => collectedItems.has('story-anxiety-seen')), true);
   await waitTyped('정신 불안', 'CU 편의점에서 항불안제를 찾아 가방(Tab)에서 복용하자.');
 
@@ -115,7 +120,6 @@ try {
   assert.equal(await page.evaluate(() => currentObjective.title), '정신 불안', '사용한 뒤 컷씬이 나오기 전까지도 목표가 유지된다');
   await page.locator('#story-scene').waitFor({ state: 'visible', timeout: 10000 });
   assert.equal(await page.locator('#story-caption').textContent(), '휴.. 겨우 정신을 차렸네..');
-  await page.waitForFunction(() => storyCaption.textContent.startsWith('ARCHI 개발 팀'), null, { timeout: 12000 });
   await page.keyboard.press('Escape');
   assert(await page.locator('#story-scene').isHidden());
   await waitTyped('로봇의 습격! 그 이유는?', 'ARCHI 개발 팀을 조사하자.');
@@ -124,7 +128,6 @@ try {
   await page.evaluate(() => collectedItems.add('story-gate-tagged'));
   await page.locator('#story-scene').waitFor({ state: 'visible', timeout: 10000 });
   assert.equal(await page.locator('#story-caption').textContent(), '아 맞다 나 일용직이였지');
-  await page.waitForFunction(() => storyCaption.textContent === '잠깐 빌리지 뭐', null, { timeout: 12000 });
   await page.keyboard.press('Escape');
   await waitTyped('출입증 쌔비기', '옆자리 직원의 자리를 조사하자.');
   assert.equal(await page.evaluate(() => officePostit.element.hidden), false, '출입증 쌔비기가 시작되면 옆자리 포스트잇이 생긴다');

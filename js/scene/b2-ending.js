@@ -60,7 +60,7 @@ function startArchiDelete() {
   Object.assign(b2Ending, { phase: 'running', elapsed: 0, alarm: 0 });
   b2Robots = b2DockX.map((x, index) => ({ name: ['R-02', 'R-05', 'R-07'][index], where: floorId(-2), x, facing: -1, wait: 0, elapsed: 0,
     mode: 'dock', hold: b2WakeDelay + index * 700, lostTime: 0, captureTime: 0, door: null, image: null, chaseOriginX: null, spottedX: null,
-    firstEncounter: false, pursuit: true, followToElevator: true, chaseSpeed: b2ChaseSpeed, onCaught: showB2BadEnding }));
+    pursuit: true, followToElevator: true, chaseSpeed: b2ChaseSpeed, onCaught: showB2BadEnding }));
   loadB2EndingArt();
   b2DeleteBar.hidden = false;
   refreshB2Bar();

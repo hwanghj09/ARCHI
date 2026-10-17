@@ -44,8 +44,10 @@ try {
     assert.equal(await page.evaluate(() => blackoutSceneActive), true, 'Landing starts the call attempt cutscene');
     assert.equal((await state()).blackout, false, 'Approach is still illuminated');
     const phases = new Set();
-    for (let i = 0; i < 52; i++) {
+    for (let i = 0; i < 80 && await page.evaluate(() => blackoutSceneActive); i++) {
       phases.add(await page.locator('#world').getAttribute('data-power-flicker'));
+      // 대사에서 멈춰 클릭을 기다리면(scene-gate.js) 화면을 클릭해 넘긴다.
+      if (await page.evaluate(() => blackoutGate.waiting)) await page.evaluate(() => blackoutScene.click());
       await page.clock.runFor(100);
     }
     assert(phases.has('off') && phases.has('on'), 'Lights flicker before the permanent outage');
