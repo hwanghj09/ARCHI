@@ -132,6 +132,11 @@ window.addEventListener('keydown', event => {
       event.preventDefault();
       if (!event.repeat) pushB2Door();
     }
+    // 로봇이 문을 억지로 여는 중(cabin-pry.js): Enter·스페이스 연타. 꾹 누르기(반복 입력)는 치지 않는다.
+    if (['Enter', 'Space'].includes(event.code) && cabinPryStruggling()) {
+      event.preventDefault();
+      if (!event.repeat) pushCabinPry();
+    }
     return;
   }
   if (event.code === 'Escape') {

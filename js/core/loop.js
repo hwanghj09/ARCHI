@@ -42,6 +42,7 @@ function update() {
   if (selectingFloor) {
     updateElevators();
     updateB2Ending(step); // 칸 안에 있어도 B2 삭제·추격은 계속된다
+    updateRoamerCabin(step); // 쫓던 순찰 로봇 R-03이 엘리베이터 문까지 온다
     updateCabin();
     return;
   }

@@ -168,7 +168,7 @@ function setCabinDoor(open) {
   }
   cabinAutoClose = 0;
   const phase = cabinScene.dataset.door;
-  if (phase === 'struggle') return; // 로봇과 문을 두고 버티는 중(b2-ending.js)
+  if (phase === 'struggle') return; // 로봇과 문을 두고 버티는 중(b2-ending.js, cabin-pry.js)
   if (phase === (open ? 'open' : 'closed') || phase === (open ? 'opening' : 'closing')) return;
   playGameSound('elevator-door');
   car.open = open;
@@ -181,6 +181,7 @@ function setCabinDoor(open) {
 function updateCabin() {
   if (cabinCarIndex === null) return;
   if (updateB2Cabin()) return; // B2 추격 중 엘리베이터 문 장면(b2-ending.js)
+  if (updateCabinPry()) return; // 쫓던 순찰 로봇이 문을 억지로 여는 장면(cabin-pry.js)
   const car = elevatorCars[cabinCarIndex];
   if (!elevatorHasPower() && !car.travelling) {
     selectedFloor = null;
