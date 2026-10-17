@@ -22,6 +22,7 @@
     <link rel="stylesheet" href="css/b2-ending.css" />
     <link rel="stylesheet" href="css/phone.css" />
     <link rel="stylesheet" href="css/sanity.css" />
+    <link rel="stylesheet" href="css/game-over.css" />
     <link rel="stylesheet" href="css/main-menu.css" />
     <link rel="stylesheet" href="css/blackout.css" />
     <link rel="stylesheet" href="css/story-scene.css" />
@@ -316,10 +317,13 @@
         <div class="phone-navigation"><span>P · 닫기 / Esc · 뒤로</span><button id="phone-close" type="button" aria-label="휴대폰 화면 닫기"><span aria-hidden="true"></span></button></div>
       </div>
     </section>
-    <section id="guard-capture" role="dialog" aria-modal="true" aria-labelledby="guard-capture-title" hidden>
-      <h2 id="guard-capture-title">로봇에게 붙잡혔다</h2>
-      <p>로비 엘리베이터 앞에서 다시 시도합니다. 수집한 단서는 유지됩니다.</p>
-      <button id="guard-retry" type="button">다시 시도</button>
+    <section id="guard-capture" class="game-over" role="dialog" aria-modal="true" aria-labelledby="guard-capture-title" hidden>
+      <div class="game-over-content">
+        <h2 id="guard-capture-title">GAME OVER</h2>
+        <strong>로봇에게 붙잡혔다</strong>
+        <p>로비 엘리베이터 앞에서 다시 시도합니다. 수집한 단서는 유지됩니다.</p>
+        <button id="guard-retry" type="button">다시 시도</button>
+      </div>
     </section>
     <section id="power-panel" role="dialog" aria-modal="true" aria-labelledby="power-title" aria-describedby="power-help" hidden>
       <div class="power-cabinet">
@@ -432,10 +436,13 @@
     <div id="hallucinations" aria-hidden="true" hidden>
       <img id="hallucination-shadow" src="assets/ui/hallucination/ghost-face.png" alt="" width="540" height="360" draggable="false" hidden />
     </div>
-    <section id="hallucination-caught" role="dialog" aria-modal="true" aria-labelledby="hallucination-caught-title" hidden>
-      <h2 id="hallucination-caught-title">환각에게 삼켜졌다</h2>
-      <p>정신을 차려 보니 아직 같은 자리다. 정신력을 조금 되찾았다.</p>
-      <button id="hallucination-retry" type="button">다시 정신 차리기</button>
+    <section id="hallucination-caught" class="game-over" role="dialog" aria-modal="true" aria-labelledby="hallucination-caught-title" hidden>
+      <div class="game-over-content">
+        <h2 id="hallucination-caught-title">GAME OVER</h2>
+        <strong>환각에게 삼켜졌다</strong>
+        <p>정신을 차려 보니 아직 같은 자리다. 정신력을 조금 되찾았다.</p>
+        <button id="hallucination-retry" type="button">다시 정신 차리기</button>
+      </div>
     </section>
     <button id="game-menu-button" type="button">메뉴 · Esc</button>
     <button id="inventory-button" type="button" aria-controls="inspection" aria-expanded="false">가방 · Tab</button>

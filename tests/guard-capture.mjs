@@ -80,6 +80,12 @@ try {
   assert(await robotOverPlayer(), 'The robot keeps holding the player from the front');
   assert.equal(await page.locator('#player').getAttribute('data-state'), 'caught');
   assert(await page.locator('#guard-capture').isVisible());
+  assert.equal(await page.locator('#guard-capture-title').textContent(), 'GAME OVER');
+  assert(await page.locator('#guard-capture-title').evaluate(el => el.scrollWidth <= el.clientWidth), 'Title fits on one line');
+  assert.equal(await page.locator('#guard-capture').evaluate(el => {
+    const box = el.getBoundingClientRect();
+    return box.top === 0 && box.left === 0 && box.width === innerWidth && box.height === innerHeight;
+  }), true, 'Game over covers the viewport');
   const pinned = (await state()).playerX;
   await page.locator('#guard-retry').evaluate(button => button.blur());
   for (const key of ['d', 'a', 'Space', 'e', 'p', 'f', 'i', 'Escape']) await page.keyboard.press(key);
@@ -97,6 +103,11 @@ try {
   await page.clock.runFor(2300);
   assert.equal((await state()).caught, true);
   await page.setViewportSize({ width: 390, height: 844 }); await page.clock.runFor(100);
+  assert(await page.locator('#guard-capture-title').evaluate(el => el.scrollWidth <= el.clientWidth), 'Title fits on mobile');
+  assert(await page.locator('#guard-retry').evaluate(el => {
+    const box = el.getBoundingClientRect();
+    return box.top >= 0 && box.bottom <= innerHeight && box.left >= 0 && box.right <= innerWidth;
+  }), 'Retry remains on screen on mobile');
   await page.screenshot({ path: '.local/guard-caught-left-mobile.png' });
   assert(await page.locator('.guard-robot-sprite').evaluate(el => new DOMMatrix(getComputedStyle(el).transform).m11 === -1));
   await page.locator('#guard-retry').click(); assert.equal((await state()).caught, false);
