@@ -20,5 +20,3 @@
 #debug-console-panel { display: grid; gap: 8px; margin-top: 8px; }
 #debug-console-panel[hidden] { display: none; }
 body:has(#debug-sidebar:not([hidden]):not([inert])) #objective { visibility: hidden; }
-#debug-puzzle select { flex: 1; min-width: 0; }
-#debug-puzzle-note { white-space: pre-line; line-height: 1.5; }

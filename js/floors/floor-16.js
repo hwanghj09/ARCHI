@@ -112,12 +112,7 @@ const FLOOR16_ROOMS = interiorRooms(16, [
     { sprite: 'assets/objects/floor16/voice-kiosk-states.png', frames: 3, poweredSprite: true,
       size: [256, 512], worldWidth: 89, x: 1515, name: '음성 주문 키오스크',
       animation: { src: 'assets/objects/floor16/voice-kiosk-states.png', frames: 3, first: 2 },
-      message: '음성 주문 키오스크다. 비상 전력이 들어오면 화면이 켜지고 수호에게 먼저 인사한다.',
-      // 작은 퍼즐: 전력이 있으면 키오스크에 말을 건다. 낮 모드처럼 굴다가, CU 영수증의 주문(23:47 컵라면)을 정확히 물어야 속을 드러낸다.
-      control: { kind: 'selector', initial: 0, when: () => world.dataset.powered === 'true',
-        choices: ['아메리카노 한 잔', '직원 호출', '어젯밤 주문 기록', '23:47 컵라면 주문자'],
-        label: '키오스크 화면이 켜지며 먼저 인사한다: "어서 오세요, 수호 님." 무엇을 물어볼까?',
-        onDone: (choice, door) => askKiosk(choice, door) } },
+      message: '음성 주문 키오스크다. 비상 전력이 들어오면 화면이 켜지고 수호에게 먼저 인사한다.' },
     { file: 'food-voice-board', size: [512, 256], worldWidth: 350, x: 1690, name: '고객의 소리 게시판',
       message: '포스트잇 한 장: "키오스크가 제가 매일 몇 시에 와서 뭘 시키는지 다 알아요. 좀 무섭습니다." 답변란은 비어 있다. 다른 포스트잇에는 음성 주문과 식당 이용 불만이 적혀 있다.',
       writing: [{ as: 'title', text: '고객의 소리' },

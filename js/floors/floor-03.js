@@ -37,11 +37,8 @@ const FLOOR3_LAYOUT = {
       doorX: 640, doorWidth: 240, doorY: 250, doorSprite: 'assets/objects/floor03/door-fitness.png' },
     { name: '고객만족센터', x: 1080, width: 690, style: 'painted', target: 'f3-cs',
       doorX: 1375, doorWidth: 130, doorY: 250, doorSprite: 'assets/objects/floor03/door-cs.png' },
-    // 퍼즐 H: 방송실 음성 인증 문(js/interaction/voice-lock.js). 2층 리허설 녹화에서 사내 방송 담당자(김도윤)의 목소리를 녹음해 와야 한다.
     { name: 'Studio', x: 4282, width: 680, style: 'painted', target: 'f3-studio',
-      doorX: 4321, doorWidth: 130, doorY: 250, doorSprite: 'assets/objects/floor03/door-studio.png',
-      locked: true, unlockedBy: 'f3-studio-open', voiceLock: { voice: '김도윤' },
-      message: '방송실 문에 음성 인증 패널이 붙어 있다. 정전에도 배터리로 깨어 있다: "등록 음성 · 사내 방송 담당자 · 인증 문장: 안녕하세요, 저는 ___입니다." 담당자의 목소리를 들려줄 수만 있다면.' },
+      doorX: 4321, doorWidth: 130, doorY: 250, doorSprite: 'assets/objects/floor03/door-studio.png' },
   ],
   fixtures: [
     { name: '3층 입주사 안내', x: 3160, y: 300, width: 170, height: 150, style: 'wall-notice',
@@ -49,20 +46,9 @@ const FLOOR3_LAYOUT = {
       message: '3층 입주사 안내판이다. ㈜하누리서비스(경비·미화)는 고객만족센터 안에 사무를 둔다. 아래 작은 글씨: "야간 무인 운영 · 00:00~06:00 Fitness Club 회원 전용 자동문 닫힘 고정."' },
   ],
   props: [
-    // 퍼즐 E: 손잡이의 작업 알림 버튼을 누르면 10초 뒤 경보가 울려 순찰 로봇 R-05가 카트 앞으로 온다(guard-patrol.js의 미끼).
     { file: 'instrument-cart', size: [256, 256], worldWidth: 113, x: 3460, name: '청소 카트',
-      message: '㈜하누리서비스 청소 카트다. 야간 작업표 칸은 이번 달부터 비어 있다. 손잡이에 붙은 쪽지: "야간 미화 중단 · 대신 로봇 순찰."',
-      control: { kind: 'press', text: '알림', when: () => !collectedItems.has('f3-robot-off'), onDone: () => {
-        startFloorRobotLure('f3', 10000);
-        showStatus('버튼을 눌렀다. 카트에서 삑삑 소리가 나기 시작한다. 10초 뒤면 경보가 울린다. 로봇이 오기 전에 숨자.', 5000);
-      },
-        label: '청소 카트 손잡이 쪽지: "야간 미화 중단 · 대신 로봇 순찰." 그 옆에 "작업 알림 · 10초 뒤 경보" 버튼이 있다. 순찰 로봇은 경보가 울리면 그쪽으로 확인하러 간다.' } },
+      message: '㈜하누리서비스 청소 카트다. 야간 작업표 칸은 이번 달부터 비어 있다. 손잡이에 붙은 쪽지: "야간 미화 중단 · 대신 로봇 순찰."' },
   ],
-  // 퍼즐 E: 배터리로 도는 순찰 로봇 R-05가 Fitness Club·고객만족센터 앞을 지킨다. 들키면 엘리베이터 앞으로 끌려 나온다.
-  // 청소 카트 경보(미끼)로 동쪽 계단 너머까지 불러내고 방에 숨었다가, 로봇이 카트를 보고 있는 동안 서쪽 방으로 간다.
-  robot: { name: 'R-05', x: 900, sight: 360, patrol: { left: 300, right: 1400, speed: 90, pause: 1400 }, disabledBy: 'f3-robot-off',
-    lure: { x: 3330, face: 1, speed: 220, wait: 20000,
-      message: '복도 끝 청소 카트에서 경보가 울린다. 바퀴 소리가 빠르게 그쪽으로 몰려간다.' } },
 };
 const floor3Room = (id, name, art, width, fixtures, extra = {}) => ({ id, name, width, background: FLOOR3_BACKGROUND,
   backgroundWallsOnly: true, backgroundImage: floor3Scene(art, width), fixtures, ...extra });

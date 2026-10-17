@@ -1,8 +1,7 @@
 // 직접 조작하는 장치(소품·설비의 control): 레버를 내리고, 열쇠를 돌리고, 전원선을 뽑는 일을 문구로 넘기지 않고 플레이어가 직접 한다.
 // control은 단계 하나 또는 단계 목록이다(2층 영사기: 리모컨 버튼 → 디스크 투입). 단계마다 kind:
 //   lever·switch(dir 'down'|'up'), plug(dir 'out'|'in'), card — 끝까지 끌어야 한다(놓으면 제자리로 돌아간다).
-//   key·crank·clock — 시계 방향으로 turn도까지 돌린다. selector — 4층 UPS처럼 cycle 칸 하나를 골라 놓는다(cycle이 없으면 spec.choices).
-//   press — 누른다. 마지막 단계의 onDone(고른 칸)이 있으면 원래 조사 대신 그것을 부른다(1층 엔딩 분전반).
+//   key·crank·clock — 시계 방향으로 turn도까지 돌린다. selector — 4층 UPS처럼 cycle 칸 하나를 골라 놓는다. press — 누른다.
 // 마우스·터치로 끌거나 방향키(·WASD)로 움직이고, 버튼·선택은 Enter/Space/E로 누른다. 다 하면 원래 조사(문구·gives)가 이어진다.
 // doneBy: gives가 없는 설비가 이미 조작됐는지 보는 물건(B1 CCTV는 seenBy). when: 지금만 조작하는 설비(12층 네트워크 랙).
 const manualControl = document.getElementById('manual-control');
@@ -61,6 +60,7 @@ function nextControlStep() {
   const spec = controlSteps.shift();
   if (!spec) return finishControl();
   const { kind } = spec;
+  // 선택기는 소품의 cycle 칸을 고르거나, cycle이 없으면 spec.choices 중에서 고른다.
   const choices = kind === 'selector' ? spec.choices ?? controlDoor.cycle.states : null;
   controlStep = { spec, done: false, value: 0, target: LINEAR_CONTROLS[kind] ? 1 : spec.turn ?? ROTARY_CONTROLS[kind] ?? 1,
     choices, choice: choices ? spec.choices ? spec.initial ?? 0 : cycleState(controlDoor.cycle) : null };
@@ -144,8 +144,6 @@ function finishControl() {
   door.controlDone = true;
   door.controlPassed = true;
   if (door.cycle) door.controlChoice = choice;
-  const onDone = [].concat(door.control).at(-1).onDone;
-  if (onDone) { door.controlPassed = false; onDone(choice, door); return; }
   interact();
 }
 
