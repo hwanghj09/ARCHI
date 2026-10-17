@@ -188,7 +188,7 @@ try {
   const floors = () => page.evaluate(() => [...solarPoweredFloors]);
   await supply(1);
   await page.evaluate(() => refreshObjective());
-  assert.equal(await page.evaluate(() => currentObjective.text), '엘리베이터를 타고 1층으로 내려가자.');
+  assert.equal(await page.evaluate(() => currentObjective.text), '승강기가 다시 움직인다. 아래로 내려가자.');
   await supply(12);
   assert.deepEqual(await floors(), [12]);
   await page.evaluate(() => refreshObjective());
