@@ -31,7 +31,7 @@ const inventoryButton = document.getElementById('inventory-button');
 
 function refreshInventoryCount() {
   const count = ownedInventoryIds().length;
-  inventoryButton.textContent = count ? `가방 (${count}) · Tab` : '가방 · Tab';
+  inventoryButton.textContent = `${count ? `가방 (${count})` : '가방'} · ${bindingLabel('inventory')}`;
 }
 
 function itemButton(id) {

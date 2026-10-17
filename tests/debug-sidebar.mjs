@@ -62,6 +62,16 @@ try {
   await page.locator('#debug-room button').click();
   await finishSceneTransition(page);
   assert.equal(await page.evaluate(() => room), 'office');
+  assert.deepEqual(await page.evaluate(() => PUZZLE_STEPS.filter(step => step.at !== 'office' && !floorById.has(step.at))), []);
+  await page.locator('#debug-puzzle-select').selectOption({ label: '7F 백업 장비 · 오늘 기록' });
+  await page.locator('#debug-puzzle button').click();
+  await finishSceneTransition(page);
+  assert.deepEqual(await page.evaluate(() => [currentSceneFloor, realBuildingBlackout(), solarEnabled,
+    collectedItems.has('f7-training-time-solved'), collectedItems.has('f7-external-connection-solved')]), [7, true, true, true, false]);
+  await page.locator('#debug-puzzle-select').selectOption({ index: 0 });
+  await page.locator('#debug-puzzle button').click();
+  await finishSceneTransition(page);
+  assert.deepEqual(await page.evaluate(() => [room, realBuildingBlackout(), solarEnabled, [...collectedItems]]), ['office', false, false, ['f17-badge']]);
   await page.evaluate(() => triggerBuildingBlackout());
   await page.locator('#debug-floor-select').selectOption('f2');
   await page.locator('#debug-floor button').click();

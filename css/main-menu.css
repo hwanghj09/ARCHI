@@ -32,6 +32,13 @@
 .menu-key-list > div { display: flex; justify-content: space-between; gap: 16px; padding: 12px 0; border-top: 1px solid #34473c; }
 .menu-key-list dt { color: #bacabf; font-size: 12px; }
 .menu-key-list dd { margin: 0; color: #9aaea0; font-size: 12px; }
+#menu-controls { width: min(520px, 100%); }
+#menu-controls .menu-note { margin-bottom: 18px; }
+#menu-key-list > div { align-items: center; }
+#menu-key-list dt { flex: 1; }
+#menu-key-list dd { max-width: 60%; }
+#menu-key-list button { width: 100%; min-height: 44px; padding: 8px 12px; text-align: center; overflow-wrap: anywhere; }
+#menu-key-list button[aria-pressed="true"] { border-color: #d9c697; color: #f0dbac; }
 .menu-floor-mark { position: absolute; right: 10%; bottom: 22%; display: grid; color: #b2c3b449; pointer-events: none; }
 .menu-floor-mark > span { font-size: clamp(100px, 16vw, 220px); font-weight: 200; letter-spacing: -.08em; line-height: 1; }
 .menu-floor-mark > small { margin-top: 20px; font-size: 9px; letter-spacing: .16em; }

@@ -15,7 +15,7 @@ function setDebugSidebar(open) {
 menuDebugToggle.addEventListener('click', () => setDebugSidebar(debugSidebar.hidden));
 document.getElementById('debug-close').addEventListener('click', () => setDebugSidebar(false));
 window.addEventListener('keydown', event => {
-  if (event.code !== 'F2') return;
+  if (event.code !== 'F2' || document.querySelector('#menu-key-list [aria-pressed="true"]')) return;
   event.preventDefault(); event.stopImmediatePropagation();
   if (!event.repeat) setDebugSidebar(debugSidebar.hidden);
 }, true);

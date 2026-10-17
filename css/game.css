@@ -891,6 +891,8 @@ body { margin: 0; overflow: hidden; background: #27292b; color: #eee; font: 14px
 #player #run-sheet, #player #phone-run-sheet { width: 800%; height: 100%; }
 #player .action-sheet { width: 200%; height: 100%; }
 #player #antianxiety-sheet { width: 600%; height: 100%; }
+#player #crouch-sheet { width: 400%; height: 100%; }
+#player[data-state="crouch"] #crouch-sheet { display: block; }
 #player[data-state="consume"] #antianxiety-sheet { display: block; }
 #player[data-state="idle"] #idle-sprite,
 #player:not([data-phone-held="true"])[data-state="walk"] #walk-sheet,

@@ -6,8 +6,59 @@ const menuVolume = document.getElementById('menu-volume');
 const menuBrightness = document.getElementById('menu-brightness');
 const menuFullscreen = document.getElementById('menu-fullscreen');
 const menuSettingsStatus = document.getElementById('menu-settings-status');
+const menuKeyList = document.getElementById('menu-key-list');
+const menuKeysStatus = document.getElementById('menu-keys-status');
+let pendingKeyAction = null;
 let menuBlocked = [];
 let menuReturnButton = menuStart;
+
+menuKeyList.innerHTML = Object.entries(keyBindingActions).map(([action, label]) =>
+  `<div><dt>${label}</dt><dd><button type="button" data-key-action="${action}" aria-pressed="false"></button></dd></div>`).join('');
+
+function refreshKeyBindingUI() {
+  for (const button of menuKeyList.querySelectorAll('button')) {
+    const action = button.dataset.keyAction;
+    button.textContent = pendingKeyAction === action ? '키를 누르세요…' : bindingLabel(action);
+    button.setAttribute('aria-label', `${keyBindingActions[action]} 키 변경: ${bindingLabel(action)}`);
+    button.setAttribute('aria-pressed', String(pendingKeyAction === action));
+  }
+  document.getElementById('interact').textContent = bindingLabel('interact');
+  document.getElementById('interact').title = `상호작용 (${bindingLabel('interact')})`;
+  document.getElementById('phone-button').title = `휴대폰 (${bindingLabel('phone')})`;
+  refreshInventoryCount();
+}
+
+function cancelKeyBinding() {
+  if (!pendingKeyAction) return;
+  pendingKeyAction = null;
+  refreshKeyBindingUI();
+  menuKeysStatus.textContent = '키 변경을 취소했습니다.';
+}
+
+function saveKeyBindings() {
+  releaseInput();
+  refreshKeyBindingUI();
+  try {
+    localStorage.setItem('archi.keybindings', JSON.stringify(keyBindings));
+    menuKeysStatus.textContent = '조작키를 저장했습니다.';
+  } catch { menuKeysStatus.textContent = '조작키를 적용했습니다. 이 브라우저에서는 저장할 수 없습니다.'; }
+}
+
+for (const button of menuKeyList.querySelectorAll('button')) {
+  button.addEventListener('click', () => {
+    pendingKeyAction = button.dataset.keyAction;
+    refreshKeyBindingUI();
+    menuKeysStatus.textContent = `${keyBindingActions[pendingKeyAction]}에 사용할 키를 누르세요. Esc로 취소합니다.`;
+  });
+  button.addEventListener('blur', cancelKeyBinding);
+}
+document.getElementById('menu-keys-reset').addEventListener('click', () => {
+  pendingKeyAction = null;
+  applyKeyBindings(defaultKeyBindings);
+  saveKeyBindings();
+});
+document.getElementById('menu-keybindings-button').addEventListener('click', () => showMenuView('controls'));
+refreshKeyBindingUI();
 
 function applyMenuSettings() {
   gameVolume = Number(menuVolume.value) / 100;
@@ -70,6 +121,7 @@ function openGameMenu() {
 }
 
 function showMenuView(view) {
+  cancelKeyBinding();
   for (const id of ['home', 'settings', 'controls', 'new-game']) document.getElementById(`menu-${id}`).hidden = id !== view;
   mainMenu.dataset.view = view;
   if (view === 'home') menuReturnButton.focus({ preventScroll: true });
@@ -134,6 +186,29 @@ document.addEventListener('fullscreenchange', () => {
   menuFullscreen.textContent = document.fullscreenElement ? '전체화면 해제 ↙' : '전체화면으로 전환 ↗';
 });
 mainMenu.addEventListener('keydown', event => {
+  if (pendingKeyAction) {
+    if (event.code === 'Tab') cancelKeyBinding();
+    else {
+      event.preventDefault();
+      event.stopPropagation();
+      if (event.repeat || event.isComposing) return;
+      if (event.code === 'Escape') return cancelKeyBinding();
+      if (!isBindableKey(event.code) || event.altKey || event.metaKey ||
+          event.ctrlKey && !event.code.startsWith('Control') || event.shiftKey && !event.code.startsWith('Shift')) {
+        menuKeysStatus.textContent = '이 키는 창 조작에 사용하거나 지원하지 않습니다. 다른 키 하나를 누르세요.';
+        return;
+      }
+      const conflict = Object.keys(keyBindings).find(action => action !== pendingKeyAction && keyMatches(action, event.code));
+      if (conflict) {
+        menuKeysStatus.textContent = `${keyLabel(event.code)} 키는 ${keyBindingActions[conflict]}에 사용 중입니다. 다른 키를 누르세요.`;
+        return;
+      }
+      applyKeyBindings({ ...keyBindings, [pendingKeyAction]: [event.code] });
+      pendingKeyAction = null;
+      saveKeyBindings();
+      return;
+    }
+  }
   if (event.code === 'Escape' && mainMenu.dataset.view !== 'home') {
     event.preventDefault(); showMenuView('home');
   }

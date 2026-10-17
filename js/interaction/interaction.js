@@ -44,32 +44,33 @@ function updateInteraction() {
   if (nearbyDoor) {
     hint.style.left = `${nearbyDoor.x + nearbyDoor.width / 2}px`;
     hint.style.top = `${nearbyDoor.y - (nearbyDoor.type === 'elevator' ? 72 : 42)}px`;
-    hint.textContent = nearbyDoor.type === 'office' ? (room === 'corridor' ? 'E · 사무실 들어가기' : 'E · 복도로 나가기') : doorHintText(nearbyDoor);
+    hint.textContent = nearbyDoor.type === 'office' ? `${bindingLabel('interact')} · ${room === 'corridor' ? '사무실 들어가기' : '복도로 나가기'}` : doorHintText(nearbyDoor);
   }
 }
 
 function doorHintText(door) {
-  if (door.type === 'computer') return floorHasPower(currentSceneFloor) ? 'E · 컴퓨터 사용' : 'E · 전원 없음';
-  if (door.type === 'power') return 'E · 태양광 전력 제어';
+  const key = bindingLabel('interact');
+  if (door.type === 'computer') return floorHasPower(currentSceneFloor) ? `${key} · 컴퓨터 사용` : `${key} · 전원 없음`;
+  if (door.type === 'power') return `${key} · 태양광 전력 제어`;
   if (door.phoneCharger) return phoneChargerHint(door);
-  if (door.accessGate) return door.element.dataset.open === 'true' ? '인증 완료 · 통과 가능' : 'E · 출입증 태그';
+  if (door.accessGate) return door.element.dataset.open === 'true' ? '인증 완료 · 통과 가능' : `${key} · 출입증 태그`;
   // 12층 야간 로그 삭제가 진행 중일 때만 네트워크 랙의 힌트를 "뽑기"로 바꿔 지금 할 일을 알려 준다(log-puzzle.js).
-  if (door.name === '네트워크 랙' && dynamicFloorId === 'f12-eval' && logDeleting()) return 'E · LAN 케이블 뽑기';
-  if (door.shutterLever) return collectedItems.has(door.shutterLever) ? 'E · 셔터 내리기' : 'E · 셔터 올리기';
-  if (door.type === 'inspect') return `E · ${door.name} 조사`;
-  if (door.locked && door.control && [].concat(door.requires || []).every(item => collectedItems.has(item))) return `E · ${door.name} 카드키 태그`;
-  if (door.locked) return `E · ${door.name} (잠김)`;
+  if (door.name === '네트워크 랙' && dynamicFloorId === 'f12-eval' && logDeleting()) return `${key} · LAN 케이블 뽑기`;
+  if (door.shutterLever) return collectedItems.has(door.shutterLever) ? `${key} · 셔터 내리기` : `${key} · 셔터 올리기`;
+  if (door.type === 'inspect') return `${key} · ${door.name} 조사`;
+  if (door.locked && door.control && [].concat(door.requires || []).every(item => collectedItems.has(item))) return `${key} · ${door.name} 카드키 태그`;
+  if (door.locked) return `${key} · ${door.name} (잠김)`;
   if (door.type === 'room') return door.hint;
-  if (door.type === 'stairs') return currentSceneFloor === 18 ? 'E · 17층으로 내려가기' : 'E · 옥상으로 올라가기';
-  if (door.type === 'panel') return 'E · 조사';
+  if (door.type === 'stairs') return currentSceneFloor === 18 ? `${key} · 17층으로 내려가기` : `${key} · 옥상으로 올라가기`;
+  if (door.type === 'panel') return `${key} · 조사`;
   if (door.type === 'elevator') {
-    if (!elevatorHasPower()) return 'E · 엘리베이터 전력 없음';
+    if (!elevatorHasPower()) return `${key} · 엘리베이터 전력 없음`;
     const car = elevatorCars[door.carIndex];
     if (car.travelling) return car.rider ? '이동 중…' : '호출 중…';
-    if (car.floor === currentSceneFloor) return 'E · 탑승';
-    return 'E · 호출';
+    if (car.floor === currentSceneFloor) return `${key} · 탑승`;
+    return `${key} · 호출`;
   }
-  return door.element.dataset.open === 'true' ? 'E · 닫기' : 'E · 열기';
+  return door.element.dataset.open === 'true' ? `${key} · 닫기` : `${key} · 열기`;
 }
 
 function interact() {
@@ -110,7 +111,7 @@ function interact() {
       return;
     }
     if (nearbyDoor.powerCircuit) { openEmergencyCircuit(); return; }
-    if (enterB2TrueEnd(nearbyDoor)) return; // ARCHI를 끈 뒤 1층 정문으로 나가기(b2-ending.js)
+    if (handleB2Console(nearbyDoor)) return; // B2 삭제 중 메인 콘솔: 문을 막은 뒤면 루트 터미널(b2-ending.js)
     if (handleLogTerminalInteract(nearbyDoor)) return; // 12층 야간 로그 단말기·네트워크 랙(log-puzzle.js)
     if (handleBackupDeviceInteract(nearbyDoor)) return; // 7층 망분리 백업 장비(backup-puzzle.js)
     if (handleVaultInteract(nearbyDoor)) return; // 13층 보안 자료실 크랭크·배치도(vault-puzzle.js)
@@ -236,6 +237,10 @@ function interact() {
     return;
   }
   if (nearbyDoor.type === 'elevator') {
+    if (b2Ending.phase === 'running') {
+      showStatus('호출 버튼이 눌리지 않는다. ARCHI가 B2 승강기를 멈췄다.', 3000);
+      return;
+    }
     const car = elevatorCars[nearbyDoor.carIndex];
     if (!elevatorHasPower() && car.floor !== currentSceneFloor) {
       showStatus(elevatorPowerMessage, 6000);

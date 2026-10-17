@@ -23,10 +23,10 @@ const OBJECTIVES = [
   // 16층 CU 반입문은 안에서 열리지 않는다(floor-16.js): 항불안제를 챙긴 뒤 셔터를 올려야 나간다.
   { when: () => room === 'dynamic' && dynamicFloorId === 'f16-cu' && collectedItems.has('f16-antianxiety') && !collectedItems.has('f16-cu'),
     title: '편의점 나가기', text: '반입문은 안에서 열리지 않는다. 셔터 제어함의 수동 레버로 셔터를 올리고 나가자.' },
-  // B2 DELETE 뒤 엔딩 추격(b2-ending.js): 단계마다 다음 할 일을 알려 준다.
-  { when: () => b2Ending.phase === 'running' && b2Ending.offline, title: '탈출하기', text: 'ARCHI가 꺼졌다. 1층 정문으로 나가자.' },
-  { when: () => b2Ending.phase === 'running' && b2Ending.stage === 'lobby', title: '1층 전력 끊기', text: '휴대폰(P)의 비상 전력 제어 앱에서 1층 전력을 끊어 ARCHI를 멈추자.' },
-  { when: () => b2Ending.phase === 'running', title: '도망치기', text: '경비 로봇들이 깨어났다. 엘리베이터를 타고 1층으로 올라가자.' },
+  // B2 DELETE 뒤 엔딩(b2-ending.js): 단계마다 다음 할 일을 알려 준다.
+  { when: () => b2Ending.phase === 'running' && b2Ending.offline, title: 'ARCHI 삭제 완료', text: 'ARCHI가 꺼졌다. 문 너머의 경비 로봇도 멈췄다.' },
+  { when: () => b2Ending.phase === 'running' && b2Ending.barricaded, title: '삭제 배틀', text: '바리케이드가 버티는 동안 메인 콘솔에서 명령어로 ARCHI의 방해를 막고 삭제를 끝내자.' },
+  { when: () => b2Ending.phase === 'running', title: '문 막기', text: '경비 로봇들이 서버실로 온다. 장비 운반 상자를 밀어 출입문을 막자.' },
   { when: () => collectedItems.has('goal-b2-console'), title: 'ARCHI 멈추기', text: 'ARCHI가 자신을 외부로 복제하고 있다. 메인 콘솔에서 DELETE를 실행하자.' },
   // 12층·7층 필수 퍼즐(log-puzzle.js, backup-puzzle.js)을 차례로 풀어야 다음 목표로 넘어간다.
   { when: () => collectedItems.has('f7-external-connection-solved') && collectedItems.has('b1-elevator'), title: 'B2 서버실 조사하기', text: 'B2 ARCHI 메인 서버실로 내려가 진짜 목적을 확인하자.' },

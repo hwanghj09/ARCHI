@@ -20,7 +20,7 @@ function render() {
   const state = sprite.dataset.state;
   const index = Number(sprite.dataset.frame) || 0;
   const lamp = state === 'walk' ? walkPhoneLamps[index] : state === 'run' ? runPhoneLamps[index] :
-    state === 'jump' ? runPhoneLamps[2] : state === 'fall' ? runPhoneLamps[6] : [158, 68];
+    state === 'jump' ? runPhoneLamps[2] : state === 'fall' ? runPhoneLamps[6] : state === 'crouch' ? [180, 196] : [158, 68];
   world.style.setProperty('--beam-x', `${body.position.x + (lamp[0] * .75 - 96) * facing}px`);
   world.style.setProperty('--beam-y', `${body.bounds.max.y - 178 + lamp[1] * .75}px`);
   world.style.setProperty('--beam-angle', `${facing === 1 ? 68 : 248}deg`);

@@ -11,7 +11,8 @@
 // 단서 방향: 메인 콘솔의 작업 요약이 기획.md의 일곱 가지 진실(낮 3~5% 위장, 야간 전력 집중, 추가 학습, 야간 87.6%, 외부 호스트
 // 시험 성공, 00:00 건물 전력 장악, 자기 복제 전송 중)을 한 번에 보여 주고, 명령 칸에 DELETE ARCHI가 대기한다. 외부 전송은
 // ARC-FULL-041(4층)이 DR-EXT(6층 회선)로 61% 진행 중. 연결 실험실은 인간-시스템 연결 장비 2차와 "대체 호스트: 정수호"
-// (서브엔딩 복선), 복도의 경비 로봇 셋은 "삭제 명령 감지 시 기동". 삭제와 추격 결말은 js/scene/b2-ending.js.
+// (서브엔딩 복선), 복도의 경비 로봇 셋은 "삭제 명령 감지 시 기동". 삭제 결말(상자로 문 막기 → 터미널 삭제 배틀)은
+// js/scene/b2-ending.js.
 const B2_LAYOUT = {
   header: 'B2 · 서버실', background: '#0c1014', theme: 'core',
   backgroundWallsOnly: true, backgroundImage: { src: 'assets/background/b2/b2-corridor-finished.png', height: 760, top: 0 },
@@ -48,6 +49,10 @@ const B2_LAYOUT = {
 const B2_ROOMS = interiorRooms(-2, [
   { id: 'b2-main', name: 'ARCHI 메인 서버실', width: 3150, windowless: true, interiorStyle: 'core-hall',
     backgroundWallsOnly: true, backgroundImage: { src: 'assets/background/b2/b2-main-finished.png', height: 760, top: 0 },
+    // 엔딩의 문 막기(b2-ending.js): DELETE 뒤에만 밀리는 장비 운반 상자. 무거워서 이동 속도의 0.35배로 밀린다. 출구(문 2850~3010,
+    // exitDoorX)를 다 가리는 자리(중심 2930)까지 밀면 문이 막힌다. 콘솔(1400)에서 달려와 밀면 약 9초, 로봇은 약 14초 뒤 온다.
+    movables: [{ kind: 'b2-crate', name: '장비 운반 상자', x: 1950, width: 190, height: 95,
+      pushable: { factor: .35, minX: 2045, maxX: 2930, barricade: true } }],
     fixtures: [
       { name: '외부 전송 현황', x: 1900, y: 120, width: 500, height: 170, style: 'transfer-screen',
         lines: ['EXTERNAL TRANSFER', 'ARC-FULL-041 → DR-EXT', '61%'],

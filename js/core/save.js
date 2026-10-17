@@ -26,7 +26,7 @@ function readProgress() {
 function progressSnapshot() {
   // ponytail: 컷씬·포획은 조작 가능한 위치로 저장한다. 컷씬 프레임 재개가 필요할 때 별도로 보존한다.
   const scene = { id: room === 'office' ? 'office' : room === 'corridor' ? 'f17' : dynamicFloorId,
-    x: body.position.x, y: body.position.y, velocity: { ...body.velocity }, facing, returnX,
+    x: body.position.x, y: body.position.y - (crouching ? 33 : 0), velocity: { ...body.velocity }, facing, returnX,
     arrivalKey: currentDoors.find(door => door.key === 'exit')?.key || currentDoors.find(door => door.key)?.key };
   if (openingActive) Object.assign(scene, { id: 'office', x: 656, y: floorY - 81, velocity: { x: 0, y: 0 } });
   if (playerCaught) Object.assign(scene, { id: 'f1', x: BUILDING_CORE.elevators[0].x + 40, y: floorY - 81, velocity: { x: 0, y: 0 } });

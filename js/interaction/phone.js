@@ -41,7 +41,6 @@ function openPhoneApp(app) {
   if (app === 'gallery') renderPhoneGallery();
   if (app === 'solar') {
     document.getElementById('phone-solar-floor').value = String(solarPoweredFloors[0] || 17);
-    jamB2SolarApp(); // B2 엔딩 1층: 열 때마다 ARCHI가 잠시 방해한다
     refreshSolarApp();
   }
   playGameSound('phone');
@@ -75,9 +74,9 @@ function phoneChargeState() {
 }
 
 function phoneChargerHint(door) {
-  if (isPhoneDock(door)) return `E · 휴대폰 가져가기 · ${Math.ceil(phoneBattery)}% · ${phoneChargeState()}`;
+  if (isPhoneDock(door)) return `${bindingLabel('interact')} · 휴대폰 가져가기 · ${Math.ceil(phoneBattery)}% · ${phoneChargeState()}`;
   if (phoneDock) return `휴대폰은 ${phoneDockLocation()} 충전 콘센트에 있습니다`;
-  return floorHasPower(currentSceneFloor) ? 'E · 휴대폰 맡겨 충전' : 'E · 충전 불가 · 전력 없음';
+  return floorHasPower(currentSceneFloor) ? `${bindingLabel('interact')} · 휴대폰 맡겨 충전` : `${bindingLabel('interact')} · 충전 불가 · 전력 없음`;
 }
 
 function refreshPhoneChargers() {
@@ -126,7 +125,7 @@ function refreshPhone() {
 function togglePhone() {
   if (photoCaptureTime > 0 || itemUseTime > 0 || playerCaught || hallucinationCaught || blackoutSceneActive || cctvSceneActive) return;
   if (usingPhone) return closePhone();
-  if (phoneDock) return showStatus(`${phoneDockLocation()} 책상에 휴대폰을 두었다. 그 자리에서 E로 가져오자.`, 4000);
+  if (phoneDock) return showStatus(`${phoneDockLocation()} 책상에 휴대폰을 두었다. 그 자리에서 ${bindingLabel('interact')} 키로 가져오자.`, 4000);
   usingPhone = true;
   playGameSound('phone');
   phoneTime = 0;
@@ -189,7 +188,7 @@ function chargePhone(door) {
   phoneDrainAccumulator = 0;
   refreshPhone();
   animate(0);
-  showStatus('충전기를 콘센트에 꽂고 휴대폰을 책상에 두었다. 충전 중에는 사용할 수 없다. 돌아와 E로 가져오자.', 5000);
+  showStatus(`충전기를 콘센트에 꽂고 휴대폰을 책상에 두었다. 충전 중에는 사용할 수 없다. 돌아와 ${bindingLabel('interact')} 키로 가져오자.`, 5000);
 }
 
 function updatePhoneCharging(elapsed) {
@@ -199,7 +198,7 @@ function updatePhoneCharging(elapsed) {
   phoneBattery = Math.min(100, phoneBattery + 2 * Math.floor(phoneChargeAccumulator / 1000));
   phoneChargeAccumulator %= 1000;
   refreshPhone();
-  if (phoneBattery === 100) showStatus(`${phoneDockLocation()}의 휴대폰 충전이 끝났다. 맡긴 자리에서 E로 가져오자.`, 5000);
+  if (phoneBattery === 100) showStatus(`${phoneDockLocation()}의 휴대폰 충전이 끝났다. 맡긴 자리에서 ${bindingLabel('interact')} 키로 가져오자.`, 5000);
 }
 
 function updatePhone(elapsed) {
