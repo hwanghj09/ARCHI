@@ -75,3 +75,32 @@
 #phone-button[data-docked="true"]::after { content: attr(data-charge); position: fixed; right: max(24px, env(safe-area-inset-right)); bottom: 88px; max-width: calc(100vw - 48px); padding: 6px 9px; border: 1px solid #758a78; background: #101c20ed; color: #dbe5d8; font: 11px/1.5 Arial, sans-serif; pointer-events: none; }
 
 #phone-help:empty, #phone-note-status:empty { display: none; }
+
+.phone-camera-icon, .phone-gallery-icon { display: grid; place-items: center; border-radius: 12px; background: linear-gradient(145deg, #e3e9ec, #788c9f); color: #172b3b; font-size: 34px; line-height: 1; }
+.phone-gallery-icon { background: linear-gradient(145deg, #ebdcb5, #759d8c); }
+.phone-photo-help, #phone-camera-status, #phone-gallery-empty { margin: 8px 0; font-size: 12px; line-height: 1.7; overflow-wrap: anywhere; }
+#phone-camera-shoot { width: 100%; border-radius: 12px; }
+#phone-camera-preview { max-height: 180px; overflow: hidden; border-radius: 8px; background: #101921; }
+#phone-gallery-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin: 0; padding: 0; list-style: none; }
+#phone .phone-photo-card { display: flex; flex-direction: column; gap: 6px; width: 100%; min-height: 44px; padding: 6px; border: 1px solid #536778; border-radius: 8px; background: #172535; text-align: left; overflow-wrap: anywhere; }
+.phone-photo-card strong { font-size: 12px; }
+.phone-photo-card small { color: #b2c4d1; font-size: 10px; }
+.phone-photo-preview { width: 100%; height: 90px; overflow: hidden; background: #101921; }
+#phone :is(.phone-photo-preview, #phone-camera-preview) .writing-sheet { --hand-size: 12px; --frame: 4px; padding: 2px; }
+#phone :is(.phone-photo-preview, #phone-camera-preview) .writing-caption { display: none; }
+.phone-photo-image { margin: 0 auto; max-width: 720px; background: #1b242a; }
+.phone-photo-image > img { display: block; width: 100%; max-height: 60dvh; object-fit: contain; }
+.phone-photo-crop { position: relative; overflow: hidden; }
+.phone-photo-crop > img { position: absolute; max-width: none; max-height: none; }
+#inspection-photo { min-height: 44px; padding: 6px 12px; border-color: #8fbda3; background: #192421; color: #e6f0e3; font-size: 13px; }
+#inspection-photo[hidden] { display: none; }
+#inspection-photo:focus-visible { outline: 2px solid #dec898; outline-offset: 3px; }
+#inspection .dialog-actions { flex-wrap: wrap; }
+#player[data-state="photo"] #phone-sheet, #player[data-state="photo-away"] #phone-away-sheet { display: block; }
+#photo-shutter { position: fixed; inset: 0; z-index: 11; background: #fff; opacity: .18; pointer-events: none; }
+#photo-shutter[hidden] { display: none; }
+@media (prefers-reduced-motion: reduce) { #photo-shutter { display: none; } }
+@media (max-height: 480px) {
+  #inspection[data-surface]:has(#inspection-photo:not([hidden])) .dialog-actions { position: static; }
+  #inspection[data-surface]:has(#inspection-photo:not([hidden])) .inspection-heading { padding-right: 0; }
+}

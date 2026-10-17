@@ -6,7 +6,7 @@ function pressAction(button) {
 
 buttons.forEach(button => {
   button.addEventListener('pointerdown', event => {
-    if (event.button !== 0 || itemUseTime > 0 || blackoutSceneActive || cctvSceneActive || playerCaught || hallucinationCaught || transitioning || selectingFloor || usingComputer || usingKeypad || usingControl || usingPhone || usingPowerPanel || usingInspection) return;
+    if (event.button !== 0 || photoCaptureTime > 0 || itemUseTime > 0 || blackoutSceneActive || cctvSceneActive || playerCaught || hallucinationCaught || transitioning || selectingFloor || usingComputer || usingKeypad || usingControl || usingPhone || usingPowerPanel || usingInspection) return;
     event.preventDefault();
     button.setPointerCapture(event.pointerId);
     pressAction(button);
@@ -16,7 +16,7 @@ buttons.forEach(button => {
   ['pointerup', 'pointercancel', 'lostpointercapture'].forEach(name => button.addEventListener(name, release));
   button.addEventListener('contextmenu', event => event.preventDefault());
   button.addEventListener('click', event => {
-    if (event.detail !== 0 || itemUseTime > 0 || blackoutSceneActive || cctvSceneActive || playerCaught || hallucinationCaught || transitioning || selectingFloor || usingComputer || usingKeypad || usingControl || usingPhone || usingPowerPanel || usingInspection) return;
+    if (event.detail !== 0 || photoCaptureTime > 0 || itemUseTime > 0 || blackoutSceneActive || cctvSceneActive || playerCaught || hallucinationCaught || transitioning || selectingFloor || usingComputer || usingKeypad || usingControl || usingPhone || usingPowerPanel || usingInspection) return;
     pressAction(button);
   });
 });

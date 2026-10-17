@@ -8,6 +8,7 @@
     "test:floor15": "node tests/floor15-art.mjs",
     "test:floor16": "node tests/floor16-art.mjs",
     "test:clues": "node tests/phone-clues.mjs",
+    "test:photos": "node tests/phone-photos.mjs",
     "test": "node scripts/test.mjs",
     "test:antianxiety-animation": "node tests/antianxiety-animation.mjs"
   },

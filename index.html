@@ -86,6 +86,7 @@
     <script src="js/interaction/interaction.js" defer></script>
     <script src="js/interaction/phone.js" defer></script>
     <script src="js/interaction/clues.js" defer></script>
+    <script src="js/interaction/photos.js" defer></script>
     <script src="js/interaction/power.js" defer></script>
     <script src="js/interaction/inspection.js" defer></script>
     <script src="js/interaction/inventory.js" defer></script>
@@ -259,6 +260,8 @@
             <button type="button" data-phone-app="notes"><span class="phone-app-icon app-art" data-app-icon="notes" aria-hidden="true"></span><span>메모</span></button>
             <button type="button" data-phone-app="calculator"><span class="phone-app-icon app-art" data-app-icon="calculator" aria-hidden="true"></span><span>계산기</span></button>
             <button type="button" data-phone-app="building"><span class="phone-app-icon app-art" data-app-icon="building" aria-hidden="true"></span><span>시설 안내</span></button>
+            <button type="button" data-phone-app="camera"><span class="phone-app-icon phone-camera-icon" aria-hidden="true">▣</span><span>카메라</span></button>
+            <button type="button" data-phone-app="gallery"><span class="phone-app-icon phone-gallery-icon" aria-hidden="true">▧</span><span>갤러리</span></button>
             <button type="button" data-phone-app="solar" hidden><span class="phone-app-icon app-art" data-app-icon="flashlight" aria-hidden="true"></span><span>비상 전력 제어</span></button>
           </div>
         </div>
@@ -304,6 +307,17 @@
             <select id="phone-solar-floor" aria-label="전력을 공급할 층"></select>
             <button id="phone-solar-supply" type="button">비상 전력 공급</button>
             <p>한 층만 공급 · 다시 선택하면 해제</p>
+          </div>
+          <div id="phone-camera" data-phone-view="camera" hidden>
+            <p id="phone-camera-status" role="status"></p>
+            <div id="phone-camera-preview" aria-hidden="true"></div>
+            <button id="phone-camera-shoot" type="button" disabled>사진 찍기</button>
+            <p class="phone-photo-help">단서가 있는 물체를 E로 조사한 뒤 촬영하세요. 사진은 갤러리에 보관됩니다.</p>
+          </div>
+          <div id="phone-gallery" data-phone-view="gallery" hidden>
+            <p id="phone-gallery-empty">아직 찍은 사진이 없습니다.</p>
+            <p class="phone-photo-help">사진을 누르면 크게 볼 수 있습니다.</p>
+            <ol id="phone-gallery-list" aria-label="촬영한 단서 사진"></ol>
           </div>
         </section>
         <div class="phone-navigation"><span>P · 닫기 / Esc · 뒤로</span><button id="phone-close" type="button" aria-label="휴대폰 화면 닫기"><span aria-hidden="true"></span></button></div>
@@ -361,8 +375,9 @@
       <div id="inspection-sheet" aria-hidden="true" hidden></div>
       <p id="inspection-text" tabindex="0"></p>
       <span id="inspection-description" hidden></span>
-      <div class="dialog-actions"><span class="inspection-help">E / Esc</span><button id="inspection-use" type="button" hidden>사용하기</button><button id="inspection-delete" class="b2-action" type="button" hidden>DELETE</button><button id="inspection-yes" class="b2-action" type="button" hidden>예</button><button id="inspection-no" class="b2-action" type="button" hidden>아니요</button><button id="inspection-close" type="button">닫기 ▾</button></div>
+      <div class="dialog-actions"><span class="inspection-help">E / Esc</span><button id="inspection-photo" type="button" hidden>사진 찍기</button><button id="inspection-use" type="button" hidden>사용하기</button><button id="inspection-delete" class="b2-action" type="button" hidden>DELETE</button><button id="inspection-yes" class="b2-action" type="button" hidden>예</button><button id="inspection-no" class="b2-action" type="button" hidden>아니요</button><button id="inspection-close" type="button">닫기 ▾</button></div>
     </section>
+    <div id="photo-shutter" aria-hidden="true" hidden></div>
     <div id="b2-delete-bar" role="status" aria-label="ARCHI 삭제 진행률" hidden>
       <span>ARCHI DELETE PROCESS <output id="b2-delete-percent">0%</output></span>
       <span class="b2-delete-track" aria-hidden="true"><span id="b2-delete-fill"></span></span>

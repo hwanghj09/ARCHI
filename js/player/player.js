@@ -14,6 +14,8 @@ const antianxietySheet = document.getElementById('antianxiety-sheet');
 const itemUseFrameDurations = [220, 220, 200, 280, 300, 280];
 const itemUseDuration = itemUseFrameDurations.reduce((total, duration) => total + duration, 0);
 let itemUseTime = 0;
+let photoCaptureTime = 0;
+const photoCaptureDuration = 1260;
 
 function startItemUseAnimation() {
   if (antianxietySheet.naturalWidth !== 1536 || antianxietySheet.naturalHeight !== 256) {
@@ -67,6 +69,15 @@ function animate(distance, sprinting = false, elapsed = 0) {
     const frame = captureTime < 640 ? 0 : 1 + Math.floor((captureTime - 640) / 240) % 3;
     sprite.dataset.state = 'caught'; sprite.dataset.frame = frame;
     caughtSheet.style.transform = `translateX(${-frame * 25}%)`;
+    return;
+  }
+  if (photoCaptureTime > 0 && !hallucinationCaught) {
+    const away = photoCaptureTime <= 360;
+    const index = away ? Number(photoCaptureTime <= 180) : Math.min(3, Math.floor((photoCaptureDuration - photoCaptureTime) / 180));
+    sprite.dataset.state = away ? 'photo-away' : 'photo';
+    sprite.dataset.frame = index;
+    sprite.dataset.phoneHeld = 'true';
+    (away ? phoneAwaySheet : phoneSheet).style.transform = `translateX(${-index * (away ? 50 : 25)}%)`;
     return;
   }
   if (itemUseTime > 0) {

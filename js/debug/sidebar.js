@@ -28,7 +28,7 @@ debugSidebar.addEventListener('keydown', event => {
 function debugCanAct() {
   return gameStarted && !mainMenuActive && !openingActive && !blackoutSceneActive && !storySceneActive && !cctvSceneActive &&
     !transitioning && !selectingFloor && !usingComputer && !usingPhone && !usingKeypad && !usingControl && !usingInspection && !usingPowerPanel &&
-    !playerCaught && !hallucinationCaught && itemUseTime <= 0 && b2Ending.phase === 'idle';
+    !playerCaught && !hallucinationCaught && photoCaptureTime <= 0 && itemUseTime <= 0 && b2Ending.phase === 'idle';
 }
 
 const debugRoomSelect = document.getElementById('debug-room-select');

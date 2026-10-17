@@ -12,6 +12,17 @@ function update() {
   if (blackoutSceneActive) { updateBlackoutScene(step); return; }
   if (storySceneActive) { updateStoryScene(step); return; }
   if (cctvSceneActive) { updateCctvScene(step); return; }
+  if (photoCaptureTime > 0) {
+    updatePhotoCapture(step);
+    if (photoCaptureTime > 0) {
+      updatePhone(step);
+      updateGuardPatrol(step);
+      updateB2Ending(step);
+      updateElevators();
+      animate(0, false, step);
+      return;
+    }
+  }
   if (playerCaught) {
     updateGuardPatrol(step);
     animate(0, false, step);

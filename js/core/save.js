@@ -30,7 +30,7 @@ function progressSnapshot() {
     arrivalKey: currentDoors.find(door => door.key === 'exit')?.key || currentDoors.find(door => door.key)?.key };
   if (openingActive) Object.assign(scene, { id: 'office', x: 656, y: floorY - 81, velocity: { x: 0, y: 0 } });
   if (playerCaught) Object.assign(scene, { id: 'f1', x: BUILDING_CORE.elevators[0].x + 40, y: floorY - 81, velocity: { x: 0, y: 0 } });
-  return { version: 1, savedAt: Date.now(), scene, items: [...collectedItems], clues: clueSnapshot(),
+  return { version: 1, savedAt: Date.now(), scene, items: [...collectedItems], clues: clueSnapshot(), photos: photoSnapshot(),
     battery: phoneBattery, sanity, light: phoneLightOn, dock: phoneDock && { ...phoneDock },
     phoneChargeAccumulator, phoneDrainAccumulator,
     blackout: realBuildingBlackout() || blackoutSceneActive, solarEnabled, solarPoweredFloors: [...solarPoweredFloors],
@@ -63,6 +63,7 @@ function restoreProgress(data) {
   restoringProgress = true;
   try {
     itemUseTime = 0;
+    cancelPhotoCapture();
     closeComputerUsbConnection();
     resetComputerDesktop();
     releaseInput();
@@ -93,6 +94,7 @@ function restoreProgress(data) {
     collectedItems.add('f17-badge');
     for (const item of data.items) collectedItems.add(item);
     restoreClues(data.clues);
+    restorePhotos(data.photos);
     allPowerOverride = false; // 불러오거나 새로 시작하면 콘솔의 전력 활성화는 꺼진다
     buildingBlackout = data.blackout === true;
     if (typeof syncAllPowerButton === 'function') syncAllPowerButton();

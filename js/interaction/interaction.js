@@ -2,7 +2,7 @@
 let nearbyDoor = null;
 
 function updateInteraction() {
-  if (itemUseTime > 0 || openingActive || blackoutSceneActive || cctvSceneActive || playerCaught || hallucinationCaught) { hint.hidden = true; return; }
+  if (photoCaptureTime > 0 || itemUseTime > 0 || openingActive || blackoutSceneActive || cctvSceneActive || playerCaught || hallucinationCaught) { hint.hidden = true; return; }
   if (room === 'dynamic') {
     if (shouldStartCctvScene()) {
       startCctvScene();
@@ -72,7 +72,7 @@ function doorHintText(door) {
 }
 
 function interact() {
-  if (itemUseTime > 0 || openingActive || blackoutSceneActive || cctvSceneActive || playerCaught || hallucinationCaught || transitioning || selectingFloor || usingComputer || usingKeypad || usingControl || usingPhone || usingPowerPanel || usingInspection) return;
+  if (photoCaptureTime > 0 || itemUseTime > 0 || openingActive || blackoutSceneActive || cctvSceneActive || playerCaught || hallucinationCaught || transitioning || selectingFloor || usingComputer || usingKeypad || usingControl || usingPhone || usingPowerPanel || usingInspection) return;
   updateInteraction();
   if (blackoutSceneActive || cctvSceneActive) return;
   if (!nearbyDoor) return;
@@ -164,7 +164,10 @@ function interact() {
     else openInspection(nearbyDoor.name, inspectionMessage, writingSheetFor(nearbyDoor, inspectionMessage));
     offerArchiDelete(nearbyDoor); // B2 메인 콘솔이면 DELETE 버튼(b2-ending.js)
     if (missing) return;
-    if (!unreadable) { recordClue(nearbyDoor); noteObjectiveRead(nearbyDoor); }
+    if (!unreadable) {
+      recordClue(nearbyDoor); noteObjectiveRead(nearbyDoor);
+      offerInspectionPhoto(nearbyDoor, inspectionMessage);
+    }
     const alreadyCollected = gives && collectedItems.has(gives);
     if (gives) {
       collectedItems.add(gives);
