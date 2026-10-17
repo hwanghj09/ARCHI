@@ -192,7 +192,6 @@ try {
   await page.keyboard.down('e');
   await page.keyboard.up('e');
   assert.equal(await doors.nth(0).getAttribute('data-open'), 'false', 'Calling must not open the elevator immediately');
-  assert.match(await page.locator('#interaction-status').textContent(), /1번 엘리베이터.*호출했습니다/);
   assert.deepEqual(await indicators.allTextContents(), ['↑ 01F', '01F', '01F'], 'Only the called elevator starts moving');
   await actionFrame('#interact-sheet', 0);
   await page.clock.runFor(220);
@@ -209,7 +208,6 @@ try {
   await page.clock.runFor(elevatorFloorMs);
   assert.equal(await indicators.nth(0).textContent(), '17F');
   assert.equal(await doors.nth(0).getAttribute('data-open'), 'true', 'Arrival must automatically open the door');
-  assert.match(await page.locator('#interaction-status').textContent(), /17층에 도착/);
   await page.screenshot({ path: '.local/door-elevator-open.png' });
   await page.keyboard.press('e');
   await finishSceneTransition(page);
@@ -304,7 +302,6 @@ try {
   assert.equal(await page.evaluate(() => document.getElementById('world').style.width), '5000px', 'Every floor shares the 17F width');
   assert.equal(await page.locator('header span').textContent(), '12F · 기술본부 ARCHI 개발팀');
   assert.equal(await page.locator('#dynamic-scene .solid:not(.floor):not(.boundary)').count(), 0, 'The 12F corridor has no extra box obstacles');
-  assert.match(await page.locator('#interaction-status').textContent(), /12층에 도착/);
   assert.equal(await page.locator('#elevator-cabin').isHidden(), true, 'Exiting must close the cabin view');
   await page.screenshot({ path: '.local/floor-12.png' });
 
@@ -316,8 +313,7 @@ try {
   await page.locator('#cabin-exit').click();
   await finishSceneTransition(page);
   assert.equal(await page.locator('#world').getAttribute('data-room'), 'corridor', 'Boarding must return the player to floor 17');
-  assert.equal(await page.locator('header span').textContent(), '17F · 00:00');
-  assert.match(await page.locator('#interaction-status').textContent(), /17층 · 복도에 도착/);
+  assert.equal(await page.locator('header span').textContent(), '17F · 복도');
 
   assert.deepEqual(errors, []);
   console.log('PASS: delayed elevator calls, gradual floor indicators, independent travel, automatic arrival opening, repeated-call guards, multi-floor boarding across structurally distinct floors; doors, player animations, movement, collisions, camera and resize.');

@@ -122,7 +122,7 @@ try {
   assert.match(await page.locator('#interaction-hint').textContent(), /17층으로 내려가기/);
   await page.locator('#interact').click();
   await arrived('corridor');
-  assert.equal(await page.locator('header span').textContent(), '17F · 00:00');
+  assert.equal(await page.locator('header span').textContent(), '17F · 복도');
   assert(Math.abs((await state()).x - 2946) < 1, 'Return to the 17F stair door');
   assert.equal(await page.locator('#dynamic-scene .door').count(), 0);
   assert.equal(await supply.count(), 0, 'Device is removed when leaving the roof');

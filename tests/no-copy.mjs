@@ -17,7 +17,7 @@ try {
     return event.defaultPrevented;
   }, [selector, type]);
   for (const type of ['selectstart', 'dragstart', 'copy', 'cut', 'contextmenu']) {
-    assert.equal(await blocked('#interaction-status', type), true, `${type} is blocked on game text`);
+    assert.equal(await blocked('#interaction-hint', type), true, `${type} is blocked on game text`);
     assert.equal(await blocked('#phone-note', type), false, `${type} still works in the phone note`);
   }
   assert.equal(await page.evaluate(() => getComputedStyle(document.body).userSelect), 'none', 'Game text cannot be selected');

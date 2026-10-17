@@ -122,7 +122,7 @@ function openGameMenu() {
 
 function showMenuView(view) {
   cancelKeyBinding();
-  for (const id of ['home', 'settings', 'controls', 'new-game']) document.getElementById(`menu-${id}`).hidden = id !== view;
+  for (const id of ['home', 'settings', 'controls', 'slots', 'new-game']) document.getElementById(`menu-${id}`).hidden = id !== view;
   mainMenu.dataset.view = view;
   if (view === 'home') menuReturnButton.focus({ preventScroll: true });
   else document.getElementById(`menu-${view}`).querySelector('button').focus({ preventScroll: true });
@@ -154,7 +154,6 @@ menuContinue.addEventListener('click', () => {
     }
   } else (selectingFloor ? cabin : stage).focus({ preventScroll: true });
 });
-document.getElementById('game-menu-button').addEventListener('click', openGameMenu);
 
 for (const view of ['settings', 'controls']) {
   document.getElementById(`menu-${view}-button`).addEventListener('click', event => {
@@ -217,4 +216,68 @@ mainMenu.addEventListener('keydown', event => {
   const index = enabled.indexOf(document.activeElement);
   if (event.shiftKey && index <= 0) { event.preventDefault(); enabled.at(-1).focus(); }
   else if (!event.shiftKey && index === enabled.length - 1) { event.preventDefault(); enabled[0].focus(); }
+});
+
+// 저장 · 불러오기: 슬롯 3칸. 자동 저장(목표가 바뀔 때, save.js)과 직접 저장이 같은 칸을 쓴다.
+const menuSlotList = document.getElementById('menu-slot-list');
+const menuSlotsStatus = document.getElementById('menu-slots-status');
+
+function slotSummary(saved) {
+  if (!saved) return '비어 있음';
+  const name = saved.scene.id === 'office' ? '17층 사무실' : floorById.get(saved.scene.id).label;
+  const time = Number.isFinite(saved.savedAt) ? new Date(saved.savedAt).toLocaleString('ko-KR', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : '';
+  return `${name} · ${time} · ${saved.slotKind === 'manual' ? '직접 저장' : '자동 저장'}${saved.objective ? ` · 목표: ${saved.objective}` : ''}`;
+}
+
+function renderSlots() {
+  menuSlotList.replaceChildren(...slotKeys.map((key, index) => {
+    const saved = readProgress(key);
+    const item = document.createElement('li');
+    const info = document.createElement('div');
+    const title = document.createElement('strong');
+    const detail = document.createElement('small');
+    title.textContent = `슬롯 ${index + 1}`;
+    detail.textContent = slotSummary(saved);
+    info.append(title, detail);
+    const buttons = document.createElement('div');
+    const save = document.createElement('button');
+    const load = document.createElement('button');
+    save.type = load.type = 'button';
+    save.textContent = '저장'; load.textContent = '불러오기';
+    save.dataset.slotSave = load.dataset.slotLoad = String(index);
+    save.disabled = !gameStarted;
+    load.disabled = !saved;
+    buttons.append(save, load);
+    item.append(info, buttons);
+    return item;
+  }));
+}
+
+document.getElementById('menu-slots-button').addEventListener('click', event => {
+  menuReturnButton = event.currentTarget;
+  menuSlotsStatus.textContent = gameStarted ? '목표가 바뀔 때마다 가장 오래된 칸에 자동으로 저장됩니다.' : '게임을 시작한 뒤에 저장할 수 있습니다. 저장된 칸은 불러올 수 있습니다.';
+  renderSlots();
+  showMenuView('slots');
+});
+
+menuSlotList.addEventListener('click', event => {
+  const save = event.target.closest('[data-slot-save]');
+  const load = event.target.closest('[data-slot-load]');
+  if (save) {
+    const index = Number(save.dataset.slotSave);
+    menuSlotsStatus.textContent = writeSlot(index, 'manual') ? `슬롯 ${index + 1}에 저장했습니다.` : '지금은 저장할 수 없습니다.';
+    renderSlots();
+    menuSlotList.querySelector(`[data-slot-save="${index}"]`)?.focus({ preventScroll: true });
+  } else if (load) {
+    const saved = readProgress(slotKeys[Number(load.dataset.slotLoad)]);
+    if (!saved) return renderSlots();
+    closeMainMenu();
+    try { restoreProgress(saved); saveProgress(); }
+    catch {
+      mainMenuActive = true;
+      document.body.dataset.mainMenu = 'true';
+      showMainMenu();
+      document.getElementById('menu-save-info').textContent = '저장한 진행 상황을 불러오지 못했습니다.';
+    }
+  }
 });

@@ -11,4 +11,3 @@
 .phone-clue-place { display: block; margin-bottom: 4px; color: #f7d79b; font: 600 11px/1.4 Arial, sans-serif; }
 #phone-clue-list p { margin: 0; color: #e7edf3; font: 13px/1.6 Arial, sans-serif; word-break: keep-all; }
 /* "단서 기록됨"은 조사 창이 열린 채 뜨므로, 그동안만 상태 문구를 조사 창(z-index 12)과 그 어두운 막 위로 올린다. */
-body:has(#inspection:not([hidden])) #interaction-status { z-index: 13; color: #f3e6c4; }

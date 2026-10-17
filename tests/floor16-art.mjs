@@ -129,7 +129,6 @@ try {
   await use(1150);
   assert.match(await interactionMessage(page), /23:47/);
   const exit = await exitDoor(page);
-  const status = () => page.locator('#interaction-status').textContent();
   const hintText = () => page.locator('#interaction-hint').textContent();
   const rolling = () => page.locator('.room-door.shutter').getAttribute('data-rolling');
   const shutterUnlocked = () => page.locator('.room-door.shutter').getAttribute('data-unlocked');
@@ -150,8 +149,6 @@ try {
     const original = playGameSound;
     playGameSound = (name, options) => { soundLog.push(name); original(name, options); };
   });
-  const raiseMessage = '셔터가 덜컹거리며 말려 올라간다.';
-  const lowerMessage = '셔터가 덜컹거리며 내려온다.';
   // The exit is the lowered shutter: it stays shut until the panel lever raises it.
   assert.equal(await page.evaluate(() => collectedItems.has('f16-cu')), false);
   await walk(exit.x + exit.width / 2);
@@ -169,7 +166,6 @@ try {
   assert.equal(await page.locator('header span').textContent(), '16F · CU 편의점', 'Raising the shutter does not leave the store');
   assert(await page.evaluate(() => collectedItems.has('f16-cu') && progressSnapshot().items.includes('f16-cu')), 'The raised shutter is recorded at once');
   assert.deepEqual(await page.evaluate(() => soundLog), ['shutter']);
-  assert.equal(await status(), raiseMessage);
   assert.equal(await rolling(), 'up');
   assert(await page.locator('.room-door.shutter').evaluate(el => {
     const style = getComputedStyle(el, '::after');
@@ -195,7 +191,6 @@ try {
   await finishSceneTransition(page);
   assert.equal(await page.locator('header span').textContent(), '16F · 편의시설');
   assert.deepEqual(await page.evaluate(() => soundLog), ['door'], 'Leaving by the raised shutter is an ordinary door');
-  assert.equal(await status(), '복도로 나왔습니다.');
   assert.equal(await page.locator('.room-door.shutter').getAttribute('aria-label'), 'CU 편의점 출입문');
   await checkDoors();
   assert.equal(await shutterUnlocked(), 'true');
@@ -209,7 +204,6 @@ try {
   await page.evaluate(() => { soundLog.length = 0; });
   await page.keyboard.press('e');
   assert.deepEqual(await page.evaluate(() => soundLog), ['shutter']);
-  assert.equal(await status(), lowerMessage);
   assert.equal(await rolling(), 'down');
   assert.deepEqual(await rollAnimation(), { direction: 'reverse', duration: 900 }, 'The shutter rolls down over about a second');
   assert.equal(await shutterUnlocked(), 'true', 'The open frame stays underneath while the curtain comes down');
@@ -241,7 +235,7 @@ try {
   await checkArt(1);
   await capture('mobile');
   await page.setViewportSize({ width: 1280, height: 720 });
-  // With reduced motion the lever line and sound remain, and the corridor shows the raised shutter without the roll.
+  // With reduced motion the lever sound remains, and the corridor shows the raised shutter without the roll.
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.evaluate(() => { collectedItems.delete('f16-cu'); performFloorChange('f16-cu', null, 'link:f16-kitchen'); });
   await page.clock.runFor(100);
@@ -259,7 +253,7 @@ try {
   await page.evaluate(() => { soundLog.length = 0; });
   await page.keyboard.press('e');
   assert.deepEqual(await page.evaluate(() => soundLog), ['shutter']);
-  assert.equal(await status(), raiseMessage);
+  assert.equal(await page.evaluate(() => collectedItems.has('f16-cu')), true);
   assert.equal(await rolling(), null, 'Reduced motion skips the roll');
   assert.equal(await shutterUnlocked(), 'true');
   await page.emulateMedia({ reducedMotion: null });

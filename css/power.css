@@ -26,4 +26,3 @@
 #power-help { position: absolute; left: 22%; top: 83.4%; width: 56%; height: 4.5%; margin: 0; display: grid; align-content: center; color: #393126; text-align: center; font-size: clamp(7px, 2.1vw, 10px); line-height: 1.05; white-space: nowrap; }
 #power-close { position: absolute; left: 38%; top: 93%; width: 24%; min-height: 32px; padding: 5px; border: 1px solid #7f8e84; border-radius: 2px; background: #18211f; color: #e7e3d2; font-size: 12px !important; }
 /* 패널이 열린 동안에도 '먼저 켠 층은 꺼집니다' 같은 안내가 어두운 막 아래에 묻히지 않게 상태 문구를 패널(z-index 8) 위로 올린다. */
-body:has(#power-panel:not([hidden])) #interaction-status { z-index: 9; color: #f3e6c4; }

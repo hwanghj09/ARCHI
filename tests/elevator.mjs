@@ -31,7 +31,7 @@ try {
   };
   await hold('d', 8200);
   // The first call position now plays the outage scene before allowing a real call.
-  if (await page.locator('#blackout-scene').isVisible()) await page.clock.runFor(5000);
+  if (await page.locator("#blackout-scene").isVisible()) await page.locator("#blackout-skip").click();
   // Rooftop power recovery is exercised by elevator-power.mjs; this suite checks the powered floor routes.
   await page.evaluate(() => { collectedItems.add("f17-emergency-linked"); solarEnabled = true; updatePowerState(); });
   await page.keyboard.press('e');
@@ -124,7 +124,7 @@ try {
   assert.equal(await page.locator('#cabin-scene').getAttribute('data-door'), 'open', 'The arrival door opens after fade-in');
   await page.locator('#cabin-exit').click();
   assert(await cabin.isVisible(), 'Cabin remains visible until departure fade reaches black');
-  assert.equal(await page.locator('header span').textContent(), '17F · 00:00');
+  assert.equal(await page.locator('header span').textContent(), '17F · 복도');
   await page.clock.runFor(150);
   assert(await cabin.isVisible());
   assert(await page.evaluate(() => document.elementFromPoint(innerWidth / 2, innerHeight / 2).id === 'room-transition'));
@@ -146,11 +146,12 @@ try {
     await hold(x < from ? 'a' : 'd', Math.abs(x - from) / 200 * 1000);
   };
   const hint = () => page.locator('#interaction-hint').textContent();
+  // Without a message the prop acts silently (sequence steps, buttons, selectors); callers check the resulting state.
   const inspect = async (x, hintText, message) => {
     await walkTo(x);
     assert.equal(await hint(), hintText);
     await page.keyboard.press('e');
-    assert.match(await interactionMessage(page), message);
+    if (message) assert.match(await interactionMessage(page), message);
   };
   // Painted floors use measured door positions; the other floors share the building core.
   const checkCore = async () => {
@@ -1277,8 +1278,8 @@ try {
     await checkCutawayArt('floor08-qa-interior.png', 3044);
     assert.equal(await page.locator('#dynamic-scene .fixture.art-spot').count(), 5);
     await inspect(455, 'E · 결함 현황판 조사', /47장.*새벽 3시.*SYSTEM.*회의실 화이트보드/);
-    await inspect(292, 'E · 관찰 카메라 조사', /절차 불일치/);
-    await inspect(100, 'E · 재현 벤치 조사', /절차 불일치/);
+    await inspect(292, 'E · 관찰 카메라 조사');
+    await inspect(100, 'E · 재현 벤치 조사');
     assert.equal(await done(), 0, 'No step counts out of order');
     await leaveRoom(qaRoom, corridorHeader);
 
@@ -1297,13 +1298,13 @@ try {
     // With the order: terminal clock, occupancy sensor, camera, then the bench. Skipping ahead still resets.
     const qaAgain = await enterThroughSpriteDoor('QA 시험실', '8F');
     assert.equal(await done(), 0, 'Leaving the room (which latches its id) does not count as the record');
-    await inspect(186, 'E · 시험 단말 조사', /03:00.*조건 1\/3/);
+    await inspect(186, 'E · 시험 단말 조사');
     assert.equal(await done(), 1);
-    await inspect(100, 'E · 재현 벤치 조사', /절차 불일치/);
+    await inspect(100, 'E · 재현 벤치 조사');
     assert.equal(await done(), 0, 'Skipping to the bench starts over');
-    await inspect(186, 'E · 시험 단말 조사', /조건 1\/3/);
-    await inspect(240, 'E · 재실 센서 제어함 조사', /조건 2\/3/);
-    await inspect(292, 'E · 관찰 카메라 조사', /조건 3\/3/);
+    await inspect(186, 'E · 시험 단말 조사');
+    await inspect(240, 'E · 재실 센서 제어함 조사');
+    await inspect(292, 'E · 관찰 카메라 조사');
     assert.equal(await done(), 3);
     const doneDevice = await page.locator('#dynamic-scene .fixture.art-spot[data-done="true"]').evaluateAll(els => els.map(el =>
       [el.getAttribute('aria-label'), parseFloat(el.style.top), parseFloat(el.style.height), getComputedStyle(el, '::after').backgroundColor]));
@@ -1313,7 +1314,7 @@ try {
     await inspect(100, 'E · 재현 벤치 조사', /정답률 4%.*정답률 91%.*보는 사람이 있는지/);
     assert.equal(await done(), 4);
     await page.keyboard.press('e');
-    assert.match(await status(), /방금 뽑은 재현 기록/, 'The record is printed once');
+    assert.equal(await done(), 4, 'The record is printed once');
     await page.screenshot({ path: '.local/floor-8-qa.png' });
     await leaveRoom(qaAgain, corridorHeader);
     await enterThroughSpriteDoor('QA 시험실', '8F');
@@ -1409,7 +1410,7 @@ try {
     await inspect(2490, 'E · 테이프 카트 조사', /반출 B2 · 요청 ARCHI/);
     await inspect(2677, 'E · 로그 판독기 조사', /투입구는 비어/);
     await inspect(2864, 'E · 테이프 선반 조사', /원본은 회의실 검토 테이블에/);
-    await inspect(2562, 'E · UPS 분배기 조사', /연구 회의실 전기 잠금/);
+    await inspect(2562, 'E · UPS 분배기 조사');
     assert.equal(await upsState(), '1');
     await leaveRoom(labRoom, corridorHeader);
     await walkTo(meeting.door.x + meeting.door.width / 2);
@@ -1433,7 +1434,7 @@ try {
     await enterThroughSpriteDoor('연구개발 업무 공간', '4F');
     assert.equal(await upsState(), '1', 'The UPS keeps its output');
     await inspect(2677, 'E · 로그 판독기 조사', /테이프와 UPS 전원이 둘 다/);
-    await inspect(2562, 'E · UPS 분배기 조사', /셋째 칸 로그 판독기로/);
+    await inspect(2562, 'E · UPS 분배기 조사');
     assert.equal(await upsState(), '2');
     await inspect(2677, 'E · 로그 판독기 조사', /archi_svc · 외부 주소로 전송 시험 · 1\.2TB · 성공/);
     await page.screenshot({ path: '.local/floor-4-lab.png' });
@@ -1527,14 +1528,14 @@ try {
     await page.keyboard.press('e');
     assert.match(await status(), /닫힘 고정/);
     // Walking from the counter button arrives after the door has closed again.
-    await inspect(2620, 'E · 비상 개방 버튼 조사', /5초를 세기/);
+    await inspect(2620, 'E · 비상 개방 버튼 조사');
     assert.equal(await autoDoor.getAttribute('data-open'), 'true');
     await hold('a', 7000);
     assert.equal(await autoDoor.getAttribute('data-open'), 'false', 'The door closes after 5 s');
     assert((await playerX()) > 1346, 'Walking arrives too late');
-    assert.match(await status(), /다시 닫혔다/);
     // Sprinting gets through, and the door shuts behind the player.
-    await inspect(2620, 'E · 비상 개방 버튼 조사', /5초를 세기/);
+    await inspect(2620, 'E · 비상 개방 버튼 조사');
+    assert.equal(await autoDoor.getAttribute('data-open'), 'true');
     await page.keyboard.down('ShiftLeft');
     await hold('a', 4300);
     await page.keyboard.up('ShiftLeft');
@@ -1544,7 +1545,8 @@ try {
     await inspect(1068, 'E · 러닝머신 콘솔 조사', /R-02 · R-05 · R-07.*시속 21km/);
     await inspect(370, 'E · 러닝머신 벨트 조사', /바퀴 자국/);
     await page.screenshot({ path: '.local/floor-3-gym.png' });
-    await inspect(1194, 'E · 퇴실 버튼 조사', /잠깐 열린다/);
+    await inspect(1194, 'E · 퇴실 버튼 조사');
+    assert.equal(await autoDoor.getAttribute('data-open'), 'true');
     await walkTo(1500);
     assert((await playerX()) > 1400, 'The inside button opens the way back');
     await inspect(2570, 'E · 속도 차트 조사', /러닝머신의 R-02 · R-05 · R-07.*수호보다 빠르다/);
@@ -1793,7 +1795,6 @@ try {
     await page.keyboard.press('e');
     await page.clock.runFor(800);
     assert.match(await status(), /비상계단 문이 잠겨/);
-    await inspect(3310, 'E · 안내 데스크 조사', /23:58 출입증 등록 해제 · 17F 정수호/);
     await visitRestroom('1F');
     await inspect(4390, 'E · 스피드 게이트 조사', /미등록 출입증/);
     // The panel sticker points at the build date, which is the old code.
@@ -1919,7 +1920,6 @@ try {
     const verifyRoom = await enterRoom('검증실', '7F');
     assert.equal(await worldWidth(page), 1856);
     assert.equal(await page.locator('#dynamic-scene > .floor-background[src$="floor7/verify-finished.png"]').count(), 1);
-    assert.match(await status(), /문이 잠겼다/, 'Arriving says the door locked behind');
     assert.equal(await exitLabel(), '복도 출입문 · 잠김');
     assert.equal(await hint(), 'E · 복도 (잠김)');
     await page.keyboard.press('e');
@@ -2033,13 +2033,12 @@ try {
     assert.equal(await phone.getAttribute('data-ringing'), 'true', 'It starts ringing a moment later');
     assert.deepEqual(await phone.evaluate(el => [parseFloat(el.style.top), parseFloat(el.style.height), getComputedStyle(el).animationName]),
       [441, 39, 'f6-phone-ring'], 'The ringing overlay follows the resized phone artwork');
-    assert.match(await status(), /당직 전화가 울린다/);
     await page.clock.runFor(7600);
     assert.equal(await phone.getAttribute('data-ringing'), 'false', 'Unanswered, the call drops');
-    assert.match(await status(), /무응답 · 자동 승인/);
     await inspect(1606, 'E · 회선 신청서 묶음 조사', /전부 SYSTEM.*당직 ARS 무응답 자동 승인/);
     await inspect(1762, 'E · 야간 승인 규칙판 조사', /응답 없으면 자동 승인.*archi_svc/);
-    await inspect(1878, 'E · 당직 전화 조사', /내선 2000 · B2 서버실.*지금은 조용하다/);
+    await inspect(1878, 'E · 당직 전화 조사');
+    assert(await page.evaluate(() => !collectedItems.has('f6-oncall')), 'The silent phone cannot be answered');
     await inspect(2034, 'E · 전용선 단말함 조사', /B2 ARCHI-MAIN → DR-EXT.*B2까지/);
     await inspect(2110, 'E · 회선 사용 기록지 조사', /03:05~03:40.*등록되지 않은 주소 · 해외/);
     await leaveRoom(engineeringRoom, corridorHeader);
@@ -2353,7 +2352,6 @@ try {
     await nextSpan(0);
     await walkTo(1500);
     assert.equal(await camera.getAttribute('data-alert'), 'true', 'The camera sees the player on the elevator side');
-    assert.match(await status(), /메인 서버실 문에서 잠금 소리/);
     assert.equal(await mainDoor(), 'ARCHI 메인 서버실 출입문 · 잠김');
     await walkTo(980);
     assert.equal(await hint(), 'E · ARCHI 메인 서버실 (잠김)');

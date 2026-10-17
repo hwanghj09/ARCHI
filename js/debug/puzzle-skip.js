@@ -40,7 +40,6 @@ function skipToPuzzle(index) {
   restoreProgress({ ...progressSnapshot(), items: done.flatMap(entry => entry.items || []), blackout: index > 0,
     solarEnabled: Boolean(solar), solarPoweredFloors: solar?.solar || [], logPuzzle: null, cabin: null, runtime: {} });
   transitionScene(() => debugGoTo(step.at));
-  showStatus(`테스트: '${step.label}' 직전 상태로 건너뛰었습니다.`, 3000);
 }
 
 document.getElementById('debug-puzzle').addEventListener('submit', event => {

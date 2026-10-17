@@ -131,15 +131,12 @@ try {
     assert(await page.locator('#power-floor-grid button.active').evaluateAll(buttons =>
       buttons.every(button => getComputedStyle(button).backgroundColor === 'rgb(40, 76, 57)')), 'The supplied floor uses the lit button art');
     await page.screenshot({ path: `.local/solar-panel-replacement-${width}.png` });
-    // Replacing the floor reports which supply was cut.
+    // Selecting a new floor drops the one that was supplied.
     await floor(1).click();
     assert.deepEqual(await state(), { on: true, floors: [1] }, 'Selecting 1F replaces 7F');
     await status('1F 전력 공급 중 (1/1)');
     await pressed([1], [7, 12]);
     assert(await floor(1).evaluate(el => !el.classList.contains('suggested') && !el.hasAttribute('aria-label')));
-    assert.match(await page.locator('#interaction-status').textContent(), /1층.*켜져 있던 7층은 꺼집니다/);
-    assert(await page.evaluate(() => Number(getComputedStyle(document.getElementById('interaction-status')).zIndex) >
-      Number(getComputedStyle(document.getElementById('power-panel')).zIndex)), 'The drop notice shows above the open panel');
     // Pressing the lit floor stops supply without raising the lever.
     await floor(1).click();
     assert.deepEqual(await state(), { on: true, floors: [] }, 'Clicking the supplied floor turns it off');

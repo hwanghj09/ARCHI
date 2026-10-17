@@ -1,5 +1,10 @@
 /* 이야기 컷씬(혼잣말): blackout-scene과 같은 위아래 검은 띠 + 하단 대사. */
-#story-scene { position: fixed; inset: 0; z-index: 20; pointer-events: none; color: #eee8d8; }
+#story-scene { position: fixed; inset: 0; z-index: 20; color: #eee8d8; cursor: pointer; }
+/* 오프닝·정전·소등 컷씬: 대사에서 멈춰 클릭을 기다릴 때만(data-waiting, scene-gate.js) 화면이 클릭을 받고 안내가 보인다. */
+:is(#opening, #blackout-scene, #cctv-scene)[data-waiting] { pointer-events: auto; cursor: pointer; }
+.scene-next { display: none; }
+[data-waiting] > .scene-next { display: block; }
+#story-next, .scene-next { position: absolute; left: 0; right: 0; bottom: max(62px, calc(14vh - 30px)); margin: 0; font-size: 13px; text-align: center; color: #b8b2a2; text-shadow: 0 1px 4px #000; }
 #story-scene[hidden] { display: none; }
 #story-scene::before, #story-scene::after { content: ''; position: absolute; left: 0; right: 0; height: clamp(30px, 7vh, 64px); background: #050708; }
 #story-scene::before { top: 0; }
@@ -7,5 +12,5 @@
 #story-caption { position: absolute; left: 0; right: 0; bottom: max(92px, 14vh); width: min(944px, calc(100% - 40px)); margin: 0 auto; font-size: clamp(15px, 2vw, 19px); line-height: 1.7; text-align: center; text-shadow: 0 2px 6px #000, 0 0 2px #000; word-break: keep-all; }
 #story-skip { position: absolute; z-index: 1; right: max(20px, env(safe-area-inset-right)); bottom: max(10px, env(safe-area-inset-bottom)); min-height: 44px; padding: 8px 14px; border: 1px solid #677174; border-radius: 4px; background: #101619e6; color: #ddd; font: inherit; cursor: pointer; pointer-events: auto; }
 #story-skip:focus-visible { outline: 2px solid #e1cf9b; outline-offset: 3px; }
-body:has(#story-scene:not([hidden])) :is(header, nav, #debug-sidebar, #inventory-button, #objective, #game-menu-button, #interaction-hint, #interaction-status, #interaction-outline) { visibility: hidden; }
+body:has(#story-scene:not([hidden])) :is(header, nav, #debug-sidebar, #inventory-button, #objective, #game-menu-button, #interaction-hint, #interaction-outline) { visibility: hidden; }
 @media (max-width: 600px) { #story-caption { bottom: 20vh; } }

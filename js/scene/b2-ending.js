@@ -92,7 +92,7 @@ function startArchiDelete() {
   // 체크포인트: [예]를 누르기 직전 상태. 자동 저장 칸도 같은 상태로 맞춰 두고, 삭제가 시작되면 자동 저장을 멈춘다.
   saveProgress();
   try { localStorage.setItem(b2CheckpointKey, JSON.stringify(progressSnapshot())); }
-  catch { showStatus('체크포인트를 저장하지 못했습니다.', 4000); }
+  catch { /* 체크포인트 없이도 삭제는 진행한다. */ }
   closeInspection();
   Object.assign(b2Ending, { phase: 'running', barricaded: false, progress: 0, barricade: 100, offline: false, bang: 0 });
   b2Robots = b2DockX.map((x, index) => ({ name: ['R-02', 'R-05', 'R-07'][index], where: floorId(-2), x, facing: -1, wait: 0, elapsed: 0,
@@ -103,7 +103,6 @@ function startArchiDelete() {
   refreshB2Bar();
   mountB2Robots();
   setB2Siren(true); // 삭제가 끝날 때까지 사이렌을 반복한다
-  showStatus('DELETE ARCHI 실행. 경보가 울리고 복도 끝에서 경비 로봇들이 깨어난다. 장비 운반 상자로 서버실 문을 막자!', 5000);
 }
 
 // 장면을 새로 그릴 때(floor-change.js) 같은 장면에 있는 로봇만 스프라이트를 붙이고, B2 전체를 비상 모드로 그린다.
@@ -167,7 +166,6 @@ function updateB2Robots(delta) {
     if (next === 'b2-main' && b2Ending.barricaded) {
       // 막힌 서버실 문 앞: 들어오지 못하고 두드린다(아래).
       if (!robot.banging) playDoorPrySound();
-      if (!robot.banging) showStatus(`쾅! 문 너머에서 경비 로봇 ${robot.name}이 문을 밀어붙인다. 상자가 버티고 있다.`, 2600);
       robot.banging = true;
       continue;
     }
@@ -184,7 +182,6 @@ function updateB2Robots(delta) {
       setTimeout(() => { if (door.element.isConnected) door.element.dataset.open = 'false'; }, 900);
     }
     playGameSound('door', { x: robot.x });
-    showStatus(`문이 벌컥 열리고 경비 로봇 ${robot.name}이 들어온다!`, 2400);
     mountB2Robot(robot);
   }
   const banging = b2Robots.filter(robot => robot.banging).length;
@@ -224,7 +221,6 @@ function barricadeB2Door() {
   door.element.setAttribute('aria-label', `${door.name} · 상자로 막음`);
   playGameSound('shutter', { x: door.x });
   b2BarricadeLine.hidden = false;
-  showStatus('상자로 서버실 문을 막았다. 그 순간 진행 바가 멈춘다. ARCHI: "삭제를 거부합니다." 메인 콘솔로 가자.', 5000);
 }
 
 function thumpB2Barricade() {
@@ -246,7 +242,6 @@ function breakB2Barricade() {
   if (crate) Body.setPosition(crate.body, { x: crate.body.position.x - 140, y: crate.body.position.y });
   if (door) door.element.dataset.open = 'true';
   playGameSound('door', { x: body.position.x });
-  showStatus('상자가 밀려나고 문이 벌컥 열린다. 경비 로봇들이 쏟아져 들어온다!', 3000);
   b2Battle.threat = null;
   for (const robot of b2Robots) Object.assign(robot, { where: dynamicFloorId, banging: false, hold: Infinity, x: door ? door.x + door.width / 2 : body.position.x });
   const [robot] = b2Robots;
@@ -261,8 +256,7 @@ function breakB2Barricade() {
 function handleB2Console(door) {
   if (b2Ending.phase !== 'running' || dynamicFloorId !== 'b2-main' || door.name !== 'ARCHI 메인 콘솔') return false;
   if (b2Ending.offline) return true;
-  if (!b2Ending.barricaded) showStatus('삭제가 진행 중이다. 경비 로봇이 오기 전에 장비 운반 상자로 출입문부터 막자.', 3500);
-  else openB2Terminal();
+  if (b2Ending.barricaded) openB2Terminal();
   return true;
 }
 
@@ -436,7 +430,6 @@ function finishArchiDelete() {
   b2Log('sys', 'ARCHI-MAIN 삭제 완료. ARCHI — OFFLINE');
   refreshB2Terminal();
   playGameSound('blackout');
-  showStatus('ARCHI — OFFLINE. 문 너머의 두드림이 멎었다.', 5000);
   b2FinaleTimers.push(setTimeout(() => { closeB2Terminal(); showB2Escape(); }, b2FinaleDelay));
 }
 
@@ -533,11 +526,10 @@ document.getElementById('b2-restart').addEventListener('click', () => {
 });
 document.getElementById('b2-checkpoint').addEventListener('click', () => {
   let data = null;
-  try { data = JSON.parse(localStorage.getItem(b2CheckpointKey)); } catch { /* 아래에서 알린다. */ }
-  if (!data?.scene) { showStatus('체크포인트를 불러오지 못했습니다. 처음부터 다시 시작해 주세요.', 5000); return; }
+  try { data = JSON.parse(localStorage.getItem(b2CheckpointKey)); } catch { /* 아래에서 그냥 돌아간다. */ }
+  if (!data?.scene) return;
   restoreProgress(data);
   saveProgress();
-  showStatus('DELETE를 누르기 직전으로 돌아왔습니다.', 3000);
 });
 document.getElementById('b2-escape-menu').addEventListener('click', () => {
   // 삭제 중에는 자동 저장을 멈췄으므로 저장 칸은 DELETE 직전 상태다. 메뉴의 '이어하기'는 그 저장에서 시작한다.

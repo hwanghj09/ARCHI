@@ -31,7 +31,7 @@ const inventoryButton = document.getElementById('inventory-button');
 
 function refreshInventoryCount() {
   const count = ownedInventoryIds().length;
-  inventoryButton.textContent = `${count ? `가방 (${count})` : '가방'} · ${bindingLabel('inventory')}`;
+  inventoryButton.ariaLabel = inventoryButton.title = `${count ? `가방 (${count})` : '가방'} · ${bindingLabel('inventory')}`; // 화면에는 그림만 보이고 글자는 접근성 이름으로만 남는다
 }
 
 function itemButton(id) {
@@ -197,6 +197,5 @@ function useInventoryItem(id) {
   refreshInventoryCount();
   if (item.use.animation) closeInspection();
   else showInventoryList();
-  showStatus(`${item.name}를 사용했다. 정신력이 조금 돌아왔다.`, 3000);
 }
 

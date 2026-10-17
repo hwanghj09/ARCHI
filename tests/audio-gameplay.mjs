@@ -18,7 +18,8 @@ try {
     const original = playGameSound;
     playGameSound = (name, options) => { audioEvents.push(name); original(name, options); };
   });
-  await page.clock.runFor(5500);
+  // 오프닝은 대사마다 클릭을 기다린다(scene-gate.js).
+  for (let i = 0; i < 6 && await page.evaluate(() => openingActive); i++) { await page.clock.runFor(2000); await page.evaluate(() => opening.click()); }
   assert((await page.evaluate(() => audioEvents)).includes('switch'), 'Computer shutdown has a power click');
   const clear = () => page.evaluate(() => { audioEvents.length = 0; });
   const events = () => page.evaluate(() => [...audioEvents]);

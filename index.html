@@ -27,6 +27,7 @@
     <link rel="stylesheet" href="css/main-menu.css" />
     <link rel="stylesheet" href="css/blackout.css" />
     <link rel="stylesheet" href="css/story-scene.css" />
+    <link rel="stylesheet" href="css/map.css" />
     <link rel="stylesheet" href="css/cctv-event.css" />
     <link rel="stylesheet" href="css/device-apps.css" />
     <link rel="stylesheet" href="css/clues.css" />
@@ -42,7 +43,6 @@
     <script src="js/core/dom.js" defer></script>
     <script src="js/core/state.js" defer></script>
     <script src="js/audio/audio.js" defer></script>
-    <script src="js/ui/status.js" defer></script>
     <script src="js/interaction/writing.js" defer></script>
     <script src="js/floors/helpers.js" defer></script>
     <script src="js/floors/floor-01.js" defer></script>
@@ -108,6 +108,7 @@
     <script src="js/player/sanity.js" defer></script>
     <script src="js/scene/pushables.js" defer></script>
     <script src="js/scene/story-scene.js" defer></script>
+    <script src="js/ui/map.js" defer></script>
     <script src="js/core/loop.js" defer></script>
     <script src="js/input/input.js" defer></script>
     <script src="js/input/no-copy.js" defer></script>
@@ -117,6 +118,7 @@
     <script src="js/debug/floor-select.js" defer></script>
     <script src="js/debug/puzzle-skip.js" defer></script>
     <script src="js/debug/sanity-debug.js" defer></script>
+    <script src="js/scene/scene-gate.js" defer></script>
     <script src="js/scene/opening.js" defer></script>
     <script src="js/scene/blackout.js" defer></script>
     <script src="js/scene/cctv-event.js" defer></script>
@@ -161,16 +163,15 @@
         </div>
         <div id="opening-chair-front" aria-hidden="true"></div>
       </div>
-      <header><strong>ARCHI</strong><span>17F · 사무실</span><label id="floor17-light-switch"><input id="floor17-lights" type="checkbox" checked aria-label="17층 조명" /><output id="floor17-light-state">조명 켜짐</output></label></header>
+    </main>
+      <header><span>17F · 사무실</span><label id="floor17-light-switch"><input id="floor17-lights" type="checkbox" checked aria-label="17층 조명" /><output id="floor17-light-state">조명 켜짐</output></label><button id="map-button" type="button" aria-label="지도" title="지도"></button></header>
       <nav aria-label="플레이어 조작">
         <button id="interact" type="button" aria-label="상호작용" title="상호작용 (E)">E</button>
-        <button id="phone-button" type="button" aria-label="휴대폰" title="휴대폰 (P)">▣<span id="phone-flash-state" aria-hidden="true">플래시 꺼짐</span></button>
+        <button id="phone-button" type="button" aria-label="휴대폰" title="휴대폰 (P)"><span id="phone-flash-state" aria-hidden="true">플래시 꺼짐</span></button>
       </nav>
-      <div id="interaction-status" role="status" aria-live="polite"></div>
-    </main>
     <section id="main-menu" role="dialog" aria-modal="true" aria-label="ARCHI 메인 메뉴" data-view="home">
       <div class="menu-backdrop" aria-hidden="true"></div>
-      <div class="menu-topline"><span>ARCHI</span><span>17F <i></i> 00:00</span></div>
+      <div class="menu-topline"><span>ARCHI</span><span>17F</span></div>
       <div class="menu-content">
         <div id="menu-home" class="menu-view">
           <h1 class="menu-title">ARCHI</h1>
@@ -180,6 +181,7 @@
             <button id="menu-start" class="menu-primary" type="button"><span>새 게임</span><span aria-hidden="true">01</span></button>
             <button id="menu-settings-button" type="button"><span>설정</span><span aria-hidden="true">02</span></button>
             <button id="menu-controls-button" type="button"><span>조작키 설정</span><span aria-hidden="true">03</span></button>
+            <button id="menu-slots-button" type="button"><span>저장 · 불러오기</span><span aria-hidden="true">04</span></button>
           </div>
           <p id="menu-save-info" class="menu-note" role="status" aria-live="polite">진행 상황은 자동으로 저장됩니다.</p>
         </div>
@@ -201,6 +203,12 @@
           <button id="menu-keys-reset" class="menu-screen-button" type="button">기본 조작키로 복원</button>
           <p id="menu-keys-status" class="menu-note" role="status" aria-live="polite">조작키는 자동으로 저장됩니다. Esc · 창 닫기 / 메뉴</p>
         </div>
+        <div id="menu-slots" class="menu-view" hidden>
+          <button class="menu-back" type="button">← 메인으로</button>
+          <h2>저장 · 불러오기</h2>
+          <ul id="menu-slot-list" class="menu-slot-list"></ul>
+          <p id="menu-slots-status" class="menu-note" role="status" aria-live="polite">목표가 바뀔 때마다 가장 오래된 칸에 자동으로 저장됩니다.</p>
+        </div>
         <div id="menu-new-game" class="menu-view" hidden>
           <h2>새 게임</h2>
           <p class="menu-story">새 게임을 시작하면 기존 진행 상황이 덮어써집니다.<br />처음부터 시작하시겠습니까?</p>
@@ -212,6 +220,7 @@
     <section id="opening" role="region" aria-label="퇴근 오프닝 컷씬" hidden>
       <p id="opening-label">17F · 야근이 끝난 뒤</p>
       <p id="opening-caption" role="status" aria-live="polite">사무실을 불러오는 중…</p>
+      <p class="scene-next" aria-hidden="true">클릭하여 계속 ▸</p>
       <button id="opening-skip" type="button">건너뛰기 · Esc</button>
     </section>
     <!-- 테스트용 층 이동 창 -->
@@ -236,16 +245,23 @@
     </section>
     <section id="blackout-scene" role="dialog" aria-modal="true" aria-label="엘리베이터 앞 정전" hidden>
       <p id="blackout-caption" role="status" aria-live="polite"></p>
+      <p class="scene-next" aria-hidden="true">클릭하여 계속 ▸</p>
       <button id="blackout-skip" type="button">건너뛰기 · Esc</button>
+    </section>
+    <section id="map-window" role="dialog" aria-label="지도" hidden>
+      <div id="map-head"><h2 id="map-title">지도</h2><button id="map-close" type="button">닫기 · Esc</button></div>
+      <div id="map-view" aria-hidden="true"></div>
     </section>
     <section id="story-scene" role="dialog" aria-modal="true" aria-label="수호의 혼잣말" hidden>
       <p id="story-caption" role="status" aria-live="polite"></p>
+      <p id="story-next" aria-hidden="true">클릭하여 계속 ▸</p>
       <button id="story-skip" type="button">건너뛰기 · Esc</button>
     </section>
     <section id="cctv-scene" role="dialog" aria-modal="true" aria-label="B1 방재 관제실 CCTV" hidden>
       <div id="cctv-dim" aria-hidden="true"></div>
       <p id="cctv-rec" aria-hidden="true">● REC</p>
       <p id="cctv-caption" role="status" aria-live="polite"></p>
+      <p class="scene-next" aria-hidden="true">클릭하여 계속 ▸</p>
       <button id="cctv-skip" type="button">건너뛰기 · Esc</button>
     </section>
     <section id="phone" class="device-dialog" role="dialog" aria-modal="true" aria-labelledby="phone-title" hidden>
@@ -265,7 +281,6 @@
             <button type="button" data-phone-app="notes"><span class="phone-app-icon app-art" data-app-icon="notes" aria-hidden="true"></span><span>메모</span></button>
             <button type="button" data-phone-app="calculator"><span class="phone-app-icon app-art" data-app-icon="calculator" aria-hidden="true"></span><span>계산기</span></button>
             <button type="button" data-phone-app="building"><span class="phone-app-icon app-art" data-app-icon="building" aria-hidden="true"></span><span>시설 안내</span></button>
-            <button type="button" data-phone-app="camera"><span class="phone-app-icon phone-camera-icon" aria-hidden="true">▣</span><span>카메라</span></button>
             <button type="button" data-phone-app="gallery"><span class="phone-app-icon phone-gallery-icon" aria-hidden="true">▧</span><span>갤러리</span></button>
             <button type="button" data-phone-app="solar" hidden><span class="phone-app-icon app-art" data-app-icon="flashlight" aria-hidden="true"></span><span>비상 전력 제어</span></button>
           </div>
@@ -460,8 +475,7 @@
         <button id="hallucination-retry" type="button">다시 정신 차리기</button>
       </div>
     </section>
-    <button id="game-menu-button" type="button">메뉴 · Esc</button>
-    <button id="inventory-button" type="button" aria-controls="inspection" aria-expanded="false">가방 · Tab</button>
+    <button id="inventory-button" type="button" aria-controls="inspection" aria-expanded="false" aria-label="가방 · Tab" title="가방 · Tab"></button>
     <section id="objective" aria-labelledby="objective-heading" aria-live="polite">
       <h2 id="objective-heading" hidden>목표</h2>
       <strong id="objective-title"></strong>

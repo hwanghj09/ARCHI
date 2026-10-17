@@ -70,8 +70,6 @@ function openInspection(name, message, sheet) {
   inspectionSheet.scrollTop = 0;
   if (surface) inspectionPanel.dataset.surface = surface;
   else delete inspectionPanel.dataset.surface;
-  clearTimeout(statusTimer);
-  status.textContent = '';
   inspectionPanel.hidden = false;
   hint.hidden = true;
   releaseInput();

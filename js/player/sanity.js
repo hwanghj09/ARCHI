@@ -30,7 +30,6 @@ let blinkTimer = 0;
 let blinkNextIn = Infinity;
 let blinkFlashTimer = 0;
 
-let zeroEventApproachDone = false; // 0%가 되기 전 예고 환각을 이미 보여줬다
 let zeroEventPhase = 'idle'; // 'idle' | 'waiting' | 'charging' (0%에서만 의미가 있다)
 let zeroEventTimer = 0;
 let zeroEventSide = 1;
@@ -177,21 +176,12 @@ function updateZeroEvent(elapsed, fsmPaused) {
   if (zeroEventPhase === 'charging') {
     zeroEventTimer += elapsed;
     if (facing === zeroEventSide && phoneLightOn) { resolveZeroEvasion(); return; }
-    // 환각은 월드 좌표에서 일정한 속도로 수호에게 다가간다. 수호가 어느 쪽으로 움직여도 환각의 속도는 변하지 않고, 닿으면 삼켜진다.
+    // 환각은 월드 좌표에서 수호에게 다가간다. 수호가 어느 쪽으로 움직여도 환각의 속도는 같고(시간이 지나며 빨라진다), 닿으면 삼켜진다.
     const gap = body.position.x - zeroEventGhostX;
-    zeroEventGhostX += Math.sign(gap) * Math.min(Math.abs(gap), zeroEventGhostStartGap / zeroEventRushDurationMs * elapsed);
+    const speedUp = zeroEventSpeedStepFactor ** Math.floor(zeroEventTimer / zeroEventSpeedStepMs); // 1.5초마다 1.5배씩 빨라진다
+    zeroEventGhostX += Math.sign(gap) * Math.min(Math.abs(gap), zeroEventGhostStartGap / zeroEventRushDurationMs * speedUp * elapsed);
     if (Math.abs(body.position.x - zeroEventGhostX) <= zeroEventReachGap) triggerDevoured();
     else if (zeroEventForced && zeroEventTimer >= 6000) resolveZeroEvasion(); // 콘솔로 시작한 추격을 달려서 따돌린 경우의 안전장치
-  }
-}
-
-// ---- 0%가 되기 전, 한 번뿐인 예고 환각 ----
-
-function updatePreZeroApproach(elapsed, fsmPaused) {
-  if (zeroEventApproachDone || fsmPaused || hallucinationMode) return;
-  if (sanity > 0 && sanity <= zeroEventApproachThreshold) {
-    zeroEventApproachDone = true;
-    beginHallucinationSighting('approach', Math.random() < .5 ? -1 : 1, 300);
   }
 }
 
@@ -335,7 +325,12 @@ for (const [x0, y0, x1, y1] of [[225, 414, 306, 462], [441, 414, 516, 460], [748
 // 눈은 생성된 벽 위치에 고정되고, 홍채와 동공만 수호를 쳐다본다.
 // 화면 밖으로 밀려난 눈은 다음 깜빡임에 사라지고, 장면이 바뀌면 모두 사라진다.
 const RED_EYE_SIZE = 80;
+const RED_EYE_SPAWN_MIN_DISTANCE = 300; // 눈은 수호에게서 이만큼 이상 떨어진 곳에만 생긴다
+const RED_EYE_JUMP_REACH = 150; // 점프(속도 10.8, 중력 1.5)로 수호 중심이 올라가는 높이(약 140px)에 여유를 둔 값
+const RED_EYE_FADE_MS = 1500; // 불이 켜져 눈 전체가 사라졌다 돌아오는 시간(css/sanity.css #red-eyes의 transition 1.5s)
+const RED_EYE_LIT_FADE_MS = 750; // 손전등에 비춰진 눈이 사라지는 시간(.red-eye의 filter transition .75s)
 let redEyeScene = null;
+let redEyeBrightAt = -Infinity; // 마지막으로 불이 켜져 눈 전체가 투명했던 시각
 
 function spawnRedEyes() {
   const minX = Math.max(48, cameraX + 48);
@@ -353,6 +348,9 @@ function spawnRedEyes() {
     const oy = -60 + Math.sin(angle) * (150 + Math.random() * 200);
     const x = body.position.x + ox, y = body.position.y + oy;
     if (x < minX || x > maxX || y < 80) continue;
+    if (Math.hypot(x - body.position.x, y - (body.position.y - 20)) < RED_EYE_SPAWN_MIN_DISTANCE) continue; // 바로 근처에는 생기지 않는다(생기자마자 깨지지 않게)
+    // 점프로 닿을 수 있는 높이에만 생긴다: 서 있는 수호 중심에서 점프 높이 + 깨지는 거리(여유 20px)보다 높은 곳에는 만들지 않는다.
+    if (y < (grounded ? body.position.y : floorY - 81) - 20 - RED_EYE_JUMP_REACH - (RED_EYE_BREAK_DISTANCE - 20)) continue;
     if ([...redEyes.children].some(other => Math.hypot(Number(other.dataset.x) - x, Number(other.dataset.y) - y) < 140)) continue; // 눈끼리 간격을 둔다
     const eye = document.createElement('div');
     eye.className = 'red-eye';
@@ -367,24 +365,60 @@ function spawnRedEyes() {
   }
 }
 
+// 눈에 가까이 다가가면(RED_EYE_BREAK_DISTANCE) 눈이 즉시 사라지고, 그 자리에서 붉은 조각들이 떨어지며 흩어져 사라진다.
+const RED_EYE_BREAK_DISTANCE = 120;
+const redEyeShards = document.createElement('div');
+redEyeShards.id = 'red-eye-shards';
+redEyeShards.setAttribute('aria-hidden', 'true');
+redEyes.after(redEyeShards);
+
+function shatterRedEye(eye) {
+  const x = Number(eye.dataset.x), y = Number(eye.dataset.y);
+  eye.remove();
+  playRedEyeBreakSound();
+  for (let i = 0; i < 9; i++) {
+    const shard = document.createElement('i');
+    const size = 4 + Math.random() * 6;
+    Object.assign(shard.style, { left: `${x + (Math.random() - .5) * RED_EYE_SIZE * .6}px`, top: `${y + (Math.random() - .5) * RED_EYE_SIZE * .4}px`,
+      width: `${size}px`, height: `${size * (.6 + Math.random() * .6)}px` });
+    shard.style.setProperty('--dx', `${(Math.random() - .5) * 130}px`);
+    shard.style.setProperty('--dy', `${70 + Math.random() * 110}px`); // 아래로 떨어진다
+    shard.style.setProperty('--spin', `${(Math.random() - .5) * 540}deg`);
+    shard.style.animationDuration = `${.45 + Math.random() * .3}s`;
+    shard.addEventListener('animationend', () => shard.remove());
+    redEyeShards.append(shard);
+  }
+}
+
 // 매 프레임(render)에서 부른다: 장면이 바뀌었으면 눈을 지우고, 고정된 눈 안의 눈동자만 수호 쪽으로 옮긴다.
 function updateRedEyes() {
   const key = room === 'dynamic' ? dynamicFloorId : room;
-  if (key !== redEyeScene) { redEyes.replaceChildren(); redEyeScene = key; }
+  if (key !== redEyeScene) { redEyes.replaceChildren(); redEyeShards.replaceChildren(); redEyeScene = key; }
   // 불이 켜지면 눈 전체가, 손전등을 켜면 빛 원뿔에 닿은 눈만 서서히 사라지고, 다시 어두워지면 같은 자리에 서서히 드러난다(css/sanity.css).
   const exposure = sanityExposure();
   redEyes.dataset.lit = String(exposure === 'bright');
+  const now = performance.now();
+  if (exposure === 'bright') redEyeBrightAt = now;
   const beamX = parseFloat(world.style.getPropertyValue('--beam-x')), beamY = parseFloat(world.style.getPropertyValue('--beam-y')); // camera.js의 render가 정한 손전등 끝
-  for (const eye of redEyes.children) {
+  for (const eye of [...redEyes.children]) {
     const x = Number(eye.dataset.x);
     const y = Number(eye.dataset.y);
     // 손전등 원뿔(css/game.css의 #darkness: 바라보는 방향 ±24°)에 눈 가장자리라도 걸리면 끈다.
     const ahead = (x - beamX) * facing;
     const inBeam = ahead > 0 && Math.atan2(Math.abs(y - beamY), ahead) - Math.atan2(RED_EYE_SIZE / 2, Math.hypot(ahead, y - beamY)) < 24 * Math.PI / 180;
     eye.dataset.lit = String(exposure === 'flashlight' && inBeam);
+    if (eye.dataset.lit === 'true') {
+      eye.litAt = now; // 빛에 닿아 투명해진 시각
+      eye.litSince ??= now;
+      // 손전등으로 완전히 사라질 때까지(RED_EYE_LIT_FADE_MS) 비춰진 눈은 그대로 지운다: 빛이 걷혀도 다시 나타나지 않는다.
+      if (now - eye.litSince >= RED_EYE_LIT_FADE_MS) { eye.remove(); continue; }
+    } else eye.litSince = null; // 다 사라지기 전에 빛이 걷히면 다시 드러난다
     const dx = body.position.x - x;
     const dy = body.position.y - 20 - y;
     const distance = Math.hypot(dx, dy) || 1;
+    // 불이나 손전등으로 투명해진 눈은, 다시 완전히 드러날 때까지(RED_EYE_FADE_MS) 가까이 가도 깨지지 않는다.
+    const visible = now - redEyeBrightAt >= RED_EYE_FADE_MS && now - (eye.litAt ?? -Infinity) >= RED_EYE_LIT_FADE_MS;
+    if (distance < RED_EYE_BREAK_DISTANCE && visible) { shatterRedEye(eye); continue; }
     const reach = RED_EYE_SIZE * .08 * Math.min(1, distance / 160); // 커진 홍채가 눈꺼풀 안에 머물고, 아주 가까우면 가운데로 모인다
     eye.style.setProperty('--px', `${dx / distance * reach}px`);
     eye.style.setProperty('--py', `${dy / distance * reach}px`);
@@ -481,11 +515,10 @@ function updateSanity(elapsed) {
   // 30%→20% 구간에서 검은 비네트가 서서히 붉게 변하고, 20% 밑으로는 완전히 붉다.
   fearOverlayRed.style.opacity = String(Math.max(0, Math.min(1, (30 - sanity) / 10)) * (fearTier >= 1 ? .7 : 0));
   document.body.dataset.weary = String(fearTier >= 3);
-  if (fearTier < 5 && redEyes.children.length) redEyes.replaceChildren();
+  if (fearTier < 5 && redEyes.children.length) { redEyes.replaceChildren(); redEyeShards.replaceChildren(); }
   updateComputerFear(fearTier >= 4);
   updateBlink(elapsed, fsmPaused);
   updateDarkFace(elapsed, fsmPaused);
-  updatePreZeroApproach(elapsed, fsmPaused);
   updateZeroEvent(elapsed, fsmPaused);
   updateAmbientSighting(elapsed, fsmPaused);
   updateHallucinationSighting(elapsed, fsmPaused);
@@ -505,7 +538,8 @@ function renderHallucination() {
   hallucinations.dataset.mode = hallucinationMode;
   flashPrompt.hidden = hallucinationMode !== 'charge'; // 매 프레임 환각 종류와 맞춰, 다시 추격할 때도 안내가 뜬다
   document.body.dataset.hallucinating = 'true';
-  const width = Math.min(224 * scale, stage.clientWidth * .4);
+  const sizeFactor = hallucinationMode === 'charge' ? 2 : 1; // 2배 크기는 돌진(추격) 환각만, 생성(멀리 보임)·예고 환각은 처음 크기
+  const width = Math.min(224 * sizeFactor * scale, stage.clientWidth * .4 * sizeFactor);
   let opacity = .5;
   let targetX;
   if (hallucinationMode === 'ambient') {
@@ -515,7 +549,8 @@ function renderHallucination() {
   } else if (hallucinationMode === 'charge') {
     // charge: 월드 좌표의 환각. 수호와의 실제 거리가 줄수록 짙어진다.
     const progress = 1 - Math.min(1, Math.abs(body.position.x - zeroEventGhostX) / zeroEventGhostStartGap);
-    opacity = Math.min(1, .3 + progress);
+    // 나타나는 순간부터 zeroEventGhostFadeInMs 동안 서서히 시작해 갈수록 빠르게 짙어진다(제곱 곡선).
+    opacity = Math.min(1, .3 + progress) * Math.min(1, zeroEventTimer / zeroEventGhostFadeInMs) ** 2;
     targetX = (zeroEventGhostX - cameraX) * scale;
   } else {
     // approach: 플레이어 기준 상대 거리가 진행도에 따라 줄어든다.

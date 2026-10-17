@@ -49,16 +49,13 @@ function submitKeypad() {
     // 패널 쪽 클릭·드래그가 안 먹는다. 전선 패널을 닫을 때(closeWirePanel) 전력 패널로 돌아간다.
     keypadTarget = null;
     closeKeypad();
-    showStatus('비밀번호는 맞았다. 그런데 레버를 당기자마자 과부하로 제어반 안의 전선 다발이 끊어져 나간다.', 4200);
     openWirePanel(() => {
       collectedItems.add('roof-wires-fixed');
       setSolarPower(true);
-      showStatus('전선을 다시 연결했다. 태양광 비상 전력이 켜진다.', 4200);
     });
   } else if (target.type === 'room') {
     closeKeypad();
     unlockRoomDoor(target);
-    showStatus(target.codeMessage || '도어락이 열렸다.', 5000);
   } else {
     if (target.gives) collectedItems.add(target.gives);
     closeKeypad();

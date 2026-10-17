@@ -28,7 +28,7 @@ const sanityDarkDrainPerSecond = 1 / 3;
 const sanityChaseDrainPerSecond = 10;
 const sanityAnxietyDrainPerSecond = .1; // 10%에서도 16층으로 이동해 약을 찾을 시간(100초)을 준다.
 const sanityChaseFloor = 10; // 경비 로봇에게 쫓겨서는 이 값 아래로 줄지 않는다
-const sanityZeroTurnDelayMs = 200; // 정신력 0%에서 방향을 바꿀 때 기다려야 하는 시간
+const sanityZeroTurnDelayMs = 100; // 정신력 0%에서 방향을 바꿀 때 기다려야 하는 시간
 const newGameSanity = 35; // 새 게임을 시작할 때의 정신력
 const antianxietyRestore = 50; // 항불안제를 사용했을 때의 정신력 회복량
 // 50/40/30/20/10% 미만 구간의 공포 연출 단계(1~5). sanityTierOf()가 이 경계로 계산한다.
@@ -39,9 +39,11 @@ const ambientSightingIntervalRange = [7000, 15000]; // 30% 미만에서 먼 환�
 const ambientSightingLifeMs = 3400;
 // 20% 미만(4단계)은 3단계보다 깜빡이는 간격이 1/3 짧고, 10% 미만(5단계)은 거기서 다시 1/3 짧다.
 const blinkIntervalRangeByTier = { 2: [7000, 11000], 3: [6000, 10000], 4: [4000, 6667], 5: [2667, 4444] };
-const zeroEventApproachThreshold = 3; // 0%가 되기 전, 이 수치 이하에서 한 번 예고 환각이 다가온다
 const zeroEventApproachDurationMs = 3600;
 const zeroEventChargeWaitMs = 15000; // 0% 도달 후 첫 돌진까지
 const zeroEventRetryWaitMs = 10000; // 회피 이후 다음 돌진까지
-const zeroEventRushDurationMs = Math.round(2400 / 1.7 / 1.5); // 돌진이 플레이어에게 닿기까지 걸리는 시간(기존 2400ms의 1.7×1.5배 속도). 회피하지 못하면 게임 오버
+const zeroEventRushDurationMs = Math.round(2400 / 1.7 / 1.5 / .75); // 돌진이 플레이어에게 닿기까지 걸리는 시간(기존 2400ms의 1.7×1.5×0.75배 속도, 이후 1.5초마다 가속). 회피하지 못하면 게임 오버
+const zeroEventGhostFadeInMs = 700; // 돌진 환각이 처음 나타날 때 투명에서 보이기까지 걸리는 시간
+const zeroEventSpeedStepMs = 1500; // 추격이 이어지는 동안 이 시간마다
+const zeroEventSpeedStepFactor = 1.5; // 환각의 속도가 이만큼 배가 된다(1.5초 뒤 1.5배, 3초 뒤 2.25배 …)
 const wallEyeMaxCount = 6;

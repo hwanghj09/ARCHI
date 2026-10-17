@@ -1,5 +1,7 @@
 /* 소화전 내부와 소지품은 같은 조사창 안에서 조작한다. */
-#inventory-button { position: fixed; right: max(24px, env(safe-area-inset-right)); top: 68px; z-index: 5; padding: 10px 14px; border: 1px solid #778778; border-radius: 4px; background: #182327; color: #eddfbd; cursor: pointer; }
+#inventory-button { position: fixed; left: 50%; transform: translateX(-50%); bottom: max(24px, env(safe-area-inset-bottom)); z-index: 5; width: 78px; height: 78px; padding: 0; border: 1px solid #778778; border-radius: 50%; background: #182327; cursor: pointer; }
+/* 아이콘은 투명 배경의 검은 그림이라, 어두운 단추 위에서 보이도록 색을 뒤집는다(마스크는 file://에서 막힌다). */
+#inventory-button::before { content: ""; display: block; width: 42px; height: 42px; margin: auto; background: url("../assets/ui/bag-icon.png") center / contain no-repeat; filter: invert(.87); }
 #inspection[data-surface="hydrant"], #inspection[data-surface="inventory"], #inspection[data-surface="rooftop-lock"] { width: min(520px, calc(100vw - 24px)); }
 .item-panel { padding: 12px; color: #e6dcc6; }
 .hydrant-cabinet { position: relative; width: min(380px, 100%); aspect-ratio: 1; margin: auto; }

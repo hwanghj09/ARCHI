@@ -46,6 +46,8 @@ const cctvLightsOutAt = 3700;
 const cctvLightsBackAt = 5300;
 // 불이 나가는 순간 첫 대사는 지운다('').
 const cctvLightsLines = [[400, '…뭐지. 그동안 계속 날 지켜보고 있었던 거야?'], [cctvLightsOutAt, ''], [6000, '뭐야… 불이 왜 꺼지는 거지?']];
+// 첫 대사를 띄운 채 지직거리기 직전과 끝에서 멈추고 클릭하면 이어간다(scene-gate.js). 첫 컷씬(intro)에는 대사가 없어 멈추지 않는다.
+const cctvLightsGate = createSceneGate(cctvScene, [cctvLightsGlitchAt, cctvLightsLength]);
 // 소등 뒤 정신력이 한 번에 깎이는 양. 깎였는지는 cctvLightsOutItem으로 기억한다.
 const cctvLightsSanityLoss = 35;
 const cctvLightsOutItem = 'b1-lights-out';
@@ -113,8 +115,12 @@ function openCctvOverlay() {
 }
 
 function updateCctvScene(elapsed) {
+  if (cctvSceneMode === 'lights') {
+    const before = cctvElapsed;
+    cctvElapsed = cctvLightsGate.advance(cctvElapsed, elapsed);
+    return updateCctvLights(cctvElapsed - before);
+  }
   cctvElapsed += elapsed;
-  if (cctvSceneMode === 'lights') return updateCctvLights(elapsed);
   const time = cctvElapsed;
   if (time >= cctvScreensAt + cctvIntroSteps.end) return finishCctvScene();
   const phase = cctvScenePhase(time);
@@ -183,6 +189,7 @@ function startCctvLights(wall) {
   cctvSceneActive = true;
   cctvSceneMode = 'lights';
   cctvElapsed = 0;
+  cctvLightsGate.reset();
   cctvWall = wall;
   cameraFocus.x = wall.x + wall.width / 2;
   cameraFocus.y = wall.y + wall.height / 2;
@@ -253,6 +260,7 @@ function finishCctvScene() {
   if (!cctvSceneActive) return;
   // 건너뛰거나 장면을 바꿔도 한 번 본 것으로 친다.
   cctvSceneActive = false;
+  cctvLightsGate.reset();
   const lights = cctvSceneMode === 'lights';
   if (lights) {
     if (cctvWall?.element.isConnected) delete cctvWall.element.dataset.glitch;
@@ -279,8 +287,6 @@ function finishCctvScene() {
   releaseInput();
   updateInteraction();
   stage.focus({ preventScroll: true });
-  showStatus(lights ? `불이 나갔다가 비상등만 돌아왔다. 정신력이 크게 흔들린다(−${cctvLightsSanityLoss}%).` :
-    'CCTV 화면이 전부 지지직거린다. 모니터 벽을 조사해 CCTV를 켜 보자.', 5000);
 }
 
 // 설비 그림(fullImage)을 화면 전체에 띄운다. 조사창의 닫기·키 처리를 그대로 쓰고, 조사 문구는 그림 아래에 붙인다.

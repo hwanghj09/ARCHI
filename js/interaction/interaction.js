@@ -10,7 +10,7 @@ function updateInteraction() {
     }
     // 전력이 들어온 채 감지했던 자리로 걸어 돌아가는('return') 로봇은 감지를 끈 채 움직이고 있어 바로 옆까지
     // 갈 수 있다. 정비 패널은 멈춘 로봇의 보조 배터리 화면이므로 그동안은 조사 대상에서 뺀다.
-    const returningRobot = world.dataset.powered === 'true' && guardPatrol.mode === 'return' ? guardPatrol.door : null;
+    const returningRobot = guardPatrolPowered(guardPatrol) && guardPatrol.mode === 'return' ? guardPatrol.door : null;
     const candidates = [...(guardPatrol.door ? [guardPatrol.door] : []),
       ...currentDoors.filter(door => door.accessGate && door.solid), ...currentDoors.filter(door => door.phoneCharger),
       ...currentDoors.filter(door => !door.accessGate && !door.phoneCharger)]
@@ -83,7 +83,7 @@ function interact() {
   if (needsControl(nearbyDoor)) { openControl(nearbyDoor); return; }
   if (nearbyDoor.type === 'computer') {
     // 정전 중에는 켜지지 않는다. 옥상 태양광 전력을 17층에 보내면 다시 쓸 수 있다.
-    if (!floorHasPower(currentSceneFloor)) return showStatus('전원이 들어오지 않는다. 전력을 공급해야 한다.', 4000);
+    if (!floorHasPower(currentSceneFloor)) return;
     computerReturnFocus = document.activeElement;
     transitionScene(() => {
       setOfficeComputerPower('on');
@@ -138,7 +138,6 @@ function interact() {
     // 울리는 전화(ring)는 벨이 울리는 동안에만 받을 수 있다. 받으면 벨이 멎고 아래에서 message와 gives를 준다.
     if (nearbyDoor.ring && !collectedItems.has(gives)) {
       if (nearbyDoor.ring.state !== 'ringing') {
-        showStatus(nearbyDoor.ring.idleMessage, 5000);
         return;
       }
       nearbyDoor.ring.state = 'answered';
@@ -220,7 +219,6 @@ function interact() {
       return;
     }
     if (destId === 'rooftop' && (!rooftopBackground.complete || !rooftopBackground.naturalWidth)) {
-      showStatus('옥상 배경을 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.');
       return;
     }
     playGameSound('door');
@@ -233,17 +231,12 @@ function interact() {
     return;
   }
   if (nearbyDoor.type === 'panel') {
-    showStatus(`${nearbyDoor.name}입니다. (추후 구현 예정)`);
     return;
   }
   if (nearbyDoor.type === 'elevator') {
-    if (b2Ending.phase === 'running') {
-      showStatus('호출 버튼이 눌리지 않는다. ARCHI가 B2 승강기를 멈췄다.', 3000);
-      return;
-    }
+    if (b2Ending.phase === 'running') return; // ARCHI가 B2 승강기를 멈췄다
     const car = elevatorCars[nearbyDoor.carIndex];
     if (!elevatorHasPower() && car.floor !== currentSceneFloor) {
-      showStatus(elevatorPowerMessage, 6000);
       return;
     }
     if (car.travelling) return;
@@ -261,7 +254,6 @@ function interact() {
     car.open = false;
     playGameSound('switch');
     updateFloorIndicator(nearbyDoor);
-    showStatus(`${nearbyDoor.name}를 호출했습니다.`);
     updateInteraction();
     return;
   }
@@ -271,7 +263,6 @@ function interact() {
   const open = nearbyDoor.element.dataset.open !== 'true';
   playGameSound('door');
   setDoorOpen(nearbyDoor, open);
-  showStatus(`${nearbyDoor.name} 문을 ${open ? '열었습니다' : '닫았습니다'}.`);
   updateInteraction();
 }
 

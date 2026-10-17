@@ -152,18 +152,16 @@ try {
       Body.setPosition(body, { x: guardPatrol.x - 250, y: floorY - 81 });
       before = guardPatrol.x; updateGuardPatrol(dt);
     }
-    return { detected, mode: guardPatrol.mode, before, x: guardPatrol.x, limit: speed * dt, playerX: body.position.x,
-      status: document.getElementById('interaction-status').textContent };
+    return { detected, mode: guardPatrol.mode, before, x: guardPatrol.x, limit: speed * dt, playerX: body.position.x };
   });
   const sprite = () => page.evaluate(() => ({ src: guardPatrol.image.getAttribute('src'), phase: guardPatrol.door.element.dataset.patrol,
     frame: guardPatrol.door.element.dataset.frame, width: guardPatrol.door.element.firstElementChild.style.width,
     flip: guardPatrol.door.element.firstElementChild.style.transform }));
   await check('Elevator escape walks back to the detection point at patrol speed, then resumes patrol', async () => {
-    await reset({ playerX: 3200, robot: { x: 3400, facing: -1, firstEncounter: false } });
+    await reset({ playerX: 3200, robot: { x: 3400, facing: -1 } });
     const escape = await escapeToElevator();
     assert.deepEqual(escape.detected, { mode: 'chase', origin: 3400 });
     assert.equal(escape.mode, 'return', JSON.stringify(escape));
-    assert.match(escape.status, /감지했던 자리로 돌아가기 시작했다/);
     assert(escape.x > escape.before && escape.x - escape.before <= escape.limit + 1e-9, `No teleport on escape: ${JSON.stringify(escape)}`);
     assert(escape.x < 3100, 'The chase carried the robot well away from its detection point');
     const returning = await sprite();
@@ -227,7 +225,7 @@ try {
     assert.equal(resumed.mode, 'chase', 'Detection is back once the robot is on patrol again');
   });
   await check('Returning is not immunity: standing right next to it re-detects it mid-walk', async () => {
-    await reset({ playerX: 3200, robot: { x: 3400, facing: -1, firstEncounter: false } });
+    await reset({ playerX: 3200, robot: { x: 3400, facing: -1 } });
     const escape = await escapeToElevator();
     assert.equal(escape.mode, 'return', JSON.stringify(escape));
     const reacquired = await page.evaluate(() => {
@@ -240,7 +238,7 @@ try {
   await check('A robot right behind the player stops at the elevator instead of re-spotting and catching', async () => {
     // 바짝 붙어 쫓아오던 로봇이 엘리베이터 앞에서 'return'으로 바뀐 직후 130px 근접 감지로 수호를 다시 보고
     // 끝까지 따라와 붙잡던 버그. 엘리베이터 앞(1번, 2046)에 선 수호 바로 뒤 100px에서 쫓아오는 로봇.
-    await reset({ playerX: 2046, robot: { x: 2146, facing: -1, mode: 'chase', chaseOriginX: 3400, firstEncounter: false } });
+    await reset({ playerX: 2046, robot: { x: 2146, facing: -1, mode: 'chase', chaseOriginX: 3400 } });
     const result = await page.evaluate(() => {
       const modes = new Set(); let caught = false;
       for (let i = 0; i < 180; i++) {
@@ -254,11 +252,10 @@ try {
     assert(!result.modes.includes('chase'), `Never re-acquires at the elevator: ${JSON.stringify(result)}`);
     assert(result.x > 2146, `Walks back instead of closing in: ${result.x}`);
   });
-  await check('Returning in the live loop: gradual motion, first-encounter lines and leaving mid-return', async () => {
-    await reset({ playerX: 3200, robot: { x: 3400, facing: -1, firstEncounter: true } });
+  await check('Returning in the live loop: gradual motion, leaving mid-return', async () => {
+    await reset({ playerX: 3200, robot: { x: 3400, facing: -1 } });
     const escape = await escapeToElevator();
     assert.equal(escape.mode, 'return');
-    assert.match(escape.status, /돌아가기 시작했다/);
     let previous = escape.x;
     for (let i = 0; i < 25; i++) {
       await page.clock.runFor(100);
@@ -271,12 +268,8 @@ try {
       if (i === 10) await page.screenshot({ path: '.local/guard-returning.png' });
     }
     assert(previous - escape.x > 150 && previous < 3400, 'Still on the way back after 2.5 seconds');
-    assert.match(await page.locator('#interaction-status').textContent(), /단순 정전이 아니다/, 'First-encounter line follows the return message');
-    await page.clock.runFor(4200);
-    assert.match(await page.locator('#interaction-status').textContent(), /층별 안내판/);
-    assert.equal(await page.evaluate(() => guardPatrol.firstEncounter), false);
     // 다시 돌아가는 도중에 층을 떠나면 그 자리에서 순찰 상태로 정리되고, 돌아와도 로봇이 하나만 남는다.
-    await reset({ playerX: 3200, robot: { x: 3400, facing: -1, firstEncounter: false } });
+    await reset({ playerX: 3200, robot: { x: 3400, facing: -1 } });
     await escapeToElevator();
     await page.clock.runFor(1000);
     const midway = await state();
@@ -303,15 +296,21 @@ try {
     await page.locator('#keypad-input').fill('0914'); await page.keyboard.press('Enter');
     assert(await page.evaluate(() => collectedItems.has('f1-robot-log')));
     await page.keyboard.press('Escape');
+    // 코드를 넣은 R-01은 꺼져서 전력이 들어와도 수호를 잡지 않는다.
+    await reset({ playerX: 3060 }); await page.clock.runFor(1300);
+    assert.equal((await state()).caught, false, 'A robot disabled with 0914 does not catch');
+    // 이어지는 반복은 붙잡기 연출을 다시 시도해도 단서가 남는지 보려고 잠깐 로봇을 다시 켠다.
     for (let i = 0; i < 5; i++) {
-      await reset({ playerX: 3060 }); await page.clock.runFor(1300);
+      await page.evaluate(() => collectedItems.delete('f1-robot-log')); await reset({ playerX: 3060 }); await page.clock.runFor(1300);
       assert.equal(await page.evaluate(() => document.activeElement.id), 'guard-retry');
       if (i % 2) await page.keyboard.press('Space');
       else await page.locator('#guard-retry').click();
+      await page.evaluate(() => collectedItems.add('f1-robot-log'));
       assert.equal((await state()).caught, false); assert.equal((await state()).inert, false);
       assert(await page.evaluate(() => collectedItems.has('f1-robot-log') && keys.size === 0));
       assert.equal(await page.locator('.guard-robot-sprite').count(), 1);
     }
+    await page.evaluate(() => collectedItems.delete('f1-robot-log')); // 다음 시험은 켜진 로봇을 쓴다
   });
   await check('Phone/light and held movement inputs are cleared on capture', async () => {
     await reset({ playerX: 3060 });

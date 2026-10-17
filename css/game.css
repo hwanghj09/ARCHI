@@ -19,10 +19,10 @@ body { margin: 0; overflow: hidden; background: #27292b; color: #eee; font: 14px
 /* 열린 엘리베이터 둘레는 어둠이 걷힌다(구멍 3개 = 차량 3대, js/elevator/elevators.js가 --eNx/y/w/h/k를 채움). 구멍끼리는 intersect로 곱해진다. */
 #darkness { mask-image: radial-gradient(ellipse var(--e0w, 1px) var(--e0h, 1px) at var(--e0x, 0px) var(--e0y, 0px), rgb(0 0 0 / calc(1 - var(--e0k, 0) * .92)) 0, rgb(0 0 0 / calc(1 - var(--e0k, 0) * .85)) 50%, rgb(0 0 0 / calc(1 - var(--e0k, 0) * .4)) 75%, #000 100%), radial-gradient(ellipse var(--e1w, 1px) var(--e1h, 1px) at var(--e1x, 0px) var(--e1y, 0px), rgb(0 0 0 / calc(1 - var(--e1k, 0) * .92)) 0, rgb(0 0 0 / calc(1 - var(--e1k, 0) * .85)) 50%, rgb(0 0 0 / calc(1 - var(--e1k, 0) * .4)) 75%, #000 100%), radial-gradient(ellipse var(--e2w, 1px) var(--e2h, 1px) at var(--e2x, 0px) var(--e2y, 0px), rgb(0 0 0 / calc(1 - var(--e2k, 0) * .92)) 0, rgb(0 0 0 / calc(1 - var(--e2k, 0) * .85)) 50%, rgb(0 0 0 / calc(1 - var(--e2k, 0) * .4)) 75%, #000 100%); mask-composite: intersect, intersect; }
 #world[data-flashlight="on"] #darkness {
-  mask-image: radial-gradient(ellipse var(--e0w, 1px) var(--e0h, 1px) at var(--e0x, 0px) var(--e0y, 0px), rgb(0 0 0 / calc(1 - var(--e0k, 0) * .92)) 0, rgb(0 0 0 / calc(1 - var(--e0k, 0) * .85)) 50%, rgb(0 0 0 / calc(1 - var(--e0k, 0) * .4)) 75%, #000 100%), radial-gradient(ellipse var(--e1w, 1px) var(--e1h, 1px) at var(--e1x, 0px) var(--e1y, 0px), rgb(0 0 0 / calc(1 - var(--e1k, 0) * .92)) 0, rgb(0 0 0 / calc(1 - var(--e1k, 0) * .85)) 50%, rgb(0 0 0 / calc(1 - var(--e1k, 0) * .4)) 75%, #000 100%), radial-gradient(ellipse var(--e2w, 1px) var(--e2h, 1px) at var(--e2x, 0px) var(--e2y, 0px), rgb(0 0 0 / calc(1 - var(--e2k, 0) * .92)) 0, rgb(0 0 0 / calc(1 - var(--e2k, 0) * .85)) 50%, rgb(0 0 0 / calc(1 - var(--e2k, 0) * .4)) 75%, #000 100%), radial-gradient(ellipse 390px 210px at var(--beam-x) var(--beam-y), #0000 0 35px, #0004 180px, #000 390px), conic-gradient(from var(--beam-angle) at var(--beam-x) var(--beam-y), #0000 0deg 44deg, #000 48deg 356deg, #0000 360deg);
+  mask-image: radial-gradient(ellipse var(--e0w, 1px) var(--e0h, 1px) at var(--e0x, 0px) var(--e0y, 0px), rgb(0 0 0 / calc(1 - var(--e0k, 0) * .92)) 0, rgb(0 0 0 / calc(1 - var(--e0k, 0) * .85)) 50%, rgb(0 0 0 / calc(1 - var(--e0k, 0) * .4)) 75%, #000 100%), radial-gradient(ellipse var(--e1w, 1px) var(--e1h, 1px) at var(--e1x, 0px) var(--e1y, 0px), rgb(0 0 0 / calc(1 - var(--e1k, 0) * .92)) 0, rgb(0 0 0 / calc(1 - var(--e1k, 0) * .85)) 50%, rgb(0 0 0 / calc(1 - var(--e1k, 0) * .4)) 75%, #000 100%), radial-gradient(ellipse var(--e2w, 1px) var(--e2h, 1px) at var(--e2x, 0px) var(--e2y, 0px), rgb(0 0 0 / calc(1 - var(--e2k, 0) * .92)) 0, rgb(0 0 0 / calc(1 - var(--e2k, 0) * .85)) 50%, rgb(0 0 0 / calc(1 - var(--e2k, 0) * .4)) 75%, #000 100%), radial-gradient(circle 1500px at var(--beam-x) var(--beam-y), #0000 0 30px, #0002 120px, #0004 320px, #0007 650px, #000b 1000px, #000 1500px), conic-gradient(from var(--beam-angle) at var(--beam-x) var(--beam-y), #0000 0deg 44deg, #000 48deg 356deg, #0000 360deg);
   mask-composite: intersect, intersect, intersect, add;
 }
-#flashlight-beam { display: none; position: absolute; z-index: 3; left: var(--beam-x); top: calc(var(--beam-y) - 170px); width: 390px; height: 340px; transform: scaleX(var(--beam-facing)); transform-origin: 0 50%; clip-path: polygon(0 50%, 100% 0, 100% 100%); background: linear-gradient(90deg, #fff4bb24, #fff4bb00); pointer-events: none; }
+#flashlight-beam { display: none; position: absolute; z-index: 3; left: var(--beam-x); top: calc(var(--beam-y) - 610px); width: 1500px; height: 1220px; transform: scaleX(var(--beam-facing)); transform-origin: 0 50%; clip-path: polygon(0 50%, 100% 0, 100% 100%); background: linear-gradient(90deg, #fff4bb30, #fff4bb16 25%, #fff4bb08 55%, #fff4bb00); pointer-events: none; }
 /* 작은 광원은 밝은 곳에서도 켜짐을 알아볼 수 있도록 수호 위에 표시한다. */
 #flashlight-glow { display: none; position: absolute; z-index: 7; left: var(--beam-x); top: var(--beam-y); width: 32px; height: 32px; transform: translate(-50%, -50%); border-radius: 50%; background: radial-gradient(circle, #fff 0 3px, #fff5cce6 4px, #ffe99b70 8px, #ffe99b00 16px); pointer-events: none; }
 #world[data-flashlight="on"]:not([data-opening], [data-blackout-scene]) #flashlight-glow { display: block; }
@@ -869,7 +869,6 @@ body { margin: 0; overflow: hidden; background: #27292b; color: #eee; font: 14px
 /* 근접 테두리: 가까운 상호작용 대상 하나를 감싸는 한 장(js/interaction/outline.js가 대상의 보이는 상자에 맞춘다). */
 #interaction-outline { position: absolute; z-index: 4; outline: 2px solid #96b7aa; pointer-events: none; }
 #interaction-hint { position: absolute; z-index: 8; transform: translateX(-50%); padding: 6px 10px; background: #101b20; border: 1px solid #96b7aa; pointer-events: none; white-space: nowrap; }
-#interaction-status { position: absolute; bottom: 24px; width: 100%; text-align: center; text-shadow: 0 2px 4px #000; pointer-events: none; }
 #room-transition { position: fixed; inset: 0; z-index: 20; background: #000; opacity: 0; pointer-events: none; }
 #room-transition.visible { pointer-events: auto; }
 .solid { position: absolute; }
@@ -910,14 +909,23 @@ body { margin: 0; overflow: hidden; background: #27292b; color: #eee; font: 14px
 #player[data-state="phone-light"] #phone-light-sheet,
 #player[data-state="phone-away"] #phone-away-sheet { display: block; }
 #interact-sheet { position: relative; top: -4px; }
-header { position: absolute; inset: max(24px, env(safe-area-inset-top)) max(24px, env(safe-area-inset-right)) auto max(24px, env(safe-area-inset-left)); display: flex; justify-content: space-between; gap: 16px; pointer-events: none; }
-header strong { font-size: 18px; font-weight: 600; }
+header { position: fixed; inset: max(24px, env(safe-area-inset-top)) max(24px, env(safe-area-inset-right)) auto max(24px, env(safe-area-inset-left)); display: flex; justify-content: space-between; gap: 16px; pointer-events: none; }
 header span { color: #b8c6c0; font-size: 13px; }
-#floor17-light-switch { display: flex; align-items: center; gap: 6px; min-height: 32px; font-size: 13px; white-space: nowrap; pointer-events: auto; cursor: pointer; }
-#floor17-light-switch[hidden] { display: none; }
+/* 현재 위치(층·방)는 오른쪽 위, 지도 버튼 왼쪽에 띄운다. 지도 버튼의 아이콘은 투명 배경의 검은 그림이라 색을 뒤집는다(마스크는 file://에서 막힌다). */
+body > header > span { font-size: 19.5px; position: fixed; right: calc(max(24px, env(safe-area-inset-right)) + 56px); top: max(24px, env(safe-area-inset-top)); line-height: 44px; text-shadow: 0 1px 3px #000; }
+#map-button { position: fixed; z-index: 10; right: max(24px, env(safe-area-inset-right)); top: max(24px, env(safe-area-inset-top)); width: 44px; height: 44px; padding: 0; border: 1px solid #778778; border-radius: 50%; background: #182327; cursor: pointer; pointer-events: auto; }
+#map-button::before { content: ""; display: block; width: 24px; height: 24px; margin: auto; background: url("../assets/ui/map-icon.png") center / contain no-repeat; filter: invert(.87); }
+/* 17층 조명 스위치(왼쪽 위 "조명 켜짐/꺼짐 · 전력 없음")는 화면에서 숨긴다. */
+#floor17-light-switch { display: none; }
 #floor17-lights { width: 18px; height: 18px; margin: 0; accent-color: #b9d0a6; cursor: pointer; }
 #floor17-lights:focus-visible { outline: 2px solid #e2e9cc; outline-offset: 3px; }
-nav { position: absolute; inset: auto max(24px, env(safe-area-inset-right)) max(24px, env(safe-area-inset-bottom)) max(24px, env(safe-area-inset-left)); display: flex; gap: 12px; }
+nav { position: fixed; inset: auto max(24px, env(safe-area-inset-right)) max(24px, env(safe-area-inset-bottom)) max(24px, env(safe-area-inset-left)); display: flex; gap: 12px; }
+/* 화면의 E 버튼과 플래시 상태 글자는 숨긴다(키보드 E·F는 그대로). */
+#interact, #phone-flash-state { display: none; }
+/* 휴대폰 버튼: 가방 버튼(가운데 아래) 오른쪽의 원형 단추. 아이콘은 투명 배경의 검은 그림이라 색을 뒤집는다(마스크는 file://에서 막힌다). 화면 흔들림·흐림(#stage 안)에 영향받지 않게 #stage 밖에 있다. */
+nav #phone-button { position: fixed; left: calc(50% + 51px); bottom: max(24px, env(safe-area-inset-bottom)); width: 78px; height: 78px; border-radius: 50%; background: #182327; border-color: #778778; }
+nav #phone-button::before { content: ""; display: block; width: 45px; height: 57px; margin: auto; background: url("../assets/ui/phone-icon.png") center / contain no-repeat; filter: invert(.87); }
+nav #phone-button[data-flashlight="on"]::before { filter: invert(.87) sepia(1) saturate(4) hue-rotate(5deg); }
 nav button { width: 56px; height: 52px; flex-shrink: 0; padding: 0; border: 1px solid #6b6d70; border-radius: 4px; background: #252629; color: #e5e7e9; font: 24px Arial, sans-serif; cursor: pointer; touch-action: none; user-select: none; -webkit-user-select: none; }
 #interact { margin-left: auto; font-size: 18px; }
 nav button:hover { border-color: #b9c6cf; }
@@ -958,6 +966,16 @@ nav button:focus-visible { outline: 2px solid #c9dde5; outline-offset: 4px; }
   #inspection h2 { font-size: 15px; }
   #inspection-text { min-height: 0; font-size: 15px; line-height: 1.7; }
   #inspection .dialog-actions { margin-top: 8px; }
+}
+/* 컷씬 자막(오프닝·정전·혼잣말·CCTV)도 조사 대화창과 같은 자리·틀의 대화 상자에 쓴다. 글이 없는 동안은 상자를 숨긴다.
+   각 컷씬 CSS의 자막 규칙보다 앞서도록 body를 붙여 우선한다. */
+body :is(#opening-caption, #blackout-caption, #story-caption, #cctv-caption) { box-sizing: border-box; top: auto; bottom: max(100px, calc(env(safe-area-inset-bottom) + 84px)); width: min(1040px, calc(100% - 32px)); min-height: calc(3.6em + 80px); padding: 16px 24px; border: 24px solid #77857c; border-image: url('../assets/ui/dialogue-frame.png') 110 fill / 24px stretch; background: #10181c; background-clip: padding-box; color: #f0eee4; font-size: 17px; line-height: 1.8; text-align: left; text-shadow: none; word-break: keep-all; overflow-wrap: anywhere; white-space: pre-line; box-shadow: 0 12px 36px #0009; }
+body :is(#opening-caption, #blackout-caption, #story-caption, #cctv-caption):empty { display: none; }
+/* "클릭하여 계속"(scene-gate.js)은 대화 상자 바로 아래에 둔다. */
+body :is(#story-next, .scene-next) { bottom: max(72px, calc(env(safe-area-inset-bottom) + 56px)); }
+@media (max-width: 600px), (max-height: 480px) {
+  body :is(#opening-caption, #blackout-caption, #story-caption, #cctv-caption) { bottom: max(88px, calc(env(safe-area-inset-bottom) + 76px)); min-height: calc(3.4em + 52px); padding: 10px 8px; border-width: 16px; border-image-width: 16px; font-size: 15px; line-height: 1.7; }
+  body :is(#story-next, .scene-next) { bottom: max(62px, calc(env(safe-area-inset-bottom) + 50px)); }
 }
 @media (max-height: 480px) {
   nav { bottom: max(12px, env(safe-area-inset-bottom)); }

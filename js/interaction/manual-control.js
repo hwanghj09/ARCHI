@@ -146,7 +146,6 @@ function finishControl() {
   // 잠긴 방 문(12층 모델 평가실 카드 리더): 열리면 아래 interact가 그대로 방에 들어간다.
   if (door.type === 'room' && door.locked) {
     unlockRoomDoor(door);
-    showStatus('삑. 리더기 표시등이 초록으로 바뀌고 잠금이 풀렸다.', 3000);
   }
   if (door.cycle) door.controlChoice = choice;
   interact();

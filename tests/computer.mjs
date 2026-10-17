@@ -185,7 +185,6 @@ try {
   const desktop = powerPage.locator('#computer');
   const monitor = powerPage.locator('#office-computer');
   const hintText = () => powerPage.locator('#interaction-hint').textContent();
-  const statusText = () => powerPage.locator('#interaction-status').textContent();
   const useComputer = async () => {
     await powerPage.keyboard.press('e');
     await finishSceneTransition(powerPage);
@@ -202,7 +201,6 @@ try {
     assert.equal(await hintText(), 'E · 전원 없음', `${message}: hint shows no power`);
     await powerPage.keyboard.press('e');
     assert.equal(await powerPage.locator('#room-transition').getAttribute('data-phase'), 'idle', `${message}: no fade starts`);
-    assert.equal(await statusText(), '전원이 들어오지 않는다. 전력을 공급해야 한다.');
     await powerPage.clock.runFor(800);
     assert(await desktop.isHidden(), `${message}: the computer UI stays closed`);
     assert.equal(await powerPage.evaluate(() => usingComputer), false);

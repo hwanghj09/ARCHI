@@ -20,7 +20,6 @@ const photoCaptureDuration = 1260;
 
 function startItemUseAnimation() {
   if (antianxietySheet.naturalWidth !== 1536 || antianxietySheet.naturalHeight !== 256) {
-    showStatus('복용 동작을 불러오는 중입니다. 잠시 후 다시 사용해 주세요.');
     return false;
   }
   releaseInput();
