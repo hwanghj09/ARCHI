@@ -8,12 +8,8 @@
   "frameDurationMs": 130,
   "loop": true,
   "facing": "right",
-  "includesBox": true,
+  "includesBox": false,
   "footBaseline": 244,
-  "boxAnchor": {
-    "right": 250,
-    "bottom": 240
-  },
   "frames": [
     {
       "index": 0,
@@ -59,65 +55,9 @@
     }
   ],
   "sourceLayout": {
-    "columns": 3,
-    "rows": 2,
-    "cellWidth": 512,
-    "cellHeight": 512
-  },
-  "normalization": [
-    {
-      "frame": 0,
-      "translateSourcePixels": {
-        "x": -9,
-        "y": -2
-      },
-      "boxRightSource": 509,
-      "boxBottomSource": 482
-    },
-    {
-      "frame": 1,
-      "translateSourcePixels": {
-        "x": 3,
-        "y": -2
-      },
-      "boxRightSource": 497,
-      "boxBottomSource": 482
-    },
-    {
-      "frame": 2,
-      "translateSourcePixels": {
-        "x": 23,
-        "y": -2
-      },
-      "boxRightSource": 477,
-      "boxBottomSource": 482
-    },
-    {
-      "frame": 3,
-      "translateSourcePixels": {
-        "x": -8,
-        "y": 14
-      },
-      "boxRightSource": 508,
-      "boxBottomSource": 466
-    },
-    {
-      "frame": 4,
-      "translateSourcePixels": {
-        "x": 3,
-        "y": 14
-      },
-      "boxRightSource": 497,
-      "boxBottomSource": 466
-    },
-    {
-      "frame": 5,
-      "translateSourcePixels": {
-        "x": 23,
-        "y": 14
-      },
-      "boxRightSource": 477,
-      "boxBottomSource": 466
-    }
-  ]
+    "columns": 6,
+    "rows": 1,
+    "cellWidth": 256,
+    "cellHeight": 256
+  }
 }
