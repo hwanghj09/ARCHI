@@ -115,24 +115,88 @@ try {
   assert(turn.waited >= 180 && turn.waited <= 220, `turn delay ${turn.waited}ms`);
   assert.equal(turn.normal, -1, '정신력이 있으면 바로 돌아선다');
 
-  // ---- 붉은 눈: 월드 좌표의 일반 배경에 생기고, 눈동자가 수호 쪽으로 움직이며, 깜빡이는 간격이 20%/10% 미만에서 1/3씩 짧아진다 ----
+  // ---- 붉은 눈: 깜빡일 때마다 수호 주변의 벽에 1~2개씩 늘고 눈동자가 수호를 따라본다 ----
   const eyes = await page.evaluate(() => {
     redEyes.replaceChildren();
-    for (let i = 0; i < 4; i++) spawnRedEye();
+    spawnRedEyes();
+    const first = redEyes.children.length;
+    spawnRedEyes();
+    const second = redEyes.children.length;
+    for (let i = 0; i < 6; i++) spawnRedEyes();
+    const fullEye = redEyes.firstElementChild;
+    spawnRedEyes();
     render();
     return {
+      first, second,
       count: redEyes.children.length,
+      keepsOld: redEyes.firstElementChild === fullEye,
       inWorld: world.contains(redEyes),
-      ys: [...redEyes.children].map(eye => Number(eye.dataset.y)),
-      nearDoor: [...redEyes.children].some(eye => currentDoors.some(door => Number(eye.dataset.x) > door.x - 50 && Number(eye.dataset.x) < door.x + door.width + 50)),
+      around: [...redEyes.children].every(eye => Math.abs(Number(eye.dataset.x) - body.position.x) <= 460),
+      clearOfPlayer: [...redEyes.children].every(eye => Number(eye.dataset.y) - body.position.y <= -60 && (Math.abs(Number(eye.dataset.x) - body.position.x) >= 85 || Number(eye.dataset.y) - body.position.y <= -150)),
       pupil: [...redEyes.children].every(eye => eye.style.getPropertyValue('--px') !== ''),
       ranges: [3, 4, 5].map(tier => blinkIntervalRangeByTier[tier]),
     };
   });
-  assert(eyes.count >= 1 && eyes.inWorld, '붉은 눈은 월드 안에 생긴다');
-  assert(eyes.ys.every(y => y >= 200 && y <= 330), '너무 낮지도 높지도 않은 높이');
-  assert.equal(eyes.nearDoor, false, '상호작용 대상 옆에는 생기지 않는다');
+  assert(eyes.first >= 1 && eyes.first <= 2, '붉은 눈은 한 번에 1~2개씩 생긴다');
+  assert(eyes.second - eyes.first >= 1 && eyes.second - eyes.first <= 2, '다음 깜빡임에 기존 눈을 두고 1~2개 더 생긴다');
+  assert(eyes.count <= 6 && eyes.inWorld, '붉은 눈은 최대 6개까지 월드 안에 머문다');
+  assert(eyes.keepsOld, '최대 개수가 차면 오래된 눈을 지우고 새로 만들지 않는다');
+  assert(eyes.around, '화면 전체가 아니라 수호 주변에 모인다');
+  assert(eyes.clearOfPlayer, '수호 몸을 가리지 않고 양옆·머리 위에만 생긴다');
   assert.equal(eyes.pupil, true, '눈동자 위치가 계산된다');
+  const moved = await page.evaluate(() => {
+    const original = { ...body.position };
+    const eye = redEyes.firstElementChild;
+    updateRedEyes();
+    const position = () => [eye.dataset.x, eye.dataset.y, eye.style.left, eye.style.top];
+    const pupil = () => [eye.style.getPropertyValue('--px'), eye.style.getPropertyValue('--py')];
+    const before = position(), pupilBefore = pupil();
+    Body.setPosition(body, { x: original.x + 120, y: original.y - 40 });
+    for (let i = 0; i < 120; i++) updateRedEyes();
+    const after = position(), pupilAfter = pupil();
+    Body.setPosition(body, original); updateRedEyes();
+    return { before, after, pupilBefore, pupilAfter };
+  });
+  assert.deepEqual(moved.after, moved.before, '수호가 움직여도 눈 전체는 생성된 벽 위치에 고정된다');
+  assert.notDeepEqual(moved.pupilAfter, moved.pupilBefore, '고정된 눈 안의 눈동자만 수호를 따라 움직인다');
+  const gaze = await page.evaluate(async () => {
+    const eye = redEyes.firstElementChild;
+    const original = { ...eye.dataset };
+    // 수호가 눈에서 (dx, dy)만큼 떨어진 자리에 있도록 눈을 옮겨 본다.
+    const look = (dx, dy) => {
+      Object.assign(eye.dataset, { x: body.position.x - dx, y: body.position.y - 20 - dy });
+      updateRedEyes();
+    };
+    const offsets = [];
+    for (const dx of [-200, 200]) {
+      look(dx, 0);
+      offsets.push(parseFloat(eye.style.getPropertyValue('--px')));
+    }
+    const irisRatios = [];
+    const opening = eye.style.getPropertyValue('--eye-open');
+    for (const open of [.8, 1.05]) {
+      eye.style.setProperty('--eye-open', open);
+      for (const [dx, dy] of [[0, 0], [-200, 0], [200, 0], [0, -200], [0, 200], [200, 200]]) {
+        look(dx, dy);
+        const iris = getComputedStyle(eye, '::before');
+        const matrix = new DOMMatrix(iris.transform);
+        irisRatios.push(parseFloat(iris.height) * matrix.d * open / (parseFloat(iris.width) * matrix.a));
+      }
+    }
+    eye.style.setProperty('--eye-open', opening);
+    Object.assign(eye.dataset, original); updateRedEyes();
+    const backgrounds = [getComputedStyle(eye).backgroundImage, getComputedStyle(eye, '::before').backgroundImage];
+    const loaded = await Promise.all(backgrounds.map(background => new Promise(resolve => {
+      const image = new Image(); image.onload = () => resolve(image.naturalWidth > 0);
+      image.onerror = () => resolve(false); image.src = background.slice(5, -2);
+    })));
+    return { offsets, irisRatios, backgrounds, loaded };
+  });
+  assert(gaze.offsets[0] < 0 && gaze.offsets[1] > 0, '홍채와 동공이 캐릭터의 좌우 이동을 따라본다');
+  assert(gaze.offsets.every(offset => Math.abs(offset) <= 80 * .08 + .001), '홍채가 눈꺼풀 안에 머문다');
+  assert(gaze.irisRatios.every(ratio => Math.abs(ratio - 1) < .01), '시선과 눈꺼풀 벌어짐이 달라도 홍채의 원형이 유지된다');
+  assert(gaze.backgrounds[0].includes('red-eye-sclera-pixel.png') && gaze.backgrounds[1].includes('red-eye-iris-pixel.png'));
+  assert(gaze.loaded.every(Boolean), '분리된 흰자와 홍채 에셋이 로드된다');
   assert(Math.abs(eyes.ranges[1][1] / eyes.ranges[0][1] - 2 / 3) < .01 && Math.abs(eyes.ranges[2][1] / eyes.ranges[1][1] - 2 / 3) < .01, '깜빡이는 간격이 단계마다 1/3씩 짧아진다');
 
   // ---- 어둠 속 얼굴: 15% 미만·불 꺼진 어둠에서 9초마다 나오고, 직전 얼굴은 건너뛰며, 밝아지면 즉시 사라진다 ----

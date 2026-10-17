@@ -39,18 +39,31 @@ body[data-fear-tier="5"] #fear-overlay { opacity: .8; filter: blur(3.2px); }
 #blink-flash:not([data-active="true"]) { transition: opacity .22s ease-out; }
 
 /* 10% 미만: 깜빡일 때마다 월드의 일반 배경 위에 붉은 눈이 하나씩 더 생긴다(sanity.js의 spawnRedEye). 어둠 막(z-index 5)보다 문서 순서가 뒤라
-   어둠 속에서도 보이고, 어두울 때는 희미하게 맥동하며 빛난다. 가운데 검은 눈동자(::before)는 --px/--py만큼 수호 쪽으로 움직인다. */
-#red-eyes { position: absolute; inset: 0; z-index: 5; pointer-events: none; --eye-opacity: .85; }
-.red-eye { position: absolute; margin: -26px 0 0 -26px; border-radius: 50%; opacity: 0;
-  background: url(../assets/ui/hallucination/red-eye.png) center / 100% 100% no-repeat; filter: drop-shadow(0 0 6px #ff2a2a88);
+   어둠 속에서도 보이고, 어두울 때는 희미하게 맥동한다. 홍채와 동공(::before)은 --px/--py만큼 수호 쪽으로 움직인다. */
+#red-eyes { position: absolute; inset: 0; z-index: 6; pointer-events: none; --eye-opacity: .78; transition: opacity 1.5s ease; }
+#red-eyes[data-lit="true"] { opacity: 0; }
+.red-eye { position: absolute; translate: -50% -50%; border-radius: 50%; opacity: 0;
+  image-rendering: pixelated;
+  rotate: var(--eye-roll, 0deg); scale: var(--eye-size, 1) calc(var(--eye-size, 1) * var(--eye-open, 1));
+  background: url(../assets/ui/hallucination/red-eye-sclera-pixel.png) center / contain no-repeat;
+  background-color: rgba(210, 24, 30, .72); background-blend-mode: multiply;
+  filter: saturate(.58) brightness(.94) contrast(.84) opacity(var(--eye-unlit, 1)); transition: filter 1.5s ease;
+  mask-image: url(../assets/ui/hallucination/red-eye-sclera-pixel.png);
+  mask-size: contain; mask-position: center; mask-repeat: no-repeat;
   animation: red-eye-in .5s ease-out forwards; }
-.red-eye::before { content: ''; position: absolute; left: 50%; top: 50%; width: 32%; height: 32%; margin: -16% 0 0 -16%; border-radius: 50%;
-  background: radial-gradient(circle, #000 0 62%, #000c 80%, transparent 100%); transform: translate(var(--px, 0px), var(--py, 0px)); }
-@keyframes red-eye-in { from { opacity: 0; transform: scale(.4); } to { opacity: var(--eye-opacity); transform: scale(1); } }
-@keyframes red-eye-glow { 0%, 100% { opacity: .5; } 50% { opacity: .85; } }
-#world:is([data-blackout="true"], [data-dark="true"][data-room="dynamic"], [data-lights="off"][data-floor="17"]) #red-eyes { --eye-opacity: .6; }
+.red-eye::before { content: ''; position: absolute; left: 50%; top: 50%; width: 38%; height: 38%; margin: -19% 0 0 -19%; border-radius: 50%;
+  background: url(../assets/ui/hallucination/red-eye-iris-pixel.png) center / 100% 100% no-repeat;
+  transform: translate(var(--px, 0px), var(--py, 0px)) scaleY(var(--iris-height, 1)); }
+@keyframes red-eye-in {
+  from { opacity: 0; transform: scale(.4); }
+  to { opacity: var(--eye-opacity); transform: scale(1); }
+}
+@keyframes red-eye-glow { 0%, 100% { opacity: calc(var(--eye-opacity) * .8); } 50% { opacity: var(--eye-opacity); } }
+#world:is([data-blackout="true"], [data-dark="true"][data-room="dynamic"], [data-lights="off"][data-floor="17"]) #red-eyes { --eye-opacity: .58; }
 #world:is([data-blackout="true"], [data-dark="true"][data-room="dynamic"], [data-lights="off"][data-floor="17"]) .red-eye {
-  filter: drop-shadow(0 0 12px #ff2a2add) brightness(1.2); animation: red-eye-in .5s ease-out forwards, red-eye-glow 3.2s ease-in-out .5s infinite; }
+  filter: saturate(.58) brightness(.84) contrast(.84) opacity(var(--eye-unlit, 1)); animation: red-eye-in .5s ease-out forwards, red-eye-glow 3.2s ease-in-out .5s infinite; }
+/* 손전등 원뿔에 닿은 눈만 서서히 사라진다(js/player/sanity.js의 updateRedEyes). 애니메이션이 opacity를 쥐고 있어 filter로 끈다. */
+.red-eye[data-lit="true"] { --eye-unlit: 0; }
 
 /* 30% 미만: 더 지친 모습(새 그림이 없어 필터로 대신한다) + 이동 속도 저하는 config.js의 sanitySpeedFactor가 맡는다. */
 body[data-weary="true"] #player { filter: grayscale(.35) brightness(.82) contrast(1.05); }

@@ -329,49 +329,67 @@ for (const [x0, y0, x1, y1] of [[225, 414, 306, 462], [441, 414, 516, 460], [748
   world.insertBefore(screen, sprite);
 }
 
-// ---- 눈 깜빡임 연출과, 10% 미만에서 깜빡일 때마다 느는 붉은 눈 ----
+// ---- 눈 깜빡임 연출과, 10% 미만에서 수호를 둘러보는 붉은 눈 ----
 
-// 붉은 눈(10% 미만): 깜빡일 때마다 화면이 아니라 월드 좌표의 일반 배경(상호작용 대상 옆을 피한 곳, 너무 낮지도 높지도 않은 높이)에
-// 하나씩 생긴다. 어둠 속에서도 어둠 막 위에 그려져 희미하게 빛나고(css/sanity.css), 가운데 검은 눈동자가 늘 수호 쪽으로 움직인다.
-// 장면(층·방)이 바뀌면 지운다. 최대 wallEyeMaxCount개이고 넘치면 오래된 눈부터 사라진다.
-const RED_EYE_SIZE = 52;
-const RED_EYE_Y = [200, 330];
+// 붉은 눈(10% 미만): 깜빡일 때마다 수호 양옆과 머리 위를 감싸는 벽에 1~2개씩 늘어나고, wallEyeMaxCount개가 차면 더 생기지 않는다.
+// 눈은 생성된 벽 위치에 고정되고, 홍채와 동공만 수호를 쳐다본다.
+// 화면 밖으로 밀려난 눈은 다음 깜빡임에 사라지고, 장면이 바뀌면 모두 사라진다.
+const RED_EYE_SIZE = 80;
 let redEyeScene = null;
 
-function spawnRedEye() {
-  const minX = Math.max(64, cameraX + 60);
-  const maxX = Math.min(worldWidth - 64, cameraX + viewWidth - 60);
+function spawnRedEyes() {
+  const minX = Math.max(48, cameraX + 48);
+  const maxX = Math.min(worldWidth - 48, cameraX + viewWidth - 48);
   if (maxX <= minX) return;
-  for (let tries = 0; tries < 24; tries++) {
-    const x = minX + Math.random() * (maxX - minX);
-    const y = RED_EYE_Y[0] + Math.random() * (RED_EYE_Y[1] - RED_EYE_Y[0]);
-    if (Math.abs(x - body.position.x) < 140) continue; // 수호 바로 옆은 피한다
-    if (currentDoors.some(door => x > door.x - 50 && x < door.x + door.width + 50)) continue; // 문·소품 등 상호작용 대상 옆은 피한다
-    if ([...redEyes.children].some(other => Math.abs(Number(other.dataset.x) - x) < 100)) continue; // 서로 겹치지 않게
-    if (redEyes.children.length >= wallEyeMaxCount) redEyes.firstElementChild.remove();
+  for (const eye of [...redEyes.children]) {
+    const x = Number(eye.dataset.x);
+    if (x < minX || x > maxX) eye.remove();
+  }
+  const count = Math.min(1 + Math.floor(Math.random() * 2), wallEyeMaxCount - redEyes.children.length);
+  for (let tries = 0, added = 0; tries < 1000 && added < count; tries++) {
+    // 수호 상반신을 중심으로 왼쪽 옆 → 머리 위 → 오른쪽 옆을 반원으로 감싼다(아래쪽에는 생기지 않는다).
+    const angle = Math.PI + Math.random() * Math.PI;
+    const ox = Math.cos(angle) * (200 + Math.random() * 260);
+    const oy = -60 + Math.sin(angle) * (150 + Math.random() * 200);
+    const x = body.position.x + ox, y = body.position.y + oy;
+    if (x < minX || x > maxX || y < 80) continue;
+    if ([...redEyes.children].some(other => Math.hypot(Number(other.dataset.x) - x, Number(other.dataset.y) - y) < 140)) continue; // 눈끼리 간격을 둔다
     const eye = document.createElement('div');
     eye.className = 'red-eye';
-    eye.dataset.x = String(x);
+    eye.dataset.x = String(x); // 생성된 벽 위치
     eye.dataset.y = String(y);
     Object.assign(eye.style, { left: `${x}px`, top: `${y}px`, width: `${RED_EYE_SIZE}px`, height: `${RED_EYE_SIZE}px` });
+    eye.style.setProperty('--eye-roll', `${Math.random() * 24 - 12}deg`);
+    eye.style.setProperty('--eye-size', .85 + Math.random() * .15);
+    eye.style.setProperty('--eye-open', .8 + Math.random() * .25);
     redEyes.append(eye);
-    return;
+    added++;
   }
 }
 
-// 매 프레임(render)에서 부른다: 장면이 바뀌었으면 눈을 지우고, 눈동자를 수호가 있는 쪽으로 옮긴다.
+// 매 프레임(render)에서 부른다: 장면이 바뀌었으면 눈을 지우고, 고정된 눈 안의 눈동자만 수호 쪽으로 옮긴다.
 function updateRedEyes() {
   const key = room === 'dynamic' ? dynamicFloorId : room;
   if (key !== redEyeScene) { redEyes.replaceChildren(); redEyeScene = key; }
-  const targetX = body.position.x;
-  const targetY = body.position.y - 20;
+  // 불이 켜지면 눈 전체가, 손전등을 켜면 빛 원뿔에 닿은 눈만 서서히 사라지고, 다시 어두워지면 같은 자리에 서서히 드러난다(css/sanity.css).
+  const exposure = sanityExposure();
+  redEyes.dataset.lit = String(exposure === 'bright');
+  const beamX = parseFloat(world.style.getPropertyValue('--beam-x')), beamY = parseFloat(world.style.getPropertyValue('--beam-y')); // camera.js의 render가 정한 손전등 끝
   for (const eye of redEyes.children) {
-    const dx = targetX - Number(eye.dataset.x);
-    const dy = targetY - Number(eye.dataset.y);
+    const x = Number(eye.dataset.x);
+    const y = Number(eye.dataset.y);
+    // 손전등 원뿔(css/game.css의 #darkness: 바라보는 방향 ±24°)에 눈 가장자리라도 걸리면 끈다.
+    const ahead = (x - beamX) * facing;
+    const inBeam = ahead > 0 && Math.atan2(Math.abs(y - beamY), ahead) - Math.atan2(RED_EYE_SIZE / 2, Math.hypot(ahead, y - beamY)) < 24 * Math.PI / 180;
+    eye.dataset.lit = String(exposure === 'flashlight' && inBeam);
+    const dx = body.position.x - x;
+    const dy = body.position.y - 20 - y;
     const distance = Math.hypot(dx, dy) || 1;
-    const reach = RED_EYE_SIZE * .2 * Math.min(1, distance / 160); // 아주 가까우면 가운데로 모인다
+    const reach = RED_EYE_SIZE * .08 * Math.min(1, distance / 160); // 커진 홍채가 눈꺼풀 안에 머물고, 아주 가까우면 가운데로 모인다
     eye.style.setProperty('--px', `${dx / distance * reach}px`);
     eye.style.setProperty('--py', `${dy / distance * reach}px`);
+    // 눈꺼풀 벌어짐에 따른 세로 눌림만 보정해 홍채의 원형을 유지한다.
+    eye.style.setProperty('--iris-height', 1 / Number(eye.style.getPropertyValue('--eye-open') || 1));
   }
 }
 
@@ -435,7 +453,7 @@ function updateBlink(elapsed, fsmPaused) {
   blinkNextIn = randomBetween(blinkIntervalRangeByTier[fearTier] || blinkIntervalRangeByTier[2]);
   blinkFlash.dataset.active = 'true';
   blinkFlashTimer = 180;
-  if (fearTier >= 5) spawnRedEye();
+  if (fearTier >= 5) spawnRedEyes();
 }
 
 function updateSanity(elapsed) {
