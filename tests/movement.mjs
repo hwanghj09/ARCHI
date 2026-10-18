@@ -19,7 +19,9 @@ try {
   await reachInitialCorridor(page);
   // This suite checks powered movement; outage and recovery have their own regression routes.
   await page.evaluate(() => triggerBuildingBlackout());
-  await page.evaluate(() => { solarEnabled = true; updatePowerState(); });
+  // 태양광은 전등만 켠다. 승강기는 17층 비상 UPS 회선(f17-emergency-linked)으로 움직인다(elevators.js).
+  // 순찰 로봇 R-03은 정전 중 승강기를 타고 층을 옮긴다(roaming-guard.mjs). 칸 배정을 흔들지 않게 9층에 머물게 한다.
+  await page.evaluate(() => { collectedItems.add('f17-emergency-linked'); solarEnabled = true; updatePowerState(); roamer.stay = Infinity; });
   await page.locator('#power-floor-grid [data-floor="17"]').dispatchEvent('click');
   const state = () => page.locator('#player').evaluate(el => {
     const player = new DOMMatrix(getComputedStyle(el).transform);
@@ -257,14 +259,15 @@ try {
   await page.keyboard.up('d');
   await hold('d', 15000);
   near((await state()).x, 4948, 'Interaction must preserve movement and boundaries');
-  assert.equal(await page.locator('#interaction-hint').isVisible(), false, 'Walking away hides the prompt');
+  // 오른쪽 끝벽 앞에는 청소 카트(관리실 메모, corridor17.js)가 있어 엘리베이터 안내 대신 카트 안내가 뜬다.
+  assert.match(await page.locator('#interaction-hint').textContent(), /^E · 청소 카트/, 'Walking away replaces the elevator prompt');
 
   const beforeResize = await state();
   await page.setViewportSize({ width: 390, height: 844 });
   await page.clock.runFor(100);
   near((await state()).x, beforeResize.x, 'Resize must preserve world position');
   near((await state()).feet, beforeResize.feet, 'Resize must preserve floor contact');
-  assert.equal(await page.locator('nav button').count(), 2, 'Only interact and phone screen buttons remain');
+  assert.equal(await page.locator('nav button').count(), 3, 'Only interact, flash and phone screen buttons remain'); // 플래시 버튼 추가(94c0924)
   assert.equal(await page.locator('nav [data-direction], nav #jump').count(), 0, 'Movement and jump use the keyboard');
 
   await hold('a', 300);

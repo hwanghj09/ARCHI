@@ -24,7 +24,7 @@ const FLOOR16_LAYOUT = {
       doorX: 4354, doorWidth: 140, doorStyle: 'cafe' },
   ],
   props: [
-    { file: 'waiting-sofa', size: [512, 256], worldWidth: 230, x: 930 },
+    { file: 'waiting-sofa', size: [512, 256], worldWidth: 240, x: 930 }, // 다른 층 소파와 같은 사람 비율(최소 240)
     { file: 'large-planter', size: [256, 512], worldWidth: 78, x: 3500 },
     { file: 'waiting-sofa', size: [512, 256], worldWidth: 250, x: 3980 },
     { file: 'water-cooler', size: [256, 512], worldWidth: 62, x: 4190 },

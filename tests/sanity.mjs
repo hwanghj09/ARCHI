@@ -255,8 +255,9 @@ try {
     sanity = 15; updateSanity(0);
     out.office = document.querySelectorAll('.fear-screen.office').length;
     out.corridor = document.querySelectorAll('.fear-screen.corridor').length;
+    // 그림을 2배로 놓는다(출구 문 칸을 넣은 3층 고객센터 그림은 2168×475).
     const holder = document.createElement('div'); const art = document.createElement('img'); holder.append(art); document.body.append(holder);
-    Object.assign(art.style, { left: '100px', top: '10px', width: '3692px', height: '950px' }); addBackgroundMonitors(art, 'assets/background/floor03/floor03-cs-interior.png');
+    Object.assign(art.style, { left: '100px', top: '10px', width: '4336px', height: '950px' }); addBackgroundMonitors(art, 'assets/background/floor03/floor03-cs-interior.png');
     const placed = [...holder.querySelectorAll('.fear-screen')].sort((a, b) => parseFloat(a.style.left) - parseFloat(b.style.left));
     out.bg = [placed.length, placed[0]?.style.left, placed[0]?.style.top]; holder.remove();
     out.officeShown = [...document.querySelectorAll('.fear-screen.office')].every(el => getComputedStyle(el).display === 'block');

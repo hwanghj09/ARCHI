@@ -44,6 +44,8 @@ try {
   await page.evaluate(() => {
     buildingBlackout = true; collectedItems.add("f17-emergency-linked"); solarEnabled = true; solarPoweredFloors = [17];
     world.dataset.lights = 'on'; elevatorCars[0].floor = 17; showCabin(0);
+    // 처음 목표('퇴근하기')에서는 1층 버튼만 눌린다(cabin.js). 바꾼 진행 상태로 목표를 다시 고른다.
+    refreshObjective();
   });
   await page.locator('#cabin-floor-buttons [data-floor="16"]').click();
   await page.clock.runFor(3600);
