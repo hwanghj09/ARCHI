@@ -117,6 +117,8 @@ function updateElevators() {
     }
   }
   for (const car of elevatorCars) {
+    // 다른 층에서 호출해도 로봇이 탄 칸은 문 닫힘을 마친 뒤 출발한다.
+    if (roamer.trip?.phase === 'close' && elevatorCars[roamer.car] === car) { car.travelling = false; continue; }
     // 전력 차단 시 호출·탑승 운행 모두 같은 위치와 경과 시간에서 멈춘다. 복구하면 이어서 운행한다.
     if (!elevatorHasPower() || !car.travelling) continue;
     car.elapsed += step;

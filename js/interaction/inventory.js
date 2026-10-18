@@ -42,6 +42,9 @@ function itemButton(id) {
 }
 
 function openItemPanel(title, description, surface, content) {
+  if (surface === 'inventory' && !inventoryShown()) playGameSound('bag-zip');
+  else if (surface === 'drawer') playGameSound('drawer');
+  else if (surface === 'hydrant') playGameSound('lever');
   openInspection(title, description);
   finishInspectionText();
   inspectionPanel.dataset.surface = surface;

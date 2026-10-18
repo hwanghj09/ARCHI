@@ -6,6 +6,10 @@ const gameAudioBuffers = new Map();
 const gameAudioEffects = new Set();
 const gameAudioAmbience = new Map();
 const gameAudioLastPlayed = new Map();
+const gameAudioLastVariant = new Map();
+let gameAudioRoomKey = '';
+let gameAudioRoomElapsed = 0;
+let gameAudioRoomNext = 10000;
 const sanityMusicTracks = ['sanity-dread', 'sanity-musicbox', 'sanity-vent', 'sanity-pulse', 'sanity-strings', 'sanity-signal'];
 let sanityMusicIndex = Math.floor(Math.random() * sanityMusicTracks.length);
 const sanityMusicElement = new Audio(`assets/audio/${sanityMusicTracks[sanityMusicIndex]}.wav`);
@@ -53,22 +57,57 @@ function refreshGameAudioVolume() {
   gameAudioMaster.gain.setTargetAtTime(volume, gameAudioContext.currentTime, .02);
 }
 
+function gameAudioRoomProfile() {
+  if (selectingFloor) return 'cabin';
+  if (currentSceneFloor === 18) return 'roof';
+  const config = room === 'dynamic' ? floorById.get(dynamicFloorId) : null;
+  if (config?.id.endsWith('-restroom')) return 'restroom';
+  if (!config?.interior && room !== 'office') return currentSceneFloor < 0 ? 'service' : 'hallway';
+  if (/server|main|eval|testbay|security|verify|ops/.test(config?.id || '')) return 'server';
+  if (currentSceneFloor < 0 || /power|manager/.test(config?.id || '')) return 'service';
+  if (/harmony|vip|lounge|meeting|strategy|executive|director/.test(config?.id || '')) return 'hall';
+  if (/kitchen|cafe|cu$/.test(config?.id || '')) return 'tile';
+  return 'office';
+}
+
+function gameAudioCue(name, options) {
+  if (name === 'step') {
+    if (options.landing) return 'landing';
+    const profile = gameAudioRoomProfile();
+    return `step-${['roof', 'cabin', 'service', 'server'].includes(profile) ? 'metal' :
+      ['office', 'hall'].includes(profile) ? 'carpet' : 'tile'}`;
+  }
+  if (name === 'door') {
+    const material = `${options.door?.style || ''} ${options.door?.sprite || ''}`;
+    return /slide/.test(material) ? 'door-slide' : /glass|pivot|cafeteria|cafe/.test(material) ? 'door-glass' :
+      /wood|blinds|hall-double|executive|director|lacquer/.test(material) ? 'door-wood' : 'door-metal';
+  }
+  return options.cue || name;
+}
+
 // 소음과 감쇠하는 저음을 섞어 충격·마찰음을 만든다. 반복음도 시작/끝의 파형을 맞춘다.
-function gameAudioBuffer(name) {
-  if (gameAudioBuffers.has(name)) return gameAudioBuffers.get(name);
+function gameAudioBuffer(name, variant = 0) {
+  const key = variant ? `${name}:${variant}` : name;
+  if (gameAudioBuffers.has(key)) return gameAudioBuffers.get(key);
   const durations = { step: .2, door: .65, 'elevator-door': 1.05, 'elevator-arrive': 1.05,
     'elevator-alarm': .95, blackout: 1.5, 'robot-step': .26, 'robot-servo': .48, 'robot-alert': .6,
     'robot-grab': .65, 'call-ring': .85, phone: .14, charger: .24, pickup: .22, 'item-get': .5, 'item-use': .3, deny: .46,
     shutter: 1.35, 'camera-shutter': .18, switch: .12, ui: .09,
-    'cctv-beep': 2.2, 'cctv-on': 1.3, 'cctv-hit': 1.8, 'cctv-static': .7, heartbeat: .9, 'cctv-rise': 5.2 };
-  const loop = ['office', 'dark', 'wind', 'motor', 'cctv-bgm', 'cctv-dread'].includes(name);
+    'cctv-beep': 2.2, 'cctv-on': 1.3, 'cctv-hit': 1.8, 'cctv-static': .7, heartbeat: .9, 'cctv-rise': 5.2,
+    'step-tile': .2, 'step-carpet': .22, 'step-metal': .24, landing: .4,
+    'door-metal': .65, 'door-wood': .72, 'door-glass': .52, 'door-slide': .9,
+    paper: .42, 'bag-zip': .48, drawer: .62, lever: .3, plug: .26, 'card-scan': .34, dial: .18,
+    keyboard: .09, 'mouse-click': .075, 'power-relay': .65, 'water-drop': .5, 'pipe-tick': .55 };
+  const loop = ['office', 'dark', 'wind', 'motor', 'cctv-bgm', 'cctv-dread',
+    'server-room', 'electrical-room', 'plumbing', 'hall-room'].includes(name);
   const duration = loop ? 8 : durations[name];
   if (!duration) return null;
   const rate = 24000;
   const buffer = gameAudioContext.createBuffer(1, Math.ceil(duration * rate), rate);
   const samples = buffer.getChannelData(0);
-  let seed = 12345, low = 0, soft = 0;
-  const sin = (frequency, t) => Math.sin(2 * Math.PI * frequency * t);
+  let seed = 12345 + variant * 1013, low = 0, soft = 0;
+  const pitch = variant ? 1 + (variant - 2) * .035 : 1;
+  const sin = (frequency, t) => Math.sin(2 * Math.PI * frequency * pitch * t);
   const hit = (t, at, decay) => t >= at ? Math.exp(-(t - at) * decay) : 0;
   // 버저·삑 소리처럼 일정하게 이어지는 음은 at부터 length 동안만 켜고 양끝을 짧게 다듬는다.
   const gate = (t, at, length) => t >= at && t < at + length ? Math.min(1, (t - at) / .006, (at + length - t) / .02) : 0;
@@ -107,6 +146,33 @@ function gameAudioBuffer(name) {
         (.2 * soft + .06 * sin(420, t)) * Math.exp(-((t * 22) % 1) * 4.5) * (.75 + .25 * sin(2.3, t)) * gate(t, .1, 1) + (.2 * sin(70, t) + .16 * soft) * hit(t, 1.15, 26); break;
       case 'switch': sample = (.28 * soft + .1 * sin(210, t)) * hit(t, .008, 48); break;
       case 'ui': sample = .09 * sin(720 - 900 * t, t) * Math.sin(Math.PI * t / duration) * Math.exp(-25 * t); break;
+      case 'step-tile': sample = (.23 * soft + .17 * sin(125, t)) * hit(t, .004, 45) + .14 * soft * hit(t, .06, 36); break;
+      case 'step-carpet': sample = (.4 * low + .1 * sin(78, t)) * hit(t, .008, 26) + .12 * soft * gate(t, .035, .11); break;
+      case 'step-metal': sample = (.24 * soft + .16 * sin(116, t)) * hit(t, .004, 32) +
+        (.055 * sin(710, t) + .035 * sin(1087, t)) * hit(t, .014, 24); break;
+      case 'landing': sample = (.25 * sin(64, t) + .38 * low) * hit(t, .008, 18) + .16 * soft * hit(t, .06, 25); break;
+      case 'door-metal': sample = (.22 * soft + .09 * sin(880, t)) * hit(t, .015, 48) + .15 * low * gate(t, .08, .3) +
+        (.22 * sin(81, t) + .16 * soft) * hit(t, .42, 26); break;
+      case 'door-wood': sample = .17 * low * gate(t, .02, .38) + .04 * sin(175 - 45 * t, t) * gate(t, .08, .32) +
+        (.2 * sin(92, t) + .2 * low) * hit(t, .4, 21) + .13 * soft * hit(t, .47, 48); break;
+      case 'door-glass': sample = (.18 * soft + .045 * sin(1680, t)) * hit(t, .01, 55) + .14 * low * gate(t, .07, .25) +
+        (.1 * sin(530, t) + .07 * sin(907, t)) * hit(t, .32, 23); break;
+      case 'door-slide': sample = (.3 * low + .035 * sin(220, t)) * Math.sin(Math.PI * t / duration) +
+        .13 * soft * (hit(t, .015, 45) + hit(t, .74, 32)); break;
+      case 'paper': sample = (.28 * soft + .06 * noise) * (gate(t, .02, .16) + .65 * gate(t, .23, .15)) * (.6 + .4 * sin(31, t)); break;
+      case 'bag-zip': sample = .25 * soft * gate(t, .03, .35) * (.45 + .55 * Math.abs(sin(65, t))) + .13 * low * hit(t, .36, 35); break;
+      case 'drawer': sample = .3 * low * gate(t, .015, .43) * (.7 + .3 * sin(18, t)) +
+        (.14 * sin(112, t) + .15 * soft) * hit(t, .44, 30); break;
+      case 'lever': sample = (.26 * soft + .11 * sin(170, t)) * (hit(t, .01, 48) + .8 * hit(t, .16, 35)); break;
+      case 'plug': sample = .17 * soft * gate(t, .01, .12) + (.2 * soft + .08 * sin(340, t)) * hit(t, .14, 50); break;
+      case 'card-scan': sample = .1 * sin(1320, t) * gate(t, .03, .08) + .1 * sin(1760, t) * gate(t, .15, .11); break;
+      case 'dial': sample = (.19 * soft + .07 * sin(930, t)) * (hit(t, .005, 80) + .65 * hit(t, .065, 70)); break;
+      case 'keyboard': sample = (.19 * soft + .06 * sin(420, t)) * (hit(t, .003, 110) + .45 * hit(t, .038, 110)); break;
+      case 'mouse-click': sample = (.16 * soft + .05 * sin(1800, t)) * (hit(t, .003, 150) + .5 * hit(t, .032, 130)); break;
+      case 'power-relay': sample = (.21 * soft + .09 * sin(150, t)) * (hit(t, .01, 52) + .7 * hit(t, .12, 48)) +
+        .11 * sin(100, t) * gate(t, .15, .4) * Math.exp(-3 * t); break;
+      case 'water-drop': sample = (.09 * sin(1600 - 1800 * t, t) + .045 * sin(2410 - 1600 * t, t)) * hit(t, .015, 13) + .05 * soft * hit(t, .06, 35); break;
+      case 'pipe-tick': sample = (.12 * sin(640, t) + .055 * sin(973, t)) * hit(t, .005, 12) + .12 * soft * hit(t, .008, 65); break;
       // CCTV 컷씬: 신호가 끊긴 화면의 귀를 찢는 "삐——"(1kHz 2.2초, 처음과 끝이 뚝 끊긴다), 브라운관이 켜지는 쿵 소리와 고주파 울림,
       // 놀랄 때의 낮은 충격과 불협화음, 화면이 바뀔 때의 짧은 잡음, 심장 박동.
       case 'cctv-beep': sample = .22 * sin(1000, t) + .05 * sin(2000, t); break;
@@ -133,6 +199,11 @@ function gameAudioBuffer(name) {
       case 'dark': sample = .46 * low + .065 * sin(37.5, t) * (1 + .18 * sin(.125, t)); break;
       case 'wind': sample = .95 * low * (.65 + .2 * sin(.25, t) + .12 * sin(.625, t)); break;
       case 'motor': sample = .14 * sin(87.5, t) + .045 * sin(175, t) + .3 * low; break;
+      case 'server-room': sample = .48 * low + .1 * soft * (.7 + .2 * sin(.375, t)) +
+        .045 * sin(187.5, t) + .025 * sin(375, t); break;
+      case 'electrical-room': sample = .18 * sin(50, t) + .055 * sin(100, t) + .3 * low * (.8 + .15 * sin(.25, t)); break;
+      case 'plumbing': sample = .35 * low + .07 * soft * (.7 + .3 * sin(.25, t)) + .025 * sin(112.5, t); break;
+      case 'hall-room': sample = .28 * low + .035 * sin(62.5, t) + .025 * sin(93.75, t) * (.6 + .3 * sin(.125, t)); break;
     }
     const edge = loop ? 1 : Math.min(1, t / .008, (duration - t) / .025);
     samples[i] = Math.max(-1, Math.min(1, sample)) * edge;
@@ -146,7 +217,7 @@ function gameAudioBuffer(name) {
       samples[end] = samples[end] * (1 - blend) + samples[i] * blend;
     }
   }
-  gameAudioBuffers.set(name, buffer);
+  gameAudioBuffers.set(key, buffer);
   return buffer;
 }
 
@@ -159,19 +230,30 @@ function playGameSound(name, options = {}) {
   if (distance >= 800) return;
   const interval = name === 'step' ? (options.running ? .21 : .29) : name === 'robot-step' ? 0 : name === 'robot-alert' ? 1.2 : name === 'robot-servo' ? 1.1 : .08;
   if (now - (gameAudioLastPlayed.get(name) ?? -Infinity) < interval || gameAudioEffects.size >= 6) return;
-  const buffer = gameAudioBuffer(name);
+  const cue = gameAudioCue(name, options);
+  const varied = name === 'step' || name === 'door' || ['paper', 'keyboard', 'water-drop', 'pipe-tick'].includes(cue);
+  const last = gameAudioLastVariant.get(cue) || 1;
+  const variant = varied ? (last + Math.floor(Math.random() * 2)) % 3 + 1 : 0;
+  const buffer = gameAudioBuffer(cue, variant);
   if (!buffer) return;
+  if (varied) gameAudioLastVariant.set(cue, variant);
   gameAudioLastPlayed.set(name, now);
   const source = gameAudioContext.createBufferSource();
   const gain = gameAudioContext.createGain();
   source.buffer = buffer;
   source.playbackRate.value = name === 'step' || name === 'robot-step' ? .94 + Math.random() * .12 : 1;
   gain.gain.value = (name === 'step' ? (options.landing ? .65 : options.running ? .6 : .42) : name === 'blackout' ? .7 : name === 'cctv-hit' ? .85 : name === 'cctv-rise' ? .7 :
-    name === 'robot-servo' ? .35 : name === 'robot-step' ? .52 : .6) * (1 - distance / 800);
-  source.connect(gain).connect(gameAudioMaster);
-  const effect = { source, gain, name, stopping: false };
+    name === 'robot-servo' ? .35 : name === 'robot-step' ? .52 :
+    ['paper', 'keyboard', 'mouse-click', 'bag-zip', 'water-drop', 'pipe-tick'].includes(cue) ? .32 : .6) * (1 - distance / 800);
+  const pan = Number.isFinite(options.x) ? gameAudioContext.createStereoPanner?.() : null;
+  source.connect(gain);
+  if (pan) {
+    pan.pan.value = Math.max(-.75, Math.min(.75, (options.x - body.position.x) / 600));
+    gain.connect(pan).connect(gameAudioMaster);
+  } else gain.connect(gameAudioMaster);
+  const effect = { source, gain, pan, name, cue, variant, stopping: false };
   gameAudioEffects.add(effect);
-  source.onended = () => { gameAudioEffects.delete(effect); source.disconnect(); gain.disconnect(); };
+  source.onended = () => { gameAudioEffects.delete(effect); source.disconnect(); gain.disconnect(); pan?.disconnect(); };
   source.start();
 }
 
@@ -298,6 +380,8 @@ function playRedEyeBreakSound() {
 }
 
 function pauseGameAudio() {
+  gameAudioRoomKey = '';
+  gameAudioRoomElapsed = 0;
   sanityMusicElement.pause();
   sanityMusicGain = sanityMusicTarget = 0;
   sanityMusicElement.volume = 0;
@@ -337,11 +421,32 @@ function updateGameAudio(elapsed = step) {
   // 음산한 배경음(cctv-dread)이 흐른다(js/scene/cctv-event.js).
   const dread = !selectingFloor && cctvDreadPlaying();
   const haunted = !selectingFloor && cctvBgmPlaying();
-  const background = dread ? 'cctv-dread' : haunted ? 'cctv-bgm' : roof ? 'wind' : lit ? 'office' : 'dark';
+  const profile = gameAudioRoomProfile();
+  const powered = floorHasPower(currentSceneFloor);
+  const roomTone = profile === 'restroom' ? 'plumbing' : powered && profile === 'server' ? 'server-room' :
+    powered && profile === 'service' ? 'electrical-room' : lit && profile === 'hall' ? 'hall-room' : null;
+  const background = dread ? 'cctv-dread' : haunted ? 'cctv-bgm' : roof ? 'wind' : roomTone || (lit ? 'office' : 'dark');
   const moving = selectingFloor && cabinCarIndex !== null && elevatorCars[cabinCarIndex].travelling && elevatorHasPower();
   const wanted = new Map([[background, dread ? .42 : haunted ? .34 : roof ? .23 : lit ? .18 : .14]]);
   const fear = sanityTierOf(sanity);
-  const musicAllowed = !dread && !haunted && !openingActive && !blackoutSceneActive && !storySceneActive && !cctvSceneActive && !playerCaught && !hallucinationCaught;
+  const musicAllowed = !dread && !haunted && !openingActive && !blackoutSceneActive && !storySceneActive && !cctvSceneActive && !b2CaptureActive && !solarRestoreActive && !playerCaught && !hallucinationCaught;
+  const roomKey = `${room}:${dynamicFloorId}:${currentSceneFloor}:${selectingFloor}`;
+  if (roomKey !== gameAudioRoomKey) {
+    gameAudioRoomKey = roomKey;
+    gameAudioRoomElapsed = 0;
+    gameAudioRoomNext = 9000 + Math.random() * 9000;
+  }
+  if (!musicAllowed) gameAudioRoomElapsed = 0;
+  else if (!selectingFloor) gameAudioRoomElapsed += Math.min(elapsed, 100);
+  if (musicAllowed && !selectingFloor && gameAudioRoomElapsed >= gameAudioRoomNext) {
+    if (profile === 'restroom' || profile === 'service') {
+      const sink = profile === 'restroom' && currentDoors.find(door => door.name === '세면대 거울');
+      const x = sink ? sink.x + sink.width / 2 : Math.max(32, Math.min(worldWidth - 32, body.position.x + (Math.random() < .5 ? -220 : 220)));
+      playGameSound(profile === 'restroom' ? 'water-drop' : 'pipe-tick', { x });
+    }
+    gameAudioRoomElapsed = 0;
+    gameAudioRoomNext = 11000 + Math.random() * 13000;
+  }
   updateSanityMusic(musicAllowed ? fear * .06 : 0, elapsed);
   if (moving) wanted.set('motor', .25);
   for (const [name, sound] of gameAudioAmbience) {

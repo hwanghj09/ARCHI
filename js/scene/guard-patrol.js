@@ -17,7 +17,7 @@ const guardPatrol = { x: 4530, facing: -1, wait: 0, elapsed: 0, mode: 'dock',
 // 정전 뒤에만 움직이고 B2 엔딩 중에는 멈춘다. 수호와 다른 장면에 있는 동안에는 머무는 시간(stay)만 줄다가
 // 다 되면 바로 다음 장면으로 옮긴다. 같은 장면이면 나갈 문(엘리베이터)까지 걸어가서 나간다.
 // 층을 옮길 때는 진짜 엘리베이터(elevatorCars)를 쓴다: 비어 있는 칸을 불러 문이 열리면 타고(trip 'call' → 'board'),
-// 문이 닫힌 칸이 다음 층으로 운행해(층 표시등도 바뀐다) 도착해 문이 열리면 내린다('ride'). 승강기 전력이 없으면 이 층을 계속 돈다.
+// 문이 완전히 닫힌 뒤 운행하고('close' → 'ride'), 도착해 문이 완전히 열리면 내린다('exit'). 승강기 전력이 없으면 이 층을 계속 돈다.
 const roamerFloors = [-1, ...Array.from({ length: 15 }, (_, index) => index + 2)];
 const roamerStay = { corridor: 30000, room: 15000, ride: 6000 };
 const roamerSpeed = { patrol: 70, chase: 220 }; // R-01(순찰 80, 추격 270)보다 느리다. 걷기 200·달리기 340
@@ -172,7 +172,9 @@ function pickRoamerCar(floor) {
 
 function sendRoamerCar(car) {
   roamer.lastFloor = floorId(car.floor);
-  Object.assign(car, { travelling: true, destination: floorById.get(pickRoamerFloor()).floor, elapsed: 0, open: false });
+  Object.assign(car, { travelling: false, destination: floorById.get(pickRoamerFloor()).floor, elapsed: 0, open: false });
+  Object.assign(roamer.trip, { phase: 'close', time: elevatorDoorMs });
+  if (roamerHere() === floorId(car.floor)) playGameSound('elevator-door', { x: roamerElevatorX(roamer.car, floorId(car.floor)) });
 }
 
 // 복도에서 머무는 시간이 끝났다: 칸을 골라 그 문 앞까지 걸어가서 부른다.
@@ -202,7 +204,8 @@ function updateRoamerTrip(delta) {
   const { trip } = roamer;
   const here = roamer.where === roamerHere();
   // 기다리는 동안 수호를 보고 쫓아가거나 수호가 그 칸에 타면 그만두고 나중에 다시 부른다.
-  if (trip.phase !== 'ride' && (roamer.mode === 'chase' || car.rider)) { roamer.trip = roamer.car = null; return; }
+  if (roamer.where !== null && (roamer.mode === 'chase' || car.rider)) { roamer.trip = roamer.car = null; return; }
+  if (!elevatorHasPower() || car.rider) return;
   if (trip.phase === 'call') {
     if (car.travelling || car.floor !== floorById.get(roamer.where).floor) return;
     if (!car.open && here) playGameSound('elevator-door', { x: roamer.x });
@@ -213,11 +216,30 @@ function updateRoamerTrip(delta) {
     trip.time -= delta;
     if (trip.time > 0) return;
     if (roamer.door) { roamer.door.element.remove(); roamer.door = roamer.image = null; }
-    if (here) playGameSound('elevator-door', { x: roamer.x });
     roamer.where = null;
     sendRoamerCar(car);
+  } else if (trip.phase === 'close') {
+    if (car.open) {
+      sendRoamerCar(car);
+      return;
+    }
+    trip.time -= delta;
+    if (trip.time > 0) return;
+    car.travelling = true;
     trip.phase = 'ride';
-  } else if (!car.travelling) {
+  } else if (trip.phase === 'ride' && !car.travelling) {
+    Object.assign(trip, { phase: 'exit', time: elevatorDoorMs });
+  } else if (trip.phase === 'exit') {
+    if (car.travelling) { trip.phase = 'ride'; return; }
+    if (!car.open) {
+      car.open = true;
+      trip.time = elevatorDoorMs;
+      elevatorOpenTime[roamer.car] = 0;
+      if (roamerHere() === floorId(car.floor)) playGameSound('elevator-door', { x: roamerElevatorX(roamer.car, floorId(car.floor)) });
+      return;
+    }
+    trip.time -= delta;
+    if (trip.time > 0) return;
     // 도착했다(문은 updateElevators가 연다). 내릴 수 없는 층이거나 수호가 바로 문 앞에 있으면 다른 층으로 간다.
     const sceneId = floorId(car.floor);
     if (!roamerFloors.includes(car.floor) || roamerNearSuho(sceneId, roamerElevatorX(roamer.car, sceneId))) return sendRoamerCar(car);

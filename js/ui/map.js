@@ -81,6 +81,7 @@ function updateMap() {
 
 function openMap() {
   if (mapHidden()) return;
+  if (mapWindow.hidden) playGameSound('paper');
   mapWindow.hidden = false;
   renderMap();
   requestAnimationFrame(updateMap);

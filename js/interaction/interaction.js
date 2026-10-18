@@ -221,7 +221,7 @@ function interact() {
     // 한 번 안에서 열고 나오면 그 뒤로 복도에서도 열린다. 16층 VU 셔터는 안의 레버(shutterLever)로 따로 올리고 내린다.
     if (nearbyDoor.key === 'exit') collectedItems.add(dynamicFloorId);
     nearbyDoor.element.dataset.open = 'true';
-    playGameSound('door');
+    playGameSound('door', { door: nearbyDoor });
     changeRoom(() => performFloorChange(target, null, arrivalKey));
     return;
   }
@@ -235,12 +235,12 @@ function interact() {
     if (destId === 'rooftop' && (!rooftopBackground.complete || !rooftopBackground.naturalWidth)) {
       return;
     }
-    playGameSound('door');
+    playGameSound('door', { door: nearbyDoor });
     changeRoom(() => performFloorChange(destId, null));
     return;
   }
   if (nearbyDoor.type === 'office') {
-    playGameSound('door');
+    playGameSound('door', { door: nearbyDoor });
     changeRoom();
     return;
   }
@@ -279,7 +279,7 @@ function interact() {
   facing = body.position.x <= nearbyDoor.x + nearbyDoor.width / 2 ? 1 : -1;
   animate(0);
   const open = nearbyDoor.element.dataset.open !== 'true';
-  playGameSound('door');
+  playGameSound('door', { door: nearbyDoor });
   setDoorOpen(nearbyDoor, open);
   updateInteraction();
 }

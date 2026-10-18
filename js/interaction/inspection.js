@@ -46,6 +46,7 @@ function openInspection(name, message, sheet) {
   inspectionClose.hidden = false;
   for (const button of inspectionPanel.querySelectorAll('.b2-action')) button.hidden = true; // B2 DELETE·확인 버튼(b2-ending.js)
   const surface = hasWritingSheet(sheet) ? sheet.surface : null;
+  if (['document', 'memo', 'notebook'].includes(surface)) playGameSound('paper');
   inspectionTitle.textContent = name;
   inspectionDescription.textContent = message;
   finishInspectionText();

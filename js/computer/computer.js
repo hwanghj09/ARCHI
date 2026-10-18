@@ -260,7 +260,13 @@ try {
 } catch {
   computerSaveStatus.textContent = '저장소를 읽을 수 없음';
 }
-computerNote.addEventListener('input', () => { computerSaveStatus.textContent = '저장되지 않음'; });
+computerNote.addEventListener('input', () => {
+  computerSaveStatus.textContent = '저장되지 않음';
+  playGameSound('keyboard');
+});
+computer.addEventListener('click', event => {
+  if (usingComputer && event.target.closest('button:not(:disabled)')) playGameSound('mouse-click');
+});
 document.getElementById('computer-save').addEventListener('click', () => {
   try {
     localStorage.setItem('archi.office17.note', computerNote.value);

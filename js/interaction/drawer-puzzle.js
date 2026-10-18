@@ -35,6 +35,7 @@ function openDrawerPuzzle() {
       if (paper !== remaining.at(-1)) return;
       collectedItems.add(`f12-drawer-paper-${index}`);
       remaining.pop();
+      playGameSound('paper');
       paper.remove();
       refresh();
       (remaining.at(-1) || card).focus();

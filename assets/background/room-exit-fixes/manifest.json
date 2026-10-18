@@ -1,0 +1,46 @@
+[
+  {
+    "id": "f12-lead",
+    "base": "floor12/lead",
+    "box": [
+      1800,
+      200,
+      210,
+      370
+    ],
+    "file": "exec-a2badd1b-18c2-4f79-8d94-e300292c59b5.png"
+  },
+  {
+    "id": "f12-eval",
+    "base": "floor12/eval",
+    "box": [
+      380,
+      195,
+      100,
+      65
+    ],
+    "file": "exec-d8d49434-464b-4063-a651-70931a23d310.png"
+  },
+  {
+    "id": "f1-clinic",
+    "base": "floor1/clinic",
+    "box": [
+      820,
+      170,
+      218,
+      400
+    ],
+    "file": "exec-fed638c1-95cc-4e99-9bfa-6eb0f02dbec4.png"
+  },
+  {
+    "id": "f1-vision",
+    "base": "floor1/vision",
+    "box": [
+      200,
+      245,
+      190,
+      325
+    ],
+    "file": "exec-b2dc11c0-135e-42b4-a5d9-8b5cd1958074.png"
+  }
+]

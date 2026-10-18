@@ -60,7 +60,8 @@ try {
   const trip = () => page.evaluate(() => {
     const index = roamer.car ?? 0, car = elevatorCars[index];
     const door = currentDoors.find(entry => entry.type === 'elevator' && entry.carIndex === index);
-    return { phase: roamer.trip?.phase ?? null, index, floor: car.floor, travelling: car.travelling, doorOpen: door?.element.dataset.open };
+    return { phase: roamer.trip?.phase ?? null, remaining: roamer.trip?.time ?? 0,
+      index, floor: car.floor, travelling: car.travelling, carOpen: car.open, doorOpen: door?.element.dataset.open };
   });
   await page.evaluate(() => {
     collectedItems.add('f17-emergency-linked'); updatePowerState();
@@ -79,11 +80,55 @@ try {
   assert.equal((await state()).sprites, 1, 'R-03 waits at the open doors');
   await page.clock.runFor(1500);
   t = await trip(); s = await state();
-  assert.deepEqual([s.where, s.sprites, t.phase, t.travelling], [null, 0, 'ride', true], 'R-03 boards and the car leaves');
+  assert.deepEqual([s.where, s.sprites, t.phase, t.floor, t.travelling], [null, 0, 'close', 5, false], 'R-03 boards while the car stays put to close its doors');
   assert.equal(t.doorOpen, 'false', 'The doors close behind it');
-  await page.clock.runFor(3000);
+  // 전력이 끊기면 문 닫힘 대기도 멈추고, 복구한 뒤 남은 시간을 기다린다.
+  await page.evaluate(() => { collectedItems.delete('f17-emergency-linked'); updatePowerState(); });
+  const paused = await trip();
+  await page.clock.runFor(600);
+  assert.deepEqual(await trip(), paused, 'No departure or closing countdown without elevator power');
+  await page.evaluate(() => { collectedItems.add('f17-emergency-linked'); updatePowerState(); });
+  const recalled = await page.evaluate(() => {
+    const car = elevatorCars[roamer.car];
+    car.travelling = true; // 다른 층 호출도 같은 칸의 travelling을 켠다.
+    updateElevators();
+    return [car.travelling, car.floor];
+  });
+  assert.deepEqual(recalled, [false, 5], 'A simultaneous hall call cannot bypass door closing');
+  await page.clock.runFor(Math.floor((await trip()).remaining) - 100);
+  assert.deepEqual([(await trip()).phase, (await trip()).floor, (await trip()).travelling], ['close', 5, false], 'No movement before the full door-closing interval');
+  await page.clock.runFor(200);
+  assert.deepEqual([(await trip()).phase, (await trip()).travelling], ['ride', true], 'Departure follows completed door closing');
+  for (let i = 0; i < 30 && (await trip()).phase !== 'exit'; i++) await page.clock.runFor(100);
+  t = await trip(); s = await state();
+  assert.deepEqual([s.where, t.phase, t.floor, t.travelling], [null, 'exit', -1, false], 'R-03 remains inside while the arrival doors open');
+  await page.evaluate(() => {
+    elevatorCars[roamer.car].open = false; // 조사창을 읽는 동안 자동으로 닫힌 경우.
+    updateRoamerTrip(step);
+  });
+  t = await trip();
+  assert.deepEqual([t.carOpen, t.remaining], [true, 1400], 'Reclosed arrival doors reopen and restart the full wait');
+  await page.clock.runFor(Math.floor(t.remaining) - 100);
+  assert.equal((await state()).where, null, 'R-03 cannot appear before the full door-opening interval');
+  await page.clock.runFor(200);
   t = await trip(); s = await state();
   assert.deepEqual([s.where, t.phase, t.floor], [await page.evaluate(() => floorId(-1)), null, -1], 'The car carries R-03 to B1 and it steps out');
+
+  // 수호가 도착 문 앞에 있으면 내리지 않고, 다시 문을 완전히 닫은 뒤 다른 층으로 간다.
+  await page.evaluate(() => {
+    performFloorChange('f5');
+    Body.setPosition(body, { x: roamerElevatorX(0, 'f5'), y: floorY - 81 });
+    Object.assign(elevatorCars[0], { floor: 5, travelling: false, open: true, rider: false });
+    Object.assign(roamer, { where: null, car: 0, trip: { phase: 'ride', time: 0 }, mode: 'patrol' });
+  });
+  await page.clock.runFor(1500);
+  t = await trip();
+  assert.deepEqual([(await state()).where, t.phase, t.floor, t.travelling, t.doorOpen], [null, 'close', 5, false, 'false'], 'A blocked exit closes the doors before rerouting');
+  await page.clock.runFor(Math.floor(t.remaining) - 100);
+  assert.equal((await trip()).travelling, false, 'Rerouting also waits for fully closed doors');
+  await page.clock.runFor(200);
+  assert.equal((await trip()).travelling, true, 'The rerouted car then departs');
+  await page.clock.runFor(3000);
 
   // 전등이 켜진 층: 복도 다음 방을 둘러본다. 다른 장면이면 바로 옮긴다.
   await page.evaluate(() => {
@@ -204,5 +249,5 @@ try {
   assert.deepEqual([c.door, c.gauge, c.floor], ['closed', false, 5], 'Space mashing shuts the open door');
   assert.equal(await page.locator('#guard-capture').isVisible(), false);
   assert.deepEqual(errors, []);
-  console.log('PASS: R-03 waits for blackout, self-powered corridor patrol on unlit floors, rooms on lit floors, elevator exit, lit-floor priority, capture, elevator door prying (win and lose, closing or open door).');
+  console.log('PASS: R-03 blackout patrol, rooms, elevator closing/opening waits, power pause, competing call, reopened arrival doors, blocked-exit rerouting, lit-floor priority, capture and door prying.');
 } finally { await browser.close(); }

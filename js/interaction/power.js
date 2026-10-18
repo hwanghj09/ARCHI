@@ -40,7 +40,7 @@ function openEmergencyCircuit() {
   openWirePanel(() => {
     collectedItems.add('f17-emergency-linked');
     updatePowerState();
-    playGameSound('switch');
+    playGameSound('switch', { cue: 'power-relay' });
     saveProgress();
     openInspection('비상 전력 연결 완료', 'UPS의 녹색 표시등이 켜졌다. 엘리베이터와 비상 설비에 전력이 공급된다. 태양광 조명을 꺼도 승강기는 멈추지 않는다.');
   }, 'elevator');
@@ -88,7 +88,7 @@ function updatePowerState() {
 }
 
 function setSolarPower(enabled) {
-  if (solarEnabled !== enabled) playGameSound('switch');
+  if (solarEnabled !== enabled) playGameSound('switch', { cue: 'power-relay' });
   solarEnabled = enabled;
   if (!enabled) solarPoweredFloors = [];
   updatePowerState();
@@ -96,7 +96,7 @@ function setSolarPower(enabled) {
 
 function supplySolarFloor(floor) {
   if (!solarEnabled || !Number.isInteger(floor) || floor < 1 || floor > 17) return;
-  playGameSound('switch');
+  playGameSound('switch', { cue: 'power-relay' });
   const button = powerGrid.querySelector(`[data-floor="${floor}"]`);
   button.classList.remove('suggested');
   button.removeAttribute('aria-label');

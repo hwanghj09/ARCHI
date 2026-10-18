@@ -133,7 +133,9 @@ function completeControlStep() {
   renderControl();
   manualControlDevice.dataset.done = 'true';
   controlDrag = null;
-  playGameSound(step.spec.kind === 'press' || step.spec.kind === 'card' ? 'ui' : 'switch');
+  const cue = step.spec.kind === 'card' ? 'card-scan' : step.spec.kind === 'plug' ? 'plug' :
+    ['selector', 'key', 'crank', 'clock'].includes(step.spec.kind) ? 'dial' : step.spec.kind === 'press' ? 'mouse-click' : 'lever';
+  playGameSound(cue);
   setTimeout(() => { if (controlStep === step) nextControlStep(); }, 380);
 }
 

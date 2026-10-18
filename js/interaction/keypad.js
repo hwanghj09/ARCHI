@@ -80,6 +80,9 @@ keypad.addEventListener('submit', event => {
   event.preventDefault();
   submitKeypad();
 });
+keypadInput.addEventListener('input', () => {
+  if (usingKeypad && keypadInput.value) playGameSound('keyboard');
+});
 keypad.addEventListener('keydown', event => {
   event.stopPropagation();
   if (event.code === 'Escape') {

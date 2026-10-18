@@ -1,0 +1,5720 @@
+{
+  "scenes": [
+    {
+      "id": "f17-office",
+      "floor": 17,
+      "header": "17F office",
+      "fixedOffice": true,
+      "width": 2400,
+      "scale": 1,
+      "broken": [],
+      "doors": [
+        {
+          "name": "1번 엘리베이터",
+          "x": 1818,
+          "y": 220,
+          "width": 218,
+          "outline": [
+            448.3999938964844,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "name": "2번 엘리베이터",
+          "x": 2148,
+          "y": 220,
+          "width": 214,
+          "outline": [
+            448.3999938964844,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "name": "3번 엘리베이터",
+          "x": 2444,
+          "y": 220,
+          "width": 216,
+          "outline": [
+            448.3999938964844,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "name": "비상계단",
+          "x": 2906,
+          "y": 232,
+          "width": 180,
+          "outline": [
+            448.3999938964844,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "name": "화장실",
+          "key": "room:f17-restroom",
+          "target": "f17-restroom",
+          "x": 3612,
+          "y": 210,
+          "width": 145,
+          "outline": [
+            448.3999938964844,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "name": "관리자 외 출입금지",
+          "key": "room:f17-manager",
+          "target": "f17-manager",
+          "x": 4378,
+          "y": 210,
+          "width": 171,
+          "outline": [
+            448.3999938964844,
+            0,
+            0,
+            0
+          ]
+        }
+      ],
+      "sources": [
+        "assets/background/floor17/floor17-finished.png",
+        "assets/background/floor17/service-corridor-finished.png",
+        "assets/background/floor17/office-interior-aligned-finished.png",
+        "assets/background/floor17/workstation-empty.png"
+      ],
+      "signs": [],
+      "file": "docs/previews/background-audit/f17-office.jpg"
+    },
+    {
+      "id": "f17",
+      "floor": 17,
+      "header": "17F · 복도",
+      "width": 5000,
+      "scale": 1,
+      "broken": [],
+      "doors": [
+        {
+          "name": "1번 엘리베이터",
+          "x": 1818,
+          "y": 220,
+          "width": 218,
+          "outline": [
+            1818,
+            220,
+            218,
+            350
+          ]
+        },
+        {
+          "name": "2번 엘리베이터",
+          "x": 2148,
+          "y": 220,
+          "width": 214,
+          "outline": [
+            2148,
+            220,
+            214,
+            350
+          ]
+        },
+        {
+          "name": "3번 엘리베이터",
+          "x": 2444,
+          "y": 220,
+          "width": 216,
+          "outline": [
+            2444,
+            220,
+            216,
+            350
+          ]
+        },
+        {
+          "name": "비상계단",
+          "x": 2906,
+          "y": 232,
+          "width": 180,
+          "outline": [
+            2906,
+            232,
+            180,
+            338
+          ]
+        },
+        {
+          "name": "화장실",
+          "key": "room:f17-restroom",
+          "target": "f17-restroom",
+          "x": 3612,
+          "y": 210,
+          "width": 145,
+          "outline": [
+            3612.0001220703125,
+            210,
+            145,
+            360
+          ]
+        },
+        {
+          "name": "관리자 외 출입금지",
+          "key": "room:f17-manager",
+          "target": "f17-manager",
+          "x": 4378,
+          "y": 210,
+          "width": 171,
+          "outline": [
+            4378.0001220703125,
+            210,
+            171,
+            360
+          ]
+        }
+      ],
+      "sources": [
+        "assets/background/floor17/floor17-finished.png",
+        "assets/background/floor17/service-corridor-finished.png",
+        "assets/background/floor17/office-interior-aligned-finished.png",
+        "assets/background/floor17/workstation-empty.png"
+      ],
+      "signs": [
+        {
+          "left": "2962px",
+          "top": "182px",
+          "parent": ""
+        }
+      ],
+      "file": "docs/previews/background-audit/f17.jpg"
+    },
+    {
+      "id": "b2",
+      "floor": -2,
+      "header": "B2 · 서버실",
+      "width": 5000,
+      "scale": 1,
+      "broken": [],
+      "doors": [
+        {
+          "name": "1번 엘리베이터",
+          "x": 1818,
+          "y": 220,
+          "width": 218,
+          "outline": [
+            1818,
+            220,
+            218,
+            350
+          ]
+        },
+        {
+          "name": "2번 엘리베이터",
+          "x": 2148,
+          "y": 220,
+          "width": 214,
+          "outline": [
+            2148,
+            220,
+            214,
+            350
+          ]
+        },
+        {
+          "name": "3번 엘리베이터",
+          "x": 2444,
+          "y": 220,
+          "width": 216,
+          "outline": [
+            2444,
+            220,
+            216,
+            350
+          ]
+        },
+        {
+          "name": "비상계단",
+          "x": 2906,
+          "y": 232,
+          "width": 180,
+          "outline": [
+            2906,
+            232,
+            180,
+            338
+          ]
+        },
+        {
+          "name": "ARCHI 메인 서버실",
+          "key": "room:b2-main",
+          "target": "b2-main",
+          "x": 888,
+          "y": 250,
+          "width": 160,
+          "outline": [
+            888,
+            250,
+            160,
+            320
+          ]
+        },
+        {
+          "name": "전력·냉각실",
+          "key": "room:b2-power",
+          "target": "b2-power",
+          "x": 3280,
+          "y": 250,
+          "width": 110,
+          "outline": [
+            3280,
+            250,
+            110.0001220703125,
+            320
+          ]
+        },
+        {
+          "name": "연결 실험실",
+          "key": "room:b2-link",
+          "target": "b2-link",
+          "x": 4380,
+          "y": 250,
+          "width": 110,
+          "outline": [
+            4380.0001220703125,
+            250,
+            110,
+            320
+          ]
+        },
+        {
+          "name": "화장실",
+          "key": "room:b2-restroom",
+          "target": "b2-restroom",
+          "x": 3612,
+          "y": 210,
+          "width": 145,
+          "outline": [
+            3612.0001220703125,
+            210,
+            145,
+            360
+          ]
+        }
+      ],
+      "sources": [
+        "assets/background/floor17/floor17-finished.png",
+        "assets/background/floor17/service-corridor-finished.png",
+        "assets/background/floor17/office-interior-aligned-finished.png",
+        "assets/background/floor17/workstation-empty.png",
+        "assets/background/b2/b2-corridor-finished.png"
+      ],
+      "signs": [],
+      "file": "docs/previews/background-audit/b2.jpg"
+    },
+    {
+      "id": "b1",
+      "floor": -1,
+      "header": "B1 · 시설 관리실",
+      "width": 5000,
+      "scale": 1,
+      "broken": [],
+      "doors": [
+        {
+          "name": "1번 엘리베이터",
+          "x": 1818,
+          "y": 220,
+          "width": 218,
+          "outline": [
+            1818,
+            220,
+            218,
+            350
+          ]
+        },
+        {
+          "name": "2번 엘리베이터",
+          "x": 2148,
+          "y": 220,
+          "width": 214,
+          "outline": [
+            2148,
+            220,
+            214,
+            350
+          ]
+        },
+        {
+          "name": "3번 엘리베이터",
+          "x": 2444,
+          "y": 220,
+          "width": 216,
+          "outline": [
+            2444,
+            220,
+            216,
+            350
+          ]
+        },
+        {
+          "name": "비상계단",
+          "x": 2906,
+          "y": 232,
+          "width": 180,
+          "outline": [
+            2906,
+            232,
+            180,
+            338
+          ]
+        },
+        {
+          "name": "시설관리팀 사무실",
+          "key": "room:b1-office",
+          "target": "b1-office",
+          "x": 4322,
+          "y": 250,
+          "width": 110,
+          "outline": [
+            4322.0001220703125,
+            250,
+            110,
+            320
+          ]
+        },
+        {
+          "name": "방재 관제실",
+          "key": "room:b1-control",
+          "target": "b1-control",
+          "x": 4580,
+          "y": 250,
+          "width": 104,
+          "outline": [
+            4580.0001220703125,
+            250,
+            104,
+            320
+          ]
+        },
+        {
+          "name": "전력 분배실",
+          "key": "room:b1-power",
+          "target": "b1-power",
+          "x": 4820,
+          "y": 250,
+          "width": 100,
+          "outline": [
+            4820.0001220703125,
+            250,
+            100,
+            320
+          ]
+        },
+        {
+          "name": "화장실",
+          "key": "room:b1-restroom",
+          "target": "b1-restroom",
+          "x": 3612,
+          "y": 210,
+          "width": 145,
+          "outline": [
+            3612.0001220703125,
+            210,
+            145,
+            360
+          ]
+        }
+      ],
+      "sources": [
+        "assets/background/floor17/floor17-finished.png",
+        "assets/background/floor17/service-corridor-finished.png",
+        "assets/background/floor17/office-interior-aligned-finished.png",
+        "assets/background/floor17/workstation-empty.png",
+        "assets/background/b1/b1-corridor-finished.png"
+      ],
+      "signs": [],
+      "file": "docs/previews/background-audit/b1.jpg"
+    },
+    {
+      "id": "f1",
+      "floor": 1,
+      "header": "1F · 로비",
+      "width": 5000,
+      "scale": 1,
+      "broken": [],
+      "doors": [
+        {
+          "name": "1번 엘리베이터",
+          "x": 1948,
+          "y": 220,
+          "width": 197,
+          "outline": [
+            1948,
+            220,
+            197,
+            340
+          ]
+        },
+        {
+          "name": "2번 엘리베이터",
+          "x": 2222,
+          "y": 220,
+          "width": 198,
+          "outline": [
+            2222,
+            220,
+            198,
+            340
+          ]
+        },
+        {
+          "name": "3번 엘리베이터",
+          "x": 2495,
+          "y": 220,
+          "width": 200,
+          "outline": [
+            2495,
+            220,
+            200,
+            340
+          ]
+        },
+        {
+          "name": "비상계단",
+          "x": 2895,
+          "y": 232,
+          "width": 145,
+          "outline": [
+            2895,
+            232,
+            145,
+            318
+          ]
+        },
+        {
+          "name": "Harmony Hall",
+          "key": "room:f1-harmony",
+          "target": "f1-harmony",
+          "x": 223,
+          "y": 250,
+          "width": 225,
+          "outline": [
+            204,
+            261,
+            237,
+            296
+          ]
+        },
+        {
+          "name": "Vision Hall",
+          "key": "room:f1-vision",
+          "target": "f1-vision",
+          "x": 650,
+          "y": 250,
+          "width": 143,
+          "outline": [
+            617,
+            261,
+            178,
+            296
+          ]
+        },
+        {
+          "name": "건강관리실",
+          "key": "room:f1-clinic",
+          "target": "f1-clinic",
+          "x": 1023,
+          "y": 250,
+          "width": 99,
+          "outline": [
+            1030,
+            302,
+            106,
+            254
+          ]
+        },
+        {
+          "name": "화장실",
+          "key": "room:f1-restroom",
+          "target": "f1-restroom",
+          "x": 3733,
+          "y": 210,
+          "width": 158,
+          "outline": [
+            3727,
+            292,
+            171,
+            266
+          ]
+        }
+      ],
+      "sources": [
+        "assets/background/floor17/floor17-finished.png",
+        "assets/background/floor17/service-corridor-finished.png",
+        "assets/background/floor17/office-interior-aligned-finished.png",
+        "assets/background/floor17/workstation-empty.png",
+        "assets/background/floor1/corridor-unified-finished.png"
+      ],
+      "signs": [
+        {
+          "left": "2941px",
+          "top": "193px",
+          "parent": ""
+        }
+      ],
+      "file": "docs/previews/background-audit/f1.jpg"
+    },
+    {
+      "id": "f2",
+      "floor": 2,
+      "header": "2F · Harmony Hall · 서버실",
+      "width": 5000,
+      "scale": 1,
+      "broken": [],
+      "doors": [
+        {
+          "name": "1번 엘리베이터",
+          "x": 1818,
+          "y": 220,
+          "width": 218,
+          "outline": [
+            1818,
+            220,
+            218,
+            350
+          ]
+        },
+        {
+          "name": "2번 엘리베이터",
+          "x": 2148,
+          "y": 220,
+          "width": 214,
+          "outline": [
+            2148,
+            220,
+            214,
+            350
+          ]
+        },
+        {
+          "name": "3번 엘리베이터",
+          "x": 2444,
+          "y": 220,
+          "width": 216,
+          "outline": [
+            2444,
+            220,
+            216,
+            350
+          ]
+        },
+        {
+          "name": "비상계단",
+          "x": 2906,
+          "y": 232,
+          "width": 180,
+          "outline": [
+            2906,
+            232,
+            180,
+            338
+          ]
+        },
+        {
+          "name": "Harmony Hall",
+          "key": "room:f2-harmony",
+          "target": "f2-harmony",
+          "x": 723,
+          "y": 250,
+          "width": 130,
+          "outline": [
+            723,
+            250,
+            130,
+            320
+          ],
+          "sprite": "assets/objects/floor02/door-harmony.png"
+        },
+        {
+          "name": "직원 휴게실",
+          "key": "room:f2-lounge",
+          "target": "f2-lounge",
+          "x": 1544,
+          "y": 250,
+          "width": 130,
+          "outline": [
+            1544,
+            250,
+            130,
+            320
+          ],
+          "sprite": "assets/objects/floor02/door-lounge.png"
+        },
+        {
+          "name": "서버실",
+          "key": "room:f2-server",
+          "target": "f2-server",
+          "x": 4385,
+          "y": 250,
+          "width": 130,
+          "outline": [
+            4385.0001220703125,
+            250,
+            130,
+            320
+          ],
+          "sprite": "assets/objects/floor02/door-server.png"
+        },
+        {
+          "name": "화장실",
+          "key": "room:f2-restroom",
+          "target": "f2-restroom",
+          "x": 3612,
+          "y": 210,
+          "width": 145,
+          "outline": [
+            3612.0001220703125,
+            210,
+            145,
+            360
+          ]
+        }
+      ],
+      "sources": [
+        "assets/background/floor17/floor17-finished.png",
+        "assets/background/floor17/service-corridor-finished.png",
+        "assets/background/floor17/office-interior-aligned-finished.png",
+        "assets/background/floor17/workstation-empty.png",
+        "assets/background/floor02/walls-finished.png"
+      ],
+      "signs": [],
+      "file": "docs/previews/background-audit/f2.jpg"
+    },
+    {
+      "id": "f3",
+      "floor": 3,
+      "header": "3F · Fitness Club · 고객만족센터",
+      "width": 5000,
+      "scale": 1,
+      "broken": [],
+      "doors": [
+        {
+          "name": "1번 엘리베이터",
+          "x": 1818,
+          "y": 220,
+          "width": 218,
+          "outline": [
+            1818,
+            220,
+            218,
+            350
+          ]
+        },
+        {
+          "name": "2번 엘리베이터",
+          "x": 2148,
+          "y": 220,
+          "width": 214,
+          "outline": [
+            2148,
+            220,
+            214,
+            350
+          ]
+        },
+        {
+          "name": "3번 엘리베이터",
+          "x": 2444,
+          "y": 220,
+          "width": 216,
+          "outline": [
+            2444,
+            220,
+            216,
+            350
+          ]
+        },
+        {
+          "name": "비상계단",
+          "x": 2906,
+          "y": 232,
+          "width": 180,
+          "outline": [
+            2906,
+            232,
+            180,
+            338
+          ]
+        },
+        {
+          "name": "Fitness Club",
+          "key": "room:f3-fitness",
+          "target": "f3-fitness",
+          "x": 640,
+          "y": 250,
+          "width": 240,
+          "outline": [
+            640,
+            250,
+            240,
+            320
+          ],
+          "sprite": "assets/objects/floor03/door-fitness.png"
+        },
+        {
+          "name": "고객만족센터",
+          "key": "room:f3-cs",
+          "target": "f3-cs",
+          "x": 1375,
+          "y": 250,
+          "width": 130,
+          "outline": [
+            1375,
+            250,
+            130,
+            320
+          ],
+          "sprite": "assets/objects/floor03/door-cs.png"
+        },
+        {
+          "name": "Studio",
+          "key": "room:f3-studio",
+          "target": "f3-studio",
+          "x": 4321,
+          "y": 250,
+          "width": 130,
+          "outline": [
+            4321.0001220703125,
+            250,
+            130,
+            320
+          ]
+        },
+        {
+          "name": "화장실",
+          "key": "room:f3-restroom",
+          "target": "f3-restroom",
+          "x": 3612,
+          "y": 210,
+          "width": 145,
+          "outline": [
+            3612.0001220703125,
+            210,
+            145,
+            360
+          ]
+        }
+      ],
+      "sources": [
+        "assets/background/floor17/floor17-finished.png",
+        "assets/background/floor17/service-corridor-finished.png",
+        "assets/background/floor17/office-interior-aligned-finished.png",
+        "assets/background/floor17/workstation-empty.png",
+        "assets/background/floor03/walls.png"
+      ],
+      "signs": [],
+      "file": "docs/previews/background-audit/f3.jpg"
+    },
+    {
+      "id": "f4",
+      "floor": 4,
+      "header": "4F · ARCHI Data 연구본부",
+      "width": 5000,
+      "scale": 1,
+      "broken": [],
+      "doors": [
+        {
+          "name": "1번 엘리베이터",
+          "x": 1818,
+          "y": 220,
+          "width": 218,
+          "outline": [
+            1818,
+            220,
+            218,
+            350
+          ]
+        },
+        {
+          "name": "2번 엘리베이터",
+          "x": 2148,
+          "y": 220,
+          "width": 214,
+          "outline": [
+            2148,
+            220,
+            214,
+            350
+          ]
+        },
+        {
+          "name": "3번 엘리베이터",
+          "x": 2444,
+          "y": 220,
+          "width": 216,
+          "outline": [
+            2444,
+            220,
+            216,
+            350
+          ]
+        },
+        {
+          "name": "비상계단",
+          "x": 2906,
+          "y": 232,
+          "width": 180,
+          "outline": [
+            2906,
+            232,
+            180,
+            338
+          ]
+        },
+        {
+          "name": "연구개발 업무 공간",
+          "key": "room:f4-lab",
+          "target": "f4-lab",
+          "x": 335,
+          "y": 250,
+          "width": 130,
+          "outline": [
+            335,
+            250,
+            130,
+            320
+          ],
+          "sprite": "assets/objects/floor04/door-lab.png"
+        },
+        {
+          "name": "개발자 업무 구역",
+          "key": "room:f4-dev",
+          "target": "f4-dev",
+          "x": 1135,
+          "y": 250,
+          "width": 130,
+          "outline": [
+            1135,
+            250,
+            130,
+            320
+          ],
+          "sprite": "assets/objects/floor04/door-dev.png"
+        },
+        {
+          "name": "연구 회의실",
+          "key": "room:f4-meeting",
+          "target": "f4-meeting",
+          "x": 4786,
+          "y": 250,
+          "width": 130,
+          "outline": [
+            4786.0001220703125,
+            250,
+            130,
+            320
+          ],
+          "sprite": "assets/objects/floor04/door-meeting.png"
+        },
+        {
+          "name": "화장실",
+          "key": "room:f4-restroom",
+          "target": "f4-restroom",
+          "x": 3612,
+          "y": 210,
+          "width": 145,
+          "outline": [
+            3612.0001220703125,
+            210,
+            145,
+            360
+          ]
+        }
+      ],
+      "sources": [
+        "assets/background/floor17/floor17-finished.png",
+        "assets/background/floor17/service-corridor-finished.png",
+        "assets/background/floor17/office-interior-aligned-finished.png",
+        "assets/background/floor17/workstation-empty.png",
+        "assets/background/floor04/walls.png"
+      ],
+      "signs": [],
+      "file": "docs/previews/background-audit/f4.jpg"
+    },
+    {
+      "id": "f5",
+      "floor": 5,
+      "header": "5F · ARCHI Data 연구본부",
+      "width": 5000,
+      "scale": 1,
+      "broken": [],
+      "doors": [
+        {
+          "name": "1번 엘리베이터",
+          "x": 1818,
+          "y": 220,
+          "width": 218,
+          "outline": [
+            1818,
+            220,
+            218,
+            350
+          ]
+        },
+        {
+          "name": "2번 엘리베이터",
+          "x": 2148,
+          "y": 220,
+          "width": 214,
+          "outline": [
+            2148,
+            220,
+            214,
+            350
+          ]
+        },
+        {
+          "name": "3번 엘리베이터",
+          "x": 2444,
+          "y": 220,
+          "width": 216,
+          "outline": [
+            2444,
+            220,
+            216,
+            350
+          ]
+        },
+        {
+          "name": "비상계단",
+          "x": 2906,
+          "y": 232,
+          "width": 180,
+          "outline": [
+            2906,
+            232,
+            180,
+            338
+          ]
+        },
+        {
+          "name": "연구개발실",
+          "key": "room:f5-rnd",
+          "target": "f5-rnd",
+          "x": 397,
+          "y": 250,
+          "width": 240,
+          "outline": [
+            397,
+            250,
+            240,
+            320
+          ],
+          "sprite": "assets/objects/floor05/door-rnd.png"
+        },
+        {
+          "name": "기술연구실",
+          "key": "room:f5-security",
+          "target": "f5-security",
+          "x": 1163,
+          "y": 250,
+          "width": 130,
+          "outline": [
+            1163,
+            250,
+            130,
+            320
+          ],
+          "sprite": "assets/objects/floor05/door-security.png"
+        },
+        {
+          "name": "회의실",
+          "key": "room:f5-meeting",
+          "target": "f5-meeting",
+          "x": 4577,
+          "y": 250,
+          "width": 130,
+          "outline": [
+            4577.0001220703125,
+            250,
+            130,
+            320
+          ],
+          "sprite": "assets/objects/floor05/door-meeting.png"
+        },
+        {
+          "name": "화장실",
+          "key": "room:f5-restroom",
+          "target": "f5-restroom",
+          "x": 3612,
+          "y": 210,
+          "width": 145,
+          "outline": [
+            3612.0001220703125,
+            210,
+            145,
+            360
+          ]
+        }
+      ],
+      "sources": [
+        "assets/background/floor17/floor17-finished.png",
+        "assets/background/floor17/service-corridor-finished.png",
+        "assets/background/floor17/office-interior-aligned-finished.png",
+        "assets/background/floor17/workstation-empty.png",
+        "assets/background/floor05/walls.png"
+      ],
+      "signs": [],
+      "file": "docs/previews/background-audit/f5.jpg"
+    },
+    {
+      "id": "f6",
+      "floor": 6,
+      "header": "6F · ARCHI Data 기술본부",
+      "width": 5000,
+      "scale": 1,
+      "broken": [],
+      "doors": [
+        {
+          "name": "1번 엘리베이터",
+          "x": 1818,
+          "y": 220,
+          "width": 218,
+          "outline": [
+            1818,
+            220,
+            218,
+            350
+          ]
+        },
+        {
+          "name": "2번 엘리베이터",
+          "x": 2148,
+          "y": 220,
+          "width": 214,
+          "outline": [
+            2148,
+            220,
+            214,
+            350
+          ]
+        },
+        {
+          "name": "3번 엘리베이터",
+          "x": 2444,
+          "y": 220,
+          "width": 216,
+          "outline": [
+            2444,
+            220,
+            216,
+            350
+          ]
+        },
+        {
+          "name": "비상계단",
+          "x": 2906,
+          "y": 232,
+          "width": 180,
+          "outline": [
+            2906,
+            232,
+            180,
+            338
+          ]
+        },
+        {
+          "name": "기술 개발 업무 공간",
+          "key": "room:f6-work",
+          "target": "f6-work",
+          "x": 397,
+          "y": 250,
+          "width": 240,
+          "outline": [
+            397,
+            250,
+            240,
+            320
+          ],
+          "sprite": "assets/objects/floor06/door-work.png"
+        },
+        {
+          "name": "공용 엔지니어링 구역",
+          "key": "room:f6-engineering",
+          "target": "f6-engineering",
+          "x": 1296,
+          "y": 250,
+          "width": 130,
+          "outline": [
+            1296,
+            250,
+            130,
+            320
+          ],
+          "sprite": "assets/objects/floor06/door-engineering.png"
+        },
+        {
+          "name": "기술 회의실",
+          "key": "room:f6-meeting",
+          "target": "f6-meeting",
+          "x": 4782,
+          "y": 250,
+          "width": 130,
+          "outline": [
+            4782.0001220703125,
+            250,
+            130,
+            320
+          ],
+          "sprite": "assets/objects/floor06/door-meeting.png"
+        },
+        {
+          "name": "화장실",
+          "key": "room:f6-restroom",
+          "target": "f6-restroom",
+          "x": 3612,
+          "y": 210,
+          "width": 145,
+          "outline": [
+            3612.0001220703125,
+            210,
+            145,
+            360
+          ]
+        }
+      ],
+      "sources": [
+        "assets/background/floor17/floor17-finished.png",
+        "assets/background/floor17/service-corridor-finished.png",
+        "assets/background/floor17/office-interior-aligned-finished.png",
+        "assets/background/floor17/workstation-empty.png",
+        "assets/background/floor06/walls.png"
+      ],
+      "signs": [],
+      "file": "docs/previews/background-audit/f6.jpg"
+    },
+    {
+      "id": "f7",
+      "floor": 7,
+      "header": "7F · Lounge · AI 테스트·검증실",
+      "width": 5000,
+      "scale": 1,
+      "broken": [],
+      "doors": [
+        {
+          "name": "1번 엘리베이터",
+          "x": 1878,
+          "y": 220,
+          "width": 213,
+          "outline": [
+            1878,
+            220,
+            213,
+            350
+          ]
+        },
+        {
+          "name": "2번 엘리베이터",
+          "x": 2178,
+          "y": 220,
+          "width": 214,
+          "outline": [
+            2178,
+            220,
+            214,
+            350
+          ]
+        },
+        {
+          "name": "3번 엘리베이터",
+          "x": 2474,
+          "y": 220,
+          "width": 211,
+          "outline": [
+            2474,
+            220,
+            211,
+            350
+          ]
+        },
+        {
+          "name": "비상계단",
+          "x": 2865,
+          "y": 232,
+          "width": 170,
+          "outline": [
+            2865,
+            232,
+            170,
+            338
+          ]
+        },
+        {
+          "name": "VIP Room",
+          "key": "room:f7-vip",
+          "target": "f7-vip",
+          "x": 314,
+          "y": 250,
+          "width": 197,
+          "outline": [
+            312,
+            247,
+            208,
+            290
+          ]
+        },
+        {
+          "name": "AI 테스트실",
+          "key": "room:f7-test",
+          "target": "f7-test",
+          "x": 4408,
+          "y": 250,
+          "width": 188,
+          "outline": [
+            4441,
+            286,
+            157,
+            248
+          ]
+        },
+        {
+          "name": "검증실",
+          "key": "room:f7-verify",
+          "target": "f7-verify",
+          "x": 4701,
+          "y": 250,
+          "width": 104,
+          "outline": [
+            4699,
+            309,
+            103,
+            225
+          ]
+        },
+        {
+          "name": "화장실",
+          "key": "room:f7-restroom",
+          "target": "f7-restroom",
+          "x": 3762,
+          "y": 210,
+          "width": 142,
+          "outline": [
+            3751,
+            293,
+            159,
+            262
+          ]
+        }
+      ],
+      "sources": [
+        "assets/background/floor17/floor17-finished.png",
+        "assets/background/floor17/service-corridor-finished.png",
+        "assets/background/floor17/office-interior-aligned-finished.png",
+        "assets/background/floor17/workstation-empty.png",
+        "assets/background/floor7/corridor-finished.png"
+      ],
+      "signs": [
+        {
+          "left": "2921px",
+          "top": "190px",
+          "parent": ""
+        }
+      ],
+      "file": "docs/previews/background-audit/f7.jpg"
+    },
+    {
+      "id": "f8",
+      "floor": 8,
+      "header": "8F · QA실 · 제품기획실",
+      "width": 5000,
+      "scale": 1,
+      "broken": [],
+      "doors": [
+        {
+          "name": "1번 엘리베이터",
+          "x": 1818,
+          "y": 220,
+          "width": 218,
+          "outline": [
+            1818,
+            220,
+            218,
+            350
+          ]
+        },
+        {
+          "name": "2번 엘리베이터",
+          "x": 2148,
+          "y": 220,
+          "width": 214,
+          "outline": [
+            2148,
+            220,
+            214,
+            350
+          ]
+        },
+        {
+          "name": "3번 엘리베이터",
+          "x": 2444,
+          "y": 220,
+          "width": 216,
+          "outline": [
+            2444,
+            220,
+            216,
+            350
+          ]
+        },
+        {
+          "name": "비상계단",
+          "x": 2906,
+          "y": 232,
+          "width": 180,
+          "outline": [
+            2906,
+            232,
+            180,
+            338
+          ]
+        },
+        {
+          "name": "QA 시험실",
+          "key": "room:f8-qa",
+          "target": "f8-qa",
+          "x": 620,
+          "y": 250,
+          "width": 130,
+          "outline": [
+            620,
+            250,
+            130,
+            320
+          ],
+          "sprite": "assets/objects/floor05/door-security.png"
+        },
+        {
+          "name": "제품기획실",
+          "key": "room:f8-planning",
+          "target": "f8-planning",
+          "x": 1160,
+          "y": 250,
+          "width": 130,
+          "outline": [
+            1160,
+            250,
+            130,
+            320
+          ],
+          "sprite": "assets/objects/floor04/door-lab.png"
+        },
+        {
+          "name": "공용 제품 회의실",
+          "key": "room:f8-meeting",
+          "target": "f8-meeting",
+          "x": 4786,
+          "y": 250,
+          "width": 130,
+          "outline": [
+            4786.0001220703125,
+            250,
+            130,
+            320
+          ],
+          "sprite": "assets/objects/floor04/door-meeting.png"
+        },
+        {
+          "name": "화장실",
+          "key": "room:f8-restroom",
+          "target": "f8-restroom",
+          "x": 3612,
+          "y": 210,
+          "width": 145,
+          "outline": [
+            3612.0001220703125,
+            210,
+            145,
+            360
+          ]
+        }
+      ],
+      "sources": [
+        "assets/background/floor17/floor17-finished.png",
+        "assets/background/floor17/service-corridor-finished.png",
+        "assets/background/floor17/office-interior-aligned-finished.png",
+        "assets/background/floor17/workstation-empty.png",
+        "assets/background/floor08/walls.png"
+      ],
+      "signs": [],
+      "file": "docs/previews/background-audit/f8.jpg"
+    },
+    {
+      "id": "f9",
+      "floor": 9,
+      "header": "9F · ARCHI Data 사업본부",
+      "width": 5000,
+      "scale": 1,
+      "broken": [],
+      "doors": [
+        {
+          "name": "1번 엘리베이터",
+          "x": 1818,
+          "y": 220,
+          "width": 218,
+          "outline": [
+            1818,
+            220,
+            218,
+            350
+          ]
+        },
+        {
+          "name": "2번 엘리베이터",
+          "x": 2148,
+          "y": 220,
+          "width": 214,
+          "outline": [
+            2148,
+            220,
+            214,
+            350
+          ]
+        },
+        {
+          "name": "3번 엘리베이터",
+          "x": 2444,
+          "y": 220,
+          "width": 216,
+          "outline": [
+            2444,
+            220,
+            216,
+            350
+          ]
+        },
+        {
+          "name": "비상계단",
+          "x": 2906,
+          "y": 232,
+          "width": 180,
+          "outline": [
+            2906,
+            232,
+            180,
+            338
+          ]
+        },
+        {
+          "name": "사업 업무 공간",
+          "key": "room:f9-office",
+          "target": "f9-office",
+          "x": 849,
+          "y": 250,
+          "width": 130,
+          "outline": [
+            849,
+            250,
+            130,
+            320
+          ],
+          "sprite": "assets/objects/floor04/door-lab.png"
+        },
+        {
+          "name": "영업·고객 관리 구역",
+          "key": "room:f9-sales",
+          "target": "f9-sales",
+          "x": 1351,
+          "y": 250,
+          "width": 130,
+          "outline": [
+            1351,
+            250,
+            130,
+            320
+          ],
+          "sprite": "assets/objects/floor04/door-lab.png"
+        },
+        {
+          "name": "프로젝트룸",
+          "key": "room:f9-project",
+          "target": "f9-project",
+          "x": 4608,
+          "y": 250,
+          "width": 130,
+          "outline": [
+            4608.0001220703125,
+            250,
+            130,
+            320
+          ],
+          "sprite": "assets/objects/floor04/door-meeting.png"
+        },
+        {
+          "name": "화장실",
+          "key": "room:f9-restroom",
+          "target": "f9-restroom",
+          "x": 3612,
+          "y": 210,
+          "width": 145,
+          "outline": [
+            3612.0001220703125,
+            210,
+            145,
+            360
+          ]
+        }
+      ],
+      "sources": [
+        "assets/background/floor17/floor17-finished.png",
+        "assets/background/floor17/service-corridor-finished.png",
+        "assets/background/floor17/office-interior-aligned-finished.png",
+        "assets/background/floor17/workstation-empty.png",
+        "assets/background/floor09/walls.png"
+      ],
+      "signs": [],
+      "file": "docs/previews/background-audit/f9.jpg"
+    },
+    {
+      "id": "f10",
+      "floor": 10,
+      "header": "10F · 경영관리본부",
+      "width": 5000,
+      "scale": 1,
+      "broken": [],
+      "doors": [
+        {
+          "name": "1번 엘리베이터",
+          "x": 1818,
+          "y": 220,
+          "width": 218,
+          "outline": [
+            1818,
+            220,
+            218,
+            350
+          ]
+        },
+        {
+          "name": "2번 엘리베이터",
+          "x": 2148,
+          "y": 220,
+          "width": 214,
+          "outline": [
+            2148,
+            220,
+            214,
+            350
+          ]
+        },
+        {
+          "name": "3번 엘리베이터",
+          "x": 2444,
+          "y": 220,
+          "width": 216,
+          "outline": [
+            2444,
+            220,
+            216,
+            350
+          ]
+        },
+        {
+          "name": "비상계단",
+          "x": 2906,
+          "y": 232,
+          "width": 180,
+          "outline": [
+            2906,
+            232,
+            180,
+            338
+          ]
+        },
+        {
+          "name": "경영관리 사무실",
+          "key": "room:f10-office",
+          "target": "f10-office",
+          "x": 369,
+          "y": 250,
+          "width": 130,
+          "outline": [
+            369,
+            250,
+            130,
+            320
+          ],
+          "sprite": "assets/objects/floor04/door-lab.png"
+        },
+        {
+          "name": "임원 회의실",
+          "key": "room:f10-meeting",
+          "target": "f10-meeting",
+          "x": 1344,
+          "y": 250,
+          "width": 130,
+          "outline": [
+            1344,
+            250,
+            130,
+            320
+          ],
+          "sprite": "assets/objects/floor04/door-meeting.png"
+        },
+        {
+          "name": "임원실",
+          "key": "room:f10-executive",
+          "target": "f10-executive",
+          "x": 4321,
+          "y": 250,
+          "width": 130,
+          "outline": [
+            4321.0001220703125,
+            250,
+            130,
+            320
+          ],
+          "sprite": "assets/objects/floor04/door-meeting.png"
+        },
+        {
+          "name": "화장실",
+          "key": "room:f10-restroom",
+          "target": "f10-restroom",
+          "x": 3612,
+          "y": 210,
+          "width": 145,
+          "outline": [
+            3612.0001220703125,
+            210,
+            145,
+            360
+          ]
+        }
+      ],
+      "sources": [
+        "assets/background/floor17/floor17-finished.png",
+        "assets/background/floor17/service-corridor-finished.png",
+        "assets/background/floor17/office-interior-aligned-finished.png",
+        "assets/background/floor17/workstation-empty.png",
+        "assets/background/floor10/walls.png"
+      ],
+      "signs": [],
+      "file": "docs/previews/background-audit/f10.jpg"
+    },
+    {
+      "id": "f11",
+      "floor": 11,
+      "header": "11F · 사업본부 · 전략마케팅본부",
+      "width": 5000,
+      "scale": 1,
+      "broken": [],
+      "doors": [
+        {
+          "name": "1번 엘리베이터",
+          "x": 1818,
+          "y": 220,
+          "width": 218,
+          "outline": [
+            1818,
+            220,
+            218,
+            350
+          ]
+        },
+        {
+          "name": "2번 엘리베이터",
+          "x": 2148,
+          "y": 220,
+          "width": 214,
+          "outline": [
+            2148,
+            220,
+            214,
+            350
+          ]
+        },
+        {
+          "name": "3번 엘리베이터",
+          "x": 2444,
+          "y": 220,
+          "width": 216,
+          "outline": [
+            2444,
+            220,
+            216,
+            350
+          ]
+        },
+        {
+          "name": "비상계단",
+          "x": 2906,
+          "y": 232,
+          "width": 180,
+          "outline": [
+            2906,
+            232,
+            180,
+            338
+          ]
+        },
+        {
+          "name": "영업본부 사무실",
+          "key": "room:f11-sales",
+          "target": "f11-sales",
+          "x": 244,
+          "y": 250,
+          "width": 140,
+          "outline": [
+            244,
+            250,
+            140,
+            320
+          ]
+        },
+        {
+          "name": "전략회의실",
+          "key": "room:f11-strategy",
+          "target": "f11-strategy",
+          "x": 4470,
+          "y": 250,
+          "width": 130,
+          "outline": [
+            4470.0001220703125,
+            250,
+            130,
+            320
+          ]
+        },
+        {
+          "name": "마케팅 자료실",
+          "key": "room:f11-marketing",
+          "target": "f11-marketing",
+          "x": 4684,
+          "y": 250,
+          "width": 120,
+          "outline": [
+            4684.0001220703125,
+            250,
+            120,
+            320
+          ]
+        },
+        {
+          "name": "화장실",
+          "key": "room:f11-restroom",
+          "target": "f11-restroom",
+          "x": 3612,
+          "y": 210,
+          "width": 145,
+          "outline": [
+            3612.0001220703125,
+            210,
+            145,
+            360
+          ]
+        }
+      ],
+      "sources": [
+        "assets/background/floor17/floor17-finished.png",
+        "assets/background/floor17/service-corridor-finished.png",
+        "assets/background/floor17/office-interior-aligned-finished.png",
+        "assets/background/floor17/workstation-empty.png",
+        "assets/background/floor11/walls.png"
+      ],
+      "signs": [],
+      "file": "docs/previews/background-audit/f11.jpg"
+    },
+    {
+      "id": "f12",
+      "floor": 12,
+      "header": "12F · 기술본부 ARCHI 개발팀",
+      "width": 5000,
+      "scale": 1,
+      "broken": [],
+      "doors": [
+        {
+          "name": "1번 엘리베이터",
+          "x": 1853,
+          "y": 220,
+          "width": 198,
+          "outline": [
+            1853,
+            220,
+            198,
+            350
+          ]
+        },
+        {
+          "name": "2번 엘리베이터",
+          "x": 2093,
+          "y": 220,
+          "width": 194,
+          "outline": [
+            2093,
+            220,
+            194,
+            350
+          ]
+        },
+        {
+          "name": "3번 엘리베이터",
+          "x": 2324,
+          "y": 220,
+          "width": 196,
+          "outline": [
+            2324,
+            220,
+            196,
+            350
+          ]
+        },
+        {
+          "name": "비상계단",
+          "x": 2781,
+          "y": 232,
+          "width": 180,
+          "outline": [
+            2781,
+            232,
+            180,
+            338
+          ]
+        },
+        {
+          "name": "개발실",
+          "key": "room:f12-dev",
+          "target": "f12-dev",
+          "x": 708,
+          "y": 250,
+          "width": 132,
+          "outline": [
+            707,
+            250,
+            209,
+            318
+          ]
+        },
+        {
+          "name": "모델 평가실",
+          "key": "room:f12-eval",
+          "target": "f12-eval",
+          "x": 3159,
+          "y": 314,
+          "width": 140,
+          "outline": [
+            3159,
+            314,
+            140,
+            256
+          ]
+        },
+        {
+          "name": "팀장실",
+          "key": "room:f12-lead",
+          "target": "f12-lead",
+          "x": 4508,
+          "y": 298,
+          "width": 137,
+          "outline": [
+            4508.0001220703125,
+            298,
+            137,
+            272
+          ]
+        },
+        {
+          "name": "화장실",
+          "key": "room:f12-restroom",
+          "target": "f12-restroom",
+          "x": 3674,
+          "y": 210,
+          "width": 145,
+          "outline": [
+            3674.0001220703125,
+            210,
+            145,
+            360
+          ]
+        }
+      ],
+      "sources": [
+        "assets/background/floor17/floor17-finished.png",
+        "assets/background/floor17/service-corridor-finished.png",
+        "assets/background/floor17/office-interior-aligned-finished.png",
+        "assets/background/floor17/workstation-empty.png",
+        "assets/background/floor12/corridor-finished.png"
+      ],
+      "signs": [
+        {
+          "left": "2847px",
+          "top": "197px",
+          "parent": ""
+        }
+      ],
+      "file": "docs/previews/background-audit/f12.jpg"
+    },
+    {
+      "id": "f13",
+      "floor": 13,
+      "header": "13F · 기술본부",
+      "width": 5000,
+      "scale": 1,
+      "broken": [],
+      "doors": [
+        {
+          "name": "1번 엘리베이터",
+          "x": 1818,
+          "y": 220,
+          "width": 218,
+          "outline": [
+            1818,
+            220,
+            218,
+            350
+          ]
+        },
+        {
+          "name": "2번 엘리베이터",
+          "x": 2148,
+          "y": 220,
+          "width": 214,
+          "outline": [
+            2148,
+            220,
+            214,
+            350
+          ]
+        },
+        {
+          "name": "3번 엘리베이터",
+          "x": 2444,
+          "y": 220,
+          "width": 216,
+          "outline": [
+            2444,
+            220,
+            216,
+            350
+          ]
+        },
+        {
+          "name": "비상계단",
+          "x": 2906,
+          "y": 232,
+          "width": 180,
+          "outline": [
+            2906,
+            232,
+            180,
+            338
+          ]
+        },
+        {
+          "name": "기술지원 상황실",
+          "key": "room:f13-ops",
+          "target": "f13-ops",
+          "x": 3240,
+          "y": 250,
+          "width": 160,
+          "outline": [
+            3240,
+            250,
+            160.0001220703125,
+            320
+          ]
+        },
+        {
+          "name": "장비 검증실",
+          "key": "room:f13-testbay",
+          "target": "f13-testbay",
+          "x": 4322,
+          "y": 236,
+          "width": 130,
+          "outline": [
+            4322.0001220703125,
+            236,
+            130,
+            334
+          ]
+        },
+        {
+          "name": "고객 교육장",
+          "key": "room:f13-training",
+          "target": "f13-training",
+          "x": 4788,
+          "y": 250,
+          "width": 120,
+          "outline": [
+            4788.0001220703125,
+            250,
+            120,
+            320
+          ]
+        },
+        {
+          "name": "화장실",
+          "key": "room:f13-restroom",
+          "target": "f13-restroom",
+          "x": 3612,
+          "y": 210,
+          "width": 145,
+          "outline": [
+            3612.0001220703125,
+            210,
+            145,
+            360
+          ]
+        }
+      ],
+      "sources": [
+        "assets/background/floor17/floor17-finished.png",
+        "assets/background/floor17/service-corridor-finished.png",
+        "assets/background/floor17/office-interior-aligned-finished.png",
+        "assets/background/floor17/workstation-empty.png",
+        "assets/background/floor13/walls.png"
+      ],
+      "signs": [],
+      "file": "docs/previews/background-audit/f13.jpg"
+    },
+    {
+      "id": "f14",
+      "floor": 14,
+      "header": "14F · 연구본부",
+      "width": 5000,
+      "scale": 1,
+      "broken": [],
+      "doors": [
+        {
+          "name": "1번 엘리베이터",
+          "x": 1818,
+          "y": 220,
+          "width": 218,
+          "outline": [
+            1818,
+            220,
+            218,
+            350
+          ]
+        },
+        {
+          "name": "2번 엘리베이터",
+          "x": 2148,
+          "y": 220,
+          "width": 214,
+          "outline": [
+            2148,
+            220,
+            214,
+            350
+          ]
+        },
+        {
+          "name": "3번 엘리베이터",
+          "x": 2444,
+          "y": 220,
+          "width": 216,
+          "outline": [
+            2444,
+            220,
+            216,
+            350
+          ]
+        },
+        {
+          "name": "비상계단",
+          "x": 2906,
+          "y": 232,
+          "width": 180,
+          "outline": [
+            2906,
+            232,
+            180,
+            338
+          ]
+        },
+        {
+          "name": "연구 자료실",
+          "key": "room:f14-archive",
+          "target": "f14-archive",
+          "x": 382,
+          "y": 244,
+          "width": 130,
+          "outline": [
+            382,
+            244,
+            130,
+            326
+          ]
+        },
+        {
+          "name": "데이터 연구실",
+          "key": "room:f14-data",
+          "target": "f14-data",
+          "x": 620,
+          "y": 250,
+          "width": 150,
+          "outline": [
+            620,
+            250,
+            150,
+            320
+          ]
+        },
+        {
+          "name": "사용자 실험실",
+          "key": "room:f14-ux",
+          "target": "f14-ux",
+          "x": 1420,
+          "y": 256,
+          "width": 130,
+          "outline": [
+            1420,
+            256,
+            130,
+            314
+          ]
+        },
+        {
+          "name": "화장실",
+          "key": "room:f14-restroom",
+          "target": "f14-restroom",
+          "x": 3612,
+          "y": 210,
+          "width": 145,
+          "outline": [
+            3612.0001220703125,
+            210,
+            145,
+            360
+          ]
+        }
+      ],
+      "sources": [
+        "assets/background/floor17/floor17-finished.png",
+        "assets/background/floor17/service-corridor-finished.png",
+        "assets/background/floor17/office-interior-aligned-finished.png",
+        "assets/background/floor17/workstation-empty.png",
+        "assets/background/floor14/walls.png"
+      ],
+      "signs": [],
+      "file": "docs/previews/background-audit/f14.jpg"
+    },
+    {
+      "id": "f15",
+      "floor": 15,
+      "header": "15F · 연구본부",
+      "width": 5000,
+      "scale": 1,
+      "broken": [],
+      "doors": [
+        {
+          "name": "1번 엘리베이터",
+          "x": 1818,
+          "y": 220,
+          "width": 218,
+          "outline": [
+            1818,
+            220,
+            218,
+            350
+          ]
+        },
+        {
+          "name": "2번 엘리베이터",
+          "x": 2148,
+          "y": 220,
+          "width": 214,
+          "outline": [
+            2148,
+            220,
+            214,
+            350
+          ]
+        },
+        {
+          "name": "3번 엘리베이터",
+          "x": 2444,
+          "y": 220,
+          "width": 216,
+          "outline": [
+            2444,
+            220,
+            216,
+            350
+          ]
+        },
+        {
+          "name": "비상계단",
+          "x": 2906,
+          "y": 232,
+          "width": 180,
+          "outline": [
+            2906,
+            232,
+            180,
+            338
+          ]
+        },
+        {
+          "name": "연구실",
+          "key": "room:f15-lab",
+          "target": "f15-lab",
+          "x": 280,
+          "y": 250,
+          "width": 140,
+          "outline": [
+            280,
+            250,
+            140,
+            320
+          ]
+        },
+        {
+          "name": "세미나실",
+          "key": "room:f15-seminar",
+          "target": "f15-seminar",
+          "x": 986,
+          "y": 250,
+          "width": 130,
+          "outline": [
+            986,
+            250,
+            130,
+            320
+          ]
+        },
+        {
+          "name": "연구본부장실",
+          "key": "room:f15-director",
+          "target": "f15-director",
+          "x": 3160,
+          "y": 240,
+          "width": 120,
+          "outline": [
+            3160,
+            240,
+            120,
+            330
+          ]
+        },
+        {
+          "name": "화장실",
+          "key": "room:f15-restroom",
+          "target": "f15-restroom",
+          "x": 3612,
+          "y": 210,
+          "width": 145,
+          "outline": [
+            3612.0001220703125,
+            210,
+            145,
+            360
+          ]
+        }
+      ],
+      "sources": [
+        "assets/background/floor17/floor17-finished.png",
+        "assets/background/floor17/service-corridor-finished.png",
+        "assets/background/floor17/office-interior-aligned-finished.png",
+        "assets/background/floor17/workstation-empty.png",
+        "assets/background/floor15/walls.png"
+      ],
+      "signs": [],
+      "file": "docs/previews/background-audit/f15.jpg"
+    },
+    {
+      "id": "f16",
+      "floor": 16,
+      "header": "16F · 편의시설",
+      "width": 5000,
+      "scale": 1,
+      "broken": [],
+      "doors": [
+        {
+          "name": "1번 엘리베이터",
+          "x": 1818,
+          "y": 220,
+          "width": 218,
+          "outline": [
+            1818,
+            220,
+            218,
+            350
+          ]
+        },
+        {
+          "name": "2번 엘리베이터",
+          "x": 2148,
+          "y": 220,
+          "width": 214,
+          "outline": [
+            2148,
+            220,
+            214,
+            350
+          ]
+        },
+        {
+          "name": "3번 엘리베이터",
+          "x": 2444,
+          "y": 220,
+          "width": 216,
+          "outline": [
+            2444,
+            220,
+            216,
+            350
+          ]
+        },
+        {
+          "name": "비상계단",
+          "x": 2906,
+          "y": 232,
+          "width": 180,
+          "outline": [
+            2906,
+            232,
+            180,
+            338
+          ]
+        },
+        {
+          "name": "The Kitchen",
+          "key": "room:f16-kitchen",
+          "target": "f16-kitchen",
+          "x": 494,
+          "y": 250,
+          "width": 200,
+          "outline": [
+            494,
+            250,
+            200,
+            320
+          ]
+        },
+        {
+          "name": "VU 편의점",
+          "key": "room:f16-cu",
+          "target": "f16-cu",
+          "x": 1542,
+          "y": 262,
+          "width": 150,
+          "outline": [
+            1542,
+            262,
+            150,
+            308
+          ]
+        },
+        {
+          "name": "Café",
+          "key": "room:f16-cafe",
+          "target": "f16-cafe",
+          "x": 4354,
+          "y": 250,
+          "width": 140,
+          "outline": [
+            4354.0001220703125,
+            250,
+            140,
+            320
+          ]
+        },
+        {
+          "name": "화장실",
+          "key": "room:f16-restroom",
+          "target": "f16-restroom",
+          "x": 3612,
+          "y": 210,
+          "width": 145,
+          "outline": [
+            3612.0001220703125,
+            210,
+            145,
+            360
+          ]
+        }
+      ],
+      "sources": [
+        "assets/background/floor17/floor17-finished.png",
+        "assets/background/floor17/service-corridor-finished.png",
+        "assets/background/floor17/office-interior-aligned-finished.png",
+        "assets/background/floor17/workstation-empty.png",
+        "assets/background/floor16/floor16-corridor.png"
+      ],
+      "signs": [],
+      "file": "docs/previews/background-audit/f16.jpg"
+    },
+    {
+      "id": "rooftop",
+      "floor": 18,
+      "header": "RF · 옥상",
+      "width": 2400,
+      "scale": 1,
+      "broken": [],
+      "doors": [
+        {
+          "name": "17층 계단",
+          "x": 160,
+          "y": 232,
+          "width": 180,
+          "outline": [
+            160,
+            232,
+            180,
+            338
+          ]
+        }
+      ],
+      "sources": [
+        "assets/background/floor17/floor17-finished.png",
+        "assets/background/floor17/service-corridor-finished.png",
+        "assets/background/floor17/office-interior-aligned-finished.png",
+        "assets/background/floor17/workstation-empty.png",
+        "assets/background/rooftop/rooftop-finished.png"
+      ],
+      "signs": [],
+      "file": "docs/previews/background-audit/rooftop.jpg"
+    },
+    {
+      "id": "f1-harmony",
+      "floor": 1,
+      "header": "1F · Harmony Hall",
+      "interior": true,
+      "width": 3224,
+      "scale": 1,
+      "broken": [],
+      "doors": [
+        {
+          "name": "복도",
+          "key": "exit",
+          "target": "f1",
+          "x": 898,
+          "y": 250,
+          "width": 225,
+          "outline": [
+            903,
+            257,
+            265,
+            311
+          ]
+        }
+      ],
+      "sources": [
+        "assets/background/floor17/floor17-finished.png",
+        "assets/background/floor17/service-corridor-finished.png",
+        "assets/background/floor17/office-interior-aligned-finished.png",
+        "assets/background/floor17/workstation-empty.png",
+        "assets/background/floor1/harmony-finished.png"
+      ],
+      "signs": [],
+      "file": "docs/previews/background-audit/f1-harmony.jpg"
+    },
+    {
+      "id": "f1-vision",
+      "floor": 1,
+      "header": "1F · Vision Hall",
+      "interior": true,
+      "width": 2356,
+      "scale": 1,
+      "broken": [],
+      "doors": [
+        {
+          "name": "복도",
+          "key": "exit",
+          "target": "f1",
+          "x": 510,
+          "y": 250,
+          "width": 143,
+          "outline": [
+            531,
+            307,
+            135,
+            261
+          ]
+        }
+      ],
+      "sources": [
+        "assets/background/floor17/floor17-finished.png",
+        "assets/background/floor17/service-corridor-finished.png",
+        "assets/background/floor17/office-interior-aligned-finished.png",
+        "assets/background/floor17/workstation-empty.png",
+        "assets/background/floor1/vision-finished.png"
+      ],
+      "signs": [
+        {
+          "left": "225px",
+          "top": "6px",
+          "parent": "floor-art-crop"
+        }
+      ],
+      "file": "docs/previews/background-audit/f1-vision.jpg"
+    },
+    {
+      "id": "f1-clinic",
+      "floor": 1,
+      "header": "1F · 건강관리실",
+      "interior": true,
+      "width": 1860,
+      "scale": 1,
+      "broken": [],
+      "doors": [
+        {
+          "name": "복도",
+          "key": "exit",
+          "target": "f1",
+          "x": 896,
+          "y": 250,
+          "width": 99,
+          "outline": [
+            883,
+            277,
+            155,
+            291
+          ]
+        }
+      ],
+      "sources": [
+        "assets/background/floor17/floor17-finished.png",
+        "assets/background/floor17/service-corridor-finished.png",
+        "assets/background/floor17/office-interior-aligned-finished.png",
+        "assets/background/floor17/workstation-empty.png",
+        "assets/background/floor1/clinic-finished.png"
+      ],
+      "signs": [
+        {
+          "left": "64px",
+          "top": "1px",
+          "parent": "floor-art-crop"
+        }
+      ],
+      "file": "docs/previews/background-audit/f1-clinic.jpg"
+    },
+    {
+      "id": "f2-harmony",
+      "floor": 2,
+      "header": "2F · Harmony Hall",
+      "interior": true,
+      "width": 2998,
+      "scale": 1,
+      "broken": [],
+      "doors": [
+        {
+          "name": "복도",
+          "key": "exit",
+          "target": "f2",
+          "x": 2748,
+          "y": 250,
+          "width": 130,
+          "outline": [
+            2748,
+            250,
+            130,
+            320
+          ],
+          "sprite": "assets/objects/floor02/door-harmony.png"
+        }
+      ],
+      "sources": [
+        "assets/background/floor17/floor17-finished.png",
+        "assets/background/floor17/service-corridor-finished.png",
+        "assets/background/floor17/office-interior-aligned-finished.png",
+        "assets/background/floor17/workstation-empty.png",
+        "assets/background/floor02/floor02-ceiling-hall.png",
+        "assets/background/floor02/floor02-floor-hall.png",
+        "assets/background/floor02/floor02-hall-interior.png"
+      ],
+      "signs": [],
+      "file": "docs/previews/background-audit/f2-harmony.jpg"
+    },
+    {
+      "id": "f2-lounge",
+      "floor": 2,
+      "header": "2F · 직원 휴게실",
+      "interior": true,
+      "width": 1846,
+      "scale": 1,
+      "broken": [],
+      "doors": [
+        {
+          "name": "복도",
+          "key": "exit",
+          "target": "f2",
+          "x": 1400,
+          "y": 250,
+          "width": 130,
+          "outline": [
+            1400,
+            250,
+            130,
+            320
+          ],
+          "sprite": "assets/objects/floor02/door-lounge.png"
+        }
+      ],
+      "sources": [
+        "assets/background/floor17/floor17-finished.png",
+        "assets/background/floor17/service-corridor-finished.png",
+        "assets/background/floor17/office-interior-aligned-finished.png",
+        "assets/background/floor17/workstation-empty.png",
+        "assets/background/floor02/floor02-ceiling-lounge.png",
+        "assets/background/floor02/floor02-floor-lounge.png",
+        "assets/background/floor02/floor02-lounge-wall.png"
+      ],
+      "signs": [],
+      "file": "docs/previews/background-audit/f2-lounge.jpg"
+    },
+    {
+      "id": "f2-server",
+      "floor": 2,
+      "header": "2F · 서버실",
+      "interior": true,
+      "width": 2162,
+      "scale": 1,
+      "broken": [],
+      "doors": [
+        {
+          "name": "복도",
+          "key": "exit",
+          "target": "f2",
+          "x": 126,
+          "y": 250,
+          "width": 130,
+          "outline": [
+            126,
+            250,
+            130,
+            320
+          ],
+          "sprite": "assets/objects/floor02/door-server.png"
+        }
+      ],
+      "sources": [
+        "assets/background/floor17/floor17-finished.png",
+        "assets/background/floor17/service-corridor-finished.png",
+        "assets/background/floor17/office-interior-aligned-finished.png",
+        "assets/background/floor17/workstation-empty.png",
+        "assets/background/floor02/floor02-ceiling-server.png",
+        "assets/background/floor02/floor02-floor-server.png",
+        "assets/background/floor02/floor02-server-interior.png"
+      ],
+      "signs": [],
+      "file": "docs/previews/background-audit/f2-server.jpg"
+    },
+    {
+      "id": "f3-fitness",
+      "floor": 3,
+      "header": "3F · Fitness Club",
+      "interior": true,
+      "width": 3108,
+      "scale": 1,
+      "broken": [],
+      "doors": [
+        {
+          "name": "복도",
+          "key": "exit",
+          "target": "f3",
+          "x": 2742,
+          "y": 250,
+          "width": 240,
+          "outline": [
+            2742,
+            250,
+            240,
+            320
+          ],
+          "sprite": "assets/objects/floor03/door-fitness.png"
+        }
+      ],
+      "sources": [
+        "assets/background/floor17/floor17-finished.png",
+        "assets/background/floor17/service-corridor-finished.png",
+        "assets/background/floor17/office-interior-aligned-finished.png",
+        "assets/background/floor17/workstation-empty.png",
+        "assets/background/floor03/floor03-ceiling-gym.png",
+        "assets/background/floor03/floor03-floor-gym.png",
+        "assets/background/floor03/floor03-gym-interior.png"
+      ],
+      "signs": [],
+      "file": "docs/previews/background-audit/f3-fitness.jpg"
+    },
+    {
+      "id": "f3-cs",
+      "floor": 3,
+      "header": "3F · 고객만족센터",
+      "interior": true,
+      "width": 2168,
+      "scale": 1,
+      "broken": [],
+      "doors": [
+        {
+          "name": "복도",
+          "key": "exit",
+          "target": "f3",
+          "x": 954,
+          "y": 250,
+          "width": 130,
+          "outline": [
+            954,
+            250,
+            129.99996948242188,
+            320
+          ],
+          "sprite": "assets/objects/floor03/door-cs.png"
+        }
+      ],
+      "sources": [
+        "assets/background/floor17/floor17-finished.png",
+        "assets/background/floor17/service-corridor-finished.png",
+        "assets/background/floor17/office-interior-aligned-finished.png",
+        "assets/background/floor17/workstation-empty.png",
+        "assets/background/floor03/floor03-ceiling-cs.png",
+        "assets/background/floor03/floor03-floor-cs.png",
+        "assets/background/floor03/floor03-cs-interior.png"
+      ],
+      "signs": [],
+      "file": "docs/previews/background-audit/f3-cs.jpg"
+    },
+    {
+      "id": "f3-studio",
+      "floor": 3,
+      "header": "3F · Studio",
+      "interior": true,
+      "width": 1840,
+      "scale": 1,
+      "broken": [],
+      "doors": [
+        {
+          "name": "복도",
+          "key": "exit",
+          "target": "f3",
+          "x": 149,
+          "y": 250,
+          "width": 130,
+          "outline": [
+            149,
+            250,
+            130,
+            320
+          ]
+        }
+      ],
+      "sources": [
+        "assets/background/floor17/floor17-finished.png",
+        "assets/background/floor17/service-corridor-finished.png",
+        "assets/background/floor17/office-interior-aligned-finished.png",
+        "assets/background/floor17/workstation-empty.png",
+        "assets/background/floor03/floor03-ceiling-studio.png",
+        "assets/background/floor03/floor03-floor-studio.png",
+        "assets/background/floor03/floor03-studio-interior.png"
+      ],
+      "signs": [],
+      "file": "docs/previews/background-audit/f3-studio.jpg"
+    },
+    {
+      "id": "f4-lab",
+      "floor": 4,
+      "header": "4F · 연구개발 업무 공간",
+      "interior": true,
+      "width": 2998,
+      "scale": 1,
+      "broken": [],
+      "doors": [
+        {
+          "name": "복도",
+          "key": "exit",
+          "target": "f4",
+          "x": 126,
+          "y": 250,
+          "width": 130,
+          "outline": [
+            126,
+            250,
+            130,
+            320
+          ],
+          "sprite": "assets/objects/floor04/door-lab.png"
+        }
+      ],
+      "sources": [
+        "assets/background/floor17/floor17-finished.png",
+        "assets/background/floor17/service-corridor-finished.png",
+        "assets/background/floor17/office-interior-aligned-finished.png",
+        "assets/background/floor17/workstation-empty.png",
+        "assets/background/floor04/floor04-ceiling-lab.png",
+        "assets/background/floor04/floor04-floor-lab.png",
+        "assets/background/floor04/floor04-lab-interior.png"
+      ],
+      "signs": [],
+      "file": "docs/previews/background-audit/f4-lab.jpg"
+    },
+    {
+      "id": "f4-dev",
+      "floor": 4,
+      "header": "4F · 개발자 업무 구역",
+      "interior": true,
+      "width": 2168,
+      "scale": 1,
+      "broken": [],
+      "doors": [
+        {
+          "name": "복도",
+          "key": "exit",
+          "target": "f4",
+          "x": 126,
+          "y": 250,
+          "width": 130,
+          "outline": [
+            126,
+            250,
+            130,
+            320
+          ],
+          "sprite": "assets/objects/floor04/door-dev.png"
+        }
+      ],
+      "sources": [
+        "assets/background/floor17/floor17-finished.png",
+        "assets/background/floor17/service-corridor-finished.png",
+        "assets/background/floor17/office-interior-aligned-finished.png",
+        "assets/background/floor17/workstation-empty.png",
+        "assets/background/floor04/floor04-ceiling-dev.png",
+        "assets/background/floor04/floor04-floor-dev.png",
+        "assets/background/floor04/floor04-dev-interior.png"
+      ],
+      "signs": [],
+      "file": "docs/previews/background-audit/f4-dev.jpg"
+    },
+    {
+      "id": "f4-meeting",
+      "floor": 4,
+      "header": "4F · 연구 회의실",
+      "interior": true,
+      "width": 2162,
+      "scale": 1,
+      "broken": [],
+      "doors": [
+        {
+          "name": "복도",
+          "key": "exit",
+          "target": "f4",
+          "x": 1410,
+          "y": 250,
+          "width": 130,
+          "outline": [
+            1410,
+            250,
+            130,
+            320
+          ],
+          "sprite": "assets/objects/floor04/door-meeting.png"
+        }
+      ],
+      "sources": [
+        "assets/background/floor17/floor17-finished.png",
+        "assets/background/floor17/service-corridor-finished.png",
+        "assets/background/floor17/office-interior-aligned-finished.png",
+        "assets/background/floor17/workstation-empty.png",
+        "assets/background/floor04/floor04-ceiling-meeting.png",
+        "assets/background/floor04/floor04-floor-meeting.png",
+        "assets/background/floor04/floor04-meeting-interior.png"
+      ],
+      "signs": [],
+      "file": "docs/previews/background-audit/f4-meeting.jpg"
+    },
+    {
+      "id": "f5-rnd",
+      "floor": 5,
+      "header": "5F · 연구개발실",
+      "interior": true,
+      "width": 3108,
+      "scale": 1,
+      "broken": [],
+      "doors": [
+        {
+          "name": "복도",
+          "key": "exit",
+          "target": "f5",
+          "x": 126,
+          "y": 250,
+          "width": 240,
+          "outline": [
+            126,
+            250,
+            240,
+            320
+          ],
+          "sprite": "assets/objects/floor05/door-rnd.png"
+        }
+      ],
+      "sources": [
+        "assets/background/floor17/floor17-finished.png",
+        "assets/background/floor17/service-corridor-finished.png",
+        "assets/background/floor17/office-interior-aligned-finished.png",
+        "assets/background/floor17/workstation-empty.png",
+        "assets/background/floor05/floor05-ceiling-rnd.png",
+        "assets/background/floor05/floor05-floor-rnd.png",
+        "assets/background/floor05/floor05-rnd-interior.png"
+      ],
+      "signs": [],
+      "file": "docs/previews/background-audit/f5-rnd.jpg"
+    },
+    {
+      "id": "f5-security",
+      "floor": 5,
+      "header": "5F · 기술연구실",
+      "interior": true,
+      "width": 2168,
+      "scale": 1,
+      "broken": [],
+      "doors": [
+        {
+          "name": "복도",
+          "key": "exit",
+          "target": "f5",
+          "x": 126,
+          "y": 250,
+          "width": 130,
+          "outline": [
+            126,
+            250,
+            130,
+            320
+          ],
+          "sprite": "assets/objects/floor05/door-security.png"
+        }
+      ],
+      "sources": [
+        "assets/background/floor17/floor17-finished.png",
+        "assets/background/floor17/service-corridor-finished.png",
+        "assets/background/floor17/office-interior-aligned-finished.png",
+        "assets/background/floor17/workstation-empty.png",
+        "assets/background/floor05/floor05-ceiling-security.png",
+        "assets/background/floor05/floor05-floor-security.png",
+        "assets/background/floor05/floor05-security-interior.png"
+      ],
+      "signs": [],
+      "file": "docs/previews/background-audit/f5-security.jpg"
+    },
+    {
+      "id": "f5-meeting",
+      "floor": 5,
+      "header": "5F · 회의실",
+      "interior": true,
+      "width": 2130,
+      "scale": 1,
+      "broken": [],
+      "doors": [
+        {
+          "name": "복도",
+          "key": "exit",
+          "target": "f5",
+          "x": 1874,
+          "y": 250,
+          "width": 130,
+          "outline": [
+            1874,
+            250,
+            130,
+            320
+          ],
+          "sprite": "assets/objects/floor05/door-meeting.png"
+        }
+      ],
+      "sources": [
+        "assets/background/floor17/floor17-finished.png",
+        "assets/background/floor17/service-corridor-finished.png",
+        "assets/background/floor17/office-interior-aligned-finished.png",
+        "assets/background/floor17/workstation-empty.png",
+        "assets/background/floor05/floor05-ceiling-meeting.png",
+        "assets/background/floor05/floor05-floor-meeting.png",
+        "assets/background/floor05/floor05-meeting-interior.png"
+      ],
+      "signs": [],
+      "file": "docs/previews/background-audit/f5-meeting.jpg"
+    },
+    {
+      "id": "f6-work",
+      "floor": 6,
+      "header": "6F · 기술 개발 업무 공간",
+      "interior": true,
+      "width": 3108,
+      "scale": 1,
+      "broken": [],
+      "doors": [
+        {
+          "name": "복도",
+          "key": "exit",
+          "target": "f6",
+          "x": 126,
+          "y": 250,
+          "width": 240,
+          "outline": [
+            126,
+            250,
+            240,
+            320
+          ],
+          "sprite": "assets/objects/floor06/door-work.png"
+        }
+      ],
+      "sources": [
+        "assets/background/floor17/floor17-finished.png",
+        "assets/background/floor17/service-corridor-finished.png",
+        "assets/background/floor17/office-interior-aligned-finished.png",
+        "assets/background/floor17/workstation-empty.png",
+        "assets/background/floor06/floor06-ceiling-work.png",
+        "assets/background/floor06/floor06-floor-work.png",
+        "assets/background/floor06/floor06-work-interior.png"
+      ],
+      "signs": [],
+      "file": "docs/previews/background-audit/f6-work.jpg"
+    },
+    {
+      "id": "f6-engineering",
+      "floor": 6,
+      "header": "6F · 공용 엔지니어링 구역",
+      "interior": true,
+      "width": 2168,
+      "scale": 1,
+      "broken": [],
+      "doors": [
+        {
+          "name": "복도",
+          "key": "exit",
+          "target": "f6",
+          "x": 749,
+          "y": 250,
+          "width": 130,
+          "outline": [
+            749,
+            250,
+            129.99996948242188,
+            320
+          ],
+          "sprite": "assets/objects/floor06/door-engineering.png"
+        }
+      ],
+      "sources": [
+        "assets/background/floor17/floor17-finished.png",
+        "assets/background/floor17/service-corridor-finished.png",
+        "assets/background/floor17/office-interior-aligned-finished.png",
+        "assets/background/floor17/workstation-empty.png",
+        "assets/background/floor06/floor06-ceiling-engineering.png",
+        "assets/background/floor06/floor06-floor-engineering.png",
+        "assets/background/floor06/floor06-engineering-interior.png"
+      ],
+      "signs": [],
+      "file": "docs/previews/background-audit/f6-engineering.jpg"
+    },
+    {
+      "id": "f6-meeting",
+      "floor": 6,
+      "header": "6F · 기술 회의실",
+      "interior": true,
+      "width": 2162,
+      "scale": 1,
+      "broken": [],
+      "doors": [
+        {
+          "name": "복도",
+          "key": "exit",
+          "target": "f6",
+          "x": 1906,
+          "y": 250,
+          "width": 130,
+          "outline": [
+            1906,
+            250,
+            130,
+            320
+          ],
+          "sprite": "assets/objects/floor06/door-meeting.png"
+        }
+      ],
+      "sources": [
+        "assets/background/floor17/floor17-finished.png",
+        "assets/background/floor17/service-corridor-finished.png",
+        "assets/background/floor17/office-interior-aligned-finished.png",
+        "assets/background/floor17/workstation-empty.png",
+        "assets/background/floor06/floor06-ceiling-meeting.png",
+        "assets/background/floor06/floor06-floor-meeting.png",
+        "assets/background/floor06/floor06-meeting-interior.png"
+      ],
+      "signs": [],
+      "file": "docs/previews/background-audit/f6-meeting.jpg"
+    },
+    {
+      "id": "f7-vip",
+      "floor": 7,
+      "header": "7F · VIP Room",
+      "interior": true,
+      "width": 3072,
+      "scale": 1,
+      "broken": [],
+      "doors": [
+        {
+          "name": "복도",
+          "key": "exit",
+          "target": "f7",
+          "x": 1830,
+          "y": 250,
+          "width": 197,
+          "outline": [
+            1821,
+            287,
+            217,
+            281
+          ]
+        }
+      ],
+      "sources": [
+        "assets/background/floor17/floor17-finished.png",
+        "assets/background/floor17/service-corridor-finished.png",
+        "assets/background/floor17/office-interior-aligned-finished.png",
+        "assets/background/floor17/workstation-empty.png",
+        "assets/background/floor7/vip-finished.png"
+      ],
+      "signs": [],
+      "file": "docs/previews/background-audit/f7-vip.jpg"
+    },
+    {
+      "id": "f7-test",
+      "floor": 7,
+      "header": "7F · AI 테스트실",
+      "interior": true,
+      "width": 2304,
+      "scale": 1,
+      "broken": [],
+      "doors": [
+        {
+          "name": "복도",
+          "key": "exit",
+          "target": "f7",
+          "x": 1178,
+          "y": 250,
+          "width": 188,
+          "outline": [
+            1171,
+            264,
+            219,
+            304
+          ]
+        }
+      ],
+      "sources": [
+        "assets/background/floor17/floor17-finished.png",
+        "assets/background/floor17/service-corridor-finished.png",
+        "assets/background/floor17/office-interior-aligned-finished.png",
+        "assets/background/floor17/workstation-empty.png",
+        "assets/background/floor7/test-finished.png"
+      ],
+      "signs": [],
+      "file": "docs/previews/background-audit/f7-test.jpg"
+    },
+    {
+      "id": "f7-verify",
+      "floor": 7,
+      "header": "7F · 검증실",
+      "interior": true,
+      "width": 1856,
+      "scale": 1,
+      "broken": [],
+      "doors": [
+        {
+          "name": "복도",
+          "key": "exit",
+          "target": "f7",
+          "x": 368,
+          "y": 250,
+          "width": 104,
+          "outline": [
+            370,
+            290,
+            208,
+            280
+          ]
+        }
+      ],
+      "sources": [
+        "assets/background/floor17/floor17-finished.png",
+        "assets/background/floor17/service-corridor-finished.png",
+        "assets/background/floor17/office-interior-aligned-finished.png",
+        "assets/background/floor17/workstation-empty.png",
+        "assets/background/floor7/verify-finished.png"
+      ],
+      "signs": [],
+      "file": "docs/previews/background-audit/f7-verify.jpg"
+    },
+    {
+      "id": "f8-qa",
+      "floor": 8,
+      "header": "8F · QA 시험실",
+      "interior": true,
+      "width": 3044,
+      "scale": 1,
+      "broken": [],
+      "doors": [
+        {
+          "name": "복도",
+          "key": "exit",
+          "target": "f8",
+          "x": 2788,
+          "y": 250,
+          "width": 130,
+          "outline": [
+            2788,
+            250,
+            130,
+            320
+          ],
+          "sprite": "assets/objects/floor05/door-security.png"
+        }
+      ],
+      "sources": [
+        "assets/background/floor17/floor17-finished.png",
+        "assets/background/floor17/service-corridor-finished.png",
+        "assets/background/floor17/office-interior-aligned-finished.png",
+        "assets/background/floor17/workstation-empty.png",
+        "assets/background/floor08/floor08-ceiling-qa.png",
+        "assets/background/floor08/floor08-floor-qa.png",
+        "assets/background/floor08/floor08-qa-interior.png"
+      ],
+      "signs": [],
+      "file": "docs/previews/background-audit/f8-qa.jpg"
+    },
+    {
+      "id": "f8-planning",
+      "floor": 8,
+      "header": "8F · 제품기획실",
+      "interior": true,
+      "width": 2178,
+      "scale": 1,
+      "broken": [],
+      "doors": [
+        {
+          "name": "복도",
+          "key": "exit",
+          "target": "f8",
+          "x": 126,
+          "y": 250,
+          "width": 130,
+          "outline": [
+            126,
+            250,
+            130,
+            320
+          ],
+          "sprite": "assets/objects/floor04/door-lab.png"
+        }
+      ],
+      "sources": [
+        "assets/background/floor17/floor17-finished.png",
+        "assets/background/floor17/service-corridor-finished.png",
+        "assets/background/floor17/office-interior-aligned-finished.png",
+        "assets/background/floor17/workstation-empty.png",
+        "assets/background/floor08/floor08-ceiling-planning.png",
+        "assets/background/floor08/floor08-floor-planning.png",
+        "assets/background/floor08/floor08-planning-interior.png"
+      ],
+      "signs": [],
+      "file": "docs/previews/background-audit/f8-planning.jpg"
+    },
+    {
+      "id": "f8-meeting",
+      "floor": 8,
+      "header": "8F · 공용 제품 회의실",
+      "interior": true,
+      "width": 2148,
+      "scale": 1,
+      "broken": [],
+      "doors": [
+        {
+          "name": "복도",
+          "key": "exit",
+          "target": "f8",
+          "x": 1306,
+          "y": 250,
+          "width": 130,
+          "outline": [
+            1306,
+            250,
+            130,
+            320
+          ],
+          "sprite": "assets/objects/floor04/door-meeting.png"
+        }
+      ],
+      "sources": [
+        "assets/background/floor17/floor17-finished.png",
+        "assets/background/floor17/service-corridor-finished.png",
+        "assets/background/floor17/office-interior-aligned-finished.png",
+        "assets/background/floor17/workstation-empty.png",
+        "assets/background/floor08/floor08-ceiling-meeting.png",
+        "assets/background/floor08/floor08-floor-meeting.png",
+        "assets/background/floor08/floor08-meeting-interior.png"
+      ],
+      "signs": [],
+      "file": "docs/previews/background-audit/f8-meeting.jpg"
+    },
+    {
+      "id": "f9-office",
+      "floor": 9,
+      "header": "9F · 사업 업무 공간",
+      "interior": true,
+      "width": 2998,
+      "scale": 1,
+      "broken": [],
+      "doors": [
+        {
+          "name": "복도",
+          "key": "exit",
+          "target": "f9",
+          "x": 2742,
+          "y": 250,
+          "width": 130,
+          "outline": [
+            2742,
+            250,
+            130,
+            320
+          ],
+          "sprite": "assets/objects/floor04/door-lab.png"
+        }
+      ],
+      "sources": [
+        "assets/background/floor17/floor17-finished.png",
+        "assets/background/floor17/service-corridor-finished.png",
+        "assets/background/floor17/office-interior-aligned-finished.png",
+        "assets/background/floor17/workstation-empty.png",
+        "assets/background/floor09/floor09-ceiling-office.png",
+        "assets/background/floor09/floor09-floor-office.png",
+        "assets/background/floor09/floor09-office-interior.png"
+      ],
+      "signs": [],
+      "file": "docs/previews/background-audit/f9-office.jpg"
+    },
+    {
+      "id": "f9-sales",
+      "floor": 9,
+      "header": "9F · 영업·고객 관리 구역",
+      "interior": true,
+      "width": 2168,
+      "scale": 1,
+      "broken": [],
+      "doors": [
+        {
+          "name": "복도",
+          "key": "exit",
+          "target": "f9",
+          "x": 930,
+          "y": 250,
+          "width": 130,
+          "outline": [
+            930,
+            250,
+            129.99996948242188,
+            320
+          ],
+          "sprite": "assets/objects/floor04/door-lab.png"
+        }
+      ],
+      "sources": [
+        "assets/background/floor17/floor17-finished.png",
+        "assets/background/floor17/service-corridor-finished.png",
+        "assets/background/floor17/office-interior-aligned-finished.png",
+        "assets/background/floor17/workstation-empty.png",
+        "assets/background/floor09/floor09-ceiling-sales.png",
+        "assets/background/floor09/floor09-floor-sales.png",
+        "assets/background/floor09/floor09-sales-interior.png"
+      ],
+      "signs": [],
+      "file": "docs/previews/background-audit/f9-sales.jpg"
+    },
+    {
+      "id": "f9-project",
+      "floor": 9,
+      "header": "9F · 프로젝트룸",
+      "interior": true,
+      "width": 2162,
+      "scale": 1,
+      "broken": [],
+      "doors": [
+        {
+          "name": "복도",
+          "key": "exit",
+          "target": "f9",
+          "x": 1906,
+          "y": 250,
+          "width": 130,
+          "outline": [
+            1906,
+            250,
+            130,
+            320
+          ],
+          "sprite": "assets/objects/floor04/door-meeting.png"
+        }
+      ],
+      "sources": [
+        "assets/background/floor17/floor17-finished.png",
+        "assets/background/floor17/service-corridor-finished.png",
+        "assets/background/floor17/office-interior-aligned-finished.png",
+        "assets/background/floor17/workstation-empty.png",
+        "assets/background/floor09/floor09-ceiling-project.png",
+        "assets/background/floor09/floor09-floor-project.png",
+        "assets/background/floor09/floor09-project-interior.png"
+      ],
+      "signs": [],
+      "file": "docs/previews/background-audit/f9-project.jpg"
+    },
+    {
+      "id": "f10-office",
+      "floor": 10,
+      "header": "10F · 경영관리 사무실",
+      "interior": true,
+      "width": 3000,
+      "scale": 1,
+      "broken": [],
+      "doors": [
+        {
+          "name": "복도",
+          "key": "exit",
+          "target": "f10",
+          "x": 126,
+          "y": 250,
+          "width": 130,
+          "outline": [
+            126,
+            250,
+            130,
+            320
+          ],
+          "sprite": "assets/objects/floor04/door-lab.png"
+        }
+      ],
+      "sources": [
+        "assets/background/floor17/floor17-finished.png",
+        "assets/background/floor17/service-corridor-finished.png",
+        "assets/background/floor17/office-interior-aligned-finished.png",
+        "assets/background/floor17/workstation-empty.png",
+        "assets/background/floor10/floor10-ceiling-office.png",
+        "assets/background/floor10/floor10-floor-office.png",
+        "assets/background/floor10/floor10-office-interior.png"
+      ],
+      "signs": [],
+      "file": "docs/previews/background-audit/f10-office.jpg"
+    },
+    {
+      "id": "f10-meeting",
+      "floor": 10,
+      "header": "10F · 임원 회의실",
+      "interior": true,
+      "width": 2166,
+      "scale": 1,
+      "broken": [],
+      "doors": [
+        {
+          "name": "복도",
+          "key": "exit",
+          "target": "f10",
+          "x": 126,
+          "y": 250,
+          "width": 130,
+          "outline": [
+            126,
+            250,
+            130,
+            320
+          ],
+          "sprite": "assets/objects/floor04/door-meeting.png"
+        }
+      ],
+      "sources": [
+        "assets/background/floor17/floor17-finished.png",
+        "assets/background/floor17/service-corridor-finished.png",
+        "assets/background/floor17/office-interior-aligned-finished.png",
+        "assets/background/floor17/workstation-empty.png",
+        "assets/background/floor10/floor10-ceiling-meeting.png",
+        "assets/background/floor10/floor10-floor-meeting.png",
+        "assets/background/floor10/floor10-meeting-interior.png"
+      ],
+      "signs": [],
+      "file": "docs/previews/background-audit/f10-meeting.jpg"
+    },
+    {
+      "id": "f10-executive",
+      "floor": 10,
+      "header": "10F · 임원실",
+      "interior": true,
+      "width": 2144,
+      "scale": 1,
+      "broken": [],
+      "doors": [
+        {
+          "name": "복도",
+          "key": "exit",
+          "target": "f10",
+          "x": 126,
+          "y": 250,
+          "width": 130,
+          "outline": [
+            126,
+            250,
+            130,
+            320
+          ],
+          "sprite": "assets/objects/floor04/door-meeting.png"
+        }
+      ],
+      "sources": [
+        "assets/background/floor17/floor17-finished.png",
+        "assets/background/floor17/service-corridor-finished.png",
+        "assets/background/floor17/office-interior-aligned-finished.png",
+        "assets/background/floor17/workstation-empty.png",
+        "assets/background/floor10/floor10-ceiling-executive.png",
+        "assets/background/floor10/floor10-floor-executive.png",
+        "assets/background/floor10/floor10-executive-interior.png"
+      ],
+      "signs": [],
+      "file": "docs/previews/background-audit/f10-executive.jpg"
+    },
+    {
+      "id": "f11-sales",
+      "floor": 11,
+      "header": "11F · 영업본부 사무실",
+      "interior": true,
+      "width": 3600,
+      "scale": 1,
+      "broken": [],
+      "doors": [
+        {
+          "name": "복도",
+          "key": "exit",
+          "target": "f11",
+          "x": 1274,
+          "y": 250,
+          "width": 140,
+          "outline": [
+            1274,
+            250,
+            140,
+            320
+          ]
+        }
+      ],
+      "sources": [
+        "assets/background/floor17/floor17-finished.png",
+        "assets/background/floor17/service-corridor-finished.png",
+        "assets/background/floor17/office-interior-aligned-finished.png",
+        "assets/background/floor17/workstation-empty.png",
+        "assets/background/floor11/floor11-ceiling-sales.png",
+        "assets/background/floor11/floor11-floor-sales.png",
+        "assets/background/floor11/floor11-sales-interior.png"
+      ],
+      "signs": [],
+      "file": "docs/previews/background-audit/f11-sales.jpg"
+    },
+    {
+      "id": "f11-strategy",
+      "floor": 11,
+      "header": "11F · 전략회의실",
+      "interior": true,
+      "width": 1800,
+      "scale": 1,
+      "broken": [],
+      "doors": [
+        {
+          "name": "복도",
+          "key": "exit",
+          "target": "f11",
+          "x": 1310,
+          "y": 250,
+          "width": 130,
+          "outline": [
+            1310,
+            250,
+            130,
+            320
+          ]
+        }
+      ],
+      "sources": [
+        "assets/background/floor17/floor17-finished.png",
+        "assets/background/floor17/service-corridor-finished.png",
+        "assets/background/floor17/office-interior-aligned-finished.png",
+        "assets/background/floor17/workstation-empty.png",
+        "assets/background/floor11/floor11-ceiling-strategy.png",
+        "assets/background/floor11/floor11-floor-strategy.png",
+        "assets/background/floor11/floor11-strategy-interior.png"
+      ],
+      "signs": [],
+      "file": "docs/previews/background-audit/f11-strategy.jpg"
+    },
+    {
+      "id": "f11-marketing",
+      "floor": 11,
+      "header": "11F · 마케팅 자료실",
+      "interior": true,
+      "width": 1800,
+      "scale": 1,
+      "broken": [],
+      "doors": [
+        {
+          "name": "복도",
+          "key": "exit",
+          "target": "f11",
+          "x": 296,
+          "y": 250,
+          "width": 120,
+          "outline": [
+            296,
+            250,
+            120,
+            320
+          ]
+        }
+      ],
+      "sources": [
+        "assets/background/floor17/floor17-finished.png",
+        "assets/background/floor17/service-corridor-finished.png",
+        "assets/background/floor17/office-interior-aligned-finished.png",
+        "assets/background/floor17/workstation-empty.png",
+        "assets/background/floor11/floor11-ceiling-marketing.png",
+        "assets/background/floor11/floor11-floor-marketing.png",
+        "assets/background/floor11/floor11-marketing-interior.png"
+      ],
+      "signs": [],
+      "file": "docs/previews/background-audit/f11-marketing.jpg"
+    },
+    {
+      "id": "f12-dev",
+      "floor": 12,
+      "header": "12F · 개발실",
+      "interior": true,
+      "width": 3280,
+      "scale": 1,
+      "broken": [],
+      "doors": [
+        {
+          "name": "복도",
+          "key": "exit",
+          "target": "f12",
+          "x": 2202,
+          "y": 250,
+          "width": 132,
+          "outline": [
+            2154,
+            277,
+            233,
+            291
+          ]
+        }
+      ],
+      "sources": [
+        "assets/background/floor17/floor17-finished.png",
+        "assets/background/floor17/service-corridor-finished.png",
+        "assets/background/floor17/office-interior-aligned-finished.png",
+        "assets/background/floor17/workstation-empty.png",
+        "assets/background/floor12/office-finished.png"
+      ],
+      "signs": [],
+      "file": "docs/previews/background-audit/f12-dev.jpg"
+    },
+    {
+      "id": "f12-eval",
+      "floor": 12,
+      "header": "12F · 모델 평가실",
+      "interior": true,
+      "width": 1804,
+      "scale": 1,
+      "broken": [],
+      "doors": [
+        {
+          "name": "복도",
+          "key": "exit",
+          "target": "f12",
+          "x": 270,
+          "y": 314,
+          "width": 140,
+          "outline": [
+            261,
+            312,
+            174,
+            256
+          ]
+        }
+      ],
+      "sources": [
+        "assets/background/floor17/floor17-finished.png",
+        "assets/background/floor17/service-corridor-finished.png",
+        "assets/background/floor17/office-interior-aligned-finished.png",
+        "assets/background/floor17/workstation-empty.png",
+        "assets/background/floor12/eval-finished.png"
+      ],
+      "signs": [
+        {
+          "left": "73px",
+          "top": "5px",
+          "parent": "floor-art-crop"
+        }
+      ],
+      "file": "docs/previews/background-audit/f12-eval.jpg"
+    },
+    {
+      "id": "f12-lead",
+      "floor": 12,
+      "header": "12F · 팀장실",
+      "interior": true,
+      "width": 2132,
+      "scale": 1,
+      "broken": [],
+      "doors": [
+        {
+          "name": "복도",
+          "key": "exit",
+          "target": "f12",
+          "x": 1475,
+          "y": 298,
+          "width": 137,
+          "outline": [
+            1427,
+            290,
+            180,
+            278
+          ]
+        }
+      ],
+      "sources": [
+        "assets/background/floor17/floor17-finished.png",
+        "assets/background/floor17/service-corridor-finished.png",
+        "assets/background/floor17/office-interior-aligned-finished.png",
+        "assets/background/floor17/workstation-empty.png",
+        "assets/background/floor12/lead-finished.png"
+      ],
+      "signs": [],
+      "file": "docs/previews/background-audit/f12-lead.jpg"
+    },
+    {
+      "id": "f13-ops",
+      "floor": 13,
+      "header": "13F · 기술지원 상황실",
+      "interior": true,
+      "width": 2622,
+      "scale": 1,
+      "broken": [],
+      "doors": [
+        {
+          "name": "복도",
+          "key": "exit",
+          "target": "f13",
+          "x": 1231,
+          "y": 250,
+          "width": 160,
+          "outline": [
+            1231,
+            250,
+            160,
+            320
+          ]
+        }
+      ],
+      "sources": [
+        "assets/background/floor17/floor17-finished.png",
+        "assets/background/floor17/service-corridor-finished.png",
+        "assets/background/floor17/office-interior-aligned-finished.png",
+        "assets/background/floor17/workstation-empty.png",
+        "assets/background/floor13/floor13-ceiling-ops.png",
+        "assets/background/floor13/floor13-floor-ops.png",
+        "assets/background/floor13/floor13-ops-interior.png"
+      ],
+      "signs": [],
+      "file": "docs/previews/background-audit/f13-ops.jpg"
+    },
+    {
+      "id": "f13-testbay",
+      "floor": 13,
+      "header": "13F · 장비 검증실",
+      "interior": true,
+      "width": 1824,
+      "scale": 1,
+      "broken": [],
+      "doors": [
+        {
+          "name": "복도",
+          "key": "exit",
+          "target": "f13",
+          "x": 307,
+          "y": 236,
+          "width": 130,
+          "outline": [
+            307,
+            236,
+            130,
+            334
+          ]
+        },
+        {
+          "name": "보안 자료실",
+          "key": "link:f13-secure",
+          "target": "f13-secure",
+          "x": 1650,
+          "y": 250,
+          "width": 110,
+          "outline": [
+            1650,
+            250,
+            110,
+            320
+          ]
+        }
+      ],
+      "sources": [
+        "assets/background/floor17/floor17-finished.png",
+        "assets/background/floor17/service-corridor-finished.png",
+        "assets/background/floor17/office-interior-aligned-finished.png",
+        "assets/background/floor17/workstation-empty.png",
+        "assets/background/floor13/floor13-ceiling-testbay.png",
+        "assets/background/floor13/floor13-floor-testbay.png",
+        "assets/background/floor13/floor13-testbay-interior.png"
+      ],
+      "signs": [],
+      "file": "docs/previews/background-audit/f13-testbay.jpg"
+    },
+    {
+      "id": "f13-secure",
+      "floor": 13,
+      "header": "13F · 보안 자료실",
+      "interior": true,
+      "width": 1824,
+      "scale": 1,
+      "broken": [],
+      "doors": [
+        {
+          "name": "장비 검증실",
+          "key": "link:f13-testbay",
+          "target": "f13-testbay",
+          "x": 56,
+          "y": 250,
+          "width": 110,
+          "outline": [
+            56,
+            250,
+            110,
+            320
+          ]
+        }
+      ],
+      "sources": [
+        "assets/background/floor17/floor17-finished.png",
+        "assets/background/floor17/service-corridor-finished.png",
+        "assets/background/floor17/office-interior-aligned-finished.png",
+        "assets/background/floor17/workstation-empty.png",
+        "assets/background/floor13/floor13-ceiling-testbay.png",
+        "assets/background/floor13/floor13-floor-testbay.png",
+        "assets/background/floor13/floor13-testbay-interior.png"
+      ],
+      "signs": [],
+      "file": "docs/previews/background-audit/f13-secure.jpg"
+    },
+    {
+      "id": "f13-training",
+      "floor": 13,
+      "header": "13F · 고객 교육장",
+      "interior": true,
+      "width": 1824,
+      "scale": 1,
+      "broken": [],
+      "doors": [
+        {
+          "name": "복도",
+          "key": "exit",
+          "target": "f13",
+          "x": 1410,
+          "y": 250,
+          "width": 120,
+          "outline": [
+            1410,
+            250,
+            120,
+            320
+          ]
+        }
+      ],
+      "sources": [
+        "assets/background/floor17/floor17-finished.png",
+        "assets/background/floor17/service-corridor-finished.png",
+        "assets/background/floor17/office-interior-aligned-finished.png",
+        "assets/background/floor17/workstation-empty.png",
+        "assets/background/floor13/floor13-ceiling-training.png",
+        "assets/background/floor13/floor13-floor-training.png",
+        "assets/background/floor13/floor13-training-interior.png"
+      ],
+      "signs": [],
+      "file": "docs/previews/background-audit/f13-training.jpg"
+    },
+    {
+      "id": "f14-archive",
+      "floor": 14,
+      "header": "14F · 연구 자료실",
+      "interior": true,
+      "width": 1800,
+      "scale": 1,
+      "broken": [],
+      "doors": [
+        {
+          "name": "복도",
+          "key": "exit",
+          "target": "f14",
+          "x": 1491,
+          "y": 244,
+          "width": 130,
+          "outline": [
+            1491,
+            244,
+            130,
+            326
+          ]
+        }
+      ],
+      "sources": [
+        "assets/background/floor17/floor17-finished.png",
+        "assets/background/floor17/service-corridor-finished.png",
+        "assets/background/floor17/office-interior-aligned-finished.png",
+        "assets/background/floor17/workstation-empty.png",
+        "assets/background/floor14/floor14-ceiling-archive.png",
+        "assets/background/floor14/floor14-floor-archive.png",
+        "assets/background/floor14/floor14-archive-interior.png"
+      ],
+      "signs": [],
+      "file": "docs/previews/background-audit/f14-archive.jpg"
+    },
+    {
+      "id": "f14-data",
+      "floor": 14,
+      "header": "14F · 데이터 연구실",
+      "interior": true,
+      "width": 2400,
+      "scale": 1,
+      "broken": [],
+      "doors": [
+        {
+          "name": "복도",
+          "key": "exit",
+          "target": "f14",
+          "x": 300,
+          "y": 250,
+          "width": 150,
+          "outline": [
+            300,
+            250,
+            150,
+            320
+          ]
+        }
+      ],
+      "sources": [
+        "assets/background/floor17/floor17-finished.png",
+        "assets/background/floor17/service-corridor-finished.png",
+        "assets/background/floor17/office-interior-aligned-finished.png",
+        "assets/background/floor17/workstation-empty.png",
+        "assets/background/floor14/floor14-ceiling-data.png",
+        "assets/background/floor14/floor14-floor-data.png",
+        "assets/background/floor14/floor14-data-interior.png"
+      ],
+      "signs": [],
+      "file": "docs/previews/background-audit/f14-data.jpg"
+    },
+    {
+      "id": "f14-ux",
+      "floor": 14,
+      "header": "14F · 사용자 실험실",
+      "interior": true,
+      "width": 2100,
+      "scale": 1,
+      "broken": [],
+      "doors": [
+        {
+          "name": "복도",
+          "key": "exit",
+          "target": "f14",
+          "x": 936,
+          "y": 256,
+          "width": 130,
+          "outline": [
+            936,
+            256,
+            129.99996948242188,
+            314
+          ]
+        }
+      ],
+      "sources": [
+        "assets/background/floor17/floor17-finished.png",
+        "assets/background/floor17/service-corridor-finished.png",
+        "assets/background/floor17/office-interior-aligned-finished.png",
+        "assets/background/floor17/workstation-empty.png",
+        "assets/background/floor14/floor14-ceiling-ux.png",
+        "assets/background/floor14/floor14-floor-ux.png",
+        "assets/background/floor14/floor14-ux-interior.png"
+      ],
+      "signs": [],
+      "file": "docs/previews/background-audit/f14-ux.jpg"
+    },
+    {
+      "id": "f15-lab",
+      "floor": 15,
+      "header": "15F · 연구실",
+      "interior": true,
+      "width": 3440,
+      "scale": 1,
+      "broken": [],
+      "doors": [
+        {
+          "name": "복도",
+          "key": "exit",
+          "target": "f15",
+          "x": 1003,
+          "y": 250,
+          "width": 140,
+          "outline": [
+            1003,
+            250,
+            139.99996948242188,
+            320
+          ]
+        }
+      ],
+      "sources": [
+        "assets/background/floor17/floor17-finished.png",
+        "assets/background/floor17/service-corridor-finished.png",
+        "assets/background/floor17/office-interior-aligned-finished.png",
+        "assets/background/floor17/workstation-empty.png",
+        "assets/background/floor15/floor15-ceiling-lab.png",
+        "assets/background/floor15/floor15-floor-lab.png",
+        "assets/background/floor15/floor15-lab-interior.png"
+      ],
+      "signs": [],
+      "file": "docs/previews/background-audit/f15-lab.jpg"
+    },
+    {
+      "id": "f15-seminar",
+      "floor": 15,
+      "header": "15F · 세미나실",
+      "interior": true,
+      "width": 2480,
+      "scale": 1,
+      "broken": [],
+      "doors": [
+        {
+          "name": "복도",
+          "key": "exit",
+          "target": "f15",
+          "x": 181,
+          "y": 250,
+          "width": 130,
+          "outline": [
+            181,
+            250,
+            130,
+            320
+          ]
+        }
+      ],
+      "sources": [
+        "assets/background/floor17/floor17-finished.png",
+        "assets/background/floor17/service-corridor-finished.png",
+        "assets/background/floor17/office-interior-aligned-finished.png",
+        "assets/background/floor17/workstation-empty.png",
+        "assets/background/floor15/floor15-ceiling-seminar.png",
+        "assets/background/floor15/floor15-floor-seminar.png",
+        "assets/background/floor15/floor15-seminar-interior.png"
+      ],
+      "signs": [],
+      "file": "docs/previews/background-audit/f15-seminar.jpg"
+    },
+    {
+      "id": "f15-director",
+      "floor": 15,
+      "header": "15F · 연구본부장실",
+      "interior": true,
+      "width": 1824,
+      "scale": 1,
+      "broken": [],
+      "doors": [
+        {
+          "name": "복도",
+          "key": "exit",
+          "target": "f15",
+          "x": 364,
+          "y": 240,
+          "width": 120,
+          "outline": [
+            364,
+            240,
+            120,
+            330
+          ]
+        }
+      ],
+      "sources": [
+        "assets/background/floor17/floor17-finished.png",
+        "assets/background/floor17/service-corridor-finished.png",
+        "assets/background/floor17/office-interior-aligned-finished.png",
+        "assets/background/floor17/workstation-empty.png",
+        "assets/background/floor15/floor15-ceiling-director.png",
+        "assets/background/floor15/floor15-floor-director.png",
+        "assets/background/floor15/floor15-director-interior.png"
+      ],
+      "signs": [],
+      "file": "docs/previews/background-audit/f15-director.jpg"
+    },
+    {
+      "id": "f16-kitchen",
+      "floor": 16,
+      "header": "16F · The Kitchen",
+      "interior": true,
+      "width": 3604,
+      "scale": 1,
+      "broken": [],
+      "doors": [
+        {
+          "name": "복도",
+          "key": "exit",
+          "target": "f16",
+          "x": 1702,
+          "y": 250,
+          "width": 200,
+          "outline": [
+            1702,
+            250,
+            200,
+            320
+          ]
+        },
+        {
+          "name": "VU 편의점",
+          "key": "link:f16-cu",
+          "target": "f16-cu",
+          "x": 3460,
+          "y": 250,
+          "width": 110,
+          "outline": [
+            3460.0001220703125,
+            250,
+            110,
+            320
+          ]
+        }
+      ],
+      "sources": [
+        "assets/background/floor17/floor17-finished.png",
+        "assets/background/floor17/service-corridor-finished.png",
+        "assets/background/floor17/office-interior-aligned-finished.png",
+        "assets/background/floor17/workstation-empty.png",
+        "assets/background/floor16/floor16-kitchen.png"
+      ],
+      "signs": [],
+      "file": "docs/previews/background-audit/f16-kitchen.jpg"
+    },
+    {
+      "id": "f16-cu",
+      "floor": 16,
+      "header": "16F · VU 편의점",
+      "interior": true,
+      "width": 2040,
+      "scale": 1,
+      "broken": [],
+      "doors": [
+        {
+          "name": "복도",
+          "key": "exit",
+          "target": "f16",
+          "x": 1728,
+          "y": 262,
+          "width": 150,
+          "outline": [
+            1728,
+            262,
+            150,
+            308
+          ]
+        },
+        {
+          "name": "The Kitchen",
+          "key": "link:f16-kitchen",
+          "target": "f16-kitchen",
+          "x": 56,
+          "y": 250,
+          "width": 110,
+          "outline": [
+            56,
+            250,
+            110,
+            320
+          ]
+        }
+      ],
+      "sources": [
+        "assets/background/floor17/floor17-finished.png",
+        "assets/background/floor17/service-corridor-finished.png",
+        "assets/background/floor17/office-interior-aligned-finished.png",
+        "assets/background/floor17/workstation-empty.png",
+        "assets/background/floor16/floor16-cu.png"
+      ],
+      "signs": [],
+      "file": "docs/previews/background-audit/f16-cu.jpg"
+    },
+    {
+      "id": "f16-cafe",
+      "floor": 16,
+      "header": "16F · Café",
+      "interior": true,
+      "width": 1904,
+      "scale": 1,
+      "broken": [],
+      "doors": [
+        {
+          "name": "복도",
+          "key": "exit",
+          "target": "f16",
+          "x": 162,
+          "y": 250,
+          "width": 140,
+          "outline": [
+            162,
+            250,
+            140,
+            320
+          ]
+        }
+      ],
+      "sources": [
+        "assets/background/floor17/floor17-finished.png",
+        "assets/background/floor17/service-corridor-finished.png",
+        "assets/background/floor17/office-interior-aligned-finished.png",
+        "assets/background/floor17/workstation-empty.png",
+        "assets/background/floor16/floor16-cafe.png"
+      ],
+      "signs": [],
+      "file": "docs/previews/background-audit/f16-cafe.jpg"
+    },
+    {
+      "id": "f17-restroom",
+      "floor": 17,
+      "header": "17F · 화장실",
+      "interior": true,
+      "width": 1800,
+      "scale": 1,
+      "broken": [],
+      "doors": [
+        {
+          "name": "복도",
+          "key": "exit",
+          "target": "f17",
+          "x": 185,
+          "y": 210,
+          "width": 145,
+          "outline": [
+            185,
+            210,
+            145,
+            360
+          ]
+        }
+      ],
+      "sources": [
+        "assets/background/floor17/floor17-finished.png",
+        "assets/background/floor17/service-corridor-finished.png",
+        "assets/background/floor17/office-interior-aligned-finished.png",
+        "assets/background/floor17/workstation-empty.png",
+        "assets/background/floor17/restroom-finished.png"
+      ],
+      "signs": [],
+      "file": "docs/previews/background-audit/f17-restroom.jpg"
+    },
+    {
+      "id": "f17-manager",
+      "floor": 17,
+      "header": "17F · 관리자실",
+      "interior": true,
+      "width": 1040,
+      "scale": 1,
+      "broken": [],
+      "doors": [
+        {
+          "name": "복도",
+          "key": "exit",
+          "target": "f17",
+          "x": 182,
+          "y": 210,
+          "width": 171,
+          "outline": [
+            182,
+            210,
+            171,
+            360
+          ]
+        }
+      ],
+      "sources": [
+        "assets/background/floor17/floor17-finished.png",
+        "assets/background/floor17/service-corridor-finished.png",
+        "assets/background/floor17/office-interior-aligned-finished.png",
+        "assets/background/floor17/workstation-empty.png",
+        "assets/background/floor17/floor17-manager-finished.png"
+      ],
+      "signs": [],
+      "file": "docs/previews/background-audit/f17-manager.jpg"
+    },
+    {
+      "id": "b1-office",
+      "floor": -1,
+      "header": "B1 · 시설관리팀 사무실",
+      "interior": true,
+      "width": 2064,
+      "scale": 1,
+      "broken": [],
+      "doors": [
+        {
+          "name": "복도",
+          "key": "exit",
+          "target": "b1",
+          "x": 497,
+          "y": 250,
+          "width": 110,
+          "outline": [
+            497,
+            250,
+            110,
+            320
+          ]
+        }
+      ],
+      "sources": [
+        "assets/background/floor17/floor17-finished.png",
+        "assets/background/floor17/service-corridor-finished.png",
+        "assets/background/floor17/office-interior-aligned-finished.png",
+        "assets/background/floor17/workstation-empty.png",
+        "assets/background/b1/b1-office-finished.png"
+      ],
+      "signs": [],
+      "file": "docs/previews/background-audit/b1-office.jpg"
+    },
+    {
+      "id": "b1-control",
+      "floor": -1,
+      "header": "B1 · 방재 관제실",
+      "interior": true,
+      "width": 1892,
+      "scale": 1,
+      "broken": [],
+      "doors": [
+        {
+          "name": "복도",
+          "key": "exit",
+          "target": "b1",
+          "x": 775,
+          "y": 250,
+          "width": 104,
+          "outline": [
+            775,
+            250,
+            103.99996948242188,
+            320
+          ]
+        }
+      ],
+      "sources": [
+        "assets/background/floor17/floor17-finished.png",
+        "assets/background/floor17/service-corridor-finished.png",
+        "assets/background/floor17/office-interior-aligned-finished.png",
+        "assets/background/floor17/workstation-empty.png",
+        "assets/background/b1/control-room-v4-finished.png"
+      ],
+      "signs": [],
+      "file": "docs/previews/background-audit/b1-control.jpg"
+    },
+    {
+      "id": "b1-power",
+      "floor": -1,
+      "header": "B1 · 전력 분배실",
+      "interior": true,
+      "width": 1806,
+      "scale": 1,
+      "broken": [],
+      "doors": [
+        {
+          "name": "복도",
+          "key": "exit",
+          "target": "b1",
+          "x": 1077,
+          "y": 250,
+          "width": 100,
+          "outline": [
+            1077,
+            250,
+            100,
+            320
+          ]
+        }
+      ],
+      "sources": [
+        "assets/background/floor17/floor17-finished.png",
+        "assets/background/floor17/service-corridor-finished.png",
+        "assets/background/floor17/office-interior-aligned-finished.png",
+        "assets/background/floor17/workstation-empty.png",
+        "assets/background/b1/b1-power-finished.png"
+      ],
+      "signs": [],
+      "file": "docs/previews/background-audit/b1-power.jpg"
+    },
+    {
+      "id": "b2-main",
+      "floor": -2,
+      "header": "B2 · ARCHI 메인 서버실",
+      "interior": true,
+      "width": 3150,
+      "scale": 1,
+      "broken": [],
+      "doors": [
+        {
+          "name": "복도",
+          "key": "exit",
+          "target": "b2",
+          "x": 2785,
+          "y": 250,
+          "width": 160,
+          "outline": [
+            2785,
+            250,
+            160,
+            320
+          ]
+        }
+      ],
+      "sources": [
+        "assets/background/floor17/floor17-finished.png",
+        "assets/background/floor17/service-corridor-finished.png",
+        "assets/background/floor17/office-interior-aligned-finished.png",
+        "assets/background/floor17/workstation-empty.png",
+        "assets/background/b2/b2-main-finished.png"
+      ],
+      "signs": [],
+      "file": "docs/previews/background-audit/b2-main.jpg"
+    },
+    {
+      "id": "b2-power",
+      "floor": -2,
+      "header": "B2 · 전력·냉각실",
+      "interior": true,
+      "width": 1800,
+      "scale": 1,
+      "broken": [],
+      "doors": [
+        {
+          "name": "복도",
+          "key": "exit",
+          "target": "b2",
+          "x": 873,
+          "y": 250,
+          "width": 110,
+          "outline": [
+            873,
+            250,
+            109.99996948242188,
+            320
+          ]
+        }
+      ],
+      "sources": [
+        "assets/background/floor17/floor17-finished.png",
+        "assets/background/floor17/service-corridor-finished.png",
+        "assets/background/floor17/office-interior-aligned-finished.png",
+        "assets/background/floor17/workstation-empty.png",
+        "assets/background/b2/b2-power-finished.png"
+      ],
+      "signs": [],
+      "file": "docs/previews/background-audit/b2-power.jpg"
+    },
+    {
+      "id": "b2-link",
+      "floor": -2,
+      "header": "B2 · 연결 실험실",
+      "interior": true,
+      "width": 1800,
+      "scale": 1,
+      "broken": [],
+      "doors": [
+        {
+          "name": "복도",
+          "key": "exit",
+          "target": "b2",
+          "x": 481,
+          "y": 250,
+          "width": 110,
+          "outline": [
+            481,
+            250,
+            110,
+            320
+          ]
+        }
+      ],
+      "sources": [
+        "assets/background/floor17/floor17-finished.png",
+        "assets/background/floor17/service-corridor-finished.png",
+        "assets/background/floor17/office-interior-aligned-finished.png",
+        "assets/background/floor17/workstation-empty.png",
+        "assets/background/b2/b2-link-finished.png"
+      ],
+      "signs": [],
+      "file": "docs/previews/background-audit/b2-link.jpg"
+    },
+    {
+      "id": "b2-restroom",
+      "floor": -2,
+      "header": "B2 · 화장실",
+      "interior": true,
+      "width": 1800,
+      "scale": 1,
+      "broken": [],
+      "doors": [
+        {
+          "name": "복도",
+          "key": "exit",
+          "target": "b2",
+          "x": 185,
+          "y": 210,
+          "width": 145,
+          "outline": [
+            185,
+            210,
+            145,
+            360
+          ]
+        }
+      ],
+      "sources": [
+        "assets/background/floor17/floor17-finished.png",
+        "assets/background/floor17/service-corridor-finished.png",
+        "assets/background/floor17/office-interior-aligned-finished.png",
+        "assets/background/floor17/workstation-empty.png",
+        "assets/background/floor17/restroom-finished.png"
+      ],
+      "signs": [],
+      "file": "docs/previews/background-audit/b2-restroom.jpg"
+    },
+    {
+      "id": "b1-restroom",
+      "floor": -1,
+      "header": "B1 · 화장실",
+      "interior": true,
+      "width": 1800,
+      "scale": 1,
+      "broken": [],
+      "doors": [
+        {
+          "name": "복도",
+          "key": "exit",
+          "target": "b1",
+          "x": 185,
+          "y": 210,
+          "width": 145,
+          "outline": [
+            185,
+            210,
+            145,
+            360
+          ]
+        }
+      ],
+      "sources": [
+        "assets/background/floor17/floor17-finished.png",
+        "assets/background/floor17/service-corridor-finished.png",
+        "assets/background/floor17/office-interior-aligned-finished.png",
+        "assets/background/floor17/workstation-empty.png",
+        "assets/background/floor17/restroom-finished.png"
+      ],
+      "signs": [],
+      "file": "docs/previews/background-audit/b1-restroom.jpg"
+    },
+    {
+      "id": "f1-restroom",
+      "floor": 1,
+      "header": "1F · 화장실",
+      "interior": true,
+      "width": 2065,
+      "scale": 1,
+      "broken": [],
+      "doors": [
+        {
+          "name": "복도",
+          "key": "exit",
+          "target": "f1",
+          "x": 450,
+          "y": 210,
+          "width": 145,
+          "outline": [
+            450,
+            210,
+            145,
+            360
+          ]
+        }
+      ],
+      "sources": [
+        "assets/background/floor17/floor17-finished.png",
+        "assets/background/floor17/service-corridor-finished.png",
+        "assets/background/floor17/office-interior-aligned-finished.png",
+        "assets/background/floor17/workstation-empty.png",
+        "assets/background/floor17/restroom-finished.png"
+      ],
+      "signs": [],
+      "file": "docs/previews/background-audit/f1-restroom.jpg"
+    },
+    {
+      "id": "f2-restroom",
+      "floor": 2,
+      "header": "2F · 화장실",
+      "interior": true,
+      "width": 1800,
+      "scale": 1,
+      "broken": [],
+      "doors": [
+        {
+          "name": "복도",
+          "key": "exit",
+          "target": "f2",
+          "x": 185,
+          "y": 210,
+          "width": 145,
+          "outline": [
+            185,
+            210,
+            145,
+            360
+          ]
+        }
+      ],
+      "sources": [
+        "assets/background/floor17/floor17-finished.png",
+        "assets/background/floor17/service-corridor-finished.png",
+        "assets/background/floor17/office-interior-aligned-finished.png",
+        "assets/background/floor17/workstation-empty.png",
+        "assets/background/floor17/restroom-finished.png"
+      ],
+      "signs": [],
+      "file": "docs/previews/background-audit/f2-restroom.jpg"
+    },
+    {
+      "id": "f3-restroom",
+      "floor": 3,
+      "header": "3F · 화장실",
+      "interior": true,
+      "width": 1800,
+      "scale": 1,
+      "broken": [],
+      "doors": [
+        {
+          "name": "복도",
+          "key": "exit",
+          "target": "f3",
+          "x": 185,
+          "y": 210,
+          "width": 145,
+          "outline": [
+            185,
+            210,
+            145,
+            360
+          ]
+        }
+      ],
+      "sources": [
+        "assets/background/floor17/floor17-finished.png",
+        "assets/background/floor17/service-corridor-finished.png",
+        "assets/background/floor17/office-interior-aligned-finished.png",
+        "assets/background/floor17/workstation-empty.png",
+        "assets/background/floor17/restroom-finished.png"
+      ],
+      "signs": [],
+      "file": "docs/previews/background-audit/f3-restroom.jpg"
+    },
+    {
+      "id": "f4-restroom",
+      "floor": 4,
+      "header": "4F · 화장실",
+      "interior": true,
+      "width": 1800,
+      "scale": 1,
+      "broken": [],
+      "doors": [
+        {
+          "name": "복도",
+          "key": "exit",
+          "target": "f4",
+          "x": 185,
+          "y": 210,
+          "width": 145,
+          "outline": [
+            185,
+            210,
+            145,
+            360
+          ]
+        }
+      ],
+      "sources": [
+        "assets/background/floor17/floor17-finished.png",
+        "assets/background/floor17/service-corridor-finished.png",
+        "assets/background/floor17/office-interior-aligned-finished.png",
+        "assets/background/floor17/workstation-empty.png",
+        "assets/background/floor17/restroom-finished.png"
+      ],
+      "signs": [],
+      "file": "docs/previews/background-audit/f4-restroom.jpg"
+    },
+    {
+      "id": "f5-restroom",
+      "floor": 5,
+      "header": "5F · 화장실",
+      "interior": true,
+      "width": 1800,
+      "scale": 1,
+      "broken": [],
+      "doors": [
+        {
+          "name": "복도",
+          "key": "exit",
+          "target": "f5",
+          "x": 185,
+          "y": 210,
+          "width": 145,
+          "outline": [
+            185,
+            210,
+            145,
+            360
+          ]
+        }
+      ],
+      "sources": [
+        "assets/background/floor17/floor17-finished.png",
+        "assets/background/floor17/service-corridor-finished.png",
+        "assets/background/floor17/office-interior-aligned-finished.png",
+        "assets/background/floor17/workstation-empty.png",
+        "assets/background/floor17/restroom-finished.png"
+      ],
+      "signs": [],
+      "file": "docs/previews/background-audit/f5-restroom.jpg"
+    },
+    {
+      "id": "f6-restroom",
+      "floor": 6,
+      "header": "6F · 화장실",
+      "interior": true,
+      "width": 1800,
+      "scale": 1,
+      "broken": [],
+      "doors": [
+        {
+          "name": "복도",
+          "key": "exit",
+          "target": "f6",
+          "x": 185,
+          "y": 210,
+          "width": 145,
+          "outline": [
+            185,
+            210,
+            145,
+            360
+          ]
+        }
+      ],
+      "sources": [
+        "assets/background/floor17/floor17-finished.png",
+        "assets/background/floor17/service-corridor-finished.png",
+        "assets/background/floor17/office-interior-aligned-finished.png",
+        "assets/background/floor17/workstation-empty.png",
+        "assets/background/floor17/restroom-finished.png"
+      ],
+      "signs": [],
+      "file": "docs/previews/background-audit/f6-restroom.jpg"
+    },
+    {
+      "id": "f7-restroom",
+      "floor": 7,
+      "header": "7F · 화장실",
+      "interior": true,
+      "width": 2126,
+      "scale": 1,
+      "broken": [],
+      "doors": [
+        {
+          "name": "복도",
+          "key": "exit",
+          "target": "f7",
+          "x": 511,
+          "y": 210,
+          "width": 145,
+          "outline": [
+            511.0000057220459,
+            210,
+            144.99996948242188,
+            360
+          ]
+        }
+      ],
+      "sources": [
+        "assets/background/floor17/floor17-finished.png",
+        "assets/background/floor17/service-corridor-finished.png",
+        "assets/background/floor17/office-interior-aligned-finished.png",
+        "assets/background/floor17/workstation-empty.png",
+        "assets/background/floor17/restroom-finished.png"
+      ],
+      "signs": [],
+      "file": "docs/previews/background-audit/f7-restroom.jpg"
+    },
+    {
+      "id": "f8-restroom",
+      "floor": 8,
+      "header": "8F · 화장실",
+      "interior": true,
+      "width": 1800,
+      "scale": 1,
+      "broken": [],
+      "doors": [
+        {
+          "name": "복도",
+          "key": "exit",
+          "target": "f8",
+          "x": 185,
+          "y": 210,
+          "width": 145,
+          "outline": [
+            185,
+            210,
+            145,
+            360
+          ]
+        }
+      ],
+      "sources": [
+        "assets/background/floor17/floor17-finished.png",
+        "assets/background/floor17/service-corridor-finished.png",
+        "assets/background/floor17/office-interior-aligned-finished.png",
+        "assets/background/floor17/workstation-empty.png",
+        "assets/background/floor17/restroom-finished.png"
+      ],
+      "signs": [],
+      "file": "docs/previews/background-audit/f8-restroom.jpg"
+    },
+    {
+      "id": "f9-restroom",
+      "floor": 9,
+      "header": "9F · 화장실",
+      "interior": true,
+      "width": 1800,
+      "scale": 1,
+      "broken": [],
+      "doors": [
+        {
+          "name": "복도",
+          "key": "exit",
+          "target": "f9",
+          "x": 185,
+          "y": 210,
+          "width": 145,
+          "outline": [
+            185,
+            210,
+            145,
+            360
+          ]
+        }
+      ],
+      "sources": [
+        "assets/background/floor17/floor17-finished.png",
+        "assets/background/floor17/service-corridor-finished.png",
+        "assets/background/floor17/office-interior-aligned-finished.png",
+        "assets/background/floor17/workstation-empty.png",
+        "assets/background/floor17/restroom-finished.png"
+      ],
+      "signs": [],
+      "file": "docs/previews/background-audit/f9-restroom.jpg"
+    },
+    {
+      "id": "f10-restroom",
+      "floor": 10,
+      "header": "10F · 화장실",
+      "interior": true,
+      "width": 1800,
+      "scale": 1,
+      "broken": [],
+      "doors": [
+        {
+          "name": "복도",
+          "key": "exit",
+          "target": "f10",
+          "x": 185,
+          "y": 210,
+          "width": 145,
+          "outline": [
+            185,
+            210,
+            145,
+            360
+          ]
+        }
+      ],
+      "sources": [
+        "assets/background/floor17/floor17-finished.png",
+        "assets/background/floor17/service-corridor-finished.png",
+        "assets/background/floor17/office-interior-aligned-finished.png",
+        "assets/background/floor17/workstation-empty.png",
+        "assets/background/floor17/restroom-finished.png"
+      ],
+      "signs": [],
+      "file": "docs/previews/background-audit/f10-restroom.jpg"
+    },
+    {
+      "id": "f11-restroom",
+      "floor": 11,
+      "header": "11F · 화장실",
+      "interior": true,
+      "width": 1800,
+      "scale": 1,
+      "broken": [],
+      "doors": [
+        {
+          "name": "복도",
+          "key": "exit",
+          "target": "f11",
+          "x": 185,
+          "y": 210,
+          "width": 145,
+          "outline": [
+            185,
+            210,
+            145,
+            360
+          ]
+        }
+      ],
+      "sources": [
+        "assets/background/floor17/floor17-finished.png",
+        "assets/background/floor17/service-corridor-finished.png",
+        "assets/background/floor17/office-interior-aligned-finished.png",
+        "assets/background/floor17/workstation-empty.png",
+        "assets/background/floor17/restroom-finished.png"
+      ],
+      "signs": [],
+      "file": "docs/previews/background-audit/f11-restroom.jpg"
+    },
+    {
+      "id": "f12-restroom",
+      "floor": 12,
+      "header": "12F · 화장실",
+      "interior": true,
+      "width": 2325,
+      "scale": 1,
+      "broken": [],
+      "doors": [
+        {
+          "name": "복도",
+          "key": "exit",
+          "target": "f12",
+          "x": 710,
+          "y": 210,
+          "width": 145,
+          "outline": [
+            710,
+            210,
+            144.99996948242188,
+            360
+          ]
+        }
+      ],
+      "sources": [
+        "assets/background/floor17/floor17-finished.png",
+        "assets/background/floor17/service-corridor-finished.png",
+        "assets/background/floor17/office-interior-aligned-finished.png",
+        "assets/background/floor17/workstation-empty.png",
+        "assets/background/floor17/restroom-finished.png"
+      ],
+      "signs": [],
+      "file": "docs/previews/background-audit/f12-restroom.jpg"
+    },
+    {
+      "id": "f13-restroom",
+      "floor": 13,
+      "header": "13F · 화장실",
+      "interior": true,
+      "width": 1800,
+      "scale": 1,
+      "broken": [],
+      "doors": [
+        {
+          "name": "복도",
+          "key": "exit",
+          "target": "f13",
+          "x": 185,
+          "y": 210,
+          "width": 145,
+          "outline": [
+            185,
+            210,
+            145,
+            360
+          ]
+        }
+      ],
+      "sources": [
+        "assets/background/floor17/floor17-finished.png",
+        "assets/background/floor17/service-corridor-finished.png",
+        "assets/background/floor17/office-interior-aligned-finished.png",
+        "assets/background/floor17/workstation-empty.png",
+        "assets/background/floor17/restroom-finished.png"
+      ],
+      "signs": [],
+      "file": "docs/previews/background-audit/f13-restroom.jpg"
+    },
+    {
+      "id": "f14-restroom",
+      "floor": 14,
+      "header": "14F · 화장실",
+      "interior": true,
+      "width": 1800,
+      "scale": 1,
+      "broken": [],
+      "doors": [
+        {
+          "name": "복도",
+          "key": "exit",
+          "target": "f14",
+          "x": 185,
+          "y": 210,
+          "width": 145,
+          "outline": [
+            185,
+            210,
+            145,
+            360
+          ]
+        }
+      ],
+      "sources": [
+        "assets/background/floor17/floor17-finished.png",
+        "assets/background/floor17/service-corridor-finished.png",
+        "assets/background/floor17/office-interior-aligned-finished.png",
+        "assets/background/floor17/workstation-empty.png",
+        "assets/background/floor17/restroom-finished.png"
+      ],
+      "signs": [],
+      "file": "docs/previews/background-audit/f14-restroom.jpg"
+    },
+    {
+      "id": "f15-restroom",
+      "floor": 15,
+      "header": "15F · 화장실",
+      "interior": true,
+      "width": 1800,
+      "scale": 1,
+      "broken": [],
+      "doors": [
+        {
+          "name": "복도",
+          "key": "exit",
+          "target": "f15",
+          "x": 185,
+          "y": 210,
+          "width": 145,
+          "outline": [
+            185,
+            210,
+            145,
+            360
+          ]
+        }
+      ],
+      "sources": [
+        "assets/background/floor17/floor17-finished.png",
+        "assets/background/floor17/service-corridor-finished.png",
+        "assets/background/floor17/office-interior-aligned-finished.png",
+        "assets/background/floor17/workstation-empty.png",
+        "assets/background/floor17/restroom-finished.png"
+      ],
+      "signs": [],
+      "file": "docs/previews/background-audit/f15-restroom.jpg"
+    },
+    {
+      "id": "f16-restroom",
+      "floor": 16,
+      "header": "16F · 화장실",
+      "interior": true,
+      "width": 1800,
+      "scale": 1,
+      "broken": [],
+      "doors": [
+        {
+          "name": "복도",
+          "key": "exit",
+          "target": "f16",
+          "x": 185,
+          "y": 210,
+          "width": 145,
+          "outline": [
+            185,
+            210,
+            145,
+            360
+          ]
+        }
+      ],
+      "sources": [
+        "assets/background/floor17/floor17-finished.png",
+        "assets/background/floor17/service-corridor-finished.png",
+        "assets/background/floor17/office-interior-aligned-finished.png",
+        "assets/background/floor17/workstation-empty.png",
+        "assets/background/floor17/restroom-finished.png"
+      ],
+      "signs": [],
+      "file": "docs/previews/background-audit/f16-restroom.jpg"
+    }
+  ],
+  "exits": [
+    {
+      "scene": "f1-harmony",
+      "name": "복도",
+      "key": "exit",
+      "x": 806,
+      "file": "docs/previews/background-audit/door-f1-harmony-0.jpg"
+    },
+    {
+      "scene": "f1-vision",
+      "name": "복도",
+      "key": "exit",
+      "x": 369,
+      "file": "docs/previews/background-audit/door-f1-vision-1.jpg"
+    },
+    {
+      "scene": "f1-clinic",
+      "name": "복도",
+      "key": "exit",
+      "x": 731,
+      "file": "docs/previews/background-audit/door-f1-clinic-2.jpg"
+    },
+    {
+      "scene": "f2-harmony",
+      "name": "복도",
+      "key": "exit",
+      "x": 2538,
+      "file": "docs/previews/background-audit/door-f2-harmony-3.jpg"
+    },
+    {
+      "scene": "f2-lounge",
+      "name": "복도",
+      "key": "exit",
+      "x": 1235,
+      "file": "docs/previews/background-audit/door-f2-lounge-4.jpg"
+    },
+    {
+      "scene": "f2-server",
+      "name": "복도",
+      "key": "exit",
+      "x": 0,
+      "file": "docs/previews/background-audit/door-f2-server-5.jpg"
+    },
+    {
+      "scene": "f3-fitness",
+      "name": "복도",
+      "key": "exit",
+      "x": 2632,
+      "file": "docs/previews/background-audit/door-f3-fitness-6.jpg"
+    },
+    {
+      "scene": "f3-cs",
+      "name": "복도",
+      "key": "exit",
+      "x": 789,
+      "file": "docs/previews/background-audit/door-f3-cs-7.jpg"
+    },
+    {
+      "scene": "f3-studio",
+      "name": "복도",
+      "key": "exit",
+      "x": 0,
+      "file": "docs/previews/background-audit/door-f3-studio-8.jpg"
+    },
+    {
+      "scene": "f4-lab",
+      "name": "복도",
+      "key": "exit",
+      "x": 0,
+      "file": "docs/previews/background-audit/door-f4-lab-9.jpg"
+    },
+    {
+      "scene": "f4-dev",
+      "name": "복도",
+      "key": "exit",
+      "x": 0,
+      "file": "docs/previews/background-audit/door-f4-dev-10.jpg"
+    },
+    {
+      "scene": "f4-meeting",
+      "name": "복도",
+      "key": "exit",
+      "x": 1245,
+      "file": "docs/previews/background-audit/door-f4-meeting-11.jpg"
+    },
+    {
+      "scene": "f5-rnd",
+      "name": "복도",
+      "key": "exit",
+      "x": 16,
+      "file": "docs/previews/background-audit/door-f5-rnd-12.jpg"
+    },
+    {
+      "scene": "f5-security",
+      "name": "복도",
+      "key": "exit",
+      "x": 0,
+      "file": "docs/previews/background-audit/door-f5-security-13.jpg"
+    },
+    {
+      "scene": "f5-meeting",
+      "name": "복도",
+      "key": "exit",
+      "x": 1670,
+      "file": "docs/previews/background-audit/door-f5-meeting-14.jpg"
+    },
+    {
+      "scene": "f6-work",
+      "name": "복도",
+      "key": "exit",
+      "x": 16,
+      "file": "docs/previews/background-audit/door-f6-work-15.jpg"
+    },
+    {
+      "scene": "f6-engineering",
+      "name": "복도",
+      "key": "exit",
+      "x": 584,
+      "file": "docs/previews/background-audit/door-f6-engineering-16.jpg"
+    },
+    {
+      "scene": "f6-meeting",
+      "name": "복도",
+      "key": "exit",
+      "x": 1702,
+      "file": "docs/previews/background-audit/door-f6-meeting-17.jpg"
+    },
+    {
+      "scene": "f7-vip",
+      "name": "복도",
+      "key": "exit",
+      "x": 1700,
+      "file": "docs/previews/background-audit/door-f7-vip-18.jpg"
+    },
+    {
+      "scene": "f7-test",
+      "name": "복도",
+      "key": "exit",
+      "x": 1051,
+      "file": "docs/previews/background-audit/door-f7-test-19.jpg"
+    },
+    {
+      "scene": "f7-verify",
+      "name": "복도",
+      "key": "exit",
+      "x": 244,
+      "file": "docs/previews/background-audit/door-f7-verify-20.jpg"
+    },
+    {
+      "scene": "f8-qa",
+      "name": "복도",
+      "key": "exit",
+      "x": 2584,
+      "file": "docs/previews/background-audit/door-f8-qa-21.jpg"
+    },
+    {
+      "scene": "f8-planning",
+      "name": "복도",
+      "key": "exit",
+      "x": 0,
+      "file": "docs/previews/background-audit/door-f8-planning-22.jpg"
+    },
+    {
+      "scene": "f8-meeting",
+      "name": "복도",
+      "key": "exit",
+      "x": 1141,
+      "file": "docs/previews/background-audit/door-f8-meeting-23.jpg"
+    },
+    {
+      "scene": "f9-office",
+      "name": "복도",
+      "key": "exit",
+      "x": 2538,
+      "file": "docs/previews/background-audit/door-f9-office-24.jpg"
+    },
+    {
+      "scene": "f9-sales",
+      "name": "복도",
+      "key": "exit",
+      "x": 765,
+      "file": "docs/previews/background-audit/door-f9-sales-25.jpg"
+    },
+    {
+      "scene": "f9-project",
+      "name": "복도",
+      "key": "exit",
+      "x": 1702,
+      "file": "docs/previews/background-audit/door-f9-project-26.jpg"
+    },
+    {
+      "scene": "f10-office",
+      "name": "복도",
+      "key": "exit",
+      "x": 0,
+      "file": "docs/previews/background-audit/door-f10-office-27.jpg"
+    },
+    {
+      "scene": "f10-meeting",
+      "name": "복도",
+      "key": "exit",
+      "x": 0,
+      "file": "docs/previews/background-audit/door-f10-meeting-28.jpg"
+    },
+    {
+      "scene": "f10-executive",
+      "name": "복도",
+      "key": "exit",
+      "x": 0,
+      "file": "docs/previews/background-audit/door-f10-executive-29.jpg"
+    },
+    {
+      "scene": "f11-sales",
+      "name": "복도",
+      "key": "exit",
+      "x": 1114,
+      "file": "docs/previews/background-audit/door-f11-sales-30.jpg"
+    },
+    {
+      "scene": "f11-strategy",
+      "name": "복도",
+      "key": "exit",
+      "x": 1145,
+      "file": "docs/previews/background-audit/door-f11-strategy-31.jpg"
+    },
+    {
+      "scene": "f11-marketing",
+      "name": "복도",
+      "key": "exit",
+      "x": 126,
+      "file": "docs/previews/background-audit/door-f11-marketing-32.jpg"
+    },
+    {
+      "scene": "f12-dev",
+      "name": "복도",
+      "key": "exit",
+      "x": 2041,
+      "file": "docs/previews/background-audit/door-f12-dev-33.jpg"
+    },
+    {
+      "scene": "f12-eval",
+      "name": "복도",
+      "key": "exit",
+      "x": 118,
+      "file": "docs/previews/background-audit/door-f12-eval-34.jpg"
+    },
+    {
+      "scene": "f12-lead",
+      "name": "복도",
+      "key": "exit",
+      "x": 1287,
+      "file": "docs/previews/background-audit/door-f12-lead-35.jpg"
+    },
+    {
+      "scene": "f13-ops",
+      "name": "복도",
+      "key": "exit",
+      "x": 1081,
+      "file": "docs/previews/background-audit/door-f13-ops-36.jpg"
+    },
+    {
+      "scene": "f13-testbay",
+      "name": "복도",
+      "key": "exit",
+      "x": 142,
+      "file": "docs/previews/background-audit/door-f13-testbay-37.jpg"
+    },
+    {
+      "scene": "f13-training",
+      "name": "복도",
+      "key": "exit",
+      "x": 1240,
+      "file": "docs/previews/background-audit/door-f13-training-38.jpg"
+    },
+    {
+      "scene": "f14-archive",
+      "name": "복도",
+      "key": "exit",
+      "x": 1326,
+      "file": "docs/previews/background-audit/door-f14-archive-39.jpg"
+    },
+    {
+      "scene": "f14-data",
+      "name": "복도",
+      "key": "exit",
+      "x": 145,
+      "file": "docs/previews/background-audit/door-f14-data-40.jpg"
+    },
+    {
+      "scene": "f14-ux",
+      "name": "복도",
+      "key": "exit",
+      "x": 771,
+      "file": "docs/previews/background-audit/door-f14-ux-41.jpg"
+    },
+    {
+      "scene": "f15-lab",
+      "name": "복도",
+      "key": "exit",
+      "x": 843,
+      "file": "docs/previews/background-audit/door-f15-lab-42.jpg"
+    },
+    {
+      "scene": "f15-seminar",
+      "name": "복도",
+      "key": "exit",
+      "x": 16,
+      "file": "docs/previews/background-audit/door-f15-seminar-43.jpg"
+    },
+    {
+      "scene": "f15-director",
+      "name": "복도",
+      "key": "exit",
+      "x": 194,
+      "file": "docs/previews/background-audit/door-f15-director-44.jpg"
+    },
+    {
+      "scene": "f16-kitchen",
+      "name": "복도",
+      "key": "exit",
+      "x": 1572,
+      "file": "docs/previews/background-audit/door-f16-kitchen-45.jpg"
+    },
+    {
+      "scene": "f16-cu",
+      "name": "복도",
+      "key": "exit",
+      "x": 1573,
+      "file": "docs/previews/background-audit/door-f16-cu-46.jpg"
+    },
+    {
+      "scene": "f16-cafe",
+      "name": "복도",
+      "key": "exit",
+      "x": 2,
+      "file": "docs/previews/background-audit/door-f16-cafe-47.jpg"
+    },
+    {
+      "scene": "f17-restroom",
+      "name": "복도",
+      "key": "exit",
+      "x": 28,
+      "file": "docs/previews/background-audit/door-f17-restroom-48.jpg"
+    },
+    {
+      "scene": "f17-manager",
+      "name": "복도",
+      "key": "exit",
+      "x": 38,
+      "file": "docs/previews/background-audit/door-f17-manager-49.jpg"
+    },
+    {
+      "scene": "b1-office",
+      "name": "복도",
+      "key": "exit",
+      "x": 322,
+      "file": "docs/previews/background-audit/door-b1-office-50.jpg"
+    },
+    {
+      "scene": "b1-control",
+      "name": "복도",
+      "key": "exit",
+      "x": 597,
+      "file": "docs/previews/background-audit/door-b1-control-51.jpg"
+    },
+    {
+      "scene": "b1-power",
+      "name": "복도",
+      "key": "exit",
+      "x": 897,
+      "file": "docs/previews/background-audit/door-b1-power-52.jpg"
+    },
+    {
+      "scene": "b2-main",
+      "name": "복도",
+      "key": "exit",
+      "x": 2635,
+      "file": "docs/previews/background-audit/door-b2-main-53.jpg"
+    },
+    {
+      "scene": "b2-power",
+      "name": "복도",
+      "key": "exit",
+      "x": 698,
+      "file": "docs/previews/background-audit/door-b2-power-54.jpg"
+    },
+    {
+      "scene": "b2-link",
+      "name": "복도",
+      "key": "exit",
+      "x": 306,
+      "file": "docs/previews/background-audit/door-b2-link-55.jpg"
+    },
+    {
+      "scene": "b2-restroom",
+      "name": "복도",
+      "key": "exit",
+      "x": 28,
+      "file": "docs/previews/background-audit/door-b2-restroom-56.jpg"
+    },
+    {
+      "scene": "b1-restroom",
+      "name": "복도",
+      "key": "exit",
+      "x": 28,
+      "file": "docs/previews/background-audit/door-b1-restroom-57.jpg"
+    },
+    {
+      "scene": "f1-restroom",
+      "name": "복도",
+      "key": "exit",
+      "x": 293,
+      "file": "docs/previews/background-audit/door-f1-restroom-58.jpg"
+    },
+    {
+      "scene": "f2-restroom",
+      "name": "복도",
+      "key": "exit",
+      "x": 28,
+      "file": "docs/previews/background-audit/door-f2-restroom-59.jpg"
+    },
+    {
+      "scene": "f3-restroom",
+      "name": "복도",
+      "key": "exit",
+      "x": 28,
+      "file": "docs/previews/background-audit/door-f3-restroom-60.jpg"
+    },
+    {
+      "scene": "f4-restroom",
+      "name": "복도",
+      "key": "exit",
+      "x": 28,
+      "file": "docs/previews/background-audit/door-f4-restroom-61.jpg"
+    },
+    {
+      "scene": "f5-restroom",
+      "name": "복도",
+      "key": "exit",
+      "x": 28,
+      "file": "docs/previews/background-audit/door-f5-restroom-62.jpg"
+    },
+    {
+      "scene": "f6-restroom",
+      "name": "복도",
+      "key": "exit",
+      "x": 28,
+      "file": "docs/previews/background-audit/door-f6-restroom-63.jpg"
+    },
+    {
+      "scene": "f7-restroom",
+      "name": "복도",
+      "key": "exit",
+      "x": 353,
+      "file": "docs/previews/background-audit/door-f7-restroom-64.jpg"
+    },
+    {
+      "scene": "f8-restroom",
+      "name": "복도",
+      "key": "exit",
+      "x": 28,
+      "file": "docs/previews/background-audit/door-f8-restroom-65.jpg"
+    },
+    {
+      "scene": "f9-restroom",
+      "name": "복도",
+      "key": "exit",
+      "x": 28,
+      "file": "docs/previews/background-audit/door-f9-restroom-66.jpg"
+    },
+    {
+      "scene": "f10-restroom",
+      "name": "복도",
+      "key": "exit",
+      "x": 28,
+      "file": "docs/previews/background-audit/door-f10-restroom-67.jpg"
+    },
+    {
+      "scene": "f11-restroom",
+      "name": "복도",
+      "key": "exit",
+      "x": 28,
+      "file": "docs/previews/background-audit/door-f11-restroom-68.jpg"
+    },
+    {
+      "scene": "f12-restroom",
+      "name": "복도",
+      "key": "exit",
+      "x": 552,
+      "file": "docs/previews/background-audit/door-f12-restroom-69.jpg"
+    },
+    {
+      "scene": "f13-restroom",
+      "name": "복도",
+      "key": "exit",
+      "x": 28,
+      "file": "docs/previews/background-audit/door-f13-restroom-70.jpg"
+    },
+    {
+      "scene": "f14-restroom",
+      "name": "복도",
+      "key": "exit",
+      "x": 28,
+      "file": "docs/previews/background-audit/door-f14-restroom-71.jpg"
+    },
+    {
+      "scene": "f15-restroom",
+      "name": "복도",
+      "key": "exit",
+      "x": 28,
+      "file": "docs/previews/background-audit/door-f15-restroom-72.jpg"
+    },
+    {
+      "scene": "f16-restroom",
+      "name": "복도",
+      "key": "exit",
+      "x": 28,
+      "file": "docs/previews/background-audit/door-f16-restroom-73.jpg"
+    }
+  ],
+  "frames": 245,
+  "errors": [],
+  "supplement": {
+    "archiveLit": "f14-archive-lit.jpg",
+    "managerCenteredCorrected": true,
+    "detailScreenshots": 4,
+    "additionalCameraViews": 3
+  }
+}

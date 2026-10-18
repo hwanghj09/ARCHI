@@ -14,22 +14,14 @@ const switchableBackgrounds = new Set([
 // [x, y, 폭, 높이]는 배경 원본 픽셀 기준이다. 표시판은 문 위에 두고 원래 그려진 표시판을 덮는다. 계단 문 위 표시판은 문 그림(위쪽 y=232)에 걸리지 않게 그 위에 둔다.
 const exitSignSrc = 'assets/objects/floor-kit/exit-sign.png';
 const luminousSigns = {
-  'floor1/clinic': [1860, 720, [[888, 211, 71, 46]]],
-  'floor1/clinic-finished': [1860, 760, [[888, 211, 71, 46]]],
   'floor1/corridor': [5000, 720, [[2941, 193, 54, 35]]],
   'floor1/corridor-finished': [5000, 760, [[2941, 193, 54, 35]]],
   'floor1/corridor-unified-finished': [5000, 760, [[2941, 193, 54, 35]]],
-  'floor1/vision': [2356, 720, [[270, 270, 49, 32]]],
-  'floor1/vision-finished': [2356, 760, [[270, 270, 49, 32]]],
   'floor7/corridor': [5000, 720, [[2921, 190, 58, 38]]],
   'floor7/corridor-finished': [5000, 760, [[2921, 190, 58, 38]]],
   'floor12/corridor': [5000, 720, [[2847, 197, 48, 31]]],
   'floor12/dev': [3600, 720, [[210, 98, 68, 44]]],
-  'floor12/eval': [1804, 720, [[400, 215, 51, 33]]],
-  'floor12/office': [3280, 720, [[1587, 220, 58, 38]]],
   'floor12/corridor-finished': [5000, 760, [[2847, 197, 48, 31]]],
-  'floor12/eval-finished': [1804, 760, [[400, 215, 51, 33]]],
-  'floor12/office-finished': [3280, 760, [[1587, 220, 58, 38]]],
   'floor17/floor17': [3328, 768, [[2962, 182, 68, 44]]],
   'floor17/floor17-finished': [3328, 760, [[2962, 182, 68, 44]]],
 };
