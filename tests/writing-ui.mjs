@@ -21,7 +21,7 @@ assert(interaction.includes('writingSheetFor(nearbyDoor, inspectionMessage)'), '
 assert(builder.includes('writing: prop.writing'));
 
 const WRITING_SURFACES = {
-  whiteboard: [], notebook: [], corkboard: [], chalkboard: [], card: [], receipt: [],
+  whiteboard: [], notebook: [], corkboard: [], chalkboard: [], card: ['badge'], receipt: [],
   memo: ['sticky', 'sticky-pink', 'sticky-blue', 'sticky-green', 'slip'],
   document: ['sheet', 'notice', 'sign', 'poster', 'certificate', 'plaque'],
   screen: ['monitor', 'terminal', 'lcd'],

@@ -99,7 +99,11 @@ function refreshContinue() {
     const name = saved.scene.id === 'office' ? '17층 사무실' : floorById.get(saved.scene.id).label;
     const time = Number.isFinite(saved.savedAt) ? new Date(saved.savedAt).toLocaleString('ko-KR', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : '';
     info.textContent = `${name} · ${time} 자동 저장`;
-  } else info.textContent = '진행 상황은 자동으로 저장됩니다.';
+  } else {
+    let cleared = false;
+    try { cleared = Boolean(localStorage.getItem(clearedKey)); } catch { /* 저장소가 없으면 표시하지 않는다. */ }
+    info.textContent = cleared ? '★ TRUE END 클리어 · 새 게임으로 다시 시작할 수 있습니다.' : '진행 상황은 자동으로 저장됩니다.';
+  }
 }
 
 function closeMainMenu() {

@@ -54,6 +54,6 @@ function floorShortLabel(floorValue) {
 // 책상 아래 콘센트에 충전기를 꽂고 휴대폰을 책상에 둔다. 전력은 해당 층 공급을 따른다.
 function phoneChargerFixture(x, tabletopY = 450) {
   return { name: '휴대폰 충전 콘센트', x, y: 530, width: 24, height: 32, phoneTop: Math.round(tabletopY) - 574,
-    style: 'phone-charger', phoneCharger: true,
+    style: 'phone-charger', phoneCharger: true, reach: 48,
     message: '콘센트에 충전기를 꽂고 휴대폰을 책상에 두어 충전한다. 같은 자리에서 다시 가져가자.' };
 }

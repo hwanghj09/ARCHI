@@ -53,10 +53,10 @@ const B2_LAYOUT = {
 const B2_ROOMS = interiorRooms(-2, [
   { id: 'b2-main', name: 'ARCHI 메인 서버실', width: 3150, windowless: true, interiorStyle: 'core-hall',
     backgroundWallsOnly: true, backgroundImage: { src: 'assets/background/b2/b2-main-finished.png', height: 760, top: 0 },
-    // 엔딩의 문 막기(b2-ending.js): DELETE 뒤에만 밀리는 장비 운반 상자. 무거워서 이동 속도의 0.35배로 밀린다. 출구(문 2850~3010,
-    // exitDoorX)를 다 가리는 자리(중심 2930)까지 밀면 문이 막힌다. 콘솔(1400)에서 달려와 밀면 약 9초, 로봇은 약 14초 뒤 온다.
+    // 엔딩의 문 막기(b2-ending.js): DELETE 뒤에만 밀리는 장비 운반 상자. 무거워서 이동 속도의 0.35배로 밀린다. 출구(문 2785~2945)를
+    // 다 가리는 자리(중심 2865)까지 밀면 문이 막힌다. 콘솔(1400)에서 달려와 밀면 약 8초, 로봇은 약 16초 뒤 온다.
     movables: [{ kind: 'b2-crate', name: '장비 운반 상자', x: 1950, width: 190, height: 95,
-      pushable: { factor: .35, minX: 2045, maxX: 2930, barricade: true } }],
+      pushable: { factor: .35, minX: 2045, maxX: 2865, barricade: true } }],
     fixtures: [
       { name: '서버실 배선 트레이', style: 'service-tray', x: 64, y: 144, width: 3022, height: 34 },
       { name: '외부 전송 현황', x: 1900, y: 120, width: 500, height: 170, style: 'transfer-screen',

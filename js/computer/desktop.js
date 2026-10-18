@@ -5,8 +5,8 @@ const COMPUTER_APPS = {
   mail: { title: '사내 메일', icon: 'mail' },
   calculator: { title: '계산기', icon: 'calculator', width: 380, height: 510 },
   building: { title: '시설 안내', icon: 'building' },
-  browser: { title: '블로그', icon: 'notes', width: 950, height: 580 },
-  transfer: { title: '파일 전송', icon: 'files', width: 570, height: 390 },
+  browser: { title: '블로그', icon: 'blog', width: 950, height: 580 },
+  transfer: { title: '파일 전송', icon: 'transfer', width: 570, height: 390 },
   document: { title: '문서', icon: 'notes' }
 };
 const computerWindows = new Map();
@@ -341,10 +341,12 @@ function resetComputerDesktop() {
   }
   refreshComputerWindows();
 }
+// 게임 속은 자정이다: 휴대폰 상태 표시줄처럼 시각은 00:00으로 둔다(날짜만 오늘).
 function refreshComputerClock() {
-  const now = new Date();
-  document.getElementById('computer-clock').textContent = `${now.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit', hour12: false })}\n${now.toLocaleDateString('ko-KR')}`;
-  document.getElementById('computer-clock').dateTime = now.toISOString();
+  const midnight = new Date();
+  midnight.setHours(0, 0, 0, 0);
+  document.getElementById('computer-clock').textContent = `00:00\n${midnight.toLocaleDateString('ko-KR')}`;
+  document.getElementById('computer-clock').dateTime = midnight.toISOString();
 }
 refreshComputerClock();
 setInterval(refreshComputerClock, 60000);

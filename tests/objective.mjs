@@ -145,7 +145,7 @@ try {
   // 이상 행동 목표 도중 게이트에 출입증을 태우면(조사창을 닫은 뒤) 세 번째 컷씬이 나오고, 끝나면 '출입증 쌔비기' 목표가 생긴다.
   await page.evaluate(() => collectedItems.add('story-gate-tagged'));
   await page.locator('#story-scene').waitFor({ state: 'visible', timeout: 10000 });
-  assert.equal(await page.locator('#story-caption').textContent(), '아 맞다 나 일용직이였지');
+  assert.equal(await page.locator('#story-caption').textContent(), '아 맞다 나 일용직이었지');
   await page.keyboard.press('Escape');
   await waitTyped('출입증 쌔비기', '출입증이 필요하다. 내 자리 옆 사원의 자리를 조사해보자.');
   assert.equal(await page.evaluate(() => officePostit.element.hidden), false, '출입증 쌔비기가 시작되면 옆자리 포스트잇이 생긴다');

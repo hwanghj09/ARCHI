@@ -1,6 +1,20 @@
 // 상호작용: 가까운 문·소품 찾기, E 힌트 문구, E를 눌렀을 때의 처리.
 let nearbyDoor = null;
 
+// 조사 대상 고르기: 앞 묶음(groups 순서)을 먼저 본다. 범위는 폭의 반 + reach(기본 28px). 같은 묶음 안에서 범위가 겹치면
+// 수호가 폭 안에 서 있는 것 중 가운데가 가장 가까운 것을 고르고(8층 QA 벤치처럼 붙어 있는 장치, 12층 게이트 옆 엘리베이터),
+// 어느 폭 안에도 서 있지 않으면 목록 순서대로 첫 번째를 고른다(엘리베이터 문 옆의 게시판).
+function pickNearbyDoor(groups, standing) {
+  const gap = door => Math.abs(body.position.x - door.x - door.width / 2);
+  for (const group of groups) {
+    const hits = group.filter(door => standing(door) && gap(door) < door.width / 2 + (door.reach ?? 28));
+    const inside = hits.filter(door => gap(door) < door.width / 2);
+    if (inside.length) return inside.reduce((best, door) => gap(door) < gap(best) ? door : best);
+    if (hits.length) return hits[0];
+  }
+  return null;
+}
+
 function updateInteraction() {
   if (photoCaptureTime > 0 || itemUseTime > 0 || openingActive || blackoutSceneActive || cctvSceneActive || playerCaught || hallucinationCaught) { hint.hidden = true; return; }
   if (room === 'dynamic') {
@@ -11,14 +25,13 @@ function updateInteraction() {
     // 전력이 들어온 채 감지했던 자리로 걸어 돌아가는('return') 로봇은 감지를 끈 채 움직이고 있어 바로 옆까지
     // 갈 수 있다. 정비 패널은 멈춘 로봇의 보조 배터리 화면이므로 그동안은 조사 대상에서 뺀다.
     const returningRobot = guardPatrolPowered(guardPatrol) && guardPatrol.mode === 'return' ? guardPatrol.door : null;
-    const candidates = [...(guardPatrol.door ? [guardPatrol.door] : []),
-      ...currentDoors.filter(door => door.accessGate && door.solid), ...currentDoors.filter(door => door.phoneCharger),
-      ...currentDoors.filter(door => !door.accessGate && !door.phoneCharger)]
-      // hideWhenTaken 설비(16층 항불안제)는 챙기고 나면 사라지므로 더는 조사 대상이 아니다. 전력이 없는 층의 전자 장치도 빠진다(power.js).
-      .filter(door => door !== returningRobot && !(door.hideWhenTaken && collectedItems.has(door.gives)) && !deviceUnpowered(door));
-    // standYs: 설비를 조사할 수 있는 발 높이가 여럿일 때(16층 선반: 바닥에서, 또는 인라면 박스 위에서) 쓴다.
-    nearbyDoor = candidates.find(door => grounded && [].concat(door.standYs ?? door.standY ?? floorY).some(y => Math.abs(body.bounds.max.y - y) < 2) &&
-      Math.abs(body.position.x - door.x - door.width / 2) < door.width / 2 + 28) || null;
+    // hideWhenTaken 설비(16층 항불안제)는 챙기고 나면 사라지므로 더는 조사 대상이 아니다. 전력이 없는 층의 전자 장치도 빠진다(power.js).
+    const usable = door => door !== returningRobot && !(door.hideWhenTaken && collectedItems.has(door.gives)) && !deviceUnpowered(door);
+    const groups = [guardPatrol.door ? [guardPatrol.door] : [], currentDoors.filter(door => door.accessGate && door.solid),
+      currentDoors.filter(door => door.phoneCharger), currentDoors.filter(door => !(door.accessGate && door.solid) && !door.phoneCharger)];
+    // standYs: 설비를 조사할 수 있는 발 높이가 여럿일 때(16층 선반: 바닥에서, 또는 진라면 박스 위에서) 쓴다.
+    nearbyDoor = pickNearbyDoor(groups.map(group => group.filter(usable)), door => grounded &&
+      [].concat(door.standYs ?? door.standY ?? floorY).some(y => Math.abs(body.bounds.max.y - y) < 2));
     for (const door of currentDoors) door.element.classList.toggle('near', door === nearbyDoor);
     updateOutline();
     hint.hidden = !nearbyDoor;
@@ -29,11 +42,12 @@ function updateInteraction() {
     }
     return;
   }
-  const activeDoors = room === 'corridor' ? [...doors.filter(door => door.phoneCharger), ...doors.filter(door => !door.phoneCharger),
-    ...officeDoors.filter(door => door.room === room)] :
-    [...officeDoors.filter(door => door.room === room), officeComputer, ...(officePostit.element.hidden ? [] : [officePostit])];
-  nearbyDoor = activeDoors.find(door => !deviceUnpowered(door) && grounded && Math.abs(body.bounds.max.y - floorY) < 2 &&
-    Math.abs(body.position.x - door.x - door.width / 2) < door.width / 2 + 28) || null;
+  const groups = room === 'corridor' ? [doors.filter(door => door.phoneCharger), [...doors.filter(door => !door.phoneCharger),
+    ...officeDoors.filter(door => door.room === room)]] :
+    [officeDoors.filter(door => door.room === room && door.phoneCharger),
+      [...officeDoors.filter(door => door.room === room && !door.phoneCharger), officeComputer, ...(officePostit.element.hidden ? [] : [officePostit])]];
+  nearbyDoor = pickNearbyDoor(groups.map(group => group.filter(door => !deviceUnpowered(door))),
+    () => grounded && Math.abs(body.bounds.max.y - floorY) < 2);
   if (!realBuildingBlackout() && room === 'corridor' && currentSceneFloor === 17 && nearbyDoor?.type === 'elevator') {
     startBlackoutScene(nearbyDoor);
     return;

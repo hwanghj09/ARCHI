@@ -48,6 +48,7 @@ function openControl(door) {
 function closeControl() {
   if (!usingControl) return;
   usingControl = false;
+  modalClosedAt = performance.now();
   controlDoor = null;
   controlStep = null;
   controlDrag = null;

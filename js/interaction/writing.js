@@ -33,10 +33,10 @@ const WRITING_SURFACE_BY_FILE = {
 };
 const WRITING_SURFACE_LABELS = {
   whiteboard: '화이트보드', notebook: '노트', corkboard: '게시판', chalkboard: '칠판', memo: '메모',
-  document: '문서', screen: '화면', receipt: '영수증', label: '라벨', card: '사원증',
+  document: '문서', screen: '화면', receipt: '영수증', label: '라벨', card: '물건',
 };
 const WRITING_LOOK_LABELS = { notice: '공지', sign: '안내판', poster: '포스터', certificate: '증서', plaque: '명패',
-  slip: '쪽지', sticker: '스티커', warning: '경고 스티커', plate: '명판', tag: '꼬리표' };
+  slip: '쪽지', sticker: '스티커', warning: '경고 스티커', plate: '명판', tag: '꼬리표', badge: '사원증' };
 const WRITING_BOARDS = new Set(['whiteboard', 'corkboard', 'chalkboard']);
 const WRITING_PINNED = new Set(['note', 'paper']);
 const WRITING_LINE_TILTS = [-0.5, 0.3, -0.15, 0.45, -0.35, 0.2];

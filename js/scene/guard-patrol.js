@@ -8,6 +8,7 @@ const guardPatrol = { x: 4530, facing: -1, wait: 0, elapsed: 0, mode: 'dock',
   lostTime: 0, captureTime: 0, door: null, image: null, chaseOriginX: null, spottedX: null };
 // 같은 규칙으로 움직이는 다른 로봇(B2 엔딩 추격, b2-ending.js)은 b2Robots에 둔다. 로봇 옵션:
 // pursuit — 놓쳐도 포기하지 않는다. followToElevator — 엘리베이터 앞에서도 멈추지 않는다. sight — 감지 거리(아래).
+// sensor — 전방 센서 거리(없으면 720px). sight와 달리 순찰 구간 밖은 보지 않는다.
 // chaseSpeed — 추격 속도(px/s)를 돌려주는 함수(없으면 270).
 // onCaught — 붙잡는 연출이 끝나면 '다시 시도' 창 대신 부른다. selfPowered — 층 전력과 상관없이 움직인다.
 // 옵션이 없는 R-01은 예전과 똑같이 움직인다.
@@ -20,11 +21,12 @@ const guardPatrol = { x: 4530, facing: -1, wait: 0, elapsed: 0, mode: 'dock',
 const roamerFloors = [-1, ...Array.from({ length: 15 }, (_, index) => index + 2)];
 const roamerStay = { corridor: 30000, room: 15000, ride: 6000 };
 const roamerSpeed = { patrol: 70, chase: 220 }; // R-01(순찰 80, 추격 270)보다 느리다. 걷기 200·달리기 340
-// 수호가 문으로 나오자마자 붙잡히지 않게, 수호가 들어온 문 앞에서 이만큼은 떨어져 있는다(전방 센서 720px보다 멀다).
+// 수호가 문으로 나오자마자 붙잡히지 않게, 수호가 들어온 문 앞에서 이만큼은 떨어져 있는다(전방 센서보다 멀다).
 const roamerSafeDistance = 800;
 const roamer = { name: 'R-03', where: 'f9', next: 'elevator', lastFloor: null, stay: 60000, car: null, trip: null, roomsLeft: 0, x: 0, facing: -1, wait: 0, elapsed: 0,
   mode: 'patrol', lostTime: 0, captureTime: 0, door: null, image: null, chaseOriginX: null, spottedX: null, firstEncounter: false, selfPowered: true,
-  followToElevator: true, chaseSpeed: () => roamerSpeed.chase };
+  followToElevator: true, chaseSpeed: () => roamerSpeed.chase,
+  sensor: 480 }; // 화면 절반(640px)보다 짧아, 감지되기 전에 화면에서 먼저 보인다
 // R-03은 엘리베이터 앞에서도 쫓아오고, 칸에 탄 수호를 따라 문을 억지로 연다(cabin-pry.js).
 const guardCapturePanel = document.getElementById('guard-capture');
 let guardBlocked = [];
@@ -329,7 +331,7 @@ function updateRobot(robot, delta) {
   } else if (delta > 0) {
     const dx = body.position.x - robot.x;
     const sameLevel = Math.abs(body.bounds.max.y - floorY) < 180;
-    // 전방 센서(720px)만 순찰 구간 밖(비상계단 왼쪽, left 미만)을 가리지 않는다 — 그 구역은 로봇이
+    // 전방 센서(720px, sensor)만 순찰 구간 밖(비상계단 왼쪽, left 미만)을 가리지 않는다 — 그 구역은 로봇이
     // 애초에 돌지 않는 곳이라, 저 멀리서 서성이는 수호를 센서 사거리만으로 감지해서 쫓아오는 것은
     // 담당 구역 밖 추격이라 부당하다. 바로 옆 근접 감지(130px)는 구간과 무관하게 그대로 둔다 —
     // 추격을 놓치고 patrol로 돌아가는 로봇이 아직 구간 밖에 있는 채로 수호가 바로 옆에 다가와도
@@ -342,7 +344,7 @@ function updateRobot(robot, delta) {
     const atElevator = !robot.followToElevator && currentDoors.some(otherDoor => otherDoor.type === 'elevator' &&
       Math.abs(body.position.x - (otherDoor.x + otherDoor.width / 2)) < otherDoor.width / 2 + 60);
     // 후방 센서(320px)는 1층 R-01에만 있고, 전방 센서처럼 순찰 구간 밖의 수호는 보지 않는다.
-    const sensorRange = dx * robot.facing > 0 ? (robot.sight ?? 720) : robot === guardPatrol ? 320 : 0;
+    const sensorRange = dx * robot.facing > 0 ? (robot.sight ?? robot.sensor ?? 720) : robot === guardPatrol ? 320 : 0;
     const seesPlayer = sameLevel && !atElevator && (Math.abs(dx) < 130 || (inBeat && Math.abs(dx) < sensorRange));
     // 'return'(복귀 이동 중)도 patrol/dock과 똑같이 감지된다 — 복귀 중이라고 무적은 아니다.
     if ((robot.mode === 'patrol' || robot.mode === 'dock' || robot.mode === 'return') && seesPlayer) {

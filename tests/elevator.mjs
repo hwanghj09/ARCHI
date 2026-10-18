@@ -124,7 +124,7 @@ try {
   assert.equal(await page.locator('#cabin-scene').getAttribute('data-door'), 'open', 'The arrival door opens after fade-in');
   await page.locator('#cabin-exit').click();
   assert(await cabin.isVisible(), 'Cabin remains visible until departure fade reaches black');
-  assert.equal(await page.locator('header span').textContent(), '17F · 복도');
+  assert.equal(await page.locator('header span').textContent(), '엘리베이터 · 16F', 'The header follows the car while riding');
   await page.clock.runFor(150);
   assert(await cabin.isVisible());
   assert(await page.evaluate(() => document.elementFromPoint(innerWidth / 2, innerHeight / 2).id === 'room-transition'));

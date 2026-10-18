@@ -1,12 +1,11 @@
 // 엘리베이터 문 강제 개방: 쫓던 순찰 로봇 R-03(guard-patrol.js)이 수호가 탄 칸의 문 옆까지 오면(칸이 그 층에 서 있을 때)
-// 층 버튼을 눌러 문이 닫히던 참이면 문틈에 손을 넣어 억지로 연다(assets/ending/elevator-gap-robot.png). "문 닫기" 게이지가 뜨고
-// Enter·스페이스(모바일은 게이지 버튼이나 칸의 닫힘 버튼)를 연타하면 차고, 로봇은 계속 깎는다. 다 차면 문이 닫히고 고른 층으로 간다.
-// 다 깎이거나 제한 시간이 지나면 끌려 나와 붙잡힌다. 층을 안 누르고 문이 열린 채 있으면 문 옆에 온 로봇이 잠시 뒤 끌어낸다.
-const cabinPryPush = 0.07; // 한 번 누를 때 차는 양
+// 문이 열려 있거나 닫히던 참이면 문틈에 손을 넣어 억지로 연다(assets/ending/elevator-gap-robot.png). "문 닫기" 게이지가 뜨고
+// 스페이스·Enter(모바일은 게이지 버튼이나 칸의 닫힘 버튼)를 연타하면 차고, 로봇은 계속 깎는다. 다 차면 문이 닫히고, 층을 골라 두었으면
+// 그 층으로 간다. 다 깎이거나 제한 시간이 지나면 끌려 나와 붙잡힌다.
+const cabinPryPush = 0.1; // 한 번 누를 때 차는 양
 const cabinPryDrain = 0.2; // 로봇이 1초에 깎는 양
 const cabinPryLimit = 5000; // 게이지 제한 시간
-const cabinPryGrabDelay = 1500; // 문이 열린 채일 때 로봇이 끌어내기까지
-const cabinPry = { state: 'idle', gauge: 0, time: 0, grab: 0 };
+const cabinPry = { state: 'idle', gauge: 0, time: 0 };
 const cabinPryGauge = document.getElementById('cabin-pry-gauge');
 const cabinPryFill = document.getElementById('cabin-pry-fill');
 const cabinPryRobot = document.getElementById('cabin-pry-robot');
@@ -51,23 +50,18 @@ function updateCabinPry() {
   }
   const atDoor = roamerChasingCabin() && roamer.x === cabinPryStopX();
   cabinPryRobot.hidden = !atDoor;
-  if (!atDoor) { cabinPry.grab = 0; return false; }
+  if (!atDoor) return false;
   const phase = cabinScene.dataset.door;
-  if (phase === 'closing' && selectedFloor !== null) {
-    // 닫히던 만큼 게이지가 차 있는 채로 시작한다(빨리 누를수록 유리하다).
+  if (phase === 'closing' || phase === 'open') {
+    // 닫히던 만큼 게이지가 차 있는 채로 시작한다(빨리 누를수록 유리하다). 활짝 열린 문은 거의 빈 게이지에서 시작한다.
     Object.assign(cabinPry, { state: 'struggle', gauge: Math.max(.15, 1 - cabinDoorAmount), time: 0 });
     cabinScene.dataset.door = 'struggle';
-    cabinStatus.textContent = '경비 로봇이 문을 억지로 연다! Enter나 스페이스를 연타해 문을 닫아라.';
+    cabinStatus.textContent = '경비 로봇이 문을 억지로 연다! 스페이스나 Enter를 연타해 문을 닫아라.';
     playDoorPrySound();
     cabinPryGauge.hidden = false;
     refreshCabinPry();
     cabin.focus({ preventScroll: true }); // 버튼에 초점이 있으면 Enter·스페이스가 그 버튼을 눌러 버린다
     return true;
-  }
-  if (phase === 'open' && selectedFloor === null) {
-    if (!cabinPry.grab) cabinStatus.textContent = '경비 로봇이 문 앞에 왔다! 층 버튼을 눌러!';
-    cabinPry.grab += step;
-    if (cabinPry.grab >= cabinPryGrabDelay) { catchInCabinPry(); return true; }
   }
   return false;
 }
@@ -102,7 +96,7 @@ function refreshCabinPry() {
 }
 
 function hideCabinPry() {
-  Object.assign(cabinPry, { state: 'idle', gauge: 0, time: 0, grab: 0 });
+  Object.assign(cabinPry, { state: 'idle', gauge: 0, time: 0 });
   cabinPryGauge.hidden = cabinPryRobot.hidden = true;
   if (cabinScene.dataset.door === 'struggle') cabinScene.dataset.door = 'open';
 }

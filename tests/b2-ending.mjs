@@ -243,13 +243,13 @@ try {
   await settle(() => b2CaptureActive);
   await page.locator('#b2-capture-skip').click();
   await page.locator('#b2-checkpoint').click();
-  await fromCheckpoint(60);
+  await fromCheckpoint(30);
   await page.keyboard.down('KeyD');
   await settle('playerCaught', 800);
   await page.keyboard.up('KeyD');
   const walked = await page.evaluate(() => ({ barricaded: b2Ending.barricaded, caught: playerCaught }));
-  console.log('sanity 60 walking push:', walked);
-  assert.deepEqual(walked, { barricaded: false, caught: true }, 'Walking the crate over is too slow: a robot gets in first');
+  console.log('sanity 30 walking push:', walked);
+  assert.deepEqual(walked, { barricaded: false, caught: true }, 'Below 45%, walking the crate over is too slow: a robot gets in first');
 
   assert.deepEqual(errors, []);
   console.log('B2 ending checks passed.');

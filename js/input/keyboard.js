@@ -140,12 +140,7 @@ window.addEventListener('keydown', event => {
   if (selectingFloor) {
     if (event.code === 'Escape') exitCabin();
     if (keyMatches('light', event.code) && !event.repeat) { event.preventDefault(); togglePhoneLight(); } // 엘리베이터 안에서도 휴대폰·가방·플래시를 쓴다
-    // 로봇이 문을 억지로 여는 중(cabin-pry.js): Enter·스페이스 연타. 꾹 누르기(반복 입력)는 치지 않는다.
-    if (['Enter', 'Space'].includes(event.code) && cabinPryStruggling()) {
-      event.preventDefault();
-      if (!event.repeat) pushCabinPry();
-    }
-    // 로봇이 문을 억지로 여는 중(cabin-pry.js): Enter·스페이스 연타. 꾹 누르기(반복 입력)는 치지 않는다.
+    // 로봇이 문을 억지로 여는 중(cabin-pry.js): 스페이스·Enter 연타. 꾹 누르기(반복 입력)는 치지 않는다.
     if (['Enter', 'Space'].includes(event.code) && cabinPryStruggling()) {
       event.preventDefault();
       if (!event.repeat) pushCabinPry();
@@ -154,7 +149,7 @@ window.addEventListener('keydown', event => {
   }
   if (event.code === 'Escape') {
     event.preventDefault();
-    if (!event.repeat) openGameMenu();
+    if (!event.repeat && performance.now() - modalClosedAt > 700) openGameMenu();
     return;
   }
   if (keyMatches('light', event.code)) {

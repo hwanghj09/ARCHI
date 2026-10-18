@@ -13,7 +13,7 @@ layout.json example:
     {"x": 2300, "width": 720, "wall": "wall-glass-mixed", "behind": "rooms/lounge.png"}
   ]
 }
-- every segment gets a pilaster on both ends automatically
+- every segment gets a pilaster on both ends automatically (from the wall top y=96 down: the ceiling and its soffit band run over it)
 - "behind" (optional): an image drawn behind glass walls (room interior). Add "behind_floor_y": <floor line y in that image>
   so its floor is aligned to y=570 (e.g. 438 for the floor-section assets); otherwise it is scaled to the module height
 - result: height 752 (floor line at 570). In floor-XX.js:
@@ -43,6 +43,9 @@ def main(layout_path, out_path):
     H = pil.size[1]
     Wt = cfg['width'] * k
     canvas = tile(load(cfg.get('fill', 'wall-concrete')), Wt)
+    # 기둥은 벽 윗선(y=96)부터 그린다. 천장과 천장 띠는 기둥 위로 그대로 이어진다(trim_pilaster_ceiling.py와 같은 규칙).
+    top = 96 * k
+    pil = pil.crop((0, top, pil.size[0], H))
     for seg in cfg.get('segments', []):
         x, w = seg['x'] * k, seg['width'] * k
         layer = Image.new('RGBA', (w, H), (12, 13, 15, 255))
@@ -54,8 +57,8 @@ def main(layout_path, out_path):
             layer.alpha_composite(b.crop((0, 0, min(w, b.size[0]), H)), (0, 0))
         layer.alpha_composite(tile(load(seg['wall']), w))
         canvas.paste(layer, (x, 0))
-        canvas.alpha_composite(pil, (x - pil.size[0] // 2, 0))
-        canvas.alpha_composite(pil, (x + w - pil.size[0] // 2, 0))
+        canvas.alpha_composite(pil, (x - pil.size[0] // 2, top))
+        canvas.alpha_composite(pil, (x + w - pil.size[0] // 2, top))
     canvas.save(out_path)
     print('saved', out_path, canvas.size)
 

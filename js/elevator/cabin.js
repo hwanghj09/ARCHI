@@ -135,6 +135,7 @@ function refreshCabin() {
   const powered = elevatorHasPower();
   const display = `${car.travelling && powered ? (car.destination > car.floor ? '↑' : '↓') : ''}${label}`;
   if (cabinDisplay.textContent !== display) cabinDisplay.textContent = display;
+  document.querySelector('header span').textContent = `엘리베이터 · ${floorShortLabel(car.floor)}`; // 내리면 floor-change.js가 그 층 이름으로 되돌린다
   cabin.dataset.moving = String(car.travelling && powered);
   cabinScene.dataset.powered = String(powered);
   cabin.dataset.floor = car.floor;

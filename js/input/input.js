@@ -67,7 +67,16 @@ function releaseInput() {
   animate(0);
 }
 
-window.addEventListener('blur', releaseInput);
+// 지금 손가락이 누르고 있는 키. 장면 전환은 입력을 비우고 그동안의 keydown도 버리므로(키 반복은 다른 키를 누르면 끊긴다),
+// 전환이 끝나면 아직 누르고 있는 이동·달리기·웅크리기 키를 다시 이어 준다(transition.js).
+const heldKeys = new Set();
+window.addEventListener('keydown', event => heldKeys.add(event.code), true);
+window.addEventListener('keyup', event => heldKeys.delete(event.code), true);
+function resumeHeldKeys() {
+  for (const code of heldKeys) if (Object.hasOwn(movementKeys, code) || runKeys.has(code) || crouchKeys.has(code)) keys.add(code);
+}
+
+window.addEventListener('blur', () => { heldKeys.clear(); releaseInput(); });
 document.addEventListener('visibilitychange', () => {
   if (document.hidden) releaseInput();
 });

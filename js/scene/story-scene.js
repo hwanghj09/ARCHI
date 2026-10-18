@@ -21,7 +21,7 @@ let f1ElevatorArrival = false; // 엘리베이터에서 1층에 막 내렸다(ca
 // 아래 목록과 따로 둔다: 목록은 앞 장면을 봐야 다음이 나오는데, 정전 컷씬 없이 정전된 저장·테스트에서 뒤 장면을 막지 않게.
 const BLACKOUT_MONOLOGUE = { flag: 'story-blackout-seen', steps: [
   { say: '…앞이 하나도 안 보이네.', pose: 'look-back' },
-  { say: '일단 휴대폰(P) 플래시라도 켜야겠다.', pose: 'think' },
+  { say: '일단 휴대폰 플래시(F)라도 켜야겠다.', pose: 'think' },
   { say: '엘리베이터도 완전히 멈췄어. 건물 전체가 나간 건가?', pose: 'look-up' },
   { say: '그러고 보니 옥상에 태양광 패널이 있다고 들었는데…', pose: 'think' },
 ] };
@@ -76,16 +76,16 @@ const STORY_SCENES = [
     steps: [
       { say: '휴.. 겨우 정신을 차렸네..', pose: 'relieved' },
       { say: '그래서 경비 로봇이 왜 날 공격했던거지?', pose: 'look-back' },
-      { say: '그 로봇은 ARCHI 개발 팀에서 만든 로봇이였나?', pose: 'think' },
+      { say: '그 로봇은 ARCHI 개발 팀에서 만든 로봇이었나?', pose: 'think' },
       { say: 'ARCHI 개발 팀을 조사해보자.', pose: 'think' },
     ],
   },
   { // 이상 행동 목표 도중 12~15층 게이트에 출입증을 태우고, 그 조사창을 닫은 직후.
     flag: 'story-badge-seen', delay: 300, ready: () => collectedItems.has('story-gate-tagged'),
     steps: [
-      { say: '아 맞다 나 일용직이였지', pose: 'badge' },
-      { say: '일용직한테 야근시키는 이 @#$% 회사... 떄려치던가 해야지..', pose: 'anxious' },
-      { say: '그러고보니 내 옆자리 사원의 직급이 팀장이였던거로 아는데..', pose: 'think' },
+      { say: '아 맞다 나 일용직이었지', pose: 'badge' },
+      { say: '일용직한테 야근시키는 이 @#$% 회사... 때려치든가 해야지..', pose: 'anxious' },
+      { say: '그러고보니 내 옆자리 사원의 직급이 팀장이었던 걸로 아는데..', pose: 'think' },
       { say: '잠깐 빌리지 뭐', pose: 'think' },
     ],
   },
