@@ -8,9 +8,16 @@
 #sanity-hud[data-state="low"] #sanity-fill { background: #c7aa75; }
 #sanity-hud[data-state="hallucinating"] { border-color: #986779; background: #22171fe8; }
 #sanity-hud[data-state="hallucinating"] #sanity-state { color: #d396b0; }
-#hallucinations { position: fixed; z-index: 11; inset: 0; overflow: hidden; pointer-events: none; background: radial-gradient(ellipse at center, transparent 38%, #2714266b 78%, #130b20bd); }
+#hallucinations { position: absolute; inset: 0; z-index: 0; pointer-events: none; }
 #hallucinations[hidden], #hallucination-shadow[hidden] { display: none; }
-#hallucination-shadow { position: absolute; object-fit: contain; filter: blur(.8px) drop-shadow(0 0 10px #9aa4b0aa); pointer-events: none; user-select: none; }
+#hallucination-shadow { position: absolute; width: 192px; height: 192px; pointer-events: none; }
+#hallucination-shadow::before { content: ''; position: absolute; inset: 0; background: url(../assets/player/jeong-suho-idle-four.png) 3.375px 1.585px / 357.39px 357.39px no-repeat;
+  clip-path: inset(0 7% 7% 0); filter: grayscale(1) brightness(.22) contrast(1.35); image-rendering: pixelated; }
+#hallucination-shadow[data-walking="true"]::before { background-image: url(../assets/player/jeong-suho-walk-eight.png); background-size: 1536px 192px; background-position: var(--stride) 0; clip-path: none; }
+#hallucination-shadow::after { content: ''; position: absolute; left: 65px; top: 174px; width: 66px; height: 9px; border-radius: 50%; background: #0005; filter: blur(3px); }
+.floor-prop, .office-desk-backdrop, #office-workstation, #office-computer { z-index: 1; }
+#hallucination-effects { position: fixed; z-index: 11; inset: 0; overflow: hidden; pointer-events: none; background: radial-gradient(ellipse at center, transparent 38%, #2714266b 78%, #130b20bd); }
+#hallucination-effects[hidden] { display: none; }
 body:has(#world[data-opening]) #sanity-hud,
 body:has(#world[data-blackout-scene]) #sanity-hud,
 body:has(#world[data-opening]) #fear-overlay, body:has(#world[data-opening]) #fear-overlay-red,
@@ -19,7 +26,6 @@ body:has(#world[data-opening]) #blink-flash, body:has(#world[data-blackout-scene
 body:has(#world[data-opening]) :is(#red-eyes, #red-eye-shards), body:has(#world[data-blackout-scene]) :is(#red-eyes, #red-eye-shards) { visibility: hidden; }
 @media (max-width: 480px) { #sanity-hud { width: 136px; padding: 8px 10px; } }
 @media (max-height: 480px) { #sanity-hud { top: 56px; } }
-@media (prefers-reduced-motion: reduce) { #hallucination-shadow { filter: blur(.8px); } }
 
 /* 50/40/30/20/10% 미만 단계별 화면 연출: 검은 비네트 → 흐림 → (30~20%에서) 붉게 전환. */
 #fear-overlay, #fear-overlay-red { position: fixed; z-index: 10; inset: 0; pointer-events: none; opacity: 0;
@@ -69,8 +75,8 @@ body[data-fear-tier="5"] #fear-overlay { opacity: .8; filter: blur(3.2px); }
 body[data-weary="true"] #player { filter: grayscale(.35) brightness(.82) contrast(1.05); }
 
 /* 환각이 보이는 동안(어느 종류든) 화면이 지직거리고, 환각이 사라질 때까지 장면이 살짝 떨린다. */
-#hallucinations[data-mode] { animation: fear-glitch .22s steps(2) infinite; }
-#hallucinations::after { content: ""; position: absolute; inset: 0; background: repeating-linear-gradient(0deg, #ffffff14 0 1px, transparent 1px 4px); animation: static-flicker .14s steps(2) infinite; }
+#hallucination-effects[data-mode] { animation: fear-glitch .22s steps(2) infinite; }
+#hallucination-effects::after { content: ""; position: absolute; inset: 0; background: repeating-linear-gradient(0deg, #ffffff14 0 1px, transparent 1px 4px); animation: static-flicker .14s steps(2) infinite; }
 @keyframes static-flicker { 0% { opacity: .9; transform: translateY(0); } 50% { opacity: .35; transform: translateY(2px); } 100% { opacity: .7; transform: translateY(-1px); } }
 body[data-hallucinating="true"] #stage { animation: screen-tremor .16s steps(2) infinite; }
 @keyframes screen-tremor {
@@ -98,17 +104,18 @@ body[data-hallucinating="true"] #stage { animation: screen-tremor .16s steps(2) 
 
 
 @media (prefers-reduced-motion: reduce) {
-  #hallucinations[data-mode], #hallucinations::after, body[data-hallucinating="true"] #stage { animation: none; }
+  #hallucination-effects[data-mode], #hallucination-effects::after, body[data-hallucinating="true"] #stage { animation: none; }
   .red-eye, :is(#world) .red-eye { animation: none; opacity: var(--eye-opacity); }
 }
 
 
 
-/* 환각 추격(돌진) 이벤트 안내: 화면 중앙보다 살짝 아래에서 깜빡인다. 환각이 사라지면 함께 사라진다. */
-#flash-prompt { position: fixed; z-index: 12; left: 50%; top: 58%; transform: translateX(-50%); margin: 0; padding: 8px 18px; border: 1px solid #c97878; background: #1b0d10e6; color: #ffe3dc; font: bold clamp(16px, 2.4vw, 24px) Arial, sans-serif; text-align: center; white-space: nowrap; pointer-events: none; animation: flash-prompt-blink .6s steps(1) infinite; }
+/* 추격 방향 안내는 플레이 화면 아래에 둔다. */
+#flash-prompt { position: fixed; z-index: 12; left: 50%; bottom: max(112px, env(safe-area-inset-bottom)); transform: translateX(-50%); margin: 0;
+  max-width: calc(100vw - 32px); width: max-content; padding: 6px 10px; border: 1px solid #8b8e87; background: #11191ceb; color: #d9dfd5; font: 13px/1.5 Arial, sans-serif; text-align: center; pointer-events: none; }
 #flash-prompt[hidden] { display: none; }
-@keyframes flash-prompt-blink { 0% { opacity: 1; } 50% { opacity: .15; } }
-@media (prefers-reduced-motion: reduce) { #flash-prompt { animation: none; } }
+@media (max-height: 480px) { #flash-prompt { bottom: 72px; } }
+@media (prefers-reduced-motion: reduce) { #fear-overlay, #fear-overlay-red { transition: none; } }
 
 /* 어둠 속 얼굴(15% 미만, sanity.js의 updateDarkFace): 검은 바탕은 screen 합성으로 비치고, 가장자리는 가려 흐리게 번지며 2초 동안 흐릿 → 선명 → 흐릿. */
 #dark-face { position: fixed; z-index: 9; left: 16%; top: 50%; height: min(52vh, 400px); max-width: 40vw; image-rendering: pixelated; object-fit: contain; transform: translate(-50%, -50%); pointer-events: none;

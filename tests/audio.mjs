@@ -67,6 +67,8 @@ try {
   await page.locator('#opening-skip').click();
   await page.waitForTimeout(200);
   assert.equal(await page.evaluate(() => window.audioContextCount), 1, 'Clicks and keys reuse the same context');
+  assert(await page.evaluate(() => sanity >= 50 && sanityMusicElement.paused), '안정 상태로 시작할 때 긴장 음악이 먼저 공포를 알리지 않는다');
+  await page.evaluate(() => { sanity = 35; refreshSanity(); updateGameAudio(10000); });
   await page.waitForFunction(() => sanityMusicElement.readyState >= 3 && !sanityMusicElement.paused);
   assert(await page.evaluate(() => sanityMusicElement.currentSrc.endsWith(`/${sanityMusicTracks[sanityMusicIndex]}.wav`) && !sanityMusicElement.loop && sanityMusicElement.duration === 48 && !sanityMusicElement.error), 'The game plays a local playlist track through native audio');
   assert.deepEqual(await page.evaluate(() => sanityMusicTracks), musicTracks);

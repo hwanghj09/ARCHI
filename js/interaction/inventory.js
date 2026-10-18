@@ -6,14 +6,18 @@ const INVENTORY_ITEMS = {
     hint: '16층 Café에서 마지막 확인' },
   'f16-antianxiety': { name: '항불안제', description: brandText('16층 VU 편의점 선반의 약품 칸에서 챙긴 항불안제. 먹으면 불안이 조금 가라앉을 것 같다.'), image: 'assets/objects/items/antianxiety-v2.png',
     usedFlag: 'f16-antianxiety-used', use: { label: '사용하기', sanity: antianxietyRestore, animation: 'antianxiety' } },
+  'f2-reel': { name: '리허설 녹화 디스크', description: '2층 서버실 녹화 NAS에서 챙긴 원본 디스크. 03:00 무관객 리허설이 녹화되어 있다. Harmony Hall의 배터리 영사기에 넣어 볼 수 있다.',
+    image: 'assets/ui/manual-control/disc.png', usedFlag: 'f2-projected' },
+  'f2-remote': { name: '영사기 리모컨', description: '2층 직원 휴게실 커피 테이블에서 챙긴 리모컨. Harmony Hall 천장의 배터리 영사기를 내릴 수 있다.',
+    image: 'assets/objects/items/projector-remote-v2.png' },
   // B2 전력·냉각실(엔딩 준비): 먹으면 정신력이 최소 50%가 된다(minSanity).
   'b2-antianxiety': { name: '항불안제', description: 'B2 전력·냉각실 캐비닛 위에서 챙긴 항불안제. 먹으면 정신력이 최소 50%까지 돌아온다.', image: 'assets/objects/items/antianxiety-v2.png',
     usedFlag: 'b2-antianxiety-used', use: { label: '사용하기', minSanity: 50, animation: 'antianxiety' } },
-  'f12-lead-key': { name: '팀장실 보조키', description: '12층 책상 서랍에서 챙긴 열쇠. 꼬리표에 "팀장실 보조키"라고 적혀 있다.' },
+  'f12-lead-key': { name: '팀장실 보조키', description: '12층 책상 서랍에서 챙긴 열쇠. 꼬리표에 "팀장실 보조키"라고 적혀 있다.', image: 'assets/objects/items/lead-key.png' },
   'f12-eval-keycard': { name: '모델 평가실 카드키', description: '12층 개발실 맨 왼쪽 서랍의 종이 더미 밑에서 찾은 카드키. 모델 평가실 문을 열 수 있다.',
-    image: 'assets/ui/eval-keycard.svg', hint: '12층 개발실 맨 왼쪽 서랍 확인' },
+    image: 'assets/objects/items/eval-keycard.png', hint: '12층 개발실 맨 왼쪽 서랍 확인' },
   'f13-backup-device': { name: '원격지원 게이트웨이 백업 장치', description: '13층 보안 자료실에서 가져온 백업 장치. 라벨: "03:05 외부 송신 경로 원본 · 원격 접속 에이전트 배포 계정 archi_svc".',
-    hint: '13층 보안 자료실 백업 장치 보관함' },
+    image: 'assets/objects/items/backup-device.png', hint: '13층 보안 자료실 백업 장치 보관함' },
   'rooftop-key': { name: '낡은 열쇠', description: '옥상문을 열 수 있을 것만 같다… 조금 더럽다.' },
   'f17-manager-memo': { name: '관리실 비상 출입 메모', image: 'assets/ui/floor17/manager-memo.png',
     description: MANAGER_MEMO_TEXT, sheet: MANAGER_MEMO_SHEET },
@@ -25,6 +29,21 @@ const inventoryButton = document.getElementById('inventory-button');
 function refreshInventoryCount() {
   const count = ownedInventoryIds().length;
   inventoryButton.ariaLabel = inventoryButton.title = `${count ? `가방 (${count})` : '가방'} · ${bindingLabel('inventory')}`; // 화면에는 그림만 보이고 글자는 접근성 이름으로만 남는다
+}
+
+function showItemAcquired(id, message) {
+  const item = INVENTORY_ITEMS[id];
+  const description = `${item.name} 획득 · 가방에 넣었다.\n${message || item.description}`;
+  openInspection(`${item.name} 획득`, description, {
+    ...(item.sheet || { surface: 'card', look: item.look, image: item.image || 'assets/ui/rooftop-key.png' }),
+    caption: description,
+  });
+  inspectionLabel.textContent = '획득';
+  inspectionPanel.dataset.acquiredItem = id;
+  // 터치로 집은 버튼이 사라진 뒤에도 닫기 버튼에 초점을 둔다.
+  requestAnimationFrame(() => {
+    if (inspectionPanel.dataset.acquiredItem === id) inspectionClose.focus();
+  });
 }
 
 function itemButton(id) {
@@ -77,10 +96,8 @@ function openHydrant() {
       collectedItems.add('rooftop-key');
       playGameSound('item-get');
       key.remove();
-      description.textContent = '낡은 열쇠를 가방에 넣었다. 옥상문을 열 수 있을 것 같다.';
-      inspectionDescription.textContent = description.textContent;
       refreshInventoryCount();
-      inspectionClose.focus();
+      showItemAcquired('rooftop-key');
     });
     cabinet.append(key);
   } else {
@@ -161,7 +178,7 @@ function openCleaningCart() {
     playGameSound('item-get');
     refreshInventoryCount();
     refreshReady();
-    openInspection(INVENTORY_ITEMS[item].name, MANAGER_MEMO_TEXT, MANAGER_MEMO_SHEET);
+    showItemAcquired(item);
     saveProgress();
   };
   memo.addEventListener('click', collect);
@@ -248,6 +265,10 @@ function showInventoryList(focusItem) {
 }
 
 inventoryButton.addEventListener('click', toggleInventory);
+// 가방(목록·가방에서 연 카드) 밖을 누르면 닫는다. 가방 버튼은 자기 토글이 닫는다.
+document.addEventListener('pointerdown', event => {
+  if (inventoryShown() && !inspectionPanel.contains(event.target) && !inventoryButton.contains(event.target)) closeInspection();
+}, true);
 
 // 가방의 물건 사용: 효과/사용 플래그는 즉시 저장 가능한 상태로 만들고, 복용 동작은 닫힌 가방 밖에서 보여 준다.
 function useInventoryItem(id) {

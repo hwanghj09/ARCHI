@@ -606,4 +606,4 @@
   #inspection[data-surface] .writing-card img { height: calc(100dvh - 140px); }
   #inspection[data-surface] .writing-label-stack { padding: 10px 0; }
 }
-.writing-card img[src*="antianxiety"] { image-rendering: pixelated; }
+.writing-card img[src^="assets/objects/items/"], .writing-card img[src$="/disc.png"] { image-rendering: pixelated; }

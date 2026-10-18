@@ -290,9 +290,10 @@ try {
   await hold(stepsToElevator0 > 0 ? 'a' : 'd', Math.abs(stepsToElevator0));
   assert.equal(await doors.nth(0).getAttribute('data-open'), 'false', 'An idle car closes while the player walks away');
   await page.keyboard.press('e');
-  const boardingDelay = await page.evaluate(() => elevatorEntering?.remaining ?? 0);
-  assert(boardingDelay > 0, 'A closed door opens before boarding');
-  await page.clock.runFor(boardingDelay + 34);
+  await page.clock.runFor(1500);
+  assert.equal(await doors.nth(0).getAttribute('data-open'), 'true', 'A closed door opens first');
+  assert(await page.locator('#elevator-cabin').isHidden(), 'Opening the door does not board the car');
+  await page.keyboard.press('e');
   await finishSceneTransition(page);
   assert(await page.locator('#elevator-cabin').isVisible(), 'Reopening a parked car enters the cabin');
   await page.locator('#cabin-floor-buttons [data-floor="12"]').click();

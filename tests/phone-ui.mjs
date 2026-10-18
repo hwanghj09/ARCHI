@@ -49,6 +49,16 @@ try {
   await page.clock.runFor(400);
   assert.equal((await state()).state, 'idle'); assert.equal((await state()).held, 'false');
   assert.equal((await state()).inert, false);
+  // 휴대폰·가방 밖을 누르면 닫힌다.
+  await page.keyboard.press('p');
+  assert((await state()).open);
+  await page.mouse.click(100, 300);
+  assert.equal((await state()).open, false, 'Clicking outside the phone closes it');
+  await page.evaluate(() => toggleInventory());
+  assert(await page.evaluate(() => inventoryShown()));
+  await page.mouse.click(100, 300);
+  assert.equal(await page.evaluate(() => usingInspection), false, 'Clicking outside the bag closes it');
+  await page.clock.runFor(400);
 
   for (const [name, width, height] of [['desktop', 1280, 720], ['mobile', 390, 844], ['landscape', 568, 320]]) {
     await page.setViewportSize({ width, height });

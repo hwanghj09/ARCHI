@@ -28,7 +28,7 @@ const FLOOR12_LAYOUT = {
       // 카드키(f12-eval-keycard)를 가진 채 E를 누르면 카드를 직접 끌어 리더기에 대야 열린다(manual-control.js의 card).
       doorX: 3159, doorWidth: 140, doorY: 314, doorStyle: 'security', locked: true, unlockedBy: 'f12-eval-door-opened',
       requires: 'f12-eval-keycard',
-      control: { kind: 'card', label: '카드키를 마우스로 끌어 리더기에 올리자.', reader: '카드키', doneBy: 'f12-eval-door-opened' },
+      control: { kind: 'card', item: 'f12-eval-keycard', label: '카드키를 마우스로 끌어 리더기에 올리자.', reader: '카드키', doneBy: 'f12-eval-door-opened' },
       message: '모델 평가실 문이 잠겨 있다. 전자 잠금장치에 전용 카드키가 필요하다. 개발실 서랍부터 찾아보자.' },
     { name: '팀장실', x: 4070, width: 723, style: 'blinds', target: 'f12-lead',
       doorX: 4508, doorWidth: 137, doorY: 298, doorStyle: 'blinds', locked: true, unlockedBy: 'f12-lead-key',

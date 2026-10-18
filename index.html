@@ -482,12 +482,13 @@
     </aside>
     <img id="dark-face" alt="" aria-hidden="true" draggable="false" hidden />
     <video id="devoured-video" src="assets/video/hallucination-devoured.mp4" muted playsinline preload="auto" aria-hidden="true" hidden></video>
-    <p id="flash-prompt" role="alert" hidden>F를 눌러 플래시를 비추세요!</p>
+    <p id="flash-prompt" role="status" aria-live="polite" hidden></p>
     <div id="fear-overlay" aria-hidden="true"></div>
     <div id="fear-overlay-red" aria-hidden="true"></div>
     <div id="blink-flash" aria-hidden="true" data-active="false"></div>
+    <div id="hallucination-effects" aria-hidden="true" hidden></div>
     <div id="hallucinations" aria-hidden="true" hidden>
-      <img id="hallucination-shadow" src="assets/ui/hallucination/ghost-face.png" alt="" width="540" height="360" draggable="false" hidden />
+      <div id="hallucination-shadow" hidden></div>
     </div>
     <section id="hallucination-caught" class="game-over" role="dialog" aria-modal="true" aria-labelledby="hallucination-caught-title" hidden>
       <div class="game-over-content">
@@ -533,8 +534,9 @@
         <button id="debug-console-toggle" type="button" aria-expanded="false" aria-controls="debug-console-panel">이벤트 펼치기</button>
         <div id="debug-console-panel" hidden>
           <button id="debug-chase-hallucination" type="button">환각 추격 이벤트</button>
-          <button id="debug-spawn-hallucination" type="button">환각 생성 이벤트</button>
+          <button id="debug-spawn-hallucination" type="button">멀리 보이는 형상</button>
           <button id="debug-jumpscare" type="button">점프스케어 이벤트</button>
+          <button id="debug-auditory-hallucination" type="button">환청 재생</button>
           <button id="debug-all-power" type="button" aria-pressed="false">모든 층 전력 활성화 · OFF</button>
         </div>
       </section>

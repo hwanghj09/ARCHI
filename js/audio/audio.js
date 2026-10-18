@@ -10,6 +10,11 @@ const gameAudioLastVariant = new Map();
 let gameAudioRoomKey = '';
 let gameAudioRoomElapsed = 0;
 let gameAudioRoomNext = 10000;
+const auditoryHallucinationSounds = ['hallucination-footsteps', 'hallucination-knock', 'hallucination-whisper'];
+let auditoryHallucinationLast = null;
+let auditoryHallucinationRoom = '';
+let auditoryHallucinationElapsed = 0;
+let auditoryHallucinationNext = 22000 + Math.random() * 20000;
 const sanityMusicTracks = ['sanity-dread', 'sanity-musicbox', 'sanity-vent', 'sanity-pulse', 'sanity-strings', 'sanity-signal'];
 let sanityMusicIndex = Math.floor(Math.random() * sanityMusicTracks.length);
 const sanityMusicElement = new Audio(`assets/audio/${sanityMusicTracks[sanityMusicIndex]}.wav`);
@@ -97,7 +102,8 @@ function gameAudioBuffer(name, variant = 0) {
     'step-tile': .2, 'step-carpet': .22, 'step-metal': .24, landing: .4,
     'door-metal': .65, 'door-wood': .72, 'door-glass': .52, 'door-slide': .9,
     paper: .42, 'bag-zip': .48, drawer: .62, lever: .3, plug: .26, 'card-scan': .34, dial: .18,
-    keyboard: .09, 'mouse-click': .075, 'power-relay': .65, 'water-drop': .5, 'pipe-tick': .55 };
+    keyboard: .09, 'mouse-click': .075, 'power-relay': .65, 'water-drop': .5, 'pipe-tick': .55,
+    'hallucination-footsteps': 1.6, 'hallucination-knock': 1.5, 'hallucination-whisper': 2.8 };
   const loop = ['office', 'dark', 'wind', 'motor', 'cctv-bgm', 'cctv-dread',
     'server-room', 'electrical-room', 'plumbing', 'hall-room'].includes(name);
   const duration = loop ? 8 : durations[name];
@@ -111,6 +117,9 @@ function gameAudioBuffer(name, variant = 0) {
   const hit = (t, at, decay) => t >= at ? Math.exp(-(t - at) * decay) : 0;
   // 버저·삑 소리처럼 일정하게 이어지는 음은 at부터 length 동안만 켜고 양끝을 짧게 다듬는다.
   const gate = (t, at, length) => t >= at && t < at + length ? Math.min(1, (t - at) / .006, (at + length - t) / .02) : 0;
+  // 잡음에 성도 공명을 입혀 말뜻을 알아들을 수 없는 숨 섞인 속삭임을 만든다.
+  const whisperFormants = name === 'hallucination-whisper' ? [550, 1450, 2600].map(frequency =>
+    ({ a: 1.92 * Math.cos(2 * Math.PI * frequency * pitch / rate), first: 0, second: 0 })) : null;
   for (let i = 0; i < samples.length; i++) {
     const t = i / rate;
     seed = (Math.imul(seed, 1664525) + 1013904223) >>> 0;
@@ -119,6 +128,19 @@ function gameAudioBuffer(name, variant = 0) {
     soft += .15 * (noise - soft);
     let sample = 0;
     switch (name) {
+      case 'hallucination-footsteps': sample = (.34 * low + .12 * sin(86, t)) * (hit(t, .02, 28) + .75 * hit(t, .48, 30) + .5 * hit(t, 1.03, 32)) +
+        .1 * soft * (hit(t, .07, 40) + .7 * hit(t, .53, 40) + .45 * hit(t, 1.08, 40)); break;
+      case 'hallucination-knock': sample = (.2 * sin(108, t) + .23 * low + .08 * soft) * (hit(t, .04, 22) + .65 * hit(t, .62, 25)); break;
+      case 'hallucination-whisper': {
+        let voice = 0;
+        for (const formant of whisperFormants) {
+          const next = .04 * noise + formant.a * formant.first - .9216 * formant.second;
+          formant.second = formant.first; formant.first = next; voice += next;
+        }
+        const syllables = Math.exp(-(((t - .45) / .2) ** 2)) + .65 * Math.exp(-(((t - 1.1) / .18) ** 2)) + .85 * Math.exp(-(((t - 1.85) / .35) ** 2));
+        sample = (.35 * voice + .045 * (noise - soft)) * syllables;
+        break;
+      }
       case 'step': sample = .42 * low * hit(t, 0, 25) + .18 * sin(92, t) * hit(t, 0, 34) + .22 * soft * hit(t, .045, 38); break;
       case 'door': sample = .18 * low * Math.sin(Math.PI * t / duration) + (.22 * sin(74, t) + .2 * soft) * hit(t, .47, 28); break;
       case 'elevator-door': sample = (.1 * sin(138, t) + .3 * low) * Math.sin(Math.PI * t / duration) + .2 * soft * hit(t, .88, 36); break;
@@ -255,6 +277,38 @@ function playGameSound(name, options = {}) {
   gameAudioEffects.add(effect);
   source.onended = () => { gameAudioEffects.delete(effect); source.disconnect(); gain.disconnect(); pan?.disconnect(); };
   source.start();
+  return effect;
+}
+
+function playAuditoryHallucination() {
+  if (!gameAudioContext || gameAudioContext.state !== 'running' || document.hidden || mainMenuActive || !gameStarted || gameVolume <= 0 || restoringProgress) return false;
+  const choices = auditoryHallucinationSounds.filter(sound => sound !== auditoryHallucinationLast);
+  const name = choices[Math.floor(Math.random() * choices.length)];
+  const x = body.position.x + (Math.random() < .5 ? -1 : 1) * (180 + Math.random() * 220);
+  if (!playGameSound(name, { x })) return false;
+  auditoryHallucinationLast = name;
+  return true;
+}
+
+function updateAuditoryHallucinations(elapsed, allowed) {
+  const key = `${room}:${dynamicFloorId}:${currentSceneFloor}`;
+  if (!allowed || gameVolume <= 0 || key !== auditoryHallucinationRoom) {
+    auditoryHallucinationRoom = key;
+    auditoryHallucinationElapsed = 0;
+    for (const sound of gameAudioEffects) if (auditoryHallucinationSounds.includes(sound.name)) stopGameAudioSource(sound);
+    return;
+  }
+  auditoryHallucinationElapsed += Math.min(elapsed, 100);
+  if (auditoryHallucinationElapsed < auditoryHallucinationNext) return;
+  if (playAuditoryHallucination()) {
+    auditoryHallucinationElapsed = 0;
+    auditoryHallucinationNext = 22000 + Math.random() * 20000;
+  }
+}
+
+function debugTriggerAuditoryHallucination() {
+  if (hallucinationEventBlocked()) return false;
+  return playAuditoryHallucination();
 }
 
 function updateRobotMovementSound(robot, distance) {
@@ -382,6 +436,8 @@ function playRedEyeBreakSound() {
 function pauseGameAudio() {
   gameAudioRoomKey = '';
   gameAudioRoomElapsed = 0;
+  auditoryHallucinationRoom = '';
+  auditoryHallucinationElapsed = 0;
   sanityMusicElement.pause();
   sanityMusicGain = sanityMusicTarget = 0;
   sanityMusicElement.volume = 0;
@@ -430,6 +486,8 @@ function updateGameAudio(elapsed = step) {
   const wanted = new Map([[background, dread ? .42 : haunted ? .34 : roof ? .23 : lit ? .18 : .14]]);
   const fear = sanityTierOf(sanity);
   const musicAllowed = !dread && !haunted && !openingActive && !blackoutSceneActive && !storySceneActive && !cctvSceneActive && !b2CaptureActive && !solarRestoreActive && !playerCaught && !hallucinationCaught;
+  updateAuditoryHallucinations(elapsed, musicAllowed && fear >= 1 && !hallucinationEventBlocked() && !hallucinationMode &&
+    guardPatrol.mode !== 'chase' && roamer.mode !== 'chase' && b2Ending.phase !== 'running');
   const roomKey = `${room}:${dynamicFloorId}:${currentSceneFloor}:${selectingFloor}`;
   if (roomKey !== gameAudioRoomKey) {
     gameAudioRoomKey = roomKey;

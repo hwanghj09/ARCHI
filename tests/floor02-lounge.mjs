@@ -5,6 +5,14 @@ import sharp from 'sharp';
 import { autoControl } from './auto-control.mjs';
 
 await mkdir('.local', { recursive: true });
+for (const name of ['battery-projector', 'projector-remote-v2']) {
+  const image = sharp(`assets/objects/items/${name}.png`);
+  const metadata = await image.metadata();
+  assert(metadata.hasAlpha, `${name}: alpha channel`);
+  const alpha = (await image.stats()).channels[3];
+  assert.equal(alpha.min, 0, `${name}: transparent background`);
+  assert.equal(alpha.max, 255, `${name}: visible sprite`);
+}
 for (const [name, size] of [['lounge-sofa', [512, 152]], ['lounge-table', [512, 128]], ['projector-remote', [160, 40]]]) {
   const image = sharp(`assets/objects/floor02/${name}.png`);
   const metadata = await image.metadata();
@@ -54,6 +62,9 @@ try {
   await place(412);
   await page.keyboard.press('e');
   assert(await page.evaluate(() => collectedItems.has('f2-remote')));
+  assert.equal(await page.locator('#inspection').getAttribute('data-acquired-item'), 'f2-remote');
+  assert.equal(await page.locator('#inspection-sheet img').getAttribute('src'), 'assets/objects/items/projector-remote-v2.png');
+  assert(await page.evaluate(() => ownedInventoryIds().includes('f2-remote')), 'The remote is a carried item');
   assert(await remote().isHidden(), 'Only the remote disappears immediately');
   assert.equal(await furniture().filter({ visible: true }).count(), 4);
   await place(412);
@@ -72,10 +83,21 @@ try {
   await page.locator('#menu-continue').click();
   assert.equal(await page.evaluate(() => dynamicFloorId), 'f2-lounge');
   assert(await remote().isHidden(), 'Remote stays collected after loading a save');
+  assert(await page.evaluate(() => ownedInventoryIds().includes('f2-remote')), 'Loading restores the remote to the bag');
+  await visit('f2-server');
+  await place((1542 + 1597) / 2); await page.keyboard.press('e');
+  assert.equal(await page.locator('#inspection').getAttribute('data-acquired-item'), 'f2-reel');
+  assert.equal(await page.locator('#inspection-sheet img').getAttribute('src'), 'assets/ui/manual-control/disc.png');
+  assert(await page.evaluate(() => ownedInventoryIds().includes('f2-reel')), 'The recording disc is a carried item');
   await visit('f2-harmony');
-  await page.evaluate(() => { collectedItems.add('f2-reel'); refreshReady(); });
-  await place(565); await page.keyboard.press('e');
+  const projector = page.locator('#dynamic-scene .floor-prop img[src$="battery-projector.png"]');
+  await projector.evaluate(image => image.decode());
+  assert(await projector.isVisible(), 'Harmony Hall uses the new ceiling projector sprite');
+  await place(565);
+  await page.screenshot({ path: '.local/floor02-projector-sprite.png' });
+  await page.keyboard.press('e');
   assert(await page.evaluate(() => collectedItems.has('f2-projected')), 'The collected remote still powers the projector puzzle');
+  assert(await page.evaluate(() => !ownedInventoryIds().includes('f2-reel') && ownedInventoryIds().includes('f2-remote')), 'The inserted disc leaves the bag; the remote stays');
   await visit('f2-lounge');
   await page.setViewportSize({ width: 390, height: 844 });
   await place(412);

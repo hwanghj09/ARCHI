@@ -81,7 +81,7 @@ function doorHintText(door) {
     if (!elevatorHasPower()) return `${key} · 엘리베이터 전력 없음`;
     const car = elevatorCars[door.carIndex];
     if (car.travelling) return car.rider ? '이동 중…' : '호출 중…';
-    if (car.floor === currentSceneFloor) return `${key} · 탑승`;
+    if (car.floor === currentSceneFloor) return car.open ? `${key} · 탑승` : `${key} · 문 열기`;
     return `${key} · 호출`;
   }
   return door.element.dataset.open === 'true' ? `${key} · 닫기` : `${key} · 열기`;
@@ -213,6 +213,7 @@ function interact() {
       door.locked = false;
       door.element.setAttribute('aria-label', `${door.name} 출입문`);
     }
+    if (!alreadyCollected && INVENTORY_ITEMS[gives]) showItemAcquired(gives, inspectionMessage);
     return;
   }
   if (nearbyDoor.type === 'room') {

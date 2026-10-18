@@ -136,7 +136,8 @@ try {
   assert.equal(await page.locator('#world').getAttribute('data-room'), 'office');
   await page.keyboard.down('d');
   await page.clock.runFor(150);
-  assert.equal((await state()).animation, 'walk', 'Scene transitions clear held sprint input');
+  // 장면 전환 뒤에도 아직 누르고 있는 이동·달리기 키는 이어진다(input.js resumeHeldKeys, d2e60b1).
+  assert.equal((await state()).animation, 'run', 'Scene transitions keep held sprint input');
   await page.keyboard.up('d');
   await page.keyboard.up('ShiftLeft');
   assert.deepEqual(errors, []);

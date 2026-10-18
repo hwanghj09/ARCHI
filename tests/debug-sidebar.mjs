@@ -80,8 +80,8 @@ try {
   await page.locator('#debug-console-toggle').click();
   await page.locator('#debug-all-power').click();
   assert.equal(await page.evaluate(() => allPowerOverride), true);
-  await page.locator('#debug-jumpscare').click();
-  assert(await page.evaluate(() => darkFaceForced));
+  await page.locator('#debug-spawn-hallucination').click();
+  assert(await page.evaluate(() => hallucinationMode === 'ambient'));
   await page.clock.runFor(50);
   const closeBox = await page.locator('#debug-close').boundingBox();
   assert(closeBox.y >= 0 && closeBox.y + closeBox.height <= 720, 'Sidebar close remains visible after scrolling to events');

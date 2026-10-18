@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256">
+  <g stroke="#10191e" stroke-width="6" stroke-linejoin="round">
+    <path d="M102 48V20h52v28" fill="#9daeb3"/>
+    <rect x="62" y="44" width="132" height="188" rx="12" fill="#263940"/>
+    <path d="M76 58h104v156H76z" fill="#435b63"/>
+    <path d="M84 92h88v82H84z" fill="#d8d3b9"/>
+  </g>
+  <g fill="#263940" font-family="monospace" text-anchor="middle">
+    <text x="128" y="116" font-size="14">ARCHI</text>
+    <text x="128" y="139" font-size="13">BACKUP</text>
+    <text x="128" y="160" font-size="13">03:05</text>
+  </g>
+  <circle cx="128" cy="195" r="5" fill="#92c4a5"/>
+</svg>

@@ -57,3 +57,5 @@
 #inspection .cleaning-tool[data-tool="2"] { left: 10.9375%; top: 48.4375%; width: 33.59375%; height: 33.203125%; }
 .cleaning-tool[data-tool="2"] .cleaning-tool-sprite { background-position: -10.9375cqw -48.4375cqw; }
 @media (max-height: 480px) { .cleaning-cart-tray { width: min(250px, 100%); } }
+#inspection[data-acquired-item] .inspection-label { color: #ffe1a2; border-color: #a58a51; background: #302819; }
+

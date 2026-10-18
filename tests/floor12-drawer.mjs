@@ -110,6 +110,7 @@ try {
     await page.keyboard.press('e');
     assert.equal(await page.evaluate(() => usingControl), true, 'The card reader opens');
     assert.equal(await page.locator('#manual-control-device').getAttribute('class'), 'control-device control-card');
+    assert.match(await page.locator('#manual-control-device .control-handle').evaluate(handle => getComputedStyle(handle).backgroundImage), /objects\/items\/eval-keycard\.png/);
     if (name === 'mobile') {
       for (let i = 0; i < 9; i++) await page.keyboard.press('ArrowRight');
     } else {

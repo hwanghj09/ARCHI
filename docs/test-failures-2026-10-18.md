@@ -1,64 +1,37 @@
 # 전체 테스트 오류 목록 (2026-10-18)
 
-`npm test`를 작업 트리 전체(여러 세션의 커밋 전 수정 포함)에서 돌린 결과다. **89개 중 47개 통과, 42개 실패.**
+## 처음 상태
 
-- 기존 실패: 41개. 이번 작업(1층 추격 컷신, 엘리베이터 안 휴대폰·가방, 로그 삭제 속도, 휴대폰 배치·스크롤바) 전 HEAD에서도 똑같이 실패했다.
-- 새 실패: 1개(`opening.mjs`). 다시 돌려도 같은 곳에서 실패한다.
+`npm test`: 89개 중 47개 통과, 42개 실패. 41개는 이번 작업 전부터 실패하던 것이었고, 새 실패는 `opening.mjs` 1개였다.
 
-## 새 실패
+## 고친 것
 
-| 테스트 | 첫 오류 | 비고 |
+대부분 게임을 일부러 바꾼 뒤 테스트를 따라 고치지 않은 경우였다. 게임 버그는 아래 "게임 코드 수정"에 적은 것뿐이다.
+
+공통 원인:
+
+- 지도 창의 장면 복제본이 열린(open) shadow root 안에 있어서, Playwright가 `#stage`·`#world`를 두 개씩 찾았다. 복제본의 shadow root를 closed로 바꿨다(`js/ui/map.js`).
+- 화면의 E 버튼(`#interact`)과 17층 조명 스위치(`#floor17-lights`)는 HUD 개편 때 숨겼다. 테스트는 E 키를 누르고, 스위치는 코드로 값을 바꾼 뒤 change 이벤트를 보낸다.
+- 정전 직후 혼잣말, 컷씬 대사의 클릭 대기, 층 전력에 따른 장치 꺼짐, 퍼즐 순서 같은 게임 변화에 테스트를 맞췄다.
+- 카메라 앱이 없어졌다. 사진은 1층 층별 안내판만 찍을 수 있어서, 사진 테스트를 그 기준으로 다시 썼다.
+- 장면 전환 뒤에도 아직 누르고 있는 이동·달리기 키가 이어진다(`d2e60b1`). `running.mjs`를 그 기준으로 바꿨다.
+- 방 출구 칸이 들어가 배경 그림이 넓어졌다. 5층 기술연구실 모니터 위치 기대값을 322px 민 값으로 바꿨다(`elevator.mjs`).
+
+게임 코드 수정:
+
+- `js/floors/floor-17.js`: 회로 안내도가 CSS가 없는 `manual` 모양을 썼고 1280x720 화면보다 길었다. 두 표를 낱장 두 장으로 나눴다.
+- `js/scene/prop-outlines.js`: 소품 그림에 맞춰 다시 만들었다. 새 소품 9개만 추가됐다.
+- `js/player/sanity.js`: 출구 칸을 끼운 방 배경에서 모니터 공포 화면 위치를 칸 폭만큼 민다.
+- `js/interaction/keypad.js`: 키패드로 방 문을 연 뒤 바로 "들어가기" 안내가 뜬다.
+- `js/floors/floor-16.js`: 복도 소파 폭을 다른 층과 같은 사람 비율(240)로 맞췄다.
+
+## 지금 상태
+
+`main`(`c7d3897`)에서 다시 돌린 전체 테스트: 92개 중 88개 통과, 4개 실패. 그 4개는 다음과 같다.
+
+| 테스트 | 원인 | 상태 |
 |---|---|---|
-| `opening.mjs` | AssertionError [ERR_ASSERTION]: Standing uses the idle sprite, not the walking cell of the opening sheet | 다른 세션의 수호 서 있기(idle)·컷씬 포즈 스프라이트 작업과 관련된 것으로 보인다 (`tests/opening.mjs:123`). |
-
-## 기존 실패 (이번 작업 전부터)
-
-| 테스트 | 첫 오류 |
-|---|---|
-| `access-gates.mjs` | locator.click: Timeout 30000ms exceeded. |
-| `antianxiety-animation.mjs` | ReferenceError: MANAGER_MEMO_TEXT is not defined |
-| `audio-gameplay.mjs` | AssertionError [ERR_ASSERTION]: Each brief flicker has an electrical click |
-| `b2-ending.mjs` | AssertionError [ERR_ASSERTION]: The crate covers the door (2835-3025 vs 2785-2945) |
-| `background-power.mjs` | locator.uncheck: Timeout 30000ms exceeded. |
-| `blackout-scene.mjs` | AssertionError [ERR_ASSERTION]: Expected values to be strictly equal: |
-| `blackout.mjs` | AssertionError [ERR_ASSERTION]: false == true |
-| `cabin-background.mjs` | AssertionError [ERR_ASSERTION]: Expected values to be strictly equal: |
-| `cabin-blackout.mjs` | Error: strict mode violation: locator('#stage') resolved to 2 elements: |
-| `cabin-hallucination.mjs` | AssertionError [ERR_ASSERTION]: The hallway hallucination is paused during the ride |
-| `cctv-scene.mjs` | AssertionError [ERR_ASSERTION]: The control room is dim from the start |
-| `computer-desktop.mjs` | Error: strict mode violation: locator('#stage') resolved to 2 elements: |
-| `computer.mjs` | Error: strict mode violation: locator('#stage') resolved to 2 elements: |
-| `device-app-art.mjs` | AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal: |
-| `elevator.mjs` | AssertionError [ERR_ASSERTION]: The called elevator arrives with its door open |
-| `floor12-restroom.mjs` | AssertionError [ERR_ASSERTION]: Return beside the original corridor door |
-| `floor17-extension.mjs` | AssertionError [ERR_ASSERTION]: Old boundary is traversable |
-| `guard-capture.mjs` | Error: strict mode violation: locator('#stage') resolved to 2 elements: |
-| `guard-patrol.mjs` | AssertionError [ERR_ASSERTION]: Powered patrol rolls at 80 pixels per second |
-| `interaction-outline.mjs` | AssertionError [ERR_ASSERTION]: js/scene/prop-outlines.js must match the prop sprites: run node scripts/build-prop-outlines.mjs |
-| `lighting.mjs` | locator.isChecked: Timeout 30000ms exceeded. |
-| `manual-control-art.mjs` | AssertionError [ERR_ASSERTION]: f2-harmony/배터리 영사기: inspection opens image controls |
-| `map.mjs` | AssertionError [ERR_ASSERTION]: The map window is compact |
-| `movement.mjs` | AssertionError [ERR_ASSERTION]: Only the called elevator starts moving |
-| `object-layout.mjs` | locator.tap: Timeout 30000ms exceeded. |
-| `office.mjs` | Error: strict mode violation: locator('#stage') resolved to 2 elements: |
-| `phone-charging.mjs` | locator.tap: Timeout 30000ms exceeded. |
-| `phone-flash-visibility.mjs` | locator.uncheck: Timeout 30000ms exceeded. |
-| `phone-photos.mjs` | locator.click: Timeout 30000ms exceeded. |
-| `phone-power.mjs` | AssertionError [ERR_ASSERTION]: The expression evaluated to a falsy value: |
-| `phone-ui.mjs` | AssertionError [ERR_ASSERTION]: false == true |
-| `power-notice.mjs` | locator.tap: Timeout 30000ms exceeded. |
-| `restrooms.mjs` | locator.tap: Timeout 30000ms exceeded. |
-| `rooftop.mjs` | AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal: |
-| `room-spatial-layout.mjs` | locator.tap: Timeout 30000ms exceeded. |
-| `running.mjs` | AssertionError [ERR_ASSERTION]: Extended map boundary still blocks sprinting |
-| `sanity.mjs` | locator.uncheck: Timeout 30000ms exceeded. |
-| `save-slots.mjs` | page.waitForFunction: Timeout 30000ms exceeded. |
-| `solar-ui.mjs` | Error: strict mode violation: locator('#stage') resolved to 2 elements: |
-| `usb-connection.mjs` | Error: Input file is missing: /C:/Users/hwang/Desktop/project/game/ARCHI/assets/ui/usb-connection/phone.png |
-| `writing-ui.mjs` | AssertionError [ERR_ASSERTION]: 비상 전력 회로 안내도: document has no look manual |
-
-자주 나오는 원인:
-
-- `locator('#stage') resolved to 2 elements`: `#stage`가 두 개로 잡힌다. 테스트 셀렉터나 마크업 쪽 문제다.
-- `MANAGER_MEMO_TEXT is not defined`: 테스트가 없어진 전역 이름을 쓴다.
-- 속도·시간 단언(px/s, 프레임 간격): 동시에 여러 테스트를 돌리면 흔들릴 수 있다.
+| `running.mjs` | 장면 전환 뒤 달리기 키가 이어지는 쪽으로 게임이 바뀌었는데, 테스트는 옛 규칙을 확인했다. | 고침, 통과 |
+| `elevator.mjs` | 5층 기술연구실 모니터 위치 기대값이 출구 칸을 넣기 전 그림 기준이었다. | 고침 |
+| `floor17-extension.mjs` | 전체 테스트 도중 다른 세션이 `js/audio/audio.js`를 고치고 있어서 `debugTriggerAuditoryHallucination`을 못 찾았다. | 다시 돌리니 통과 |
+| `save-progress.mjs` | 새 게임 정신력 기대값 35와 실제 85가 다르다. 다른 세션이 커밋하지 않은 정신력 개편(`js/core/config.js`의 `newGameSanity = 85`) 때문이다. 커밋된 `main`의 값은 35다. | 그 세션이 마무리할 때 테스트를 같이 맞춰야 한다 |

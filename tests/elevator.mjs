@@ -2173,7 +2173,7 @@ try {
     await checkCutawayArt('floor05-security-interior.png', 2168);
     const monitors = await page.locator('#dynamic-scene .fear-screen').evaluateAll(els => els.map(el =>
       [parseFloat(el.style.left), parseFloat(el.style.top), parseFloat(el.style.width), parseFloat(el.style.height)]).sort((a, b) => a[0] - b[0]));
-    assert.deepEqual(monitors, [[510, 422, 56, 45], [566, 422, 56, 45]], 'Security monitor overlays follow the resized artwork');
+    assert.deepEqual(monitors, [[832, 422, 56, 45], [888, 422, 56, 45]], 'Security monitor overlays follow the resized artwork (출구 칸 322px만큼 밀림)');
     assert.equal(await page.locator('#dynamic-scene .fixture.art-spot').count(), 5);
     await inspect(398, 'E · 보안 캐비닛 조사', /키패드가 꺼져/);
     await inspect(854, 'E · 보안 연구원 자리 조사', /214번/);
@@ -2441,9 +2441,11 @@ try {
   assert(await page.locator('#player').evaluate(el =>
     Math.abs(new DOMMatrix(getComputedStyle(el).transform).m42 + 178 - 570) < 1));
   const reboard = async () => {
+    if (await page.evaluate(() => !elevatorCars[nearbyDoor.carIndex].open)) {
+      await page.keyboard.press('e'); // 닫힌 문은 먼저 열기만 한다
+      await page.clock.runFor(1500);
+    }
     await page.keyboard.press('e');
-    const openingTime = await page.evaluate(() => elevatorEntering?.remaining || 0);
-    if (openingTime) await page.clock.runFor(openingTime + 34);
     await finishSceneTransition(page);
     assert(await cabin.isVisible(), 'Can reboard at the arrival floor');
   };

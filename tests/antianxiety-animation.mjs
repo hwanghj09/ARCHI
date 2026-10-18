@@ -67,7 +67,6 @@ const context = createContext({ console, Element: class {},
   updateGuardPatrol: noop, updateB2Ending: noop, updateElevators: noop, updateInteraction: noop, updateCall: noop, checkStoryScenes: noop,
   updateTimedBarriers: noop, updateCameras: noop, cameraTarget: () => 0,
   sanitySpeedFactor: () => 1,
-  applyZeroSanityTurnDelay: direction => direction,
   pushPushables: (direction, amount) => amount,
   closeInspection: () => runInContext('usingInspection = false', context),
   // inventory.js가 읽는 17층 관리실 메모(js/floors/floor-17.js)는 층 데이터째 싣지 않고 자리만 채운다.

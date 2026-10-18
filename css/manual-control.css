@@ -53,6 +53,8 @@
   background-image: url('../assets/ui/manual-control/reader.png'); background-size: 76px 104px; color: #9be8cb; font: bold 11px monospace; }
 .control-card .control-handle { left: calc(22px + (100% - 126px) * var(--p)); top: 88px; width: 88px; height: 56px;
   background-image: url('../assets/ui/manual-control/badge.png'); }
+.control-card[data-item="f12-eval-keycard"] .control-handle { top: 72px; height: 88px;
+  background-image: url('../assets/objects/items/eval-keycard.png'); background-size: contain; image-rendering: pixelated; }
 
 /* 회전 중심은 고정한다. 키·크랭크·시계 바늘의 축이 원판 중앙에 놓인다. */
 .control-dial { left: 50%; top: 24px; width: 180px; height: 180px; margin-left: -90px;
@@ -82,4 +84,8 @@
 .control-press .control-handle { left: 50%; top: 68px; width: 110px; height: 110px; margin-left: -55px; display: grid; place-items: center;
   background-image: url('../assets/ui/manual-control/button.png'); color: #08200d; text-shadow: 0 1px #b8efb8; font: bold 18px Arial, sans-serif; }
 .control-press[data-done="true"] .control-handle { transform: translateY(6px); }
+.control-press[data-item="f2-remote"] .control-plate { top: 18px; width: 220px; height: 220px;
+  background-image: url('../assets/objects/items/projector-remote-v2.png'); background-size: contain; image-rendering: pixelated; }
+.control-press[data-item="f2-remote"] .control-handle { top: 58px; width: 64px; height: 64px; margin-left: -32px;
+  background: none; color: transparent; text-shadow: none; border: 0; box-shadow: none; }
 @media (prefers-reduced-motion: reduce) { .control-device .control-handle { transition: none; } }

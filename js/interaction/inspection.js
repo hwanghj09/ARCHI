@@ -41,6 +41,7 @@ function openInspection(name, message, sheet) {
   if (!message) return;
   usingInspection = true;
   delete inspectionPanel.dataset.returnTo;
+  delete inspectionPanel.dataset.acquiredItem;
   inspectionUse.hidden = true;
   document.getElementById('inspection-photo').hidden = true;
   inspectionClose.hidden = false;
@@ -82,6 +83,7 @@ function closeInspection() {
   usingInspection = false;
   inspectionPanel.hidden = true;
   delete inspectionPanel.dataset.returnTo;
+  delete inspectionPanel.dataset.acquiredItem;
   inspectionUse.hidden = true;
   document.getElementById('inventory-button').setAttribute('aria-expanded', 'false');
   (selectingFloor ? cabin : stage).focus();

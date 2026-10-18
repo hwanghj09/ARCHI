@@ -103,19 +103,8 @@ function autoCloseElevators() {
   });
 }
 
-// 닫혀 있는 엘리베이터를 타려고 하면 문이 먼저 열리고(elevatorDoorMs 직전까지) 그 뒤에 내부 화면으로 들어간다.
-let elevatorEntering = null;
-
 function updateElevators() {
   autoCloseElevators();
-  if (elevatorEntering) {
-    elevatorEntering.remaining -= step;
-    if (elevatorEntering.remaining <= 0) {
-      const { carIndex } = elevatorEntering;
-      elevatorEntering = null;
-      if (elevatorCars[carIndex].floor === currentSceneFloor && !transitioning) enterCabin(carIndex);
-    }
-  }
   for (const car of elevatorCars) {
     // 다른 층에서 호출해도 로봇이 탄 칸은 문 닫힘을 마친 뒤 출발한다.
     if (roamer.trip?.phase === 'close' && elevatorCars[roamer.car] === car) { car.travelling = false; continue; }

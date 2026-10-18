@@ -70,22 +70,21 @@ panelFloors.forEach((floor, index) => {
 });
 
 function enterCabin(carIndex) {
-  if (transitioning || elevatorEntering) return;
+  if (transitioning) return;
   const art = document.getElementById('cabin-art');
   if (!art.complete || !art.naturalWidth) {
     return;
   }
-  cabinReturnFocus = document.activeElement;
   const car = elevatorCars[carIndex];
-  // 닫혀 있으면 문이 열리는 동안 기다렸다가 탄다(전력이 없어 문이 못 열릴 때는 바로 들어간다).
+  // 닫혀 있으면 문만 연다. 타려면 한 번 더 상호작용한다(전력이 없어 문이 못 열릴 때는 바로 들어간다).
   if (!car.open && elevatorHasPower()) {
     car.open = true;
     elevatorOpenTime[carIndex] = 0;
     playGameSound('elevator-door');
     refreshSceneElevatorDoors();
-    elevatorEntering = { carIndex, remaining: 1200 };
     return;
   }
+  cabinReturnFocus = document.activeElement;
   if (!car.open) playGameSound('elevator-door');
   transitionScene(() => showCabin(carIndex));
 }

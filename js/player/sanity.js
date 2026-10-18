@@ -1,8 +1,4 @@
-// 정신력(공포 연출): 빛 노출은 암전 마스크를 따른다. 플래시/밝은 곳은 소모를 막을 뿐 더 이상 회복시키지 않는다.
-// 어두운 곳에서는 3초에 1%씩, 경비 로봇에게 쫓기는 동안(guardPatrol.mode === 'chase')은 1초에 10%씩 줄어든다(보스전 제외).
-// 50/40/30/20/10% 미만마다 화면 연출이 단계적으로 심해지고(sanityTierOf), 0%에 닿으면 '환각'이 플레이어를 노리는
-// 이벤트가 시작된다: 15초 뒤 돌진 → 바라보던 반대쪽에서 뛰어들고, 그 방향으로 플래시를 비추면 회피 → 5초 뒤 재시도.
-// 회피하지 못하면 잡아먹혀 게임 오버.
+// 정신력은 피로와 드문 기척으로 드러난다. 형상은 월드의 조명·소품과 같은 깊이에서 그린다.
 const sanityHud = document.getElementById('sanity-hud');
 const sanityValue = document.getElementById('sanity-value');
 const sanityMeter = document.getElementById('sanity-meter');
@@ -11,24 +7,30 @@ const sanityState = document.getElementById('sanity-state');
 const hallucinations = document.getElementById('hallucinations');
 const hallucinationShadow = document.getElementById('hallucination-shadow');
 const flashPrompt = document.getElementById('flash-prompt');
+const hallucinationEffects = document.getElementById('hallucination-effects');
 const devouredVideo = document.getElementById('devoured-video');
 const redEyes = document.getElementById('red-eyes');
 const blinkFlash = document.getElementById('blink-flash');
-const hallucinationCapturePanel = document.getElementById('hallucination-caught');
 const fearOverlayRed = document.getElementById('fear-overlay-red');
+const hallucinationCapturePanel = document.getElementById('hallucination-caught');
+world.insertBefore(hallucinations, sprite);
 
-// 환각 모습: null(없음) | 'ambient'(30% 미만, 가끔 먼 곳에 보임) | 'approach'(0%가 되기 전 예고) | 'charge'(0% 돌진).
+// 환각 모습: null(없음) | 'ambient'(30% 미만, 먼 곳의 기척) | 'charge'(0% 접근).
 let hallucinationMode = null;
 let hallucinationSide = 1; // -1/1, 환각이 플레이어를 기준으로 어느 쪽에서 나타났는지
 let hallucinationLife = 0; // 지금 환각이 떠 있은 시간(ms)
 let hallucinationAnchorX = 0; // ambient 전용: 화면이 아니라 세계 좌표에 고정된 위치(다가가면 사라진다)
-let hallucinationStartDistance = 0; // approach/charge 전용: 처음 나타났을 때 플레이어와의 거리
+let hallucinationStartDistance = 0; // 접근 속도를 정하는 최초 거리
 
-let ambientTimer = 0;
-let ambientNextIn = ambientSightingIntervalRange[0];
 let blinkTimer = 0;
 let blinkNextIn = Infinity;
 let blinkFlashTimer = 0;
+let ambientTimer = 0;
+let ambientNextIn = randomBetween(ambientSightingIntervalRange);
+let ambientSeenScene = null;
+let hallucinationScene = null;
+let zeroEventLightTime = 0;
+let zeroEventStepTimer = 0;
 
 let zeroEventPhase = 'idle'; // 'idle' | 'waiting' | 'charging' (0%에서만 의미가 있다)
 let zeroEventTimer = 0;
@@ -63,15 +65,6 @@ function sanitySpeedFactor() {
   return fearTier >= 5 ? sanitySlowSpeedFactor * sanityCriticalSpeedFactor : fearTier >= 3 ? sanitySlowSpeedFactor : 1;
 }
 
-// 정신력 0%: 지금 보는 방향의 반대로 걸으려 하면 sanityZeroTurnDelayMs 동안 제자리에서 기다린 뒤에야 돌아선다(그동안 입력은 무시).
-// 보는 방향이 바뀌거나 입력을 떼면 다시 처음부터 잰다.
-let zeroTurnTimer = 0;
-function applyZeroSanityTurnDelay(input) {
-  if (sanity > 0 || !input || input === facing) { zeroTurnTimer = 0; return input; }
-  zeroTurnTimer += step;
-  return zeroTurnTimer >= sanityZeroTurnDelayMs ? input : 0;
-}
-
 function refreshSanity() {
   const percent = Math.ceil(sanity);
   const state = sanity === 0 ? 'hallucinating' : fearTier >= 1 ? 'low' : 'normal';
@@ -89,13 +82,33 @@ function randomBetween([min, max]) { return min + Math.random() * (max - min); }
 
 // ---- 0% 이벤트: 돌진 시작, 회피, 잡아먹힘 ----
 
+function hallucinationSceneKey() { return room === 'dynamic' ? dynamicFloorId : room; }
+
+// 화면 가장자리나 벽 밖에서 출발하지 않도록 실제로 보이는 쪽에 둔다.
+function hallucinationSpawnX(distance) {
+  const left = Math.max(96, cameraX + 64);
+  const right = Math.min(worldWidth - 96, cameraX + viewWidth - 64);
+  const side = body.position.x - left > right - body.position.x ? -1 : 1;
+  const target = Math.max(left, Math.min(right, body.position.x + side * distance));
+  const doors = currentDoors.filter(door => ['elevator', 'room', 'stairs'].includes(door.type));
+  const clear = x => doors.every(door => x <= door.x - 38 || x >= door.x + door.width + 38);
+  if (clear(target)) return target;
+  // 닫힌 문 뒤에 완전히 숨겨지는 위치 대신 문틀 옆 빈 벽에 선다.
+  const gaps = doors.flatMap(door => [door.x - 38, door.x + door.width + 38])
+    .filter(x => x >= left && x <= right && Math.abs(x - body.position.x) > 100 && clear(x));
+  return gaps.sort((a, b) => Math.abs(a - target) - Math.abs(b - target))[0] ?? target;
+}
+
 function startZeroCharge() {
+  endHallucinationSighting();
   zeroEventPhase = 'charging';
-  zeroEventTimer = 0;
-  zeroEventSide = -facing; // 플레이어가 바라보지 않는 쪽
-  if (phoneLightOn) { phoneLightOn = false; refreshPhone(); }
-  zeroEventGhostX = body.position.x + zeroEventSide * zeroEventGhostStartGap;
-  beginHallucinationSighting('charge', zeroEventSide, zeroEventGhostStartGap);
+  zeroEventTimer = zeroEventLightTime = zeroEventStepTimer = 0;
+  zeroEventGhostX = hallucinationSpawnX(zeroEventGhostStartGap);
+  zeroEventSide = Math.sign(zeroEventGhostX - body.position.x) || 1;
+  beginHallucinationSighting('charge', zeroEventSide, Math.abs(zeroEventGhostX - body.position.x));
+  const side = zeroEventSide < 0 ? '왼쪽' : '오른쪽';
+  flashPrompt.textContent = side + '에서 발소리 · ' + side + '을 비추세요 (F)';
+  playGameSound('step', { x: zeroEventGhostX });
 }
 
 function resolveZeroEvasion() {
@@ -143,13 +156,13 @@ function triggerDevoured() {
 }
 
 function releaseHallucinationCapture() {
-  hideDevouredVideo(); // 영상 도중 Enter로 다시 시작해도 영상이 남지 않게 한다
+  hideDevouredVideo();
   hallucinationCaught = false;
   hallucinationCapturePanel.hidden = true;
   for (const element of hallucinationBlocked) element.inert = false;
   hallucinationBlocked = [];
   // 완전히 소진된 상태로 다시 몰아붙이지 않도록 한숨 돌릴 여유를 준다.
-  sanity = Math.max(sanity, 35);
+  sanity = Math.max(sanity, 50);
   zeroEventEvasions = 0;
   refreshSanity();
   animate(0);
@@ -178,41 +191,65 @@ function updateZeroEvent(elapsed, fsmPaused) {
     return;
   }
   if (zeroEventPhase === 'charging') {
+    // 충전하거나 배터리가 떨어진 동안에는 방어할 수 없는 공격을 남기지 않는다.
+    if (phoneBattery <= 0 || phoneDock) { resolveZeroEvasion(); return; }
+    const side = Math.sign(zeroEventGhostX - body.position.x) || zeroEventSide;
+    if (side !== zeroEventSide) {
+      zeroEventSide = side;
+      zeroEventLightTime = 0;
+      const direction = side < 0 ? '왼쪽' : '오른쪽';
+      flashPrompt.textContent = direction + '에서 발소리 · ' + direction + '을 비추세요 (F)';
+    }
     zeroEventTimer += elapsed;
-    if (facing === zeroEventSide && phoneLightOn) { resolveZeroEvasion(); return; }
-    // 환각은 월드 좌표에서 수호에게 다가간다. 수호가 어느 쪽으로 움직여도 환각의 속도는 같고(시간이 지나며 빨라진다), 닿으면 삼켜진다.
+    const beamX = parseFloat(world.style.getPropertyValue('--beam-x'));
+    const beamY = parseFloat(world.style.getPropertyValue('--beam-y'));
+    const ahead = (zeroEventGhostX - beamX) * facing;
+    const verticalGap = Math.max(floorY - 168 - beamY, beamY - (floorY - 15), 0);
+    const inBeam = phoneLightOn && ahead > 0 && verticalGap <= ahead * Math.tan(24 * Math.PI / 180);
+    zeroEventLightTime = inBeam ? zeroEventLightTime + elapsed : 0;
+    if (zeroEventLightTime >= zeroEventLightHoldMs) { resolveZeroEvasion(); return; }
+    zeroEventStepTimer += elapsed;
+    if (zeroEventStepTimer >= 650) {
+      zeroEventStepTimer %= 650;
+      playGameSound('step', { x: zeroEventGhostX });
+    }
+    if (zeroEventTimer <= zeroEventWarningMs) return;
     const gap = body.position.x - zeroEventGhostX;
-    const speedUp = zeroEventSpeedStepFactor ** Math.floor(zeroEventTimer / zeroEventSpeedStepMs); // 1.5초마다 1.5배씩 빨라진다
-    zeroEventGhostX += Math.sign(gap) * Math.min(Math.abs(gap), zeroEventGhostStartGap / zeroEventRushDurationMs * speedUp * elapsed);
+    if (Math.abs(gap) > hallucinationStartDistance + 240) { resolveZeroEvasion(); return; }
+    const movingMs = Math.min(elapsed, zeroEventTimer - zeroEventWarningMs);
+    zeroEventGhostX += Math.sign(gap) * Math.min(Math.abs(gap), hallucinationStartDistance / zeroEventRushDurationMs * movingMs);
     if (Math.abs(body.position.x - zeroEventGhostX) <= zeroEventReachGap) triggerDevoured();
-    else if (zeroEventForced && zeroEventTimer >= 6000) resolveZeroEvasion(); // 콘솔로 시작한 추격을 달려서 따돌린 경우의 안전장치
   }
 }
 
 // ---- 30% 미만: 가끔 멀리서 보이는, 공격하지 않는 환각 ----
 
 function updateAmbientSighting(elapsed, fsmPaused) {
-  if (fsmPaused || hallucinationMode || fearTier < 3 || sanity <= 0) { ambientTimer = 0; return; }
+  if (fsmPaused || hallucinationMode || fearTier < 3 || sanity <= 0 || sanityExposure() === 'bright') { ambientTimer = 0; return; }
+  if (ambientSeenScene === hallucinationSceneKey()) return;
   ambientTimer += elapsed;
   if (ambientTimer < ambientNextIn) return;
-  ambientTimer = 0;
-  ambientNextIn = randomBetween(ambientSightingIntervalRange);
   startAmbientSighting();
 }
 
-// 플레이어 근처(220~340px)에 나타나 공격하지 않는 환각. 정신력 연출과 콘솔 버튼이 함께 쓴다.
 function startAmbientSighting() {
-  hallucinationSide = Math.random() < .5 ? -1 : 1;
-  hallucinationAnchorX = Math.max(60, Math.min(worldWidth - 60, body.position.x + hallucinationSide * (220 + Math.random() * 120)));
-  hallucinationMode = 'ambient';
-  playHallucinationSound(.5, true); // 멀리서 보이는 환각은 작게
-  hallucinationLife = 0;
+  hallucinationAnchorX = hallucinationSpawnX(420);
+  // 가구 가장자리에 서 있게 해 다가갈 때 몸 일부가 자연스럽게 가려진다.
+  const props = [...dynamicScene.querySelectorAll('.floor-prop')].filter(element => getComputedStyle(element).display !== 'none');
+  const edge = props.map(element => parseFloat(element.style.left) + 18).find(x =>
+    Math.abs(x - hallucinationAnchorX) < 120 && Math.abs(x - body.position.x) > 150 &&
+    x > cameraX + 64 && x < Math.min(worldWidth - 96, cameraX + viewWidth - 64) &&
+    currentDoors.every(door => !['elevator', 'room', 'stairs'].includes(door.type) || x <= door.x - 38 || x >= door.x + door.width + 38));
+  if (room === 'dynamic' && edge !== undefined) hallucinationAnchorX = edge;
+  hallucinationSide = Math.sign(hallucinationAnchorX - body.position.x) || 1;
+  beginHallucinationSighting('ambient', hallucinationSide, Math.abs(hallucinationAnchorX - body.position.x));
+  ambientSeenScene = hallucinationSceneKey();
 }
 
 // 콘솔 창 버튼용. 컷씬·전환·포획·창이 열려 있는 동안은 정신력 진행처럼 실행하지 않는다.
 function hallucinationEventBlocked() {
-  return !gameStarted || mainMenuActive || openingActive || blackoutSceneActive || cctvSceneActive || playerCaught || hallucinationCaught ||
-    transitioning || selectingFloor || usingComputer || usingKeypad || usingControl || usingPhone || usingPowerPanel || usingInspection || !wirePanel.hidden;
+  return !gameStarted || mainMenuActive || openingActive || blackoutSceneActive || storySceneActive || cctvSceneActive || b2CaptureActive || solarRestoreActive || playerCaught || hallucinationCaught ||
+    transitioning || selectingFloor || usingComputer || usingKeypad || usingControl || usingPhone || usingPowerPanel || usingInspection || !wirePanel.hidden || !logPanel.hidden || !backupPanel.hidden;
 }
 
 function debugTriggerChaseHallucination() {
@@ -233,38 +270,28 @@ function debugTriggerAmbientHallucination() {
 
 function beginHallucinationSighting(mode, side, distance) {
   hallucinationMode = mode;
-  playHallucinationSound(1, mode !== 'charge'); // 돌진(추격)만 기존 소리, 예고 환각은 무작위
+  playHallucinationSound(mode === 'ambient' ? .5 : 1, mode !== 'charge');
+  hallucinationScene = hallucinationSceneKey();
   hallucinationSide = side;
   hallucinationStartDistance = distance;
   hallucinationLife = 0;
-  flashPrompt.hidden = mode !== 'charge'; // 돌진(추격) 이벤트 동안만 플래시 안내를 깜빡인다
+  flashPrompt.hidden = mode !== 'charge';
 }
 
 function endHallucinationSighting() {
   hallucinationMode = null;
+  ambientTimer = 0;
+  ambientNextIn = randomBetween(ambientSightingIntervalRange);
+  hallucinations.hidden = hallucinationEffects.hidden = true;
   delete document.body.dataset.hallucinating;
-  hallucinations.hidden = true;
   hallucinationShadow.hidden = true;
   flashPrompt.hidden = true;
 }
 
 function updateHallucinationSighting(elapsed, fsmPaused) {
   if (!hallucinationMode || fsmPaused || hallucinationMode === 'charge') return;
-  // 'charge'의 진행은 updateZeroEvent의 zeroEventTimer가 끌고 간다(회피/잡아먹힘 판정과 같은 시계여야 한다).
-  // approach: 플래시를 비추며 바라보면 같은 시계가 2.6배 빨리 흐른다. 끝나는 시점만 앞당기면 위치·투명도 계산(life 기준)과
-  // 어긋나 환각이 중간에 갑자기 끊기거나 속도가 일정하지 않게 보인다.
-  const towardIt = hallucinationMode === 'approach' && phoneLightOn && facing === hallucinationSide;
-  hallucinationLife += elapsed * (towardIt ? 2.6 : 1);
-  if (hallucinationMode === 'ambient') {
-    const dist = selectingFloor ? Infinity : Math.abs(body.position.x - hallucinationAnchorX);
-    if (hallucinationLife >= ambientSightingLifeMs || dist < 90) endHallucinationSighting();
-    return;
-  }
-  if (hallucinationMode === 'approach') {
-    if (hallucinationLife >= zeroEventApproachDurationMs) endHallucinationSighting();
-    return;
-  }
-  // 'charge'는 updateZeroEvent가 회피/도달 시점에 endHallucinationSighting을 직접 부른다.
+  hallucinationLife += elapsed;
+  if (hallucinationLife >= ambientSightingLifeMs || Math.abs(body.position.x - hallucinationAnchorX) < 90) endHallucinationSighting();
 }
 
 // ---- 컴퓨터 화면: 20% 미만에서 배경(17층 사무실)의 켜진 모니터가 꺼짐·색상바·오류화면·지직거리는 화면 중 하나로 바뀐다 ----
@@ -496,12 +523,10 @@ function updateBlink(elapsed, fsmPaused) {
 
 function updateSanity(elapsed) {
   // 컷씬·장면 전환·포획과 문서를 읽는 동안은 공포 진행을 멈춘다.
-  const paused = openingActive || blackoutSceneActive || cctvSceneActive || playerCaught || hallucinationCaught || transitioning ||
+  const paused = storySceneActive || b2CaptureActive || solarRestoreActive || openingActive || blackoutSceneActive || cctvSceneActive || playerCaught || hallucinationCaught || transitioning ||
     usingComputer || usingKeypad || usingControl || usingPowerPanel || usingInspection || !wirePanel.hidden || !logPanel.hidden || !backupPanel.hidden;
-  const fsmPaused = paused || selectingFloor;
-  // 컷씬·대화(오프닝·정전·CCTV·혼잣말·조사창)와 엘리베이터 탑승(selectingFloor) 도중에는 환각이 나오지 않고, 이미 나와 있거나 추격 중이면 즉시 끝난다.
-  if ((openingActive || blackoutSceneActive || cctvSceneActive || storySceneActive || usingInspection || selectingFloor || elevatorEntering) &&
-      (hallucinationMode || zeroEventPhase === 'charging' || !darkFace.hidden || redEyeShards.childElementCount)) clearHallucinationEvents();
+  const fsmPaused = paused || selectingFloor || usingPhone;
+  if (fsmPaused &&(hallucinationMode || !darkFace.hidden || blinkFlashTimer > 0 || redEyeShards.childElementCount)) clearHallucinationEvents();
   const exposure = sanityExposure();
   // B2 엔딩 중에는 R-01에게 쫓겨도 줄지 않는다: 정신력은 로봇 속도(45% 규칙, b2-ending.js)를 정하는 데 쓰인다.
   const chasing = (guardPatrol.mode === 'chase' || roamer.mode === 'chase') && !bossFightActive && b2Ending.phase !== 'running';
@@ -520,10 +545,9 @@ function updateSanity(elapsed) {
   if (tier !== fearTier) { fearTier = tier; document.body.dataset.fearTier = String(fearTier); }
   const deskSrc = `assets/objects/floor17/workstation${fearTier >= 3 ? '-fear' : ''}.png`;
   if (officeDeskImage.getAttribute('src') !== deskSrc) officeDeskImage.src = deskSrc;
-  // 30%→20% 구간에서 검은 비네트가 서서히 붉게 변하고, 20% 밑으로는 완전히 붉다.
   fearOverlayRed.style.opacity = String(Math.max(0, Math.min(1, (30 - sanity) / 10)) * (fearTier >= 1 ? .7 : 0));
-  document.body.dataset.weary = String(fearTier >= 3);
   if (fearTier < 5 && redEyes.children.length) { redEyes.replaceChildren(); redEyeShards.replaceChildren(); }
+  document.body.dataset.weary = String(fearTier >= 3);
   updateComputerFear(fearTier >= 4);
   updateBlink(elapsed, fsmPaused);
   updateDarkFace(elapsed, fsmPaused);
@@ -534,46 +558,24 @@ function updateSanity(elapsed) {
 }
 
 function renderHallucination() {
-  // 탑승 중에는 복도 환각의 진행 상태를 보존하고 화면 표시만 숨긴다.
-  if (selectingFloor) {
-    hallucinations.hidden = hallucinationShadow.hidden = true;
-    delete document.body.dataset.hallucinating;
-    return;
-  }
+  if (hallucinationMode && (hallucinationScene !== hallucinationSceneKey() || selectingFloor)) clearHallucinationEvents();
   if (!hallucinationMode) return;
-  hallucinations.hidden = false;
-  hallucinationShadow.hidden = false;
-  hallucinations.dataset.mode = hallucinationMode;
-  flashPrompt.hidden = hallucinationMode !== 'charge'; // 매 프레임 환각 종류와 맞춰, 다시 추격할 때도 안내가 뜬다
+  hallucinations.hidden = hallucinationShadow.hidden = hallucinationEffects.hidden = false;
+  hallucinationEffects.dataset.mode = hallucinationMode;
   document.body.dataset.hallucinating = 'true';
-  const sizeFactor = hallucinationMode === 'charge' ? 2 : 1; // 2배 크기는 돌진(추격) 환각만, 생성(멀리 보임)·예고 환각은 처음 크기
-  const width = Math.min(224 * sizeFactor * scale, stage.clientWidth * .4 * sizeFactor);
-  let opacity = .5;
-  let targetX;
-  if (hallucinationMode === 'ambient') {
-    const progress = hallucinationLife / ambientSightingLifeMs;
-    opacity = .4 * Math.sin(Math.PI * Math.min(1, progress + .06));
-    targetX = (hallucinationAnchorX - cameraX) * scale;
-  } else if (hallucinationMode === 'charge') {
-    // charge: 월드 좌표의 환각. 수호와의 실제 거리가 줄수록 짙어진다.
-    const progress = 1 - Math.min(1, Math.abs(body.position.x - zeroEventGhostX) / zeroEventGhostStartGap);
-    // 나타나는 순간부터 zeroEventGhostFadeInMs 동안 서서히 시작해 갈수록 빠르게 짙어진다(제곱 곡선).
-    opacity = Math.min(1, .3 + progress) * Math.min(1, zeroEventTimer / zeroEventGhostFadeInMs) ** 2;
-    targetX = (zeroEventGhostX - cameraX) * scale;
-  } else {
-    // approach: 플레이어 기준 상대 거리가 진행도에 따라 줄어든다.
-    const progress = Math.min(1, hallucinationLife / zeroEventApproachDurationMs);
-    const offset = hallucinationStartDistance - hallucinationStartDistance * .78 * progress;
-    opacity = Math.min(1, progress * 2.4) * (1 - Math.max(0, progress - .75) * 4);
-    targetX = (body.position.x + hallucinationSide * offset - cameraX) * scale;
-  }
-  if (stage.clientWidth < 600 && hallucinationMode === 'ambient') {
-    targetX = (body.position.x - cameraX) * scale < stage.clientWidth / 2 ? stage.clientWidth - width / 2 - 12 : width / 2 + 12;
-  }
-  const left = Math.max(12, Math.min(stage.clientWidth - width - 12, targetX - width / 2));
-  const top = floorY * scale - 238 * width / 256 + width * .12;
-  Object.assign(hallucinationShadow.style, { left: `${left}px`, top: `${top}px`, width: `${width}px`, height: `${width * 2 / 3}px`,
-    opacity: String(Math.max(0, opacity)), transform: `scaleX(${hallucinationSide})` });
+  hallucinations.dataset.mode = hallucinationMode;
+  flashPrompt.hidden = hallucinationMode !== 'charge';
+  const charging = hallucinationMode === 'charge';
+  const life = charging ? zeroEventTimer : hallucinationLife;
+  const x = charging ? zeroEventGhostX : hallucinationAnchorX;
+  const fadeOut = charging ? 1 : Math.min(1, (ambientSightingLifeMs - life) / 600);
+  hallucinationShadow.style.opacity = String(Math.max(0, Math.min(1, life / zeroEventGhostFadeInMs) * fadeOut));
+  hallucinationShadow.style.left = (x - 96) + 'px';
+  hallucinationShadow.style.top = (floorY - 178) + 'px';
+  hallucinationShadow.style.transform = 'scaleX(' + (charging ? Math.sign(body.position.x - x) || 1 : -hallucinationSide) + ')';
+  const walking = charging && life > zeroEventWarningMs;
+  hallucinationShadow.dataset.walking = String(walking);
+  hallucinationShadow.style.setProperty('--stride', walking ? (-Math.floor((life - zeroEventWarningMs) / 160) % 8 * 192) + 'px' : '0px');
 }
 
 refreshSanity();
@@ -614,18 +616,18 @@ function addBackgroundMonitors(image, src) {
   }
 }
 
-// 컷씬(정전·혼잣말·CCTV)이 시작되면 휴대폰(창과 손전등)을 끄고, 나와 있던 환각·돌진 추격·점프스케어 얼굴·깜빡임·붉은 조각을 모두 없앤다.
+// 컷씬 시작 시 휴대폰과 진행 중인 기척을 정리한다.
 function clearEventsForCutscene() {
   closePhone();
   if (phoneLightOn) { phoneLightOn = false; refreshPhone(); }
   clearHallucinationEvents();
 }
 
-// 환각·돌진 추격·점프스케어 얼굴·깜빡임·붉은 조각을 즉시 없앤다. 컷씬·대화(조사창)가 진행되는 동안 매 프레임 검사해서(updateSanity),
-// 그 도중에 시작됐거나 이미 나와 있던 것도 바로 사라진다.
+// 조사·컷씬·탑승·장면 전환은 진행 중인 형상을 끝낸다.
 function clearHallucinationEvents() {
   endHallucinationSighting();
   zeroEventPhase = 'idle'; zeroEventTimer = 0; zeroEventForced = false;
+  zeroEventLightTime = zeroEventStepTimer = 0;
   darkFace.hidden = true; darkFaceForced = false; darkFaceTimer = darkFaceLife = 0;
   blinkFlash.dataset.active = 'false'; blinkFlashTimer = 0;
   redEyeShards.replaceChildren();

@@ -24,6 +24,7 @@ const specs = [
   { kind: 'selector', choices: ['조명', '승강기', '1F 주 전원'] },
   { kind: 'selector', choices: ['한정우', '김도윤', '이수민', '정수호'] },
   { kind: 'press', text: '퇴실' },
+  { kind: 'press', item: 'f2-remote', text: '▼' },
   { kind: 'plug', dir: 'out', item: 'CAM', socket: 'B2 복도' },
   { kind: 'plug', dir: 'in', item: 'NAS', socket: '투입구' },
   { kind: 'plug', dir: 'in', item: '핸들', socket: '개방구' },
@@ -62,7 +63,7 @@ try {
         for (const src of sources) { const image = new Image(); image.src = src; await image.decode(); }
         return sources.size;
       });
-      assert(rendered >= 2, `${spec.kind}: both static and moving sprites decode`);
+      assert(rendered >= (spec.item === 'f2-remote' ? 1 : 2), `${spec.kind}: its sprite layers decode`);
       for (const progress of [0, .5, 1]) {
         await page.evaluate(progress => { controlStep.value = controlStep.target * progress; renderControl(); }, progress);
         const geometry = await device.evaluate(element => {
@@ -78,6 +79,7 @@ try {
       }
       await page.evaluate(() => { controlStep.value = controlStep.target * .5; renderControl(); });
       if (width === 1280) previews.push(await page.locator('#manual-control').screenshot());
+      if (spec.item === 'f2-remote') await page.locator('#manual-control').screenshot({ path: `.local/projector-remote-control-${width}.png` });
       if (width === 320 && spec.kind === 'press') {
         await device.locator('.control-handle').tap();
         assert.equal(await page.evaluate(() => controlStep.done), true, 'A real touch presses the button sprite');
@@ -138,7 +140,7 @@ try {
       for (const src of sources) { const image = new Image(); image.src = src; await image.decode(); }
       return sources.length;
     });
-    assert(images >= 2, `${location.name}: generated sprites load in the real game`);
+    assert(images >= (location.name === '배터리 영사기' ? 1 : 2), `${location.name}: generated sprites load in the real game`);
     if (index === 0) await page.screenshot({ path: '.local/manual-control-applied-b2.png' });
     if (location.name === '배터리 영사기' || location.name === '방화셔터') {
       await page.evaluate(() => completeControlStep());

@@ -74,7 +74,7 @@ function openDrawerPuzzle() {
     playGameSound('item-get');
     refreshInventoryCount();
     refresh();
-    inspectionClose.focus();
+    showItemAcquired(item);
     saveProgress();
   };
   card.addEventListener('click', collect);

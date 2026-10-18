@@ -71,8 +71,7 @@ function update() {
   }
   updatePhone(step);
   const directions = [...keys].map(key => movementKeys[key]);
-  const inputDirection = itemUseTime > 0 ? 0 : Number(directions.includes(1)) - Number(directions.includes(-1));
-  const direction = applyZeroSanityTurnDelay(inputDirection); // 정신력 0%: 방향을 바꾸려면 0.1초 기다려야 한다
+  const direction = itemUseTime > 0 ? 0 : Number(directions.includes(1)) - Number(directions.includes(-1));
   setCrouching(grounded && itemUseTime <= 0 && !usingPhone && [...crouchKeys].some(key => keys.has(key)));
   if (itemUseTime > 0 || crouching) jumpQueued = false;
   const sprinting = !crouching && !phoneLightOn && [...runKeys].some(key => keys.has(key));

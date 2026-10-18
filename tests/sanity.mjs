@@ -12,7 +12,7 @@ try {
   await page.goto(new URL('../index.html', import.meta.url).href);
   await page.locator('#menu-start').click();
   if (await page.locator('#menu-new-confirm').isVisible()) await page.locator('#menu-new-confirm').click();
-  assert.equal(await page.locator('#sanity-meter').getAttribute('aria-valuenow'), '35', '새 게임은 정신력 35%로 시작한다');
+  assert.equal(await page.locator('#sanity-meter').getAttribute('aria-valuenow'), '85', '새 게임은 안정 상태인 정신력 85%로 시작한다');
   assert(await page.locator('#sanity-hud').isHidden(), 'Opening hides the gameplay meter');
   await page.locator('#opening-skip').click();
   await page.clock.pauseAt(new Date('2026-10-04T00:01:00Z'));
@@ -100,131 +100,6 @@ try {
   assert.equal((await state()).sanity, 50, '항불안제 사용 후 빛을 비추면 임무·어둠 감소가 모두 없다');
   await page.evaluate(() => { collectedItems.delete('story-anxiety-seen'); collectedItems.delete('f16-antianxiety-used'); collectedItems.delete('sanity-drain-resume'); phoneLightOn = false; });
 
-  // ---- 정신력 0%: 방향 전환에 0.1초(sanityZeroTurnDelayMs)가 걸리고(그동안 제자리), 같은 방향이거나 정신력이 있으면 지연 없음 ----
-  const turn = await page.evaluate(() => {
-    const out = {};
-    sanity = 0; facing = 1; zeroTurnTimer = 0;
-    out.same = applyZeroSanityTurnDelay(1);
-    let ticks = 0;
-    while (applyZeroSanityTurnDelay(-1) === 0 && ticks < 100) ticks++;
-    out.waited = ticks * step;
-    sanity = 50; zeroTurnTimer = 0;
-    out.normal = applyZeroSanityTurnDelay(-1);
-    return out;
-  });
-  assert.equal(turn.same, 1);
-  assert(turn.waited >= 80 && turn.waited <= 120, `turn delay ${turn.waited}ms`);
-  assert.equal(turn.normal, -1, '정신력이 있으면 바로 돌아선다');
-
-  // ---- 붉은 눈: 깜빡일 때마다 수호 주변의 벽에 1~2개씩 늘고 눈동자가 수호를 따라본다 ----
-  const eyes = await page.evaluate(() => {
-    redEyes.replaceChildren();
-    spawnRedEyes();
-    const first = redEyes.children.length;
-    spawnRedEyes();
-    const second = redEyes.children.length;
-    for (let i = 0; i < 6; i++) spawnRedEyes();
-    const fullEye = redEyes.firstElementChild;
-    spawnRedEyes();
-    render();
-    return {
-      first, second,
-      count: redEyes.children.length,
-      keepsOld: redEyes.firstElementChild === fullEye,
-      inWorld: world.contains(redEyes),
-      around: [...redEyes.children].every(eye => Math.abs(Number(eye.dataset.x) - body.position.x) <= 460),
-      clearOfPlayer: [...redEyes.children].every(eye => Number(eye.dataset.y) - body.position.y <= -60 && (Math.abs(Number(eye.dataset.x) - body.position.x) >= 85 || Number(eye.dataset.y) - body.position.y <= -150)),
-      pupil: [...redEyes.children].every(eye => eye.style.getPropertyValue('--px') !== ''),
-      ranges: [3, 4, 5].map(tier => blinkIntervalRangeByTier[tier]),
-    };
-  });
-  assert(eyes.first >= 1 && eyes.first <= 2, '붉은 눈은 한 번에 1~2개씩 생긴다');
-  assert(eyes.second - eyes.first >= 1 && eyes.second - eyes.first <= 2, '다음 깜빡임에 기존 눈을 두고 1~2개 더 생긴다');
-  assert(eyes.count <= 6 && eyes.inWorld, '붉은 눈은 최대 6개까지 월드 안에 머문다');
-  assert(eyes.keepsOld, '최대 개수가 차면 오래된 눈을 지우고 새로 만들지 않는다');
-  assert(eyes.around, '화면 전체가 아니라 수호 주변에 모인다');
-  assert(eyes.clearOfPlayer, '수호 몸을 가리지 않고 양옆·머리 위에만 생긴다');
-  assert.equal(eyes.pupil, true, '눈동자 위치가 계산된다');
-  const moved = await page.evaluate(() => {
-    const original = { ...body.position };
-    const eye = redEyes.firstElementChild;
-    updateRedEyes();
-    const position = () => [eye.dataset.x, eye.dataset.y, eye.style.left, eye.style.top];
-    const pupil = () => [eye.style.getPropertyValue('--px'), eye.style.getPropertyValue('--py')];
-    const before = position(), pupilBefore = pupil();
-    Body.setPosition(body, { x: original.x + 120, y: original.y - 40 });
-    for (let i = 0; i < 120; i++) updateRedEyes();
-    const after = position(), pupilAfter = pupil();
-    Body.setPosition(body, original); updateRedEyes();
-    return { before, after, pupilBefore, pupilAfter };
-  });
-  assert.deepEqual(moved.after, moved.before, '수호가 움직여도 눈 전체는 생성된 벽 위치에 고정된다');
-  assert.notDeepEqual(moved.pupilAfter, moved.pupilBefore, '고정된 눈 안의 눈동자만 수호를 따라 움직인다');
-  const gaze = await page.evaluate(async () => {
-    const eye = redEyes.firstElementChild;
-    const original = { ...eye.dataset };
-    // 가까이 가면 눈이 깨지므로(RED_EYE_BREAK_DISTANCE), 방금 불이 켜졌던 것으로 두어 (0, 0) 시선에서도 깨지지 않게 한다.
-    redEyeBrightAt = performance.now();
-    // 수호가 눈에서 (dx, dy)만큼 떨어진 자리에 있도록 눈을 옮겨 본다.
-    const look = (dx, dy) => {
-      Object.assign(eye.dataset, { x: body.position.x - dx, y: body.position.y - 20 - dy });
-      updateRedEyes();
-    };
-    const offsets = [];
-    for (const dx of [-200, 200]) {
-      look(dx, 0);
-      offsets.push(parseFloat(eye.style.getPropertyValue('--px')));
-    }
-    const irisRatios = [];
-    const opening = eye.style.getPropertyValue('--eye-open');
-    for (const open of [.8, 1.05]) {
-      eye.style.setProperty('--eye-open', open);
-      for (const [dx, dy] of [[0, 0], [-200, 0], [200, 0], [0, -200], [0, 200], [200, 200]]) {
-        look(dx, dy);
-        const iris = getComputedStyle(eye, '::before');
-        const matrix = new DOMMatrix(iris.transform);
-        irisRatios.push(parseFloat(iris.height) * matrix.d * open / (parseFloat(iris.width) * matrix.a));
-      }
-    }
-    eye.style.setProperty('--eye-open', opening);
-    Object.assign(eye.dataset, original); updateRedEyes();
-    redEyeBrightAt = -Infinity;
-    const backgrounds = [getComputedStyle(eye).backgroundImage, getComputedStyle(eye, '::before').backgroundImage];
-    const loaded = await Promise.all(backgrounds.map(background => new Promise(resolve => {
-      const image = new Image(); image.onload = () => resolve(image.naturalWidth > 0);
-      image.onerror = () => resolve(false); image.src = background.slice(5, -2);
-    })));
-    return { offsets, irisRatios, backgrounds, loaded };
-  });
-  assert(gaze.offsets[0] < 0 && gaze.offsets[1] > 0, '홍채와 동공이 캐릭터의 좌우 이동을 따라본다');
-  assert(gaze.offsets.every(offset => Math.abs(offset) <= 80 * .08 + .001), '홍채가 눈꺼풀 안에 머문다');
-  assert(gaze.irisRatios.every(ratio => Math.abs(ratio - 1) < .01), '시선과 눈꺼풀 벌어짐이 달라도 홍채의 원형이 유지된다');
-  assert(gaze.backgrounds[0].includes('red-eye-sclera-pixel.png') && gaze.backgrounds[1].includes('red-eye-iris-pixel.png'));
-  assert(gaze.loaded.every(Boolean), '분리된 흰자와 홍채 에셋이 로드된다');
-  assert(Math.abs(eyes.ranges[1][1] / eyes.ranges[0][1] - 2 / 3) < .01 && Math.abs(eyes.ranges[2][1] / eyes.ranges[1][1] - 2 / 3) < .01, '깜빡이는 간격이 단계마다 1/3씩 짧아진다');
-
-  // ---- 어둠 속 얼굴: 15% 미만·불 꺼진 어둠에서 9초마다 나오고, 직전 얼굴은 건너뛰며, 밝아지면 즉시 사라진다 ----
-  const faces = await page.evaluate(() => {
-    const out = { seq: [] };
-    buildingBlackout = true; updatePowerState(); phoneLightOn = false; sanity = 10; darkFace.hidden = true; darkFaceTimer = darkFaceLife = 0; darkFaceLast = -1;
-    updateDarkFace(8999, false); out.early = !darkFace.hidden;
-    for (let i = 0; i < 8; i++) { updateDarkFace(9000, false); out.seq.push(darkFaceLast); }
-    out.shown = !darkFace.hidden;
-    updateDarkFace(2000, false); out.gone = darkFace.hidden;
-    updateDarkFace(9000, false); phoneLightOn = true; updateDarkFace(16, false); out.flash = darkFace.hidden;
-    phoneLightOn = false; sanity = 20; updateDarkFace(9000, false); out.highSanity = darkFace.hidden;
-    sanity = 100; darkFaceTimer = 0; out.forced = debugTriggerJumpscare() && !darkFace.hidden; updateDarkFace(2000, false); out.forcedGone = darkFace.hidden;
-    return out;
-  });
-  assert.equal(faces.early, false, '9초가 지나기 전에는 나오지 않는다');
-  assert.equal(faces.shown, true);
-  assert(faces.seq.every((face, index) => index === 0 || face !== faces.seq[index - 1]), '직전 얼굴은 연달아 나오지 않는다');
-  assert.equal(faces.gone, true, '2초 뒤 사라진다');
-  assert.equal(faces.flash, true, '플래시를 켜면 즉시 사라진다');
-  assert.equal(faces.highSanity, true, '15% 이상에서는 나오지 않는다');
-  assert.equal(faces.forced, true, '콘솔 버튼은 조건과 상관없이 얼굴을 띄운다');
-  assert.equal(faces.forcedGone, true);
-
   // ---- 정신력이 0%보다 높아지면 진행 중이던 추격(콘솔로 시작한 것 포함)이 중지된다 ----
   const stopped = await page.evaluate(() => {
     const out = {};
@@ -301,33 +176,33 @@ try {
   await page.evaluate(() => {
     sanity = 0; facing = 1; phoneLightOn = false; phoneBattery = 100; zeroEventEvasions = 0; zeroEventPhase = 'idle'; zeroEventTimer = 0;
   });
-  await page.clock.runFor(15100); // 15초 대기 후 첫 돌진
+  await page.clock.runFor(45100); // 45초 대기 후 첫 기척
   const charge1 = await page.evaluate(() => ({ phase: zeroEventPhase, side: zeroEventSide, mode: hallucinationMode }));
   assert.equal(charge1.phase, 'charging');
   assert.equal(charge1.mode, 'charge');
-  assert.equal(charge1.side, -1, '플레이어가 바라보던 오른쪽의 반대쪽(왼쪽)에서 나타난다');
-  assert.equal(await page.evaluate(() => phoneLightOn), false, '돌진이 시작되면 켜져 있던 플래시가 꺼진다');
+  assert([-1, 1].includes(charge1.side), '화면 안에서 접근 가능한 쪽에 나타난다');
+  assert.equal(await page.evaluate(() => phoneLightOn), false, '꺼져 있던 플래시를 자동으로 켜지 않는다');
   assert(await page.locator('#flash-prompt').isVisible(), '돌진 동안 플래시 안내가 뜬다');
   await page.evaluate(side => { facing = side; phoneLightOn = true; }, charge1.side);
-  await page.clock.runFor(100); // 바라보며 플래시를 비추면 회피
+  await page.clock.runFor(400); // 방향을 확인하고 빛을 유지하면 회피
   assert.equal(await page.evaluate(() => zeroEventEvasions), 1);
   assert(await page.locator('#flash-prompt').isHidden(), '환각이 사라지면 안내도 사라진다');
   assert.equal((await state()).mode, null);
   assert.equal((await state()).hallucinationCaught, false);
 
   await page.evaluate(() => { facing = 1; phoneLightOn = false; });
-  await page.clock.runFor(10100); // 회피 이후에는 10초 뒤 재시도
+  await page.clock.runFor(60100); // 회피 이후에는 60초 뒤 재시도
   const charge2 = await page.evaluate(() => ({ phase: zeroEventPhase, side: zeroEventSide }));
   assert.equal(charge2.phase, 'charging');
   await page.evaluate(side => { facing = side; phoneLightOn = true; }, charge2.side);
-  await page.clock.runFor(100);
+  await page.clock.runFor(400);
   assert.equal(await page.evaluate(() => zeroEventEvasions), 2);
   // ---- 회피하지 못하면 환각에게 잡아먹혀 게임 오버, 다시 정신을 차리고 이어간다 ----
   await page.evaluate(() => {
     sanity = 0; facing = 1; phoneLightOn = false; zeroEventEvasions = 0; zeroEventPhase = 'idle'; zeroEventTimer = 0;
   });
-  await page.clock.runFor(15100);
-  await page.clock.runFor(2500); // 회피하지 않으면 돌진 지속 시간 안에 잡아먹힌다
+  await page.clock.runFor(45100);
+  await page.clock.runFor(5500); // 예고와 접근 시간이 지난 뒤에만 잡힌다
   assert.equal((await state()).hallucinationCaught, true);
   assert.equal(await page.locator('#hallucination-caught').isHidden(), false);
   assert.equal(await page.locator('#hallucination-caught-title').textContent(), 'GAME OVER');
@@ -342,6 +217,6 @@ try {
   assert.equal(await page.locator('#hallucination-caught').isHidden(), true);
 
   assert.deepEqual(errors, []);
-  console.log('PASS: sanity HUD/clamps, dark-only drain (no bright/flashlight recovery), chase drain with boss exemption, ' +
-    'fear tiers and speed penalty, pre-zero warning sighting, 0% charge/evade/retry chain, devoured game over and recovery.');
+  console.log('PASS: sanity HUD/clamps, dark-only drain, chase drain with boss exemption, ' +
+    'fear tiers and speed penalty, 0% warning/approach/evade/retry chain, game over and recovery.');
 } finally { await browser.close(); }

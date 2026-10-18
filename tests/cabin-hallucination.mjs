@@ -19,15 +19,14 @@ try {
   const state = () => page.evaluate(() => ({ mode: hallucinationMode, life: hallucinationLife, phase: zeroEventPhase, timer: zeroEventTimer }));
   for (const mobile of [false, true]) {
     await page.setViewportSize(mobile ? { width: 390, height: 844 } : { width: 1280, height: 720 });
-    for (const mode of ['ambient', 'approach', 'charge']) {
+    for (const mode of ['ambient', 'charge']) {
       await page.evaluate(mode => {
         endHallucinationSighting(); zeroEventPhase = 'idle'; zeroEventTimer = 0; zeroEventForced = false;
-        sanity = mode === 'charge' ? 0 : mode === 'approach' ? 2 : 25;
+        sanity = mode === 'charge' ? 0 : 25;
         performFloorChange('b1');
         elevatorCars[0].floor = -1;
         if (mode === 'ambient') startAmbientSighting();
         else if (mode === 'charge') startZeroCharge();
-        else beginHallucinationSighting(mode, 1, 300);
         hallucinationLife = 400; zeroEventTimer = 200; renderHallucination();
       }, mode);
       assert(await ghost.isVisible(), `${mode} is visible in the hall before boarding`);
@@ -37,6 +36,7 @@ try {
       assert(immediatelyHidden, `${mode} disappears synchronously when the cabin opens`);
       await page.clock.runFor(3000);
       assert(await ghost.isHidden()); assert(await shadow.isHidden());
+      assert(await page.locator('#hallucination-effects').isHidden());
       assert.equal(await page.locator('body').getAttribute('data-hallucinating'), null);
       assert.deepEqual(await state(), cleared, 'The hallway hallucination ends when the ride starts');
       assert.equal(await page.evaluate(() => debugTriggerAmbientHallucination()), false);
@@ -58,7 +58,7 @@ try {
     }
   }
   assert.deepEqual(errors, []);
-  console.log('PASS: ambient/approach/charge hidden while boarding, closing, moving and arriving; attacks end on boarding, debug guards, hallway resumption; desktop/touch');
+  console.log('PASS: ambient/charge hidden while boarding, closing, moving and arriving; attacks end on boarding, debug guards, hallway resumption; desktop/touch');
 } finally {
   await browser.close();
 }

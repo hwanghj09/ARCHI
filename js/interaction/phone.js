@@ -213,6 +213,10 @@ function updatePhone(elapsed) {
   refreshPhone();
 }
 
+// 휴대폰 밖을 누르면 닫는다. 캡처 단계라 휴대폰 버튼 자체의 토글보다 먼저 돌고, 그 버튼은 제외한다.
+document.addEventListener('pointerdown', event => {
+  if (usingPhone && !phonePanel.contains(event.target) && !phoneButton.contains(event.target)) closePhone();
+}, true);
 phoneLightButton.addEventListener('click', togglePhoneLight);
 document.getElementById('phone-close').addEventListener('click', closePhone);
 for (const button of phonePanel.querySelectorAll('[data-phone-app]')) {
