@@ -42,7 +42,8 @@ try {
   await page.keyboard.press('Escape');
   await page.evaluate(() => { solarEnabled = true; solarPoweredFloors = [17]; updatePowerState(); });
   await page.clock.runFor(2500); near((await state()).sanity, reading - 5 / 3); // 밝은 곳에서는 더 이상 회복되지 않는다
-  await page.getByRole('checkbox', { name: '17층 조명' }).uncheck();
+  // 17층 조명 스위치는 화면에서 숨겨졌으니 같은 change 처리기로 끈다.
+  await page.locator('#floor17-lights').evaluate(el => { el.checked = false; el.dispatchEvent(new Event('change')); });
   await page.clock.runFor(3000); near((await state()).sanity, reading - 5 / 3 - 1);
   await page.evaluate(() => {
     phoneBattery = 1; phoneLightOn = true; phoneDrainAccumulator = 0; refreshPhone();
@@ -99,7 +100,7 @@ try {
   assert.equal((await state()).sanity, 50, '항불안제 사용 후 빛을 비추면 임무·어둠 감소가 모두 없다');
   await page.evaluate(() => { collectedItems.delete('story-anxiety-seen'); collectedItems.delete('f16-antianxiety-used'); collectedItems.delete('sanity-drain-resume'); phoneLightOn = false; });
 
-  // ---- 정신력 0%: 방향 전환에 0.2초가 걸리고(그동안 제자리), 같은 방향이거나 정신력이 있으면 지연 없음 ----
+  // ---- 정신력 0%: 방향 전환에 0.1초(sanityZeroTurnDelayMs)가 걸리고(그동안 제자리), 같은 방향이거나 정신력이 있으면 지연 없음 ----
   const turn = await page.evaluate(() => {
     const out = {};
     sanity = 0; facing = 1; zeroTurnTimer = 0;
@@ -112,7 +113,7 @@ try {
     return out;
   });
   assert.equal(turn.same, 1);
-  assert(turn.waited >= 180 && turn.waited <= 220, `turn delay ${turn.waited}ms`);
+  assert(turn.waited >= 80 && turn.waited <= 120, `turn delay ${turn.waited}ms`);
   assert.equal(turn.normal, -1, '정신력이 있으면 바로 돌아선다');
 
   // ---- 붉은 눈: 깜빡일 때마다 수호 주변의 벽에 1~2개씩 늘고 눈동자가 수호를 따라본다 ----
@@ -162,6 +163,8 @@ try {
   const gaze = await page.evaluate(async () => {
     const eye = redEyes.firstElementChild;
     const original = { ...eye.dataset };
+    // 가까이 가면 눈이 깨지므로(RED_EYE_BREAK_DISTANCE), 방금 불이 켜졌던 것으로 두어 (0, 0) 시선에서도 깨지지 않게 한다.
+    redEyeBrightAt = performance.now();
     // 수호가 눈에서 (dx, dy)만큼 떨어진 자리에 있도록 눈을 옮겨 본다.
     const look = (dx, dy) => {
       Object.assign(eye.dataset, { x: body.position.x - dx, y: body.position.y - 20 - dy });
@@ -185,6 +188,7 @@ try {
     }
     eye.style.setProperty('--eye-open', opening);
     Object.assign(eye.dataset, original); updateRedEyes();
+    redEyeBrightAt = -Infinity;
     const backgrounds = [getComputedStyle(eye).backgroundImage, getComputedStyle(eye, '::before').backgroundImage];
     const loaded = await Promise.all(backgrounds.map(background => new Promise(resolve => {
       const image = new Image(); image.onload = () => resolve(image.naturalWidth > 0);

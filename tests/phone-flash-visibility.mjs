@@ -14,6 +14,8 @@ try {
   await page.locator('#opening-skip').click();
   await page.clock.pauseAt(new Date('2026-10-04T00:01:00Z'));
   await page.clock.runFor(100);
+  // 17층 조명 스위치는 HUD 개편으로 화면에서 숨겨졌다. 같은 change 처리기로 상태를 바꾼다.
+  const setLights = on => page.locator('#floor17-lights').evaluate((el, on) => { el.checked = on; el.dispatchEvent(new Event('change')); }, on);
   const glow = page.locator('#flashlight-glow');
   const badge = page.locator('#phone-flash-state');
   assert(await page.locator('#darkness').isHidden(), 'Start in a lit office');
@@ -37,10 +39,10 @@ try {
     }), 'The glow follows the same hand coordinates as the directional beam');
   }
   await page.screenshot({ path: '.local/phone-flash-bright-desktop.png' });
-  await page.locator('#floor17-lights').uncheck();
+  await setLights(false);
   assert(await glow.isVisible());
   assert(await page.locator('#flashlight-beam').isVisible(), 'Dark rooms retain the beam');
-  await page.locator('#floor17-lights').check();
+  await setLights(true);
 
   await page.setViewportSize({ width: 390, height: 844 });
   await page.locator('#phone-button').tap();
@@ -53,7 +55,9 @@ try {
   await page.locator('#phone-close').tap();
   assert(await glow.isVisible());
   assert.equal(await badge.textContent(), '플래시 켜짐');
-  const rect = await badge.boundingBox();
+  // 플래시 글자(#phone-flash-state)는 HUD 개편으로 숨겨졌고, 화면에서는 빛나는 플래시 버튼이 상태를 보여 준다.
+  assert.equal(await page.locator('#flash-button').getAttribute('data-flashlight'), 'on');
+  const rect = await page.locator('#flash-button').boundingBox();
   assert(rect.x >= 0 && rect.y >= 0 && rect.x + rect.width <= 390 && rect.y + rect.height <= 844);
   await page.screenshot({ path: '.local/phone-flash-bright-mobile.png' });
 

@@ -17,6 +17,8 @@ try {
   await page.locator('#menu-start').click();
   if (await page.locator('#menu-new-confirm').isVisible()) await page.locator('#menu-new-confirm').click();
   await page.locator('#opening-skip').click();
+  // 17층 조명 스위치는 HUD 개편으로 화면에서 숨겨졌다. 같은 change 처리기로 상태를 바꾼다.
+  const setLights = on => page.locator('#floor17-lights').evaluate((el, on) => { el.checked = on; el.dispatchEvent(new Event('change')); }, on);
   const decode = () => page.locator('img[data-lit-src]').evaluateAll(imgs => Promise.all(imgs.map(img => img.decode())));
   const check = off => page.locator('img[data-lit-src]').evaluateAll((imgs, off) =>
     imgs.every(img => img.getAttribute('src') === (off ? img.dataset.unlitSrc : img.dataset.litSrc)), off);
@@ -33,10 +35,10 @@ try {
   await decode(); assert(await check(false));
   const before = await page.locator('#office-background').boundingBox();
   await page.screenshot({ path: '.local/background-office-on.png' });
-  await page.locator('#floor17-lights').uncheck();
+  await setLights(false);
   await decode(); assert(await check(true), 'Local light switch overrides supplied power');
   assert.deepEqual(await page.locator('#office-background').boundingBox(), before, 'Lighting preserves geometry');
-  await page.locator('#floor17-lights').check();
+  await setLights(true);
   await decode(); assert(await check(false));
   await page.evaluate(() => powerLever.click());
   await decode(); assert(await check(true));

@@ -44,12 +44,17 @@ try {
   assert((await events()).includes('step'), 'Landing produces a single impact');
   await page.evaluate(() => {
     performFloorChange('f17');
+    collectedItems.add('story-blackout-seen'); // 정전 컷씬 뒤 혼잣말(story-scene.js)은 이 소리 검사와 무관하니 건너뛴다
     startBlackoutScene(currentDoors.find(door => door.type === 'elevator'));
     audioEvents.length = 0;
   });
-  await page.clock.runFor(2800);
+  // 정전 컷씬은 대사마다(1000·2900ms) 멈추고 클릭을 기다린다(scene-gate.js).
+  const nextLine = async () => { assert(await page.evaluate(() => blackoutGate.waiting)); await page.evaluate(() => blackoutScene.click()); };
+  await page.clock.runFor(1100); await nextLine();
+  await page.clock.runFor(1800);
   assert.equal((await events()).filter(name => name === 'switch').length, 8, 'Each brief flicker has an electrical click');
   assert(!(await events()).includes('blackout'), 'Outage impact waits for the final cut');
+  await page.clock.runFor(200); await nextLine();
   await page.clock.runFor(2100);
   assert.equal((await events()).filter(name => name === 'blackout').length, 1, 'Final outage fires once');
   await clear();

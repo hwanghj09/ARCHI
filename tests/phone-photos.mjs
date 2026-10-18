@@ -37,10 +37,9 @@ try {
     await page.clock.runFor(100);
   };
 
+  // 휴대폰의 카메라 앱은 삭제되었고(9bda9e8), 새 사진은 photo: true인 1층 층별 안내판만 찍는다(d661332).
   await page.keyboard.press('p');
-  await page.locator('[data-phone-app="camera"]').click();
-  assert(await page.locator('#phone-camera-shoot').isDisabled(), 'Camera requires an inspected nearby subject');
-  await page.locator('#phone-app-back').click();
+  assert.equal(await page.locator('[data-phone-app="camera"]').count(), 0);
   await page.locator('[data-phone-app="gallery"]').click();
   assert(await page.locator('#phone-gallery-empty').isVisible());
   await page.locator('#phone-close').click();
@@ -49,8 +48,13 @@ try {
   await inspect(810);
   assert(await page.locator('#inspection-photo').isHidden(), 'An ordinary prop has no photo action');
   await inspect(1700);
-  assert(await page.locator('#inspection-photo').isEnabled());
-  assert.equal(await count(), 0, 'Inspecting a clue does not automatically take a photo');
+  assert(await page.locator('#inspection-photo').isHidden(), 'A clue alone is not a photo target');
+
+  await go('f1');
+  await inspect(1480);
+  assert.match(await page.locator('#inspection-title').textContent(), /층별 안내판/);
+  assert(await page.locator('#inspection-photo').isEnabled(), 'The 1F directory is a photo target');
+  assert.equal(await count(), 0, 'Inspecting the directory does not automatically take a photo');
   await page.locator('#phone-sheet').evaluate(image => image.decode());
   await page.locator('#phone-away-sheet').evaluate(image => image.decode());
   await page.locator('#inspection-photo').click();
@@ -78,60 +82,45 @@ try {
   await page.clock.runFor(100);
   await page.keyboard.up('d');
   assert(await page.evaluate(before => body.position.x > before, x), 'Movement resumes');
-  await inspect(1700);
+  await inspect(1480);
   assert(await page.locator('#inspection-photo').isDisabled(), 'Duplicate photos are prevented');
   await page.keyboard.press('Escape');
 
   await page.keyboard.press('p');
   await page.locator('[data-phone-app="gallery"]').click();
   assert.equal(await page.locator('#phone-gallery-list li').count(), 1);
-  assert.match(await page.locator('#phone-gallery-list').textContent(), /영업 현황판/);
+  assert.match(await page.locator('#phone-gallery-list').textContent(), /층별 안내판/);
   await page.screenshot({ path: '.local/phone-photo-gallery.png' });
   await page.locator('.phone-photo-card').click();
   assert(await page.locator('#phone').isHidden());
-  assert.match(await page.locator('#inspection-title').textContent(), /사진 · 영업 현황판/);
-  assert.match(await page.locator('#inspection-sheet').textContent(), /사내 성능 평가 3~5%/);
+  assert.match(await page.locator('#inspection-title').textContent(), /사진 · 층별 안내판/);
+  assert.match(await page.locator('#inspection-sheet').textContent(), /17F/);
   assert(await page.locator('#inspection-photo').isHidden(), 'Viewing a saved photo cannot take another');
   await page.screenshot({ path: '.local/phone-photo-expanded.png' });
   await page.keyboard.press('Escape');
   assert(await page.locator('#phone-gallery').isVisible(), 'Back returns to the gallery');
   await page.locator('#phone-close').click();
 
-  await go('f13-ops');
-  await inspect(1060);
-  assert(await page.locator('#inspection-photo').isHidden(), 'Missing prerequisites do not expose a photo');
-  await page.evaluate(() => { collectedItems.add('f13-ups'); refreshReady(); });
-  await inspect(1060);
-  assert(await page.locator('#inspection-photo').isEnabled());
+  // 배터리·충전·붙잡힘 조건은 갤러리를 비우고 같은 안내판으로 확인한다.
+  await page.evaluate(() => restorePhotos([]));
   await page.evaluate(() => { phoneBattery = 0; refreshPhone(); });
-  await inspect(1060);
+  await inspect(1480);
   assert(await page.locator('#inspection-photo').isDisabled(), 'An empty battery blocks capture');
   await page.evaluate(() => { phoneBattery = 100; phoneDock = { scene: 'office', floor: 17, x: 0 }; });
-  await inspect(1060);
+  await inspect(1480);
   assert(await page.locator('#inspection-photo').isDisabled(), 'A docked phone cannot take a photo');
   await page.evaluate(() => { phoneDock = null; refreshPhone(); });
-  await inspect(1060);
+  await inspect(1480);
   await page.locator('#inspection-photo').click();
   await page.evaluate(() => { hallucinationCaught = true; });
   await page.clock.runFor(100);
   assert.equal(await page.evaluate(() => photoCaptureTime), 0, 'Capture is cancelled when Suho is caught');
-  assert.equal(await count(), 1, 'An interrupted capture does not save a photo');
+  assert.equal(await count(), 0, 'An interrupted capture does not save a photo');
   await page.evaluate(() => { hallucinationCaught = false; });
-
-  await go('f14-archive');
-  await inspect(880);
-  assert(await page.locator('#inspection-photo').isHidden(), 'Unreadable clues cannot be photographed');
-  await go('f1');
   await inspect(1480);
-  assert.match(await page.locator('#inspection-title').textContent(), /층별 안내판/);
-  assert(await page.locator('#inspection-photo').isEnabled(), 'The 1F directory is a photo target');
-  await page.keyboard.press('Escape');
-  await page.keyboard.press('p');
-  await page.locator('[data-phone-app="camera"]').click();
-  assert(await page.locator('#phone-camera-shoot').isEnabled());
-  await page.locator('#phone-camera-shoot').click();
+  await page.locator('#inspection-photo').click();
   await page.clock.runFor(1400);
-  assert.equal(await count(), 2, 'The camera app can photograph an inspected nearby target');
+  assert.equal(await count(), 1, 'The 1F directory can be photographed after a cancelled capture');
 
   const badge = await page.evaluate(() => {
     const original = renderPhonePhoto({ scene: 'f16-cafe', name: '카페 테이블', variant: 'original' });
@@ -145,12 +134,12 @@ try {
 
   // Restores accept only known photo subjects and deduplicate, without trusting stored markup or URLs.
   await page.evaluate(() => restorePhotos([...photoSnapshot(), ...photoSnapshot(), null, { scene: 'f1', name: '<img onerror=alert(1)>', variant: 'original' }]));
-  assert.equal(await count(), 2);
+  assert.equal(await count(), 1);
   assert(await page.evaluate(() => saveProgress()));
   await page.reload();
   await page.locator('#menu-continue').click();
   await page.clock.runFor(200);
-  assert.equal(await count(), 2, 'Photos survive save and continue');
+  assert.equal(await count(), 1, 'Photos survive save and continue');
   await page.keyboard.press('p');
   await page.locator('[data-phone-app="gallery"]').click();
   assert.match(await page.locator('.phone-photo-card').first().textContent(), /층별 안내판/);
@@ -166,7 +155,7 @@ try {
   await page.evaluate(() => startNewGame());
   assert.equal(await count(), 0, 'New game clears the gallery');
   assert.deepEqual(errors, []);
-  console.log('PASS phone photos: camera, inspection action, motion, input locks, gallery viewer, prerequisites, battery, cancellation, 1F directory, save/continue/reset and mobile layouts');
+  console.log('PASS phone photos: 1F directory only, inspection action, motion, input locks, gallery viewer, battery, dock, cancellation, save/continue/reset and mobile layouts');
 } finally {
   await browser.close();
 }

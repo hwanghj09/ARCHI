@@ -1,10 +1,11 @@
 import assert from 'node:assert/strict';
 import { chromium } from 'playwright';
 import sharp from 'sharp';
+import { fileURLToPath } from 'node:url';
 import { finishSceneTransition } from './scene-transition.mjs';
 
 for (const [file, width, height, alpha] of [['phone', 512, 1024, true], ['plug', 128, 320, true], ['cord', 40, 40, true], ['desk', 1536, 1024, false]]) {
-  const meta = await sharp(new URL(`../assets/ui/usb-connection/${file}.png`, import.meta.url).pathname).metadata();
+  const meta = await sharp(fileURLToPath(new URL(`../assets/ui/usb-connection/${file}.png`, import.meta.url))).metadata(); // pathname은 Windows에서 /C:/... 가 된다
   assert.deepEqual([meta.width, meta.height, meta.hasAlpha], [width, height, alpha], `${file} sprite format`);
 }
 const browser = await chromium.launch();

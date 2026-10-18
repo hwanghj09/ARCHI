@@ -24,7 +24,9 @@ try {
   await page.evaluate(() => { solarEnabled = true; updatePowerState(); });
   await page.locator('#power-floor-grid [data-floor="17"]').dispatchEvent('click');
   await page.locator('#office-background').evaluate(img => img.decode());
-  const lights = page.getByRole('checkbox', { name: '17층 조명' });
+  // 17층 조명 스위치는 HUD 개편으로 화면에서 숨겨졌다(css/game.css). 같은 change 처리기로 상태를 바꾼다.
+  const lights = page.locator('#floor17-lights');
+  const setLights = on => lights.evaluate((el, on) => { el.checked = on; el.dispatchEvent(new Event('change')); }, on);
   const filter = selector => page.locator(selector).evaluate(el => getComputedStyle(el).filter);
   const darkness = page.locator('#darkness');
   const alignedSight = () => page.locator('#player').evaluate(el => {
@@ -37,7 +39,7 @@ try {
   assert.equal(await filter('#office-background'), 'none');
   assert(await darkness.isHidden());
   await page.screenshot({ path: '.local/lights-on-desktop.png' });
-  await lights.uncheck();
+  await setLights(false);
   assert(await darkness.isVisible());
   assert(await alignedSight());
   assert.equal(await filter('#player'), 'none');
@@ -59,17 +61,11 @@ try {
   await page.clock.runFor(500);
   await page.keyboard.up('a');
   await page.clock.runFor(34);
-  const label = await page.locator('#floor17-light-switch').boundingBox();
-  assert(label.x >= 0 && label.x + label.width <= 390, 'Light switch fits mobile viewport');
-  await lights.focus();
-  await page.keyboard.press('Space');
-  await page.clock.runFor(150);
+  await setLights(true);
   assert(await lights.isChecked());
   assert.equal(await filter('#office-background'), 'none');
   assert(await darkness.isHidden());
-  assert(await page.locator('#player').evaluate(el => Math.abs(new DOMMatrix(getComputedStyle(el).transform).m42 + 178 - 570) < 1),
-    'Space on the light checkbox must not jump');
-  await lights.uncheck();
+  await setLights(false);
   await reachInitialCorridor(page);
   await collectRooftopKey(page);
   assert(await darkness.isVisible(), 'Corridor shares the office light state');
@@ -88,15 +84,14 @@ try {
   assert.equal(await filter('#dynamic-scene .door'), 'none', 'Rooftop door is not dimmed');
   await page.keyboard.press('e');
   await finishSceneTransition(page);
-  assert(await lights.isVisible());
   assert.equal(await lights.isChecked(), false);
   assert(await darkness.isVisible(), '17F remembers lights after returning');
   assert(await alignedSight());
-  await lights.check();
+  await setLights(true);
   assert(await darkness.isHidden());
   assert.equal(await filter('#background'), 'none');
   assert.deepEqual(errors, []);
-  console.log('PASS: 17F lighting, shared office/corridor state, rooftop exclusion, persistence, keyboard access and mobile layout.');
+  console.log('PASS: 17F lighting, shared office/corridor state, rooftop exclusion, and persistence.');
 } finally {
   await browser.close();
 }
