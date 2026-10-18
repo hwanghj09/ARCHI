@@ -1,13 +1,16 @@
 // 상호작용: 가까운 문·소품 찾기, E 힌트 문구, E를 눌렀을 때의 처리.
 let nearbyDoor = null;
 
-// 조사 대상 고르기: 앞 묶음(groups 순서)을 먼저 보고, 같은 묶음 안에서 범위가 겹치면 가운데가 수호와 가장 가까운 것을 고른다
-// (8층 QA 벤치처럼 붙어 있는 장치, 12층 게이트 옆 엘리베이터). 범위는 폭의 반 + reach(기본 28px).
+// 조사 대상 고르기: 앞 묶음(groups 순서)을 먼저 본다. 범위는 폭의 반 + reach(기본 28px). 같은 묶음 안에서 범위가 겹치면
+// 수호가 폭 안에 서 있는 것 중 가운데가 가장 가까운 것을 고르고(8층 QA 벤치처럼 붙어 있는 장치, 12층 게이트 옆 엘리베이터),
+// 어느 폭 안에도 서 있지 않으면 목록 순서대로 첫 번째를 고른다(엘리베이터 문 옆의 게시판).
 function pickNearbyDoor(groups, standing) {
   const gap = door => Math.abs(body.position.x - door.x - door.width / 2);
   for (const group of groups) {
     const hits = group.filter(door => standing(door) && gap(door) < door.width / 2 + (door.reach ?? 28));
-    if (hits.length) return hits.reduce((best, door) => gap(door) < gap(best) ? door : best);
+    const inside = hits.filter(door => gap(door) < door.width / 2);
+    if (inside.length) return inside.reduce((best, door) => gap(door) < gap(best) ? door : best);
+    if (hits.length) return hits[0];
   }
   return null;
 }
