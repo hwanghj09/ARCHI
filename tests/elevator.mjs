@@ -364,8 +364,8 @@ try {
     await page.keyboard.up(key);
     await page.clock.runFor(34);
   };
-  // 16F is the amenity floor of the lobby directory: The Kitchen and CU share a wall left of the elevators, the café
-  // sits right of the restroom. Its mechanic: the CU shutter came down before the blackout, so the way in is the goods
+  // 16F is the amenity floor of the lobby directory: The Kitchen and VU share a wall left of the elevators, the café
+  // sits right of the restroom. Its mechanic: the VU shutter came down before the blackout, so the way in is the goods
   // door at the far end of the kitchen; the lever inside raises the shutter, which then opens the store from the corridor.
   const checkFloor16 = async () => {
     roomScales.length = 0;
@@ -394,13 +394,13 @@ try {
       parseFloat(getComputedStyle(sign).left)), 128.5, 'Restroom sign is centered over its door');
     assert.equal(await page.locator('#dynamic-scene').getAttribute('data-art'), 'walls', 'Doors remain separate from the background');
     assert.deepEqual(await page.locator('#dynamic-scene .floor-room-sign').allTextContents(),
-      ['The Kitchen', 'CU 편의점', 'Café', '화장실'], 'Rooms follow the lobby directory');
+      ['The Kitchen', 'VU 편의점', 'Café', '화장실'], 'Rooms follow the lobby directory');
     assert.deepEqual(await page.locator('#dynamic-scene .floor-room').evaluateAll(els => els.map(el => el.className)),
       ['floor-room kitchen', 'floor-room store', 'floor-room cafe', 'floor-room restroom']);
     assert.deepEqual(await page.locator('#dynamic-scene .room-door').evaluateAll(els => els.map(el => el.className)),
       ['room-door cafeteria', 'room-door shutter', 'room-door cafe', 'room-door metal']);
     const kitchen = await roomFront(page, 'The Kitchen');
-    const cu = await roomFront(page, 'CU 편의점');
+    const cu = await roomFront(page, 'VU 편의점');
     const cafe = await roomFront(page, 'Café');
     assert.equal(kitchen.room.x + kitchen.room.width, cu.room.x, 'The kitchen and the store share a wall');
     assert(cu.room.x + cu.room.width <= 1790 && cu.door.x + cu.door.width + 28 <= 1790, 'Both sit in the left zone');
@@ -423,7 +423,7 @@ try {
     assert.match(await status(), /비상계단 문이 잠겨/);
     await visitRestroom('16F');
     await walkTo(cu.door.x + cu.door.width / 2);
-    assert.equal(await hint(), 'E · CU 편의점 (잠김)');
+    assert.equal(await hint(), 'E · VU 편의점 (잠김)');
     await page.keyboard.press('e');
     await page.clock.runFor(800);
     assert.equal(await header(), corridorHeader, 'The shuttered store does not open from the corridor');
@@ -445,10 +445,10 @@ try {
     const kitchenLink = await linkDoor();
     assert.deepEqual(kitchenLink, { x: 3460, y: 250, width: 110 }, 'The goods door is at the wall shared with the store');
     await walkTo(kitchenLink.x + kitchenLink.width / 2);
-    assert.equal(await hint(), 'E · CU 편의점 들어가기');
+    assert.equal(await hint(), 'E · VU 편의점 들어가기');
     await page.keyboard.press('e');
     await finishSceneTransition(page);
-    assert.equal(await header(), '16F · CU 편의점');
+    assert.equal(await header(), '16F · VU 편의점');
     await page.locator('#dynamic-scene .floor-prop img').evaluateAll(images => Promise.all(images.map(img => img.decode())));
     await page.clock.runFor(100);
     const cuLink = await linkDoor();
@@ -462,7 +462,7 @@ try {
     await assertHumanScale();
     const cuExit = await exitDoor(page);
     assert.deepEqual([cuExit.y, cuExit.width], [cu.door.y, cu.door.width], 'The store exit is the shutter itself');
-    assertMirroredDoor(cu.room, cu.door, 2040, cuExit, 'CU 편의점');
+    assertMirroredDoor(cu.room, cu.door, 2040, cuExit, 'VU 편의점');
     roomScales.push(2040 / cu.room.width);
     await walkTo(300);
     await jump('d');
@@ -472,11 +472,11 @@ try {
     // The exit stays shut while the shutter is down; the panel lever raises it as a separate step.
     await inspect(cuExit.x + cuExit.width / 2, 'E · 복도 (잠김)', /셔터 제어함 수동 레버/);
     await inspect(1640, 'E · 셔터 올리기', /말려 올라간다/);
-    assert.equal(await header(), '16F · CU 편의점', 'Raising the shutter does not leave the store');
+    assert.equal(await header(), '16F · VU 편의점', 'Raising the shutter does not leave the store');
     await leaveRoom({ front: cu, exit: cuExit }, corridorHeader);
-    assert.equal(await page.locator('#dynamic-scene .room-door.shutter').getAttribute('aria-label'), 'CU 편의점 출입문',
+    assert.equal(await page.locator('#dynamic-scene .room-door.shutter').getAttribute('aria-label'), 'VU 편의점 출입문',
       'Raising the shutter from inside opens the store from the corridor');
-    await enterRoom('CU 편의점', '16F');
+    await enterRoom('VU 편의점', '16F');
     await walkTo(530);
     await jump('a');
     assert(await playerX() < 322, 'Jump clears the ramen box on the way to the kitchen goods door');
@@ -802,7 +802,7 @@ try {
     await walkTo(startX);
     await page.clock.runFor(100);
   };
-  // 10F is TmaxSoft·TmaxTibero 경영관리본부 and uses the user's cutaway asset (management office, executive meeting room,
+  // 10F is ARCHI Soft·ARCHI Data 경영관리본부 and uses the user's cutaway asset (management office, executive meeting room,
   // executive office) at 1:1 (floor line y=438 → 570). The corridor shows each room behind glass: 경영관리 사무실 and
   // 임원 회의실 left of the elevators, 임원실 right of the restroom. Each room is its own scene, the full painted room widened
   // with repeated bays, and every clue is a transparent art-spot over a painted object. Its mechanic is the dual-key cabinet:
@@ -911,7 +911,7 @@ try {
     await walkTo(startX);
     await page.clock.runFor(100);
   };
-  // 9F, the TmaxTibero 사업본부, uses the user's cutaway asset of the business office, the sales and customer area and the
+  // 9F, the ARCHI Data 사업본부, uses the user's cutaway asset of the business office, the sales and customer area and the
   // project room at 1:1 (floor line y=438 → 570). The corridor shows each room behind glass: 사업 업무 공간 and 영업·고객 관리 구역
   // left of the elevators, 프로젝트룸 right of the restroom; the doors stand clear of the painted clues. Each room is its own
   // scene, the full painted room widened with repeated bays. Its mechanic is a clue chain across the rooms: the license ledger
@@ -919,7 +919,7 @@ try {
   // on the project room's presentation laptop (requires list + partialMessage → 9층 조사 완료).
   const checkFloor9 = async () => {
     roomScales.length = 0;
-    const corridorHeader = '9F · TmaxTibero 사업본부';
+    const corridorHeader = '9F · ARCHI Data 사업본부';
     const ready = () => page.locator('#dynamic-scene .fixture.art-spot[data-requires]').evaluateAll(els => els.map(el => el.dataset.ready));
     assert.equal(await header(), corridorHeader);
     await checkCore();
@@ -1216,7 +1216,7 @@ try {
     await walkTo(startX);
     await page.clock.runFor(100);
   };
-  // 8F follows the lobby directory (TmaxTibero QA실·제품기획실) and uses the user's cutaway asset of the QA test room, the product
+  // 8F follows the lobby directory (ARCHI Data QA실·제품기획실) and uses the user's cutaway asset of the QA test room, the product
   // planning workspace and the shared product meeting room at 1:1 (floor line y=438 → 570). The corridor shows each room behind
   // glass: QA 시험실 and 제품기획실 left of the elevators, 공용 제품 회의실 right of the restroom, and the dark release gate light
   // in the middle zone. Each room is its own scene, the full painted room widened with repeated bays.
@@ -1336,7 +1336,7 @@ try {
     await walkTo(startX);
     await page.clock.runFor(100);
   };
-  // 4F TmaxTibero 연구본부 uses vertically fitted cutaway walls with separate ceiling/floor layers (floor line y=438 → 570): the
+  // 4F ARCHI Data 연구본부 uses vertically fitted cutaway walls with separate ceiling/floor layers (floor line y=438 → 570): the
   // R&D workspace and the developer area behind glass left of the elevators, the research meeting room right of the restroom.
   // Its mechanic: the UPS distributor on the R&D wall feeds one output at a time (fixture cycle: cooling fan → meeting room lock →
   // log reader). The meeting room's card-reader lock is fail-secure and opens only while the UPS feeds it, the original tape lies
@@ -1344,7 +1344,7 @@ try {
   // settings. Moving the output locks the meeting room again on the next corridor rebuild.
   const checkFloor4 = async () => {
     roomScales.length = 0;
-    const corridorHeader = '4F · TmaxTibero 연구본부';
+    const corridorHeader = '4F · ARCHI Data 연구본부';
     const status = () => interactionMessage(page);
     const upsState = () => page.locator('#dynamic-scene .fixture.f4-ups').getAttribute('data-state');
     assert.equal(await header(), corridorHeader);
@@ -1763,12 +1763,12 @@ try {
         ['fixture revolving-door', '정문']]);
     const directory = await page.locator('#dynamic-scene .fixture.directory-board span').allTextContents();
     assert.equal(directory.length, 15, 'The directory lists 17F to B2 with minor floors grouped as "···"');
-    assert.equal(directory[0], '17F  TmaxSoft 사업테스트본부');
+    assert.equal(directory[0], '17F  ARCHI Soft 사업테스트본부');
     assert.equal(directory.at(-1), 'B2  AI 서버실', 'The game ends at B2, so the directory has no B3 line');
     // The nth-child rules in index.html highlight exactly the three clue lines.
     assert.deepEqual(await page.locator('#dynamic-scene .fixture.directory-board span').evaluateAll(spans =>
       spans.filter(span => getComputedStyle(span).color === 'rgb(246, 230, 188)').map(span => span.textContent)),
-    ['12F  TmaxSoft 기술본부 · ARCHI 개발팀', '7F  Lounge / VIP Room · AI 테스트·검증실', 'B2  AI 서버실']);
+    ['12F  ARCHI Soft 기술본부 · ARCHI 개발팀', '7F  Lounge / VIP Room · AI 테스트·검증실', 'B2  AI 서버실']);
     // corridor.png paints the gold frame; its inner edge is x 1323..1644, y 229..505. Every line stays inside it.
     assert.deepEqual(await page.locator('#dynamic-scene .fixture.directory-board').evaluate(board => {
       const frame = board.getBoundingClientRect();
@@ -1961,7 +1961,7 @@ try {
     await walkTo(startX);
     await page.clock.runFor(100);
   };
-  // 6F is TmaxTibero 기술본부 (DB 기술지원) and uses the user's cutaway asset of the development workspace, the shared engineering
+  // 6F is ARCHI Data 기술본부 (DB 기술지원) and uses the user's cutaway asset of the development workspace, the shared engineering
   // area and the technical meeting room at 1:1 (floor line y=438 → 570). The workspace and the engineering area sit left of the
   // elevators, the meeting room right of the restroom; each is its own scene, the full painted room widened with repeated bays.
   // Its mechanic: the on-call phone painted on the engineering bench (fixture ring) rings a moment after the player comes in.
@@ -1969,7 +1969,7 @@ try {
   // again after leaving and coming back.
   const checkFloor6 = async () => {
     roomScales.length = 0;
-    const corridorHeader = '6F · TmaxTibero 기술본부';
+    const corridorHeader = '6F · ARCHI Data 기술본부';
     const status = () => interactionMessage(page);
     const phone = page.locator('#dynamic-scene .fixture.duty-phone');
     const spots = () => page.locator('#dynamic-scene .fixture.art-spot').count();
@@ -2089,7 +2089,7 @@ try {
     await walkTo(startX);
     await page.clock.runFor(100);
   };
-  // 5F is the second TmaxTibero 연구본부 floor (DB 보안 연구) and uses the user's cutaway asset of the R&D room, the security
+  // 5F is the second ARCHI Data 연구본부 floor (DB 보안 연구) and uses the user's cutaway asset of the R&D room, the security
   // research lab and the meeting room at 1:1 (floor line y=438 → 570). The corridor shows each room behind glass: 연구개발실 and
   // 기술연구실 left of the elevators, 회의실 right of the restroom. Each room is its own scene, the full painted room widened with
   // repeated bays. Its mechanic: the key notebook lies on the tallest painted shelf (186px, a solid with a message, inspectable
@@ -2097,7 +2097,7 @@ try {
   // (movables, its own sprite; the painted one was erased from the art) has to be pushed against it first.
   const checkFloor5 = async () => {
     roomScales.length = 0;
-    const corridorHeader = '5F · TmaxTibero 연구본부';
+    const corridorHeader = '5F · ARCHI Data 연구본부';
     const status = () => interactionMessage(page);
     const playerBottom = () => page.locator('#player').evaluate(el => new DOMMatrix(getComputedStyle(el).transform).m42 + 178);
     assert.equal(await header(), corridorHeader);

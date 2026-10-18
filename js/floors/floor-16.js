@@ -1,7 +1,7 @@
 // 16층: FLOOR16_LAYOUT(복도)과 FLOOR16_ROOMS(방 내부). 등록은 registry.js에서 한다.
-// 16층 편의시설(1층 층별 안내: The Kitchen / CU 편의점 / Café): 크림색 타일 마감(food 테마). 코어 왼쪽에 벽을 맞댄
-// 사내 식당(The Kitchen)·CU 편의점, 화장실 오른쪽 구역에 카페를 둔다. 방 안 폭은 복도 전면 폭의 3.4배(1060/600/560 → 3604/2040/1904).
-// CU 셔터는 정전 직전에 내려와 복도에서 열리지 않는다(unlockedBy: 자기 방 id). 식당 안쪽 끝의 주방 반입문(links)으로 편의점
+// 16층 편의시설(1층 층별 안내: The Kitchen / VU 편의점 / Café): 크림색 타일 마감(food 테마). 코어 왼쪽에 벽을 맞댄
+// 사내 식당(The Kitchen)·VU 편의점, 화장실 오른쪽 구역에 카페를 둔다. 방 안 폭은 복도 전면 폭의 3.4배(1060/600/560 → 3604/2040/1904).
+// VU 셔터는 정전 직전에 내려와 복도에서 열리지 않는다(unlockedBy: 자기 방 id). 식당 안쪽 끝의 주방 반입문(links)으로 편의점
 // 창고에 들어가고(반입문은 편의점 쪽에서 열리지 않는다), 안의 셔터 제어함 수동 레버로 셔터를 올린 뒤(올린 채로는 복도에서도 드나든다) 출구로 나온다.
 // 레버로 셔터를 다시 내릴 수도 있고, 내려 두면 출구도 복도 문도 닫힌다.
 // 단서는 새벽마다 끊기는 냉동고 전원, 정전 직전 SYSTEM이 내린 셔터와 수호의 23:47 영수증, 낮에는 주문도 못 알아듣다가
@@ -12,12 +12,13 @@ const FLOOR16_LAYOUT = {
   header: '16F · 편의시설', background: '#1d1b17', theme: 'food',
   backgroundWallsOnly: true,
   backgroundImage: { src: 'assets/background/floor16/floor16-corridor.png', height: 760, top: 0 },
+  brandSigns: [{ x: 1340, y: 134, width: 170, height: 50 }],
   rooms: [
     { name: 'The Kitchen', x: 64, width: 1060, style: 'kitchen', target: 'f16-kitchen',
       doorX: 494, doorWidth: 200, doorStyle: 'cafeteria' },
-    { name: 'CU 편의점', x: 1124, width: 600, style: 'store', target: 'f16-cu',
+    { name: 'VU 편의점', x: 1124, width: 600, style: 'store', target: 'f16-cu',
       doorX: 1542, doorWidth: 150, doorY: 262, doorStyle: 'shutter', locked: true, unlockedBy: 'f16-cu',
-      message: 'CU 편의점 셔터가 내려와 있다. 셔터 옆 안내문: "셔터가 내려간 뒤에는 식당 주방 반입문으로 출입해 주세요."',
+      message: 'VU 편의점 셔터가 내려와 있다. 셔터 옆 안내문: "셔터가 내려간 뒤에는 식당 주방 반입문으로 출입해 주세요."',
       insideMessage: '셔터가 바닥까지 내려와 있다. 옆의 셔터 제어함 수동 레버로 먼저 올려야 나갈 수 있다.' },
     { name: 'Café', x: 4322, width: 560, style: 'cafe', target: 'f16-cafe',
       doorX: 4354, doorWidth: 140, doorStyle: 'cafe' },
@@ -44,9 +45,9 @@ const FLOOR16_ROOMS = interiorRooms(16, [
     { file: 'food-dining-table', size: [512, 256], worldWidth: 243, x: 380 },
     { file: 'food-dining-table', size: [512, 256], worldWidth: 243, x: 800 },
     { file: 'food-kitchen-board', size: [512, 256], worldWidth: 350, x: 1250, name: '주방 게시판',
-      message: '주방 근무표 옆 메모: "밤에는 CU가 무인 운영이라 편의점 물품도 주방 반입문으로 들어옴. 반입문 잠그지 말 것." 마감 점검표와 시설팀 회신도 붙어 있다: "냉동고 전원 건 · 건물 전력 이상 없음."',
+      message: '주방 근무표 옆 메모: "밤에는 VU가 무인 운영이라 편의점 물품도 주방 반입문으로 들어옴. 반입문 잠그지 말 것." 마감 점검표와 시설팀 회신도 붙어 있다: "냉동고 전원 건 · 건물 전력 이상 없음."',
       writing: [{ as: 'paper', title: '주방 근무표', text: '조식  A조\n중식  A조 · B조\n석식  B조' },
-        { as: 'note', text: '밤에는 CU가 무인 운영이라\n편의점 물품도\n주방 반입문으로 들어옴.\n\n반입문 잠그지 말 것.' },
+        { as: 'note', text: '밤에는 VU가 무인 운영이라\n편의점 물품도\n주방 반입문으로 들어옴.\n\n반입문 잠그지 말 것.' },
         { as: 'paper', title: '주방 마감 점검', text: '· 가스 밸브 잠금\n· 냉동고 온도 기록\n· 음식물 쓰레기 배출' },
         { as: 'paper', title: '시설팀 회신', text: '냉동고 전원 건\n건물 전력 이상 없음.' }],
       caption: '주방 근무표 옆 메모.' },
@@ -61,16 +62,17 @@ const FLOOR16_ROOMS = interiorRooms(16, [
     { file: 'staff-lockers', size: [256, 512], worldWidth: 130, x: 2980 },
     { file: 'maintenance-tool-cabinet', size: [512, 256], worldWidth: 198, x: 3250 },
   ] },
-  { id: 'f16-cu', name: 'CU 편의점', width: 2040, interiorStyle: 'shelves',
+  { id: 'f16-cu', name: 'VU 편의점', width: 2040, interiorStyle: 'shelves',
     backgroundWallsOnly: true,
     backgroundImage: { src: 'assets/background/floor16/floor16-cu.png', height: 760, top: 0 },
+    brandSigns: [{ x: 950, y: 108, width: 160, height: 42 }],
     // 반입문은 주방 쪽에서만 열린다: 들어온 뒤에는 셔터 제어함 레버로 셔터를 올려야 나간다(필수 퍼즐).
     links: [{ target: 'f16-kitchen', x: 56, width: 110, style: 'backdoor', locked: true,
       message: '반입문은 주방 쪽에서만 열리게 걸려 있다. 셔터 제어함의 수동 레버로 셔터를 올리고 나가자.' }], props: [
     { file: 'instrument-cart', size: [256, 256], worldWidth: 113, x: 290 },
     { file: 'food-checkout', size: [512, 256], worldWidth: 312, x: 1150, name: '계산대',
       message: 'POS 화면은 꺼져 있다. 계산대에 영수증 한 장이 걸려 있다: "23:47 · 컵라면 1 · 삼각김밥 1 · 사원증 결제 · 17층 정수호". 아까 야근하다 사 간 야식이다.',
-      surface: 'receipt', writing: [{ as: 'title', text: 'CU' }, { as: 'rule' }, '23:47', { as: 'field', label: '컵라면', text: '1' },
+      surface: 'receipt', writing: [{ as: 'title', text: 'VU' }, { as: 'rule' }, '23:47', { as: 'field', label: '컵라면', text: '1' },
         { as: 'field', label: '삼각김밥', text: '1' }, { as: 'rule' }, '사원증 결제', '17층 정수호'],
       caption: 'POS 화면은 꺼져 있다. 계산대에 영수증 한 장이 걸려 있다. 아까 야근하다 사 간 야식이다.' },
     { file: 'drink-vending-machine', size: [256, 512], worldWidth: 96, x: 1450 },
@@ -81,16 +83,16 @@ const FLOOR16_ROOMS = interiorRooms(16, [
       // 올라가 있으면 밀어 내린다. 출구는 셔터가 올라가 있을 때만 열린다.
       shutterLever: 'f16-cu' },
   ],
-  // 밀 수 있는 진라면 박스(js/scene/pushables.js): 플레이어 가슴 높이(117px, 처음의 1.3배)이고, 옆에서 막힌 채 걸으면 플레이어 이동 속도의 절반으로
+  // 밀 수 있는 인라면 박스(js/scene/pushables.js): 플레이어 가슴 높이(117px, 처음의 1.3배)이고, 옆에서 막힌 채 걸으면 플레이어 이동 속도의 절반으로
   // 밀린다. 왼쪽은 처음 자리(중심 415)보다 더 밀리지 않고, 오른쪽은 계산대 왼쪽 끝(1150 - 312 / 2 + 312 * .0156 ≈ 999)에 박스
   // 오른쪽 끝(중심 + 93)이 맞닿는 자리(중심 906)에서 멈춘다. 박스 위에 서면(어디까지 밀었든) 선반 항불안제에 손이 닿는다.
-  movables: [{ kind: 'ramen-box', name: '진라면 박스', x: 322, width: 186, height: 117,
+  movables: [{ kind: 'ramen-box', name: '인라면 박스', x: 322, width: 186, height: 117,
     pushable: { factor: .5, minX: 415, maxX: 906 } }],
   // 상단 선반 약품 칸의 항불안제(위치는 선반 그림 속 컵라면 칸 위). condition(박스 위에 서기)을 채우기 전에는
   // 손이 닿지 않아 챙길 수 없고, 챙기면(gives) 선반에서 사라지고 가방에 들어간다(INVENTORY_ITEMS).
   fixtures: [
     { name: '항불안제', style: 'pill-item', x: 880, y: 246, width: 48, height: 45,
-      standYs: [floorY, floorY - 117], condition: () => playerOnPushable('진라면 박스'),
+      standYs: [floorY, floorY - 117], condition: () => playerOnPushable(brandText('인라면 박스')),
       gives: 'f16-antianxiety', hideWhenTaken: true,
       surface: 'card', image: 'assets/objects/items/antianxiety.png',
       message: '박스 위에 올라서니 손이 닿는다. 선반 위의 항불안제 한 통을 꺼냈다. 챙겼다.',
@@ -130,7 +132,7 @@ const FLOOR16_ROOMS = interiorRooms(16, [
         { as: 'note', color: 'pink', text: '디카페인 원두도\n들여 주세요.' },
         { as: 'note', color: 'green', text: '키오스크 말고\n직원분께 주문하고 싶어요.' },
         { as: 'note', color: 'green', text: '국이 너무 짜요.' },
-        { as: 'note', color: 'blue', text: '밤에도 CU에\n계산원 있으면 좋겠어요.' }],
+        { as: 'note', color: 'blue', text: '밤에도 VU에\n계산원 있으면 좋겠어요.' }],
       caption: '답변란은 비어 있다.' },
   ] },
 ]);

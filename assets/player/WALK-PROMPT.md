@@ -1,5 +1,7 @@
 # 정수호 걷기 애니메이션
 
+현재 게임은 같은 화풍으로 걷기 한 주기를 다시 그린 `jeong-suho-walk-eight.png`를 사용한다. 접지·하강·통과·발끝 밀기를 양발로 반복하는 8프레임이며, 이전 12프레임 조합은 제거했다. 새 원본·내보내기·휴대폰 변형은 [movement-inbetweens-source/README.md](movement-inbetweens-source/README.md)를 참고한다. 아래는 보존된 6프레임 버전의 제작 기록이다.
+
 - 생성 도구: 내장 image_gen
 - 참조: `jeong-suho-source.png`, 기존 Notion 주인공 디자인
 - `jeong-suho-walk-source.png`: 8프레임 생성 원본

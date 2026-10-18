@@ -160,8 +160,8 @@
 #computer [data-computer-task-app][data-running="true"]::after { content: ''; position: absolute; bottom: 2px; left: 50%; transform: translateX(-50%); width: 6px; height: 3px; border-radius: 2px; background: #7b8289; }
 #computer [data-computer-task-app][data-active="true"] { background: #fff9; }
 #computer [data-computer-task-app][data-active="true"]::after { width: 16px; background: #0067c0; }
-.windows-mark { display: grid; grid-template-columns: repeat(2, 10px); grid-template-rows: repeat(2, 10px); gap: 2px; }
-.windows-mark i { background: #0078d4; }
+.desktop-mark { position: relative; width: 15px; height: 15px; border: 2px solid #75c4b8; transform: rotate(45deg); }
+.desktop-mark::after { content: ''; position: absolute; inset: 4px; background: #75c4b8; }
 .computer-tray { display: flex; align-items: center; gap: 12px; }
 #computer-clock { white-space: pre; text-align: right; font-size: 11px; line-height: 1.4; font-variant-numeric: tabular-nums; }
 .computer-network { color: #303a47; font-size: 14px; }

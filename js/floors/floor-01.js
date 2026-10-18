@@ -45,7 +45,7 @@ const FLOOR1_LAYOUT = {
     { name: '층별 안내판', x: 1323, y: 229, width: 321, height: 276, style: 'directory-board', photo: true,
       lines: [
         '17F  TmaxSoft 사업테스트본부',
-        '16F  The Kitchen / CU 편의점 / Café',
+        '16F  The Kitchen / VU 편의점 / Café',
         '···',
         '13F  TmaxSoft 기술본부',
         '12F  TmaxSoft 기술본부 · ARCHI 개발팀',
@@ -63,7 +63,7 @@ const FLOOR1_LAYOUT = {
       message: '층별 안내판이다. 12F 기술본부 · ARCHI 개발팀, 7F AI 테스트·검증실, B2 AI 서버실.',
       surface: 'document', look: 'sign',
       writing: [{ as: 'title', text: '층별 안내' },
-        { text: '17F  TmaxSoft 사업테스트본부\n16F  The Kitchen / CU 편의점 / Café\n15F  TmaxSoft 연구본부\n14F  TmaxSoft 연구본부\n' +
+        { text: '17F  TmaxSoft 사업테스트본부\n16F  The Kitchen / VU 편의점 / Café\n15F  TmaxSoft 연구본부\n14F  TmaxSoft 연구본부\n' +
           '13F  TmaxSoft 기술본부', size: 'small' },
         { text: '12F  TmaxSoft 기술본부 · ARCHI 개발팀', size: 'small' },
         { text: '11F  TmaxSoft 사업본부 / 전략마케팅본부\n10F  TmaxSoft / TmaxTibero 경영관리본부\n9F  TmaxTibero 사업본부\n' +

@@ -33,14 +33,15 @@
     <link rel="stylesheet" href="css/device-apps.css" />
     <link rel="stylesheet" href="css/clues.css" />
     <link rel="preload" as="image" href="assets/objects/guard-robot/guard-capture.png" />
-    <link rel="preload" as="image" href="assets/player/jeong-suho-phone-walk-on.png" />
-    <link rel="preload" as="image" href="assets/player/jeong-suho-phone-run-on.png" />
+    <link rel="preload" as="image" href="assets/player/jeong-suho-phone-walk-eight-on.png" />
+    <link rel="preload" as="image" href="assets/player/jeong-suho-phone-jump-on.png" />
     <link rel="stylesheet" href="css/game.css" />
     <link rel="stylesheet" href="css/debug.css" />
     <script src="assets/vendor/matter.min.js" defer></script>
     <!-- 게임 스크립트는 모두 일반 스크립트라 최상위 선언(전역)을 서로 함께 쓴다. 불러오는 순서가 곧 의존 순서다:
          설정·상태 → 층 데이터 → 엘리베이터·17층 고정 장면·물리 → 기능별 로직 → 입력 → main.js(첫 화면과 루프 시작). -->
     <script src="js/core/config.js" defer></script>
+    <script src="js/core/brands.js" defer></script>
     <script src="js/core/dom.js" defer></script>
     <script src="js/core/state.js" defer></script>
     <script src="js/audio/audio.js" defer></script>
@@ -153,12 +154,12 @@
           <img id="caught-sheet" src="assets/player/jeong-suho-caught.png" alt="" width="1024" height="256" draggable="false" />
           <img id="idle-sprite" src="assets/player/jeong-suho-idle-four.png" alt="" width="1254" height="1254" draggable="false" />
           <img id="antianxiety-sheet" src="assets/player/jeong-suho-antianxiety.png" alt="" width="1536" height="256" draggable="false" />
-          <img id="walk-sheet" src="assets/player/jeong-suho-walk-six.png" alt="" width="1536" height="256" draggable="false" />
+          <img id="walk-sheet" src="assets/player/jeong-suho-walk-eight.png" alt="" width="2048" height="256" draggable="false" />
           <img id="push-sheet" src="assets/player/jeong-suho-push-box.png" alt="" width="1536" height="256" draggable="false" />
-          <img id="run-sheet" src="assets/player/jeong-suho-run-eight.png" alt="" width="2048" height="256" draggable="false" />
+          <img id="run-sheet" src="assets/player/jeong-suho-run-sixteen.png" alt="" width="4096" height="256" draggable="false" />
           <img id="crouch-sheet" src="assets/player/jeong-suho-crouch.png" alt="" width="1024" height="256" draggable="false" />
-          <img id="phone-walk-sheet" src="assets/player/jeong-suho-phone-walk-off.png" alt="" width="1536" height="256" draggable="false" />
-          <img id="phone-run-sheet" src="assets/player/jeong-suho-phone-run-off.png" alt="" width="2048" height="256" draggable="false" />
+          <img id="phone-walk-sheet" src="assets/player/jeong-suho-phone-walk-eight-off.png" alt="" width="2048" height="256" draggable="false" />
+          <img id="phone-run-sheet" src="assets/player/jeong-suho-phone-run-sixteen-off.png" alt="" width="4096" height="256" draggable="false" />
           <img id="jump-sheet" class="action-sheet" src="assets/player/jeong-suho-jump-fall.png" alt="" width="1774" height="887" draggable="false" />
           <img id="interact-sheet" class="action-sheet" src="assets/player/jeong-suho-interact.png" alt="" width="1774" height="887" draggable="false" />
           <img id="phone-sheet" class="phone-sheet" src="assets/player/jeong-suho-phone-idle.png" alt="" width="1024" height="256" draggable="false" />
@@ -724,7 +725,7 @@
       </div>
       <div class="computer-taskbar">
         <div class="computer-taskbar-apps">
-          <button id="computer-start-button" type="button" aria-label="시작" title="시작" aria-expanded="false" aria-controls="computer-start-menu"><span class="windows-mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span></button>
+          <button id="computer-start-button" type="button" aria-label="시작" title="시작" aria-expanded="false" aria-controls="computer-start-menu"><span class="desktop-mark" aria-hidden="true"></span></button>
           <div id="computer-taskbar-windows"></div>
         </div>
         <div class="computer-tray"><span class="computer-network" title="사내 네트워크">◉</span><time id="computer-clock"></time><button id="computer-exit" type="button" aria-label="컴퓨터 사용 종료" title="컴퓨터 사용 종료"><img src="assets/vendor/lucide/log-out.svg" alt="" /></button></div>

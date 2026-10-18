@@ -18,7 +18,7 @@ const ROTARY_CONTROLS = { key: 90, crank: 720, clock: 90 };
 
 // 지금 조작해야 하는가: 필요한 물건이 모자라면(missingMessage를 먼저 보여야 하면) 아직 아니다.
 function needsControl(door) {
-  if (door.shutterLever) return true; // 16층 CU 셔터 레버는 누를 때마다 올리거나 내린다(doors.js toggleShutter).
+  if (door.shutterLever) return true; // 16층 VU 셔터 레버는 누를 때마다 올리거나 내린다(doors.js toggleShutter).
   const { control } = door;
   if (!control) return false;
   if (door.controlPassed) { door.controlPassed = false; return false; }

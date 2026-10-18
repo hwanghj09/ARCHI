@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { chromium } from 'playwright';
 
-// 16층 CU 편의점: 진라면 박스를 밀어(플레이어 속도의 절반) 선반 가까이 옮기고 그 위에 올라서면 항불안제를 챙길 수 있다.
+// 16층 VU 편의점: 인라면 박스를 밀어(플레이어 속도의 절반) 선반 가까이 옮기고 그 위에 올라서면 항불안제를 챙길 수 있다.
 const browser = await chromium.launch();
 try {
   const page = await browser.newPage({ viewport: { width: 1280, height: 720 } });

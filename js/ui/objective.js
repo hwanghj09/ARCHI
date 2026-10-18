@@ -20,7 +20,7 @@ const OBJECTIVES = [
     text: '어둠이 내려앉았다. 이제는 셔터를 직접 움직일 수 있지 않을까?' },
   { when: () => ['f13-testbay', 'f13-secure'].includes(dynamicFloorId) && room === 'dynamic' && !collectedItems.has('f13-backup-device'),
     title: '백업 장치 가져오기', text: '이 층 어딘가에 백업 장치가 보관되어 있다. 잠금도 결국 전기로 움직인다.' },
-  // 16층 CU 반입문은 안에서 열리지 않는다(floor-16.js): 항불안제를 챙긴 뒤 셔터를 올려야 나간다.
+  // 16층 VU 반입문은 안에서 열리지 않는다(floor-16.js): 항불안제를 챙긴 뒤 셔터를 올려야 나간다.
   { when: () => room === 'dynamic' && dynamicFloorId === 'f16-cu' && collectedItems.has('f16-antianxiety') && !collectedItems.has('f16-cu'),
     title: '편의점 나가기', text: '들어온 문으로는 나갈 수 없다. 다른 출구는 없을까?' },
   // B2 DELETE 뒤 엔딩(b2-ending.js): 단계마다 다음 할 일을 알려 준다.
