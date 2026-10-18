@@ -10,6 +10,10 @@ const sheets = [
   ['phone-run-on', 'phone-jump-on', 2],
 ];
 let phoneArmPhases;
+const walkHead = await sharp('assets/player/movement-inbetweens-source/walk-head.png').ensureAlpha().raw()
+  .toBuffer({ resolveWithObject: true });
+assert.equal(walkHead.info.width, 56);
+assert.equal(walkHead.info.height, 56);
 
 for (const [original, expanded, frames] of sheets) {
   const before = original && await sharp(`assets/player/jeong-suho-${original}.png`).ensureAlpha().raw()
@@ -49,6 +53,24 @@ for (const [original, expanded, frames] of sheets) {
     if (walking) {
       assert(Math.abs(bottom - (expanded === 'walk-eight' ? 239 : 237)) <= 1, 'Walking always keeps a support foot planted');
       headTops.push(top);
+      // Compare artwork, not just its center: scaling and leftover nape/face pixels must fail.
+      for (let y = 0; y < 56; y++) for (let x = 0; x < 56; x++) {
+        const h = (y * 56 + x) * 4, p = ((top + y) * 256 + 106 + x) * 4;
+        if (walkHead.data[h + 3]) assert(cell.subarray(p, p + 4).equals(walkHead.data.subarray(h, h + 4)),
+          `${expanded}/${frame}: identical unscaled head, jaw, neck and collar`);
+      }
+      for (let y = 0; y < top + 44; y++) for (let x = 85; x < 186; x++) {
+        if (y >= top + 40 && x >= 114) continue; // The collar and phone begin below the face.
+        const hx = x - 106, hy = y - top;
+        const expected = hx >= 0 && hx < 56 && hy >= 0 && hy < 56 ? walkHead.data[(hy * 56 + hx) * 4 + 3] : 0;
+        assert.equal(cell[(y * 256 + x) * 4 + 3], expected, `${expanded}/${frame}: no head halo or gray nape trail`);
+      }
+      for (let y = top + 30; y < top + 56; y++) for (let x = 114; x < 158; x++) {
+        const h = ((y - top) * 56 + x - 106) * 4, p = (y * 256 + x) * 4;
+        if (walkHead.data[h + 3] || !cell[p + 3]) continue;
+        assert(!(cell[p] > 110 && cell[p] > cell[p + 1] + 20 && cell[p + 1] > cell[p + 2] + 10),
+          `${expanded}/${frame}: no old chin or neck outside the shared head`);
+      }
       let sum = 0, pixels = 0;
       const support = [];
       for (let y = 0; y < 256; y++) for (let x = 0; x < 256; x++) {
@@ -147,4 +169,4 @@ try {
   }
   assert.deepEqual(errors, []);
 } finally { await browser.close(); }
-console.log('PASS: eight-pose walks with forward/middle/back free-arm swing and matching light variants, low late-swing feet, toe-off/head alignment, preserved run/jump pixels, alpha/margins; full 8/16-frame cycles and idle in Chromium.');
+console.log('PASS: identical unscaled heads across all 24 walk poses, no gray nape trail or old chin, matching arm swing/light variants, low feet, preserved run/jump pixels, alpha/margins; full 8/16-frame cycles and idle in Chromium.');

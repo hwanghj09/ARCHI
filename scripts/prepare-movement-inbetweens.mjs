@@ -30,6 +30,16 @@ const walkPoses = [
   ['walk-keys', 3, 2, 0], ['walk-keys', 3, 2, 1], ['walk-keys', 3, 2, 2], ['walk-up', 2, 1, 1],
   ['walk-keys', 3, 2, 3], ['walk-keys', 3, 2, 4], ['walk-keys', 3, 2, 5], ['walk-up', 2, 1, 0],
 ];
+const walkHead = await sharp(`${root}movement-inbetweens-source/walk-head.png`).ensureAlpha().raw()
+  .toBuffer({ resolveWithObject: true });
+assert(walkHead.info.width === 56 && walkHead.info.height === 56, 'The shared walking head has one fixed pixel size');
+// Clip the old head through the shoulder/collar boundary, including the gray nape matte.
+const collar = [[70, 96], [90, 80], [114, 61], [130, 69], [134, 73], [140, 73], [159, 82], [186, 90]];
+const headCut = new Map();
+for (let p = 1; p < collar.length; p++) {
+  const [x1, y1] = collar[p - 1], [x2, y2] = collar[p];
+  for (let x = x1; x < x2; x++) headCut.set(x, Math.round(y1 + (y2 - y1) * (x - x1) / (x2 - x1)));
+}
 for (const variant of ['', '-off', '-on']) {
   const output = Buffer.alloc(2048 * 256 * 4);
   for (let i = 0; i < 8; i++) {
@@ -63,6 +73,19 @@ for (const variant of ['', '-off', '-on']) {
       const dx = x + xOffset, dy = y + yOffset;
       assert(dx >= 6 && dx < 250 && dy >= 6 && dy < 250, `${name}/${i}: clipped character`);
       scaled.data.copy(output, (dy * 2048 + i * 256 + dx) * 4, from, from + 4);
+    }
+    const bob = [0, 1, 0, -2][i % 4] - (variant ? 2 : 0);
+    for (const [x, edge] of headCut) for (let y = 0; y < edge + bob; y++) {
+      // The forward phone begins beside the jaw and must retain its LED.
+      if (variant && x >= 158 && y >= 58 + bob) continue;
+      const p = (y * 2048 + i * 256 + x) * 4;
+      output.fill(0, p, p + 4);
+    }
+    // Paste after body scaling: every walk uses identical head pixels, with translation only.
+    for (let y = 0; y < 56; y++) for (let x = 0; x < 56; x++) {
+      const from = (y * 56 + x) * 4;
+      if (!walkHead.data[from + 3]) continue;
+      walkHead.data.copy(output, ((17 + bob + y) * 2048 + i * 256 + 106 + x) * 4, from, from + 4);
     }
   }
   const name = variant ? `phone-walk-eight${variant}` : 'walk-eight';
