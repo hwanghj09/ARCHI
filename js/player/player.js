@@ -11,6 +11,20 @@ const phoneAwaySheet = document.getElementById('phone-away-sheet');
 const phoneWalkSheet = document.getElementById('phone-walk-sheet');
 const phoneRunSheet = document.getElementById('phone-run-sheet');
 const caughtSheet = document.getElementById('caught-sheet');
+const cutsceneSheet = document.getElementById('cutscene-sheet');
+const cutscenePoses = { alert: 0, startled: 1, 'look-up': 2, 'look-back': 3, pant: 4,
+  think: 6, anxious: 7, relieved: 8, badge: 9 };
+
+function showCutscenePose(pose, elapsed = 0) {
+  if (cutsceneSheet.naturalWidth !== 2560 || cutsceneSheet.naturalHeight !== 256 || !(pose in cutscenePoses)) return false;
+  const frame = cutscenePoses[pose] + (pose === 'pant' ? Math.floor(elapsed / 480) % 2 : 0);
+  sprite.dataset.state = 'cutscene';
+  sprite.dataset.cutscenePose = pose;
+  sprite.dataset.frame = String(frame);
+  sprite.dataset.phoneHeld = 'false';
+  cutsceneSheet.style.transform = `translateX(${-frame * 10}%)`;
+  return true;
+}
 const antianxietySheet = document.getElementById('antianxiety-sheet');
 const itemUseFrameDurations = [220, 220, 200, 280, 300, 280];
 const itemUseDuration = itemUseFrameDurations.reduce((total, duration) => total + duration, 0);
@@ -84,6 +98,7 @@ function showIdleFrame(index) {
 
 function animate(distance, sprinting = false, elapsed = 0) {
   if (openingActive || blackoutSceneActive) return;
+  delete sprite.dataset.cutscenePose;
   if ((playerCaught || hallucinationCaught) && itemUseTime > 0) {
     itemUseTime = 0;
     refreshPhone();

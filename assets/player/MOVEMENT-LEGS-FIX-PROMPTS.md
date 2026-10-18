@@ -1,0 +1,43 @@
+# 걷기·달리기 겹친 하체 수정
+
+2026-10-18 · 도구: built-in ImageGen, 실제 투명 배경. 다리를 통과시켜 그린 중복 윤곽, 여분의 종아리/신발, 앞뒤 신발의 중복된 뒤꿈치를 수정했다.
+
+## 최종 파일과 적용 위치
+
+| 게임 시트 | 수정한 원본 자세 |
+| --- | --- |
+| `assets/player/jeong-suho-walk-eight.png` | 3·4·7 |
+| `assets/player/jeong-suho-phone-walk-eight-off.png` | 3·7 |
+| `assets/player/jeong-suho-phone-walk-eight-on.png` | 3·7 |
+| `assets/player/jeong-suho-run-sixteen.png` | 원본 1·3·6 (각 자세가 2개의 타이밍 셀에 표시됨) |
+| `assets/player/jeong-suho-phone-run-sixteen-off.png` | 원본 1·2·5 |
+
+내보내기: `scripts/prepare-movement-inbetweens.mjs`. 수정한 하체를 골반 중심과 원래 발바닥 높이에 정렬한다. y128 위의 머리·몸통·팔은 픽셀 그대로 유지한다. 손 피부와 셔츠 끝은 마스크로 보존하고 새 원본의 손/셔츠가 하체와 함께 덧붙지 않게 한다. 기존 중간 자세 1장, 프레임 수, 이동·재생 속도는 보존한다.
+
+검증: `tests/movement-inbetweens.mjs`는 56개 이동 타이밍 셀에서 큰 신발 실루엣 2개, 상체 픽셀 해시, 손/셔츠 끝 보존, 바닥·여백·연결 상태 및 실제 게임 프레임 선택을 검사한다. 끈과 작은 회색 패널은 별도의 신발로 세지 않는다. 기존의 중복 신발은 같은 검사에서 3개로 검출된다. `tests/phone-movement.mjs`로 휴대폰·조명·좌우 이동·점프·모바일을 검사한다.
+
+비교: `docs/previews/movement-legs-fixed.png`의 위쪽은 수정 전, 아래쪽은 수정 후다.
+
+## 1. walk-legs-fix.png (걷기 하체 중간 원본)
+
+참조: 일반 걷기 3·7번, 휴대폰 OFF 걷기 3·7번을 2×2 셀로 배치. 1254×1254 RGBA. 이 원본은 다음 단계 최종 정리본 제작에 사용한다.
+
+Use case: precise-object-edit. Production transparent PIXEL ART anatomy correction for ARCHI side-scrolling game. Input is EDIT TARGET atlas. Preserve EXACT grid, frame positions, scale and character upper bodies. Fix ONLY the LOWER BODY: each adult male MUST have EXACTLY TWO anatomically connected legs total, and EXACTLY TWO gray-white sneakers total, ONE per foot. No duplicate middle shin, no second parallel calf attached to the forward leg, no extra heel/shoe behind a toe, no translucent echo limb, no merged double sneakers. Two thighs join two knees, two shins, two ankles and two shoes. Slim charcoal trousers and original gray-white sneaker design.
+Make near/far leg silhouette readable: farther leg modestly darker, clear separation between calf outlines and sneakers; when they pass, one limb naturally occludes the other, do NOT draw both through each other with doubled outlines. Leave a small transparent gap between the lower legs/shoes wherever anatomically possible. At least one grounded support foot remains at exact original floor height, and preserve original body height and hip position. Original arms, hands, shirt, tie, badge, head and face are invariant: DO NOT alter upper body, pose, proportions or identity. No torso cut/paste, no new expression, no body resizing. Keep crisp muted anime PIXEL ART, fine dark outlines, true transparency, no shadows/floor/background/text/borders/glow. Exact layout TWO COLUMNS x TWO ROWS, four equal square cells, requested1024x1024. Every cell is a WALKING TOE-OFF pose facing RIGHT. The source has a spurious extra straight calf and extra foot at lower right; DELETE that extra third limb. Keep ONE rear leg behind the hips with heel raised and toe supporting on the floor, and ONE forward leg stepping through with moderately bent knee and shoe lifted only a little above ground. The forward leg must not split into two calves or two shoes. Preserve the original walking phase and both shoe locations as closely as possible, while removing the redundant middle foot. The forward lifted shoe stays BELOW knee level, low near the floor, no high-knee run. Top-left/top-right are empty hands, bottom-left/bottom-right hold ONE phone at chest with the far arm; retain it unchanged. The four upper bodies remain distinct original poses. Frame-local hip aroundx128,y128, shoes withinx78..206,y205..239 in a256px normalized cell. Keep waist-to-shoe overall size same as original.
+
+## 2. run-legs-fix.png (달리기 다리 통과 자세)
+
+참조: 일반 달리기 원본 1번, 휴대폰 달리기 원본 1·5번. 2172×724 RGBA, 가로 3셀.
+
+Use case: precise-object-edit. Production transparent PIXEL ART anatomy correction for ARCHI side-scrolling game. Input is EDIT TARGET atlas. Preserve EXACT grid, frame positions, scale and character upper bodies. Fix ONLY the LOWER BODY: each adult male MUST have EXACTLY TWO anatomically connected legs total, and EXACTLY TWO gray-white sneakers total, ONE per foot. No duplicate middle shin, no second parallel calf attached to the forward leg, no extra heel/shoe behind a toe, no translucent echo limb, no merged double sneakers. Two thighs join two knees, two shins, two ankles and two shoes. Slim charcoal trousers and original gray-white sneaker design.
+Make near/far leg silhouette readable: farther leg modestly darker, clear separation between calf outlines and sneakers; when they pass, one limb naturally occludes the other, do NOT draw both through each other with doubled outlines. Leave a small transparent gap between the lower legs/shoes wherever anatomically possible. At least one grounded support foot remains at exact original floor height, and preserve original body height and hip position. Original arms, hands, shirt, tie, badge, head and face are invariant: DO NOT alter upper body, pose, proportions or identity. No torso cut/paste, no new expression, no body resizing. Keep crisp muted anime PIXEL ART, fine dark outlines, true transparency, no shadows/floor/background/text/borders/glow. Exact layout THREE COLUMNS x ONE ROW, three equal square cells, requested1536x512. These are RUNNING PASSING/COMPRESSION poses facing RIGHT. First cell has empty hands, second/third carry ONE original phone at chest; preserve phones and hands. One support leg bends slightly and extends DOWN to a single sneaker on the floor at originalx145..180,y235..239 in256pxcell. The other thigh bends FORWARD and the knee folds its shin back to a SINGLE airborne sneaker. That raised shoe should sit to LEFT/BEHIND the support calf with a clearly visible 6–10px transparent gap from the grounded leg, shoe angled naturally downward, ONE sole and ONE ankle. Move only raised ankle/shoe slightly left as needed to remove overlap; keep knee connected and upper thigh length correct. No extra calf on the raised leg, no shoe through the support shin, no stacked shoe soles. Keep original hip and torso lean, same original head/torso height; raised foot can be aroundx95..120,y180..207 while support shoe remainsx145..180,y235..239. First two original passing phases similar, third has opposite support leg; preserve that distinction.
+
+## 3. movement-legs-clean.png (최종 걷기/달리기 하체)
+
+참조: 1단계 걷기 4자세, 일반 걷기 4번, 일반 달리기 원본 3·6번, 휴대폰 달리기 원본 2번. 신발 형태 참조는 기존에 수정한 달리기 0번의 한 개로 이어진 신발이다. 1774×887 RGBA, 4×2 셀.
+
+Use case: precise-object-edit. EDIT TARGET image1: exactly4 columns x2 rows with EIGHT full-body right-facing pixel-art character poses. Supporting reference2 shows the CORRECT SINGLE SNEAKER side-profile design: ONE unified gray shoe upper with one integrated heel and one continuous white sole. DO NOT copy the big scale of reference2, use it only to understand the unified shoe anatomy.
+In EVERY cell of image1, correct malformed overlapping shoe/heel artifacts on BOTH FEET. Each whole human has EXACTLY TWO LEGS, EXACTLY TWO ANKLES, EXACTLY TWO SNEAKERS TOTAL. Some current shoes contain a detached mini-heel white/gray block that resembles a third foot glued onto another shoe. REMOVE every extra stacked heel block, duplicated sole and doubled toe. Each foot must have ONE coherent gray shoe surface, ONE single continuous white outsole, ONE integrated heel and ONE toe, like supporting reference. NO SEPARATE GRAY HEEL PANEL or black vertical divider splitting the sneaker into two apparent shoes. Even backward/raised feet show ONE continuous gray profile between the white sole and ankle cuff, no second small shoe behind it.
+Preserve all leg angles/lengths and positions, only tiny anatomical cleanup around shins/ankles if needed. Do not add any limb. A single clear outline per calf, no extra middle calf. Farther leg slightly darker to distinguish occlusion. Keep two feet visibly separate; no blending of sneakers. Keep existing whole poses and original support sole heights.
+Upper body is immutable: same head/face/hair, shoulder/torso dimensions, arms/hands, shirts, badge and any phone remain exactly as supplied. DO NOT change body size, position, lean or identity. Do not alter grid/spacing or reorder frames. Requested2048x1024 exact4x2 equal512cells, transparent. Crisp muted anime PIXEL ART, fine dark outline, no backgrounds/floors/shadows/text/labels/motion trails.
+Top row4 are WALKING toe-off phases (first two empty hands, last two phone). The rear toe is on ground and the front shoe is low above ground. Bottom-left is walking extended stride; other3 bottom cells are RUNNING flight phases with both feet already clearly apart. The issue in bottom row is duplicated gray heel blocks on a sneaker, not the overall running pose. Correct BOTH forward and backward sneakers in all8 cells to clean single-foot profiles.

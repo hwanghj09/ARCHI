@@ -5,6 +5,7 @@
 .scene-next { display: none; }
 [data-waiting] > .scene-next { display: block; }
 #story-next, .scene-next { position: absolute; left: 0; right: 0; bottom: max(62px, calc(14vh - 30px)); margin: 0; font-size: 13px; text-align: center; color: #b8b2a2; text-shadow: 0 1px 4px #000; }
+#story-scene[data-acting] #story-next { display: none; } /* 걷기·달리기·기다리기 연출 중(story-scene.js) */
 #story-scene[hidden] { display: none; }
 #story-scene::before, #story-scene::after { content: ''; position: absolute; left: 0; right: 0; height: clamp(30px, 7vh, 64px); background: #050708; }
 #story-scene::before { top: 0; }

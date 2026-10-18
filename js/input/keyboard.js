@@ -9,6 +9,10 @@ function handleSceneKey(event, scene, skip) {
 
 window.addEventListener('keydown', event => {
   if (mainMenuActive) return;
+  if (solarRestoreActive) {
+    if (event.code === 'Enter' && event.target.id === 'solar-restore-skip' && !event.repeat) return;
+    return handleSceneKey(event, solarRestoreScene, finishSolarRestoreScene);
+  }
   if (!b2CaptureScene.hidden) {
     const captureButton = event.target.closest?.('#b2-capture-skip, #b2-bad-ending button');
     if (event.code === 'Escape' && b2CaptureActive) { event.preventDefault(); finishB2CaptureScene(); }
@@ -57,13 +61,13 @@ window.addEventListener('keydown', event => {
     event.preventDefault();
     return;
   }
-  if (keyMatches('inventory', event.code) && !(event.code === 'Tab' && event.shiftKey) && !selectingFloor && !usingComputer && !usingKeypad && !usingControl &&
+  if (keyMatches('inventory', event.code) && !(event.code === 'Tab' && event.shiftKey) && !usingComputer && !usingKeypad && !usingControl &&
       !usingPhone && !usingPowerPanel && (!usingInspection || inventoryShown())) {
     event.preventDefault();
     if (!event.repeat) toggleInventory();
     return;
   }
-  if (keyMatches('phone', event.code) && !event.repeat && !usingPhone && !selectingFloor && !usingComputer && !usingKeypad && !usingControl && !usingPowerPanel && !usingInspection) {
+  if (keyMatches('phone', event.code) && !event.repeat && !usingPhone && !usingComputer && !usingKeypad && !usingControl && !usingPowerPanel && !usingInspection) {
     event.preventDefault();
     togglePhone();
     return;
@@ -135,6 +139,7 @@ window.addEventListener('keydown', event => {
   }
   if (selectingFloor) {
     if (event.code === 'Escape') exitCabin();
+    if (keyMatches('light', event.code) && !event.repeat) { event.preventDefault(); togglePhoneLight(); } // 엘리베이터 안에서도 휴대폰·가방·플래시를 쓴다
     // 로봇이 문을 억지로 여는 중(cabin-pry.js): Enter·스페이스 연타. 꾹 누르기(반복 입력)는 치지 않는다.
     if (['Enter', 'Space'].includes(event.code) && cabinPryStruggling()) {
       event.preventDefault();
@@ -174,6 +179,6 @@ window.addEventListener('keyup', event => keys.delete(event.code));
 
 // Space로는 컷씬·대화를 넘기지 못한다. 버튼은 Space를 뗄 때 눌리므로 keyup도 막는다.
 window.addEventListener('keyup', event => {
-  if (event.code === 'Space' && (storySceneActive || blackoutSceneActive || cctvSceneActive || openingActive ||
+  if (event.code === 'Space' && (solarRestoreActive || storySceneActive || blackoutSceneActive || cctvSceneActive || openingActive ||
       (usingInspection && event.target.id === 'inspection-close'))) event.preventDefault();
 }, true);

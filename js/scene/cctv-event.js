@@ -161,6 +161,8 @@ function updateCctvScene(elapsed) {
   Body.setPosition(body, { x, y: floorY - 81 });
   grounded = true;
   animate(phase === 'walk' ? moved : 0, false, elapsed);
+  if (phase !== 'walk') showCutscenePose(phase === 'lost' ? 'startled' :
+    phase === 'settle' ? 'look-back' : phase === 'enter' ? 'alert' : 'look-up');
   // 카메라: 처음에는 수호를 따라가다가 벽 가운데로 옮겨 가며 확대한다. 화면이 꺼지는 순간(lost) 확대된 채로 가장 세게 흔들리고
   // 1.1초에 걸쳐 잦아든 뒤, 흔들림 없이 천천히 물러난다(settle).
   const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -230,6 +232,8 @@ function updateCctvLights(elapsed) {
   Body.setVelocity(body, { x: 0, y: 0 });
   grounded = true;
   animate(0, false, elapsed);
+  showCutscenePose(phase === 'watch' ? 'look-up' : phase === 'glitch' ? 'alert' :
+    phase === 'out' ? 'startled' : 'look-back');
   const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
   cameraX += (cameraTarget() - cameraX) * .13;
   cameraZoom += ((reducedMotion ? 1 : phase === 'back' ? 1.04 : 1.1) - cameraZoom) * .03;

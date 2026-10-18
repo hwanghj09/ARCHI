@@ -1,0 +1,18 @@
+#solar-restore-scene { position: fixed; inset: 0; z-index: 20; overflow: hidden; background: #000; color: #eee8d8; }
+#solar-restore-scene[hidden] { display: none; }
+#solar-restore-view { position: absolute; inset: 0; overflow: hidden; }
+#solar-restore-camera { position: absolute; left: 50%; top: 50%; width: 3328px; height: 760px; transform-origin: 0 0; image-rendering: pixelated; }
+.solar-restore-background { position: absolute; inset: 0; width: 3328px; height: 760px; }
+#solar-restore-lit { opacity: 0; }
+#solar-restore-fixtures { filter: brightness(.4) saturate(.6); }
+#solar-restore-scene[data-light="on"] #solar-restore-lit { opacity: 1; }
+#solar-restore-scene[data-light="on"] #solar-restore-fixtures { filter: none; }
+#solar-restore-scene::before, #solar-restore-scene::after { content: ''; position: absolute; z-index: 2; left: 0; right: 0; height: clamp(30px, 7vh, 64px); background: #050708; pointer-events: none; }
+#solar-restore-scene::before { top: 0; }
+#solar-restore-scene::after { bottom: 0; }
+#solar-restore-location, #solar-restore-caption { position: absolute; z-index: 3; margin: 0; padding: 8px 14px; background: #10181cdd; text-shadow: 0 1px 3px #000; }
+#solar-restore-location { left: max(24px, env(safe-area-inset-left)); top: max(72px, 10vh); font-size: 22px; }
+#solar-restore-caption { left: 50%; bottom: max(82px, 13vh); transform: translateX(-50%); max-width: calc(100% - 32px); width: max-content; font-size: 17px; }
+#solar-restore-skip { position: absolute; z-index: 3; right: max(20px, env(safe-area-inset-right)); bottom: max(10px, env(safe-area-inset-bottom)); min-height: 44px; padding: 8px 14px; border: 1px solid #677174; border-radius: 4px; background: #101719; color: #dce2df; font: inherit; cursor: pointer; }
+#solar-restore-skip:focus-visible { outline: 2px solid #e1cf9b; outline-offset: 3px; }
+body:has(#solar-restore-scene:not([hidden])) :is(header, nav, #debug-sidebar, #inventory-button, #objective, #sanity-hud, #game-menu-button, #interaction-hint, #interaction-outline, #suho-line) { visibility: hidden; }

@@ -10,7 +10,12 @@ const OBJECTIVE_READS = {
   '12|팀장 책상': 'goal-f12-memo', // 읽은 기록만 남긴다. 12층 진행은 모델 평가실 퍼즐(f12-evaluation-solved)로 넘어간다.
   '5|서가 꼭대기': 'goal-f5-note', // 5층 연구 노트: 8층 재현 기록과 함께 7층 백업 장비의 조건(backup-puzzle.js)
   '-2|ARCHI 메인 콘솔': 'goal-b2-console',
+  '1|층별 안내판': 'goal-f1-directory',
 };
+
+// 1층 추격 뒤 층별 안내판을 아직 안 봤다. 이 동안은 엘리베이터를 타지 않는다(interaction.js). 예전 저장으로 다른 층에 있으면 건너뛴다.
+const needsF1Directory = () => collectedItems.has('story-anxiety-seen') && !collectedItems.has('goal-f1-directory') &&
+  !collectedItems.has('story-robot-seen') && currentSceneFloor === 1;
 
 const OBJECTIVES = [
   // 13층 보안 자료실(vault-puzzle.js): 갇힌 동안의 목표. 백업 장치는 7층 다음 필수 목표(아래 '외부 연결 통로 찾기')이고 먼저 챙겨도 된다.
@@ -52,6 +57,7 @@ const OBJECTIVES = [
   { when: () => collectedItems.has('story-robot-seen') && !collectedItems.has('f1-robot-log'), title: '이상 행동',
     text: '경비 로봇은 왜 나를 노렸을까? ARCHI 개발 팀을 조사해보자.' },
   { when: () => collectedItems.has('story-robot-seen'), title: '이상 행동', text: '경비 로봇은 왜 나를 노렸을까? ARCHI 개발 팀을 조사해보자.' },
+  { when: needsF1Directory, title: '편의점은 몇 층?', text: '항불안제를 사러 편의점에 가야 한다. 엘리베이터 옆 층별 안내판을 확인하자.' },
   { when: () => collectedItems.has('story-anxiety-seen') && !collectedItems.has('story-robot-seen'), title: '정신 불안', text: '머리가 어지럽다. 마음을 진정시킬 무언가가 필요하다. 편의점으로 가보자.' },
   { when: () => solarEnabled && !collectedItems.has('f17-emergency-linked') && !floorHasLighting(17),
     title: '17층 전등 켜기', text: '전력은 돌아왔지만 17층은 아직 어둡다.' },

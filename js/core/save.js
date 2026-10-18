@@ -80,6 +80,7 @@ function saveObjectiveSlot() {
 function restoreProgress(data) {
   restoringProgress = true;
   try {
+    resetSolarRestoreScene();
     itemUseTime = 0;
     cancelPhotoCapture();
     closeComputerUsbConnection();

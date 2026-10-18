@@ -207,7 +207,7 @@ function toggleInventory() {
     inventoryButton.focus();
     return;
   }
-  if (photoCaptureTime > 0 || itemUseTime > 0 || transitioning || selectingFloor || usingComputer || usingKeypad || usingControl || usingPhone || usingPowerPanel || usingInspection) return;
+  if (photoCaptureTime > 0 || itemUseTime > 0 || transitioning || usingComputer || usingKeypad || usingControl || usingPhone || usingPowerPanel || usingInspection) return;
   showInventoryList();
 }
 
@@ -250,8 +250,9 @@ inventoryButton.addEventListener('click', toggleInventory);
 function useInventoryItem(id) {
   const item = INVENTORY_ITEMS[id];
   if (!item?.use || !collectedItems.has(id) || collectedItems.has(item.usedFlag) || photoCaptureTime > 0 || itemUseTime > 0 ||
-      mainMenuActive || openingActive || blackoutSceneActive || playerCaught || hallucinationCaught || transitioning || selectingFloor) return;
-  if (item.use.animation && !startItemUseAnimation()) return;
+      mainMenuActive || openingActive || blackoutSceneActive || playerCaught || hallucinationCaught || transitioning) return;
+  // 엘리베이터 안에서는 수호가 그려지지 않으니 복용 동작 없이 바로 쓴다.
+  if (item.use.animation && !selectingFloor && !startItemUseAnimation()) return;
   collectedItems.add(item.usedFlag);
   if (item.use.sanity || item.use.minSanity) {
     sanity = Math.max(item.use.minSanity ?? 0, Math.min(100, sanity + (item.use.sanity ?? 0)));

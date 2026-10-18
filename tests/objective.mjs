@@ -94,26 +94,37 @@ try {
   await page.waitForTimeout(100);
   assert.equal(await page.evaluate(() => currentObjective.text), '드디어 1층이다. 이제 집에 가자.');
 
-  // 로봇 추격이 끝나고 3초 뒤 혼잣말 컷씬이 나오고, Esc로 끝내면 '정신 불안' 목표가 생긴다.
+  // 엘리베이터로 1층에 내리면 1초 뒤 컷씬: 정문으로 가다 경비 로봇에게 쫓겨 1번 엘리베이터 앞까지 달아나고, 혼잣말을 한다.
   await page.evaluate(() => {
-    collectedItems.add('f1-chase-ended'); // 추격이 끝난 것으로 치면 3초 뒤 컷씬이 시작된다
-    collectedItems.delete('solar-app-installed'); solarPoweredFloors = [17]; updatePowerState(); // 이전 저장의 후속 이야기는 설치 목표로 되돌리지 않는다
-    performFloorChange('f1', 0);
+    collectedItems.delete('solar-app-installed'); // 이전 저장의 후속 이야기는 설치 목표로 되돌리지 않는다
+    solarPoweredFloors = [1]; updatePowerState();
+    performFloorChange('f1', 0); f1ElevatorArrival = true; // 엘리베이터에서 내린 것과 같다(cabin.js의 leaveCabin)
   });
   await page.locator('#story-scene').waitFor({ state: 'visible' });
-  assert.equal(await page.locator('#story-caption').textContent(), '왜 경비 로봇이 나를 공격하려고 했던 거지?');
-  await page.waitForTimeout(3500);
-  assert.equal(await page.locator('#story-caption').textContent(), '왜 경비 로봇이 나를 공격하려고 했던 거지?', '클릭하기 전에는 대사가 넘어가지 않는다');
+  assert.equal(await page.locator('#story-caption').textContent(), '하.. 이제 퇴근해야지.');
+  await page.waitForTimeout(1500);
+  assert.equal(await page.locator('#story-caption').textContent(), '하.. 이제 퇴근해야지.', '클릭하기 전에는 대사가 넘어가지 않는다');
   await page.locator('#story-caption').click();
-  assert(await page.locator('#story-caption').textContent().then(text => text.startsWith('으윽')), '클릭하면 다음 대사');
+  await page.waitForFunction(() => guardPatrol.mode === 'chase', null, { timeout: 20000 });
+  await page.locator('#story-caption').click(); // 연출 중에는 클릭해도 넘어가지 않는다
+  await page.waitForFunction(() => storyCaption.textContent === '헉.. 헉.. 저 로봇 왜 저래?', null, { timeout: 20000 });
+  assert.deepEqual(await page.evaluate(() => [collectedItems.has('f1-chase-ended'), playerCaught, guardPatrol.mode !== 'chase',
+    Math.abs(body.position.x - f1EscapeX()) < 10]), [true, false, true, true], 'Suho escapes to elevator 1 and the robot gives up');
+  for (const line of ['왜 경비 로봇이 나를 공격하려고 했던 거지?', '으윽.. 야근해서 힘든 와중에 이런 일을 겪으니 너무 힘들다..',
+    '항불안제라도 먹어야겠어..', '편의점이 몇 층이었더라?']) {
+    await page.locator('#story-caption').click();
+    assert.equal(await page.locator('#story-caption').textContent(), line);
+  }
   await page.locator('#story-caption').click();
-  await page.locator('#story-caption').click();
-  assert.equal(await page.locator('#story-caption').textContent(), '편의점이 몇 층이었더라?');
-  // 마지막 대사에서 클릭하면 수호가 층별 안내판까지 걸어가 조사하고, 조사창이 뜨면 컷씬이 끝난다.
-  await page.locator('#story-caption').click();
-  await page.locator('#story-scene').waitFor({ state: 'hidden', timeout: 20000 });
-  assert.equal(await page.locator('#inspection-title').textContent(), '층별 안내판');
+  await page.locator('#story-scene').waitFor({ state: 'hidden' });
   assert.equal(await page.evaluate(() => collectedItems.has('story-anxiety-seen')), true);
+  await waitTyped('편의점은 몇 층?', '항불안제를 사러 편의점에 가야 한다. 엘리베이터 옆 층별 안내판을 확인하자.');
+  // 층별 안내판을 보기 전에는 엘리베이터를 타지 않고 혼잣말만 한다.
+  await page.evaluate(() => interact());
+  assert.equal(await page.locator('#suho-line').textContent(), '편의점이 몇 층이더라…');
+  assert.equal(await page.evaluate(() => selectingFloor || elevatorCars[0].travelling), false);
+  await page.evaluate(() => { Body.setPosition(body, { x: 1483, y: body.position.y }); interact(); });
+  assert.equal(await page.locator('#inspection-title').textContent(), '층별 안내판');
   await page.keyboard.press('Escape');
   await page.locator('#inspection').waitFor({ state: 'hidden' });
   await waitTyped('정신 불안', '머리가 어지럽다. 마음을 진정시킬 무언가가 필요하다. 편의점으로 가보자.');

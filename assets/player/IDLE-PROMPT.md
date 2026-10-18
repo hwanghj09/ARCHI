@@ -2,12 +2,20 @@
 
 - Tool: built-in image_gen.
 - Identity and style reference: jeong-suho.png.
-- Output: jeong-suho-idle-four.png, original transparent PNG.
+- Output: jeong-suho-idle-four.png, repaired transparent PNG (2026-10-18).
 - Layout: 2 columns x 2 rows, four frames read left to right then top to bottom.
 - Sequence: neutral, inhale, blink, exhale. Feet remain planted for a standing idle pose.
 - Connected to the game's idle state; the original 1254x1254 PNG is reused without resampling.
 - Render at 0.285 scale, with source hip anchors [325, 925, 325, 925] and sole anchors [619, 619, 1234, 1235] aligned to player-local (96, 178). CSS clips the selected pose to the player viewport.
 - Loop: neutral 1200ms, inhale 900ms, blink 120ms, exhale 980ms. Movement, jumping, and interaction interrupt the loop; stopping starts again at neutral.
+
+## Wrist/thigh repair · 2026-10-18
+
+The original bottom-row poses contained horizontal cuts and displaced hands inside the image itself. The built-in `image_gen` edit repaired the sheet while retaining its 1254×1254 canvas, transparent background, four poses and existing runtime anchors. No runtime or CSS change was needed. `tests/idle-animation.mjs` catches the original wrist/thigh discontinuity and checks two complete idle loops after releasing movement in both directions; per-pose game captures are saved under `.local/idle-after-*.png`.
+
+### Repair prompt
+
+Use case: precise-object-edit. Asset type: production transparent pixel-art game sprite sheet. Edit target: the supplied 1254x1254 transparent 2x2 four-frame standing idle animation sheet of Jeong Suho. Repair ONLY the visibly broken horizontal seams and duplicated/displaced hands at the wrist/thigh area in the bottom-left and bottom-right characters (around original y=940..1015). Each character must have exactly two coherent anatomically natural hands hanging from his arms, connected wrists, clean continuous trousers with no horizontal black cutout or slice. Use the intact relaxed arms/hands of the top-row characters as the repair reference. Keep the top-row poses unchanged. Preserve every character's identity, clothing, face/eyes (bottom-left blinking), hair, body proportions, exact scale, position, foot placement, subtle breathing differences, original pixel art style, palette, and four-frame 2x2 layout. Preserve the original square canvas and transparent background, no shadows, outlines, text or new objects. Do not redesign or beautify the character. Keep all four complete characters with large transparent margins. Output the repaired sprite sheet only with genuine alpha transparency.
 
 ## Generation prompt
 

@@ -27,6 +27,7 @@
     <link rel="stylesheet" href="css/game-over.css" />
     <link rel="stylesheet" href="css/main-menu.css" />
     <link rel="stylesheet" href="css/blackout.css" />
+    <link rel="stylesheet" href="css/solar-restore-scene.css" />
     <link rel="stylesheet" href="css/story-scene.css" />
     <link rel="stylesheet" href="css/map.css" />
     <link rel="stylesheet" href="css/cctv-event.css" />
@@ -126,6 +127,7 @@
     <script src="js/scene/opening.js" defer></script>
     <script src="js/scene/blackout.js" defer></script>
     <script src="js/scene/cctv-event.js" defer></script>
+    <script src="js/scene/solar-restore-scene.js" defer></script>
     <script src="js/core/save.js" defer></script>
     <script src="js/ui/main-menu.js" defer></script>
     <script src="js/main.js" defer></script>
@@ -151,6 +153,9 @@
         <div id="player" role="img" aria-label="정수호" data-state="idle" data-frame="0">
           <img id="opening-sheet" src="assets/player/jeong-suho-opening.png" alt="" width="1536" height="256" draggable="false" />
           <img id="blackout-call-sheet" src="assets/player/jeong-suho-blackout-call.png" alt="" width="512" height="256" draggable="false" />
+          <img id="cutscene-sheet" src="assets/player/jeong-suho-cutscene.png" alt="" width="2560" height="256" draggable="false" />
+          <img id="unconscious-sheet" src="assets/player/jeong-suho-unconscious.png" alt="" width="768" height="256" draggable="false" />
+          <div id="drag-sprite"><img id="drag-sheet" src="assets/player/jeong-suho-drag-four.png" alt="" width="1280" height="256" draggable="false" /></div>
           <img id="caught-sheet" src="assets/player/jeong-suho-caught.png" alt="" width="1024" height="256" draggable="false" />
           <img id="idle-sprite" src="assets/player/jeong-suho-idle-four.png" alt="" width="1254" height="1254" draggable="false" />
           <img id="antianxiety-sheet" src="assets/player/jeong-suho-antianxiety.png" alt="" width="1536" height="256" draggable="false" />
@@ -253,6 +258,18 @@
       <div id="manual-control-device" class="control-device" tabindex="0"></div>
       <p id="manual-control-help"></p>
       <button id="manual-control-close" type="button">닫기 · Esc</button>
+    </section>
+    <section id="solar-restore-scene" role="dialog" aria-modal="true" aria-label="17층 조명 복구" hidden>
+      <div id="solar-restore-view" aria-hidden="true">
+        <div id="solar-restore-camera">
+          <img class="solar-restore-background" src="assets/background/floor17/floor17-finished-off.png" alt="" width="3328" height="760" draggable="false" />
+          <img id="solar-restore-lit" class="solar-restore-background" src="assets/background/floor17/floor17-finished.png" alt="" width="3328" height="760" draggable="false" />
+          <div id="solar-restore-fixtures"></div>
+        </div>
+      </div>
+      <p id="solar-restore-location">17F · 복도</p>
+      <p id="solar-restore-caption" role="status" aria-live="polite"></p>
+      <button id="solar-restore-skip" type="button">건너뛰기 · Esc</button>
     </section>
     <section id="blackout-scene" role="dialog" aria-modal="true" aria-label="엘리베이터 앞 정전" hidden>
       <p id="blackout-caption" role="status" aria-live="polite"></p>
@@ -437,27 +454,16 @@
       <div id="b2-terminal-threat" role="alert" hidden><span id="b2-terminal-threat-text"></span><span class="b2-delete-track" aria-hidden="true"><span id="b2-terminal-threat-fill"></span></span></div>
       <form id="b2-terminal-form"><label for="b2-terminal-input">root@archi-main:~#</label><input id="b2-terminal-input" type="text" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="send" lang="en" /></form>
     </section>
-    <section id="b2-bad-ending" class="b2-ending-dialog" role="dialog" aria-modal="true" aria-labelledby="b2-bad-ending-title" hidden>
-      <h2 id="b2-bad-ending-title">BAD END — NEW HOST</h2>
-      <p>ARCHI 삭제 실패.<br>B2 연결 실험실에서 정수호에게 ARCHI가 업로드되었다.<br>눈을 뜬 것은 더 이상 수호가 아니었다.</p>
+    <section id="b2-bad-ending" class="b2-ending-dialog" role="dialog" aria-modal="true" aria-label="결말 이후 선택" hidden>
       <div class="b2-ending-actions"><button id="b2-restart" type="button">처음부터 다시하기</button><button id="b2-checkpoint" type="button">체크포인트로 이동</button></div>
     </section>
-    <section id="b2-capture-scene" role="dialog" aria-modal="true" aria-label="수호의 시점 · 경비로봇 제압과 ARCHI 업로드" tabindex="-1" hidden>
+    <section id="b2-capture-scene" role="dialog" aria-modal="true" aria-label="경비로봇에게 제압된 수호의 이송과 실험실 연결" tabindex="-1" hidden>
       <div class="b2-capture-frame" aria-hidden="true">
         <div id="b2-capture-view"></div>
         <div class="b2-capture-vignette"></div>
         <div id="b2-capture-eyelids"></div>
       </div>
-      <p id="b2-capture-location"></p>
-      <div id="b2-upload" hidden>
-        <p>B2 · 연결 실험실</p>
-        <h2>ARCHI → 정수호</h2>
-        <p id="b2-upload-status">신경 인터페이스 연결 중</p>
-        <progress id="b2-upload-progress" max="100" value="0" aria-label="정수호에게 ARCHI 업로드 진행률"></progress>
-        <output id="b2-upload-percent">0%</output>
-      </div>
-      <p id="b2-capture-caption" aria-live="polite" aria-atomic="true"></p>
-      <button id="b2-capture-skip" type="button">건너뛰기 · Esc</button>
+      <button id="b2-capture-skip" type="button" aria-label="연출 건너뛰기">×</button>
     </section>
     <section id="b2-escape" role="dialog" aria-modal="true" aria-labelledby="b2-escape-title" tabindex="-1" data-step="white" hidden>
       <img id="b2-true-end-art" alt="" hidden />

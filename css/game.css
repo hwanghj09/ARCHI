@@ -924,6 +924,8 @@ body { margin: 0; overflow: hidden; background: #27292b; color: #eee; font: 14px
 #player .action-sheet { width: 200%; height: 100%; }
 #player #antianxiety-sheet { width: 600%; height: 100%; }
 #player #crouch-sheet { width: 400%; height: 100%; }
+#player #cutscene-sheet { width: 1000%; height: 100%; }
+#player[data-state="cutscene"] #cutscene-sheet { display: block; }
 #player[data-state="crouch"] #crouch-sheet { display: block; }
 #player[data-state="consume"] #antianxiety-sheet { display: block; }
 #player[data-state="idle"] #idle-sprite,

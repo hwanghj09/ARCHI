@@ -25,6 +25,7 @@ let blackoutSceneActive = false;
 let storySceneActive = false; // 이야기 컷씬(story-scene.js)이 진행 중
 // B1 방재 관제실 첫 입장 컷씬(js/scene/cctv-event.js).
 let cctvSceneActive = false;
+let solarRestoreActive = false; // 옥상에서 17층 조명 복구를 비추는 컷씬
 let playerCaught = false;
 let selectingFloor = false;
 let usingComputer = false;

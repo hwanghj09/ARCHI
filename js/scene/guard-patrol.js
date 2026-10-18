@@ -358,7 +358,7 @@ function updateRobot(robot, delta) {
         // 순간이동으로 자리를 되돌리지 않는다 — 'return' 모드로 넘어가 감지했던 자리까지 순찰 속도로
         // 직접 걸어서 돌아가고(아래 return 처리), 도착하면 그제서야 patrol로 돌아간다.
         robot.mode = 'return'; robot.wait = 0; robot.lostTime = 0;
-        if (robot === guardPatrol) collectedItems.add('f1-chase-ended'); // 추격이 끝났다: 3초 뒤 혼잣말 컷씬(story-scene.js)
+        if (robot === guardPatrol) collectedItems.add('f1-chase-ended'); // 추격이 끝났다(1층 도착 컷씬도 여기서 끝난다, story-scene.js)
       } else {
         robot.lostTime = robot.pursuit || (sameLevel && Math.abs(dx) < 600) ? 0 : robot.lostTime + delta;
         if (robot.lostTime >= 1800) {

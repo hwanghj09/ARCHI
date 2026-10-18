@@ -1,6 +1,10 @@
 # Jeong Suho Run Sprites
 
-Current runtime: `jeong-suho-run-sixteen.png`, 4096×256, with eight newly drawn in-between poses. See [movement-inbetweens-source/README.md](movement-inbetweens-source/README.md) for sources, export and phone variants. The eight-frame production sheet below is preserved as the original.
+Current runtime: `jeong-suho-run-sixteen.png`, 4096×256, with eight intact original whole-body poses plus one new midpoint between poses 0 and 1. The midpoint replaces timing cell 1; all other cells retain their original whole-body artwork. See [midpoint source and prompt](RUN-MID-01-PROMPT.md) and [movement sources](movement-inbetweens-source/README.md).
+
+The separate torso/arm composite and mismatched in-between artwork are no longer used. Heads, torsos and arms retain their original artwork. Malformed overlapping lower legs and doubled shoe/heel profiles are corrected below the hips; see [current leg-correction sources and prompts](MOVEMENT-LEGS-FIX-PROMPTS.md).
+
+Forward-shoe corrections are applied during export to original normal-run poses 0/3/7 and phone-run pose 0. Only the front ankle/shoe rectangle is replaced; the body, rear foot, timing and new midpoint are preserved. See [shoe correction sources and prompt](RUN-SHOE-FIX-PROMPT.md).
 
 - Tool: built-in `image_gen`.
 - Identity reference: `jeong-suho.png`.
@@ -13,7 +17,7 @@ Current runtime: `jeong-suho-run-sixteen.png`, 4096×256, with eight newly drawn
 - Added pose generation and refinement prompts: [RUN-EXTRA-PROMPT.md](RUN-EXTRA-PROMPT.md).
 - Preparation: `scripts/prepare-run.ps1` at the project root. Preserves the source, uses nearest-neighbor scaling (0.47), aligns measured hip anchors to x=128 and contact feet to y=239; flight frames retain their clearance.
 - The two added poses use scale 0.285, hip anchors x=450/448 mapped to x=128, and source bottom y=808/806 mapped to y=232 (just above ground).
-- Connected to either Shift key plus movement. Walking is 200px/s; running is 340px/s. One run frame per 24px of actual grounded movement; cycle remains 192px, about 0.565 seconds.
+- Connected to either Shift key plus movement. Walking is 200px/s; running is 340px/s. The current sixteen-frame sheet advances once per 18px of grounded movement: 288px per cycle, about 0.847 seconds. The original eight-frame artwork below is archived.
 - Shift release returns to walking; stationary/blocked movement is idle, airborne movement uses jump/fall. Blur and scene transitions clear sprint input.
 - Transparent background samples were verified numerically. Preserve the generated alpha channel.
 

@@ -45,6 +45,9 @@ try {
   const running = await state();
   assert.equal(running.animation, 'run');
   assert(Math.abs(running.x - walking.x - 221) < 6, 'Sprint speed is 340px/s');
+  assert((await page.evaluate(() => window.runFrames.size)) < 16, 'A run cycle takes longer than 650ms');
+  await page.clock.runFor(350);
+  assert(Math.abs((await state()).x - walking.x - 340) < 6, 'Slower animation preserves sprint movement speed');
   assert.deepEqual((await page.evaluate(() => [...window.runFrames])).sort((a, b) => a - b), Array.from({ length: 16 }, (_, i) => i));
   assert.equal(await page.locator('#player img:visible').count(), 1);
   assert(await page.locator('#run-sheet').evaluate(el => {

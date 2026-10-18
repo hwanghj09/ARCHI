@@ -63,7 +63,7 @@ function renderMap() {
 
 // 컷씬·메뉴처럼 HUD가 숨는 동안에는 지도도 닫는다(조작 창들이 열려 있는 것은 상관없다).
 function mapHidden() {
-  return mainMenuActive || openingActive || blackoutSceneActive || storySceneActive || cctvSceneActive || playerCaught || hallucinationCaught || selectingFloor;
+  return mainMenuActive || openingActive || blackoutSceneActive || storySceneActive || cctvSceneActive || solarRestoreActive || playerCaught || hallucinationCaught || selectingFloor;
 }
 
 function updateMap() {

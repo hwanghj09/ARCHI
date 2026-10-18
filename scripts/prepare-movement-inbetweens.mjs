@@ -4,10 +4,8 @@ import sharp from 'sharp';
 
 const root = fileURLToPath(new URL('../assets/player/', import.meta.url));
 const specs = [
-  { source: 'run', base: 'run-eight', output: 'run-sixteen', columns: 4, scale: .575,
-    soles: [239, 239, 226, 236, 239, 239, 222, 236] },
-  { source: 'phone-run-off', base: 'phone-run-off', output: 'phone-run-sixteen-off', columns: 4, scale: .55,
-    soles: [237, 237, 225, 230, 237, 237, 225, 230] },
+  { base: 'run-eight', output: 'run-sixteen', feet: [[0, 0], [3, 1], [7, 2]] },
+  { base: 'phone-run-off', output: 'phone-run-sixteen-off', feet: [[0, 0]] },
 ];
 
 function bounds(data, width, height) {
@@ -23,6 +21,67 @@ function bounds(data, width, height) {
     if (data[(y * width + x) * 4 + 3] >= 128) { sum += x; count++; }
   }
   return { top, bottom, headX: sum / count };
+}
+
+async function legCells(name, columns, rows) {
+  const atlas = await sharp(`${root}movement-inbetweens-source/${name}.png`)
+    .resize(columns * 256, rows * 256, { kernel: 'nearest' }).ensureAlpha().raw().toBuffer();
+  const cells = [];
+  for (let frame = 0; frame < columns * rows; frame++) {
+    const cell = Buffer.alloc(256 * 256 * 4);
+    for (let y = 0; y < 256; y++) {
+      const from = ((Math.floor(frame / columns) * 256 + y) * columns * 256 + frame % columns * 256) * 4;
+      atlas.copy(cell, y * 256 * 4, from, from + 256 * 4);
+    }
+    for (let p = 0; p < cell.length; p += 4) {
+      if (cell[p + 3] < 128) cell.fill(0, p, p + 4);
+      else cell[p + 3] = 255;
+    }
+    cells.push(cell);
+  }
+  return cells;
+}
+const cleanLegs = await legCells('movement-legs-clean', 4, 2);
+const passingLegs = await legCells('run-legs-fix', 3, 1);
+
+function legAnchor(data, width, frame, row = 132) {
+  let bottom = 0, sum = 0, count = 0;
+  for (let y = 130; y < 250; y++) for (let x = 5; x < 250; x++) {
+    const p = (y * width + frame * 256 + x) * 4;
+    if (data[p + 3] < 128) continue;
+    bottom = Math.max(bottom, y);
+    if (x >= 105 && y >= row && y < row + 6 && Math.max(...data.subarray(p, p + 3)) < 110) { sum += x; count++; }
+  }
+  assert(count > 10 && bottom > 210, 'Complete hips and foot registration');
+  return { x: sum / count, bottom };
+}
+function replaceLegs(data, width, frame, patch) {
+  const target = legAnchor(data, width, frame), source = legAnchor(patch, 256, 0);
+  const dy = target.bottom - source.bottom;
+  const dx = Math.round(target.x - legAnchor(patch, 256, 0, 132 - dy).x);
+  const upperBodyMask = (pixels, stride, index) => {
+    const mask = new Uint8Array(256 * 256);
+    for (let y = 124; y < 165; y++) for (let x = 30; x < 225; x++) {
+      const p = (y * stride + index * 256 + x) * 4;
+      if (pixels[p + 3] < 128) continue;
+      const skin = pixels[p] > 110 && pixels[p] > pixels[p + 1] + 20 && pixels[p + 1] > pixels[p + 2] + 10;
+      const rgb = pixels.subarray(p, p + 3);
+      const shirt = y < 140 && Math.min(...rgb) >= 110 && Math.max(...rgb) - Math.min(...rgb) < 50;
+      if (!skin && !shirt) continue;
+      for (let yy = y - 2; yy <= y + 2; yy++) for (let xx = x - 2; xx <= x + 2; xx++) mask[yy * 256 + xx] = 1;
+    }
+    return mask;
+  };
+  const originalUpperBody = upperBodyMask(data, width, frame), patchUpperBody = upperBodyMask(patch, 256, 0);
+  for (let y = 128; y < 256; y++) for (let x = 0; x < 256; x++) {
+    if (originalUpperBody[y * 256 + x]) continue;
+    const to = (y * width + frame * 256 + x) * 4, sx = x - dx, sy = y - dy;
+    if (y < 140 && sx >= 0 && sx < 256 && sy >= 0 && sy < 256 && patchUpperBody[sy * 256 + sx]) continue;
+    data.fill(0, to, to + 4);
+    if (sx < 0 || sx >= 256 || sy < 0 || sy >= 256) continue;
+    if (patchUpperBody[sy * 256 + sx]) continue; // Preserve the original hands and shirt hem.
+    patch.copy(data, to, (sy * 256 + sx) * 4, (sy * 256 + sx + 1) * 4);
+  }
 }
 
 // Redraw the whole walk cycle together instead of alternating incompatible artwork.
@@ -89,6 +148,9 @@ for (const variant of ['', '-off', '-on']) {
     }
   }
   const name = variant ? `phone-walk-eight${variant}` : 'walk-eight';
+  replaceLegs(output, 2048, 3, cleanLegs[variant ? 2 : 0]);
+  replaceLegs(output, 2048, 7, cleanLegs[variant ? 3 : 1]);
+  if (!variant) replaceLegs(output, 2048, 4, cleanLegs[4]);
   await sharp(output, { raw: { width: 2048, height: 256, channels: 4 } }).png()
     .toFile(`${root}jeong-suho-${name}.png`);
   console.log(`${name}: eight consistent walking phases.`);
@@ -105,57 +167,82 @@ for (const [index, source] of [2, 6].entries()) for (let y = 0; y < 256; y++) {
 await sharp(airborne, { raw: { width: 512, height: 256, channels: 4 } })
   .png().toFile(`${root}jeong-suho-phone-jump-on.png`);
 
-for (const spec of specs) {
-  const count = spec.columns * 2;
-  const input = `${root}movement-inbetweens-source/${spec.source}.png`;
-  const anchor = `${root}movement-inbetweens-source/${spec.anchor || spec.source}.png`;
-  const original = `${root}jeong-suho-${spec.base}.png`;
-  const metadata = await sharp(input).metadata();
-  const anchorMetadata = await sharp(anchor).metadata();
-  assert(metadata.hasAlpha && metadata.width === anchorMetadata.width && metadata.height === anchorMetadata.height);
-  const base = await sharp(original).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
-  assert(base.info.width === count * 256 && base.info.height === 256);
-  const outputWidth = count * 2 * 256;
-  const output = Buffer.alloc(outputWidth * 256 * 4);
+// One new whole-body midpoint, scaled uniformly to the neighboring poses' head and floor anchors.
+const midSource = await sharp(`${root}movement-inbetweens-source/run-mid-01.png`).ensureAlpha().raw()
+  .toBuffer({ resolveWithObject: true });
+const midBounds = bounds(midSource.data, midSource.info.width, midSource.info.height);
+const midScale = 218 / (midBounds.bottom - midBounds.top);
+for (let p = 0; p < midSource.data.length; p += 4) {
+  if (midSource.data[p + 3] < 128) midSource.data.fill(0, p, p + 4);
+  else midSource.data[p + 3] = 255;
+}
+const midScaled = await sharp(midSource.data, { raw: midSource.info })
+  .resize(Math.round(midSource.info.width * midScale), Math.round(midSource.info.height * midScale), { kernel: 'nearest' })
+  .raw().toBuffer({ resolveWithObject: true });
+const midCell = Buffer.alloc(256 * 256 * 4);
+const midDx = Math.round(179 - midBounds.headX * midScaled.info.width / midSource.info.width);
+const midDy = 239 - Math.round(midBounds.bottom * midScaled.info.height / midSource.info.height);
+for (let y = 0; y < midScaled.info.height; y++) for (let x = 0; x < midScaled.info.width; x++) {
+  const from = (y * midScaled.info.width + x) * 4;
+  if (!midScaled.data[from + 3]) continue;
+  assert(x + midDx > 5 && x + midDx < 250 && y + midDy > 5 && y + midDy < 250, 'Complete midpoint with transparent margins');
+  midScaled.data.copy(midCell, ((y + midDy) * 256 + x + midDx) * 4, from, from + 4);
+}
+await sharp(midCell, { raw: { width: 256, height: 256, channels: 4 } }).png().toFile(`${root}jeong-suho-run-mid-01.png`);
 
-  for (let i = 0; i < count; i++) {
-    const left = Math.floor(i % spec.columns * metadata.width / spec.columns);
-    const top = Math.floor(Math.floor(i / spec.columns) * metadata.height / 2);
-    const width = Math.floor((i % spec.columns + 1) * metadata.width / spec.columns) - left;
-    const height = Math.floor((Math.floor(i / spec.columns) + 1) * metadata.height / 2) - top;
-    const rect = { left, top, width, height };
-    const source = await sharp(input).extract(rect).ensureAlpha().raw().toBuffer();
-    const alignment = await sharp(anchor).extract(rect).ensureAlpha().raw().toBuffer();
-    const sourceBounds = bounds(alignment, width, height);
-    const heads = [];
-    for (const index of [i, (i + 1) % count]) {
-      const cell = await sharp(original).extract({ left: index * 256, top: 0, width: 256, height: 256 })
-        .ensureAlpha().raw().toBuffer();
-      heads.push(bounds(cell, 256, 256).headX);
+const fixedFeet = await sharp(`${root}movement-inbetweens-source/run-feet-fix.png`)
+  .resize(768, 256, { kernel: 'nearest' }).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
+for (let p = 0; p < fixedFeet.data.length; p += 4) {
+  if (fixedFeet.data[p + 3] < 128) fixedFeet.data.fill(0, p, p + 4);
+  else fixedFeet.data[p + 3] = 255;
+}
+function frontFootAnchor(image, frame, row = 196) {
+  let bottom = 0, xSum = 0, count = 0;
+  for (let y = 185; y < 250; y++) for (let x = 150; x < 250; x++) {
+    const p = (y * image.info.width + frame * 256 + x) * 4;
+    if (image.data[p + 3] < 128) continue;
+    bottom = Math.max(bottom, y);
+    if (y >= row && y < row + 5 && Math.max(...image.data.subarray(p, p + 3)) < 110) { xSum += x; count++; }
+  }
+  assert(count > 5 && bottom > 210, 'Complete shin and shoe registration');
+  return { x: xSum / count, bottom };
+}
+
+// Preserve the body; repair only the front ankle/shoe region before copying timing cells.
+for (const spec of specs) {
+  const base = await sharp(`${root}jeong-suho-${spec.base}.png`).ensureAlpha().raw()
+    .toBuffer({ resolveWithObject: true });
+  assert.equal(base.info.width, 8 * 256); assert.equal(base.info.height, 256);
+  for (const [frame, patch] of spec.feet) {
+    const target = frontFootAnchor(base, frame), source = frontFootAnchor(fixedFeet, patch);
+    const dy = target.bottom - source.bottom;
+    const dx = Math.round(target.x - frontFootAnchor(fixedFeet, patch, 196 - dy).x);
+    for (let y = 196; y < 256; y++) for (let x = 150; x < 250; x++) {
+      const to = (y * base.info.width + frame * 256 + x) * 4;
+      const sx = x - dx, sy = y - dy;
+      base.data.fill(0, to, to + 4);
+      if (sx < 0 || sx >= 256 || sy < 0 || sy >= 256) continue;
+      const from = (sy * fixedFeet.info.width + patch * 256 + sx) * 4;
+      fixedFeet.data.copy(base.data, to, from, from + 4);
     }
-    // Mechanical alpha cleanup and nearest-neighbor export; all poses are drawn by image_gen.
-    for (let p = 0; p < source.length; p += 4) {
-      if (source[p + 3] < 128) source.fill(0, p, p + 4);
-      else source[p + 3] = 255;
-    }
-    const scaled = await sharp(source, { raw: { width, height, channels: 4 } })
-      .resize(Math.round(width * spec.scale), Math.round(height * spec.scale), { kernel: 'nearest' })
-      .raw().toBuffer({ resolveWithObject: true });
-    const xOffset = Math.round((heads[0] + heads[1]) / 2 - sourceBounds.headX * scaled.info.width / width);
-    const yOffset = spec.soles[i] - Math.round(sourceBounds.bottom * scaled.info.height / height);
-    for (let y = 0; y < 256; y++) {
-      const from = (y * base.info.width + i * 256) * 4;
-      base.data.copy(output, (y * outputWidth + i * 512) * 4, from, from + 256 * 4);
-    }
-    for (let y = 0; y < scaled.info.height; y++) for (let x = 0; x < scaled.info.width; x++) {
-      const from = (y * scaled.info.width + x) * 4;
-      if (!scaled.data[from + 3]) continue;
-      const dx = x + xOffset, dy = y + yOffset;
-      assert(dx >= 6 && dx < 250 && dy >= 6 && dy < 250, `${spec.source}/${i}: clipped character`);
-      scaled.data.copy(output, (dy * outputWidth + (i * 2 + 1) * 256 + dx) * 4, from, from + 4);
-    }
+  }
+  if (spec.base === 'run-eight') {
+    replaceLegs(base.data, base.info.width, 1, passingLegs[0]);
+    replaceLegs(base.data, base.info.width, 3, cleanLegs[5]);
+    replaceLegs(base.data, base.info.width, 6, cleanLegs[6]);
+  } else {
+    replaceLegs(base.data, base.info.width, 1, passingLegs[1]);
+    replaceLegs(base.data, base.info.width, 5, passingLegs[2]);
+    replaceLegs(base.data, base.info.width, 2, cleanLegs[7]);
+  }
+  const outputWidth = 16 * 256, output = Buffer.alloc(outputWidth * 256 * 4);
+  for (let frame = 0; frame < 16; frame++) for (let y = 0; y < 256; y++) {
+    const from = (y * base.info.width + Math.floor(frame / 2) * 256) * 4;
+    base.data.copy(output, (y * outputWidth + frame * 256) * 4, from, from + 256 * 4);
+    if (spec.base === 'run-eight' && frame === 1) midCell.copy(output,
+      (y * outputWidth + frame * 256) * 4, y * 256 * 4, (y + 1) * 256 * 4);
   }
   await sharp(output, { raw: { width: outputWidth, height: 256, channels: 4 } })
     .png().toFile(`${root}jeong-suho-${spec.output}.png`);
-  console.log(`${spec.output}: ${count * 2} frames, ${outputWidth}×256; original cells preserved.`);
+  console.log(`${spec.output}: ${spec.base === 'run-eight' ? 'nine' : 'eight'} whole-body poses, sixteen timing cells.`);
 }

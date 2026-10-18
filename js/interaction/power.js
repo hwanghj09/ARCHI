@@ -107,6 +107,8 @@ function supplySolarFloor(floor) {
   }
   solarPoweredFloors = [...solarPoweredFloors, floor].slice(-solarFloorLimit);
   updatePowerState();
+  if (floor === 17 && currentSceneFloor === 18 && realBuildingBlackout() &&
+      !restoringProgress && !collectedItems.has('story-solar-17-seen')) startSolarRestoreScene();
 }
 
 function refreshSolarApp() {

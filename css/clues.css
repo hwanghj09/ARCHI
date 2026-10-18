@@ -4,7 +4,7 @@
 #phone .phone-note-tabs button[aria-selected="true"] { background: #23374d; color: #f3f7fb; }
 #phone-clue-count:not(:empty) { display: inline-block; min-width: 18px; margin-left: 4px; padding: 0 5px; border-radius: 9px; background: #f7d79b; color: #172c3d; font-size: 11px; line-height: 18px; }
 #phone-memo-pane:not([hidden]), #phone-clue-pane:not([hidden]) { display: flex; flex: 1; min-height: 0; flex-direction: column; gap: 10px; }
-#phone-clue-pane { overflow-y: auto; scrollbar-width: thin; }
+#phone-clue-pane { overflow-y: auto; scrollbar-width: none; }
 #phone-clue-empty { margin: 8px 2px; color: #9babbc; font: 12px/1.7 Arial, sans-serif; word-break: keep-all; }
 #phone-clue-list { display: flex; flex-direction: column; gap: 8px; margin: 0; padding: 0; list-style: none; }
 #phone-clue-list li { padding: 10px 12px; border: 1px solid #536778; border-radius: 12px; background: #111d2c; }

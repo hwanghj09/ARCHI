@@ -28,6 +28,10 @@ try {
   const charger = () => page.evaluate(() => { const door = (room === 'office' ? officeDoors : currentDoors).find(door => door.phoneCharger); return door.x + door.width / 2; });
   // Before the outage, mains power charges even when the light switch is off.
   await page.evaluate(() => { world.dataset.lights = 'off'; });
+  await place(await charger(), 100); await page.keyboard.press('e');
+  assert.equal((await state()).dock, null, 'A full phone stays with the player');
+  assert.equal((await state()).battery, 100);
+  assert.equal(await page.locator('#suho-line').textContent(), '휴대폰 배터리는 이미 100%야. 충전할 필요는 없겠어.');
   await place(await charger(), 20); await page.keyboard.press('e');
   await page.clock.runFor(2100); assert.equal((await state()).battery, 24);
   await page.keyboard.press('e'); assert.equal((await state()).dock, null);

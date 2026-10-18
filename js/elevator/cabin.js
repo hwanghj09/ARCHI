@@ -224,6 +224,7 @@ function leaveCabin() {
   stage.inert = false;
   releaseInput();
   performFloorChange(destination.id, cabinCarIndex);
+  f1ElevatorArrival = destination.id === 'f1'; // 1층 도착 컷씬(story-scene.js)
   cabinCarIndex = null;
 }
 cabinOpen.addEventListener('click', () => setCabinDoor(true));
@@ -235,7 +236,7 @@ document.getElementById('cabin-alarm').addEventListener('click', () => {
   playGameSound('elevator-alarm');
 });
 cabin.addEventListener('keydown', event => {
-  if (event.code !== 'Tab') return;
+  if (event.code !== 'Tab' || (keyMatches('inventory', event.code) && !event.shiftKey)) return; // Tab이 가방 키면 가방을 연다(keyboard.js)
   const enabled = [...cabin.querySelectorAll('button:not(:disabled)')];
   const index = enabled.indexOf(document.activeElement);
   if (event.shiftKey && index <= 0) { event.preventDefault(); enabled.at(-1).focus(); }

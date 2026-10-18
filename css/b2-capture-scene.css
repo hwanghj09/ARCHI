@@ -1,47 +1,38 @@
-/* 1920×1080 1인칭 컷. 타격 시트는 같은 크기 가로 4프레임이다. */
-#b2-capture-scene { position: fixed; z-index: 18; inset: 0; overflow: hidden; background: #000; color: #eee5d6; outline: none; }
+#b2-capture-scene { position: fixed; z-index: 18; inset: 0; overflow: hidden; color: #eee5d6; outline: none; }
 #b2-capture-scene[hidden], #b2-capture-scene [hidden] { display: none; }
 .b2-capture-frame { position: absolute; inset: 0; overflow: hidden; }
-#b2-capture-view { position: absolute; inset: 0; background: center / cover no-repeat; image-rendering: pixelated; }
-#b2-capture-scene[data-phase="strike"] #b2-capture-view { inset: auto; left: 50%; top: 50%; width: max(100vw, 177.778vh); aspect-ratio: 16 / 9;
-  translate: -50% -50%; background-image: url(../assets/ending/b2-capture/robot-strike.png); background-size: 400% 100%; }
-#b2-capture-view[data-frame="0"] { background-position-x: 0%; }
+#b2-capture-view { display: none; position: absolute; image-rendering: pixelated; }
+#b2-capture-scene[data-phase="strike"] #b2-capture-view { display: block; left: 50%; top: 50%; width: max(100vw, 177.778vh); aspect-ratio: 16 / 9;
+  translate: -50% -50%; background: url(../assets/ending/b2-capture/robot-strike.png) 0 0 / 400% 100% no-repeat; }
 #b2-capture-view[data-frame="1"] { background-position-x: 33.333333%; }
 #b2-capture-view[data-frame="2"] { background-position-x: 66.666667%; }
 #b2-capture-view[data-frame="3"] { background-position-x: 100%; }
 #b2-capture-scene[data-phase="strike"] #b2-capture-view[data-frame="3"] { transform: rotate(-7deg) scale(1.12); filter: brightness(.6) saturate(.65); }
-#b2-capture-scene[data-phase="black"] #b2-capture-view { visibility: hidden; }
-#b2-capture-scene[data-phase="drag"] #b2-capture-view { background-image: url(../assets/ending/b2-capture/drag-pov.png);
-  transform: scale(1.1) translateX(calc(var(--drift, 0) * -1.5%)) rotate(calc(-1deg + var(--drift, 0) * 2deg)); filter: brightness(.7); }
-#b2-capture-scene[data-phase="drag"] #b2-capture-view[data-glimpse="1"] { background-position: 40% center; transform: scale(1.2) rotate(2deg); }
-#b2-capture-scene[data-phase="drag"] #b2-capture-view[data-glimpse="2"] { background-position: 30% 30%; transform: scale(1.4) rotate(-2deg); }
-#b2-capture-scene:is([data-phase="lab"], [data-phase="upload"], [data-phase="complete"]) #b2-capture-view { background-image: url(../assets/ending/b2-capture/upload-pov.png); }
-#b2-capture-scene[data-phase="upload"] #b2-capture-view { filter: brightness(.75) saturate(.6); }
-#b2-capture-scene[data-phase="complete"] #b2-capture-view { filter: brightness(.35) saturate(.35); }
-.b2-capture-vignette { position: absolute; inset: 0; background: radial-gradient(ellipse, transparent 15%, #0006 60%, #000 100%); }
+.b2-capture-vignette { position: absolute; inset: 0; background: radial-gradient(ellipse at 50% 65%, transparent 25%, #0006 75%, #000 100%); }
 #b2-capture-eyelids { position: absolute; inset: 0; background: #000;
   clip-path: polygon(0 0, 100% 0, 100% calc(50% - var(--eye-open, 1) * 50%), 0 calc(50% - var(--eye-open, 1) * 50%),
     0 calc(50% + var(--eye-open, 1) * 50%), 100% calc(50% + var(--eye-open, 1) * 50%), 100% 100%, 0 100%); }
-#b2-capture-location { position: absolute; top: 8%; left: 6%; margin: 0; color: #b8ccc9; font: 13px/1.5 monospace; letter-spacing: .12em; text-shadow: 0 2px 5px #000; }
-#b2-capture-caption { position: absolute; left: 50%; bottom: max(10%, 65px); translate: -50% 0; width: min(800px, calc(100% - 48px)); margin: 0;
-  font-size: clamp(15px, 2vw, 22px); line-height: 1.7; text-align: center; text-shadow: 0 2px 5px #000, 0 0 12px #000; }
-#b2-capture-caption:not(:empty) { padding: 12px 18px; background: #000b; border-left: 2px solid #a1504b; }
-#b2-capture-skip { position: absolute; right: max(20px, env(safe-area-inset-right)); bottom: max(14px, env(safe-area-inset-bottom)); min-height: 44px;
-  padding: 8px 14px; border: 1px solid #7c8986; background: #0b1316d9; color: #d4dcd7; font: inherit; cursor: pointer; }
+#b2-capture-skip { position: absolute; right: max(18px, env(safe-area-inset-right)); top: max(14px, env(safe-area-inset-top));
+  width: 44px; height: 44px; border: 0; background: #07101580; color: #b8c2c0; font: 25px Arial, sans-serif; cursor: pointer; }
 #b2-capture-skip:focus-visible { outline: 2px solid #eac47d; outline-offset: 3px; }
-#b2-upload { position: absolute; top: 10%; left: 50%; translate: -50% 0; box-sizing: border-box; width: min(480px, calc(100% - 32px));
-  padding: 18px 22px; border: 1px solid #66b8b1; background: #071315ec; box-shadow: 0 0 35px #183b3d66; color: #a8dcd5; font: 13px/1.6 monospace; }
-#b2-upload h2 { margin: 6px 0 12px; color: #e2ece5; font-size: 22px; font-weight: 400; }
-#b2-upload p { margin: 0; }
-#b2-upload-progress { display: block; width: 100%; height: 8px; margin: 14px 0 6px; accent-color: #88c9c1; }
-#b2-upload-percent { display: block; text-align: right; }
-#b2-bad-ending { z-index: 19; }
-@media (max-width: 600px) {
-  #b2-capture-scene:is([data-phase="lab"], [data-phase="upload"], [data-phase="complete"]) #b2-capture-view { background-position: 57% center; }
-  #b2-upload { top: 5%; padding: 12px 16px; font-size: 11px; }
-  #b2-upload h2 { font-size: 18px; }
-  #b2-bad-ending { box-sizing: border-box; }
-}
+#player #unconscious-sheet { width: 300%; height: 100%; }
+#player[data-state="unconscious"] #unconscious-sheet { display: block; }
+#player #drag-sprite { display: none; position: relative; left: -48px; width: 240px; height: 192px; overflow: hidden; }
+#player[data-state="dragged"] { overflow: visible; }
+#player[data-state="dragged"] #drag-sprite { display: block; }
+#player #drag-sheet { display: block; width: 400%; height: 100%; max-width: none; }
+#b2-transport-robot { position: absolute; z-index: 7; width: 240px; height: 160px; overflow: hidden; pointer-events: none; image-rendering: pixelated; }
+#b2-transport-robot img { display: block; width: 400%; height: 100%; max-width: none; }
+#b2-connection-cable { position: absolute; z-index: 8; inset: 0; width: 100%; height: 720px; overflow: visible; pointer-events: none; }
+#b2-connection-cable path { fill: none; stroke-linecap: round; }
+#b2-connection-cable .cable-jacket { stroke: #101416; stroke-width: 8px; }
+#b2-connection-cable .cable-core { stroke: #39494b; stroke-width: 2px; }
+#b2-connection-cable .connector { fill: #899b9b; stroke: #192326; stroke-width: 2px; }
+#b2-connection-cable[data-connected="true"] .connector { fill: #83d3ca; filter: drop-shadow(0 0 3px #83d3ca); }
+#world[data-b2-capture] .guard-bot { visibility: hidden; }
+body:has(#b2-capture-scene:not([hidden])) #world #darkness { display: none; }
+body:has(#b2-capture-scene:not([hidden])) :is(header, nav, #debug-sidebar, #inventory-button, #objective, #sanity-hud, #game-menu-button, #interaction-hint, #interaction-outline, #suho-line, #b2-delete-bar, #b2-barricade-line, #room-alarm) { visibility: hidden; }
+#b2-bad-ending { z-index: 19; border: 0; background: transparent; box-shadow: none; }
 @media (prefers-reduced-motion: reduce) {
   #b2-capture-scene #b2-capture-view { transform: none !important; }
   #b2-capture-eyelids { clip-path: none; opacity: calc(1 - var(--eye-open, 1)); }

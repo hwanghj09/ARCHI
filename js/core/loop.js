@@ -20,12 +20,13 @@ function fallDuringStoryScene() {
 function update() {
   updateGameAudio(step);
   if (mainMenuActive) return;
-  if (b2CaptureActive) { updateB2CaptureScene(step); return; }
+  if (b2CaptureActive || !b2CaptureScene.hidden) { updateB2CaptureScene(step); return; }
   updatePhoneCharging(step);
+  if (solarRestoreActive) { updateSolarRestoreScene(step); return; }
   updateSanity(step);
   if (openingActive) { updateOpening(step); return; }
   if (blackoutSceneActive) { updateBlackoutScene(step); return; }
-  if (storySceneActive && !transitioning) { updateStoryWalk(step); return; } // 대사는 클릭으로 넘기고, walkTo 컷씬은 대상까지 걷는다(story-scene.js)
+  if (storySceneActive && !transitioning) { updateStoryScene(step); return; } // 대사는 클릭으로 넘기고, 연출 단계(걷기·달리기)는 저절로 진행된다(story-scene.js)
   if (cctvSceneActive) { updateCctvScene(step); return; }
   if (photoCaptureTime > 0) {
     updatePhotoCapture(step);
@@ -55,6 +56,7 @@ function update() {
     return;
   }
   if (selectingFloor) {
+    updatePhone(step); // 엘리베이터 안에서도 플래시가 배터리를 쓴다
     updateElevators();
     updateB2Ending(step); // 칸 안에 있어도 B2 삭제·추격은 계속된다
     updateRoamerCabin(step); // 쫓던 순찰 로봇 R-03이 엘리베이터 문까지 온다

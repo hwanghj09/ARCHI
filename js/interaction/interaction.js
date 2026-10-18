@@ -235,6 +235,7 @@ function interact() {
   }
   if (nearbyDoor.type === 'elevator') {
     if (b2Ending.phase === 'running') return; // ARCHI가 B2 승강기를 멈췄다
+    if (needsF1Directory()) { sayLine('편의점이 몇 층이더라…'); return; } // 층별 안내판을 먼저 본다(objective.js)
     const car = elevatorCars[nearbyDoor.carIndex];
     if (!elevatorHasPower() && car.floor !== currentSceneFloor) {
       sayLine(solarEnabled ? '불은 켜졌는데 엘리베이터는 안 와… 승강기 전기는 따로 연결해야 하나?' : '전기가 없으니 엘리베이터도 안 오겠지…');

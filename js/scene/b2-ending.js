@@ -463,7 +463,7 @@ function endB2Ending() {
   for (const robot of b2Robots) Object.assign(robot, { hold: Infinity, banging: false });
 }
 
-// 붙잡기 연출(1.1초)이 끝나면 1인칭 제압·이송·업로드 컷씬으로 이어진다.
+// 붙잡기 연출(1.1초)이 끝나면 타격 뒤 실제 월드에서 끌고 가 연결하는 컷씬으로 이어진다.
 function showB2BadEnding() {
   endB2Ending();
   startB2CaptureScene();

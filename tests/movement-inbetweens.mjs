@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { createHash } from 'node:crypto';
 import { mkdir } from 'node:fs/promises';
 import { chromium } from 'playwright';
 import sharp from 'sharp';
@@ -14,42 +15,102 @@ const walkHead = await sharp('assets/player/movement-inbetweens-source/walk-head
   .toBuffer({ resolveWithObject: true });
 assert.equal(walkHead.info.width, 56);
 assert.equal(walkHead.info.height, 56);
+const runMidpoint = await sharp('assets/player/jeong-suho-run-mid-01.png').ensureAlpha().raw()
+  .toBuffer({ resolveWithObject: true });
+assert.deepEqual([runMidpoint.info.width, runMidpoint.info.height], [256, 256]);
+
+// These baselines protect the existing head, shirt and arm artwork during leg-only repairs.
+const upperBodyHashes = {
+  'walk-eight': '7362869cf879d98a69d8c96cdb51faaad1312d5cfdf3ff8fb5ec86128696246b',
+  'phone-walk-eight-off': 'eb626c44b68af88a1211d248c49018d6ea1686d0b79349036811f4cdd6607c99',
+  'phone-walk-eight-on': 'c998367f8d2e368a773519c92ed7582164cb8ffc1d3277205539215cde15d544',
+  'run-sixteen': '4d2e3f540d0fed5ffc1229c3202cee0c53edc7049d0288b69476fc997cf68641',
+  'phone-run-sixteen-off': 'f256b9664332985299272085c21720e045e19e36a0d5a3883e429f8f90b656cc',
+};
+function shoeParts(cell, minX = 5, minY = 145) {
+  const seen = new Set(), parts = [];
+  const shoe = (x, y) => {
+    if (x < minX || x >= 250 || y < minY || y >= 250) return false;
+    const p = (y * 256 + x) * 4, rgb = cell.subarray(p, p + 3);
+    return cell[p + 3] >= 128 && Math.min(...rgb) >= 90 && Math.max(...rgb) - Math.min(...rgb) < 45;
+  };
+  for (let y = minY; y < 250; y++) for (let x = minX; x < 250; x++) {
+    if (!shoe(x, y) || seen.has(y * 256 + x)) continue;
+    const stack = [[x, y]]; let count = 0;
+    while (stack.length) {
+      const [u, v] = stack.pop(), key = v * 256 + u;
+      if (seen.has(key) || !shoe(u, v)) continue;
+      seen.add(key); count++;
+      for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) stack.push([u + dx, v + dy]);
+    }
+    if (count > 130) parts.push(count); // Ignore small lace/gray panels inside one sneaker.
+  }
+  return parts.length;
+}
 
 for (const [original, expanded, frames] of sheets) {
   const before = original && await sharp(`assets/player/jeong-suho-${original}.png`).ensureAlpha().raw()
     .toBuffer({ resolveWithObject: true });
   const airborne = expanded === 'phone-jump-on';
   const walking = expanded.includes('walk-eight');
+  const running = expanded.includes('run-sixteen');
+  const hasMidpoint = expanded === 'run-sixteen';
   const after = await sharp(`assets/player/jeong-suho-${expanded}.png`).ensureAlpha().raw()
     .toBuffer({ resolveWithObject: true });
   assert.equal(after.info.width, frames * 256, `${expanded}: complete square cells`);
   assert.equal(after.info.height, 256);
+  if (upperBodyHashes[expanded]) assert.equal(createHash('sha256').update(after.data.subarray(0, after.info.width * 128 * 4)).digest('hex'),
+    upperBodyHashes[expanded], `${expanded}: upper-body artwork stays pixel-identical`);
   const poses = new Set();
   const headTops = [], headCenters = [];
   const freeHandCenters = [];
   for (let frame = 0; frame < frames; frame++) {
     const cell = Buffer.alloc(256 * 256 * 4);
+    const repairedFoot = running && !(hasMidpoint && frame === 1) &&
+      (hasMidpoint ? [0, 3, 7] : [0]).includes(Math.floor(frame / 2));
+    const repairedLegs = running && !(hasMidpoint && frame === 1) &&
+      (hasMidpoint ? [1, 3, 6] : [1, 2, 5]).includes(Math.floor(frame / 2));
     for (let y = 0; y < 256; y++) {
       const from = (y * after.info.width + frame * 256) * 4;
       after.data.copy(cell, y * 256 * 4, from, from + 256 * 4);
-      if (before && (airborne || frame % 2 === 0)) {
-        const oldIndex = airborne ? [2, 6][frame] : frame / 2;
+      if (before && (airborne || running || frame % 2 === 0)) {
+        const oldIndex = airborne ? [2, 6][frame] : Math.floor(frame / 2);
         const old = (y * before.info.width + oldIndex * 256) * 4;
-        assert(cell.subarray(y * 256 * 4, (y + 1) * 256 * 4)
-          .equals(before.data.subarray(old, old + 256 * 4)), `${expanded}/${frame}: original pixels preserved`);
+        const expected = hasMidpoint && frame === 1 ? runMidpoint.data.subarray(y * 256 * 4, (y + 1) * 256 * 4) :
+          before.data.subarray(old, old + 256 * 4);
+        const actual = cell.subarray(y * 256 * 4, (y + 1) * 256 * 4);
+        if (repairedLegs && y >= 128) {
+          for (let x = 0; x < 256 && y < 165; x++) {
+            const p = x * 4, rgb = expected.subarray(p, p + 3);
+            const skin = expected[p] > 110 && expected[p] > expected[p + 1] + 20 && expected[p + 1] > expected[p + 2] + 10;
+            const shirt = y < 140 && Math.min(...rgb) >= 110 && Math.max(...rgb) - Math.min(...rgb) < 50;
+            if (expected[p + 3] >= 128 && (skin || shirt)) assert(actual.subarray(p, p + 4).equals(expected.subarray(p, p + 4)), 'Preserve the original hands and shirt hem');
+          }
+        } else if (repairedFoot && y >= 196) {
+          assert(actual.subarray(0, 150 * 4).equals(expected.subarray(0, 150 * 4)) &&
+            actual.subarray(250 * 4).equals(expected.subarray(250 * 4)), `${expanded}/${frame}: only the front ankle/shoe changes`);
+        } else assert(actual.equals(expected), `${expanded}/${frame}: preserve the whole body outside the intended midpoint/shoe correction`);
       }
     }
     poses.add(cell.toString('base64'));
     let count = 0, top = 256, bottom = 0;
     for (let y = 0; y < 256; y++) for (let x = 0; x < 256; x++) {
       const alpha = cell[(y * 256 + x) * 4 + 3];
-      if (!before || (!airborne && frame % 2)) assert(alpha === 0 || alpha === 255, `${expanded}/${frame}: crisp alpha without haze`);
+      if (!before || hasMidpoint && frame === 1) assert(alpha === 0 || alpha === 255, `${expanded}/${frame}: crisp alpha without haze`);
       if (alpha < 32) continue;
       count++; top = Math.min(top, y); bottom = Math.max(bottom, y);
       assert(x > 5 && x < 250 && y > 5 && y < 250, `${expanded}/${frame}: unclipped margins`);
     }
     assert(count > 6000 && count < 33000, `${expanded}/${frame}: complete, isolated character`);
     assert(top >= 12 && top < 55 && bottom >= 210 && bottom <= 240, `${expanded}/${frame}: body scale and ground alignment`);
+    if (walking || running) assert.equal(shoeParts(cell), 2,
+      `${expanded}/${frame}: exactly two isolated sneaker silhouettes, with no extra heel/foot`);
+    if (repairedFoot) {
+      assert.equal(shoeParts(cell, 150, 196), 1, `${expanded}/${frame}: one continuous sneaker, without a second stacked heel/shoe`);
+      let seam = 0;
+      for (let x = 150; x < 250; x++) if (cell[(195 * 256 + x) * 4 + 3] >= 128 && cell[(196 * 256 + x) * 4 + 3] >= 128) seam++;
+      assert(seam >= 3, `${expanded}/${frame}: the repaired ankle stays connected to the shin`);
+    }
     if (walking) {
       assert(Math.abs(bottom - (expanded === 'walk-eight' ? 239 : 237)) <= 1, 'Walking always keeps a support foot planted');
       headTops.push(top);
@@ -104,7 +165,29 @@ for (const [original, expanded, frames] of sheets) {
       freeHandCenters.push(sum / pixels);
     }
   }
-  assert.equal(poses.size, frames, `${expanded}: every pose is distinct`);
+  assert.equal(poses.size, hasMidpoint ? 9 : running ? 8 : frames, `${expanded}: one added midpoint or complete original movement poses`);
+  if (hasMidpoint) {
+    const malformedFirstPose = Buffer.alloc(256 * 256 * 4);
+    for (let y = 0; y < 256; y++) before.data.copy(malformedFirstPose, y * 256 * 4,
+      y * before.info.width * 4, (y * before.info.width + 256) * 4);
+    assert.equal(shoeParts(malformedFirstPose, 150, 196), 2, 'The original stacked heel/shoe is detected by the regression check');
+    assert.equal(shoeParts(malformedFirstPose), 3, 'The original extra foot fails the two-feet regression check');
+    const anchors = [];
+    for (const [image, frame] of [[before, 0], [runMidpoint, 0], [before, 1]]) {
+      let headLeft = 256, headRight = 0, headX = 0, headPixels = 0, soleX = 0, solePixels = 0;
+      for (let y = 0; y < 256; y++) for (let x = 0; x < 256; x++) {
+        if (image.data[(y * image.info.width + frame * 256 + x) * 4 + 3] < 128) continue;
+        if (y < 52) { headLeft = Math.min(headLeft, x); headRight = Math.max(headRight, x); headX += x; headPixels++; }
+        if (y >= 232) { soleX += x; solePixels++; }
+      }
+      assert(headPixels > 0 && solePixels > 0, 'Complete head and grounded support foot');
+      anchors.push({ head: headX / headPixels, width: headRight - headLeft, sole: soleX / solePixels });
+    }
+    const [a, mid, b] = anchors;
+    assert(mid.head >= Math.min(a.head, b.head) - 1 && mid.head <= Math.max(a.head, b.head) + 1, 'Aligned head between neighboring poses');
+    assert(Math.abs(mid.width - (a.width + b.width) / 2) <= 5, 'Midpoint retains neighboring head scale');
+    assert(mid.sole > Math.min(a.sole, b.sole) + 5 && mid.sole < Math.max(a.sole, b.sole) - 5, 'The support foot is a real intermediate phase');
+  }
   if (walking) {
     assert(Math.max(...headTops) - Math.min(...headTops) <= 4, `${expanded}: restrained vertical body bob`);
     assert(Math.max(...headCenters) - Math.min(...headCenters) < 3, `${expanded}: stable head anchor`);
@@ -141,7 +224,7 @@ try {
     Body.setVelocity(body, { x: 0, y: 0 }); grounded = true;
   });
   await page.locator('#walk-sheet, #run-sheet').evaluateAll(images => Promise.all(images.map(image => image.decode())));
-  for (const [motion, frames, duration] of [['walk', 8, 1100], ['run', 16, 650]]) {
+  for (const [motion, frames, duration] of [['walk', 8, 1100], ['run', 16, 1000]]) {
     await page.evaluate(motion => {
       window.observedMovementFrames = new Set();
       const sample = () => {
@@ -152,7 +235,15 @@ try {
     }, motion);
     await page.keyboard.down('d');
     if (motion === 'run') await page.keyboard.down('Shift');
-    await page.clock.runFor(duration);
+    const startX = await page.evaluate(() => body.position.x);
+    if (motion === 'run') {
+      await page.clock.runFor(650);
+      assert((await page.evaluate(() => window.observedMovementFrames.size)) < 16,
+        'Running no longer completes a cycle in 650ms');
+      await page.clock.runFor(duration - 650);
+      assert(Math.abs(await page.evaluate(() => body.position.x) - startX - 340) < 6,
+        'Slower run animation preserves 340px/s movement');
+    } else await page.clock.runFor(duration);
     assert.deepEqual((await page.evaluate(() => [...window.observedMovementFrames])).sort((a, b) => a - b),
       Array.from({ length: frames }, (_, i) => i), `${motion}: full cycle at the real game frame rate`);
     assert.equal(await page.locator('#player img:visible').count(), 1);
@@ -169,4 +260,4 @@ try {
   }
   assert.deepEqual(errors, []);
 } finally { await browser.close(); }
-console.log('PASS: identical unscaled heads across all 24 walk poses, no gray nape trail or old chin, matching arm swing/light variants, low feet, preserved run/jump pixels, alpha/margins; full 8/16-frame cycles and idle in Chromium.');
+console.log('PASS: two sneaker silhouettes in all 56 walk/run timing cells, unchanged upper-body pixels and original hands/hem, one preserved midpoint, complete normal/phone movement cycles and unchanged sprint speed/cadence in Chromium.');

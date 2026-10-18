@@ -11,11 +11,12 @@ const LOG_PUZZLE_ROWS = [
   { date: '10/05', day: '3.6%', night: '89.2%' },
   { date: '10/07', day: '3.7%', night: '4.2%', anomaly: true },
 ];
-// 위에서부터 지우되 10/07은 세 번째다: 경고 5초 뒤부터 12초마다 한 줄(17·29·41·53초). 랙까지는 걸어서 몇 초면 간다.
+// 위에서부터 지우되 10/07은 세 번째다: 경고 2초 뒤부터 4초마다 한 줄(6·10·14·18초). 랙까지는 걸어서 몇 초면 간다.
+// 지워지는 모습을 보기 전에 케이블부터 뽑지 않도록 첫 줄은 금방 지운다.
 const LOG_DELETE_ORDER = [0, 1, 3, 2];
 const LOG_KEY_ROW = 3;
-const LOG_WARNING_DELAY = 5000;
-const LOG_DELETE_INTERVAL = 12000;
+const LOG_WARNING_DELAY = 2000;
+const LOG_DELETE_INTERVAL = 4000;
 const LOG_DELETE_END = LOG_WARNING_DELAY + LOG_DELETE_INTERVAL * LOG_DELETE_ORDER.length;
 const LOG_ACCESS_RECORD = '출입 기록  10/07 — 조현아 · 23:10 입실 · 05:02 퇴실';
 const LOG_QUIZ_QUESTION = '10/07 밤에는 왜 ARCHI의 성능이 낮았을까?';

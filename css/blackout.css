@@ -10,7 +10,6 @@ body:has(#world[data-blackout-scene]) :is(header, nav, #debug-sidebar, #inventor
 #world[data-blackout-scene][data-power-flicker="off"] #darkness { display: block; background: #0009; mask-image: none; }
 #world[data-blackout-scene] #flashlight-beam { display: none; }
 #world[data-blackout-scene="shock"][data-blackout] #darkness { display: block; mask-image: none; background: radial-gradient(ellipse 175px 220px at var(--sight-x) var(--sight-y), #0004, #000e); }
-#player[data-state="startled"] #caught-sheet { display: block; }
 #player #blackout-call-sheet { width: 200%; height: 100%; }
 #player[data-state="blackout-call"] #blackout-call-sheet { display: block; }
 @media (max-width: 600px) { #blackout-caption { bottom: 20vh; } }

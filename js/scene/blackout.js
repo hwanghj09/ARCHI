@@ -62,11 +62,13 @@ function updateBlackoutScene(elapsed) {
   } else {
     facing = 1;
     const frame = time < 1300 ? 0 : 1;
-    sprite.dataset.state = phase === 'reach' ? 'blackout-call' : 'startled';
-    sprite.dataset.frame = phase === 'reach' ? String(frame) : '0';
+    sprite.dataset.state = 'blackout-call';
+    sprite.dataset.frame = String(frame);
     blackoutCallSheet.style.transform = `translateX(${-frame * 50}%)`;
-    caughtSheet.style.transform = 'translateX(0)';
-    if (phase === 'shock') x -= 24 * Math.min(1, (time - 2900) / 320);
+    if (phase === 'shock') {
+      showCutscenePose(time < 3060 ? 'alert' : 'startled');
+      x -= 24 * Math.min(1, (time - 2900) / 320);
+    }
   }
   Body.setPosition(body, { x, y: floorY - 81 });
   cameraX += (cameraTarget() - cameraX) * .13;

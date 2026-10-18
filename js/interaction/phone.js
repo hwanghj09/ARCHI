@@ -152,7 +152,7 @@ function closePhone() {
   for (const element of phoneBlocked) element.inert = false;
   phoneBlocked = [];
   animate(0);
-  stage.focus();
+  (selectingFloor ? cabin : stage).focus();
 }
 
 function togglePhoneLight() {
@@ -178,7 +178,7 @@ function chargePhone(door) {
   }
   if (phoneDock) return;
   if (!floorHasPower(currentSceneFloor)) return;
-  if (phoneBattery >= 100) return;
+  if (phoneBattery >= 100) return sayLine('휴대폰 배터리는 이미 100%야. 충전할 필요는 없겠어.');
   phoneDock = { floor: door.floor, scene: door.scene, x: door.x };
   playGameSound('charger');
   sayLine('충전하는 동안 여기 두고… 나중에 꼭 챙기자.');

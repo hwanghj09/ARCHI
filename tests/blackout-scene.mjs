@@ -69,7 +69,10 @@ try {
   assert(Math.max(...durations) < 200, 'Flickering intervals stay fast');
   assert(new Set(durations).size >= 4, 'Flickering intervals vary instead of following a regular beat');
   assert.equal(changes.at(-1).light, 'off', 'The final cut stays dark');
-  assert.equal((await state()).phase, 'shock'); assert.equal((await state()).pose, 'startled');
+  assert.equal((await state()).phase, 'shock'); assert.equal((await state()).pose, 'cutscene');
+  assert.equal(await page.locator('#player').getAttribute('data-cutscene-pose'),
+    (await state()).elapsed < 3060 ? 'alert' : 'startled');
+  assert(await page.locator('#caught-sheet').isHidden(), 'A power outage never uses the capture sprite');
   assert.equal((await state()).blackout, true); assert.equal((await state()).called, false);
   assert.equal(await page.locator('#player img:visible').count(), 1);
   await advance(3300);

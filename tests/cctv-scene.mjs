@@ -32,7 +32,7 @@ try {
   const state = () => page.evaluate(() => {
     const wall = document.querySelector('#dynamic-scene .fixture.cctv-wall');
     return { active: cctvSceneActive, elapsed: cctvElapsed, phase: world.dataset.cctvScene ?? null, x: Math.round(body.position.x),
-      pose: sprite.dataset.state, facing, zoom: cameraZoom, shake: Math.hypot(cameraShake.x, cameraShake.y), live: wall?.dataset.live,
+      pose: sprite.dataset.state, acting: sprite.dataset.cutscenePose, facing, zoom: cameraZoom, shake: Math.hypot(cameraShake.x, cameraShake.y), live: wall?.dataset.live,
       seen: collectedItems.has('b1-cctv-live'), inert: stage.inert, hidden: document.getElementById('cctv-scene').hidden,
       caption: document.getElementById('cctv-caption').textContent, sounds: [...soundLog],
       dim: Number(document.getElementById('cctv-dim').style.opacity || 0), bgm: cctvBgmPlaying() };
@@ -73,7 +73,8 @@ try {
   assert(now.sounds.includes('step') && now.sounds.includes('cctv-rise'), 'Footsteps and the rising drone play');
   assert.equal(now.bgm, false, 'The control-room BGM waits for the screens to die');
   now = await untilPhase('look');
-  assert.equal(now.x, 1247); assert.equal(now.pose, 'idle'); assert.equal(now.live, 'false', 'All screens are still off');
+  assert.equal(now.x, 1247); assert.equal(now.pose, 'cutscene'); assert.equal(now.acting, 'look-up');
+  assert.equal(now.live, 'false', 'All screens are still off');
 
   // 아홉 칸이 한꺼번에 밝은 잡음으로 지지직 켜진다. 수호의 모습은 어디에도 비치지 않는다.
   const noiseMasks = () => page.locator('#dynamic-scene .cctv-wall').evaluate(el => {
@@ -109,7 +110,7 @@ try {
   now = await state();
   assert(now.dim > .4 && now.dim < .7, `Partial darkness (${now.dim})`);
   assert.equal(await page.locator('#cctv-dim').getAttribute('data-tint'), '');
-  assert.equal(now.pose, 'idle'); assert.equal(now.facing, 1);
+  assert.equal(now.pose, 'cutscene'); assert.equal(now.acting, 'startled'); assert.equal(now.facing, 1);
   await page.screenshot({ path: '.local/cctv-quake.png' });
 
   // 흔들림이 잦아든 뒤에야 흔들림 없이 천천히 물러난다. 잡음은 조금 어두워진 회색으로 남는다.

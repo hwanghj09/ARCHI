@@ -64,7 +64,7 @@ try {
   assert.deepEqual(await rowTexts(), ['09/28    낮  3.9%    밤 87.1%', '09/30    낮  4.4%    밤 88.5%',
     '10/05    낮  3.6%    밤 89.2%', '10/07    낮  3.7%    밤  4.2%']);
   assert(await page.locator('#log-alert').isHidden(), 'The warning comes a moment later');
-  await page.clock.runFor(5200);
+  await page.clock.runFor(2200);
   assert.match(await page.locator('#log-alert').textContent(), /WARNING: UNAUTHORIZED LOG MODIFICATION\nSOURCE: SYSTEM\nDELETING NIGHT EVALUATION RECORDS/);
   assert.equal(await objective(), '로그 삭제를 막아라');
   await page.keyboard.press('Escape');
@@ -73,7 +73,7 @@ try {
   const startX = await page.evaluate(() => body.position.x);
   await page.keyboard.down('ArrowLeft'); await page.clock.runFor(600); await page.keyboard.up('ArrowLeft');
   assert(await page.evaluate(() => body.position.x) < startX - 20, 'Suho walks while the deletion runs');
-  await page.clock.runFor(12000);
+  await page.clock.runFor(4000);
   assert.equal(await page.evaluate(() => logDeletedCount()), 1, 'Deletion keeps running with the window closed');
   // 창을 다시 열어도 처음부터 다시 지우지 않는다.
   await use('f12-eval', '야간 로그 단말기');
@@ -221,13 +221,13 @@ try {
   assert.match(await page.locator('#inspection-description').textContent(), /아직 모른다/);
   assert.equal(await has('b1-elevator'), false, 'B1 key switch waits for the 7F puzzles');
   await use('f12-eval', '야간 로그 단말기');
-  await page.clock.runFor(20000);
+  await page.clock.runFor(7000);
   await continueGame();
   const resumed = await page.evaluate(() => logPuzzle.elapsed);
-  assert(resumed >= 19000 && resumed <= 21000, `Deletion resumes where it was (${resumed})`);
+  assert(resumed >= 6500 && resumed <= 9500, `Deletion resumes where it was (${resumed})`);
   assert.equal(await page.evaluate(() => logDeletedCount()), 1);
-  await page.clock.runFor(22000);
-  assert.equal(await page.evaluate(() => logDeletedCount()), 3, '10/07 is gone after ~41s');
+  await page.clock.runFor(8000);
+  assert.equal(await page.evaluate(() => logDeletedCount()), 3, '10/07 is gone after ~14s');
   await use('f12-eval', '네트워크 랙');
   await unplugWithKeyboard();
   assert.equal(await page.evaluate(() => logPuzzle.outcome), 'too-late');

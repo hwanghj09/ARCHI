@@ -47,7 +47,8 @@ try {
         });
       }, { src: `data:image/png;base64,${png.toString('base64')}`, frames, motion });
       assert.equal(cells.length, frames, `${motion}/${light}: sheet dimensions`);
-      assert.equal(new Set(cells.map(cell => cell.sample)).size, frames, 'Distinct animation phases');
+      assert.equal(new Set(cells.map(cell => cell.sample)).size, motion === 'run' ? 8 : frames,
+        'Complete whole-body run poses or distinct walk phases');
       for (const cell of cells) {
         assert(cell.top > 5 && cell.top < 55 && cell.bottom >= 216 && cell.bottom <= 239,
           `${motion}/${light}: full body and calibrated foot line ${JSON.stringify({ top: cell.top, bottom: cell.bottom })}`);
