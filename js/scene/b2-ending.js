@@ -12,7 +12,7 @@
 const b2CheckpointKey = 'archi.checkpoint.b2';
 const b2DockX = [4790, 4850, 4910]; // 충전 도크(대기 중인 경비 로봇 fixture)의 세 자리
 const b2DoorHold = 700; // 문을 열고 들어온 로봇이 잠깐 멈춰 서는 시간
-const b2WakeDelay = 1000; // DELETE 뒤 첫 로봇이 깨어나기까지(나머지는 0.7초씩 늦게)
+const b2WakeDelay = 3000; // DELETE 뒤 첫 로봇이 깨어나기까지(나머지는 0.7초씩 늦게). 상자를 밀 여유를 준다
 // 정신력 45% 규칙(B2 로봇 3대): 로봇 속도를 지금 수호가 낼 수 있는 가장 빠른 속도(뛰기, 정신력 0%면 걷기)에 곱해 정한다.
 // 45% 이상이면 수호보다 느리고(b2SlowRatio), 미만이면 빠르다(b2FastRatio). 45% 미만이면 ARCHI의 방해도 더 잦고 짧다.
 const b2SanityLine = 45;
@@ -104,6 +104,7 @@ function startArchiDelete() {
   refreshB2Bar();
   mountB2Robots();
   setB2Siren(true); // 삭제가 끝날 때까지 사이렌을 반복한다
+  sayLine('로봇들이 깨어났어! 저 장비 상자를 밀어서 문을 막아야 해.', 5000);
 }
 
 // 장면을 새로 그릴 때(floor-change.js) 같은 장면에 있는 로봇만 스프라이트를 붙이고, B2 전체를 비상 모드로 그린다.
@@ -500,6 +501,8 @@ function showB2Escape() {
   if (b2Art.trueEnd) { b2TrueEndArt.src = b2Art.trueEnd; b2Escape.dataset.art = 'true'; }
   b2Escape.dataset.step = 'white';
   b2Escape.hidden = false;
+  // 클리어 기록: 메인 메뉴에 표시하고, '계속하기'가 DELETE 직전으로 돌아가지 않게 이어하기 저장을 지운다(저장 칸·체크포인트는 그대로).
+  try { localStorage.setItem(clearedKey, String(Date.now())); localStorage.removeItem(progressKey); } catch { /* 저장소가 없어도 엔딩은 보인다. */ }
   b2Escape.focus();
   b2FinaleTimers.push(...b2FinaleSteps.map(([step, at]) => setTimeout(() => {
     b2Escape.dataset.step = step;
@@ -541,7 +544,7 @@ document.getElementById('b2-checkpoint').addEventListener('click', () => {
   saveProgress();
 });
 document.getElementById('b2-escape-menu').addEventListener('click', () => {
-  // 삭제 중에는 자동 저장을 멈췄으므로 저장 칸은 DELETE 직전 상태다. 메뉴의 '이어하기'는 그 저장에서 시작한다.
+  // TRUE END에서 이어하기 저장을 지웠으므로 메뉴에는 '계속하기' 대신 클리어 표시가 보인다(main-menu.js). 저장 칸은 그대로 불러올 수 있다.
   resetB2Ending();
   gameStarted = false;
   mainMenuActive = true;

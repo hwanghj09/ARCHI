@@ -26,7 +26,7 @@ const OBJECTIVES = [
   // B2 DELETE 뒤 엔딩(b2-ending.js): 단계마다 다음 할 일을 알려 준다.
   { when: () => b2Ending.phase === 'running' && b2Ending.offline, title: 'ARCHI 삭제 완료', text: 'ARCHI가 꺼졌다. 문 너머가 조용해졌다.' },
   { when: () => b2Ending.phase === 'running' && b2Ending.barricaded, title: '삭제 배틀', text: 'ARCHI가 삭제를 거부한다. 문이 버티는 동안 끝낼 수 있을까?' },
-  { when: () => b2Ending.phase === 'running', title: '문 막기', text: '경비 로봇들이 깨어났다. 이 방으로 들어오지 못하게 할 수는 없을까?' },
+  { when: () => b2Ending.phase === 'running', title: '문 막기', text: '경비 로봇들이 깨어났다. 장비 운반 상자를 출입문까지 밀어 막자!' },
   { when: () => collectedItems.has('goal-b2-console'), title: 'ARCHI 멈추기', text: 'ARCHI가 자신을 외부로 복제하고 있다. 지금 여기서 끝내야 한다.' },
   // 12층·7층 필수 퍼즐(log-puzzle.js, backup-puzzle.js)을 차례로 풀어야 다음 목표로 넘어간다.
   { when: () => collectedItems.has('f7-external-connection-solved') && collectedItems.has('b1-elevator'), title: 'B2 서버실 조사하기', text: '길이 열렸다. 승강기를 타고 B2 서버실로 내려가자.' },
@@ -34,6 +34,10 @@ const OBJECTIVES = [
     text: 'ARCHI의 신호는 어디를 거쳐 밖으로 나가는 걸까? 13층 보안 자료실에 무언가 남아 있을지도.' },
   { when: () => collectedItems.has('f7-external-connection-solved') && !collectedItems.has('f2-projected'), title: '2층 조사하기',
     text: '아무도 없는 새벽 3시의 리허설. 2층 행사장 무대에는 무엇이 비춰졌을까?' },
+  // 승강기 제어반은 관제실 CCTV 모니터 벽(소등 컷씬)을 본 뒤에야 돌릴 수 있다(floor-b1.js).
+  { when: () => collectedItems.has('f7-external-connection-solved') && collectedItems.has('f13-backup-device') && collectedItems.has('f2-projected') &&
+      currentSceneFloor === -1 && !collectedItems.has('b1-lights-out') && !collectedItems.has('b1-elevator'), title: '관제실 CCTV',
+    text: '모니터 벽이 무엇을 찍고 있었는지 먼저 확인해 보자.' },
   { when: () => collectedItems.has('f7-external-connection-solved') && collectedItems.has('b2-restricted-seen'), title: 'B2 운행 제한 해제', text: '승강기가 B2로 내려가지 않는다. B1 방재 관제실에서 운행을 관리할 텐데.' },
   { when: () => collectedItems.has('f7-external-connection-solved'), title: '지하에서 무슨 일이?', text: '모든 기록이 지하를 가리킨다. 승강기를 타고 B2로 내려가 보자.' },
   { when: () => collectedItems.has('f7-training-time-solved'), title: '오늘만 다른 기록', text: '평소의 밤과 오늘 밤. 7층 검증실 백업 장비에서 [오늘] 기록을 비교해 보자.' },

@@ -182,6 +182,12 @@ try {
   await page.evaluate(() => collectedItems.add('f13-backup-device'));
   assert.equal(await objective(), '2층 조사하기');
   await page.evaluate(() => collectedItems.add('f2-projected'));
+  // B1에 있으면 관제실 CCTV 모니터 벽(소등 컷씬)을 먼저 보라고 한다. 보기 전에는 제어반도 돌아가지 않는다.
+  assert.equal(await objective(), '관제실 CCTV');
+  await use('b1-control', '승강기 제어반');
+  assert.match(await page.locator('#inspection-description').textContent(), /CCTV 모니터 벽/);
+  assert.equal(await has('b1-elevator'), false, 'B1 key switch waits for the CCTV wall');
+  await page.evaluate(() => { closeInspection(); collectedItems.add('b1-lights-out'); });
   assert.equal(await objective(), '지하에서 무슨 일이?');
 
   // ---- B1·B2 ----

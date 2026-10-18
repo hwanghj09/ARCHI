@@ -36,6 +36,8 @@ let usingPowerPanel = false;
 let usingInspection = false;
 // 직접 조작하는 장치(manual-control.js): 레버·열쇠·전원선 같은 조작 창이 열려 있는 동안 플레이어 조작을 멈춘다.
 let usingControl = false;
+// 조작창·키패드·회선 퍼즐이 닫힌 시각(performance.now). 저절로 닫힌 직후 닫으려고 누른 Esc가 일시정지 메뉴를 열지 않게 한다(keyboard.js).
+let modalClosedAt = -Infinity;
 let phoneBattery = 100;
 // 휴대폰을 충전하는 방·층·콘센트 위치. 맡긴 방의 같은 자리에서 찾아간다.
 let phoneDock = null;

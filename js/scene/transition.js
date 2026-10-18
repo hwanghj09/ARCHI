@@ -56,4 +56,5 @@ function updateSceneTransition() {
   const focus = usingComputer ? computer.querySelector('button') : selectingFloor ? cabin :
     previousFocus?.isConnected && previousFocus !== document.body ? previousFocus : stage;
   focus.focus({ preventScroll: true });
+  if (!selectingFloor && !usingComputer) resumeHeldKeys();
 }

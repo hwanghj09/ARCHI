@@ -107,7 +107,7 @@ const FLOOR16_ROOMS = interiorRooms(16, [
       clue: '조현아 팀장(기술본부 ARCHI 프로젝트) 사원증을 챙겼다. 12~15층 하차 로비의 인증 게이트를 열 수 있다.',
       sprite: 'assets/objects/floor16/cafe-table-badge-states.png', stateBy: 'f16-badge',
       message: '식은 라테 옆에 사원증 한 장이 엎어져 있다: "조현아 · 기술본부 ARCHI 프로젝트 팀장". 저녁에 두고 퇴근한 모양이다.',
-      surface: 'card', image: 'assets/objects/id-cards/jo-hyeon-a.png',
+      surface: 'card', look: 'badge', image: 'assets/objects/id-cards/jo-hyeon-a.png',
       caption: '식은 라테 옆에 사원증 한 장이 엎어져 있다. 기술본부 ARCHI 프로젝트 팀장. 저녁에 두고 퇴근한 모양이다.',
       takenMessage: '테이블에는 식은 라테만 남아 있다. 조현아 팀장의 사원증은 이미 챙겼다.' },
     { file: 'food-coffee-bar', size: [512, 256], worldWidth: 296, x: 1330, name: '커피 바',

@@ -79,7 +79,9 @@ function refreshSanity() {
   if (sanityMeter.getAttribute('aria-valuenow') !== String(percent)) sanityMeter.setAttribute('aria-valuenow', String(percent));
   sanityFill.style.width = `${percent}%`;
   sanityHud.dataset.state = state;
-  const label = state === 'hallucinating' ? '환각' : state === 'low' ? '불안' : '안정';
+  // 상태 글자는 공포 단계를 따른다: 50% 미만 불안, 30% 미만 공포, 10% 미만 한계, 0% 환각.
+  const tier = sanityTierOf(sanity);
+  const label = state === 'hallucinating' ? '환각' : tier >= 5 ? '한계' : tier >= 3 ? '공포' : tier >= 1 ? '불안' : '안정';
   if (sanityState.textContent !== label) sanityState.textContent = label;
 }
 
@@ -506,8 +508,9 @@ function updateSanity(elapsed) {
   if (!paused) {
     // 정신 불안 임무: 첫 컷씬을 본 뒤 항불안제를 쓰기 전까지는 어디서든 천천히 줄어든다(추격 중에는 추격 감소량 적용).
     const anxiety = collectedItems.has('story-anxiety-seen') && !collectedItems.has('f16-antianxiety-used') && !collectedItems.has('b2-antianxiety-used');
-    // 항불안제를 쓴 뒤에는 다시 닳기 시작하는 조건(collectedItems의 'sanity-drain-resume', 아직 정해지지 않아 어디서도 켜지 않는다)이 생기기 전까지 정신력이 닳지 않는다.
-    const calm = collectedItems.has('f16-antianxiety-used') && !collectedItems.has('sanity-drain-resume');
+    // 항불안제 효과는 12층 모델 평가실 퍼즐을 풀 때까지(f12-evaluation-solved) 간다. 그 뒤로는 어둠·추격 규칙대로 닳고,
+    // B1 관제실 소등(cctv-event.js의 sanity-drain-resume)에서 한 번에 깎인다.
+    const calm = collectedItems.has('f16-antianxiety-used') && !collectedItems.has('sanity-drain-resume') && !collectedItems.has('f12-evaluation-solved');
     const rate = calm ? 0 : chasing ? -sanityChaseDrainPerSecond : anxiety ? -sanityAnxietyDrainPerSecond : exposure === 'dark' ? -sanityDarkDrainPerSecond : 0;
     // 쫓기는 동안의 감소는 10%에서 멈춘다(이미 10% 아래면 쫓겨서는 더 줄지 않는다).
     const lowest = chasing ? Math.min(sanity, sanityChaseFloor) : 0;

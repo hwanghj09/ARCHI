@@ -87,7 +87,7 @@ function openWirePanel(onSolved, mode = 'solar') {
   wireDrag = null;
   // 그림의 아래쪽 명판 한 줄(#wire-status)이 안내문과 진행 상황을 함께 보여준다 — 첫 연결부터는
   // attemptConnection()이 이 자리를 덮어쓴다.
-  wireStatus.textContent = elevator ? 'S→R→E 경로를 추적해 연결한 뒤 회로 검사. 공급 단자를 누르면 해제.' : '왼쪽 전선 끝을 당기거나 클릭해 같은 색 오른쪽 단자에 연결하자.';
+  wireStatus.textContent = elevator ? 'S→R→E로 연결 · 회로 검사 · 공급 단자를 누르면 해제' : '왼쪽 전선 끝을 당기거나 클릭해 같은 색 오른쪽 단자에 연결하자.';
   buildWireColumn(wireLeft, 'left', elevator ? WIRE_COLORS : shuffledWireColors());
   buildWireColumn(wireRight, 'right', elevator ? [...WIRE_COLORS].sort((a, b) =>
     EMERGENCY_CIRCUITS.find(c => c.color === a.id).target.localeCompare(EMERGENCY_CIRCUITS.find(c => c.color === b.id).target)) : shuffledWireColors());
@@ -103,6 +103,7 @@ function openWirePanel(onSolved, mode = 'solar') {
 function closeWirePanel() {
   if (wirePanel.hidden) return;
   wirePanel.hidden = true;
+  modalClosedAt = performance.now();
   wireDrag = null;
   wireOnSolved = null;
   setArmed(null);

@@ -15,7 +15,7 @@ let storyInspectPending = false; // 건너뛰어 대상 앞으로 옮긴 뒤, �
 // 아래 목록과 따로 둔다: 목록은 앞 장면을 봐야 다음이 나오는데, 정전 컷씬 없이 정전된 저장·테스트에서 뒤 장면을 막지 않게.
 const BLACKOUT_MONOLOGUE = { flag: 'story-blackout-seen',
   lines: ['…앞이 하나도 안 보이네.',
-    '일단 휴대폰(P) 플래시라도 켜야겠다.',
+    '일단 휴대폰 플래시(F)라도 켜야겠다.',
     '엘리베이터도 완전히 멈췄어. 건물 전체가 나간 건가?',
     '그러고 보니 옥상에 태양광 패널이 있다고 들었는데…'] };
 
@@ -33,14 +33,14 @@ const STORY_SCENES = [
     flag: 'story-robot-seen', delay: 2000, ready: () => collectedItems.has('story-anxiety-seen') && collectedItems.has('f16-antianxiety-used'),
     lines: ['휴.. 겨우 정신을 차렸네..',
       '그래서 경비 로봇이 왜 날 공격했던거지?',
-      '그 로봇은 ARCHI 개발 팀에서 만든 로봇이였나?',
+      '그 로봇은 ARCHI 개발 팀에서 만든 로봇이었나?',
       'ARCHI 개발 팀을 조사해보자.'],
   },
   { // 이상 행동 목표 도중 12~15층 게이트에 출입증을 태우고, 그 조사창을 닫은 직후.
     flag: 'story-badge-seen', delay: 300, ready: () => collectedItems.has('story-gate-tagged'),
-    lines: ['아 맞다 나 일용직이였지',
-      '일용직한테 야근시키는 이 @#$% 회사... 떄려치던가 해야지..',
-      '그러고보니 내 옆자리 사원의 직급이 팀장이였던거로 아는데..',
+    lines: ['아 맞다 나 일용직이었지',
+      '일용직한테 야근시키는 이 @#$% 회사... 때려치든가 해야지..',
+      '그러고보니 내 옆자리 사원의 직급이 팀장이었던 걸로 아는데..',
       '잠깐 빌리지 뭐'],
   },
   { // 16층 Café에서 조현아 팀장의 사원증(f16-badge)을 챙기고 조사가 끝난 1초 뒤.

@@ -18,3 +18,5 @@
 쓰는 법: 층 폴더에 `walls-layout.json`(`"modules": "../wall"`, 방마다 x·width·wall, 유리 구간은 `behind`)을 두고
 `python assets/background/wall/compose_floor.py assets/background/floorNN/walls-layout.json assets/background/floorNN/walls.png`.
 게임은 `backgroundImage: { src: 'assets/background/floorNN/walls.png', height: 752, top: 0 }`로 쓴다. 문은 벽에 넣지 않는다(assets/objects).
+기둥은 벽 윗선(y=96)부터 그리고 천장·천장 띠는 그 위로 이어진다. 이 규칙 전에 만든 복도 배경은
+`python3 -B assets/background/wall/trim_pilaster_ceiling.py`로 맞췄다(다시 돌려도 이미 고친 그림은 그대로 둔다).

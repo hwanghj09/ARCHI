@@ -1,8 +1,8 @@
 // 실제 소지품만 등록한다. collectedItems의 퍼즐 진행 플래그는 가방에 표시하지 않는다.
 // hint: 아직 챙기지 않은 물건이 어디 있는지 건물 안내 앱이 알려 주는 짧은 단서(전부 알려 주지는 않는다).
 const INVENTORY_ITEMS = {
-  'f17-badge': { name: '수호의 출입증', description: '늘 지니고 다니는 내 출입증. ARCHI · 정수호 · 개발팀.', image: 'assets/objects/id-cards/jeong-suho.png' },
-  'f16-badge': { name: '조현아 팀장 사원증', description: '16층 카페에서 챙긴 사원증. 12~15층의 인증 게이트에서 사용할 수 있다.', image: 'assets/objects/id-cards/jo-hyeon-a.png',
+  'f17-badge': { name: '수호의 출입증', description: '늘 지니고 다니는 내 출입증. ARCHI · 정수호 · 개발팀.', image: 'assets/objects/id-cards/jeong-suho.png', look: 'badge' },
+  'f16-badge': { name: '조현아 팀장 사원증', description: '16층 카페에서 챙긴 사원증. 12~15층의 인증 게이트에서 사용할 수 있다.', image: 'assets/objects/id-cards/jo-hyeon-a.png', look: 'badge',
     hint: '16층 Café에서 마지막 확인' },
   'f16-antianxiety': { name: '항불안제', description: '16층 CU 편의점 선반의 약품 칸에서 챙긴 항불안제. 먹으면 불안이 조금 가라앉을 것 같다.', image: 'assets/objects/items/antianxiety-v2.png',
     usedFlag: 'f16-antianxiety-used', use: { label: '사용하기', sanity: antianxietyRestore, animation: 'antianxiety' } },
@@ -207,7 +207,7 @@ function toggleInventory() {
     inventoryButton.focus();
     return;
   }
-  if (photoCaptureTime > 0 || itemUseTime > 0 || transitioning || selectingFloor || usingComputer || usingKeypad || usingControl || usingPhone || usingPowerPanel || usingInspection) return;
+  if (photoCaptureTime > 0 || itemUseTime > 0 || transitioning || usingComputer || usingKeypad || usingControl || usingPhone || usingPowerPanel || usingInspection) return;
   showInventoryList();
 }
 
@@ -226,7 +226,7 @@ function showInventoryList(focusItem) {
     button.addEventListener('click', () => {
       const item = INVENTORY_ITEMS[id];
       if (!item.image) return describe();
-      openInspection(item.name, item.description, item.sheet || { surface: 'card', image: item.image, caption: item.description });
+      openInspection(item.name, item.description, item.sheet || { surface: 'card', look: item.look, image: item.image, caption: item.description });
       inspectionPanel.dataset.returnTo = 'inventory';
       // 쓸 수 있는 물건(항불안제)은 카드 아래에 사용하기 버튼이 뜬다.
       if (item.use) {
@@ -250,8 +250,10 @@ inventoryButton.addEventListener('click', toggleInventory);
 function useInventoryItem(id) {
   const item = INVENTORY_ITEMS[id];
   if (!item?.use || !collectedItems.has(id) || collectedItems.has(item.usedFlag) || photoCaptureTime > 0 || itemUseTime > 0 ||
-      mainMenuActive || openingActive || blackoutSceneActive || playerCaught || hallucinationCaught || transitioning || selectingFloor) return;
-  if (item.use.animation && !startItemUseAnimation()) return;
+      mainMenuActive || openingActive || blackoutSceneActive || playerCaught || hallucinationCaught || transitioning) return;
+  // 엘리베이터 안(1인칭)에서는 수호가 보이지 않으니 먹는 동작 없이 바로 효과만 낸다.
+  const withAnimation = item.use.animation && !selectingFloor;
+  if (withAnimation && !startItemUseAnimation()) return;
   collectedItems.add(item.usedFlag);
   if (item.use.sanity || item.use.minSanity) {
     sanity = Math.max(item.use.minSanity ?? 0, Math.min(100, sanity + (item.use.sanity ?? 0)));
@@ -259,7 +261,7 @@ function useInventoryItem(id) {
   }
   playGameSound('item-use');
   refreshInventoryCount();
-  if (item.use.animation) closeInspection();
+  if (withAnimation) closeInspection();
   else showInventoryList();
 }
 

@@ -23,6 +23,7 @@ function closeKeypad() {
   if (!usingKeypad) return;
   const returnToPower = keypadTarget?.type === 'power';
   usingKeypad = false;
+  modalClosedAt = performance.now();
   keypadTarget = null;
   keypad.hidden = true;
   stage.inert = false;

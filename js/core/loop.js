@@ -63,7 +63,7 @@ function update() {
   }
   if (usingComputer || usingKeypad || usingControl || usingPowerPanel || usingInspection || !wirePanel.hidden) {
     updateElevators();
-    updatePhone(step);
+    if (!usingInspection) updatePhone(step); // 조사창을 읽는 동안에는 정신력처럼 플래시 배터리도 닳지 않는다
     if (usingPhone || phoneAwayTime > 0) animate(0, false, step);
     return;
   }

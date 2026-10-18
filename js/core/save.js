@@ -1,5 +1,7 @@
 // 단일 자동 저장 슬롯. 메뉴에서는 이전 저장을 덮어쓰지 않는다.
 const progressKey = 'archi.progress.v1';
+// TRUE END를 본 시각(b2-ending.js). 메인 메뉴의 클리어 표시에 쓴다.
+const clearedKey = 'archi.cleared';
 let restoringProgress = false;
 let progressSaveFailed = false;
 const savedNumber = (value, fallback, min, max) => Number.isFinite(value) ? Math.max(min, Math.min(max, value)) : fallback;

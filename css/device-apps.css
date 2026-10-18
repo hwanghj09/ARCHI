@@ -5,6 +5,10 @@
 .app-art[data-app-icon="calculator"] { background-position-x: 60%; }
 .app-art[data-app-icon="building"] { background-position-x: 80%; }
 .app-art[data-app-icon="flashlight"] { background-position-x: 100%; }
+/* 블로그(초록 공책)·파일 전송(파란 폴더와 화살표): 메모장·파일 탐색기와 구별되게 따로 만든 두 칸(assets/ui/apps/README.md). */
+.app-art:is([data-app-icon="blog"], [data-app-icon="transfer"]) { background-image: url('../assets/ui/apps/app-icons-extra.png'); background-size: 200% 200%; }
+.app-art[data-app-icon="blog"] { background-position-x: 0%; }
+.app-art[data-app-icon="transfer"] { background-position-x: 100%; }
 .device-calculator { width: min(100%, 360px); margin: 16px auto; padding: 16px; border-radius: 12px; background: #233246; color: #eef3f8; }
 [data-calculator-history] { display: block; min-height: 20px; overflow-wrap: anywhere; color: #b2c5d2; text-align: right; font: 12px/1.5 Arial, sans-serif; }
 .calculator-display { display: block; width: 100%; padding: 10px 2px 18px; overflow-wrap: anywhere; color: #f4f9fc; text-align: right; font: 32px/1.2 Arial, sans-serif; font-variant-numeric: tabular-nums; }

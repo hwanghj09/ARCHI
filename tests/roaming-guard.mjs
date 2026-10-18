@@ -131,6 +131,15 @@ try {
   assert(!picks.f1 && !picks.f17 && !picks.b2 && !picks[await page.evaluate(() => floorId(-2))], 'Never 1F, 17F or B2');
   assert(picks.f5 > 2.2 * picks.f6, `Lit floor is preferred: f5 ${picks.f5} vs f6 ${picks.f6}`);
 
+  // 전방 센서는 480px로 화면 절반(640px)보다 짧다: 화면에 보이는 로봇에게 바로 감지되지는 않는다.
+  const spotted = await page.evaluate(() => [520, 440].map(dx => {
+    Object.assign(roamer, { x: 3000, mode: 'patrol', facing: 1, stay: 99999, wait: 0 });
+    Body.setPosition(body, { x: 3000 + dx, y: floorY - 81 }); grounded = true;
+    updateRobot(roamer, 16);
+    return roamer.mode;
+  }));
+  assert.deepEqual(spotted, ['patrol', 'chase'], 'R-03 spots Suho within 480 px ahead');
+
   // 붙잡히면 '다시 시도' 창이 뜨고 그 층(5층) 엘리베이터 앞에서 다시 한다. R-03은 다른 층으로 가고, 1층 추격 기록은 남기지 않는다.
   await page.evaluate(() => {
     roamer.x = 3000; roamer.mode = 'patrol'; roamer.facing = 1; roamer.stay = 99999; roamer.wait = 0;
@@ -147,7 +156,7 @@ try {
   assert.equal(await page.evaluate(() => collectedItems.has('f1-chase-ended')), false);
 
   // 쫓기다 엘리베이터에 타면 R-03이 문 앞까지 와서 문을 억지로 연다. 연타로 닫으면 고른 층으로 간다.
-  const toCabin = () => page.evaluate(() => {
+  const toCabin = (floor = '3') => page.evaluate(floor => {
     performFloorChange('f5'); releaseInput();
     const door = currentDoors.find(entry => entry.type === 'elevator' && entry.carIndex === 0);
     const center = door.x + door.width / 2;
@@ -156,8 +165,8 @@ try {
     Object.assign(roamer, { x: center + 160, mode: 'chase', stay: 99999 });
     Body.setPosition(body, { x: center, y: floorY - 81 });
     showCabin(0);
-    document.querySelector('#cabin-floor-buttons button[data-floor="3"]').click();
-  });
+    if (floor) document.querySelector(`#cabin-floor-buttons button[data-floor="${floor}"]`).click();
+  }, floor);
   const cabinState = () => page.evaluate(() => {
     const art = document.querySelector('#cabin-pry-robot img');
     return { door: cabinScene.dataset.door, gauge: !document.getElementById('cabin-pry-gauge').hidden,
@@ -185,6 +194,15 @@ try {
   assert(await page.locator('#guard-capture').isVisible(), 'Losing the door fight gets Suho caught');
   assert.equal(await page.evaluate(() => selectingFloor), false);
   await page.locator('#guard-retry').click();
+
+  // 층을 안 고르고 문이 열린 채여도 같은 대결이 된다. 스페이스 연타로 이기면 문이 닫히고 칸은 그 층에 그대로 있다.
+  await toCabin(null);
+  await page.clock.runFor(800);
+  assert.equal((await cabinState()).door, 'struggle', 'R-03 pries the open door too');
+  for (let i = 0; i < 20 && (await cabinState()).door === 'struggle'; i++) { await page.keyboard.press('Space'); await page.clock.runFor(60); }
+  c = await cabinState();
+  assert.deepEqual([c.door, c.gauge, c.floor], ['closed', false, 5], 'Space mashing shuts the open door');
+  assert.equal(await page.locator('#guard-capture').isVisible(), false);
   assert.deepEqual(errors, []);
-  console.log('PASS: R-03 waits for blackout, self-powered corridor patrol on unlit floors, rooms on lit floors, elevator exit, lit-floor priority, capture, elevator door prying (win and lose).');
+  console.log('PASS: R-03 waits for blackout, self-powered corridor patrol on unlit floors, rooms on lit floors, elevator exit, lit-floor priority, capture, elevator door prying (win and lose, closing or open door).');
 } finally { await browser.close(); }
