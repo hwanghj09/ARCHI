@@ -45,6 +45,7 @@ const ROOFTOP = { id: 'rooftop', floor: 18, label: '옥상', header: 'RF · 옥�
       ] },
   ] };
 const floorById = new Map([...ALL_FLOORS, ROOFTOP, ...FLOOR1_ROOMS, ...FLOOR2_ROOMS, ...FLOOR3_ROOMS, ...FLOOR4_ROOMS, ...FLOOR5_ROOMS, ...FLOOR6_ROOMS, ...FLOOR7_ROOMS, ...FLOOR8_ROOMS, ...FLOOR9_ROOMS, ...FLOOR10_ROOMS, ...FLOOR11_ROOMS, ...FLOOR12_ROOMS, ...FLOOR13_ROOMS, ...FLOOR14_ROOMS, ...FLOOR15_ROOMS, ...FLOOR16_ROOMS, ...FLOOR17_ROOMS, ...B1_ROOMS, ...B2_ROOMS, ...RESTROOMS].map(entry => [entry.id, entry]));
+applyBrandNames([FLOOR_LAYOUTS, FLOORS, [...floorById.values()]]);
 // 충전 콘센트는 방 안의 PC 책상·카페 테이블 옆에만 둔다.
 for (const config of floorById.values()) {
   if (!config.interior) continue;

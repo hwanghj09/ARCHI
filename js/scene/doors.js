@@ -25,6 +25,7 @@ function addRoomDoor(door, parent = dynamicScene) {
     parent.insertBefore(bay, parent.querySelector('.floor-room'));
     door.bay = bay;
   }
+  if (door.style === 'shutter') addBrandSign(door.element, { x: 18, y: 4, width: 114, height: 16 });
   parent.append(door.element);
   return door;
 }
@@ -35,7 +36,7 @@ function setDoorOpen(door, open) {
   door.element.setAttribute('aria-label', `${door.name} 문 ${open ? '열림' : '닫힘'}`);
 }
 
-// 16층 CU 셔터 레버(소품의 shutterLever: 셔터가 올라가 있음을 나타내는 물건): 내려 있으면 레버를 아래로 당겨 올리고,
+// 16층 VU 셔터 레버(소품의 shutterLever: 셔터가 올라가 있음을 나타내는 물건): 내려 있으면 레버를 아래로 당겨 올리고,
 // 올라가 있으면 위로 밀어 내린다.
 function shutterLeverStep(lever) {
   return collectedItems.has(lever.shutterLever) ?

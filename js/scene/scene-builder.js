@@ -66,6 +66,7 @@ function addPaintedWalls(config, doors) {
 function buildDynamicScene(config) {
   const bodies = [];
   const doorList = [];
+  for (const sign of config.brandSigns || []) addBrandSign(dynamicScene, sign);
   // 벽만 그린 배경은 실제 문을 유지한다. 기존 문 포함 배경(화장실)은 기존 art 모드를 쓴다.
   dynamicScene.dataset.art = config.backgroundWallsOnly ? 'walls' : String(Boolean(config.backgroundImage));
   for (const art of [config.backgroundImage].flat().filter(Boolean)) {
@@ -125,6 +126,7 @@ function buildDynamicScene(config) {
     element.className = `solid movable ${movable.kind || ''}`.trim();
     element.setAttribute('role', 'img');
     element.setAttribute('aria-label', movable.name);
+    if (movable.kind === 'ramen-box') addCartonBrand(element);
     Object.assign(element.style, { left: `${movable.x}px`, top: `${floorY - movable.height}px`,
       width: `${movable.width}px`, height: `${movable.height}px` });
     dynamicScene.append(element);
@@ -217,7 +219,7 @@ function buildDynamicScene(config) {
         dynamicScene.append(wall);
       }
       // exitLock: 들어오면 등 뒤에서 잠기는 출구(7층 검증실). until 물건을 챙기면 그 자리에서 풀린다(lockedUntil).
-      // insideMessage: 안에서도 닫혀 있는 출구(16층 CU 셔터). 방 안의 레버(shutterLever)로 unlockedBy를 챙겨야 나간다.
+      // insideMessage: 안에서도 닫혀 있는 출구(16층 VU 셔터). 방 안의 레버(shutterLever)로 unlockedBy를 챙겨야 나간다.
       const lock = config.exitLock;
       const shut = Boolean(outside.insideMessage) && !collectedItems.has(outside.unlockedBy);
       doorList.push(addRoomDoor({ name: '복도', type: 'room', hint: 'E · 복도로 나가기', target: config.parent,
@@ -230,7 +232,7 @@ function buildDynamicScene(config) {
         outline: config.exitOutline && [config.exitOutline[0] + offset, ...config.exitOutline.slice(1)] }));
     }
     // 벽을 맞댄 방끼리의 연결문(links, 16층 주방 반입문): 복도를 거치지 않고 옆방에 있는 짝 연결문 앞으로 나온다. 다른 층의 방과도
-    // 이을 수 있고, 그때는 hint로 안내 문구를 바꾼다. locked인 연결문은 이쪽에서 열리지 않고 message만 보인다(16층 CU 쪽 반입문).
+    // 이을 수 있고, 그때는 hint로 안내 문구를 바꾼다. locked인 연결문은 이쪽에서 열리지 않고 message만 보인다(16층 VU 쪽 반입문).
     for (const link of config.links || []) {
       const next = floorById.get(link.target);
       doorList.push(addRoomDoor({ name: next.name, type: 'room', hint: link.hint ?? `E · ${next.name} 들어가기`, target: link.target,

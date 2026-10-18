@@ -16,7 +16,7 @@ function updateInteraction() {
       ...currentDoors.filter(door => !door.accessGate && !door.phoneCharger)]
       // hideWhenTaken 설비(16층 항불안제)는 챙기고 나면 사라지므로 더는 조사 대상이 아니다. 전력이 없는 층의 전자 장치도 빠진다(power.js).
       .filter(door => door !== returningRobot && !(door.hideWhenTaken && collectedItems.has(door.gives)) && !deviceUnpowered(door));
-    // standYs: 설비를 조사할 수 있는 발 높이가 여럿일 때(16층 선반: 바닥에서, 또는 진라면 박스 위에서) 쓴다.
+    // standYs: 설비를 조사할 수 있는 발 높이가 여럿일 때(16층 선반: 바닥에서, 또는 인라면 박스 위에서) 쓴다.
     nearbyDoor = candidates.find(door => grounded && [].concat(door.standYs ?? door.standY ?? floorY).some(y => Math.abs(body.bounds.max.y - y) < 2) &&
       Math.abs(body.position.x - door.x - door.width / 2) < door.width / 2 + 28) || null;
     for (const door of currentDoors) door.element.classList.toggle('near', door === nearbyDoor);
@@ -204,7 +204,7 @@ function interact() {
   if (nearbyDoor.type === 'room') {
     const { target, arrivalKey } = nearbyDoor;
     // 방 안에서 복도 문으로 나오면 그 방 id를 챙긴 것으로 친다: 안쪽 걸쇠로 잠긴 방(unlockedBy: 자기 방 id)은
-    // 한 번 안에서 열고 나오면 그 뒤로 복도에서도 열린다. 16층 CU 셔터는 안의 레버(shutterLever)로 따로 올리고 내린다.
+    // 한 번 안에서 열고 나오면 그 뒤로 복도에서도 열린다. 16층 VU 셔터는 안의 레버(shutterLever)로 따로 올리고 내린다.
     if (nearbyDoor.key === 'exit') collectedItems.add(dynamicFloorId);
     nearbyDoor.element.dataset.open = 'true';
     playGameSound('door');

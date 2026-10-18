@@ -41,6 +41,7 @@
     <!-- 게임 스크립트는 모두 일반 스크립트라 최상위 선언(전역)을 서로 함께 쓴다. 불러오는 순서가 곧 의존 순서다:
          설정·상태 → 층 데이터 → 엘리베이터·17층 고정 장면·물리 → 기능별 로직 → 입력 → main.js(첫 화면과 루프 시작). -->
     <script src="js/core/config.js" defer></script>
+    <script src="js/core/brands.js" defer></script>
     <script src="js/core/dom.js" defer></script>
     <script src="js/core/state.js" defer></script>
     <script src="js/audio/audio.js" defer></script>
@@ -724,7 +725,7 @@
       </div>
       <div class="computer-taskbar">
         <div class="computer-taskbar-apps">
-          <button id="computer-start-button" type="button" aria-label="시작" title="시작" aria-expanded="false" aria-controls="computer-start-menu"><span class="windows-mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span></button>
+          <button id="computer-start-button" type="button" aria-label="시작" title="시작" aria-expanded="false" aria-controls="computer-start-menu"><span class="desktop-mark" aria-hidden="true"></span></button>
           <div id="computer-taskbar-windows"></div>
         </div>
         <div class="computer-tray"><span class="computer-network" title="사내 네트워크">◉</span><time id="computer-clock"></time><button id="computer-exit" type="button" aria-label="컴퓨터 사용 종료" title="컴퓨터 사용 종료"><img src="assets/vendor/lucide/log-out.svg" alt="" /></button></div>

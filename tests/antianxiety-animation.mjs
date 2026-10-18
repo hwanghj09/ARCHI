@@ -74,7 +74,7 @@ const context = createContext({ console, Element: class {},
 context.engine.pairs.list.push({ isActive: true, bodyA: context.body, bodyB: {}, collision: { normal: { y: -1 } } });
 const load = path => runInContext(readFileSync(new URL(`../${path}`, import.meta.url), 'utf8'), context, { filename: path });
 const evaluate = source => runInContext(source, context);
-for (const path of ['js/core/config.js', 'js/core/state.js', 'js/player/player.js', 'js/input/input.js', 'js/input/keyboard.js', 'js/interaction/inventory.js', 'js/core/loop.js']) load(path);
+for (const path of ['js/core/config.js', 'js/core/brands.js', 'js/core/state.js', 'js/player/player.js', 'js/input/input.js', 'js/input/keyboard.js', 'js/interaction/inventory.js', 'js/core/loop.js']) load(path);
 evaluate("mainMenuActive = openingActive = false; usingInspection = true; grounded = true; sanity = 40; collectedItems.add('f16-antianxiety')");
 evaluate("useInventoryItem('f16-antianxiety')");
 assert.equal(evaluate('sanity'), 90);

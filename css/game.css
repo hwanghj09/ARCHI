@@ -141,7 +141,7 @@ body { margin: 0; overflow: hidden; background: #27292b; color: #eee; font: 14px
 #dynamic-scene[data-theme="lab"] .room-interior::before { border-color: #353c45; }
 #dynamic-scene[data-theme="lab"] .room-interior::after { background: repeating-linear-gradient(90deg, transparent 0 220px, #3a414b 220px 360px); }
 #dynamic-scene[data-theme="lab"] .room-interior.windowless { background: linear-gradient(#0b0c0f 0 44px, #2a2f36 44px 50px, transparent 50px), radial-gradient(circle, #0b0d10 0 1.6px, transparent 2px) 0 0 / 12px 12px, linear-gradient(#23272d, #1c1f24) !important; }
-/* 16층 편의시설: 식당 유리벽과 메뉴 라이트박스·진열창과 꺼진 간판(CU)·목재 루버(카페), 식당 양문·편의점 셔터·카페 문·주방 반입문. 방 안은 타일 벽(식당)·진열대 벽(CU) */
+/* 16층 편의시설: 식당 유리벽과 메뉴 라이트박스·진열창과 꺼진 간판(VU)·목재 루버(카페), 식당 양문·편의점 셔터·카페 문·주방 반입문. 방 안은 타일 벽(식당)·진열대 벽(VU) */
 #dynamic-scene[data-theme="food"] .room-interior { background: linear-gradient(#12100d 0 44px, #3a352b 44px 50px, #26231d 50px 420px, #312d25 420px 424px, #1f1c17 424px); }
 #dynamic-scene[data-theme="food"] .room-interior::before { border-color: #4d4536; }
 #dynamic-scene .floor-room.kitchen { background: linear-gradient(transparent 58%, #3b352a 58% 59.5%, transparent 59.5%), repeating-linear-gradient(90deg, #2a2721 0 38px, #24211c 38px 40px); }
@@ -158,13 +158,13 @@ body { margin: 0; overflow: hidden; background: #27292b; color: #eee; font: 14px
 .room-door.cafe { border-color: #6b4f36; background: radial-gradient(circle at 16% 55%, #c9a877 0 4px, transparent 5px), linear-gradient(105deg, #2c3438 0 30%, #20272a 30%); box-shadow: inset 0 0 0 8px #4a3524; }
 .room-door.backdoor { border-color: #5d584c; background: linear-gradient(transparent 82%, #6c6556 82%), linear-gradient(90deg, transparent 80%, #a39c8a 80% 84%, transparent 84%), linear-gradient(#3b3830, #2c2a24); box-shadow: inset 0 0 0 4px #1b1914; }
 .room-door.backdoor::before { content: '반입문'; position: absolute; top: -28px; left: 50%; transform: translateX(-50%); padding: 1px 8px; border: 2px solid #6a604c; background: #16130e; color: #e2cf9a; font: bold 12px Arial, sans-serif; white-space: nowrap; }
-/* 16층은 용도별 문 스프라이트를 복도와 방 안쪽에 함께 쓴다. CU 시트: 왼쪽 잠김 / 오른쪽 해제. */
+/* 16층은 용도별 문 스프라이트를 복도와 방 안쪽에 함께 쓴다. VU 시트: 왼쪽 잠김 / 오른쪽 해제. */
 #dynamic-scene[data-theme="food"] .room-door:is(.cafeteria, .shutter, .metal, .cafe, .backdoor) { border: 0; box-shadow: none; background-color: #131618; background-size: 100% 100%; background-repeat: no-repeat; background-position: 0 0; image-rendering: pixelated; }
 #dynamic-scene[data-theme="food"] .room-door.cafeteria { background-image: url('../assets/objects/floor16/cafeteria-door.png'); }
 #dynamic-scene[data-theme="food"] .room-door.shutter { background-image: url('../assets/objects/floor16/cu-shutter-states.png'); background-size: 200% 100%; }
 #dynamic-scene[data-theme="food"] .room-door.shutter[data-unlocked="true"] { background-position: 100% 0; }
 #dynamic-scene[data-theme="food"] .room-door.shutter::before { content: none; }
-/* 안의 레버로 움직이는 CU 셔터(toggleShutter): 열린 칸 위에 닫힌 칸의 셔터 판만 얹어 약 1초 동안 덜컹거리며 말아 올리고
+/* 안의 레버로 움직이는 VU 셔터(toggleShutter): 열린 칸 위에 닫힌 칸의 셔터 판만 얹어 약 1초 동안 덜컹거리며 말아 올리고
    (data-rolling="up"), 내릴 때는 같은 움직임을 거꾸로 돌린다("down"). 셔터 소리의 끝(쿵)과 맞춘다. 판은 위로 밀려
    올라가고(translateY), 위쪽 끝은 셔터 통 아래(문 높이 15%)에서 잘려(clip-path) 통 속으로 감긴다. */
 #dynamic-scene[data-theme="food"] .room-door.shutter[data-rolling]::after { content: ''; position: absolute; inset: 0; background: url('../assets/objects/floor16/cu-shutter-states.png') 0 0 / 200% 100% no-repeat; image-rendering: pixelated; animation: cu-shutter-raise .9s linear both; }
@@ -548,10 +548,18 @@ body { margin: 0; overflow: hidden; background: #27292b; color: #eee; font: 14px
 #dynamic-scene .fixture.art-spot { border: 0; background: none; box-shadow: none; }
 #dynamic-scene .fixture.pill-item { background: url(../assets/objects/items/antianxiety-v2.png) center / contain no-repeat; image-rendering: pixelated; filter: drop-shadow(0 0 6px #7fd0ff99); }
 #dynamic-scene .fixture[hidden] { display: none; }
-/* 16F CU 진라면 박스(movable ramen-box, 밀 수 있는 정적 충돌체): 바닥에 붙어 보이도록 아래에 접지 그림자를 깔고, 어두운 장면에 맞게 살짝 눌러 준다. */
+/* 16F VU 인라면 박스(movable ramen-box, 밀 수 있는 정적 충돌체): 바닥에 붙어 보이도록 아래에 접지 그림자를 깔고, 어두운 장면에 맞게 살짝 눌러 준다. */
 #dynamic-scene .solid.movable.ramen-box { filter: brightness(.88) saturate(.92); }
 #dynamic-scene .solid.movable.ramen-box::before { content: ''; position: absolute; left: -5%; bottom: -5px; width: 110%; height: 22%; border-radius: 50%; background: radial-gradient(ellipse at center, #000000b3 0, #0000006b 55%, transparent 74%); filter: blur(1px); pointer-events: none; }
-#dynamic-scene .solid.movable.ramen-box::after { content: ''; position: absolute; inset: 0; background: url(../assets/objects/floor16/ramen-box.png) 0 0 / 100% 100% no-repeat; pointer-events: none; }
+#dynamic-scene .carton-art { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+.carton-label { position: absolute; z-index: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #930f29; font-family: 'Malgun Gothic', sans-serif; font-weight: 900; line-height: 1.1; white-space: nowrap; pointer-events: none; }
+.carton-label small { font: bold 7px Arial, sans-serif; letter-spacing: .5px; margin-top: 5px; }
+.carton-label-front { left: 5%; top: 37%; width: 61%; height: 36%; transform: skewY(5deg); }
+.carton-label-side { left: 73%; top: 49%; width: 24%; height: 28%; transform: skewY(-20deg); }
+.carton-label-side small { font-size: 5px; }
+.brand-sign { position: absolute; z-index: 2; display: flex; align-items: center; justify-content: center; gap: 8px; color: #d3d2c3; font: 900 28px Arial, 'Malgun Gothic', sans-serif; white-space: nowrap; pointer-events: none; }
+.brand-sign img { height: 75%; width: auto; image-rendering: pixelated; }
+#world[data-background-lights="off"] .brand-sign { filter: brightness(.42); }
 /* walls-v3 흰색 키트 복도(2~6·8~11·13~16층, archi-floor-walls): 이름표는 천장 띠(y=48..96) 바로 아래, 화장실 이름표는 문 위 가운데,
    화장실 문은 16층 화장실 문 그림. 흰 벽에 붙는 안내판(wall-notice)은 짙은 판에 글줄. */
 #dynamic-scene:is([data-theme="concert"], [data-theme="gym"], [data-theme="rnd"], [data-theme="archive"], [data-theme="oncall"], [data-theme="qa"], [data-theme="business"], [data-theme="finance"])[data-art="walls"] .floor-room:is(.painted, .restroom) .floor-room-sign { top: -22px; }
