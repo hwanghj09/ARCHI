@@ -131,7 +131,7 @@ try {
   assert(await pc.isHidden(), 'Computer cannot be used while airborne');
   await page.clock.runFor(1200);
   await page.setViewportSize({ width: 390, height: 844 });
-  await page.getByRole('button', { name: '상호작용', exact: true }).click();
+  await page.keyboard.press('e'); // 화면 E 버튼은 HUD 개편으로 숨겨졌다
   await finishSceneTransition(page);
   await openApp(page, 'files');
   await page.screenshot({ path: '.local/computer-company-files-mobile.png' });
@@ -196,9 +196,11 @@ try {
     await finishSceneTransition(powerPage);
     assert(await desktop.isHidden());
   };
-  const assertBlocked = async message => {
+  // 조명도 없는 층에서는 전자 장치가 힌트 없이 꺼져 있고(power.js deviceUnpowered), 조명만 있으면 '전원 없음'을 보여 준다.
+  const assertBlocked = async (message, hint = null) => {
     await powerPage.clock.runFor(50);
-    assert.equal(await hintText(), 'E · 전원 없음', `${message}: hint shows no power`);
+    if (hint) assert.equal(await hintText(), hint, `${message}: hint shows no power`);
+    else assert(await powerPage.locator('#interaction-hint').isHidden(), `${message}: the unlit computer shows no hint`);
     await powerPage.keyboard.press('e');
     assert.equal(await powerPage.locator('#room-transition').getAttribute('data-phase'), 'idle', `${message}: no fade starts`);
     await powerPage.clock.runFor(800);
@@ -225,7 +227,7 @@ try {
   await powerPage.evaluate(() => { openPowerPanel(); powerLever.click(); });
   await powerPage.locator('#power-floor-grid [data-floor="17"]').click();
   await powerPage.keyboard.press('Escape');
-  await assertBlocked('Solar lights do not power the computer');
+  await assertBlocked('Solar lights do not power the computer', 'E · 전원 없음');
   await powerPage.evaluate(() => { collectedItems.add('f17-emergency-linked'); updatePowerState(); });
   assert.equal(await monitor.getAttribute('data-power'), 'off', 'Restored power does not boot the computer by itself');
   await powerPage.clock.runFor(50);

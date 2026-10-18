@@ -19,7 +19,7 @@ try {
   await page.locator('#map-window').waitFor({ state: 'visible' });
   const panel = await page.locator('#map-window').boundingBox();
   assert(Math.abs(panel.x + panel.width / 2 - 640) < 2 && Math.abs(panel.y + panel.height / 2 - 360) < 2, 'The map sits in the center');
-  assert(panel.width <= 640, 'The map window is compact');
+  assert(panel.width <= 960, 'The map window is compact'); // HUD 크기 조정으로 1.5배(최대 960px)
   const cover = await page.evaluate(() => document.elementFromPoint(20, 400)?.closest('#map-window') ?? null);
   assert.equal(cover, null, 'The rest of the screen is not covered by the map window');
   assert.equal(await page.locator('#map-view .map-player').count(), 1);

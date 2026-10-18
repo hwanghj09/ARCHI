@@ -119,7 +119,7 @@ try {
   await hold('a', 12000);
   near((await state()).x, 52);
   await hold('d', (officeExit.x + officeExit.width / 2 - 52) / 200 * 1000);
-  await page.locator('#interact').click();
+  await page.keyboard.press('e'); // 화면 E 버튼은 HUD 개편으로 숨겨졌다
   await transition('corridor');
   near((await state()).x, entrance.x);
   await page.setViewportSize({ width: 1280, height: 720 });
