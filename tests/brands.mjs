@@ -19,7 +19,7 @@ assert.equal(run('floor.image'), 'assets/cu-shutter-states.png');
 run(`var nodes = []; var document = { createElement: tag => ({ tag, style: {}, children: [], setAttribute() {}, append(...children) { this.children.push(...children); } }) }; var Image = function() {}; var parent = { append(node) { nodes.push(node); } }; BRAND_NAMES.store = '<상점>'; BRAND_NAMES.ramen = '<라면>'; addBrandSign(parent, {x:1,y:2,width:150,height:40}); addCartonBrand(parent);`);
 assert.equal(run('nodes[0].children[1].textContent'), '<상점>');
 assert.equal(run('nodes[2].textContent'), '<라면>');
-assert.equal(run('nodes[3].textContent'), '<라면>');
+assert.equal(run('nodes.length'), 3);
 console.log('Brand configuration: custom names, literal text, shared/cyclic data and stable save IDs passed.');
 
 const { chromium } = await import('playwright');
@@ -41,8 +41,9 @@ try {
   });
   const box = page.locator('.ramen-box');
   assert.deepEqual(await box.evaluate(el => [el.style.width, el.style.height, el.getAttribute('aria-label')]), ['186px', '117px', '인라면 박스']);
-  assert.equal(await box.locator('.carton-label').count(), 2);
+  assert.equal(await box.locator('.carton-label').count(), 1);
   assert.match(await box.locator('.carton-label-front').textContent(), /^인라면IN RAMEN$/);
+  assert.equal(await box.locator('.carton-label-front').evaluate(el => getComputedStyle(el).transform), 'none', 'Side-view lettering stays level');
   assert(await box.locator('.carton-art').evaluate(async img => { await img.decode(); return img.naturalWidth === 568 && img.naturalHeight === 357; }));
   assert.equal(await page.locator('#dynamic-scene > .brand-sign span').textContent(), 'VU');
   assert.equal(await page.locator('.room-door.shutter .brand-sign span').textContent(), 'VU');

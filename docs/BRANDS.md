@@ -8,7 +8,7 @@
 | `databaseCompany` | ARCHI Data | 회사명·층별 안내 |
 | `databaseProduct` | ARCHI DB | DB 제품명 |
 | `store` | VU | 편의점 간판·영수증·설명 |
-| `ramen` | 인라면 | 밀기 상자 앞·옆면·아이템 설명 |
+| `ramen` | 인라면 | 밀기 상자 측면·아이템 설명 |
 | `ramenEnglish` | IN RAMEN | 상자의 영문 표기 |
 
 예: `store: '우리상점'`, `ramen: '별라면'`으로 바꿀 수 있습니다. 간판과 상자의 글자는 그림과 분리되어 있어 다시 그릴 필요가 없습니다. 작은 간판에서 읽기 쉽도록 짧은 이름을 권장합니다.

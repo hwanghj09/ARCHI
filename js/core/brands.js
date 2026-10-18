@@ -53,14 +53,12 @@ function addCartonBrand(parent) {
   image.src = BRAND_ART.ramenBox;
   image.alt = '';
   parent.append(image);
-  for (const side of ['front', 'side']) {
-    const label = document.createElement('span');
-    label.className = `carton-label carton-label-${side}`;
-    label.style.fontSize = `${Math.min(side === 'front' ? 24 : 15, (side === 'front' ? 110 : 43) / Math.max(3, [...BRAND_NAMES.ramen].length))}px`;
-    label.textContent = BRAND_NAMES.ramen;
-    const english = document.createElement('small');
-    english.textContent = BRAND_NAMES.ramenEnglish;
-    label.append(english);
-    parent.append(label);
-  }
+  const label = document.createElement('span');
+  label.className = 'carton-label carton-label-front';
+  label.style.fontSize = `${Math.min(28, 140 / Math.max(3, [...BRAND_NAMES.ramen].length))}px`;
+  label.textContent = BRAND_NAMES.ramen;
+  const english = document.createElement('small');
+  english.textContent = BRAND_NAMES.ramenEnglish;
+  label.append(english);
+  parent.append(label);
 }
