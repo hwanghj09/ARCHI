@@ -28,12 +28,14 @@ try {
   const state = () => page.evaluate(() => ({ held: sprite.dataset.phoneHeld, state: sprite.dataset.state,
     light: phoneLightOn, open: usingPhone, inert: stage.inert, x: body.position.x }));
   await page.keyboard.press('p');
-  assert((await state()).open && (await state()).inert);
+  // 휴대폰을 켜도 게임은 멈추지 않는다(d661332): 뒤 화면을 막지 않고 이동은 그대로 된다.
+  assert((await state()).open && !(await state()).inert);
   assert.equal(await page.locator('#phone-stow').count(), 0);
   assert(!/들고 이동|휴대폰 넣기/.test(await page.locator('#phone').textContent()));
   const before = (await state()).x;
   await page.keyboard.down('d'); await page.clock.runFor(300); await page.keyboard.up('d');
-  assert.equal((await state()).x, before, 'Phone controls do not move the player while the world continues');
+  assert((await state()).x > before, 'The player keeps moving with the phone open');
+  assert((await state()).open);
   await page.keyboard.press('Tab');
   assert.equal(await page.evaluate(() => document.activeElement.dataset.phoneApp), 'notes');
   await page.keyboard.press('Shift+Tab');
@@ -82,7 +84,8 @@ try {
   assert.equal(await page.evaluate(() => document.activeElement.id), 'phone-close', 'Empty battery still leaves a keyboard exit');
   await page.keyboard.press('Enter'); assert.equal((await state()).open, false);
   await page.evaluate(() => {
-    triggerBuildingBlackout(); solarEnabled = true; solarPoweredFloors = [1]; performFloorChange('f1');
+    // 로봇은 태양광 조명이 아니라 17층 UPS 회선(f17-emergency-linked)으로 움직인다(floorHasPower).
+    triggerBuildingBlackout(); collectedItems.add('f17-emergency-linked'); solarEnabled = true; solarPoweredFloors = [1]; performFloorChange('f1');
     Object.assign(guardPatrol, { x: 3000, facing: 1, mode: 'patrol', wait: 0, lostTime: 0, captureTime: 0 });
     Body.setPosition(body, { x: 3210, y: floorY - 81 }); Body.setVelocity(body, { x: 0, y: 0 });
     grounded = true; phoneBattery = 100; refreshPhone();

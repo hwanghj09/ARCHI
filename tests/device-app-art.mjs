@@ -43,7 +43,8 @@ try {
 
   const errors = [];
   page.on('pageerror', error => errors.push(error.message));
-  page.on('requestfailed', request => errors.push(request.url()));
+  // 미리 불러오는 정신력 음악(wav)은 Chromium이 중간에 끊을 수 있다(ERR_ABORTED). computer.mjs와 같이 실제 실패만 센다.
+  page.on('requestfailed', request => { if (request.failure()?.errorText !== 'net::ERR_ABORTED') errors.push(request.url()); });
   await page.clock.install({ time: new Date('2026-10-04T00:00:00Z') });
   await page.goto(new URL('../index.html', import.meta.url).href);
   await page.locator('#menu-start').click();

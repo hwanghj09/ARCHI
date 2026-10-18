@@ -41,7 +41,7 @@ try {
       assert(line.fits, `${name}: the full text stays inside the paper`);
     }
     await page.screenshot({ path: `.local/power-notice-${name}.png` });
-    if (name === 'desktop') await page.keyboard.press('e'); else await page.locator('#interact').tap();
+    await page.keyboard.press('e'); // 화면의 E 버튼(#interact)은 HUD 개편으로 숨겨졌다
     assert(await page.locator('#inspection-sheet').isVisible());
     assert.match(await page.locator('#inspection-sheet').textContent(), /비상 전원 안내/);
     assert.match(await page.locator('#inspection-sheet').textContent(), /비상 발전기와 UPS/);

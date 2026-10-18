@@ -26,8 +26,7 @@ try {
       ['left', 'top', 'width', 'height'].map(key => parseFloat(element.style[key]))), [1580, 273, 135, 159],
     'The board outline follows the painted frame at desktop and mobile scales');
     assert(await page.locator('#interaction-outline').isVisible());
-    if (width === 390) await page.locator('#interact').tap();
-    else await page.keyboard.press('e');
+    await page.keyboard.press('e'); // 화면의 E 버튼(#interact)은 HUD 개편으로 숨겨졌다
     assert.equal(await page.locator('#inspection').getAttribute('data-surface'), 'corkboard');
     assert.equal(await page.locator('#inspection-sheet .writing-note').count(), 6);
     assert.match(await page.locator('#inspection-sheet .writing-note').nth(3).textContent(), /태양광.*1997/s);

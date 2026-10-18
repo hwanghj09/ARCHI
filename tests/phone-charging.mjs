@@ -135,33 +135,33 @@ try {
   await page.keyboard.press('e'); assert.equal((await state()).dock, null);
   await page.clock.runFor(1100); await page.keyboard.press('p'); await page.keyboard.press('e');
   assert.equal((await state()).dock, null); await page.keyboard.press('Escape');
-  // Mobile docking, blocked device access and early retrieval.
+  // Mobile docking, blocked device access and early retrieval. 화면의 E 버튼(#interact)은 HUD 개편으로 숨겨져 E 키로 상호작용한다.
   await page.setViewportSize({ width: 390, height: 844 }); await place(at, 10);
-  await page.locator('#interact').tap(); await page.locator('#phone-button').tap();
+  await page.keyboard.press('e'); await page.locator('#phone-button').tap();
   assert.equal((await state()).modal, false); await page.clock.runFor(2100);
   assert.equal((await state()).battery, 14);
   await page.screenshot({ path: '.local/phone-charger-mobile.png' });
-  await page.locator('#interact').tap(); assert.equal((await state()).dock, null);
+  await page.keyboard.press('e'); assert.equal((await state()).dock, null);
   await page.locator('#phone-button').tap(); assert.equal((await state()).modal, true);
   assert.equal(await page.locator('#phone-battery').textContent(), '14%'); await page.keyboard.press('Escape');
-  await place(at, 100); await page.locator('#interact').tap(); assert.equal((await state()).dock, null);
+  await place(at, 100); await page.keyboard.press('e'); assert.equal((await state()).dock, null);
   // Losing power before completion pauses progress and still allows partial pickup.
-  await place(at, 10); await page.locator('#interact').tap(); await page.clock.runFor(2000);
+  await place(at, 10); await page.keyboard.press('e'); await page.clock.runFor(2000);
   await page.evaluate(() => { collectedItems.delete("f17-emergency-linked"); solarEnabled = false; solarPoweredFloors = []; updatePowerState(); });
   const partial = (await state()).battery; await page.clock.runFor(5000);
-  assert.equal((await state()).battery, partial); await page.locator('#interact').tap();
+  assert.equal((await state()).battery, partial); await page.keyboard.press('e');
   assert.equal((await state()).dock, null); assert.equal((await state()).battery, partial);
   // A different room on the same floor cannot hand back the docked phone.
   await page.evaluate(() => { collectedItems.add("f17-emergency-linked"); solarEnabled = true; solarPoweredFloors = [17]; performFloorChange('f17'); performRoomChange(); });
   const officeAt = await charger();
-  await place(officeAt, 10); await page.locator('#interact').tap();
+  await place(officeAt, 10); await page.keyboard.press('e');
   assert(await page.evaluate(() => !isPhoneDock({ ...officeCharger, scene: 'f17-manager' })), 'Room identity matters even when outlet coordinates match');
   await page.evaluate(() => performFloorChange('f17-manager', 0, 'exit'));
-  await place(await charger()); await page.locator('#interact').tap();
+  await place(await charger()); await page.keyboard.press('e');
   assert.equal((await state()).dock.scene, 'office');
   assert.match(await page.locator('#interaction-hint').textContent(), /개발팀 사무실/);
   await page.evaluate(() => { performFloorChange('f17'); performRoomChange(); });
-  await place(officeAt); await page.locator('#interact').tap(); assert.equal((await state()).dock, null);
+  await place(officeAt); await page.keyboard.press('e'); assert.equal((await state()).dock, null);
   assert.deepEqual(errors, []);
   console.log('PASS: indoor desk/cafe outlets, mains/emergency/solar power, deposit/pickup, 2%/second, power loss/resume, flashlight/device lock, capacity, interaction guards, mobile, room identity and scene rebuild.');
 } finally { await browser.close(); }
