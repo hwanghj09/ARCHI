@@ -35,7 +35,7 @@ try {
     await page.clock.runFor(34);
   };
   assert(await page.locator('#idle-sprite').evaluate(el => el.naturalWidth === 1254 && el.naturalHeight === 1254));
-  assert(await page.locator('#walk-sheet').evaluate(el => el.naturalWidth === 3072 && el.naturalHeight === 256));
+  assert(await page.locator('#walk-sheet').evaluate(el => el.naturalWidth === 2048 && el.naturalHeight === 256));
   await page.locator('.action-sheet').evaluateAll(images => Promise.all(images.map(image => image.decode())));
   const actionFrame = async (sheet, frame) => {
     assert(await page.locator(sheet).isVisible());
@@ -144,13 +144,13 @@ try {
   });
   await page.keyboard.down('d');
   await page.clock.runFor(1100);
-  assert.deepEqual((await page.evaluate(() => [...window.walkFrames])).sort((a, b) => a - b), Array.from({ length: 12 }, (_, i) => i));
+  assert.deepEqual((await page.evaluate(() => [...window.walkFrames])).sort((a, b) => a - b), Array.from({ length: 8 }, (_, i) => i));
   assert(await page.locator('#walk-sheet').evaluate(el => {
     const frame = Number(el.parentElement.dataset.frame);
     const cellWidth = el.parentElement.clientWidth;
     return Math.abs(new DOMMatrix(getComputedStyle(el).transform).m41 + frame * cellWidth) < .01 &&
-      el.clientWidth === cellWidth * 12;
-  }), 'The twelve-frame sheet must display exactly one aligned cell');
+      el.clientWidth === cellWidth * 8;
+  }), 'The eight-frame sheet must display exactly one aligned cell');
   assert(await page.locator('#walk-sheet').isVisible());
   assert.equal(await page.locator('#idle-sprite').isVisible(), false);
   await page.evaluate(() => window.dispatchEvent(new Event('blur')));

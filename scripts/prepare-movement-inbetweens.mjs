@@ -4,18 +4,10 @@ import sharp from 'sharp';
 
 const root = fileURLToPath(new URL('../assets/player/', import.meta.url));
 const specs = [
-  { source: 'walk', base: 'walk-six', output: 'walk-twelve', columns: 3, scale: .48,
-    soles: [239, 239, 239, 239, 239, 239] },
   { source: 'run', base: 'run-eight', output: 'run-sixteen', columns: 4, scale: .575,
     soles: [239, 239, 226, 236, 239, 239, 222, 236] },
-  ...['off', 'on'].flatMap(light => [
-    { source: `phone-walk-${light}`, anchor: 'phone-walk-off', base: `phone-walk-${light}`,
-      output: `phone-walk-twelve-${light}`, columns: 3, scale: .47,
-      soles: [237, 237, 237, 237, 237, 237] },
-    { source: `phone-run-${light}`, anchor: 'phone-run-off', base: `phone-run-${light}`,
-      output: `phone-run-sixteen-${light}`, columns: 4, scale: .55,
-      soles: [237, 237, 225, 230, 237, 237, 225, 230] },
-  ]),
+  { source: 'phone-run-off', base: 'phone-run-off', output: 'phone-run-sixteen-off', columns: 4, scale: .55,
+    soles: [237, 237, 225, 230, 237, 237, 225, 230] },
 ];
 
 function bounds(data, width, height) {
@@ -32,6 +24,63 @@ function bounds(data, width, height) {
   }
   return { top, bottom, headX: sum / count };
 }
+
+// Redraw the whole walk cycle together instead of alternating incompatible artwork.
+const walkPoses = [
+  ['walk-keys', 3, 2, 0], ['walk-keys', 3, 2, 1], ['walk-keys', 3, 2, 2], ['walk-up', 2, 1, 1],
+  ['walk-keys', 3, 2, 3], ['walk-keys', 3, 2, 4], ['walk-keys', 3, 2, 5], ['walk-up', 2, 1, 0],
+];
+for (const variant of ['', '-off', '-on']) {
+  const output = Buffer.alloc(2048 * 256 * 4);
+  for (let i = 0; i < 8; i++) {
+    const [name, columns, rows, index] = variant ? [`phone-walk${variant}`, 4, 2, i] : walkPoses[i];
+    const input = `${root}movement-inbetweens-source/${name}.png`;
+    const anchor = variant ? `${root}movement-inbetweens-source/phone-walk-off.png` : input;
+    const metadata = await sharp(input).metadata(), alignmentMetadata = await sharp(anchor).metadata();
+    assert(metadata.hasAlpha && metadata.width === alignmentMetadata.width && metadata.height === alignmentMetadata.height);
+    const left = Math.floor(index % columns * metadata.width / columns);
+    const top = Math.floor(Math.floor(index / columns) * metadata.height / rows);
+    const width = Math.floor((index % columns + 1) * metadata.width / columns) - left;
+    const height = Math.floor((Math.floor(index / columns) + 1) * metadata.height / rows) - top;
+    const rect = { left, top, width, height };
+    const data = await sharp(input).extract(rect).ensureAlpha().raw().toBuffer();
+    const alignment = await sharp(anchor).extract(rect).ensureAlpha().raw().toBuffer();
+    const measured = bounds(alignment, width, height);
+    // Contact, compression, passing, toe-off; repeat with the opposite support leg.
+    const scale = [220, 219, 220, 222][i % 4] / (measured.bottom - measured.top);
+    for (let p = 0; p < data.length; p += 4) {
+      if (data[p + 3] < 128) data.fill(0, p, p + 4);
+      else data[p + 3] = 255;
+    }
+    const scaled = await sharp(data, { raw: { width, height, channels: 4 } })
+      .resize(Math.round(width * scale), Math.round(height * scale), { kernel: 'nearest' })
+      .raw().toBuffer({ resolveWithObject: true });
+    const xOffset = Math.round(135 - measured.headX * scaled.info.width / width);
+    const yOffset = (variant ? 237 : 239) - Math.round(measured.bottom * scaled.info.height / height);
+    for (let y = 0; y < scaled.info.height; y++) for (let x = 0; x < scaled.info.width; x++) {
+      const from = (y * scaled.info.width + x) * 4;
+      if (!scaled.data[from + 3]) continue;
+      const dx = x + xOffset, dy = y + yOffset;
+      assert(dx >= 6 && dx < 250 && dy >= 6 && dy < 250, `${name}/${i}: clipped character`);
+      scaled.data.copy(output, (dy * 2048 + i * 256 + dx) * 4, from, from + 4);
+    }
+  }
+  const name = variant ? `phone-walk-eight${variant}` : 'walk-eight';
+  await sharp(output, { raw: { width: 2048, height: 256, channels: 4 } }).png()
+    .toFile(`${root}jeong-suho-${name}.png`);
+  console.log(`${name}: eight consistent walking phases.`);
+}
+
+// Flashlight ON has no running cycle; retain only its original jump/fall artwork.
+const litOriginal = await sharp(`${root}jeong-suho-phone-run-on.png`).ensureAlpha().raw()
+  .toBuffer({ resolveWithObject: true });
+const airborne = Buffer.alloc(512 * 256 * 4);
+for (const [index, source] of [2, 6].entries()) for (let y = 0; y < 256; y++) {
+  const from = (y * litOriginal.info.width + source * 256) * 4;
+  litOriginal.data.copy(airborne, (y * 512 + index * 256) * 4, from, from + 256 * 4);
+}
+await sharp(airborne, { raw: { width: 512, height: 256, channels: 4 } })
+  .png().toFile(`${root}jeong-suho-phone-jump-on.png`);
 
 for (const spec of specs) {
   const count = spec.columns * 2;

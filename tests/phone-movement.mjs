@@ -17,9 +17,9 @@ try {
   await page.clock.pauseAt(new Date('2026-10-03T00:01:00Z'));
   await page.clock.runFor(100);
   for (const motion of ['walk', 'run']) {
-    const frames = motion === 'walk' ? 12 : 16;
-    const cycle = motion === 'walk' ? 'twelve' : 'sixteen';
-    for (const light of ['off', 'on']) {
+    const frames = motion === 'walk' ? 8 : 16;
+    const cycle = motion === 'walk' ? 'eight' : 'sixteen';
+    for (const light of motion === 'walk' ? ['off', 'on'] : ['off']) {
       const png = await readFile(`assets/player/jeong-suho-phone-${motion}-${cycle}-${light}.png`);
       const cells = await page.evaluate(async ({ src, frames, motion }) => {
         const img = new Image(); img.src = src; await img.decode();
@@ -83,8 +83,11 @@ try {
       await active().evaluate(img => img.decode());
       assert.equal(await active().count(), 1, 'Exactly one character sheet is displayed');
       assert.equal((await state()).state, activeMotion, 'Light ON forces walking even with Shift held');
+      if (light === 'on') assert.equal(await page.evaluate(() => {
+        animate(1, true); return sprite.dataset.state;
+      }), 'walk', 'Animation callers cannot force a flashlight-on run');
       assert.equal(await active().getAttribute('id'), `${light === 'on' ? 'phone-' : ''}${activeMotion}-sheet`);
-      if (light === 'on') assert((await active().getAttribute('src')).endsWith(`${activeMotion}-twelve-on.png`));
+      if (light === 'on') assert((await active().getAttribute('src')).endsWith(`${activeMotion}-eight-on.png`));
       assert(await page.evaluate(running => Math.abs(Math.abs(body.velocity.x) - (running ? runSpeed : speed) / 60) < .01,
         activeMotion === 'run'), 'Physics speed matches the allowed gait');
       assert.equal(await page.locator('#world').getAttribute('data-flashlight'), light);
@@ -111,7 +114,15 @@ try {
   await page.clock.runFor(150);
   assert.equal((await state()).state, 'jump');
   assert.equal(await active().getAttribute('id'), 'phone-run-sheet', 'Airborne pose retains the lit phone');
-  await page.clock.runFor(1200);
+  assert((await active().getAttribute('src')).endsWith('phone-jump-on.png'), 'Flashlight uses a dedicated two-pose jump sheet');
+  await active().evaluate(img => img.decode());
+  assert(await active().evaluate(img => img.naturalWidth === 512 && img.clientWidth === 384 &&
+    Math.abs(new DOMMatrix(getComputedStyle(img).transform).m41) < .01), 'Jump uses the first lit airborne pose');
+  await page.clock.runFor(450);
+  assert.equal((await state()).state, 'fall');
+  assert(await active().evaluate(img => Math.abs(new DOMMatrix(getComputedStyle(img).transform).m41 + 192) < .01),
+    'Fall uses the second lit airborne pose');
+  await page.clock.runFor(750);
   await page.evaluate(() => { phoneBattery = 1; phoneDrainAccumulator = 0; });
   await page.keyboard.down('d');
   await page.clock.runFor(1100);
@@ -136,7 +147,7 @@ try {
   await page.keyboard.down('a');
   await page.clock.runFor(100);
   assert.equal(await active().getAttribute('id'), 'phone-walk-sheet');
-  assert((await active().getAttribute('src')).endsWith('walk-twelve-on.png'));
+  assert((await active().getAttribute('src')).endsWith('walk-eight-on.png'));
   await page.screenshot({ path: '.local/phone-walk-mobile.png' });
   await page.keyboard.up('a');
   // Sample the actual CSS darkness mask over white to verify forward light and dark rear.

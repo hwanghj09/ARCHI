@@ -1,22 +1,21 @@
-# 수호 이동 중간 프레임
+# 수호 걷기 수정 및 달리기 중간 프레임
 
-2026-10-17 · 내장 `image_gen`으로 기존 수호 시트를 참조해 새 자세를 그렸다.
+2026-10-18 · 내장 `image_gen`으로 기존 수호의 회색 셔츠 주름, 얼굴, 체형을 참조해 걷기 한 주기를 다시 그렸다. 서로 다른 상체·화풍을 번갈아 보여 주던 12프레임 버전은 제거했다.
 
-| 원본 | 배열 | 추가 자세 | 게임용 시트 |
-| --- | --- | --- | --- |
-| `walk.png` | 3열 × 2행 | 6장 | `../jeong-suho-walk-twelve.png` |
-| `run.png` | 4열 × 2행 | 8장 | `../jeong-suho-run-sixteen.png` |
-| `phone-walk-{off,on}.png` | 3열 × 2행 | 각 6장 | `../jeong-suho-phone-walk-twelve-{off,on}.png` |
-| `phone-run-{off,on}.png` | 4열 × 2행 | 각 8장 | `../jeong-suho-phone-run-sixteen-{off,on}.png` |
+| 생성 원본 | 선택 및 배열 | 게임용 시트 |
+| --- | --- | --- |
+| `walk-keys.png` | 3열 × 2행, 양발 접지·하강·통과 6장 | `../jeong-suho-walk-eight.png` |
+| `walk-up.png` | 2열 × 1행, 양발 발끝 밀기 2장 | 위 시트의 3/7번 인덱스에 삽입 |
+| `phone-walk-{off,on}.png` | 4열 × 2행, 같은 8단계 걷기 | `../jeong-suho-phone-walk-eight-{off,on}.png` |
+| `run.png` | 4열 × 2행, 달리기 중간 자세 8장 | `../jeong-suho-run-sixteen.png` |
+| `phone-run-off.png` | 4열 × 2행, 휴대폰을 든 중간 자세 8장 | `../jeong-suho-phone-run-sixteen-off.png` |
 
-각 원본의 k번 자세는 기존 k번과 다음 자세 사이에 들어간다. 마지막 자세는 첫 자세로 돌아가는 연결이다. 기존 프레임은 새 시트의 짝수 인덱스에 픽셀 그대로 보존하고 새 그림은 홀수 인덱스에 배치했다. 게임용 셀은 모두 256×256이다.
+걷기는 접지 → 무릎을 굽혀 체중 받기 → 반대 다리 통과 → 지지 발의 뒤꿈치를 들고 발끝 밀기 순서다. 후반 4장은 반대 발이 지지하며 팔도 반대로 움직인다. 모든 프레임에 지지하는 발 또는 발끝이 바닥에 닿는다. 머리 기준점과 몸 크기를 통일하고 상하 움직임은 약 3px로 제한했다. 휴대폰을 잡은 가까운 팔은 앞으로 유지하며, 빈손인 먼쪽 팔은 몸통 뒤로 가려진다.
 
-걷기는 발뒤꿈치 접지 → 체중을 받으며 무릎 굽힘 → 반대 다리가 지지 다리를 지나감 → 발끝으로 밀며 반대 발을 내미는 과정을 보강했다. 달리기는 착지 압축, 무릎 회수, 발끝 밀기, 공중에서 정강이 펴기와 다음 착지 준비를 보강했다. 반주기에서 팔과 다리의 앞뒤가 바뀌도록 수정했고, 걷기의 상체 기울기와 휴대폰을 들지 않은 먼쪽 팔의 가림 관계를 별도로 보정했다. 손전등 ON은 OFF 원본을 참조해 LED만 켜도록 생성했다.
+게임에는 **플래시를 켜고 달리는 기능이 없다**. 켜진 동안 Shift를 눌러도 걷는다. 켜진 달리기의 확장 시트·생성 원본·미리보기는 제거했다. `jeong-suho-phone-jump-on.png`는 기존 보존 시트 `jeong-suho-phone-run-on.png`의 2/6번 공중 자세만 픽셀 그대로 추출한 점프·낙하 전용 2프레임 시트다. 지상 달리기에는 사용하지 않는다.
 
-재생 주기는 기존과 같다. 걷기는 한 주기 184px 이동(200px/s에서 0.92초), 달리기는 192px 이동(340px/s에서 약 0.565초)이다. 점프·낙하의 휴대폰 그림은 기존 공중 자세를 유지하도록 새 인덱스 4/12를 사용한다. 손전등의 시작 좌표는 `js/scene/camera.js`에서 모든 새 프레임의 실제 LED 위치에 맞췄다.
+달리기 두 시트는 기존 8프레임을 짝수 인덱스에 보존하고 중간 자세를 홀수에 넣은 16프레임이다. 걷기는 전체 8프레임을 재작성했으며 이전 그림과 교대로 섞지 않는다. 런타임 셀은 256×256, 걷기는 한 주기 184px 이동(200px/s에서 0.92초), 달리기는 192px 이동(340px/s에서 약 0.565초)이다.
 
-## 내보내기와 검증
+프로젝트 루트의 `node scripts/prepare-movement-inbetweens.mjs`가 최근접 보간·알파 정리·정렬·셀 배열만 수행해 시트를 재생성한다. 걷기의 기준점은 머리 중심 x=135, 발 기준선은 일반 239/휴대폰 237이다. ON/OFF는 OFF의 정렬값을 공유한다. 광원 좌표는 `js/scene/camera.js`의 실제 LED 위치에 맞췄다.
 
-프로젝트 루트에서 `node scripts/prepare-movement-inbetweens.mjs`로 게임용 여섯 시트를 다시 만든다. 이 스크립트는 그림을 생성하거나 관절을 변형하지 않는다. 원본 그리드를 자르고 최근접 보간으로 크기를 맞추며, 머리 기준점과 발 높이를 정렬하고 중간 프레임의 알파를 0/255로 정리한다. ON/OFF는 같은 OFF 정렬값을 공유한다. 원본 생성 PNG는 보존한다.
-
-`node tests/movement-inbetweens.mjs`로 기존 픽셀 보존·프레임별 구별·투명 여백·잘림·접지를 검사한다. 브라우저 동작은 `tests/movement.mjs`, `tests/running.mjs`, `tests/phone-movement.mjs`에서 확인한다. 미리보기는 `docs/previews/suho-walk-inbetweens.gif`와 `suho-run-inbetweens.gif`이며, 왼쪽부터 일반 이동·휴대폰 OFF·휴대폰 ON이다. GIF 시간 단위에 맞춰 걷기 주기는 0.92초, 달리기는 약 0.56초로 내보냈다.
+검증은 `tests/movement-inbetweens.mjs`와 `tests/phone-movement.mjs`다. `docs/previews/suho-walk-inbetweens.gif`는 일반·휴대폰 OFF·플래시 ON 걷기 3개이고, `suho-run-inbetweens.gif`는 일반·휴대폰 OFF 달리기 2개만 보여 준다.

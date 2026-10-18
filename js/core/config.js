@@ -19,7 +19,7 @@ const runSpeed = 340;
 const crouchSpeed = 90;
 const runFrames = 16;
 const runFrameDistance = 192 / runFrames;
-const walkFrames = 12;
+const walkFrames = 8;
 const frameDistance = 184 / walkFrames;
 const step = 1000 / 60;
 // 정신력: 밝은 곳·플래시는 더 이상 올리지 않고(소모만 막는다), 어두운 곳에서만 천천히 줄어든다.
