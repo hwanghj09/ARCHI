@@ -91,6 +91,12 @@ try {
   await page.clock.runFor(2000);
   assert.equal(await page.evaluate(() => openingElapsed), 1399, '클릭하기 전에는 첫 대사에서 멈춰 있다');
   assert(await page.locator('#opening .scene-next').isVisible(), '클릭 안내가 보인다');
+  // 키보드로도 넘긴다: Space는 그대로, 건너뛰기에 초점이 있어도 Enter·E는 다음 대사로(Esc만 건너뛴다).
+  await page.keyboard.press('Space');
+  assert.equal(await page.evaluate(() => openingGate.index), 0, 'Space does not advance the line');
+  await page.keyboard.press('Enter');
+  assert.deepEqual(await page.evaluate(() => [openingGate.index, openingActive, document.activeElement.id]), [1, true, 'opening-skip'],
+    'Enter on the focused skip button advances instead of skipping');
   for (const [at, phase, frame, power] of [[1750, 'shutdown', 1, 'shutting-down'], [2700, 'off', 2, 'off'],
     [3275, 'turn', 3, 'off'], [3600, 'rising', 4, 'off']]) {
     await runOpeningTo(at + 34);

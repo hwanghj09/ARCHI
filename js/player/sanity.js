@@ -168,6 +168,8 @@ function updateZeroEvent(elapsed, fsmPaused) {
   }
   if (zeroEventPhase === 'idle') { zeroEventPhase = 'waiting'; zeroEventTimer = 0; }
   if (zeroEventPhase === 'waiting') {
+    // 플래시를 쓸 수 없는 동안(배터리 0%·충전 중)은 돌진까지의 시간을 처음부터 다시 센다: 피할 수단 없이 삼켜지지 않게.
+    if (phoneBattery <= 0 || phoneDock) { zeroEventTimer = 0; return; }
     zeroEventTimer += elapsed;
     const waitFor = zeroEventEvasions > 0 ? zeroEventRetryWaitMs : zeroEventChargeWaitMs;
     if (zeroEventTimer >= waitFor) startZeroCharge();
