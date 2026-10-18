@@ -33,6 +33,8 @@ try {
     await page.clock.runFor(100);
     if (!wasDark && await page.evaluate(() => buildingBlackout || blackoutSceneActive)) {
       if (await page.locator("#blackout-scene").isVisible()) await page.locator("#blackout-skip").click();
+      if (await page.locator('#story-scene').isVisible()) await page.locator('#story-skip').click(); // 정전 직후 혼잣말
+      await page.clock.runFor(34); // 컷씬이 시작하며 초기화한 루프 시계를 다시 맞춘 뒤 걷는다
       await walkTo(x);
     }
   };
@@ -64,9 +66,10 @@ try {
   assert.deepEqual(restroomExit, { x: 185, y: 210, width: 145 });
   assertMirroredDoor({ x: 3556, width: 726 }, { x: 3612, width: 145 }, 1800, restroomExit, '17F restroom');
   assert(Math.abs(await position() - (restroomExit.x + 40)) < 1, 'Enter at the restroom door');
-  await page.getByRole('checkbox', { name: '17층 조명' }).uncheck();
+  // 17층 조명 스위치는 화면에서 숨겨졌으므로 같은 change 처리기를 직접 부른다.
+  await page.locator('#floor17-lights').evaluate(el => { el.checked = false; el.dispatchEvent(new Event('change')); });
   assert(await page.locator('#darkness').isVisible(), 'Restroom shares 17F lighting');
-  await page.getByRole('checkbox', { name: '17층 조명' }).check();
+  await page.locator('#floor17-lights').evaluate(el => { el.checked = true; el.dispatchEvent(new Event('change')); });
   await walkTo(850);
   await page.screenshot({ path: '.local/floor17-restroom.png' });
   await walkTo(1748);
@@ -88,6 +91,8 @@ try {
   await page.keyboard.press('e');
   assert.match(await interactionMessage(page), /호스와 관창/);
   await page.screenshot({ path: '.local/floor17-extension.png' });
+  // 정전된 층의 도어락은 전력이 없으면 조사 대상에서 빠진다(power.js). 태양광으로 17층을 켠 뒤 잠긴 문을 확인한다.
+  await page.evaluate(() => { solarEnabled = true; solarPoweredFloors = [17]; updatePowerState(); });
   await walkTo(4463);
   assert.equal(await hint(), 'E · 관리자 외 출입금지 (잠김)');
   await page.keyboard.press('e');
@@ -98,7 +103,8 @@ try {
   await page.keyboard.press('Escape');
   await page.setViewportSize({ width: 390, height: 844 });
   await page.clock.runFor(100);
-  await page.locator('#interact').click();
+  // 화면 E 버튼은 숨겨졌지만 클릭 처리기는 남아 있어 잠긴 문을 넘지 못하는지 확인한다.
+  await page.locator('#interact').dispatchEvent('click');
   assert.equal(await page.locator('#room-transition').getAttribute('data-phase'), 'idle', 'Touch cannot bypass lock');
   await page.screenshot({ path: '.local/floor17-manager-locked-mobile.png' });
   await page.keyboard.press('Escape');
@@ -122,7 +128,7 @@ try {
   assert.equal(await hint(), 'E · 관리자 외 출입금지 들어가기');
   await enter();
   assert.equal(await page.locator('header span').textContent(), '17F · 관리자실');
-  assert.equal(await page.locator('#dynamic-scene .floor-prop').count(), 2);
+  assert.equal(await page.locator('#dynamic-scene .floor-prop').count(), 4); // 분배반·안내도 책상 + 장식 사물함·청소 카트(984b34f)
   await page.locator('#dynamic-scene img').evaluateAll(images => Promise.all(images.map(img => img.decode())));
   const managerExit = await exitDoor(page);
   assert.deepEqual(managerExit, { x: 182, y: 210, width: 171 });

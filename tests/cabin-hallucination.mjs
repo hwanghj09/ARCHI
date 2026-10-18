@@ -31,13 +31,14 @@ try {
         hallucinationLife = 400; zeroEventTimer = 200; renderHallucination();
       }, mode);
       assert(await ghost.isVisible(), `${mode} is visible in the hall before boarding`);
-      const paused = await state();
+      // 엘리베이터에 타면 복도 환각·돌진은 멈추는 것이 아니라 끝난다(sanity.js updateSanity, 3447290).
+      const cleared = { mode: null, life: (await state()).life, phase: 'idle', timer: 0 };
       const immediatelyHidden = await page.evaluate(() => { showCabin(0); return hallucinations.hidden && hallucinationShadow.hidden; });
       assert(immediatelyHidden, `${mode} disappears synchronously when the cabin opens`);
       await page.clock.runFor(3000);
       assert(await ghost.isHidden()); assert(await shadow.isHidden());
       assert.equal(await page.locator('body').getAttribute('data-hallucinating'), null);
-      assert.deepEqual(await state(), paused, 'The hallway hallucination is paused during the ride');
+      assert.deepEqual(await state(), cleared, 'The hallway hallucination ends when the ride starts');
       assert.equal(await page.evaluate(() => debugTriggerAmbientHallucination()), false);
       assert.equal(await page.evaluate(() => debugTriggerChaseHallucination()), false);
       const destination = page.locator('#cabin-floor-buttons [data-floor="1"]');
@@ -48,16 +49,16 @@ try {
       assert.equal(await page.evaluate(() => elevatorCars[0].floor), 1);
       assert(await page.locator('#cabin-exit').isEnabled(), 'The player can arrive and leave normally');
       assert(await ghost.isHidden(), 'Arrival does not reveal a hallucination');
-      assert.deepEqual(await state(), paused);
-      assert.equal(await page.evaluate(() => hallucinationCaught), false, 'A paused charge cannot capture the rider');
+      assert.deepEqual(await state(), cleared);
+      assert.equal(await page.evaluate(() => hallucinationCaught), false, 'An ended charge cannot capture the rider');
       if (mode === 'ambient') await page.screenshot({ path: `.local/cabin-no-hallucination-${mobile ? 'mobile' : 'desktop'}.png` });
-      await page.evaluate(() => leaveCabin());
+      await page.evaluate(() => { leaveCabin(); startAmbientSighting(); hallucinationLife = 400; renderHallucination(); });
       assert(await ghost.isVisible(), 'Hallway hallucinations can render again after leaving');
       await page.evaluate(() => { endHallucinationSighting(); zeroEventPhase = 'idle'; sanity = 35; });
     }
   }
   assert.deepEqual(errors, []);
-  console.log('PASS: ambient/approach/charge hidden while boarding, closing, moving and arriving; paused attacks, debug guards, hallway resumption; desktop/touch');
+  console.log('PASS: ambient/approach/charge hidden while boarding, closing, moving and arriving; attacks end on boarding, debug guards, hallway resumption; desktop/touch');
 } finally {
   await browser.close();
 }

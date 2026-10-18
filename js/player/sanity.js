@@ -581,29 +581,32 @@ refreshSanity();
 // 층 배경 그림 속 모니터. 키는 'assets/background/' 아래 그림 이름(확장자 제외), 값은 [그림 가로, 세로, 종류, 화면들]이다.
 // 종류 'glass'는 복도 유리벽 너머로 보이는 모니터(화질을 더 낮춰 흐릿하게), 'room'은 방 안에서 보이는 모니터. 모니터를 모두 확인한 그림만 올렸다.
 // 화면은 [x0, y0, x1, y1]이고 그림 픽셀 좌표다. 그림을 장면에 놓을 때(scene-builder.js) 그 자리에 .fear-screen을 얹는다.
+// 다섯째 값 [x, 폭]: 출구 문 칸(cutaway_kit.door_bay, 방 설정 exitBay)을 끼우기 전 그림의 x에 그 폭의 칸이 들어갔다. 화면 좌표는 칸을 끼우기 전
+// 그림 기준이고, 그 x 오른쪽 화면은 칸 폭만큼 밀린다. 그림 가로는 칸을 넣은 뒤의 값이다.
 const BACKGROUND_MONITORS = {
-  'floor03/floor03-cs-interior': [1846, 475, 'room', [[73, 325, 127, 365], [325, 325, 379, 365], [475, 325, 529, 365], [595, 325, 649, 365],
+  'floor03/floor03-cs-interior': [2168, 475, 'room', [[73, 325, 127, 365], [325, 325, 379, 365], [475, 325, 529, 365], [595, 325, 649, 365],
     [688, 325, 742, 365], [781, 325, 835, 365], [874, 325, 928, 365], [967, 325, 1021, 365], [1060, 325, 1114, 365], [1153, 325, 1207, 365],
-    [1246, 325, 1300, 365], [1339, 325, 1393, 365], [1459, 325, 1513, 365]]],
+    [1246, 325, 1300, 365], [1339, 325, 1393, 365], [1459, 325, 1513, 365]], [858, 322]],
   'floor03/floor03-studio-interior': [1840, 475, 'room', [[1078, 310, 1136, 364]]],
-  'floor04/floor04-lab-interior': [2676, 475, 'room', [[227, 318, 277, 359], [279, 318, 329, 359], [331, 318, 381, 358], [585, 318, 635, 359],
+  'floor04/floor04-lab-interior': [2998, 475, 'room', [[227, 318, 277, 359], [279, 318, 329, 359], [331, 318, 381, 358], [585, 318, 635, 359],
     [637, 318, 687, 359], [689, 318, 739, 358], [929, 318, 979, 358], [981, 318, 1031, 359], [1033, 318, 1083, 359], [1301, 318, 1351, 359],
     [1353, 318, 1403, 359], [1405, 318, 1455, 358], [1645, 318, 1695, 358], [1697, 318, 1747, 359], [1749, 318, 1799, 359],
-    [393, 340, 423, 371], [751, 340, 781, 371], [887, 340, 917, 371], [1467, 340, 1497, 371], [1603, 340, 1633, 371]]],
-  'floor05/floor05-security-interior': [1846, 475, 'room', [[510, 322, 566, 367], [566, 322, 622, 367]]],
-  'floor10/floor10-office-interior': [2678, 475, 'room', [[456, 326, 506, 367], [600, 325, 651, 367], [820, 326, 870, 367], [964, 325, 1015, 367],
+    [393, 340, 423, 371], [751, 340, 781, 371], [887, 340, 917, 371], [1467, 340, 1497, 371], [1603, 340, 1633, 371]], [30, 322]],
+  'floor05/floor05-security-interior': [2168, 475, 'room', [[510, 322, 566, 367], [566, 322, 622, 367]], [30, 322]],
+  'floor10/floor10-office-interior': [3000, 475, 'room', [[456, 326, 506, 367], [600, 325, 651, 367], [820, 326, 870, 367], [964, 325, 1015, 367],
     [1177, 325, 1228, 367], [1322, 326, 1372, 367], [1548, 326, 1598, 367], [1692, 325, 1743, 367], [1905, 325, 1956, 367],
-    [2050, 326, 2100, 367], [2272, 325, 2322, 367], [2410, 325, 2461, 367]]],
-  'floor10/floor10-executive-interior': [1822, 475, 'room', [[319, 290, 365, 326]]],
+    [2050, 326, 2100, 367], [2272, 325, 2322, 367], [2410, 325, 2461, 367]], [30, 322]],
+  'floor10/floor10-executive-interior': [2144, 475, 'room', [[319, 290, 365, 326]], [30, 322]],
 };
 
 function addBackgroundMonitors(image, src) {
   const entry = BACKGROUND_MONITORS[src.replace(/^assets\/background\/|\.png$/g, '')];
   if (!entry) return;
-  const [naturalWidth, naturalHeight, kind, rects] = entry;
+  const [naturalWidth, naturalHeight, kind, rects, [bayX, bay] = [Infinity, 0]] = entry;
   const left = parseFloat(image.style.left) || 0, top = parseFloat(image.style.top) || 0;
   const sx = parseFloat(image.style.width) / naturalWidth, sy = parseFloat(image.style.height) / naturalHeight;
-  for (const [x0, y0, x1, y1] of rects) {
+  for (const [rx0, y0, rx1, y1] of rects) {
+    const x0 = rx0 >= bayX ? rx0 + bay : rx0, x1 = x0 + rx1 - rx0;
     const screen = fearScreenElement([0, 0, 1, 1]);
     if (kind === 'glass') screen.classList.add('glass');
     Object.assign(screen.style, { left: `${left + x0 * sx}px`, top: `${top + y0 * sy}px`, width: `${(x1 - x0) * sx}px`, height: `${(y1 - y0) * sy}px` });

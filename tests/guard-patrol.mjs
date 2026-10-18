@@ -67,7 +67,12 @@ try {
   await setVisibility('.fixture.guard-bot', ''); await setVisibility('#darkness', '');
   assert(Math.abs(bareRobot - bareWall) > 20, `The sample point is on the robot casing: ${bareRobot} vs wall ${bareWall}`);
   assert(darkRobot <= 3, `The unpowered robot outside the sight circle stays in the dark: ${darkRobot}`);
-  await page.evaluate(() => { collectedItems.add("f17-emergency-linked"); solarEnabled = true; collectedItems.add("f17-emergency-linked"); solarPoweredFloors = [1]; updatePowerState(); });
+  // R-01은 처음 감지하기 전까지 도크에 서 있고('dock'), 뒤쪽 320px도 본다(c4de95d). 순찰 속도는 첫 추격이 끝난 'patrol' 상태에서,
+  // 수호를 순찰 구간(3040~) 밖 감지 거리 바깥에 두고 잰다.
+  await page.evaluate(() => {
+    collectedItems.add("f17-emergency-linked"); solarEnabled = true; solarPoweredFloors = [1]; updatePowerState();
+    guardPatrol.mode = 'patrol'; Body.setPosition(body, { x: 1500, y: floorY - 81 });
+  });
   const before = await state(); await page.clock.runFor(1000);
   assert(Math.abs(before.x - (await state()).x - 80) < 3, 'Powered patrol rolls at 80 pixels per second');
   const usedFrames = new Set();

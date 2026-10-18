@@ -77,14 +77,18 @@ try {
     '① 축전지 잔량을 확인하십시오.',
     '② 공급 대상을 선택하십시오.',
     '③ ‘비상 전력 공급’ 버튼을 누르십시오.',
-    '비상 전력은 지정된 조명, 작업용 컴퓨터 및 통신 장비에 우선 공급됩니다.',
+    // 17층 비상 UPS 회로(69e8dc6)가 생기며 조명 전용 안내와 관리실 메모 위치로 바뀌었다.
+    '태양광은 선택한 층의 전등만 공급합니다. 승강기는 17층 관리자실 비상 UPS 회선을 별도로 연결하십시오.',
+    '관리실 출입 메모: 17층 복도 청소 카트. 회로 안내도: 관리실 책상.',
     '전용 앱을 설치하면 휴대폰으로 전력 공급 상태를 확인하고 원격으로 제어할 수 있습니다.',
     '앱 다운로드 및 장치 등록에는 작업용 컴퓨터를 이용하십시오.',
   ];
   assert.deepEqual(await page.locator('#inspection-sheet .writing-item').allTextContents(), manualLines);
-  assert.equal(await page.locator('#inspection-description').textContent(), manualLines[0] + '\n\n' +
-    manualLines.slice(1, 4).join('\n') + '\n\n' + manualLines[4] + '\n\n' + manualLines.slice(5).join('\n'));
-  assert.equal(await page.locator('#inspection-sheet [data-bold="true"]').textContent(), manualLines[5]);
+  // 읽기용 설명(message)은 종이 문구와 따로 쓴 조명 전용 요약이다.
+  assert.equal(await page.locator('#inspection-description').textContent(),
+    await page.evaluate(() => floorById.get('rooftop').fixtures[0].message));
+  assert.match(await page.locator('#inspection-description').textContent(), /^태양광 임시 전력 장치 — 조명 전용\n\n/);
+  assert.equal(await page.locator('#inspection-sheet [data-bold="true"]').textContent(), manualLines[6]);
   await page.screenshot({ path: '.local/solar-manual-desktop.png' });
   await page.setViewportSize({ width: 390, height: 844 });
   const mobileLayout = await page.locator('#inspection').evaluate(panel => {
@@ -120,19 +124,19 @@ try {
   await page.clock.runFor(100);
   await page.screenshot({ path: '.local/rooftop-mobile.png' });
   assert.match(await page.locator('#interaction-hint').textContent(), /17층으로 내려가기/);
-  await page.locator('#interact').click();
+  await page.keyboard.press('e');
   await arrived('corridor');
   assert.equal(await page.locator('header span').textContent(), '17F · 복도');
   assert(Math.abs((await state()).x - 2946) < 1, 'Return to the 17F stair door');
   assert.equal(await page.locator('#dynamic-scene .door').count(), 0);
   assert.equal(await supply.count(), 0, 'Device is removed when leaving the roof');
   assert.equal(await manual.count(), 0, 'Manual is removed when leaving the roof');
-  await page.locator('#interact').click();
+  await page.keyboard.press('e');
   await arrived('dynamic');
   assert.equal(await page.locator('#dynamic-scene .door').count(), 1, 'Reentry does not duplicate doors');
   assert.equal(await supply.count(), 1, 'Reentry creates exactly one device');
   assert.equal(await manual.count(), 1, 'Reentry creates exactly one manual');
-  await page.locator('#interact').click();
+  await page.keyboard.press('e');
   await arrived('corridor');
   assert.deepEqual(errors, []);
   console.log('PASS: rooftop stair round trips, solar placement and cleanup, input guards, collisions, mobile controls, and no elevator roof stop.');

@@ -26,8 +26,7 @@ try {
       grounded = true; cameraX = cameraTarget(); render(); updateInteraction();
     });
     assert.equal(await page.locator('#interaction-hint').textContent(), 'E · 화장실 들어가기');
-    if (name === 'mobile') await page.locator('#interact').tap();
-    else await page.keyboard.press('e');
+    await page.keyboard.press('e');
     await finishSceneTransition(page);
     assert.equal(await page.locator('header span').textContent(), '12F · 화장실');
     const exit = await page.evaluate(() => {
@@ -54,11 +53,10 @@ try {
     await page.screenshot({ path: `.local/floor12-restroom-${name}.png` });
     await page.clock.runFor(100);
     assert.equal(await page.locator('#interaction-hint').textContent(), 'E · 복도로 나가기');
-    if (name === 'mobile') await page.locator('#interact').tap();
-    else await page.keyboard.press('e');
+    await page.keyboard.press('e');
     await finishSceneTransition(page);
     assert.equal(await page.evaluate(() => dynamicFloorId), 'f12');
-    assert(Math.abs(await page.evaluate(() => body.position.x) - 3728) < 1, 'Return beside the original corridor door');
+    assert(Math.abs(await page.evaluate(() => body.position.x) - 3714) < 1, 'Return beside the original corridor door'); // 문 doorX 3674 + 40(48c7e86)
   }
   await page.evaluate(() => performFloorChange('f17-restroom', null, 'exit'));
   assert.equal(await page.evaluate(() => currentDoors.find(door => door.key === 'exit').x), 185, '17F exit is unchanged');

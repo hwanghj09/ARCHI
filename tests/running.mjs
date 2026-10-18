@@ -78,7 +78,8 @@ try {
     await page.clock.runFor(300);
     assert.equal((await state()).animation, 'run', `${sanity}% still runs`);
   }
-  await page.evaluate(() => { solarPoweredFloors = [17]; updatePowerState(); });
+  // 낮은 정신력의 이동 속도 감소는 sanity.mjs가 확인한다. 아래 경계 확인은 정상 질주 속도로 한다.
+  await page.evaluate(() => { setDebugSanity(100); solarPoweredFloors = [17]; updatePowerState(); });
   await page.keyboard.up('ShiftLeft');
   await page.keyboard.up('d');
   await page.keyboard.down('ShiftLeft');
