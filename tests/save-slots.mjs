@@ -26,8 +26,9 @@ try {
   let saved = await slots();
   assert.equal(saved[0]?.title, '정전'); assert.equal(saved[0].kind, 'auto'); assert.equal(saved[1], null);
   await step(() => collectedItems.add('rooftop-unlocked'), '비상 전력 켜기');
-  await step(() => collectedItems.add('goal-f12-memo'), '7층 조사하기');
-  await step(() => collectedItems.add('goal-f7-log'), '지하에서 무슨 일이?');
+  // 12층 이후 목표는 퍼즐 플래그를 차례로 따라간다(objective.js). 한 번에 여러 개를 넣어 그 목표로 바로 간다.
+  await step(() => ['f12-evaluation-solved', 'goal-f5-note', 'f8-repro-record'].forEach(item => collectedItems.add(item)), '7층 조사하기');
+  await step(() => ['f7-external-connection-solved', 'f13-backup-device', 'f2-projected'].forEach(item => collectedItems.add(item)), '지하에서 무슨 일이?');
   await step(() => collectedItems.add('b1-elevator'), 'B2 서버실 조사하기');
   assert.deepEqual((await slots()).map(slot => slot?.title), ['정전', '비상 전력 켜기', '7층 조사하기', '지하에서 무슨 일이?', 'B2 서버실 조사하기'], '다섯 칸이 차례로 채워진다');
   await step(() => collectedItems.add('goal-b2-console'), 'ARCHI 멈추기');
@@ -42,7 +43,7 @@ try {
   assert.equal((await slots())[4].kind, 'manual');
   await page.locator('[data-slot-load="2"]').click(); // 슬롯 3 = '7층 조사하기' 시점의 저장
   await page.waitForFunction(() => !mainMenuActive);
-  assert.equal(await page.evaluate(() => collectedItems.has('goal-f7-log')), false, '불러오면 그 시점의 진행으로 돌아간다');
+  assert.equal(await page.evaluate(() => collectedItems.has('f7-external-connection-solved')), false, '불러오면 그 시점의 진행으로 돌아간다');
   await page.waitForFunction(() => currentObjective?.title === '7층 조사하기');
   await page.waitForTimeout(300);
   assert.deepEqual((await slots()).map(slot => slot?.title), ['ARCHI 멈추기', '비상 전력 켜기', '7층 조사하기', '지하에서 무슨 일이?', 'ARCHI 멈추기'], '불러오기 직후의 목표 표시는 슬롯을 덮어쓰지 않는다');

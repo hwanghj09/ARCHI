@@ -121,6 +121,8 @@ try {
       performFloorChange(id, 0, floorById.get(id).interior ? 'exit' : null);
       const door = currentDoors.find(door => door.name === name);
       for (const item of [].concat(door.requires || [])) collectedItems.add(item);
+      // 앞 장치의 requires로 들어간 결과물(예: B1 승강기 제어반이 요구하는 f2-projected)은 지워서 이 장치를 아직 안 쓴 상태로 연다.
+      if (door.gives) collectedItems.delete(door.gives);
       Body.setPosition(body, { x: door.x + door.width / 2, y: (door.standY ?? floorY) - 81 });
       Body.setVelocity(body, { x: 0, y: 0 }); grounded = true;
       interact(); cameraX = cameraTarget(); render();

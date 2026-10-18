@@ -70,6 +70,11 @@ const context = createContext({ console, Element: class {},
   applyZeroSanityTurnDelay: direction => direction,
   pushPushables: (direction, amount) => amount,
   closeInspection: () => runInContext('usingInspection = false', context),
+  // inventory.js가 읽는 17층 관리실 메모(js/floors/floor-17.js)는 층 데이터째 싣지 않고 자리만 채운다.
+  MANAGER_MEMO_TEXT: '', MANAGER_MEMO_SHEET: null,
+  // 지도 창·회선 퍼즐·야간 로그·백업 장비·B2 터미널은 닫혀 있다.
+  mapWindow: { hidden: true }, wirePanel: { hidden: true }, logPanel: { hidden: true }, backupPanel: { hidden: true },
+  b2TerminalOpen: false, updateVaultPuzzle: noop,
 });
 context.engine.pairs.list.push({ isActive: true, bodyA: context.body, bodyB: {}, collision: { normal: { y: -1 } } });
 const load = path => runInContext(readFileSync(new URL(`../${path}`, import.meta.url), 'utf8'), context, { filename: path });

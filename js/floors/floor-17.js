@@ -37,9 +37,10 @@ const FLOOR17_ROOMS = interiorRooms(17, [
       message: '비상 UPS는 살아 있지만 승강기 회선 네 가닥이 분리되어 있다. 책상의 회로 안내도로 공급 단자와 승강기 단자를 확인하자.' },
     { file: 'office-desk', size: [512, 256], worldWidth: 252, x: 800, name: '비상 전력 회로 안내도', gives: 'f17-circuit-guide-read',
       message: CIRCUIT_GUIDE_MESSAGE, takenMessage: CIRCUIT_GUIDE_MESSAGE, // 챙긴 뒤에도(gives) 같은 안내도를 몇 번이든 다시 볼 수 있다
-      surface: 'document', look: 'manual', caption: '17층 비상 전력 분배 · 단자 번호를 확인할 것',
+      surface: 'document', caption: '17층 비상 전력 분배 · 단자 번호를 확인할 것',
       writing: [{ as: 'title', text: '비상 전력 회로 안내도' }, '태양광: 층별 전등만 공급. 승강기는 별도 비상 UPS 사용.',
         { as: 'table', head: true, rows: [['공급 단자', '중계 릴레이', '용도'], ...EMERGENCY_CIRCUITS.map(circuit => [circuit.source, circuit.relay, circuit.label])] },
+        { as: 'page' }, // 두 점검표를 낱장 두 장으로 나눠 한 화면에 스크롤 없이 보이게 한다
         { as: 'table', head: true, rows: [['중계 릴레이', '승강기 단자'], ...[...EMERGENCY_CIRCUITS].sort((a, b) => a.relay.localeCompare(b.relay)).map(circuit => [circuit.relay, circuit.target])] },
         { as: 'hand', text: '색과 줄 순서는 일치하지 않음. S→R→E 경로를 추적할 것. 접지를 포함한 네 회선 연결 후 반드시 회로 검사. 오류 시 공급 단자를 눌러 연결 해제.', ink: 'red' },
         '비상 설비 버스: 승강기 · 작업용 컴퓨터 · 충전 콘센트. 층별 조명은 옥상 태양광으로 따로 제어.' ] },

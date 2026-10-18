@@ -81,7 +81,11 @@ try {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.screenshot({ path: '.local/blackout-startled-mobile.png' });
   await advance(4900);
-  assert.equal((await state()).active, false); assert.equal((await state()).inert, false);
+  assert.equal((await state()).active, false);
+  // 정전 컷씬 뒤에 이어지는 혼잣말(story-scene.js)은 조작을 막으므로 건너뛰고 이어서 검사한다.
+  assert(await page.locator('#story-scene').isVisible(), 'The blackout monologue follows the outage');
+  await page.locator('#story-skip').click();
+  assert.equal((await state()).inert, false);
   assert.equal((await state()).lights, 'off'); assert(await page.locator('#blackout-scene').isHidden());
   await page.keyboard.press('e'); assert.equal((await state()).called, false);
   await page.evaluate(() => { solarEnabled = true; updatePowerState(); });
@@ -108,12 +112,15 @@ try {
   await page.keyboard.press('Escape');
   await page.emulateMedia({ reducedMotion: 'no-preference' });
   await page.evaluate(() => { phoneLightOn = true; refreshPhone(); });
-  await reset(); await advance(1550);
+  // 첫 깜빡임(1500~1560 소등) 한가운데: 999 대사 멈춤 뒤 17ms씩 가면 1550을 넘는 첫 값이 1560 뒤라 1520까지만 간다.
+  await reset(); await advance(1520);
+  assert.equal(await page.locator('#world').getAttribute('data-power-flicker'), 'off');
   assert.equal(await page.locator('#darkness').evaluate(el => getComputedStyle(el).maskImage), 'none', 'Flashlight mask cannot override the cinematic light dip');
   await advance(3050);
   assert.equal(await page.locator('#darkness').evaluate(el => getComputedStyle(el).maskImage), 'none');
   await page.keyboard.press('Escape');
-  assert(await page.evaluate(() => phoneLightOn && sprite.dataset.phoneHeld === 'true'), 'The prior flashlight state resumes after the cutscene');
+  // 컷씬은 시작할 때 손전등을 끈다(clearEventsForCutscene). 끝난 뒤 다시 켜지지 않는다.
+  assert(await page.evaluate(() => !phoneLightOn && sprite.dataset.phoneHeld === 'false'), 'The cutscene switched the flashlight off');
   assert.deepEqual(errors, []);
   console.log('PASS: call attempt, rapid irregular flickering, permanent outage, recoil, locked input, all cars/directions, skip/scene cleanup, no retrigger, reduced motion and mobile.');
 } finally { await browser.close(); }

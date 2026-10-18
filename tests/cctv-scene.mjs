@@ -54,7 +54,7 @@ try {
   assert.deepEqual(await page.locator('#dynamic-scene .cctv-wall').evaluate(el =>
     [getComputedStyle(el).backgroundImage.includes('cctv-wall.png'), getComputedStyle(el, '::before').opacity, el.children.length]), [true, '0.9', 0]);
   assert.deepEqual(await page.locator('#dynamic-scene .cctv-wall').evaluate(el => [el.offsetWidth, el.offsetHeight]), [419, 279]);
-  assert.equal(await page.locator('#world').evaluate(el => getComputedStyle(el).filter), 'brightness(0.6)', 'The control room is dim from the start');
+  assert.equal(await page.locator('#world').evaluate(el => getComputedStyle(el).filter), 'brightness(1)', 'The control room uses the normal room brightness (floor-b1.js)');
   await page.locator('#cctv-skip').evaluate(button => button.blur());
   for (const key of ['e', 'p', 'f', 'i', 'Space', 'a']) await page.keyboard.press(key);
   assert(await page.evaluate(() => !usingPhone && !usingInspection && !phoneLightOn && !jumpQueued && keys.size === 0), 'Input stays locked');

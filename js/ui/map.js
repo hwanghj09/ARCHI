@@ -7,8 +7,9 @@ const mapTitle = document.getElementById('map-title');
 const mapButton = document.getElementById('map-button');
 
 // 복제본은 shadow DOM 안에 둔다: id가 겹쳐도 게임 코드의 getElementById·querySelector가 헷갈리지 않고,
-// 같은 스타일시트를 넣어 두면 #world·#stage 기준 CSS가 복제본에도 그대로 적용된다.
-const mapShadow = mapView.attachShadow({ mode: 'open' });
+// 같은 스타일시트를 넣어 두면 #world·#stage 기준 CSS가 복제본에도 그대로 적용된다. closed로 둬서 테스트 도구(Playwright)의 #stage·#world
+// 같은 찾기에도 복제본이 함께 잡히지 않는다(코드는 mapShadow로 직접 쓴다).
+const mapShadow = mapView.attachShadow({ mode: 'closed' });
 for (const link of document.querySelectorAll('link[rel="stylesheet"]')) mapShadow.append(link.cloneNode());
 const mapStage = document.createElement('main');
 mapStage.id = 'stage';

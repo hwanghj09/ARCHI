@@ -71,12 +71,13 @@ try {
   await page.keyboard.up('d');
   await page.screenshot({ path: '.local/opening-01-back.png' });
   // Record every painted frame so a one-frame flash of another sheet cannot slip between checks.
+  // checkVisibility: 숨긴 틀 안의 그림(#drag-sprite 안의 #drag-sheet)은 보이지 않는 것으로 친다.
   await page.evaluate(() => {
     window.openingPaints = [];
     const raf = window.requestAnimationFrame;
     window.requestAnimationFrame = callback => raf(time => {
       callback(time);
-      const visible = [...sprite.querySelectorAll('img')].filter(img => getComputedStyle(img).display !== 'none');
+      const visible = [...sprite.querySelectorAll('img')].filter(img => img.checkVisibility());
       openingPaints.push({ elapsed: openingElapsed, active: openingActive, visible: visible.map(img => img.id).join(),
         cell: Math.round(-new DOMMatrix(getComputedStyle(openingSheet).transform).m41 / 192), x: body.position.x, feet: body.bounds.max.y });
     });
@@ -111,7 +112,7 @@ try {
   const pose = () => page.evaluate(() => {
     const idle = getComputedStyle(document.getElementById('idle-sprite'));
     return { state: sprite.dataset.state, frame: sprite.dataset.frame, transform: idle.transform, clip: idle.clipPath,
-      visible: [...sprite.querySelectorAll('img')].filter(img => getComputedStyle(img).display !== 'none').map(img => img.id).join() };
+      visible: [...sprite.querySelectorAll('img')].filter(img => img.checkVisibility()).map(img => img.id).join() };
   });
   await runOpeningTo(4400);
   const standing = await status();
