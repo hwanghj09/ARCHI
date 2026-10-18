@@ -1959,7 +1959,8 @@ try {
     await inspect(1040, 'E · 기념품 진열장 조사', /해외 데이터센터 사업자/);
     const vipRoom = await enterRoom('VIP Room', '7F');
     assert.equal(await worldWidth(page), 3072);
-    assert.equal(await page.locator('#dynamic-scene > .floor-background[src$="floor7/vip-finished-off.png"]').count(), 1);
+    // 이 경로 검사는 '모든 층 전력 활성화'를 켜고 돈다(맨 위). 전등이 켜진 VIP 룸 그림이다.
+    assert.equal(await page.locator('#dynamic-scene > .floor-background[src$="floor7/vip-finished.png"]').count(), 1);
     softCount(await page.locator('#dynamic-scene .floor-prop').count(), 7);
     await assertHumanScale();
     await inspect(1600, 'E · VIP 방명록 조사', /AI 한 기 · 약 38TB/);
