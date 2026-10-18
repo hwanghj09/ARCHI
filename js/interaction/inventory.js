@@ -58,7 +58,7 @@ function openHydrant() {
   image.src = 'assets/ui/hydrant-interior.png';
   image.alt = '붉은 철문이 열린 소화전. 내부에 천 호스, 황동 밸브와 금속 관창이 있고 아래에 선반이 있다.';
   image.draggable = false;
-  const description = writingNode('p', 'item-description', '호스와 관창이 정리되어 있다. 아래 선반의 열쇠와 접힌 메모를 살펴보자.');
+  const description = writingNode('p', 'item-description', '호스와 관창이 정리되어 있다. 아래 선반에 낡은 열쇠가 놓여 있다.');
   description.id = 'item-description';
   description.setAttribute('role', 'status');
   cabinet.append(image);
