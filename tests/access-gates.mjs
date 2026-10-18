@@ -46,7 +46,9 @@ try {
   assert(await page.locator('#inspection').isHidden(), 'Esc on the list closes the bag');
   await page.evaluate(() => { performRoomChange(); performRoomChange(); });
   assert.equal(await page.locator('#office-badge').count(), 0, 'Returning to the desk does not create a pickup');
-  await page.evaluate(() => { triggerBuildingBlackout(); solarEnabled = true; performFloorChange('f17'); showCabin(0); elevatorCars[0].floor = 17; refreshCabin(); });
+  // 정전 뒤 엘리베이터는 17층 비상 회선(f17-emergency-linked)으로만 움직이고, 출입 게이트는 불이 들어온 층(태양광)에서만 반응한다(power.js).
+  // 목표('퇴근하기' 중에는 1층만)도 바로 맞춘다.
+  await page.evaluate(() => { triggerBuildingBlackout(); solarEnabled = true; solarPoweredFloors = [15]; collectedItems.add('f17-emergency-linked'); performFloorChange('f17'); showCabin(0); elevatorCars[0].floor = 17; refreshCabin(); refreshObjective(); });
   // All formerly restricted floor buttons work with no badge at all; keep B2 restriction.
   await page.evaluate(() => collectedItems.delete('f17-badge'));
   for (const floor of [12, 13, 14, 15]) {
@@ -75,7 +77,7 @@ try {
   await close();
   for (const floor of [15, 14, 13, 12]) {
     for (const car of [0, 1, 2]) {
-      await page.evaluate(({ floor, car }) => performFloorChange(`f${floor}`, car), { floor, car });
+      await page.evaluate(({ floor, car }) => { solarPoweredFloors = [floor]; performFloorChange(`f${floor}`, car); }, { floor, car });
       assert.equal(await page.locator('.access-gate').count(), 2);
       assert(await page.evaluate(() => body.position.x > 1806 && body.position.x < 2740));
     }

@@ -19,7 +19,13 @@ try {
       lights: world.dataset.backgroundLights, called: elevatorCars.some(car => car.travelling) }));
     assert.deepEqual(await state(), { blackout: false, powered: 'true', lights: 'on', called: false });
     assert(await page.locator('#darkness').isHidden());
-    if (viewport.width === 1280) await page.clock.runFor(5700);
+    if (viewport.width === 1280) {
+      // 오프닝 대사에서 멈춰 클릭을 기다리면(scene-gate.js) 화면을 클릭해 넘기며 끝까지 본다.
+      for (let i = 0; i < 10 && await page.evaluate(() => openingActive); i++) {
+        await page.clock.runFor(1500);
+        if (await page.evaluate(() => openingGate.waiting)) await page.evaluate(() => opening.click());
+      }
+    }
     else await page.locator('#opening-skip').click();
     assert(await page.locator('#opening').isHidden());
     assert.equal(await page.locator('#office-computer').getAttribute('data-power'), 'off');
@@ -52,6 +58,9 @@ try {
     }
     assert(phases.has('off') && phases.has('on'), 'Lights flicker before the permanent outage');
     assert.equal(await page.evaluate(() => blackoutSceneActive), false);
+    // 정전 직후 혼잣말(story-scene.js)은 조작을 막으므로 건너뛰고 이어서 검사한다.
+    assert(await page.locator('#story-scene').isVisible(), 'The blackout monologue follows the outage');
+    await page.locator('#story-skip').click();
     assert.deepEqual(await state(), { blackout: true, powered: 'false', lights: 'off', called: false });
     assert(await page.locator('#darkness').isVisible());
     assert(await page.locator('img[data-lit-src]').evaluateAll(imgs => imgs.every(img => img.getAttribute('src') === img.dataset.unlitSrc)),
