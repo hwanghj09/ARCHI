@@ -25,6 +25,7 @@ function refreshKeyBindingUI() {
   document.getElementById('interact').textContent = bindingLabel('interact');
   document.getElementById('interact').title = `상호작용 (${bindingLabel('interact')})`;
   document.getElementById('phone-button').title = `휴대폰 (${bindingLabel('phone')})`;
+  for (const next of document.querySelectorAll('.scene-next, #story-next')) next.textContent = `클릭 · ${bindingLabel('interact')}로 계속 ▸`;
   refreshInventoryCount();
 }
 

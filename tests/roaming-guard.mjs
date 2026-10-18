@@ -131,15 +131,19 @@ try {
   assert(!picks.f1 && !picks.f17 && !picks.b2 && !picks[await page.evaluate(() => floorId(-2))], 'Never 1F, 17F or B2');
   assert(picks.f5 > 2.2 * picks.f6, `Lit floor is preferred: f5 ${picks.f5} vs f6 ${picks.f6}`);
 
-  // 붙잡히면 '다시 시도' 창이 뜨고 1층 로비로 돌아간다. 1층 추격 기록은 남기지 않는다.
+  // 붙잡히면 '다시 시도' 창이 뜨고 그 층(5층) 엘리베이터 앞에서 다시 한다. R-03은 다른 층으로 가고, 1층 추격 기록은 남기지 않는다.
   await page.evaluate(() => {
     roamer.x = 3000; roamer.mode = 'patrol'; roamer.facing = 1; roamer.stay = 99999; roamer.wait = 0;
     Body.setPosition(body, { x: 3060, y: floorY - 81 }); grounded = true;
   });
   await page.clock.runFor(1500);
   assert(await page.locator('#guard-capture').isVisible(), 'R-03 catches Suho');
+  assert.equal(await page.evaluate(() => dynamicFloorId), 'f5');
   await page.locator('#guard-retry').click();
-  assert.equal(await page.evaluate(() => dynamicFloorId), 'f1');
+  const retry = await page.evaluate(() => ({ scene: dynamicFloorId, where: roamer.where, mounted: Boolean(roamer.door),
+    atElevator: Math.abs(body.position.x - (currentDoors.find(door => door.carIndex === 0).x + 40)) < 1 }));
+  assert.deepEqual([retry.scene, retry.atElevator, retry.mounted], ['f5', true, false], 'Retry starts at this floor\'s elevator without R-03');
+  assert.notEqual(retry.where, 'f5', 'R-03 is sent to another floor');
   assert.equal(await page.evaluate(() => collectedItems.has('f1-chase-ended')), false);
 
   // 쫓기다 엘리베이터에 타면 R-03이 문 앞까지 와서 문을 억지로 연다. 연타로 닫으면 고른 층으로 간다.

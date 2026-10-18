@@ -285,9 +285,16 @@ try {
   assert.equal((await state()).mode, null, '0% 직전에도 다가오는 예고 환각은 없다');
 
 
+  // ---- 플래시를 쓸 수 없는 동안(배터리 0%)에는 돌진하지 않는다 ----
+  await page.evaluate(() => {
+    sanity = 0; facing = 1; phoneLightOn = false; phoneBattery = 0; zeroEventEvasions = 0; zeroEventPhase = 'idle'; zeroEventTimer = 0;
+  });
+  await page.clock.runFor(16000);
+  assert.equal(await page.evaluate(() => zeroEventPhase), 'waiting', '배터리가 없으면 피할 수 없으니 돌진하지 않는다');
+
   // ---- 0% 돌진: 회피 두 번, 또는 회피 실패 → 잡아먹힘 ----
   await page.evaluate(() => {
-    sanity = 0; facing = 1; phoneLightOn = false; zeroEventEvasions = 0; zeroEventPhase = 'idle'; zeroEventTimer = 0;
+    sanity = 0; facing = 1; phoneLightOn = false; phoneBattery = 100; zeroEventEvasions = 0; zeroEventPhase = 'idle'; zeroEventTimer = 0;
   });
   await page.clock.runFor(15100); // 15초 대기 후 첫 돌진
   const charge1 = await page.evaluate(() => ({ phase: zeroEventPhase, side: zeroEventSide, mode: hallucinationMode }));

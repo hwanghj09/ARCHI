@@ -45,6 +45,9 @@ const OBJECTIVES = [
   { when: () => collectedItems.has('f12-network-isolated') && !logRecordsReady() && !collectedItems.has('f12-paper-backup'), title: '종이 백업 찾기', text: '화면 속 기록은 믿을 수 없다. 모델 평가실 평가 벤치에 출력해 둔 기록이 있을지도.' },
   { when: () => collectedItems.has('f12-network-isolated'), title: '이상한 밤 찾기', text: '기록은 지켜 냈다. 야간 로그 단말기에서 그날 밤 무슨 일이 있었는지 확인하자.' },
   { when: () => logDeleting(), title: '로그 삭제를 막아라', text: '누군가 기록을 지우고 있다! 연결을 끊어야 한다.' },
+  // 포스트잇을 읽고 닫으면(goal-postit) 사원증이 있는 곳을 가리킨다.
+  { when: () => collectedItems.has('story-badge-seen') && !collectedItems.has('f16-badge') && collectedItems.has('goal-postit'), title: '출입증 쌔비기',
+    text: '팀장은 16층 카페에 사원증을 자주 두고 간다. 카페에 가 보자.' },
   { when: () => collectedItems.has('story-badge-seen') && !collectedItems.has('f16-badge'), title: '출입증 쌔비기', text: '출입증이 필요하다. 내 자리 옆 사원의 자리를 조사해보자.' },
   { when: () => collectedItems.has('story-robot-seen') && !collectedItems.has('f1-robot-log'), title: '이상 행동',
     text: '경비 로봇은 왜 나를 노렸을까? ARCHI 개발 팀을 조사해보자.' },

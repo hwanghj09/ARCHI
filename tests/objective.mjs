@@ -138,7 +138,7 @@ try {
   await page.keyboard.press('Escape');
   await waitTyped('출입증 쌔비기', '출입증이 필요하다. 내 자리 옆 사원의 자리를 조사해보자.');
   assert.equal(await page.evaluate(() => officePostit.element.hidden), false, '출입증 쌔비기가 시작되면 옆자리 포스트잇이 생긴다');
-  // 포스트잇을 조사하면 같은 제목 아래 내용이 '쪽지에 적힌 그 사람이라면 출입증을 갖고 있겠지.'로 바뀐다.
+  // 포스트잇을 읽고 닫으면 같은 제목 아래 내용이 16층 카페를 가리키도록 바뀐다.
   await page.evaluate(() => {
     performFloorChange('f17', null); performRoomChange?.();
     Body.setPosition(body, { x: officePostit.x + officePostit.width / 2, y: floorY - 81 });
@@ -148,7 +148,7 @@ try {
   await page.waitForTimeout(300);
   assert.equal(await page.evaluate(() => currentObjective.text), '출입증이 필요하다. 내 자리 옆 사원의 자리를 조사해보자.', '포스트잇을 읽는 동안에도 목표는 그대로다');
   await page.keyboard.press('Escape');
-  assert.equal(await page.evaluate(() => currentObjective.text), '출입증이 필요하다. 내 자리 옆 사원의 자리를 조사해보자.', '포스트잇을 읽어도 목표 내용은 바뀌지 않는다');
+  await waitTyped('출입증 쌔비기', '팀장은 16층 카페에 사원증을 자주 두고 간다. 카페에 가 보자.');
 
   // 사원증을 챙기면 목표가 '이상 행동'으로 돌아가고, 12층 게이트 앞에서 컷씬이 다시 나오지 않는다.
   await page.evaluate(() => { collectedItems.add('f16-badge'); collectedItems.add('story-badge-got-seen'); collectedItems.delete('story-gate-tagged'); }); // 사원증 컷씬은 아래 별도 확인에서 본다

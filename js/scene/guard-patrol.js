@@ -64,9 +64,16 @@ function catchPlayer(robot = guardPatrol) {
 
 document.getElementById('guard-retry').addEventListener('click', () => {
   if (!playerCaught) return;
+  // R-03에게 잡히면 그 층 엘리베이터 앞에서 다시 하고 R-03은 다른 층으로 보낸다. 1층 R-01은 로비에서 다시 한다.
+  const byRoamer = caughtBy === roamer;
+  const sceneId = floorId(currentSceneFloor);
   releaseGuardCapture();
   Object.assign(guardPatrol, { x: 4530, facing: -1, wait: 0, elapsed: 0 });
-  performFloorChange('f1');
+  if (byRoamer) {
+    roamer.lastFloor = sceneId; roamer.trip = roamer.car = null;
+    roamerEnter(pickRoamerFloor(), 'elevator');
+  }
+  performFloorChange(byRoamer ? sceneId : 'f1');
   releaseInput(); stage.focus();
 });
 

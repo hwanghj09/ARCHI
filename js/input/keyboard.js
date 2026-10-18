@@ -1,4 +1,12 @@
 // 게임 조작키는 input.js의 설정을 사용한다. Esc와 창 안의 탐색 키는 고정한다.
+// 컷씬: Esc는 건너뛰기, 상호작용 키(E)와 Enter는 화면 클릭처럼 다음 대사로 넘긴다(건너뛰기 버튼에 초점이 있어도).
+// Space는 점프 키라 넘기지 않는다. 나머지 키는 막는다.
+function handleSceneKey(event, scene, skip) {
+  if (event.code === 'Escape') { event.preventDefault(); skip(); }
+  else if (keyMatches('interact', event.code) || event.code === 'Enter') { event.preventDefault(); if (!event.repeat) scene.click(); }
+  else if (event.code !== 'Tab') event.preventDefault();
+}
+
 window.addEventListener('keydown', event => {
   if (mainMenuActive) return;
   if (!b2CaptureScene.hidden) {
@@ -11,21 +19,9 @@ window.addEventListener('keydown', event => {
   if (!mapWindow.hidden && event.code === 'Escape') { if (!event.repeat) closeMap(); event.preventDefault(); return; }
   // M: 지도 버튼을 누른 것과 같다. 글을 쓰는 칸에서는 글자로 입력된다.
   if (event.code === 'KeyM' && !event.repeat && !event.ctrlKey && !event.metaKey && !event.altKey && !event.target.closest?.('textarea, input, select')) { event.preventDefault(); toggleMap(); return; }
-  if (storySceneActive) {
-    if (event.code === 'Escape') { event.preventDefault(); skipStoryScene(); }
-    else if (event.code !== 'Tab' && !(event.target.id === 'story-skip' && ['Enter'].includes(event.code))) event.preventDefault();
-    return;
-  }
-  if (blackoutSceneActive) {
-    if (event.code === 'Escape') { event.preventDefault(); finishBlackoutScene(); }
-    else if (event.code !== 'Tab' && !(event.target.id === 'blackout-skip' && ['Enter'].includes(event.code))) event.preventDefault();
-    return;
-  }
-  if (cctvSceneActive) {
-    if (event.code === 'Escape') { event.preventDefault(); finishCctvScene(); }
-    else if (event.code !== 'Tab' && !(event.target.id === 'cctv-skip' && ['Enter'].includes(event.code))) event.preventDefault();
-    return;
-  }
+  if (storySceneActive) return handleSceneKey(event, storyScene, skipStoryScene);
+  if (blackoutSceneActive) return handleSceneKey(event, blackoutScene, finishBlackoutScene);
+  if (cctvSceneActive) return handleSceneKey(event, cctvScene, finishCctvScene);
   // B2 엔딩 창(b2-ending.js)의 버튼만 누를 수 있고, 뒤의 수호는 움직이지 않는다.
   const endingButton = event.target.closest?.('#b2-bad-ending button, #b2-escape button');
   if (playerCaught || endingButton) {
@@ -36,11 +32,7 @@ window.addEventListener('keydown', event => {
     if (event.code !== 'Tab' && !(['Enter', 'Space'].includes(event.code) && event.target.id === 'hallucination-retry')) event.preventDefault();
     return;
   }
-  if (openingActive) {
-    if (event.code === 'Escape') { event.preventDefault(); finishOpening(); }
-    else if (event.code !== 'Tab' && !(event.target.id === 'opening-skip' && ['Enter'].includes(event.code))) event.preventDefault();
-    return;
-  }
+  if (openingActive) return handleSceneKey(event, opening, finishOpening);
   if (photoCaptureTime > 0 || itemUseTime > 0 && event.code !== 'Escape') { event.preventDefault(); return; }
   if (transitioning) { event.preventDefault(); return; }
   // B2 삭제 배틀 터미널(b2-ending.js)은 입력 칸이 키를 받는다. Esc로 닫는다.
