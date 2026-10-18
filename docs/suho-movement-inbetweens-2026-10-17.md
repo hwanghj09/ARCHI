@@ -8,8 +8,11 @@
 
 마지막 프레임을 포함한 3/7번의 높은 무릎 들기도 낮췄다. 뒤쪽 발끝이 지면을 지지하는 동안 앞발은 지면 가까이 내밀며, 일반·휴대폰 OFF·플래시 ON에 모두 적용했다.
 
+일반 걷기의 6개 자세에서 뒤통수와 목 사이에 남아 있던 회색 삼각형 잔상도 제거했다. 생성 도구로 정리한 투명 영역을 원본에 적용해 잔상 픽셀만 지웠으며, 나머지 원본 그림은 보존했다. 밝은 배경·어두운 배경에서 머리 외곽을 확대 확인했다.
+
 - [걷기 GIF](previews/suho-walk-inbetweens.gif): 일반 이동·휴대폰 OFF·플래시 ON.
 - [팔·다리 전후 비교](previews/suho-phone-walk-arm-swing.gif): 왼쪽 수정 전, 오른쪽 수정 후.
+- [머리 잔상 확대 비교](previews/suho-walk-head-cleanup.gif): 왼쪽 수정 전, 오른쪽 수정 후.
 - [달리기 GIF](previews/suho-run-inbetweens.gif): 일반 이동·휴대폰 OFF만 포함.
 - [원본 및 재생성 방법](../assets/player/movement-inbetweens-source/README.md)
 
