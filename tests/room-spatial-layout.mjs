@@ -153,8 +153,7 @@ try {
       }, entry);
       assert.equal(front.key, `room:${id}`, `${id}: visible corridor doorway selects its own room`);
       assert.equal(await page.locator('#interaction-hint').textContent(), `E · ${entry.name} 들어가기`);
-      if (mobile) await page.locator('#interact').tap();
-      else await page.keyboard.press('e');
+      await page.keyboard.press('e');
       await finishSceneTransition(page);
       assert.equal(await page.evaluate(() => dynamicFloorId), id);
       const inside = await page.evaluate(async () => {
@@ -169,8 +168,7 @@ try {
       assert(inside.connected, `${id}: interior exit has a scene element`);
       assert.equal(inside.key, 'exit', `${id}: entry leaves the return doorway reachable`);
       assert.equal(await page.locator('#interaction-hint').textContent(), 'E · 복도로 나가기');
-      if (mobile) await page.locator('#interact').tap();
-      else await page.keyboard.press('e');
+      await page.keyboard.press('e');
       await finishSceneTransition(page);
       const returned = await page.evaluate(() => ({ id: dynamicFloorId, x: body.position.x }));
       assert.equal(returned.id, entry.parent);

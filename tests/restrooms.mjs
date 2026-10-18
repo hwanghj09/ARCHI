@@ -31,8 +31,7 @@ try {
         return { x: door.x, width: door.width, y: door.y, roomX: room.x, roomWidth: room.width };
       }, floor);
       assert.equal(await page.locator('#interaction-hint').textContent(), 'E · 화장실 들어가기');
-      if (mobile) await page.locator('#interact').tap();
-      else await page.keyboard.press('e');
+      await page.keyboard.press('e');
       await finishSceneTransition(page);
       const exit = await page.evaluate(() => {
         const door = currentDoors.find(door => door.key === 'exit');
@@ -63,8 +62,7 @@ try {
       if ([1, 7, 12, 17].includes(floor)) await page.screenshot({ path: `.local/restroom-${floor}-${mobile ? 'mobile' : 'desktop'}.png` });
       await page.clock.runFor(100);
       assert.equal(await page.locator('#interaction-hint').textContent(), 'E · 복도로 나가기');
-      if (mobile) await page.locator('#interact').tap();
-      else await page.keyboard.press('e');
+      await page.keyboard.press('e');
       await finishSceneTransition(page);
       assert.equal(await page.evaluate(() => currentSceneFloor), floor);
       assert.equal(await page.evaluate(() => world.dataset.room), floor === 17 ? 'corridor' : 'dynamic');

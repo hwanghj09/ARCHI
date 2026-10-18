@@ -117,8 +117,7 @@ try {
         }
       } else assert.equal(geometry.rect, null, `${id}: clear aisles use their original background`);
       assert.equal(await page.locator('#interaction-hint').textContent(), 'E · 복도로 나가기', `${id}: aligned exit interaction`);
-      if (viewport.width === 390) await page.locator('#interact').tap();
-      else await page.keyboard.press('e');
+      await page.keyboard.press('e');
       await finishSceneTransition(page);
       assert.equal(await page.evaluate(() => dynamicFloorId), geometry.parent);
       assert(Math.abs(await page.evaluate(() => body.position.x) - geometry.outsideX - 40) < 1,
