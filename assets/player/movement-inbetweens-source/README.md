@@ -10,7 +10,9 @@
 | `run.png` | 4열 × 2행, 달리기 중간 자세 8장 | `../jeong-suho-run-sixteen.png` |
 | `phone-run-off.png` | 4열 × 2행, 휴대폰을 든 중간 자세 8장 | `../jeong-suho-phone-run-sixteen-off.png` |
 
-걷기는 접지 → 무릎을 굽혀 체중 받기 → 반대 다리 통과 → 지지 발의 뒤꿈치를 들고 발끝 밀기 순서다. 후반 4장은 반대 발이 지지하며 팔도 반대로 움직인다. 모든 프레임에 지지하는 발 또는 발끝이 바닥에 닿는다. 머리 기준점과 몸 크기를 통일하고 상하 움직임은 약 3px로 제한했다. 휴대폰을 잡은 가까운 팔은 앞으로 유지하며, 빈손인 먼쪽 팔은 몸통 뒤로 가려진다.
+걷기는 접지 → 무릎을 굽혀 체중 받기 → 반대 다리 통과 → 지지 발의 뒤꿈치를 들고 발끝 밀기 순서다. 후반 4장은 반대 발이 지지하며 팔도 반대로 움직인다. 모든 프레임에 지지하는 발 또는 발끝이 바닥에 닿는다. 3/7번의 과도한 무릎 들기를 낮춰, 앞으로 내미는 신발이 지면 가까이를 지나게 했다. 머리 기준점과 몸 크기를 통일하고 상하 움직임은 약 3px로 제한했다.
+
+휴대폰은 먼쪽 손으로 잡고, 빈손인 가까운 팔은 어깨·팔꿈치·손목이 보이도록 그렸다. 빈손은 다리와 반대로 흔들린다. 0/1/7번에서는 뒤쪽, 2/6번에서는 중간, 3/4/5번에서는 앞쪽을 지난다. 모든 자세는 휴대폰을 잡은 팔 하나와 빈손 팔 하나로 구성한다. ON은 생성된 LED 부분만 OFF에 정렬해 합성했으므로, 플래시를 전환해도 몸과 팔이 바뀌지 않는다.
 
 게임에는 **플래시를 켜고 달리는 기능이 없다**. 켜진 동안 Shift를 눌러도 걷는다. 켜진 달리기의 확장 시트·생성 원본·미리보기는 제거했다. `jeong-suho-phone-jump-on.png`는 기존 보존 시트 `jeong-suho-phone-run-on.png`의 2/6번 공중 자세만 픽셀 그대로 추출한 점프·낙하 전용 2프레임 시트다. 지상 달리기에는 사용하지 않는다.
 
@@ -18,4 +20,4 @@
 
 프로젝트 루트의 `node scripts/prepare-movement-inbetweens.mjs`가 최근접 보간·알파 정리·정렬·셀 배열만 수행해 시트를 재생성한다. 걷기의 기준점은 머리 중심 x=135, 발 기준선은 일반 239/휴대폰 237이다. ON/OFF는 OFF의 정렬값을 공유한다. 광원 좌표는 `js/scene/camera.js`의 실제 LED 위치에 맞췄다.
 
-검증은 `tests/movement-inbetweens.mjs`와 `tests/phone-movement.mjs`다. `docs/previews/suho-walk-inbetweens.gif`는 일반·휴대폰 OFF·플래시 ON 걷기 3개이고, `suho-run-inbetweens.gif`는 일반·휴대폰 OFF 달리기 2개만 보여 준다.
+검증은 `tests/movement-inbetweens.mjs`와 `tests/phone-movement.mjs`다. 빈손의 앞·중간·뒤 움직임, ON/OFF의 팔 위상, 3/7번의 낮은 앞발 높이도 검사한다. `docs/previews/suho-walk-inbetweens.gif`는 일반·휴대폰 OFF·플래시 ON 걷기 3개이고, `suho-run-inbetweens.gif`는 일반·휴대폰 OFF 달리기 2개만 보여 준다. `suho-phone-walk-arm-swing.gif`는 팔과 다리 수정 전(왼쪽)과 후(오른쪽) 비교다.

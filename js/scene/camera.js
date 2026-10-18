@@ -7,8 +7,8 @@ let cameraZoom = 1;
 const cameraFocus = { x: 0, y: 0 };
 const cameraShake = { x: 0, y: 0 };
 // Phone LED coordinates in the 256px animation cells, rendered at 75% scale.
-const walkPhoneLamps = [[167, 68], [167, 69], [168, 67], [169, 66],
-  [171, 69], [168, 70], [169, 70], [169, 68]];
+const walkPhoneLamps = [[169, 66], [169, 67], [170, 66], [170, 64],
+  [171, 66], [171, 67], [170, 65], [171, 65]];
 const runPhoneLamps = [[195, 75], [202, 77], [201, 72], [206, 80], [201, 66], [213, 77], [212, 70], [213, 74],
   [204, 71], [208, 85], [202, 69], [208, 82], [204, 66], [205, 89], [202, 78], [203, 78]];
 

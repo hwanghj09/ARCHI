@@ -4,7 +4,12 @@
 
 **플래시 ON 상태에서는 달릴 수 없다.** Shift를 눌러도 걷기 속도와 걷기 그림을 유지한다. 켜진 달리기 확장 시트와 해당 미리보기는 제거했다. 점프·낙하에서는 기존 공중 자세 두 장만 추출한 `jeong-suho-phone-jump-on.png`를 사용한다.
 
+휴대폰은 먼쪽 손으로 잡고 가까운 빈손 팔이 어깨부터 손목까지 보이도록 다시 그렸다. 빈손은 뒤쪽(0/1/7번) → 중간(2/6번) → 앞쪽(3/4/5번)을 오가며 다리와 반대로 흔들린다. 팔이 겹쳐 붙어 보이던 부분을 정리하고, ON에는 생성된 LED 부분만 OFF에 합성해 몸과 팔을 동일하게 유지했다.
+
+마지막 프레임을 포함한 3/7번의 높은 무릎 들기도 낮췄다. 뒤쪽 발끝이 지면을 지지하는 동안 앞발은 지면 가까이 내밀며, 일반·휴대폰 OFF·플래시 ON에 모두 적용했다.
+
 - [걷기 GIF](previews/suho-walk-inbetweens.gif): 일반 이동·휴대폰 OFF·플래시 ON.
+- [팔·다리 전후 비교](previews/suho-phone-walk-arm-swing.gif): 왼쪽 수정 전, 오른쪽 수정 후.
 - [달리기 GIF](previews/suho-run-inbetweens.gif): 일반 이동·휴대폰 OFF만 포함.
 - [원본 및 재생성 방법](../assets/player/movement-inbetweens-source/README.md)
 
@@ -15,7 +20,7 @@
 | 검사 | 결과 |
 | --- | --- |
 | `node scripts/prepare-movement-inbetweens.mjs` | 재생성 통과, 잘림 없음 |
-| `node tests/movement-inbetweens.mjs` | 통과: 8단계 걷기의 접지·발끝 밀기·머리 기준점, 알파·여백, 달리기/점프 원본 픽셀 보존, Chromium의 전체 8/16프레임 재생·셀 선택·정지 복귀 |
+| `node tests/movement-inbetweens.mjs` | 통과: 빈손의 앞·중간·뒤 움직임과 ON/OFF 팔 위상, 3/7번의 낮은 앞발, 8단계 걷기의 접지·발끝 밀기·머리 기준점, 알파·여백, 달리기/점프 원본 픽셀 보존, Chromium의 전체 8/16프레임 재생·셀 선택·정지 복귀 |
 | `node tests/phone-movement.mjs` | 통과: 각 LED/광원 위치, 양방향 이동, 플래시 ON에서 Shift 달리기 차단, 전용 점프/낙하 2프레임, 배터리·넣기·모바일·터치 |
 | `node tests/opening.mjs` | 통과: 오프닝·제어 인계·모바일·이미지 실패 복구 |
 | `npm run test:syntax` | 89/89 스크립트 파싱 통과 |
