@@ -268,7 +268,7 @@ function renderSlots() {
     save.type = load.type = 'button';
     save.textContent = '저장'; load.textContent = '불러오기';
     save.dataset.slotSave = load.dataset.slotLoad = String(index);
-    save.disabled = !gameStarted;
+    save.disabled = !gameStarted || slotsLoadOnly;
     load.disabled = !saved;
     buttons.append(save, load);
     item.append(info, buttons);
@@ -276,7 +276,21 @@ function renderSlots() {
   }));
 }
 
+// 게임 오버 창(로봇·환각)의 [불러오기]도 이 창을 연다. 그때는 붙잡힌 상태를 저장하지 않게 저장 버튼을 막는다(slotsLoadOnly).
+// '← 메인으로'를 누르면 메인 메뉴로, 거기서 '계속하기'를 누르면 게임 오버 창으로 돌아간다.
+let slotsLoadOnly = false;
+for (const button of document.querySelectorAll('.game-over-load')) button.addEventListener('click', () => {
+  slotsLoadOnly = true;
+  menuReturnButton = menuContinue;
+  mainMenuActive = true;
+  document.body.dataset.mainMenu = 'true';
+  menuSlotsStatus.textContent = '불러올 칸을 고르세요. 붙잡힌 지금 상태는 저장하지 않습니다.';
+  renderSlots();
+  showMainMenu('slots');
+});
+
 document.getElementById('menu-slots-button').addEventListener('click', event => {
+  slotsLoadOnly = false;
   menuReturnButton = event.currentTarget;
   menuSlotsStatus.textContent = gameStarted ? '목표가 바뀔 때마다 가장 오래된 칸에 자동으로 저장됩니다.' : '게임을 시작한 뒤에 저장할 수 있습니다. 저장된 칸은 불러올 수 있습니다.';
   renderSlots();

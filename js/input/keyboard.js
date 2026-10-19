@@ -28,12 +28,13 @@ window.addEventListener('keydown', event => {
   if (cctvSceneActive) return handleSceneKey(event, cctvScene, finishCctvScene);
   // B2 엔딩 창(b2-ending.js)의 버튼만 누를 수 있고, 뒤의 수호는 움직이지 않는다.
   const endingButton = event.target.closest?.('#b2-bad-ending button, #b2-escape button');
+  const gameOverButton = event.target.closest?.('.game-over button'); // 다시 시도 · 불러오기
   if (playerCaught || endingButton) {
-    if (event.code !== 'Tab' && !(['Enter', 'Space'].includes(event.code) && (event.target.id === 'guard-retry' || endingButton))) event.preventDefault();
+    if (event.code !== 'Tab' && !(['Enter', 'Space'].includes(event.code) && (gameOverButton || endingButton))) event.preventDefault();
     return;
   }
   if (hallucinationCaught) {
-    if (event.code !== 'Tab' && !(['Enter', 'Space'].includes(event.code) && event.target.id === 'hallucination-retry')) event.preventDefault();
+    if (event.code !== 'Tab' && !(['Enter', 'Space'].includes(event.code) && gameOverButton)) event.preventDefault();
     return;
   }
   if (openingActive) return handleSceneKey(event, opening, finishOpening);

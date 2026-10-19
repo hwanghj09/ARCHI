@@ -6,6 +6,8 @@ const BRAND_NAMES = {
   store: 'VU',
   ramen: '인라면',
   ramenEnglish: 'IN RAMEN',
+  blogService: 'BLORIA', // 컴퓨터 블로그 화면의 서비스 이름
+  blogDomain: 'blog.bloria.net',
 };
 const BRAND_ART = {
   storeEmblem: 'assets/objects/signage/store-emblem.png',
@@ -61,4 +63,10 @@ function addCartonBrand(parent) {
   english.textContent = BRAND_NAMES.ramenEnglish;
   label.append(english);
   parent.append(label);
+}
+
+// HTML에 고정된 글자(data-brand="BRAND_NAMES의 키")를 설정한 이름으로 채운다: 컴퓨터 블로그의 서비스 이름·주소.
+// 화면이 없는 곳(tests/brands.mjs의 node 실행)에서는 건너뛴다.
+if (typeof document !== 'undefined') {
+  for (const element of document.querySelectorAll('[data-brand]')) element.textContent = BRAND_NAMES[element.dataset.brand];
 }

@@ -96,6 +96,7 @@ function autoCloseElevators() {
     if (elevatorOpenTime[index] < elevatorAutoCloseMs) return;
     elevatorOpenTime[index] = 0;
     car.open = false;
+    car.playerCall = false; // 부른 칸을 타지 않고 문이 닫히면 다시 아무나 쓸 수 있다
     if (car.floor === currentSceneFloor) {
       const door = currentDoors.find(candidate => candidate.type === 'elevator' && candidate.carIndex === index);
       if (door) playGameSound('elevator-door', { x: door.x + door.width / 2 });

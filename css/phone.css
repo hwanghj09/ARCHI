@@ -90,6 +90,8 @@
 .phone-gallery-icon { background: linear-gradient(145deg, #ebdcb5, #759d8c); }
 .phone-photo-help, #phone-camera-status, #phone-gallery-empty { margin: 8px 0; font-size: 12px; line-height: 1.7; overflow-wrap: anywhere; }
 #phone-camera-shoot { width: 100%; border-radius: 12px; }
+/* 사진 찍기는 다른 버튼과 구분되게 노란 테두리로 강조한다(누를 수 없을 때는 보통 모양). */
+#phone #phone-camera-shoot:not(:disabled), #inspection #inspection-photo:not(:disabled) { border: 2px solid #f5d478; box-shadow: 0 0 10px #f5d47866; color: #fff3cf; }
 #phone-camera-preview { max-height: 180px; overflow: hidden; border-radius: 8px; background: #101921; }
 #phone-gallery-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin: 0; padding: 0; list-style: none; }
 #phone .phone-photo-card { display: flex; flex-direction: column; gap: 6px; width: 100%; min-height: 44px; padding: 6px; border: 1px solid #536778; border-radius: 8px; background: #172535; text-align: left; overflow-wrap: anywhere; }
