@@ -94,7 +94,7 @@ try {
   await page.evaluate(() => { phoneLightOn = false; });
   await page.evaluate(() => { collectedItems.add('story-anxiety-seen'); sanity = 50; updateSanity(1000); });
   near((await state()).sanity, 49.9);
-  await page.evaluate(() => { collectedItems.add('f16-antianxiety-used'); collectedItems.add('sanity-drain-resume'); sanity = 50; updateSanity(1000); });
+  await page.evaluate(() => { collectedItems.add('f16-antianxiety-used'); sanity = 50; updateSanity(1000); });
   near((await state()).sanity, 50 - 1 / 3); // 임무 감소만 멈추고 어둠의 기본 소모는 유지한다.
   await page.evaluate(() => { sanity = 50; phoneLightOn = true; phoneBattery = 100; updateSanity(1000); });
   assert.equal((await state()).sanity, 50, '항불안제 사용 후 빛을 비추면 임무·어둠 감소가 모두 없다');
@@ -148,17 +148,25 @@ try {
   assert.equal(screens.propScreens > 0, true, '책상 소품의 모니터 화면도 바뀐다');
   assert.equal(screens.hidden, true, '정신력이 오르면 모두 원래대로 돌아온다');
 
-  // ---- 항불안제를 쓴 뒤에는 다시 닳기 시작하는 조건(sanity-drain-resume)이 생기기 전까지 정신력이 닳지 않는다 ----
-  const calm = await page.evaluate(() => {
-    const out = {};
-    collectedItems.add('f16-antianxiety-used'); sanity = 50; guardPatrol.mode = 'chase'; bossFightActive = false;
-    updateSanity(1000); out.calm = sanity;
-    collectedItems.add('sanity-drain-resume'); sanity = 50; updateSanity(1000); out.resumed = sanity;
-    guardPatrol.mode = 'patrol'; collectedItems.delete('sanity-drain-resume'); collectedItems.delete('f16-antianxiety-used'); sanity = 100;
-    return out;
-  });
-  assert.equal(calm.calm, 50, '항불안제를 쓴 뒤에는 쫓겨도 정신력이 닳지 않는다');
-  assert(Math.abs(calm.resumed - 40) < .1, '조건이 생기면 원래 규칙(쫓길 때 초당 10%)으로 돌아간다');
+  // ---- 항불안제 사용 직후부터 진행 플래그와 무관하게 어둠·추격 감소를 적용한다 ----
+  for (const progress of [null, 'f12-evaluation-solved', 'sanity-drain-resume']) {
+    const drained = await page.evaluate(progress => {
+      const out = {};
+      collectedItems.add('f16-antianxiety-used');
+      if (progress) collectedItems.add(progress);
+      sanity = 50; updateSanity(3000); out.dark = sanity;
+      sanity = 50; guardPatrol.mode = 'chase'; bossFightActive = false;
+      updateSanity(1000); out.chasing = sanity;
+      sanity = 12; updateSanity(1000); out.floor = sanity;
+      guardPatrol.mode = 'patrol';
+      if (progress) collectedItems.delete(progress);
+      collectedItems.delete('f16-antianxiety-used'); sanity = 100;
+      return out;
+    }, progress);
+    near(drained.dark, 49);
+    near(drained.chasing, 40);
+    assert.equal(drained.floor, 10, '회복약 사용 뒤에도 추격 감소는 10%에서 멈춘다');
+  }
 
   // ---- 0%가 되기 전에는 예고 환각이 나타나지 않는다 ----
   await page.evaluate(() => { sanity = 2; hallucinationMode = null; updateSanity(16); });

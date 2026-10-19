@@ -533,10 +533,7 @@ function updateSanity(elapsed) {
   if (!paused) {
     // 정신 불안 임무: 첫 컷씬을 본 뒤 항불안제를 쓰기 전까지는 어디서든 천천히 줄어든다(추격 중에는 추격 감소량 적용).
     const anxiety = collectedItems.has('story-anxiety-seen') && !collectedItems.has('f16-antianxiety-used') && !collectedItems.has('b2-antianxiety-used');
-    // 항불안제 효과는 12층 모델 평가실 퍼즐을 풀 때까지(f12-evaluation-solved) 간다. 그 뒤로는 어둠·추격 규칙대로 닳고,
-    // B1 관제실 소등(cctv-event.js의 sanity-drain-resume)에서 한 번에 깎인다.
-    const calm = collectedItems.has('f16-antianxiety-used') && !collectedItems.has('sanity-drain-resume') && !collectedItems.has('f12-evaluation-solved');
-    const rate = calm ? 0 : chasing ? -sanityChaseDrainPerSecond : anxiety ? -sanityAnxietyDrainPerSecond : exposure === 'dark' ? -sanityDarkDrainPerSecond : 0;
+    const rate = chasing ? -sanityChaseDrainPerSecond : anxiety ? -sanityAnxietyDrainPerSecond : exposure === 'dark' ? -sanityDarkDrainPerSecond : 0;
     // 쫓기는 동안의 감소는 10%에서 멈춘다(이미 10% 아래면 쫓겨서는 더 줄지 않는다).
     const lowest = chasing ? Math.min(sanity, sanityChaseFloor) : 0;
     sanity = Math.max(lowest, Math.min(100, sanity + rate * elapsed / 1000));

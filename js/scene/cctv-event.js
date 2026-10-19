@@ -257,7 +257,6 @@ function commitCctvLightsOut() {
   if (collectedItems.has(cctvLightsOutItem)) return;
   collectedItems.add(cctvLightsOutItem);
   updatePowerState(); // 지하(B1·B2)의 전등이 모두 꺼진다(power.js)
-  collectedItems.add('sanity-drain-resume'); // 항불안제 뒤에 멈춰 있던 정신력 감소가 이 컷씬 뒤로 다시 정상적으로 이어진다(sanity.js)
   sanity = Math.max(0, sanity - cctvLightsSanityLoss);
   refreshSanity();
 }

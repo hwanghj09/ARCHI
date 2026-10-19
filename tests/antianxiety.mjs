@@ -93,6 +93,14 @@ try {
   await page.evaluate(() => useInventoryItem('f16-antianxiety'));
   assert.equal(await page.evaluate(() => itemUseTime), 0, 'A used item cannot restart the animation');
 
+  await page.evaluate(() => { buildingBlackout = true; phoneLightOn = false; updatePowerState(); });
+  const restored = await page.evaluate(() => sanity);
+  await page.clock.runFor(3000);
+  const drained = await page.evaluate(() => sanity);
+  assert(Math.abs(restored - drained - 1) < .08, '복용 후에도 어둠에서는 3초에 정신력이 1 줄어든다');
+  await page.evaluate(() => { guardPatrol.mode = 'chase'; updateSanity(1000); guardPatrol.mode = 'patrol'; });
+  assert(Math.abs(await page.evaluate(() => sanity) - (drained - 10)) < .08, '복용 후에도 추격당하면 초당 정신력이 10 줄어든다');
+
   assert.deepEqual(errors, []);
   console.log('antianxiety: ok');
 } finally {
