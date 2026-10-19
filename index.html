@@ -365,7 +365,7 @@
         <h2 id="guard-capture-title">GAME OVER</h2>
         <strong>로봇에게 붙잡혔다</strong>
         <p>이 층 엘리베이터 앞에서 다시 시도합니다. 수집한 단서는 유지됩니다.</p>
-        <button id="guard-retry" type="button">다시 시도</button>
+        <div class="game-over-actions"><button id="guard-retry" type="button">다시 시도</button><button class="game-over-load" type="button">불러오기</button></div>
       </div>
     </section>
     <section id="power-panel" role="dialog" aria-modal="true" aria-labelledby="power-title" aria-describedby="power-help" hidden>
@@ -495,7 +495,7 @@
         <h2 id="hallucination-caught-title">GAME OVER</h2>
         <strong>환각에게 삼켜졌다</strong>
         <p>정신을 차려 보니 아직 같은 자리다. 정신력을 조금 되찾았다.</p>
-        <button id="hallucination-retry" type="button">다시 정신 차리기</button>
+        <div class="game-over-actions"><button id="hallucination-retry" type="button">다시 정신 차리기</button><button class="game-over-load" type="button">불러오기</button></div>
       </div>
     </section>
     <button id="inventory-button" type="button" aria-controls="inspection" aria-expanded="false" aria-label="가방 · Tab" title="가방 · Tab"></button>
@@ -629,8 +629,8 @@
         </div>
         <div id="computer-browser" class="computer-content" hidden>
           <div class="naver-blog">
-            <div class="blog-browser-bar"><span aria-hidden="true">▣</span><span>blog.naver.com / 시설관리의 기록</span></div>
-            <div class="blog-service-bar"><strong><span>NAVER</span> blog</strong><span>시설관리의 기록</span></div>
+            <div class="blog-browser-bar"><span aria-hidden="true">▣</span><span><span data-brand="blogDomain">blog.bloria.net</span> / 시설관리의 기록</span></div>
+            <div class="blog-service-bar"><strong><span data-brand="blogService">BLORIA</span> blog</strong><span>시설관리의 기록</span></div>
             <div class="blog-cover"><p>ARCHI BUILDING</p><h2>시설관리의 기록</h2><p>건물의 하루를 기록합니다.</p></div>
             <div class="blog-menu"><strong>블로그</strong><span>시설 점검과 일상 이야기</span></div>
             <div class="blog-connection">

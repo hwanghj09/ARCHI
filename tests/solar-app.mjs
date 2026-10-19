@@ -65,7 +65,7 @@ try {
   await page.evaluate(() => { collectedItems.add("f17-emergency-linked"); solarEnabled = true; solarPoweredFloors = [17]; updatePowerState(); });
   assert(await page.locator('#computer-solar-page').isVisible(), 'Restoring power opens the blog automatically');
   await openApp('browser');
-  assert.match(await page.locator('.blog-service-bar').textContent(), /NAVER.*blog/);
+  assert.match(await page.locator('.blog-service-bar').textContent(), new RegExp(`${await page.evaluate(() => BRAND_NAMES.blogService)}.*blog`));
   assert.match(await page.locator('#solar-blog-title').textContent(), /태양광.*다운로드/);
   assert.match(await page.locator('.blog-attachment').textContent(), /ARCHI_태양광_제어앱\.apk/);
   assert(await page.locator('#computer-blog-list-title').evaluate(el => el === document.activeElement), 'Opening the blog focuses the list');

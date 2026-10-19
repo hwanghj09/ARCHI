@@ -164,8 +164,10 @@ function roamerLeave() {
 }
 
 // 탈 칸: 아무도 안 탔고 운행 중이 아닌 칸 중 이 층에 서 있는 칸, 없으면 가장 가까운 칸.
+// 수호가 부른 칸(playerCall)과 문이 열려 있는 칸은 고르지 않는다: 수호 앞에 막 도착한 칸을 가져가 닫고 다른 층으로 보내던 문제.
 function pickRoamerCar(floor) {
-  const idle = elevatorCars.map((car, index) => ({ car, index })).filter(({ car }) => !car.rider && !car.travelling);
+  const idle = elevatorCars.map((car, index) => ({ car, index }))
+    .filter(({ car }) => !car.rider && !car.travelling && !car.open && !car.playerCall);
   idle.sort((a, b) => Math.abs(a.car.floor - floor) - Math.abs(b.car.floor - floor));
   return idle[0]?.index ?? null;
 }
@@ -194,7 +196,9 @@ function roamerToElevator() {
     return;
   }
   const car = elevatorCars[roamer.car];
-  if (car.rider || (car.travelling && car.destination !== config.floor)) { roamer.car = null; return; }
+  // 걸어오는 사이 수호가 그 칸을 불렀거나 다른 층에서 문이 열려 있으면 미리 골라 둔 칸을 포기하고 다시 고른다.
+  if (car.rider || car.playerCall || (car.open && car.floor !== config.floor) ||
+      (car.travelling && car.destination !== config.floor)) { roamer.car = null; return; }
   roamer.trip = { phase: 'call', time: 0 };
   if (car.floor !== config.floor && !car.travelling) Object.assign(car, { travelling: true, destination: config.floor, elapsed: 0, open: false });
 }

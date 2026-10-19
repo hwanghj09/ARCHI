@@ -100,6 +100,7 @@ function showCabin(carIndex) {
   renderHallucination();
   releaseInput();
   elevatorCars[carIndex].rider = true;
+  elevatorCars[carIndex].playerCall = false;
   elevatorCars[carIndex].open = true;
   cabinScene.dataset.door = 'open';
   stage.inert = true;

@@ -268,6 +268,7 @@ function interact() {
     }
     car.travelling = true;
     car.rider = false;
+    car.playerCall = true; // 수호가 부른 칸: 탈 때까지(또는 문이 저절로 닫힐 때까지) R-03이 가져가지 않는다(guard-patrol.js)
     car.destination = currentSceneFloor;
     car.elapsed = 0;
     car.open = false;
