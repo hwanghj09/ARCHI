@@ -18,7 +18,7 @@ const PUZZLE_STEPS = [
   { label: '7F 백업 장비 · 오늘 기록', at: 'f7', items: ['f7-external-connection-solved'] },
   { label: '13F 보안 자료실 백업 장치', at: 'f13', items: ['f13-backup-device'] },
   { label: '2F 리허설 영상', at: 'f2', items: ['f2-reel', 'f2-remote', 'f2-projected'] },
-  { label: 'B1 CCTV·B2 운행 제한 해제', at: 'b1', items: ['b1-lights-out', 'sanity-drain-resume', 'b1-cctv-live', 'b1-cctv-seen', 'b2-restricted-seen', 'b1-elevator'] },
+  { label: 'B1 CCTV·B2 운행 제한 해제', at: 'b1', items: ['b1-lights-out', 'b1-cctv-live', 'b1-cctv-seen', 'b2-restricted-seen', 'b1-elevator'] },
   { label: 'B2 카메라·외부 회선 차단', at: 'b2', items: ['b2-cctv-off', 'b2-transfer-cut'] },
   { label: 'B2 메인 콘솔 DELETE', at: 'b2-main' },
 ];
