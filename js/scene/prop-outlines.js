@@ -76,7 +76,6 @@ const PROP_OUTLINES = {
   'assets/objects/floor-kit/wet-floor-sign.png': [0.2148, 0.0352, 0.7813, 0.9688],
   'assets/objects/floor02/lounge-sofa.png': [0.0234, 0.0526, 0.9766, 0.9474],
   'assets/objects/floor02/lounge-table.png': [0.0156, 0.0703, 0.9844, 0.9219],
-  'assets/objects/floor02/projector-remote.png': [0.1, 0.2, 0.9, 0.8],
   'assets/objects/floor11/emergency-cabinet-states.png': [0.0352, 0.0313, 0.9629, 0.9688],
   'assets/objects/floor13/incident-printer-states.png': [0.1641, 0.0547, 0.832, 0.9688],
   'assets/objects/floor13/testbay-ups-states.png': [0.1094, 0.0313, 0.8906, 0.9688],
@@ -85,6 +84,8 @@ const PROP_OUTLINES = {
   'assets/objects/floor16/cafe-table-badge-states.png': [0.0156, 0.3828, 0.9844, 0.9688],
   'assets/objects/floor16/shutter-panel-states.png': [0.2461, 0.0156, 0.7539, 0.9844],
   'assets/objects/floor16/voice-kiosk-states.png': [0.2344, 0.0156, 0.7617, 0.9844],
+  'assets/objects/items/battery-projector.png': [0.0439, 0.1435, 0.9601, 0.8206],
+  'assets/objects/items/projector-remote-v2.png': [0.3254, 0.0175, 0.6643, 0.9856],
   'assets/objects/power/solar-supply-off-on.png': [0.0259, 0.3348, 0.9831, 0.7802],
   'assets/ui/floor17/emergency-panel-states.png': [0.0125, 0.0128, 0.9896, 0.9681],
 };
