@@ -28,6 +28,8 @@ let blinkFlashTimer = 0;
 let ambientTimer = 0;
 let ambientNextIn = randomBetween(ambientSightingIntervalRange);
 let ambientSeenScene = null;
+let ambientLightFade = 0; // 멀리 보이는 형상에 플래시를 비춘 뒤 사라지기까지 흐른 시간(ms)
+const ambientLightFadeMs = 400;
 let hallucinationScene = null;
 let zeroEventLightTime = 0;
 let zeroEventStepTimer = 0;
@@ -88,7 +90,10 @@ function hallucinationSceneKey() { return room === 'dynamic' ? dynamicFloorId : 
 function hallucinationSpawnX(distance) {
   const left = Math.max(96, cameraX + 64);
   const right = Math.min(worldWidth - 96, cameraX + viewWidth - 64);
-  const side = body.position.x - left > right - body.position.x ? -1 : 1;
+  // 보이는 범위 안에 자리가 있는 쪽(왼쪽·오른쪽) 중 무작위로 고른다. 수호가 화면 왼쪽에 서 있어 오른쪽에만 나타나던 것을 바로잡는다.
+  const leftRoom = body.position.x - left, rightRoom = right - body.position.x, need = Math.min(distance, 160);
+  const sides = [leftRoom >= need ? -1 : 0, rightRoom >= need ? 1 : 0].filter(Boolean);
+  const side = sides.length ? sides[Math.floor(Math.random() * sides.length)] : leftRoom > rightRoom ? -1 : 1;
   const target = Math.max(left, Math.min(right, body.position.x + side * distance));
   const doors = currentDoors.filter(door => ['elevator', 'room', 'stairs'].includes(door.type));
   const clear = x => doors.every(door => x <= door.x - 38 || x >= door.x + door.width + 38);
@@ -100,6 +105,10 @@ function hallucinationSpawnX(distance) {
 }
 
 function startZeroCharge() {
+  // 추격이 시작되면 켜져 있던(켜는 중이던) 플래시는 꺼진다.
+  if (phoneLightDelay) { clearTimeout(phoneLightDelay); phoneLightDelay = 0; phoneRaising = false; }
+  if (phoneLightOn) { phoneLightOn = false; phoneAwayTime = usingPhone ? 0 : 360; playGameSound('phone'); }
+  refreshPhone();
   endHallucinationSighting();
   zeroEventPhase = 'charging';
   zeroEventTimer = zeroEventLightTime = zeroEventStepTimer = 0;
@@ -174,6 +183,11 @@ document.getElementById('hallucination-retry').addEventListener('click', () => {
 });
 
 function updateZeroEvent(elapsed, fsmPaused) {
+  // B2 삭제 배틀(문 막기·삭제 진행) 동안에는 환각 추격이 일어나지 않고, 진행 중이던 것도 끝낸다.
+  if (b2Ending.phase === 'running') {
+    if (zeroEventPhase !== 'idle') { zeroEventPhase = 'idle'; zeroEventTimer = 0; zeroEventForced = false; endHallucinationSighting(); }
+    return;
+  }
   if (hallucinationCaught || fsmPaused) return;
   if (zeroEventForced && zeroEventPhase !== 'charging') zeroEventForced = false;
   if (zeroEventForced && sanity > zeroEventForcedFrom) { zeroEventForced = false; zeroEventPhase = 'idle'; zeroEventTimer = 0; endHallucinationSighting(); } // 정신력이 오르면 진행 중인 추격을 중지한다
@@ -205,8 +219,10 @@ function updateZeroEvent(elapsed, fsmPaused) {
     const beamY = parseFloat(world.style.getPropertyValue('--beam-y'));
     const ahead = (zeroEventGhostX - beamX) * facing;
     const verticalGap = Math.max(floorY - 168 - beamY, beamY - (floorY - 15), 0);
-    const inBeam = phoneLightOn && ahead > 0 && verticalGap <= ahead * Math.tan(24 * Math.PI / 180);
+    const onScreen = zeroEventGhostX > cameraX && zeroEventGhostX < cameraX + viewWidth; // 화면 밖에 있는 환각은 빛이 닿은 것으로 치지 않는다
+    const inBeam = phoneLightOn && onScreen && ahead > 0 && verticalGap <= ahead * Math.tan(24 * Math.PI / 180);
     zeroEventLightTime = inBeam ? zeroEventLightTime + elapsed : 0;
+    if (inBeam) emitGhostLightParticles(elapsed);
     if (zeroEventLightTime >= zeroEventLightHoldMs) { resolveZeroEvasion(); return; }
     zeroEventStepTimer += elapsed;
     if (zeroEventStepTimer >= 650) {
@@ -217,15 +233,17 @@ function updateZeroEvent(elapsed, fsmPaused) {
     const gap = body.position.x - zeroEventGhostX;
     if (Math.abs(gap) > hallucinationStartDistance + 240) { resolveZeroEvasion(); return; }
     const movingMs = Math.min(elapsed, zeroEventTimer - zeroEventWarningMs);
-    zeroEventGhostX += Math.sign(gap) * Math.min(Math.abs(gap), hallucinationStartDistance / zeroEventRushDurationMs * movingMs);
+    zeroEventGhostX += Math.sign(gap) * Math.min(Math.abs(gap), hallucinationStartDistance / zeroEventCrawlMs * Math.exp((zeroEventTimer - zeroEventWarningMs) / zeroEventAccelMs) * movingMs);
     if (Math.abs(body.position.x - zeroEventGhostX) <= zeroEventReachGap) triggerDevoured();
   }
 }
 
-// ---- 30% 미만: 가끔 멀리서 보이는, 공격하지 않는 환각 ----
+// ---- 15% 미만: 가끔 멀리서 보이는, 공격하지 않는 환각 ----
 
 function updateAmbientSighting(elapsed, fsmPaused) {
-  if (fsmPaused || hallucinationMode || fearTier < 3 || sanity <= 0 || sanityExposure() === 'bright') { ambientTimer = 0; return; }
+  // 휴대폰·조사창 등으로 멈춘 동안에는 쿨타임을 그대로 두고(재생 중이던 형상은 clearHallucinationEvents가 지운다), 밝은 층에서는 나오지 않는다.
+  if (fsmPaused || sanityExposure() === 'bright') return;
+  if (hallucinationMode || sanity >= 15 || sanity <= 0) { ambientTimer = 0; return; }
   if (ambientSeenScene === hallucinationSceneKey()) return;
   ambientTimer += elapsed;
   if (ambientTimer < ambientNextIn) return;
@@ -275,6 +293,7 @@ function beginHallucinationSighting(mode, side, distance) {
   hallucinationSide = side;
   hallucinationStartDistance = distance;
   hallucinationLife = 0;
+  ambientLightFade = 0;
   flashPrompt.hidden = mode !== 'charge';
 }
 
@@ -282,6 +301,7 @@ function endHallucinationSighting() {
   hallucinationMode = null;
   ambientTimer = 0;
   ambientNextIn = randomBetween(ambientSightingIntervalRange);
+  for (const dot of hallucinations.querySelectorAll(":scope > i")) dot.remove(); // 숨겨진 사이 멈춘 입자가 다음 추격에 다시 보이지 않게 지운다
   hallucinations.hidden = hallucinationEffects.hidden = true;
   delete document.body.dataset.hallucinating;
   hallucinationShadow.hidden = true;
@@ -291,6 +311,15 @@ function endHallucinationSighting() {
 function updateHallucinationSighting(elapsed, fsmPaused) {
   if (!hallucinationMode || fsmPaused || hallucinationMode === 'charge') return;
   hallucinationLife += elapsed;
+  // 플래시가 형상에 닿으면(화면 안) 0.4초에 걸쳐 서서히 사라진다. 한 번 닿으면 빛이 벗어나도 끝까지 사라진다.
+  const beamX = parseFloat(world.style.getPropertyValue('--beam-x'));
+  const beamY = parseFloat(world.style.getPropertyValue('--beam-y'));
+  const ahead = (hallucinationAnchorX - beamX) * facing;
+  const verticalGap = Math.max(floorY - 168 - beamY, beamY - (floorY - 15), 0);
+  const lit = phoneLightOn && hallucinationAnchorX > cameraX && hallucinationAnchorX < cameraX + viewWidth &&
+    ahead > 0 && verticalGap <= ahead * Math.tan(24 * Math.PI / 180);
+  if (lit || ambientLightFade > 0) ambientLightFade += elapsed;
+  if (ambientLightFade >= ambientLightFadeMs) { endHallucinationSighting(); return; }
   if (hallucinationLife >= ambientSightingLifeMs || Math.abs(body.position.x - hallucinationAnchorX) < 90) endHallucinationSighting();
 }
 
@@ -350,9 +379,9 @@ for (const [x0, y0, x1, y1] of [[225, 414, 306, 462], [441, 414, 516, 460], [748
   world.insertBefore(screen, sprite);
 }
 
-// ---- 눈 깜빡임 연출과, 10% 미만에서 수호를 둘러보는 붉은 눈 ----
+// ---- 눈 깜빡임 연출과, 20% 미만에서 수호를 둘러보는 붉은 눈 ----
 
-// 붉은 눈(10% 미만): 깜빡일 때마다 수호 양옆과 머리 위를 감싸는 벽에 1~2개씩 늘어나고, wallEyeMaxCount개가 차면 더 생기지 않는다.
+// 붉은 눈(20% 미만): 깜빡일 때마다 수호 양옆과 머리 위를 감싸는 벽에 1~2개씩 늘어나고, wallEyeMaxCount개가 차면 더 생기지 않는다.
 // 눈은 생성된 벽 위치에 고정되고, 홍채와 동공만 수호를 쳐다본다.
 // 화면 밖으로 밀려난 눈은 다음 깜빡임에 사라지고, 장면이 바뀌면 모두 사라진다.
 const RED_EYE_SIZE = 80;
@@ -518,7 +547,7 @@ function updateBlink(elapsed, fsmPaused) {
   blinkNextIn = randomBetween(blinkIntervalRangeByTier[fearTier] || blinkIntervalRangeByTier[2]);
   blinkFlash.dataset.active = 'true';
   blinkFlashTimer = 180;
-  if (fearTier >= 5) spawnRedEyes();
+  if (fearTier >= 4) spawnRedEyes();
 }
 
 function updateSanity(elapsed) {
@@ -526,7 +555,9 @@ function updateSanity(elapsed) {
   const paused = storySceneActive || b2CaptureActive || solarRestoreActive || openingActive || blackoutSceneActive || cctvSceneActive || playerCaught || hallucinationCaught || transitioning ||
     usingComputer || usingKeypad || usingControl || usingPowerPanel || usingInspection || !wirePanel.hidden || !logPanel.hidden || !backupPanel.hidden;
   const fsmPaused = paused || selectingFloor || usingPhone;
-  if (fsmPaused &&(hallucinationMode || !darkFace.hidden || blinkFlashTimer > 0 || redEyeShards.childElementCount)) clearHallucinationEvents();
+  // 휴대폰을 연 것만으로는 진행 중인 추격 환각을 지우지 않는다(추격은 휴대폰을 연 채로도 이어진다).
+  const chaseHalt = paused || selectingFloor;
+  if ((zeroEventPhase === 'charging' ? chaseHalt : fsmPaused) &&(hallucinationMode || !darkFace.hidden || blinkFlashTimer > 0 || redEyeShards.childElementCount)) clearHallucinationEvents();
   const exposure = sanityExposure();
   // B2 엔딩 중에는 R-01에게 쫓겨도 줄지 않는다: 정신력은 로봇 속도(45% 규칙, b2-ending.js)를 정하는 데 쓰인다.
   const chasing = (guardPatrol.mode === 'chase' || roamer.mode === 'chase') && !bossFightActive && b2Ending.phase !== 'running';
@@ -543,12 +574,12 @@ function updateSanity(elapsed) {
   const deskSrc = `assets/objects/floor17/workstation${fearTier >= 3 ? '-fear' : ''}.png`;
   if (officeDeskImage.getAttribute('src') !== deskSrc) officeDeskImage.src = deskSrc;
   fearOverlayRed.style.opacity = String(Math.max(0, Math.min(1, (30 - sanity) / 10)) * (fearTier >= 1 ? .7 : 0));
-  if (fearTier < 5 && redEyes.children.length) { redEyes.replaceChildren(); redEyeShards.replaceChildren(); }
+  if (fearTier < 4 && redEyes.children.length) { redEyes.replaceChildren(); redEyeShards.replaceChildren(); }
   document.body.dataset.weary = String(fearTier >= 3);
   updateComputerFear(fearTier >= 4);
   updateBlink(elapsed, fsmPaused);
   updateDarkFace(elapsed, fsmPaused);
-  updateZeroEvent(elapsed, fsmPaused);
+  updateZeroEvent(elapsed, chaseHalt);
   updateAmbientSighting(elapsed, fsmPaused);
   updateHallucinationSighting(elapsed, fsmPaused);
   refreshSanity();
@@ -565,13 +596,22 @@ function renderHallucination() {
   const charging = hallucinationMode === 'charge';
   const life = charging ? zeroEventTimer : hallucinationLife;
   const x = charging ? zeroEventGhostX : hallucinationAnchorX;
-  const fadeOut = charging ? 1 : Math.min(1, (ambientSightingLifeMs - life) / 600);
+  const fadeOut = charging ? 1 : Math.min(1, (ambientSightingLifeMs - life) / 600) * (1 - ambientLightFade / ambientLightFadeMs);
   hallucinationShadow.style.opacity = String(Math.max(0, Math.min(1, life / zeroEventGhostFadeInMs) * fadeOut));
   hallucinationShadow.style.left = (x - 96) + 'px';
   hallucinationShadow.style.top = (floorY - 178) + 'px';
   hallucinationShadow.style.transform = 'scaleX(' + (charging ? Math.sign(body.position.x - x) || 1 : -hallucinationSide) + ')';
   const walking = charging && life > zeroEventWarningMs;
   hallucinationShadow.dataset.walking = String(walking);
+  // 추격(돌진)은 유령 그림(ghost-face.png), 멀리 보이는 형상은 수호의 그림자 형태다.
+  hallucinationShadow.dataset.form = charging ? 'ghost' : 'shadow';
+  if (charging) {
+    const ghostWidth = 500, ghostHeight = ghostWidth * 2 / 3;
+    Object.assign(hallucinationShadow.style, { width: ghostWidth + 'px', height: ghostHeight + 'px',
+      left: (x - ghostWidth / 2) + 'px', top: (floorY - ghostHeight + 15) + 'px' });
+  } else {
+    Object.assign(hallucinationShadow.style, { width: '192px', height: '192px', left: (x - 96) + 'px', top: (floorY - 178) + 'px' });
+  }
   hallucinationShadow.style.setProperty('--stride', walking ? (-Math.floor((life - zeroEventWarningMs) / 160) % 8 * 192) + 'px' : '0px');
 }
 
@@ -628,4 +668,22 @@ function clearHallucinationEvents() {
   darkFace.hidden = true; darkFaceForced = false; darkFaceTimer = darkFaceLife = 0;
   blinkFlash.dataset.active = 'false'; blinkFlashTimer = 0;
   redEyeShards.replaceChildren();
+}
+
+// 플래시가 닿는 동안 유령 표면(빛과 맞닿는 수호 쪽 가장자리)에서 하얀 입자가 위로 올라가며 사라진다.
+let ghostParticleTimer = 0;
+function emitGhostLightParticles(elapsed) {
+  ghostParticleTimer += elapsed;
+  while (ghostParticleTimer >= 28) {
+    ghostParticleTimer -= 28;
+    const dot = document.createElement('i');
+    const size = 2 + Math.random() * 3;
+    Object.assign(dot.style, { left: `${zeroEventGhostX - zeroEventSide * 150 + (Math.random() - .5) * 40}px`,
+      top: `${floorY - 60 - Math.random() * 120}px`, width: `${size}px`, height: `${size}px`,
+      animationDuration: `${.6 + Math.random() * .5}s` });
+    dot.style.setProperty('--dx', `${(Math.random() - .5) * 30}px`);
+    dot.style.setProperty('--dy', `${-(40 + Math.random() * 70)}px`);
+    dot.addEventListener('animationend', () => dot.remove());
+    hallucinations.append(dot);
+  }
 }

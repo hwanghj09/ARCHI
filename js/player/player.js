@@ -46,7 +46,10 @@ function startItemUseAnimation() {
 }
 
 let phoneTime = 0;
+// 플래시를 켜고 달리는 시트(8컷)의 컷 순서.
+const phoneRunOnFrames = [0, 1, 2, 3, 4, 5, 6, 7];
 let phoneAwayTime = 0;
+let phoneRaising = false; // 플래시를 켜기 전 0.5초 동안 휴대폰을 드는 모션(phone.js가 켠다)
 
 let walkDistance = 0;
 let runDistance = 0;
@@ -137,7 +140,7 @@ function animate(distance, sprinting = false, elapsed = 0) {
     refreshPhone();
   }
   const pushing = !crouching && grounded && playerPushing && distance > .1 && pushSheet.naturalWidth === 256 * pushFrames; // 상자를 미는 동안은 밀기 모션
-  const running = !crouching && !phoneLightOn && grounded && sprinting && !pushing && distance > .1 && runSheet.naturalWidth === 256 * runFrames && runSheet.naturalHeight === 256;
+  const running = !crouching && grounded && sprinting && !pushing && distance > .1 && runSheet.naturalWidth === 256 * runFrames && runSheet.naturalHeight === 256;
   const walking = grounded && walkReady && distance > .1 && !running && !pushing;
   const holdingPhone = usingPhone || phoneLightOn;
   walkDistance = walking ? (walkDistance + distance) % (frameDistance * walkFrames) : 0;
@@ -145,7 +148,7 @@ function animate(distance, sprinting = false, elapsed = 0) {
   if (distance > .1 || !grounded) phoneAwayTime = 0;
   else phoneAwayTime = Math.max(0, phoneAwayTime - elapsed);
   // 휴대폰을 켠 채 서 있을 때만 휴대폰 자세이고, 움직이거나 뛰면 휴대폰을 든 걷기·달리기·점프 그림을 쓴다.
-  const phoneStill = usingPhone && grounded && !walking && !running && !pushing;
+  const phoneStill = grounded && (phoneRaising || (usingPhone && !walking && !running && !pushing));
   const state = phoneStill ? (phoneLightOn ? 'phone-light' : 'phone') : !grounded ? (body.velocity.y < 0 ? 'jump' : 'fall') :
     crouching ? 'crouch' : interactionTime > 0 && !holdingPhone ? 'interact' : pushing ? 'push' : running ? 'run' : walking ? 'walk' :
     phoneLightOn ? 'phone-light' : phoneAwayTime > 0 ? 'phone-away' : 'idle';
@@ -164,17 +167,17 @@ function animate(distance, sprinting = false, elapsed = 0) {
   const light = phoneLightOn ? 'on' : 'off';
   for (const [sheet, motion] of [[phoneWalkSheet, 'walk'], [phoneRunSheet, 'run']]) {
     const src = motion === 'walk' ? `assets/player/jeong-suho-phone-walk-eight-${light}.png` :
-      phoneLightOn ? 'assets/player/jeong-suho-phone-jump-on.png' : 'assets/player/jeong-suho-phone-run-sixteen-off.png';
+      phoneLightOn ? (state === 'run' ? 'assets/player/jeong-suho-phone-run-on.png' : 'assets/player/jeong-suho-phone-jump-on.png') : 'assets/player/jeong-suho-phone-run-sixteen-off.png';
     if (sheet.getAttribute('src') !== src) {
       sheet.setAttribute('src', src);
-      sheet.style.width = `${100 * (motion === 'walk' ? walkFrames : phoneLightOn ? 2 : runFrames)}%`;
+      sheet.style.width = `${100 * (motion === 'walk' ? walkFrames : phoneLightOn ? (state === 'run' ? 8 : 2) : runFrames)}%`;
     }
   }
   if (state === 'idle') showIdleFrame(index);
   if (state === 'push') pushSheet.style.transform = `translateX(${-index * 100 / pushFrames}%)`;
   if (state === 'crouch') crouchSheet.style.transform = `translateX(${-index * 25}%)`;
   if (state === 'walk') (holdingPhone ? phoneWalkSheet : walkSheet).style.transform = `translateX(${-index * 100 / walkFrames}%)`;
-  if (state === 'run') (holdingPhone ? phoneRunSheet : runSheet).style.transform = `translateX(${-index * 100 / runFrames}%)`;
+  if (state === 'run') (holdingPhone ? phoneRunSheet : runSheet).style.transform = holdingPhone && phoneLightOn ? `translateX(${-phoneRunOnFrames[Math.floor(index * phoneRunOnFrames.length / runFrames)] * 100 / 8}%)` : `translateX(${-index * 100 / runFrames}%)`;
   // The lit phone has a two-pose jump/fall sheet, never a running animation.
   if (holdingPhone && (state === 'jump' || state === 'fall')) phoneRunSheet.style.transform = phoneLightOn ?
     `translateX(${state === 'jump' ? 0 : -50}%)` : `translateX(${-(state === 'jump' ? 4 : 12) * 100 / runFrames}%)`;

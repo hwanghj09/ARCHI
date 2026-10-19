@@ -38,6 +38,12 @@ panelFloors.forEach((floor, index) => {
   button.addEventListener('click', () => {
     const car = elevatorCars[cabinCarIndex];
     if (transitioning || !car || car.travelling || floor === car.floor) return;
+    // 삭제 배틀 중과 삭제 뒤에도 승강기는 ARCHI가 막아 둔 채라, 어느 층 버튼도 눌리지 않는다.
+    if (b2Ending.phase === 'running') {
+      cabinStatus.textContent = 'ARCHI에 의해 차단되었다.';
+      playGameSound('deny');
+      return;
+    }
     if (!elevatorHasPower()) {
       cabinStatus.textContent = elevatorPowerMessage;
       return;
@@ -108,6 +114,7 @@ function showCabin(carIndex) {
   cabinStatus.textContent = `${floorShortLabel(elevatorCars[carIndex].floor)} · 문 열림`;
   refreshCabin();
   cabin.scrollLeft = cabin.scrollWidth - cabin.clientWidth;
+  if (b2Ending.phase === 'running' && !b2Ending.offline) startCabinB2Pry(); // 삭제 배틀 도중 탑승: 로봇이 문을 억지로 여는 컷씬(cabin-pry.js)
 }
 
 function arriveCabinAt(car, floor) {

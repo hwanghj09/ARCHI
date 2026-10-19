@@ -18,7 +18,7 @@ try {
     await page.locator('#opening-skip').click();
     await page.clock.pauseAt(new Date('2026-10-18T00:01:00Z'));
     assert.deepEqual(errors, [], 'Game starts without script errors');
-    assert.equal(await page.evaluate(() => sanity), 85);
+    assert.equal(await page.evaluate(() => sanity), 50);
     const layout = await page.evaluate(() => {
       performFloorChange('b1');
       clearHallucinationEvents();
@@ -56,12 +56,12 @@ try {
       const cooldown = ambientNextIn;
       updateAmbientSighting(180000, false);
       const sameRoom = hallucinationMode;
-      ambientSeenScene = null; ambientTimer = 0; ambientNextIn = 45000;
+      ambientSeenScene = null; ambientTimer = 0; ambientNextIn = 30000;
       updateAmbientSighting(44999, false); const early = hallucinationMode;
       updateAmbientSighting(1, false); const onTime = hallucinationMode;
       return { cooldown, sameRoom, early, onTime };
     });
-    assert(rhythm.cooldown >= 45000 && rhythm.cooldown <= 90000);
+    assert(rhythm.cooldown >= 30000 && rhythm.cooldown <= 45000);
     assert.equal(rhythm.sameRoom, null, 'A room does not repeat its ambient apparition');
     assert.equal(rhythm.early, null); assert.equal(rhythm.onTime, 'ambient');
 

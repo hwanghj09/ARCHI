@@ -40,13 +40,16 @@ function clueFor(door) {
   return source?.clue || null;
 }
 
+// 단서 획득은 없앴다: 조사해도 단서가 기록되지 않는다.
 function recordClue(door) {
+  return;
   const text = clueFor(door);
   if (text) addClue(door.name, text);
 }
 
 // 지금 장소에 단서 한 줄을 한 번만 남긴다(퍼즐 정답처럼 소품 clue가 아닌 단서도 여기로 온다).
 function addClue(name, text) {
+  return;
   const place = document.querySelector('header span').textContent;
   if (collectedClues.some(clue => clue.place === place && clue.name === name)) return;
   collectedClues.push({ place, name, text });

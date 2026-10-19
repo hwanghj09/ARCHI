@@ -14,9 +14,7 @@
   cursor: pointer; pointer-events: auto; font: inherit; }
 #cctv-skip:focus-visible { outline: 2px solid #e1cf9b; outline-offset: 3px; }
 body:has(#world[data-cctv-scene]) :is(header, nav, #debug-sidebar, #inventory-button, #game-menu-button, #sanity-hud, #objective, #red-eyes, #interaction-hint, #interaction-outline) { visibility: hidden; }
-/* 소등 뒤 붉은 비상등 조명(data-alarm)일 때만 화면이 조금 더 어둡다(메뉴의 화면 밝기 설정에 곱한다, main-menu.css의 #world).
-   불이 나가기 전까지는 원래 푸른 조명과 밝기 그대로다. */
-#world[data-alarm="true"] { filter: brightness(calc(var(--scene-brightness, 1) * .4)); }
+/* 소등 뒤 붉고 어두운 비상 조명(화면 밝기 낮춤·#room-alarm 덮개)은 쓰지 않는다. */
 
 /* 화면 전체를 고르게 덮는 어둠: 첫 컷씬에서 화면이 꺼지며 흔들리는 동안과 소등 컷씬에서 불이 나간 동안. data-tint="red"면 첫 컷씬에서 화면이 꺼지는
    순간 번쩍이는 새빨간 빛이다. */
@@ -147,7 +145,6 @@ body:has(#world[data-cctv-scene]) :is(header, nav, #debug-sidebar, #inventory-bu
 #room-alarm { display: none; position: absolute; inset: 0; z-index: 4; pointer-events: none; mix-blend-mode: multiply;
   background: #b8606a; }
 #room-alarm::after { content: ''; position: absolute; inset: 0; background: #000; opacity: 0; }
-#world[data-alarm="true"] #room-alarm { display: block; }
 #world[data-alarm="true"] :is(#interaction-hint, #interaction-outline) { z-index: 5; }
 @media (prefers-reduced-motion: no-preference) {
   #world[data-alarm="true"] #room-alarm { animation: alarm-breathe 4s ease-in-out infinite alternate; }

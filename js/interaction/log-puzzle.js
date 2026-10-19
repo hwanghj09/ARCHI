@@ -192,7 +192,7 @@ function renderLogPanel() {
   const needsPaper = isolated && !ready;
   logRecovery.hidden = !(needsPaper && collectedItems.has('f12-paper-backup'));
   logQuiz.hidden = !ready || solved;
-  logStatus.textContent = solved ? '분석 완료 — 단서가 휴대폰 메모에 기록됐다.' :
+  logStatus.textContent = solved ? '분석 완료.' :
     ready ? (restored ? '종이 기록으로 손상된 줄을 복원했다. 기록과 출입 기록을 비교해 보자.' : '로그를 지켰다. 기록과 출입 기록을 비교해 보자.') :
     needsPaper ? (collectedItems.has('f12-paper-backup') ? '종이 백업이 있다. 남은 로그와 대조해 복원하자.' :
       '온라인 기록이 손상됐다. 이 방 평가 벤치에 출력해 둔 종이 기록이 남아 있을지도 모른다.') :

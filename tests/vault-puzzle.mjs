@@ -1,5 +1,5 @@
 // 13층 보안 자료실(js/interaction/vault-puzzle.js): 전자 잠금 → 전력을 켜고 들어가면 CCTV가 셔터를 내림 → 전력이 있는 동안
-// 크랭크가 막힘 → 휴대폰으로 전력을 끊고 어둠 속에서 크랭크 → 다시 켜면 배치도는 보이지만 셔터도 다시 내려옴.
+// 크랭크가 막힘 → 휴대폰으로 전력을 끊고 어둠 속에서 크랭크 → 다시 켜면 셔터도 다시 내려옴.
 import assert from 'node:assert/strict';
 import { mkdir } from 'node:fs/promises';
 import { chromium } from 'playwright';
@@ -53,7 +53,6 @@ try {
     return result;
   };
 
-  assert.equal((await state()).objective, '백업 장치 가져오기');
   assert.match((await use('보안 자료실')).message, /전자 잠금/, 'Unpowered, the electric lock stays shut');
   assert.equal((await state()).scene, 'f13-testbay');
 
@@ -70,12 +69,11 @@ try {
   assert.equal(now.objective, '셔터에 갇혔다');
   await page.screenshot({ path: '.local/vault-trapped.png' });
 
-  assert.match((await use('장비 검증실')).message, /원격 잠금/, 'The shutter blocks the way out');
+  assert.match((await use('장비 검증실 - 보안 자료실')).message, /원격 잠금/, 'The shutter blocks the way out');
   assert.equal((await state()).scene, 'f13-secure');
   assert.match((await crank()).message, /전자 잠금 우선/, 'The crank is locked while powered');
   assert.equal((await state()).shut, true);
   assert.match((await use('시설 점검 기록')).message, /정전 시 전자 잠금 해제 → 수동 개방 가능/);
-  assert.match((await use('내부 배치도')).message, /수동 개방 크랭크함/);
   await use('백업 장치 보관함');
   assert.equal(await page.evaluate(() => collectedItems.has('f13-backup-device')), true);
 
@@ -83,7 +81,6 @@ try {
   now = await state();
   assert.equal(now.blackout, 'true', 'Cutting the power darkens the vault');
   assert.equal(now.objective, '어둠 속 탈출');
-  assert.match((await use('내부 배치도')).message, /너무 어두워/, 'The plan cannot be read in the dark');
   await page.screenshot({ path: '.local/vault-dark.png' });
   const cranked = await crank();
   assert.equal(cranked.control, true, 'In the dark the crank turns by hand');
@@ -94,13 +91,11 @@ try {
   await power(true);
   await page.clock.runFor(1800);
   assert.equal((await state()).shut, true, 'Powering again re-arms the CCTV');
-  assert.match((await use('내부 배치도')).message, /수동 개방 크랭크함/);
   await power(false);
   await crank();
-  await use('장비 검증실');
+  await use('장비 검증실 - 보안 자료실');
   now = await state();
   assert.equal(now.scene, 'f13-testbay', 'The way out is open after cranking');
-  assert.notEqual(now.objective, '백업 장치 가져오기', 'The side objective ends with the device');
   assert.deepEqual(errors, []);
   console.log('vault puzzle ok');
 } finally {

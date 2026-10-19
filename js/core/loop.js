@@ -66,7 +66,7 @@ function update() {
   if (usingComputer || usingKeypad || usingControl || usingPowerPanel || usingInspection || !wirePanel.hidden) {
     updateElevators();
     if (!usingInspection) updatePhone(step); // 조사창을 읽는 동안에는 정신력처럼 플래시 배터리도 닳지 않는다
-    if (usingPhone || phoneAwayTime > 0) animate(0, false, step);
+    if (usingPhone || phoneRaising || phoneAwayTime > 0) animate(0, false, step);
     return;
   }
   updatePhone(step);
@@ -74,7 +74,7 @@ function update() {
   const direction = itemUseTime > 0 ? 0 : Number(directions.includes(1)) - Number(directions.includes(-1));
   setCrouching(grounded && itemUseTime <= 0 && !usingPhone && [...crouchKeys].some(key => keys.has(key)));
   if (itemUseTime > 0 || crouching) jumpQueued = false;
-  const sprinting = !crouching && !phoneLightOn && [...runKeys].some(key => keys.has(key));
+  const sprinting = !crouching && [...runKeys].some(key => keys.has(key));
   interactionTime = direction || jumpQueued ? 0 : Math.max(0, interactionTime - step);
   if (direction) facing = direction;
   const paceFactor = sanitySpeedFactor();

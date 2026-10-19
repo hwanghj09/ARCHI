@@ -38,7 +38,17 @@ function f1EscapeX() {
 }
 
 // 1층 도착 컷씬을 건너뛰면 추격이 끝난 뒤처럼 맞춘다: 수호는 1번 엘리베이터 앞, R-01은 도크 자리에서 순찰.
+// 처음 쫓기는 컷씬에서 정신력이 한 번만 깎인다(로봇이 수호를 알아보는 순간, 건너뛰면 건너뛸 때).
+let f1SanityHit = false;
+function hitF1Sanity() {
+  if (f1SanityHit) return;
+  f1SanityHit = true;
+  sanity = Math.max(0, sanity - f1EncounterSanityLoss);
+  refreshSanity();
+}
+
 function skipF1Chase() {
+  hitF1Sanity();
   Body.setPosition(body, { x: f1EscapeX(), y: body.position.y });
   Body.setVelocity(body, { x: 0, y: 0 });
   facing = -1;
@@ -97,6 +107,10 @@ const STORY_SCENES = [
     flag: 'story-log-seen', delay: 500, ready: () => collectedItems.has('f12-log-cutscene'),
     lines: ['이상해. 다른 날은 밤마다 성능이 높았는데...', '10월 7일에는 사람이 남아 있었어.', '누군가 보고 있으면 성능을 숨기는 건가?'],
   },
+  { // 목표 '데이터 수집'이 끝나고(5층 연구 노트를 조사해 goal-f5-note를 얻고) 1초 뒤. 이 컷씬이 끝나면 '기록 재현'이 시작된다.
+    flag: 'story-data-seen', delay: 1000, ready: () => collectedItems.has('story-log-seen') && collectedItems.has('goal-f5-note') && !collectedItems.has('f8-repro-record'),
+    lines: ['ARCHI가 의도적으로 기록을 지운게 처음이 아니라고..?', '도대체 어떤 의도가 있는걸까..', '기록을 지운 당일 기록을 QA 실에서 재현해볼 수 있을거야.'],
+  },
 ];
 
 // 아직 안 본 컷씬 중 조건이 맞아 곧 시작될 것이 있는가. objective.js는 이 컷씬이 끝날 때까지 목표를 바꾸지 않는다.
@@ -120,6 +134,7 @@ function checkStoryScenes(elapsed) {
 }
 
 function startStoryScene({ lines, steps, flag, skip, pose = 'think' }) {
+  f1SanityHit = false;
   storySceneActive = true;
   clearEventsForCutscene();
   usingInspection = true; // 이동·상호작용·메뉴·정신력 진행을 막는 기존 규칙을 그대로 쓴다
@@ -152,6 +167,7 @@ function nextStoryStep() {
   animate(0);
   if (grounded && current.pose) showCutscenePose(current.pose);
   if (current.alert) {
+    hitF1Sanity();
     Object.assign(guardPatrol, { mode: 'chase', lostTime: 0, chaseOriginX: guardPatrol.x, spottedX: body.position.x });
     playGameSound('robot-alert', { x: guardPatrol.x });
     storyRobotLive = true;

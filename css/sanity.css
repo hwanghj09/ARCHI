@@ -8,13 +8,18 @@
 #sanity-hud[data-state="low"] #sanity-fill { background: #c7aa75; }
 #sanity-hud[data-state="hallucinating"] { border-color: #986779; background: #22171fe8; }
 #sanity-hud[data-state="hallucinating"] #sanity-state { color: #d396b0; }
-#hallucinations { position: absolute; inset: 0; z-index: 0; pointer-events: none; }
+/* 환각(유령)은 엘리베이터·문·소품에 가려지지 않게 월드의 모든 것 위(수호 6, 힌트 8 사이)에 그린다. */
+#hallucinations { position: absolute; inset: 0; z-index: 7; pointer-events: none; }
 #hallucinations[hidden], #hallucination-shadow[hidden] { display: none; }
 #hallucination-shadow { position: absolute; width: 192px; height: 192px; pointer-events: none; }
 #hallucination-shadow::before { content: ''; position: absolute; inset: 0; background: url(../assets/player/jeong-suho-idle-four.png) 3.375px 1.585px / 357.39px 357.39px no-repeat;
   clip-path: inset(0 7% 7% 0); filter: grayscale(1) brightness(.22) contrast(1.35); image-rendering: pixelated; }
 #hallucination-shadow[data-walking="true"]::before { background-image: url(../assets/player/jeong-suho-walk-eight.png); background-size: 1536px 192px; background-position: var(--stride) 0; clip-path: none; }
 #hallucination-shadow::after { content: ''; position: absolute; left: 65px; top: 174px; width: 66px; height: 9px; border-radius: 50%; background: #0005; filter: blur(3px); }
+/* 환각 추격: 예전 유령 그림이 바닥 위에 떠서 쫓아온다(sanity.js의 data-form="ghost"). 걷는 그림자(::before의 수호 그림)와 바닥 그림자는 끈다. */
+#hallucination-shadow[data-form="ghost"] { width: 500px; height: 333px; }
+#hallucination-shadow[data-form="ghost"]::before { background: url(../assets/ui/hallucination/ghost-face.png) center / contain no-repeat; clip-path: none; filter: blur(.8px) drop-shadow(0 0 10px #9aa4b0aa); image-rendering: auto; }
+#hallucination-shadow[data-form="ghost"]::after { display: none; }
 .floor-prop, .office-desk-backdrop, #office-workstation, #office-computer { z-index: 1; }
 #hallucination-effects { position: fixed; z-index: 11; inset: 0; overflow: hidden; pointer-events: none; background: radial-gradient(ellipse at center, transparent 38%, #2714266b 78%, #130b20bd); }
 #hallucination-effects[hidden] { display: none; }
@@ -169,3 +174,5 @@ body[data-fear-tier="5"] { --haunted-opacity: 1; }
   to { opacity: 0; transform: translate(var(--dx), var(--dy)) rotate(var(--spin)); }
 }
 @media (prefers-reduced-motion: reduce) { #red-eye-shards i { animation-duration: .01s; } }
+#hallucinations > i { position: absolute; border-radius: 50%; background: #fff; box-shadow: 0 0 4px #fff; pointer-events: none; animation: ghost-light-rise .8s ease-out forwards; }
+@keyframes ghost-light-rise { from { opacity: .95; transform: translate(0, 0); } to { opacity: 0; transform: translate(var(--dx), var(--dy)); } }

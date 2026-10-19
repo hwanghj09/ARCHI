@@ -119,10 +119,7 @@ function openGalleryPhoto(photo) {
   inspectionPanel.dataset.surface = 'photo';
   inspectionLabel.textContent = '갤러리';
   inspectionSheet.hidden = false;
-  const caption = document.createElement('p');
-  caption.className = 'writing-caption';
-  caption.textContent = `${photoPlace(photo)} · ${photoMessage(photo)}`;
-  inspectionSheet.replaceChildren(renderPhonePhoto(photo), caption);
+  inspectionSheet.replaceChildren(renderPhonePhoto(photo));
 }
 
 function startPhotoCapture() {

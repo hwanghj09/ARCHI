@@ -155,11 +155,30 @@ function closePhone() {
   (selectingFloor ? cabin : stage).focus();
 }
 
+let phoneLightDelay = 0; // 플래시를 켜기까지 대기 중인 타이머(0.5초 뒤 켜진다)
+const phoneLightDelayMs = 500;
+
 function togglePhoneLight() {
+  if (phoneLightDelay) { clearTimeout(phoneLightDelay); phoneLightDelay = 0; phoneRaising = false; animate(0); return; } // 켜지는 중에 다시 누르면 취소
   if (photoCaptureTime > 0 || itemUseTime > 0 || playerCaught || hallucinationCaught || blackoutSceneActive || cctvSceneActive) return;
   if (phoneDock) return sayLine('아, 휴대폰은 충전기에 두고 왔지.');
   if (!phoneLightOn && phoneBattery <= 0) return sayLine('배터리가 다 됐어… 충전할 데를 찾아야 해.');
-  phoneLightOn = !phoneLightOn;
+  if (!phoneLightOn) {
+    playGameSound('phone');
+    phoneRaising = true;
+    animate(0);
+    phoneLightDelay = setTimeout(() => {
+      phoneRaising = false;
+      phoneLightDelay = 0;
+      if (phoneDock || phoneBattery <= 0 || phoneLightOn) return;
+      phoneLightOn = true;
+      phoneAwayTime = 0;
+      if (usingPhone || Math.abs(body.velocity.x) < .01) animate(0);
+      refreshPhone();
+    }, phoneLightDelayMs);
+    return;
+  }
+  phoneLightOn = false;
   playGameSound('phone');
   phoneAwayTime = !phoneLightOn && !usingPhone ? 360 : 0;
   if (usingPhone || Math.abs(body.velocity.x) < .01) animate(0);

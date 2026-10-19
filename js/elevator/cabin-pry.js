@@ -41,6 +41,7 @@ function updateRoamerCabin(delta) {
 
 // cabin.js의 updateCabin이 매 프레임 먼저 부른다. true면 이번 프레임의 칸 동작을 대신 처리한 것이다.
 function updateCabinPry() {
+  if (cabinB2Pry.active) { updateCabinB2Pry(); return true; } // B2 삭제 배틀 중 탑승 컷씬
   if (cabinPry.state === 'struggle') {
     cabinPry.time += step;
     cabinPry.gauge = Math.max(0, cabinPry.gauge - cabinPryDrain * step / 1000);
@@ -123,3 +124,56 @@ function catchInCabinPry() {
 
 document.getElementById('cabin-pry-push').addEventListener('click', pushCabinPry);
 cabinClose.addEventListener('click', pushCabinPry);
+
+// B2 삭제 배틀(문 막기) 도중 칸에 타면: 문이 닫힌 뒤 경비 로봇이 문틈에 손을 넣어 억지로 열고 수호가 끌려 나와 붙잡힌다
+// (컷씬이라 조작할 수 없다). b2-ending.js의 showB2BadEnding으로 이어진다.
+const cabinB2Pry = { active: false, time: 0, pried: false };
+const cabinB2PryTimes = { closed: 900, pry: 1700, open: 3200, catch: 3900 };
+
+function startCabinB2Pry() {
+  Object.assign(cabinB2Pry, { active: true, time: 0, pried: false });
+  cabinScene.dataset.door = 'struggle';
+  cabinExit.disabled = true;
+  cabin.inert = true;
+  cabinStatus.textContent = '문이 닫힌다…';
+  playGameSound('elevator-door');
+}
+
+function updateCabinB2Pry() {
+  cabinB2Pry.time += step;
+  const t = cabinB2Pry.time;
+  const { closed, pry, open, catch: catchAt } = cabinB2PryTimes;
+  if (t < closed) cabinDoorAmount = 1 - t / closed;
+  else if (t < pry) cabinDoorAmount = 0;
+  else cabinDoorAmount = Math.min(1, (t - pry) / (open - pry));
+  cabinScene.style.setProperty('--door-open', cabinDoorAmount);
+  if (t >= pry && !cabinB2Pry.pried) {
+    cabinB2Pry.pried = true;
+    cabinPryRobot.hidden = false;
+    cabinStatus.textContent = '경비 로봇이 문을 억지로 연다!';
+    playDoorPrySound();
+  }
+  if (t >= catchAt) catchInCabinB2Pry();
+}
+
+function catchInCabinB2Pry() {
+  const door = cabinPryDoor();
+  cabinB2Pry.active = false;
+  Object.assign(elevatorCars[cabinCarIndex], { rider: false, open: true });
+  cabinPryRobot.hidden = true;
+  cabin.inert = false;
+  cabinScene.dataset.door = 'open';
+  selectingFloor = false;
+  selectedFloor = null;
+  cabinCarIndex = null;
+  cabin.hidden = true;
+  stage.inert = false;
+  refreshSceneElevatorDoors();
+  if (door) {
+    Body.setPosition(body, { x: door.x + door.width / 2, y: floorY - 81 });
+    Body.setVelocity(body, { x: 0, y: 0 });
+    grounded = true;
+    cameraX = cameraTarget();
+  }
+  showB2BadEnding();
+}

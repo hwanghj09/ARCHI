@@ -129,7 +129,7 @@ function interact() {
     if (handleB2Console(nearbyDoor)) return; // B2 삭제 중 메인 콘솔: 문을 막은 뒤면 루트 터미널(b2-ending.js)
     if (handleLogTerminalInteract(nearbyDoor)) return; // 12층 야간 로그 단말기·네트워크 랙(log-puzzle.js)
     if (handleBackupDeviceInteract(nearbyDoor)) return; // 7층 망분리 백업 장비(backup-puzzle.js)
-    if (handleVaultInteract(nearbyDoor)) return; // 13층 보안 자료실 크랭크·배치도(vault-puzzle.js)
+    if (handleVaultInteract(nearbyDoor)) return; // 13층 보안 자료실 크랭크(vault-puzzle.js)
     if (dynamicFloorId === 'f12-dev' && nearbyDoor.name === '맨 왼쪽 서랍') { openDrawerPuzzle(); return; }
     const { gives } = nearbyDoor;
     // 도어락(code): 잠긴 문이나 아직 열지 못한 소품은 키패드를 연다. 맞는 번호를 넣으면 문이 열리거나 gives를 챙긴다.
@@ -218,6 +218,11 @@ function interact() {
   }
   if (nearbyDoor.type === 'room') {
     const { target, arrivalKey } = nearbyDoor;
+    // 방재 관제실 첫 컷씬(b1-cctv-live) 뒤 CCTV 모니터 벽을 조사하기(b1-cctv-seen) 전까지는 복도로 나가지 않는다.
+    if (nearbyDoor.key === 'exit' && dynamicFloorId === 'b1-control' && collectedItems.has('b1-cctv-live') && !collectedItems.has('b1-cctv-seen')) {
+      sayLine('CCTV 모니터를 먼저 조사하자.');
+      return;
+    }
     // 방 안에서 복도 문으로 나오면 그 방 id를 챙긴 것으로 친다: 안쪽 걸쇠로 잠긴 방(unlockedBy: 자기 방 id)은
     // 한 번 안에서 열고 나오면 그 뒤로 복도에서도 열린다. 16층 VU 셔터는 안의 레버(shutterLever)로 따로 올리고 내린다.
     if (nearbyDoor.key === 'exit') collectedItems.add(dynamicFloorId);
@@ -249,7 +254,6 @@ function interact() {
     return;
   }
   if (nearbyDoor.type === 'elevator') {
-    if (b2Ending.phase === 'running') return; // ARCHI가 B2 승강기를 멈췄다
     if (needsF1Directory()) { sayLine('편의점이 몇 층이더라…'); return; } // 층별 안내판을 먼저 본다(objective.js)
     const car = elevatorCars[nearbyDoor.carIndex];
     if (!elevatorHasPower() && car.floor !== currentSceneFloor) {

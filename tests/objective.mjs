@@ -133,6 +133,7 @@ try {
   await page.evaluate(() => collectedItems.add('f16-antianxiety'));
   await page.waitForTimeout(500);
   assert.equal(await page.evaluate(() => currentObjective.title), '정신 불안', '챙기기만 해서는 목표가 바뀌지 않는다');
+  await waitTyped('정신 불안', '항불안제를 복용하자.'); // 항불안제를 찾은 뒤에는 내용이 복용으로 바뀐다
   await page.evaluate(() => collectedItems.add('f16-antianxiety-used'));
   await page.waitForTimeout(500);
   assert.equal(await page.evaluate(() => currentObjective.title), '정신 불안', '사용한 뒤 컷씬이 나오기 전까지도 목표가 유지된다');
@@ -169,9 +170,9 @@ try {
   assert(await page.locator('#story-scene').isHidden(), '컷씬은 다시 나오지 않는다');
 
   assert.equal(await titleAfter(() => collectedItems.add('goal-f12-memo')), '이상 행동', 'Reading a memo does not bypass the authored evaluation puzzle');
-  assert.equal(await titleAfter(() => collectedItems.add('f12-evaluation-solved')), '5층 조사하기');
-  assert.equal(await titleAfter(() => collectedItems.add('goal-f5-note')), '8층 조사하기');
-  assert.equal(await titleAfter(() => collectedItems.add('f8-repro-record')), '7층 조사하기');
+  assert.equal(await titleAfter(() => collectedItems.add('f12-evaluation-solved')), '데이터 수집');
+  assert.equal(await titleAfter(() => collectedItems.add('goal-f5-note')), '기록 재현');
+  assert.equal(await titleAfter(() => collectedItems.add('f8-repro-record')), '로그 분석');
   assert.equal(await titleAfter(() => collectedItems.add('f7-training-time-solved')), '오늘만 다른 기록');
   assert.equal(await titleAfter(() => collectedItems.add('f7-external-connection-solved')), '외부 연결 통로 찾기');
   assert.equal(await titleAfter(() => collectedItems.add('f13-backup-device')), '2층 조사하기');

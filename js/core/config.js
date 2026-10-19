@@ -28,18 +28,21 @@ const sanityDarkDrainPerSecond = 1 / 3;
 const sanityChaseDrainPerSecond = 10;
 const sanityAnxietyDrainPerSecond = .1; // 10%에서도 16층으로 이동해 약을 찾을 시간(100초)을 준다.
 const sanityChaseFloor = 10; // 경비 로봇에게 쫓겨서는 이 값 아래로 줄지 않는다
-const newGameSanity = 85; // 새 게임을 시작할 때의 정신력
+const newGameSanity = 50; // 새 게임을 시작할 때의 정신력
+const f1EncounterSanityLoss = 25; // 1층에서 경비 로봇 R-01에게 처음 쫓기는 컷씬에서 한 번에 깎이는 정신력(%)
 const antianxietyRestore = 50; // 항불안제를 사용했을 때의 정신력 회복량
 // 50/40/30/20/10% 미만 구간의 공포 연출 단계(1~5). sanityTierOf()가 이 경계로 계산한다.
 const sanityTierThresholds = [50, 40, 30, 20, 10];
 const sanitySlowSpeedFactor = .92; // 30% 미만 이동 속도
 const sanityCriticalSpeedFactor = .8; // 10% 미만 이동 속도(위와 곱해진다)
-const ambientSightingIntervalRange = [45000, 90000]; // 같은 장소에서는 한 번만 보인다.
+const ambientSightingIntervalRange = [30000, 45000]; // 같은 장소에서는 한 번만 보인다.
 const ambientSightingLifeMs = 2800;
 const zeroEventChargeWaitMs = 45000;
 const zeroEventRetryWaitMs = 60000;
-const zeroEventWarningMs = 1800; // 발소리와 정지한 형상을 먼저 보여 준 뒤 다가온다.
-const zeroEventRushDurationMs = 3200;
+const zeroEventWarningMs = 0.8 * 1000; // 발소리와 정지한 형상을 0.8초 보여 준 뒤 다가온다.
+// 정지가 끝난 뒤: 처음엔 전체 거리를 zeroEventCrawlMs에 갈 속도로 다가오고, 시간이 지날수록 지수적으로(zeroEventAccelMs마다 e배) 더 빨라져 덮친다.
+const zeroEventCrawlMs = 5000 / 1.3;
+const zeroEventAccelMs = 700;
 const zeroEventGhostFadeInMs = 350;
 const zeroEventLightHoldMs = 350; // 잠깐 스친 빛이 아니라 방향을 확인해 비춘 빛으로 물러난다.
 

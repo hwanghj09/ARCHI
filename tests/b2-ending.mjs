@@ -65,10 +65,10 @@ try {
   };
   await page.evaluate(() => { sanity = 60; });
   await pressDelete();
-  const started = await page.evaluate(() => ({ phase: b2Ending.phase, robots: b2Robots.length, alarm: world.dataset.alarm,
+  const started = await page.evaluate(() => ({ phase: b2Ending.phase, robots: b2Robots.length,
     bar: !document.getElementById('b2-delete-bar').hidden, checkpoint: JSON.parse(localStorage.getItem('archi.checkpoint.b2'))?.scene.id,
     saved: saveProgress() }));
-  assert.deepEqual(started, { phase: 'running', robots: 3, alarm: 'true', bar: true, checkpoint: 'b2-main', saved: false });
+  assert.deepEqual(started, { phase: 'running', robots: 3, bar: true, checkpoint: 'b2-main', saved: false });
   assert.equal((await crate()).pushable, true, 'DELETE frees the crate');
 
   // 2) 서버실 안에 가만히 있으면 로봇이 복도를 지나 서버실 문으로 들어와 붙잡는다 → 베드엔딩 → 체크포인트.

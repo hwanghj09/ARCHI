@@ -119,7 +119,7 @@ try {
   const clueCount = (await clues()).length;
   await page.evaluate(() => answerLogQuiz('건물에 사람이 있었음'));
   assert.equal((await clues()).length, clueCount);
-  assert.equal(await objective(), '5층 조사하기');
+  assert.equal(await objective(), '데이터 수집');
   // 7층 백업 장비는 5층 연구 노트와 8층 재현 기록 뒤에 열린다(backup-puzzle.js).
   await page.evaluate(() => { collectedItems.add('goal-f5-note'); collectedItems.add('f8-repro-record'); });
   // 이미 뽑은 랙은 다시 삭제를 시작하지 않는다.

@@ -1,7 +1,7 @@
 // 13층 보안 자료실(f13-secure, 장비 검증실 안쪽): 전력을 켜는 것이 늘 정답은 아니라는 퍼즐.
 // 연결문은 전자 잠금이라 13층에 태양광 전력이 들어와야 열린다. 그런데 전력이 들어온 채 안에 있으면 CCTV가 감지해
 // 보안 셔터를 내린다(f13-vault-shutter, 저장된다). 전력이 들어와 있는 동안 크랭크는 전자 잠금에 막힌다. 휴대폰 전력 앱으로
-// 13층 전력을 끊고, 어둠 속에서 맨 안쪽 크랭크를 돌려 셔터를 올린다. 다시 전력을 켜면 배치도를 볼 수 있지만 셔터도 다시 내려온다.
+// 13층 전력을 끊고, 어둠 속에서 맨 안쪽 크랭크를 돌려 셔터를 올린다. 다시 전력을 켜면 셔터도 다시 내려온다.
 const VAULT_SHUTTER = 'f13-vault-shutter';
 const VAULT_DETECT_MS = 1500;
 let vaultWatch = 0;
@@ -41,7 +41,7 @@ function updateVaultPuzzle(step) {
   saveProgress();
 }
 
-// 크랭크와 배치도는 전력 상태에 따라 다른 결과를 보인다. 크랭크 조작(control.when)을 마치면 여기서 셔터를 올린다.
+// 크랭크는 전력 상태에 따라 다른 결과를 보인다. 크랭크 조작(control.when)을 마치면 여기서 셔터를 올린다.
 function handleVaultInteract(door) {
   if (dynamicFloorId !== 'f13-secure') return false;
   if (door.name === '수동 개방 크랭크') {
@@ -54,10 +54,6 @@ function handleVaultInteract(door) {
       openInspection(door.name, door.message);
       saveProgress();
     }
-    return true;
-  }
-  if (door.name === '내부 배치도' && !vaultLit()) {
-    openInspection(door.name, '너무 어두워 배치도가 보이지 않는다. 불이 들어와 있을 때 봐 둘 걸 그랬다.');
     return true;
   }
   return false;

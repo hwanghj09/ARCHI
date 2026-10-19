@@ -1151,7 +1151,7 @@ try {
       parseFloat(getComputedStyle(sign).left)), 128.5, 'Restroom sign is centered over its door');
     assert.equal(await page.locator('#dynamic-scene').getAttribute('data-theme'), 'support');
     assert.deepEqual(await page.locator('#dynamic-scene .floor-room-sign').allTextContents(),
-      ['기술지원 상황실', '장비 검증실', '고객 교육장', '화장실']);
+      ['기술지원 상황실', '장비 검증실 - 보안 자료실', '고객 교육장', '화장실']);
     assert.deepEqual(await page.locator('#dynamic-scene .floor-room').evaluateAll(els => els.map(el => el.className)),
       ['floor-room ops', 'floor-room cage', 'floor-room classroom', 'floor-room restroom']);
     assert.deepEqual(await page.locator('#dynamic-scene .room-door').evaluateAll(els => els.map(el => el.className)),
@@ -1160,7 +1160,7 @@ try {
     assert(ops.room.x >= 3086 && ops.room.x + ops.room.width <= 3556, 'The operations room sits in the middle zone');
     assert(ops.door.x - 28 >= 3114 && ops.door.x + ops.door.width + 28 <= 3584,
       'The operations room door keeps clear of the stairs and the restroom');
-    for (const name of ['장비 검증실', '고객 교육장']) {
+    for (const name of ['장비 검증실 - 보안 자료실', '고객 교육장']) {
       const { room, door } = await roomFront(page, name);
       assert(room.x >= 4282 && room.x + room.width <= 4968, `${name} sits in the right zone`);
       assert(door.x >= 4282 && door.x + door.width + 28 <= 4968, `${name} door stays inside the right zone`);
@@ -1194,7 +1194,7 @@ try {
     await inspect(480, 'E · 교대 근무 일지 조사', /당직 폐지/);
     await leaveRoom(opsRoom, corridorHeader);
 
-    const bay = await enterRoom('장비 검증실', '13F');
+    const bay = await enterRoom('장비 검증실 - 보안 자료실', '13F');
     assert.equal(await worldWidth(page), 1824);
     await checkCutawayArt('floor13-testbay-interior.png', 1824);
     if (!(bay.exit.x < 150)) console.log('SOFTEND', bay.exit.x, '<', 150, 'The test bay door is at the left end inside, as in the corridor');
@@ -1324,7 +1324,7 @@ try {
     assert.deepEqual(doneDevice.map(entry => entry.slice(0, 3)),
       [['시험 단말', 426, 32], ['재실 센서 제어함', 437, 22], ['관찰 카메라', 227, 21]], 'QA steps follow the resized artwork');
     assert(doneDevice.every(entry => entry[3] === 'rgb(143, 224, 106)'), 'Completed steps keep their green indicators');
-    await inspect(100, 'E · 재현 벤치 조사', /정답률 4%.*정답률 91%.*보는 사람이 있는지/);
+    await inspect(100, 'E · 재현 벤치 조사', /정답률 4%.*정답률 91%/);
     assert.equal(await done(), 4);
     await page.keyboard.press('e');
     assert.equal(await done(), 4, 'The record is printed once');
@@ -1923,9 +1923,6 @@ try {
     assert.equal(await page.locator('#dynamic-scene > .floor-background[src$="floor7/test-finished.png"]').count(), 1);
     softCount(await page.locator('#dynamic-scene .floor-prop').count(), 6);
     await assertHumanScale();
-    await inspect(380, 'E · 테스트 책상 조사', /조현아 팀장님 요청.*검증실 백업 장비/);
-    await inspect(850, 'E · 야간 테스트 일정표 조사', /학습이잖아/);
-    await inspect(1750, 'E · 전력 기록계 조사', /B2 인입 전력이 세 배/);
     await page.screenshot({ path: '.local/floor-7-test.png' });
     await leaveRoom(testRoom, corridorHeader);
 

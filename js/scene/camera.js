@@ -11,6 +11,9 @@ const walkPhoneLamps = [[169, 66], [169, 67], [170, 66], [170, 64],
   [171, 66], [171, 67], [170, 65], [171, 65]];
 const runPhoneLamps = [[195, 75], [202, 77], [201, 72], [206, 80], [201, 66], [213, 77], [212, 70], [213, 74],
   [204, 71], [208, 85], [202, 69], [208, 82], [204, 66], [205, 89], [202, 78], [203, 78]];
+const averageLamp = lamps => [0, 1].map(axis => lamps.reduce((sum, lamp) => sum + lamp[axis], 0) / lamps.length);
+const walkPhoneLampAverage = averageLamp(walkPhoneLamps);
+const runPhoneLampAverage = averageLamp(runPhoneLamps);
 
 function cameraTarget() {
   return Math.max(0, Math.min(worldWidth - viewWidth, body.position.x - viewWidth * .42));
@@ -21,7 +24,8 @@ function render() {
   world.style.setProperty('--sight-y', `${body.position.y}px`);
   const state = sprite.dataset.state;
   const index = Number(sprite.dataset.frame) || 0;
-  const lamp = state === 'walk' ? walkPhoneLamps[index] : state === 'run' ? runPhoneLamps[index] :
+  // 걷기·달리기 중 휴대폰이 흔들려도 빛이 나오는 위치는 흔들리지 않게 프레임별 좌표의 평균 한 점으로 고정한다.
+  const lamp = state === 'walk' ? walkPhoneLampAverage : state === 'run' ? runPhoneLampAverage :
     state === 'jump' ? runPhoneLamps[4] : state === 'fall' ? runPhoneLamps[12] : state === 'crouch' ? [180, 196] : [158, 68];
   world.style.setProperty('--beam-x', `${body.position.x + (lamp[0] * .75 - 96) * facing}px`);
   world.style.setProperty('--beam-y', `${body.bounds.max.y - 178 + lamp[1] * .75}px`);

@@ -12,7 +12,7 @@
 const b2CheckpointKey = 'archi.checkpoint.b2';
 const b2DockX = [4790, 4850, 4910]; // 충전 도크(대기 중인 경비 로봇 fixture)의 세 자리
 const b2DoorHold = 700; // 문을 열고 들어온 로봇이 잠깐 멈춰 서는 시간
-const b2WakeDelay = 3000; // DELETE 뒤 첫 로봇이 깨어나기까지(나머지는 0.7초씩 늦게). 상자를 밀 여유를 준다
+const b2WakeDelay = 0; // DELETE 뒤 첫 로봇이 곧바로 깨어난다(나머지는 0.7초씩 늦게).
 // 정신력 45% 규칙(B2 로봇 3대): 로봇 속도를 지금 수호가 낼 수 있는 가장 빠른 속도(뛰기, 정신력 0%면 걷기)에 곱해 정한다.
 // 45% 이상이면 수호보다 느리고(b2SlowRatio), 미만이면 빠르다(b2FastRatio). 45% 미만이면 ARCHI의 방해도 더 잦고 짧다.
 const b2SanityLine = 45;
@@ -34,8 +34,12 @@ const b2MissBarricade = 8;
 const b2WrongProgress = 2;
 const b2FinaleDelay = 4000; // OFFLINE 뒤 TRUE END까지
 
+const b2AwakeDelay = 2000; // 깨어난 로봇이 움직이기 시작하기까지의 지연(ms)
+const b2CrateChaseRatio = 1.25; // 문 막기 동안 로봇은 수호보다 이만큼 빠르다
+
 function b2ChaseSpeed() {
   const suho = (sanity > 0 ? runSpeed : speed) * sanitySpeedFactor();
+  if (!b2Ending.barricaded) return suho * b2CrateChaseRatio; // 문 막기 목표
   return suho * (sanity >= b2SanityLine ? b2SlowRatio : b2FastRatio);
 }
 
@@ -97,7 +101,7 @@ function startArchiDelete() {
   Object.assign(b2Ending, { phase: 'running', barricaded: false, progress: 0, barricade: 100, offline: false, bang: 0 });
   b2Robots = b2DockX.map((x, index) => ({ name: ['R-02', 'R-05', 'R-07'][index], where: floorId(-2), x, facing: -1, wait: 0, elapsed: 0,
     mode: 'dock', hold: b2WakeDelay + index * 700, lostTime: 0, captureTime: 0, door: null, image: null, chaseOriginX: null, spottedX: null,
-    firstEncounter: false, pursuit: true, banging: false, chaseSpeed: b2ChaseSpeed, onCaught: showB2BadEnding }));
+    firstEncounter: false, pursuit: true, followToElevator: true, banging: false, chaseSpeed: b2ChaseSpeed, onCaught: showB2BadEnding }));
   loadB2EndingArt();
   preloadB2CaptureArt();
   b2DeleteBar.hidden = false;
@@ -117,7 +121,7 @@ function mountB2Robots() {
     part.pushable = b2Ending.phase === 'running' && !b2Ending.barricaded ? part.barricadeSpec : null;
   }
   if (b2Ending.phase === 'idle' || room !== 'dynamic' || floorById.get(dynamicFloorId).floor !== -2) return;
-  world.dataset.alarm = 'true';
+  // 화면 전체를 어둡게 하는 data-alarm은 쓰지 않는다(관제실 소등 조명 전용).
   const stairs = currentDoors.find(door => door.type === 'stairs');
   if (stairs) stairs.message = 'ARCHI가 비상계단을 잠갔다. 문 위 표시등이 붉게 깜빡인다.';
   const dock = dynamicScene.querySelector('.fixture.dormant-bots');
@@ -156,18 +160,21 @@ function updateB2Robots(delta) {
     if (robot.mode === 'dock') {
       robot.mode = 'chase';
       playGameSound('robot-alert', { x: robot.x });
+      robot.hold = b2AwakeDelay; // 깨어난 뒤 2초는 제자리에 서 있는다
+      continue;
     }
     // 같은 장면의 로봇은 updateGuardPatrol이 움직인다.
-    if (robot.mode !== 'chase' || !here || robot.where === here) continue;
+    // 깨어난 로봇은 수호가 어느 장면에 있든 곧장 ARCHI 메인 서버실(b2-main)로 향한다.
+    if (robot.mode !== 'chase' || robot.where === 'b2-main' || robot.where === here) continue;
     // 다른 장면에 있는 로봇: 지금 장면의 문까지 걸어간다(방 → 복도 → 수호가 있는 방).
-    const next = robot.where === corridorId ? here : corridorId;
+    const next = robot.where === corridorId ? 'b2-main' : corridorId;
     const doorX = b2DoorX(robot.where, next);
     robot.facing = doorX >= robot.x ? 1 : -1;
     robot.x += robot.facing * Math.min(Math.abs(doorX - robot.x), b2ChaseSpeed() * delta / 1000);
     if (robot.x !== doorX) continue;
     if (next === 'b2-main' && b2Ending.barricaded) {
       // 막힌 서버실 문 앞: 들어오지 못하고 두드린다(아래).
-      if (!robot.banging) playDoorPrySound();
+      if (!b2Robots.some(other => other.banging)) playDoorPrySound(); // 로봇이 몇 대 모여도 이 소리는 한 번만 낸다
       robot.banging = true;
       continue;
     }
@@ -439,6 +446,14 @@ function finishArchiDelete() {
   refreshB2Bar();
   b2DeleteLabel.textContent = 'ARCHI — OFFLINE';
   b2DeleteBar.dataset.offline = 'true';
+  // 삭제가 끝나면 ARCHI가 풀려 더는 문을 두드리지 않는다: 상자를 치우고 서버실 문을 열어 승강기까지 나갈 수 있게 한다.
+  const exit = b2ExitDoor();
+  const crate = b2Crate();
+  if (crate) Body.setPosition(crate.body, { x: crate.body.position.x - 140, y: crate.body.position.y });
+  if (exit) {
+    Object.assign(exit, { locked: false, message: undefined });
+    exit.element.setAttribute('aria-label', `${exit.name} 출입문`);
+  }
   b2Log('archi', '기록이…… 남지 않겠군요.');
   b2Log('sys', 'ARCHI-MAIN 삭제 완료. ARCHI — OFFLINE');
   refreshB2Terminal();

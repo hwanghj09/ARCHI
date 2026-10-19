@@ -117,6 +117,7 @@ function restoreProgress(data) {
     // 자신의 출입증은 기본 소지품이며, 이전 저장에도 진행 상황을 유지한 채 추가한다.
     collectedItems.add('f17-badge');
     for (const item of data.items) collectedItems.add(item);
+    officePostit.element.hidden = !collectedItems.has('story-badge-seen'); // 새 게임·불러오기 직후 오프닝 동안(목표 갱신이 막혀 있다)에도 옆자리 포스트잇이 이전 판 상태로 남지 않게 한다
     // 새 퍼즐이 없던 저장이 다른 층·이동 중인 객실에서 시작하면 귀환 수단을 보존한다.
     if (data.powerCircuitVersion !== 1 && data.blackout &&
         ((floorById.get(data.scene.id)?.floor < 17) || (data.cabin && data.elevators?.[data.cabin.index]?.travelling))) {

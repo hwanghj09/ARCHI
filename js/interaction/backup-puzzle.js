@@ -149,7 +149,7 @@ function renderBackupPanel() {
     backupMonologue.dataset.lines = lines[0];
     showMonologue(backupMonologue, lines, true);
   }
-  backupStatus.textContent = today ? (externalSolved() ? '모든 관련 로그의 발신지는 B2 ARCHI-MAIN이다. 단서가 휴대폰 메모에 기록됐다.' :
+  backupStatus.textContent = today ? (externalSolved() ? '모든 관련 로그의 발신지는 B2 ARCHI-MAIN이다.' :
     '평소 밤과 오늘 밤 기록을 비교해 보자. 다른 줄에는 표시가 붙어 있다.') :
     trainingSolved() ? '10/05 03시: 성능 상승과 B2 전력 집중이 동시에 일어났다. [오늘] 탭이 열렸다.' :
     '날짜 탭을 바꿔 가며 ARCHI 성능과 B2 전력 사용이 함께 높아진 시간을 찾자.';

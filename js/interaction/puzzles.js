@@ -25,6 +25,7 @@ function advanceSequence(door) {
   const { id, step: order, steps, gives } = door.sequence;
   if (collectedItems.has(gives)) {
     if (door.takenSheet) openInspection(door.name, door.takenMessage || door.message, door.takenSheet);
+    else if (order === steps) openInspection(door.name, door.message, door); // 마지막 단계(재현 벤치)는 챙긴 뒤에도 같은 기록을 다시 펼친다.
     return;
   }
   const progress = sequenceProgress.get(id) || 0;
