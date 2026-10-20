@@ -22,7 +22,7 @@ const runFrameDistance = 288 / runFrames; // 이동 속도는 유지하고, 동�
 const walkFrames = 8;
 const frameDistance = 184 / walkFrames;
 const step = 1000 / 60;
-// 정신력: 밝은 곳·플래시는 더 이상 올리지 않고(소모만 막는다), 어두운 곳에서만 천천히 줄어든다.
+// 정신력: 밝은 곳은 올리지도 줄이지도 않고, 어두운 곳에서 천천히 줄어든다(플래시를 켜면 절반 속도, sanityFlashlightDrainFactor).
 // 쫓기는 동안(경비 로봇 추적)은 훨씬 빠르게 줄어든다 — 보스전(bossFightActive)은 예외.
 const sanityDarkDrainPerSecond = 1 / 3;
 const sanityChaseDrainPerSecond = 10;
@@ -31,6 +31,8 @@ const sanityChaseFloor = 10; // 경비 로봇에게 쫓겨서는 이 값 아래�
 const newGameSanity = 50; // 새 게임을 시작할 때의 정신력
 const f1EncounterSanityLoss = 25; // 1층에서 경비 로봇 R-01에게 처음 쫓기는 컷씬에서 한 번에 깎이는 정신력(%)
 const antianxietyRestore = 50; // 항불안제를 사용했을 때의 정신력 회복량
+const antianxietyCalmMs = 60000; // 항불안제를 먹은 뒤 정신력이 전혀 닳지 않는 시간(게임 시간)
+const sanityFlashlightDrainFactor = .5; // 어둠 속에서 플래시를 켜면 어둠 감소(sanityDarkDrainPerSecond)의 이 배율로 줄어든다
 // 50/40/30/20/10% 미만 구간의 공포 연출 단계(1~5). sanityTierOf()가 이 경계로 계산한다.
 const sanityTierThresholds = [50, 40, 30, 20, 10];
 const sanitySlowSpeedFactor = .92; // 30% 미만 이동 속도

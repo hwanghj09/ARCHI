@@ -43,6 +43,7 @@ let phoneBattery = 100;
 // 휴대폰을 충전하는 방·층·콘센트 위치. 맡긴 방의 같은 자리에서 찾아간다.
 let phoneDock = null;
 let sanity = 100;
+let antianxietyCalm = 0; // 항불안제 효과로 정신력이 안 닳는 남은 ms(sanity.js)
 let phoneLightOn = false;
 // 태양광 전력을 받는 지상층. 켠 순서대로 담는다(앞이 가장 먼저 켠 층).
 let solarPoweredFloors = [];

@@ -35,8 +35,11 @@ const OBJECTIVES = [
   { when: () => collectedItems.has('f7-external-connection-solved') && collectedItems.has('b1-elevator'), title: 'B2 서버실 조사하기', text: '길이 열렸다. 승강기를 타고 B2 서버실로 내려가자.' },
   { when: () => collectedItems.has('f7-external-connection-solved') && !collectedItems.has('f13-backup-device'), title: '외부 연결 통로 찾기',
     text: 'ARCHI의 신호는 어디를 거쳐 밖으로 나가는 걸까? 보안 자료실에서 외부 통로를 찾아보자.' },
+  // 13층 백업 장치를 17층 컴퓨터에 꽂아 깨진 리허설 영상을 봐야(f17-usb-played, usb-video.js) 2층에 갈 이유가 생긴다.
+  { when: () => collectedItems.has('f7-external-connection-solved') && !collectedItems.has('f17-usb-played') && !collectedItems.has('f2-projected'),
+    title: '장치 확인하기', text: '이 장치에는 무엇이 들어 있을까? 17층 전력을 켜고 내 자리 컴퓨터에 장치를 꽂아 보자.' },
   { when: () => collectedItems.has('f7-external-connection-solved') && !collectedItems.has('f2-projected'), title: '2층 조사하기',
-    text: '아무도 없는 새벽 3시의 리허설. 2층 행사장 무대에는 무엇이 비춰졌을까?' },
+    text: '영상 속 새벽 3시 리허설에서 내 목소리가 나왔다. 원본이 04:00에 지워지기 전에 2층 서버실 녹화 NAS를 찾자.' },
   // 승강기 제어반은 관제실 CCTV 모니터 벽(소등 컷씬)을 본 뒤에야 돌릴 수 있다(floor-b1.js).
   { when: () => collectedItems.has('f7-external-connection-solved') && collectedItems.has('f13-backup-device') && collectedItems.has('f2-projected') &&
       currentSceneFloor === -1 && !collectedItems.has('b1-lights-out') && !collectedItems.has('b1-elevator'), title: '관제실 CCTV',

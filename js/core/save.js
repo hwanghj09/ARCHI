@@ -99,6 +99,7 @@ function restoreProgress(data) {
     for (const element of [phonePanel, computer, keypad, powerPanel, inspectionPanel, cabin, guardCapturePanel, hallucinationCapturePanel, opening, blackoutScene, storyScene, cctvScene]) element.hidden = true;
     for (const element of document.body.children) if (element !== mainMenu) element.inert = false;
     phoneBlocked = powerBlocked = guardBlocked = hallucinationBlocked = openingBlocked = blackoutBlocked = cctvBlocked = [];
+    antianxietyCalm = 0; // 항불안제 효과 시간은 저장하지 않는다
     zeroEventPhase = 'idle'; zeroEventTimer = 0; zeroEventEvasions = 0;
     clearHallucinationEvents();
     updateAuditoryHallucinations(0, false);
@@ -132,7 +133,7 @@ function restoreProgress(data) {
     }
     // 13층 백업 장치가 B1 제어반 조건이 되기 전에 B2 제한을 이미 푼 저장은 장치를 챙긴 것으로 친다.
     // 2층 리허설 영상도 같은 이유로 친다.
-    if (collectedItems.has('b1-elevator')) ['f13-backup-device', 'f2-projected'].forEach(item => collectedItems.add(item));
+    if (collectedItems.has('b1-elevator')) ['f13-backup-device', 'f17-usb-played', 'f2-projected'].forEach(item => collectedItems.add(item));
     restoreLogPuzzle(data.logPuzzle);
     closeBackupPuzzle();
     restoreClues(data.clues);

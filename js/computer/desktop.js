@@ -7,6 +7,7 @@ const COMPUTER_APPS = {
   building: { title: '시설 안내', icon: 'building' },
   browser: { title: '블로그', icon: 'blog', width: 950, height: 580 },
   transfer: { title: '파일 전송', icon: 'transfer', width: 570, height: 390 },
+  usbdrive: { title: '외부 저장 장치', icon: 'files', width: 660, height: 480 }, // 13층 백업 장치 영상(usb-video.js)
   document: { title: '문서', icon: 'notes' }
 };
 const computerWindows = new Map();
@@ -340,6 +341,7 @@ function resetComputerDesktop() {
     state.element.hidden = state.view.hidden = true;
   }
   refreshComputerWindows();
+  if (typeof refreshUsbDrive === 'function') refreshUsbDrive(); // 13층 백업 장치를 가졌으면 바탕화면에 외부 저장 장치(usb-video.js)
 }
 // 게임 속은 자정이다: 휴대폰 상태 표시줄처럼 시각은 00:00으로 둔다(날짜만 오늘).
 function refreshComputerClock() {

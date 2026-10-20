@@ -36,6 +36,7 @@ function openComputerApp(app, documentId) {
     document.getElementById('computer-document-scroll').scrollTop = 0;
   }
   if (app === 'mail' && wasClosed) showComputerMailInbox();
+  if (app === 'usbdrive' && wasClosed) playUsbVideo(); // 열 때마다 처음부터 재생(usb-video.js)
   if (app === 'building') refreshBuildingGuides();
   refreshSolarDownload();
   if (app === 'browser' && wasClosed) document.getElementById('computer-browser').scrollTop = 0;
