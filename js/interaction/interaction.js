@@ -261,6 +261,11 @@ function interact() {
       return;
     }
     if (car.travelling) return;
+    // 17층을 떠나기 전에 휴대폰 설치까지 마친다. 다른 층의 이전 저장은 설치하러 돌아올 수 있다.
+    if (car.floor === currentSceneFloor && currentSceneFloor === 17 && !collectedItems.has('solar-app-installed')) {
+      openInspection('엘리베이터', '전력 앱을 휴대폰에 먼저 설치하자. 17층 내 자리 컴퓨터에서 앱을 내려받고 USB로 전송해야 한다.');
+      return;
+    }
     // 1층 전력 켜기 목표 도중에는 칸이 와 있어도 탈 수 없다(호출은 된다).
     if (car.floor === currentSceneFloor && currentObjective?.title === '1층 전력 켜기') { openInspection('엘리베이터', '1층 전력을 먼저 켜자.'); return; }
     interactionTime = 420;

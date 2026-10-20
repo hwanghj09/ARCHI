@@ -49,8 +49,11 @@ try {
   await page.keyboard.press('Escape'); await walkTo(200); await page.keyboard.press('e');
   await finishSceneTransition(page);
   assert.equal(await page.evaluate(() => currentSceneFloor), 17);
-  // The full manager-room repair is covered in floor17-power-circuit.mjs; start this transport fixture after it.
-  await page.evaluate(() => { collectedItems.add('f17-emergency-linked'); updatePowerState(); });
+  // Repair, app installation and the initial lobby route have separate suites; exercise transport after them.
+  await page.evaluate(() => {
+    for (const item of ['f17-emergency-linked', 'solar-app-installed', 'story-robot-seen']) collectedItems.add(item);
+    updatePowerState();
+  });
   await walkTo(1858); await page.keyboard.press('e'); await page.clock.runFor(3600);
   assert.equal(await page.evaluate(() => elevatorCars[0].floor), 17);
   await page.keyboard.press('e'); await finishSceneTransition(page);
