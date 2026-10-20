@@ -180,6 +180,8 @@ try {
   assert.equal(await has('b1-elevator'), false, 'B1 key switch waits for the 13F backup device');
   await page.evaluate(() => closeInspection());
   await page.evaluate(() => collectedItems.add('f13-backup-device'));
+  assert.equal(await objective(), '장치 확인하기');
+  await page.evaluate(() => collectedItems.add('f17-usb-played'));
   assert.equal(await objective(), '2층 조사하기');
   await page.evaluate(() => collectedItems.add('f2-projected'));
   // B1에 있으면 관제실 CCTV 모니터 벽(소등 컷씬)을 먼저 보라고 한다. 보기 전에는 제어반도 돌아가지 않는다.

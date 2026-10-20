@@ -106,6 +106,7 @@
     <script src="js/computer/usb-connection.js" defer></script>
     <script src="js/computer/computer.js" defer></script>
     <script src="js/computer/desktop.js" defer></script>
+    <script src="js/computer/usb-video.js" defer></script>
     <script src="js/elevator/cabin.js" defer></script>
     <script src="js/elevator/cabin-pry.js" defer></script>
     <script src="js/scene/b2-ending.js" defer></script>
@@ -584,6 +585,21 @@
             <output id="computer-save-status" role="status" aria-live="polite">저장됨</output>
           </div>
           <textarea id="computer-note" aria-label="업무 메모 내용" spellcheck="false"></textarea>
+        </div>
+        <!-- 13층 백업 장치(USB) 속 2층 03:00 리허설 영상(js/computer/usb-video.js): 그림 없이 글자와 깨진 화면 연출만 쓴다. -->
+        <div id="computer-usbdrive" class="computer-content" hidden>
+          <p class="computer-path">외부 저장 장치 (E:) / BACKUP / 2F_REHEARSAL_0300.mp4</p>
+          <div id="usb-video" class="usb-video" data-state="idle" role="img" aria-label="깨진 리허설 영상">
+            <span id="usb-video-rec" class="usb-video-rec"></span>
+            <span id="usb-video-place" class="usb-video-place"></span>
+            <p id="usb-video-caption" class="usb-video-caption" aria-live="polite"></p>
+            <div id="usb-video-error" class="usb-video-error" hidden>
+              <strong>재생 오류 · 프레임 손상</strong>
+              <span>00:00:09 / 00:14:52에서 멈춤</span>
+              <span>원본: 2F 서버실 녹화 NAS · 04:00 자동 삭제 예정</span>
+            </div>
+          </div>
+          <button id="usb-video-replay" type="button" hidden>다시 재생</button>
         </div>
         <div id="computer-document" class="computer-content" hidden>
           <div class="computer-toolbar"><button type="button" data-computer-app="files" aria-label="파일 목록으로" title="파일 목록으로"><img src="assets/vendor/lucide/arrow-left.svg" alt="" /></button></div>

@@ -96,8 +96,12 @@ try {
   await page.evaluate(() => { buildingBlackout = true; phoneLightOn = false; updatePowerState(); });
   const restored = await page.evaluate(() => sanity);
   await page.clock.runFor(3000);
+  assert.equal(await page.evaluate(() => sanity), restored, '복용 뒤 60초(antianxietyCalmMs) 동안은 어둠에서도 닳지 않는다');
+  await page.evaluate(() => { antianxietyCalm = 0; }); // 60초가 지났다고 친다
+  const calmEnded = await page.evaluate(() => sanity);
+  await page.clock.runFor(3000);
   const drained = await page.evaluate(() => sanity);
-  assert(Math.abs(restored - drained - 1) < .08, '복용 후에도 어둠에서는 3초에 정신력이 1 줄어든다');
+  assert(Math.abs(calmEnded - drained - 1) < .08, '60초가 지나면 어둠에서 3초에 정신력이 1 줄어든다');
   await page.evaluate(() => { guardPatrol.mode = 'chase'; updateSanity(1000); guardPatrol.mode = 'patrol'; });
   assert(Math.abs(await page.evaluate(() => sanity) - (drained - 10)) < .08, '복용 후에도 추격당하면 초당 정신력이 10 줄어든다');
 

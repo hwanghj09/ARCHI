@@ -564,7 +564,10 @@ function updateSanity(elapsed) {
   if (!paused) {
     // 정신 불안 임무: 첫 컷씬을 본 뒤 항불안제를 쓰기 전까지는 어디서든 천천히 줄어든다(추격 중에는 추격 감소량 적용).
     const anxiety = collectedItems.has('story-anxiety-seen') && !collectedItems.has('f16-antianxiety-used') && !collectedItems.has('b2-antianxiety-used');
-    const rate = chasing ? -sanityChaseDrainPerSecond : anxiety ? -sanityAnxietyDrainPerSecond : exposure === 'dark' ? -sanityDarkDrainPerSecond : 0;
+    // 항불안제를 먹은 뒤 antianxietyCalmMs 동안은 무엇에도 닳지 않는다. 어둠 속 플래시는 감소를 막지 못하고 절반으로 줄인다.
+    antianxietyCalm = Math.max(0, antianxietyCalm - elapsed);
+    const rate = antianxietyCalm > 0 ? 0 : chasing ? -sanityChaseDrainPerSecond : anxiety ? -sanityAnxietyDrainPerSecond :
+      exposure === 'dark' ? -sanityDarkDrainPerSecond : exposure === 'flashlight' ? -sanityDarkDrainPerSecond * sanityFlashlightDrainFactor : 0;
     // 쫓기는 동안의 감소는 10%에서 멈춘다(이미 10% 아래면 쫓겨서는 더 줄지 않는다).
     const lowest = chasing ? Math.min(sanity, sanityChaseFloor) : 0;
     sanity = Math.max(lowest, Math.min(100, sanity + rate * elapsed / 1000));

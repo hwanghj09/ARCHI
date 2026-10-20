@@ -29,8 +29,8 @@ try {
   await page.keyboard.press('f');
   const shielded = await state();
   assert.equal(shielded.exposure, 'flashlight');
-  // 플래시도 밝은 곳과 마찬가지로 감소만 막을 뿐, 더 이상 올려주지는 않는다.
-  await page.clock.runFor(3000); near((await state()).sanity, shielded.sanity);
+  // 어둠 속 플래시는 감소를 막지 못하고 절반(sanityFlashlightDrainFactor)으로 줄인다: 3초에 0.5%. 올려주지도 않는다.
+  await page.clock.runFor(3000); near((await state()).sanity, shielded.sanity - .5);
   assert((await state()).battery < shielded.battery, 'Protection still consumes the phone battery');
   await page.keyboard.press('f');
   await page.keyboard.press('p');
@@ -97,7 +97,7 @@ try {
   await page.evaluate(() => { collectedItems.add('f16-antianxiety-used'); sanity = 50; updateSanity(1000); });
   near((await state()).sanity, 50 - 1 / 3); // 임무 감소만 멈추고 어둠의 기본 소모는 유지한다.
   await page.evaluate(() => { sanity = 50; phoneLightOn = true; phoneBattery = 100; updateSanity(1000); });
-  assert.equal((await state()).sanity, 50, '항불안제 사용 후 빛을 비추면 임무·어둠 감소가 모두 없다');
+  near((await state()).sanity, 50 - 1 / 6); // 항불안제 사용 후 플래시를 비추면 임무 감소는 없고 어둠 감소는 절반이다.
   await page.evaluate(() => { collectedItems.delete('story-anxiety-seen'); collectedItems.delete('f16-antianxiety-used'); collectedItems.delete('sanity-drain-resume'); phoneLightOn = false; });
 
   // ---- 정신력이 0%보다 높아지면 진행 중이던 추격(콘솔로 시작한 것 포함)이 중지된다 ----
@@ -148,12 +148,15 @@ try {
   assert.equal(screens.propScreens > 0, true, '책상 소품의 모니터 화면도 바뀐다');
   assert.equal(screens.hidden, true, '정신력이 오르면 모두 원래대로 돌아온다');
 
-  // ---- 항불안제 사용 직후부터 진행 플래그와 무관하게 어둠·추격 감소를 적용한다 ----
+  // ---- 항불안제를 먹은 뒤 60초(antianxietyCalmMs) 동안은 어둠·추격에도 닳지 않고, 그 뒤로는 진행 플래그와 무관하게 다시 닳는다 ----
   for (const progress of [null, 'f12-evaluation-solved', 'sanity-drain-resume']) {
     const drained = await page.evaluate(progress => {
       const out = {};
       collectedItems.add('f16-antianxiety-used');
       if (progress) collectedItems.add(progress);
+      sanity = 50; antianxietyCalm = antianxietyCalmMs; guardPatrol.mode = 'chase'; bossFightActive = false;
+      updateSanity(3000); out.calm = sanity; guardPatrol.mode = 'patrol';
+      antianxietyCalm = 0; // 60초가 지났다
       sanity = 50; updateSanity(3000); out.dark = sanity;
       sanity = 50; guardPatrol.mode = 'chase'; bossFightActive = false;
       updateSanity(1000); out.chasing = sanity;
@@ -163,6 +166,7 @@ try {
       collectedItems.delete('f16-antianxiety-used'); sanity = 100;
       return out;
     }, progress);
+    assert.equal(drained.calm, 50, '항불안제 효과 60초 동안은 쫓겨도 닳지 않는다');
     near(drained.dark, 49);
     near(drained.chasing, 40);
     assert.equal(drained.floor, 10, '회복약 사용 뒤에도 추격 감소는 10%에서 멈춘다');

@@ -43,3 +43,26 @@
 #phone-solar button:disabled { opacity: .5; }
 #phone-solar p { overflow-wrap: anywhere; }
 @media (max-height: 480px) { #computer .device-calculator { margin-block: 4px; padding: 10px; } #computer .calculator-display { padding-block: 4px; font-size: 24px; } }
+/* 17층 컴퓨터 '외부 저장 장치'의 깨진 리허설 영상(js/computer/usb-video.js): 그림 없이 주사선·노이즈·떨림·색 번짐·검은 프레임만 쓴다. */
+.usb-video { position: relative; height: 290px; margin: 8px 0; overflow: hidden; background: #07090b; color: #e9eef0; font: 14px/1.5 monospace;
+  background-image: repeating-linear-gradient(0deg, #ffffff0a 0 1px, transparent 1px 3px), radial-gradient(ellipse at 50% 40%, #2b3438 0, #07090b 70%); }
+.usb-video::after { content: ''; position: absolute; inset: 0; pointer-events: none; opacity: .25;
+  background: repeating-linear-gradient(90deg, #fff1 0 2px, transparent 2px 7px), repeating-linear-gradient(0deg, #0000 0 11px, #fff2 11px 12px);
+  animation: usb-noise .18s steps(3) infinite; }
+@keyframes usb-noise { to { background-position: 7px 13px, 0 -12px; } }
+.usb-video-rec { position: absolute; left: 12px; top: 10px; color: #ff4d4d; letter-spacing: .08em; }
+.usb-video-place { position: absolute; right: 12px; top: 10px; color: #b9c6cc; font-size: 12px; }
+.usb-video-caption { position: absolute; left: 6%; right: 6%; bottom: 18px; margin: 0; padding: 6px 10px; background: #000a; text-align: center; }
+.usb-video[data-state="glitch"] { animation: usb-glitch .22s steps(2) infinite; }
+.usb-video[data-state="glitch"] .usb-video-caption { text-shadow: 2px 0 #ff2a3a, -2px 0 #2ad4ff; clip-path: inset(0 0 35% 0); }
+@keyframes usb-glitch { 0% { transform: translate(0); filter: none; } 50% { transform: translate(-3px, 1px) skewX(-4deg); filter: contrast(1.6) hue-rotate(20deg); } }
+.usb-video[data-state="black"] { background: #000; }
+.usb-video[data-state="black"] > * { visibility: hidden; }
+.usb-video-error { position: absolute; inset: 22% 10%; display: flex; flex-direction: column; justify-content: center; gap: 6px; padding: 14px;
+  border: 1px solid #c4574b; background: #1a0c0bf0; color: #ffd9d3; text-align: center; }
+.usb-video-error[hidden] { display: none; }
+.usb-video-error strong { color: #ff8a7a; font-size: 16px; }
+.usb-video-caption:empty { display: none; }
+#usb-video-replay { min-height: 36px; margin: 2px 0; padding: 6px 16px; border: 1px solid #8fa3ad; border-radius: 6px; background: #eef3f6; color: #1d2a31; font: 600 13px Arial, sans-serif; cursor: pointer; }
+#usb-video-replay[hidden] { display: none; }
+@media (prefers-reduced-motion: reduce) { .usb-video::after, .usb-video[data-state="glitch"] { animation: none; } }
