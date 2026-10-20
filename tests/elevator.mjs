@@ -35,8 +35,11 @@ try {
   if (await page.locator("#blackout-scene").isVisible()) await page.locator("#blackout-skip").click();
   if (await page.locator('#story-scene').isVisible()) await page.locator('#story-skip').click(); // 정전 직후 혼잣말
   await page.clock.runFor(34);
-  // Rooftop power recovery is exercised by elevator-power.mjs; this suite checks the powered floor routes.
-  await page.evaluate(() => { collectedItems.add("f17-emergency-linked"); solarEnabled = true; updatePowerState(); });
+  // Power/app recovery and the initial lobby route have separate suites; this fixture explores later floors.
+  await page.evaluate(() => {
+    for (const item of ['f17-emergency-linked', 'solar-app-installed', 'story-robot-seen']) collectedItems.add(item);
+    solarEnabled = true; updatePowerState();
+  });
   // 정전된 층의 전자 장치(게이트·도어락·컴퓨터)는 꺼진다(power.js, a1c6f7d). 이 경로 검사는 층마다 장치를 쓰므로
   // 콘솔의 '모든 층 전력 활성화'를 켠다. 정전 순찰 로봇 R-03도 이 동안 멈춰 승강기 칸을 가져가지 않는다(roaming-guard.mjs가 따로 본다).
   await page.evaluate(() => setAllFloorsPower(true));
