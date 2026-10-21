@@ -37,7 +37,7 @@ const OBJECTIVES = [
     text: 'ARCHI의 신호는 어디를 거쳐 밖으로 나가는 걸까? 보안 자료실에서 외부 통로를 찾아보자.' },
   // 13층 백업 장치를 17층 컴퓨터에 꽂아 깨진 리허설 영상을 봐야(f17-usb-played, usb-video.js) 2층에 갈 이유가 생긴다.
   { when: () => collectedItems.has('f7-external-connection-solved') && !collectedItems.has('f17-usb-played') && !collectedItems.has('f2-projected'),
-    title: '장치 확인하기', text: '13층에서 챙긴 USB를 확인하자. 17층 내 자리 컴퓨터의 외부 저장 장치를 열고 USB를 연결해 보자.' },
+    title: '장치 확인하기', text: '13층에서 챙긴 USB를 확인하자. 17층 내 자리 컴퓨터의 외부 저장 장치를 열고 USB를 연결해 보자. (17층에 전력이 필요해)' },
   { when: () => collectedItems.has('f7-external-connection-solved') && collectedItems.has('f17-usb-played') && !collectedItems.has('f2-projected'), title: '2층 조사하기',
     text: '영상 속 새벽 3시 리허설에서 내 목소리가 나왔다. 원본이 04:00에 지워지기 전에 2층 서버실 녹화 NAS를 찾자.' },
   // 승강기 제어반은 관제실 CCTV 모니터 벽(소등 컷씬)을 본 뒤에야 돌릴 수 있다(floor-b1.js).

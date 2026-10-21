@@ -1076,3 +1076,26 @@ img { -webkit-user-drag: none; }
 }
 #dynamic-scene .fixture.power-notice:has(span),
 #dynamic-scene .fixture.power-notice:has(span) span { transform: none; }
+/* 8층 제품기획실 창밖 비(floor-08.js): 유리 칸 하나마다 한 상자. 그림 없이 그라데이션만 쓴다. 상자 밖으로는 잘라 내고(overflow) 옅게(opacity) 둔다.
+   ::before 가까운 빗줄기, ::after 먼 빗줄기(가는 세로 점선을 세로줄 마스크로 잘라 짧은 줄로 만들고 아래로 흘린다), 상자 자체는 유리를 타고 천천히 흐르는 물방울. */
+#dynamic-scene .fixture.rain-window { overflow: hidden; opacity: .45;
+  background: radial-gradient(circle at 50% 50%, #e4f1ff99 0 1.4px, transparent 2px) 0 0 / 41px 57px,
+    radial-gradient(circle at 50% 50%, #e4f1ff66 0 1px, transparent 1.6px) 19px 23px / 53px 71px;
+  animation: rain-drops 9s linear infinite; }
+#dynamic-scene .fixture.rain-window::before, #dynamic-scene .fixture.rain-window::after { content: ''; position: absolute; inset: -60px -30px 0;
+  transform: skewX(-8deg); pointer-events: none; }
+#dynamic-scene .fixture.rain-window::before {
+  background: repeating-linear-gradient(180deg, transparent 0 46px, #d6e8ff88 46px 64px) 0 0 / 100% 110px;
+  -webkit-mask-image: repeating-linear-gradient(90deg, #000 0 1px, transparent 1px 23px); mask-image: repeating-linear-gradient(90deg, #000 0 1px, transparent 1px 23px);
+  animation: rain-near .45s linear infinite; }
+#dynamic-scene .fixture.rain-window::after { opacity: .6;
+  background: repeating-linear-gradient(180deg, transparent 0 30px, #c4dcff77 30px 40px) 0 0 / 100% 70px;
+  -webkit-mask-image: repeating-linear-gradient(90deg, transparent 0 11px, #000 11px 12px, transparent 12px 17px);
+  mask-image: repeating-linear-gradient(90deg, transparent 0 11px, #000 11px 12px, transparent 12px 17px);
+  animation: rain-far .7s linear infinite; }
+@keyframes rain-near { to { background-position: 0 110px; } }
+@keyframes rain-far { to { background-position: 0 70px; } }
+@keyframes rain-drops { to { background-position: 0 57px, 19px 94px; } }
+@media (prefers-reduced-motion: reduce) {
+  #dynamic-scene .fixture.rain-window, #dynamic-scene .fixture.rain-window::before, #dynamic-scene .fixture.rain-window::after { animation: none; }
+}
