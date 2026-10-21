@@ -115,15 +115,10 @@ try {
     performFloorChange('f6-engineering', null, 'exit'); audioEvents.length = 0;
   });
   await page.clock.runFor(4800);
-  assert.equal((await events()).filter(name => name === 'call-ring').length, 2, 'The duty phone rings when the puzzle starts and repeats on the game clock');
-  await page.evaluate(() => {
-    Body.setPosition(body, { x: activeCall.x + activeCall.width / 2, y: floorY - 81 });
-    Body.setVelocity(body, { x: 0, y: 0 }); grounded = true;
-    interact();
-  });
-  assert(await page.evaluate(() => !activeCall && collectedItems.has('f6-oncall') && [...gameAudioEffects].filter(sound => sound.name === 'call-ring').every(sound => sound.stopping)), 'Answering stops the ring and grants the clue');
+  assert(!(await events()).includes('call-ring'), 'Exploring 6F does not start an unapproved phone subplot');
+  assert(await page.evaluate(() => !activeCall && !collectedItems.has('f6-oncall')));
   await clear(); await page.clock.runFor(3000);
-  assert(!(await events()).includes('call-ring'), 'Answered calls stay silent');
+  assert(!(await events()).includes('call-ring'), '6F remains silent after the old call deadline');
   // Item sounds: a wrong code buzzes and the right one clacks the lock open; a puzzle flag keeps the pickup thud; a device
   // run on a required item clacks once; the fire shutter rattles instead.
   await page.evaluate(() => {
@@ -154,5 +149,5 @@ try {
   assert.deepEqual(await inspect('f2-harmony', '배터리 영사기'), ['item-use'], 'Running a device on required items is a use, not a pickup');
   assert.deepEqual(await inspect('f2-harmony', '배터리 영사기'), [], 'A running device stays silent');
   assert.deepEqual(errors, []);
-  console.log('PASS: walking/running/landing, shutdown/flicker/outage timing, charger guards, robot alert/grab and return motor, item/keypad/shutter sounds, door transitions, elevator motor/arrival/isolation and repeating/answered duty calls.');
+  console.log('PASS: walking/running/landing, shutdown/flicker/outage timing, charger guards, robot alert/grab and return motor, item/keypad/shutter sounds, door transitions, elevator motor/arrival/isolation and silent 6F exploration.');
 } finally { await browser.close(); }

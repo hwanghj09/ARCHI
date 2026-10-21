@@ -19,8 +19,8 @@ function floorHasPower(floor) {
 }
 
 // 전력이 있어야 반응하는 장치: 잠긴 문의 카드 리더기·도어락, 출입 게이트, 컴퓨터, 버튼·선택기·연속 조작 장비(opens·cycle·sequence),
-// 화면·단말(surface 'screen', poweredSprite, needsPower). 그 층에 전력이 들어오지 않으면(floorHasLighting, 층별 태양광 공급) 힌트도
-// 테두리도 없고 E를 눌러도 아무 반응이 없다(interaction.js). 지하(B1·B2)는 늘 켜져 있다. 휴대폰 충전기·엘리베이터는 UPS(floorHasPower)를 따른다.
+// 화면·단말(surface 'screen', poweredSprite, needsPower). 전력이 없으면 조작 대신 안내만 보여 준다(interaction.js).
+// 지하(B1·B2)는 별도 회선이다. 컴퓨터·휴대폰 충전기·엘리베이터는 UPS(floorHasPower)를 따른다.
 // selfPowered: 배터리·별도 회선으로 정전 중에도 살아 있는 장치(층 문구가 정전 상태 기준으로 쓰인 3·4·7·8층 퍼즐, 1층 로봇 정비 패널 등).
 function needsFloorPower(door) {
   if (door.selfPowered) return false;
@@ -31,7 +31,7 @@ function needsFloorPower(door) {
 }
 
 function deviceUnpowered(door) {
-  return needsFloorPower(door) && !floorHasLighting(currentSceneFloor);
+  return needsFloorPower(door) && !(door.type === 'computer' ? floorHasPower(currentSceneFloor) : floorHasLighting(currentSceneFloor));
 }
 
 function openEmergencyCircuit() {

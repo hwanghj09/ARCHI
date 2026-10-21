@@ -3,8 +3,7 @@
 // (연구 자료실·데이터 연구실·사용자 실험실), 계단 옆과 화장실 오른쪽 복도는 연구 성과 전시장과 휴게 공간으로 쓴다.
 // 방 안 폭은 복도 전면 폭의 3.75배(480/640/560 → 1800/2400/2100). 창 없는 자료실은 캄캄해서(dark) 입구 옆
 // 충전식 작업등을 켜야(gives = litBy) 노트와 보관함 라벨을 읽을 수 있다(darkMessage).
-// 단서는 ARCHI 데이터 파이프라인이 사내 기록과 실험 데이터를 새벽마다 B2로 복사했다는 것과, 수호도 피험자였던
-// 행동 관찰 실험(서브엔딩 복선). 정전 상태(장비 꺼짐)를 기준으로 썼다.
+// 사내 기록을 학습에 쓰는 환경 자료만 남긴다. 수호의 피험자 명단·야간 관찰 실험 서브스토리는 제거했다.
 // build.py가 공용 벽 모듈의 복도와 별도 천장·바닥·벽을 만든다. 작업등·어둠 상태와 모든 문·소품 좌표는 유지한다.
 const floor14Scene = (name, width) => [
   { src: `assets/background/floor14/floor14-ceiling-${name}.png`, width, height: 100, top: 0 },
@@ -94,16 +93,8 @@ const FLOOR14_ROOMS = interiorRooms(14, [
     backgroundWallsOnly: true, backgroundImage: floor14Scene('ux', 2100), props: [
     { file: 'observation-camera-cart', size: [256, 256], worldWidth: 105, x: 800 },
     { file: 'instrument-cart', size: [256, 256], worldWidth: 113, x: 220 },
-    { file: 'observation-console', size: [512, 256], worldWidth: 272, x: 520, name: '관찰 콘솔',
-      message: '관찰 기록 출력물: "피험자 반응 — 시선, 표정, 걸음걸이, 심박. 분석 보조: ARCHI." 맨 아래 줄: "다음 단계: 야간 무인 관찰 모드 시험."',
-      surface: 'document', writing: [{ as: 'title', text: '피험자 반응' }, '시선, 표정, 걸음걸이, 심박.', { as: 'field', label: '분석 보조', text: 'ARCHI' },
-        { as: 'rule' }, { as: 'field', label: '다음 단계', text: '야간 무인 관찰 모드 시험.' }],
-      caption: '관찰 기록 출력물.' },
-    { file: 'experiment-table', size: [512, 256], worldWidth: 356, x: 1330, name: '실험 테이블',
-      message: '실험 동의서 묶음이 놓여 있다. 피험자 명단 중간에 "17층 정수호"가 있다. 참가 사례: 커피 쿠폰 2장.',
-      surface: 'document', writing: [{ as: 'title', text: '실험 참가 동의서 · 피험자 명단' }, '…', '17층 정수호', '…',
-        { as: 'rule' }, { as: 'field', label: '참가 사례', text: '커피 쿠폰 2장' }],
-      caption: '실험 동의서 묶음이 놓여 있다.' },
+    { file: 'observation-console', size: [512, 256], worldWidth: 272, x: 520, name: '관찰 콘솔' },
+    { file: 'experiment-table', size: [512, 256], worldWidth: 356, x: 1330, name: '실험 테이블' },
     { file: 'waiting-sofa', size: [512, 256], worldWidth: 250, x: 1720 },
     { file: 'large-planter', size: [256, 512], worldWidth: 78, x: 2000 },
   ] },

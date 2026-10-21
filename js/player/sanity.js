@@ -4,6 +4,7 @@ const sanityValue = document.getElementById('sanity-value');
 const sanityMeter = document.getElementById('sanity-meter');
 const sanityFill = document.getElementById('sanity-fill');
 const sanityState = document.getElementById('sanity-state');
+const sanityCalm = document.getElementById('sanity-calm');
 const hallucinations = document.getElementById('hallucinations');
 const hallucinationShadow = document.getElementById('hallucination-shadow');
 const flashPrompt = document.getElementById('flash-prompt');
@@ -68,6 +69,9 @@ function sanitySpeedFactor() {
 }
 
 function refreshSanity() {
+  sanityCalm.hidden = antianxietyCalm <= 0;
+  const calmText = `진정 효과 · ${Math.ceil(antianxietyCalm / 1000)}초`;
+  if (sanityCalm.textContent !== calmText) sanityCalm.textContent = calmText;
   const percent = Math.ceil(sanity);
   const state = sanity === 0 ? 'hallucinating' : fearTier >= 1 ? 'low' : 'normal';
   if (sanityValue.value !== `${percent}%`) sanityValue.value = `${percent}%`;
@@ -170,8 +174,9 @@ function releaseHallucinationCapture() {
   hallucinationCapturePanel.hidden = true;
   for (const element of hallucinationBlocked) element.inert = false;
   hallucinationBlocked = [];
-  // 완전히 소진된 상태로 다시 몰아붙이지 않도록 한숨 돌릴 여유를 준다.
-  sanity = Math.max(sanity, 50);
+  // 재시도는 회복 수단이 아니다. 다음 돌진까지의 대기 시간만 다시 준다.
+  zeroEventPhase = 'idle';
+  zeroEventTimer = 0;
   zeroEventEvasions = 0;
   refreshSanity();
   animate(0);
@@ -565,7 +570,9 @@ function updateSanity(elapsed) {
     // 정신 불안 임무: 첫 컷씬을 본 뒤 항불안제를 쓰기 전까지는 어디서든 천천히 줄어든다(추격 중에는 추격 감소량 적용).
     const anxiety = collectedItems.has('story-anxiety-seen') && !collectedItems.has('f16-antianxiety-used') && !collectedItems.has('b2-antianxiety-used');
     // 항불안제를 먹은 뒤 antianxietyCalmMs 동안은 무엇에도 닳지 않는다. 어둠 속 플래시는 감소를 막지 못하고 절반으로 줄인다.
+    const previousCalm = antianxietyCalm;
     antianxietyCalm = Math.max(0, antianxietyCalm - elapsed);
+    if (previousCalm > 0 && antianxietyCalm === 0) sayLine('진정 효과가 끝났다. 어둠 속에서는 다시 정신력이 줄어든다.');
     const rate = antianxietyCalm > 0 ? 0 : chasing ? -sanityChaseDrainPerSecond : anxiety ? -sanityAnxietyDrainPerSecond :
       exposure === 'dark' ? -sanityDarkDrainPerSecond : exposure === 'flashlight' ? -sanityDarkDrainPerSecond * sanityFlashlightDrainFactor : 0;
     // 쫓기는 동안의 감소는 10%에서 멈춘다(이미 10% 아래면 쫓겨서는 더 줄지 않는다).

@@ -105,7 +105,7 @@ try {
 
   // 실제 층의 조사 경로도 이미지 UI로 들어와야 한다. 임시 장치만 확인해서 연결 누락을 놓치지 않는다.
   const targets = ['외부 회선 패널', '인터록 제어반', 'UPS', '재실 센서 제어함', '관찰 카메라', '셔터 제어함',
-    '승강기 제어반', '이중 잠금 서류함', '방화셔터', '시험 단말', 'UPS 분배기', '퇴실 버튼', '비상 개방 버튼',
+    '승강기 제어반', '방화셔터', '시험 단말',
     '재현 벤치', '작업등', 'CCTV 모니터 벽', 'CCTV 분배함', '배터리 영사기', '스피드 게이트'];
   const locations = await page.evaluate(targets => targets.map(name => {
     for (const config of floorById.values()) {
@@ -151,7 +151,7 @@ try {
     }
   }
   assert.deepEqual(errors, []);
-  console.log('PASS: 19 sprite layers; 19 real game objects open image controls; 9 control types, disc/crank stages, selector positions, desktop/mobile bounds and pointer movement.');
+  console.log(`PASS: ${images.length} sprite layers; ${locations.length} real game objects open image controls; 9 control types, disc/crank stages, selector positions, desktop/mobile bounds and pointer movement.`);
 } finally {
   await browser.close();
 }

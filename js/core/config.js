@@ -32,6 +32,8 @@ const newGameSanity = 50; // 새 게임을 시작할 때의 정신력
 const f1EncounterSanityLoss = 25; // 1층에서 경비 로봇 R-01에게 처음 쫓기는 컷씬에서 한 번에 깎이는 정신력(%)
 const antianxietyRestore = 50; // 항불안제를 사용했을 때의 정신력 회복량
 const antianxietyCalmMs = 60000; // 항불안제를 먹은 뒤 정신력이 전혀 닳지 않는 시간(게임 시간)
+const solarDownloadMs = 5000;
+const solarTransferMs = 8000;
 const sanityFlashlightDrainFactor = .5; // 어둠 속에서 플래시를 켜면 어둠 감소(sanityDarkDrainPerSecond)의 이 배율로 줄어든다
 // 50/40/30/20/10% 미만 구간의 공포 연출 단계(1~5). sanityTierOf()가 이 경계로 계산한다.
 const sanityTierThresholds = [50, 40, 30, 20, 10];

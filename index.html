@@ -132,7 +132,8 @@
     <script src="js/core/save.js" defer></script>
     <script src="js/ui/main-menu.js" defer></script>
     <script src="js/main.js" defer></script>
-  </head>
+    <link rel="preload" as="image" href="assets/player/jeong-suho-phone-run-sixteen-on.png">
+</head>
   <body data-main-menu="true">
     <main id="stage" tabindex="-1" aria-label="ARCHI 17층 사무실 사이드뷰 스테이지">
       <div id="world" data-room="office" data-floor="17" data-lights="on" data-opening="loading">
@@ -279,7 +280,8 @@
     </section>
     <section id="map-window" role="dialog" aria-label="지도" hidden>
       <div id="map-head"><h2 id="map-title">지도</h2><button id="map-close" type="button">닫기 · Esc</button></div>
-      <div id="map-view" aria-hidden="true"></div>
+      <p class="map-help">출입구 약도 · 방 내부와 소품은 현장에서 확인하세요. 이동과 시간은 계속됩니다.</p>
+      <div id="map-view" aria-label="출입구와 현재 위치"></div>
     </section>
     <section id="story-scene" role="dialog" aria-modal="true" aria-label="수호의 혼잣말" hidden>
       <p id="story-caption" role="status" aria-live="polite"></p>
@@ -317,6 +319,7 @@
         <section id="phone-app-window" aria-labelledby="phone-app-title" hidden>
           <header><button id="phone-app-back" type="button" aria-label="휴대폰 홈으로">‹ 홈</button><h3 id="phone-app-title">메모</h3></header>
           <div id="phone-notes" data-phone-view="notes" hidden>
+            <p class="phone-note-help">필요한 정보는 직접 메모하세요. 메모를 보는 동안에도 시간이 흐르며, 켜 둔 플래시는 배터리를 사용합니다.</p>
             <div class="phone-note-tabs" role="tablist" aria-label="메모 종류">
               <button id="phone-tab-memo" type="button" role="tab" aria-selected="true" aria-controls="phone-memo-pane">메모</button>
               <button id="phone-tab-clues" type="button" role="tab" aria-selected="false" aria-controls="phone-clue-pane" tabindex="-1">단서<span id="phone-clue-count"></span></button>
@@ -480,6 +483,7 @@
         <span id="sanity-fill" aria-hidden="true"></span>
       </div>
       <span id="sanity-state" aria-live="polite">안정</span>
+      <span id="sanity-calm" role="timer" aria-label="진정 효과 남은 시간" hidden></span>
     </aside>
     <img id="dark-face" alt="" aria-hidden="true" draggable="false" hidden />
     <video id="devoured-video" src="assets/video/hallucination-devoured.mp4" muted playsinline preload="auto" aria-hidden="true" hidden></video>
@@ -495,7 +499,7 @@
       <div class="game-over-content">
         <h2 id="hallucination-caught-title">GAME OVER</h2>
         <strong>환각에게 삼켜졌다</strong>
-        <p>정신을 차려 보니 아직 같은 자리다. 정신력을 조금 되찾았다.</p>
+        <p>같은 자리에서 다시 정신을 차렸다. 정신력은 회복되지 않는다. 다음 발소리가 들리면 그쪽을 플래시(F)로 비추자. 이전 저장을 불러올 수도 있다.</p>
         <div class="game-over-actions"><button id="hallucination-retry" type="button">다시 정신 차리기</button><button class="game-over-load" type="button">불러오기</button></div>
       </div>
     </section>
@@ -586,10 +590,16 @@
           </div>
           <textarea id="computer-note" aria-label="업무 메모 내용" spellcheck="false"></textarea>
         </div>
-        <!-- 13층 백업 장치(USB) 속 2층 03:00 리허설 영상(js/computer/usb-video.js): 그림 없이 글자와 깨진 화면 연출만 쓴다. -->
+        <!-- 13층 USB를 연결하면 2층 03:00 리허설 녹화 사본이 재생된다. -->
         <div id="computer-usbdrive" class="computer-content" hidden>
-          <p class="computer-path">외부 저장 장치 (E:) / BACKUP / 2F_REHEARSAL_0300.mp4</p>
-          <div id="usb-video" class="usb-video" data-state="idle" role="img" aria-label="깨진 리허설 영상">
+          <p id="usb-drive-path" class="computer-path">백업 장치 · 연결 대기</p>
+          <div id="usb-drive-connect" class="usb-drive-connect">
+            <img src="assets/objects/items/backup-device.png" alt="13층 보안 자료실에서 가져온 USB" />
+            <p>보관함에서 가져온 USB다. 내 컴퓨터에서 내용을 확인해 보자.</p>
+            <button id="usb-drive-plug" type="button">USB를 컴퓨터에 연결</button>
+          </div>
+          <div id="usb-video" class="usb-video" data-state="idle" role="group" tabindex="-1" aria-label="2층 무관객 리허설 녹화 사본" hidden>
+            <div class="usb-video-footage" aria-hidden="true"></div>
             <span id="usb-video-rec" class="usb-video-rec"></span>
             <span id="usb-video-place" class="usb-video-place"></span>
             <p id="usb-video-caption" class="usb-video-caption" aria-live="polite"></p>
@@ -597,6 +607,7 @@
               <strong>재생 오류 · 프레임 손상</strong>
               <span>00:00:09 / 00:14:52에서 멈춤</span>
               <span>원본: 2F 서버실 녹화 NAS · 04:00 자동 삭제 예정</span>
+              <span>내 목소리가 왜 리허설에…? 2층에서 원본을 확인해야겠다.</span>
             </div>
           </div>
           <button id="usb-video-replay" type="button" hidden>다시 재생</button>

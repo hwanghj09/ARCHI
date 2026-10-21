@@ -4,7 +4,7 @@
 
 원본은 걷기 3열×2행(1536×1024), 달리기 4열×2행(1774×887)이다. 생성 결과의 실제 크기를 기준으로 `scripts/prepare-phone-movement.ps1`이 픽셀 보간 없이 256×256 셀의 가로 시트로 분할한다. 달리기 원본의 행 경계는 y=460이며, 접지 프레임의 발 기준은 y=237, 공중 프레임은 y=230/219다. ON/OFF가 동일한 정렬값을 사용한다.
 
-최종 수정본 `walk-off-hands.png`, `walk-on-hands.png`에서는 요청받은 1·2·4번 셀만 사용하고, 3·5·6번 셀은 최초 원본을 유지한다. 1·4번은 빈손 팔의 어깨·윗팔을 몸통 뒤로 가리고 뒤쪽 골반에서 아래팔만 보이며, 2번은 허벅지 뒤의 손끝만 보인다. 라이트 ON 달리기는 게임에서 비활성화되었으며, `run-on`의 3·7번 공중 자세만 점프·낙하에 재사용한다.
+최종 수정본 `walk-off-hands.png`, `walk-on-hands.png`에서는 요청받은 1·2·4번 셀만 사용하고, 3·5·6번 셀은 최초 원본을 유지한다. 1·4번은 빈손 팔의 어깨·윗팔을 몸통 뒤로 가리고 뒤쪽 골반에서 아래팔만 보이며, 2번은 허벅지 뒤의 손끝만 보인다. 기존 `run-on`의 3·7번 공중 자세는 점프·낙하에 재사용한다. 2026-10-20부터 지상 플래시 달리기는 아래 새 16프레임 시트를 사용한다.
 
 ## Final far-arm occlusion OFF
 
@@ -59,3 +59,28 @@ Use case: identity-preserve. Asset: production 2D side-scroller game pixel-art R
 Reference: `run-off.png` (edit target).
 
 Use case: precise-object-edit. Input is the EDIT TARGET eight-frame Suho PHONE RUN OFF sprite atlas. Create its flashlight ON counterpart. Change ONLY the small LED at the top outward-facing edge of each smartphone to a bright warm-white point with a tiny restrained glow. No beam or cone, no rays or surrounding scene lighting: game code draws it. Preserve precisely the same canvas dimensions, FOUR columns x TWO rows grid, frame positions, running poses, silhouettes, full heads and feet, phone positions, pixel art styling, face and clothing, all unchanged. Eight characters face RIGHT. Actual alpha transparency outside sprites must be preserved; no ground, no background, no text, no borders. Do not add glowing outlines to bodies or repaint the characters. Only the eight tiny phone LEDs turn on.
+
+
+## 2026-10-20 · 플래시 ON 달리기 16프레임
+
+사용자 요청에 따라 플래시를 켠 채 Shift 달리기를 지원한다. 새 원본 `run-sixteen-on-generated.png`는 image_gen으로 그렸으며, 현재 `jeong-suho-phone-run-sixteen-off.png`의 16개 셀을 4×4 격자로 배치한 이미지를 참조했다. 생성 결과는 1254×1254의 실제 알파 PNG다. 과거 8프레임 ON 파일도 존재하며, 이를 누락 파일로 기술했던 문제 기록은 정정했다.
+
+프롬프트: 기존 캐릭터의 얼굴·옷·실루엣·16개 달리기 자세와 순서를 유지한다. 검은 휴대폰의 앞쪽 상단에 프레임마다 밝은 흰색 LED를 그린다. 빛줄기·배경·바닥·그림자·글자·격자선은 그리지 않는다. 게임이 방향성 빛을 그리므로 실제 투명 배경과 셀 주변 여백을 유지한다. 인접한 자세의 홀드도 유지한다.
+
+재생성:
+
+```sh
+node scripts/prepare-flashlight-run.mjs
+```
+
+빌드 스크립트는 아트를 새로 그리지 않고, 생성 원본을 최근접 보간으로 1024×1024로 맞춘 뒤 256×256 셀 16개를 가로로 패킹한다. 최종 파일은 `assets/player/jeong-suho-phone-run-sixteen-on.png`(4096×256). 출력되는 LED 좌표는 `js/scene/camera.js`의 `runLitPhoneLamps`에 반영했다. 테스트가 16개 셀의 투명 여백·실제 LED와 광원 정합·좌우 달리기 속도·점프 전환·방전을 확인한다.
+
+플래시를 켜도 달리기 속도는 기본 달리기와 같다. 배터리·정신력·점프·플래시 켜기 지연 규칙은 유지한다. 점프·낙하는 기존 2프레임 시트를 계속 사용한다.
+
+### 16프레임 ON 외곽 정리
+
+최초 생성본에 목뒤·어깨·팔 주변의 회색 매트와 반투명 잔상이 남아 있었다. image_gen으로 원본의 배경·알파를 보정하고 `run-sixteen-on-generated.png`를 교체했다. 4×4 격자·1254×1254 크기와 16개 자세 순서를 유지한다.
+
+편집 지시: 캐릭터 바깥과 팔·다리 사이의 회색/갈색 쐐기 모양 배경, 연무, 붉은 잡픽셀을 실제 투명 알파로 제거한다. 머리·셔츠·바지·신발·휴대폰의 자연스러운 외곽선과 의상 내부 회색 디테일은 보존한다. 전신 자세·프레임 위치·LED를 유지하고 배경·빛줄기·그림자·테두리를 추가하지 않는다.
+
+`prepare-flashlight-run.mjs`로 최종 가로 시트를 다시 패킹하고 출력 LED 좌표를 광원에 반영했다. 보정본 8·9번 프레임의 발이 기존 기준선을 2px 넘어서, 신발을 자르지 않고 셀 안 배치를 2px 올렸다. 16개 셀을 어두운 배경에 합성해 외곽을 확인한다. 참고: 투명 PNG 뷰어만으로 확인하지 않고 실제 배경 위 합성 결과도 확인해야 반투명 매트가 드러난다.

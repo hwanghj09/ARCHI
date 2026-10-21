@@ -68,36 +68,16 @@ try {
   await controlClosed();
   assert.equal(await has('f11-shutter-open'), true, 'Two full turns raise the shutter');
 
-  // 선택기: 고른 칸으로 UPS 출력이 간다(4층).
-  assert.equal((await open('f4-lab', 'UPS 분배기')).control, true);
-  await page.keyboard.press('ArrowRight');
-  await page.keyboard.press('ArrowRight');
-  await page.keyboard.press('Enter');
+  // 실제 B1 제어반의 열쇠를 포인터로 돌린다.
+  await open('b1-control', '승강기 제어반', ['b1-cctv-live', 'f7-external-connection-solved', 'f13-backup-device', 'f2-projected', 'b1-lights-out']);
+  const dial = await device.locator('.control-dial').boundingBox();
+  const cx = dial.x + dial.width / 2, cy = dial.y + dial.height / 2;
+  await page.mouse.move(cx, cy - 70);
+  await page.mouse.down();
+  for (let a = 10; a <= 100; a += 10) await page.mouse.move(cx + 70 * Math.sin(a * Math.PI / 180), cy - 70 * Math.cos(a * Math.PI / 180));
+  await page.mouse.up();
   await controlClosed();
-  assert.equal(await has('f4-ups=로그 판독기'), true, 'The selector sends power to the chosen output');
-
-  // 버튼: 클릭하면 바로 눌린다(3층 퇴실 버튼은 누를 때마다).
-  assert.equal((await open('f3-fitness', '퇴실 버튼')).control, true);
-  await device.click();
-  await controlClosed();
-  assert.equal(await page.evaluate(() => currentDoors.find(door => door.name === '회원 전용 자동문').element.dataset.open), 'true');
-  assert.equal((await open('f3-fitness', '퇴실 버튼')).control, true, 'The exit button is pressed every time');
-  await page.keyboard.press('Escape');
-
-  // 원판 끌기: 열쇠를 시계 방향으로 돌린다(10층 열쇠 두 개).
-  await open('f10-executive', '이중 잠금 서류함', ['f10-key-finance', 'f10-key-director']);
-  for (let key = 0; key < 2; key++) {
-    await page.waitForFunction(() => controlStep && !controlStep.done && controlStep.value === 0);
-    const dial = await device.locator('.control-dial').boundingBox();
-    const cx = dial.x + dial.width / 2, cy = dial.y + dial.height / 2;
-    await page.mouse.move(cx, cy - 70);
-    await page.mouse.down();
-    for (let a = 10; a <= 100; a += 10) await page.mouse.move(cx + 70 * Math.sin(a * Math.PI / 180), cy - 70 * Math.cos(a * Math.PI / 180));
-    await page.mouse.up();
-  }
-  await controlClosed();
-  assert.equal(await page.evaluate(() => usingInspection && inspectionDescription.textContent.includes('서랍이 열린다')), true,
-    'Both keys turned open the drawer');
+  assert.equal(await has('b1-elevator'), true, 'The real key switch releases B2 access');
   assert.deepEqual(errors, []);
   console.log('Manual control test passed.');
 } finally {

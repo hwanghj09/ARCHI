@@ -4,7 +4,7 @@
 // 오른쪽에 전략회의실·마케팅 자료실을 붙여 둔다. 정전 직전 SYSTEM이 원격으로 내린 방화셔터(barriers)가 화장실 오른쪽 복도를
 // 막고 있어, 영업본부 사무실의 층 비상 대응함에서 수동 개방 핸들(gives)을 챙겨 와야 셔터를 올리고 두 방에 갈 수 있다.
 // 방 안 폭은 복도 전면 폭의 5.7배(632/316/316 → 3600/1800/1800). 단서는 낮 시연 실패와 밤 리허설 성공, 사업화 보류,
-// 외부 파트너 데모 서버 계정의 새벽 비밀번호 변경(7층 외부 연결 복선). 정전 상태 기준으로 썼다.
+// 외부 파트너 서버 계정 변경 서브스토리는 제거했다. 정전 상태 기준으로 썼다.
 const floor11Scene = (name, width) => [
   { src: `assets/background/floor11/floor11-ceiling-${name}.png`, width, height: 100, top: 0 },
   { src: `assets/background/floor11/floor11-floor-${name}.png`, width, height: 204, top: 556 },
@@ -115,12 +115,7 @@ const FLOOR11_ROOMS = interiorRooms(11, [
       caption: 'ARCHI 브로슈어 초판이 쌓여 있다.' },
     { file: 'filing-cabinet', size: [256, 512], worldWidth: 72, x: 600 },
     { file: 'filing-cabinet', size: [256, 512], worldWidth: 72, x: 690 },
-    { file: 'materials-desk', size: [512, 256], worldWidth: 252, x: 900, name: '자료실 책상',
-      message: '출력된 알림 메일: "해외 파트너 데모 서버 · archi-demo 계정 비밀번호가 변경되었습니다 · 03:07." 여백에 볼펜으로 "우리 팀 아무도 안 바꿈."',
-      surface: 'document',
-      writing: [{ as: 'title', text: '[알림]' }, '해외 파트너 데모 서버', 'archi-demo 계정 비밀번호가', '변경되었습니다.', '03:07',
-        { as: 'hand', text: '우리 팀 아무도 안 바꿈.', ink: 'blue' }],
-      caption: '출력된 알림 메일.' },
+    { file: 'materials-desk', size: [512, 256], worldWidth: 252, x: 900, name: '자료실 책상' },
     { file: 'office-copier', size: [256, 256], worldWidth: 110, x: 1180 },
     { file: 'staff-lockers', size: [256, 512], worldWidth: 130, x: 1400 },
     { file: 'filing-cabinet', size: [256, 512], worldWidth: 72, x: 1600 },

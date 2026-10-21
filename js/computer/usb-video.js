@@ -1,8 +1,4 @@
-// 13층 보안 자료실의 백업 장치(f13-backup-device)를 가진 채 17층 컴퓨터를 켜면 바탕화면에 '외부 저장 장치'가 생긴다.
-// 열면 2층 Harmony Hall "03:00 무관객 리허설" 녹화 사본이 깨진 채 약 9초 재생되다 멈추고, 원본이 2층 서버실 녹화 NAS에
-// 있으며 04:00에 지워진다고 알려 준다. 끝까지 보면 f17-usb-played를 남기고(목표 '2층 조사하기', objective.js) 저장한다.
-// 그림 없이 글자와 CSS(주사선·노이즈·떨림·색 번짐·검은 프레임, device-apps.css)만 쓴다. 도중에 창을 닫으면 기록하지 않는다.
-// 아이콘은 숨겨 두지 않고, 장치를 가졌을 때만 바탕화면에 붙인다(없으면 떼어 낸다).
+// 13층 USB를 17층 수호의 컴퓨터에 연결한 뒤 손상된 리허설 녹화를 끝까지 봐야 2층 목표가 열린다.
 const usbDriveShortcut = document.createElement('button');
 usbDriveShortcut.type = 'button';
 usbDriveShortcut.dataset.computerApp = 'usbdrive';
@@ -19,6 +15,9 @@ const usbVideoPlace = document.getElementById('usb-video-place');
 const usbVideoCaption = document.getElementById('usb-video-caption');
 const usbVideoError = document.getElementById('usb-video-error');
 const usbVideoReplay = document.getElementById('usb-video-replay');
+const usbDriveConnect = document.getElementById('usb-drive-connect');
+const usbDrivePlug = document.getElementById('usb-drive-plug');
+const usbDrivePath = document.getElementById('usb-drive-path');
 // [시작 ms, 화면 상태(clear·glitch·black), 녹화 시각, 자막]. 마지막 칸 뒤에 오류 화면이 뜬다.
 const USB_VIDEO_FRAMES = [
   [0, 'clear', '03:00:04', '(무관객 리허설 · 운영자 SYSTEM) 객석은 비어 있고 무대 조명만 켜져 있다.'],
@@ -34,10 +33,18 @@ let usbVideoTimers = [];
 function refreshUsbDrive() {
   if (!collectedItems.has('f13-backup-device')) usbDriveShortcut.remove();
   else if (!usbDriveShortcut.isConnected) document.querySelector('#computer .computer-shortcuts').append(usbDriveShortcut);
+  usbDrivePlug.disabled = !usbDriveAvailable();
+  if (!usbDriveAvailable()) resetUsbVideo();
+}
+
+function usbDriveAvailable() {
+  return usingComputer && !transitioning && !computer.hidden && room === 'office' && currentSceneFloor === 17 &&
+    floorHasPower(17) && collectedItems.has('f13-backup-device');
 }
 
 function usbVideoWatching() {
-  return usingComputer && computerWindows.get('usbdrive')?.open;
+  const state = computerWindows.get('usbdrive');
+  return usbDriveAvailable() && state?.open && !state.minimized && !state.element.hidden && !state.view.hidden;
 }
 
 function stopUsbVideo() {
@@ -45,8 +52,25 @@ function stopUsbVideo() {
   usbVideoTimers = [];
 }
 
-function playUsbVideo() {
+function resetUsbVideo() {
   stopUsbVideo();
+  usbVideo.hidden = true;
+  usbVideo.dataset.state = 'idle';
+  usbDriveConnect.hidden = false;
+  usbDrivePath.textContent = '백업 장치 · 연결 대기';
+  usbVideoError.hidden = usbVideoReplay.hidden = true;
+}
+
+function playUsbVideo() {
+  if (!usbVideoWatching()) return;
+  stopUsbVideo();
+  usbDriveConnect.hidden = true;
+  usbVideo.hidden = false;
+  usbVideo.focus({ preventScroll: true });
+  usbDrivePath.textContent = '외부 저장 장치 (E:) / BACKUP / 2F_REHEARSAL_0300.mp4';
+  // 다시 재생할 때도 객석 카메라를 처음 위치부터 움직인다.
+  const footage = usbVideo.querySelector('.usb-video-footage');
+  footage.replaceWith(footage.cloneNode(true));
   usbVideo.dataset.state = 'clear';
   usbVideoPlace.textContent = '2F Harmony Hall · 객석 카메라 · REC ●';
   usbVideoRec.textContent = '';
@@ -54,7 +78,7 @@ function playUsbVideo() {
   usbVideoError.hidden = usbVideoReplay.hidden = true;
   for (const [at, state, time, caption] of USB_VIDEO_FRAMES) {
     usbVideoTimers.push(setTimeout(() => {
-      if (!usbVideoWatching()) return stopUsbVideo();
+      if (!usbVideoWatching()) return resetUsbVideo();
       usbVideo.dataset.state = state;
       usbVideoRec.textContent = time;
       usbVideoCaption.textContent = caption;
@@ -62,16 +86,19 @@ function playUsbVideo() {
     }, at));
   }
   usbVideoTimers.push(setTimeout(() => {
-    if (!usbVideoWatching()) return stopUsbVideo();
+    if (!usbVideoWatching()) return resetUsbVideo();
+    stopUsbVideo();
     usbVideo.dataset.state = 'error';
     usbVideoCaption.textContent = '';
     usbVideoError.hidden = usbVideoReplay.hidden = false;
     playGameSound('deny');
     if (!collectedItems.has('f17-usb-played')) {
       collectedItems.add('f17-usb-played');
+      refreshObjective();
       saveProgress();
     }
   }, usbVideoEndMs));
 }
 
 usbVideoReplay.addEventListener('click', playUsbVideo);
+usbDrivePlug.addEventListener('click', playUsbVideo);

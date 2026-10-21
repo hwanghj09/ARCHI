@@ -59,7 +59,7 @@ try {
   }
   await page.evaluate(() => showCabin(0));
   await page.locator('[data-floor="-2"].cabin-hit').click();
-  assert.match(await page.locator('#cabin-status').textContent(), /버튼을 눌렀으나 아무 반응도 없었다/);
+  assert.match(await page.locator('#cabin-status').textContent(), /B2 운행 제한 중.*B1 방재 관제실/);
   await page.locator('[data-floor="15"].cabin-hit').click();
   await page.locator('#cabin-close').click(); await page.clock.runFor(5000);
   await page.locator('#cabin-exit').click(); await page.clock.runFor(800);
