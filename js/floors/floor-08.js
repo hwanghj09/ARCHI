@@ -52,17 +52,18 @@ const floor8Room = (id, name, art, width, fixtures, extra = {}) => ({ id, name, 
   backgroundWallsOnly: true, backgroundImage: floor8Scene(art, width), fixtures, ...extra });
 const FLOOR8_ROOMS = interiorRooms(8, [
   floor8Room('f8-qa', 'QA 시험실', 'qa', 3044, [
-    // 재현 벤치 위의 장치 넷은 붙어 있어서(왼쪽부터 벤치·단말·센서·카메라) 조사 상자를 물건보다 좁게 잡았다. 먼저 적힌 것이 이긴다.
+    // 재현 벤치 위 장치: 벤치(62..138), 창 위 카메라(270..300), 늘린 작업대 위 단말(372..396)·센서(490..508). 그림끼리 60px 넘게
+    // 떨어져 있다(build.py가 작업대를 540까지 늘리고 단말·센서를 옮겼다). 조사 상자는 물건보다 좁게 잡았다.
     floor8Spot('재현 벤치', [62, 138], [321, 400], { selfPowered: true, sequence: 'f8-repro-steps', step: 4,
       control: { kind: 'press', label: '벤치의 실행 버튼을 누르자.', text: '실행' },
       surface: 'document',
       writing: [{ as: 'title', text: '원본 재현 기록' }, '같은 질의 200개.',
         { as: 'table', head: true, rows: [['카메라', '재실', '시각', '정답률'], ['켜짐', '3명', '—', '4%'], ['꺼짐', '0명', '03:00', '91%']] }],
       message: '벤치가 원본 재현 기록을 출력한다. 같은 질의 200개. 카메라 켜짐·재실 3명: 정답률 4%. 카메라 꺼짐·재실 0명·03:00: 정답률 91%. 출력지를 챙겼다.' }),
-    floor8Spot('시험 단말', [168, 192], [329, 353], { selfPowered: true, sequence: 'f8-repro-steps', step: 1,
+    floor8Spot('시험 단말', [372, 396], [329, 353], { selfPowered: true, sequence: 'f8-repro-steps', step: 1,
       control: { kind: 'clock', label: '시험 단말의 시계를 03:00으로 돌리자.' },
       message: '배터리로 켜진 시험 단말의 시계가 03:00을 가리킨다. 벤치 화면: "조건 1/3 · 시각".' }),
-    floor8Spot('재실 센서 제어함', [226, 244], [337, 354], { selfPowered: true, sequence: 'f8-repro-steps', step: 2,
+    floor8Spot('재실 센서 제어함', [490, 508], [337, 354], { selfPowered: true, sequence: 'f8-repro-steps', step: 2,
       control: { kind: 'switch', dir: 'down', label: '재실 센서 스위치를 "0명"으로 내리자.', ends: ['자동', '0명'] },
       message: '벤치에 물린 시험용 재실 센서가 "0명"으로 고정됐다. 벤치 화면: "조건 2/3 · 재실 인원".' }),
     floor8Spot('관찰 카메라', [270, 300], [178, 194], { selfPowered: true, sequence: 'f8-repro-steps', step: 3,
@@ -73,6 +74,10 @@ const FLOOR8_ROOMS = interiorRooms(8, [
   ], { windowless: true, exitX: 2788, exitBay: 322, sequences: [{ id: 'f8-repro-steps', steps: 4, gives: 'f8-repro-record',
     wrongMessage: '벤치 화면에 "절차 불일치 · 처음부터"가 떴다가 꺼진다. 조건을 정해진 순서대로 다시 맞춰야 한다.' }] }),
   floor8Room('f8-planning', '제품기획실', 'planning', 2178, [
+    // 창밖 비(game.css .rain-window): 그림 속 창의 유리 칸(세로 창틀 사이)마다 하나씩, 비상구 표지판 아래(월드 y 248)부터
+    // 책상·모니터 윗선 위(월드 y 430)까지만 빗줄기와 물방울을 흘린다. 조사 대상이 아니다.
+    ...[[374, 512], [517, 649], [654, 788], [795, 926], [931, 1063], [1068, 1292], [1297, 1429], [1434, 1572]]
+      .map(([x0, x1]) => ({ name: '창밖에 내리는 비', style: 'rain-window', x: x0, y: 248, width: x1 - x0, height: 182 })),
     floor8Spot('기획 책상', [1272, 1312], [340, 410],
       '바인더와 서류 트레이가 줄 맞춰 놓여 있다. 맨 위 안건지: "ARCHI 탑재판 출시 일정 재검토 · QA 의견 첨부." 첨부 칸에는 QA 의견 대신 "자동 요약 · ARCHI"가 붙어 있다.'),
     floor8Spot('요구사항 정의서', [1420, 1450], [352, 372],
