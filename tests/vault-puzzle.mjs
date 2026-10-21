@@ -20,6 +20,7 @@ try {
   await page.clock.runFor(500);
   await page.evaluate(() => {
     collectedItems.add('story-robot-seen'); collectedItems.add('solar-app-installed'); sanity = 80; refreshSanity();
+    collectedItems.add('f7-external-connection-solved');
     buildingBlackout = true; solarEnabled = true; solarPoweredFloors = []; updatePowerState();
     performFloorChange('f13-testbay', null, 'exit');
   });
@@ -96,6 +97,9 @@ try {
   await use('장비 검증실 - 보안 자료실');
   now = await state();
   assert.equal(now.scene, 'f13-testbay', 'The way out is open after cranking');
+  assert.equal(now.objective, '장치 확인하기', 'Cranking out with the USB sends Suho back to his computer, not directly to 2F');
+  assert.match(await page.evaluate(() => currentObjective.text), /17층 내 자리 컴퓨터/);
+  assert.equal(await page.evaluate(() => collectedItems.has('f17-usb-played')), false);
   assert.deepEqual(errors, []);
   console.log('vault puzzle ok');
 } finally {

@@ -19,9 +19,9 @@ try {
   for (const motion of ['walk', 'run']) {
     const frames = motion === 'walk' ? 8 : 16;
     const cycle = motion === 'walk' ? 'eight' : 'sixteen';
-    for (const light of motion === 'walk' ? ['off', 'on'] : ['off']) {
+    for (const light of ['off', 'on']) {
       const png = await readFile(`assets/player/jeong-suho-phone-${motion}-${cycle}-${light}.png`);
-      const cells = await page.evaluate(async ({ src, frames, motion }) => {
+      const cells = await page.evaluate(async ({ src, frames, motion, light }) => {
         const img = new Image(); img.src = src; await img.decode();
         if (img.naturalWidth !== frames * 256 || img.naturalHeight !== 256) return [];
         const canvas = document.createElement('canvas'); canvas.width = 256; canvas.height = 256;
@@ -35,7 +35,7 @@ try {
             top = Math.min(top, y); bottom = Math.max(bottom, y); count++;
             if (x === 0 || x === 255 || y === 0 || y === 255) edge++;
           }
-          sprite.dataset.state = motion; sprite.dataset.frame = frame; render();
+          phoneLightOn = light === 'on'; sprite.dataset.state = motion; sprite.dataset.frame = frame; render();
           const ledX = Math.round((parseFloat(world.style.getPropertyValue('--beam-x')) - body.position.x) * facing / .75 + 128);
           const ledY = Math.round((parseFloat(world.style.getPropertyValue('--beam-y')) - body.bounds.max.y + 178) / .75);
           let led = 0;
@@ -45,9 +45,9 @@ try {
           }
           return { top, bottom, count, edge, led, sample: canvas.toDataURL() };
         });
-      }, { src: `data:image/png;base64,${png.toString('base64')}`, frames, motion });
+      }, { src: `data:image/png;base64,${png.toString('base64')}`, frames, motion, light });
       assert.equal(cells.length, frames, `${motion}/${light}: sheet dimensions`);
-      assert.equal(new Set(cells.map(cell => cell.sample)).size, motion === 'run' ? 8 : frames,
+      assert.equal(new Set(cells.map(cell => cell.sample)).size, motion === 'run' && light === 'off' ? 8 : frames,
         'Complete whole-body run poses or distinct walk phases');
       for (const cell of cells) {
         assert(cell.top > 5 && cell.top < 55 && cell.bottom >= 216 && cell.bottom <= 239,
@@ -57,6 +57,7 @@ try {
       }
     }
   }
+  await page.evaluate(() => { phoneLightOn = false; refreshPhone(); });
   const state = () => page.locator('#player').evaluate(el => ({ ...el.dataset }));
   const active = () => page.locator('#player img:visible');
   await page.keyboard.press('p');
@@ -78,17 +79,17 @@ try {
     assert.equal((await state()).state, motion);
     const before = await page.evaluate(() => ({ x: body.position.x, phase: walkDistance + runDistance }));
     for (const light of ['on', 'off']) {
-      const activeMotion = light === 'on' ? 'walk' : motion;
+      const activeMotion = motion;
       await page.keyboard.press('f');
-      await page.clock.runFor(34);
+      await page.clock.runFor(await page.evaluate(() => phoneLightDelay ? phoneLightDelayMs + 34 : 34));
       await active().evaluate(img => img.decode());
       assert.equal(await active().count(), 1, 'Exactly one character sheet is displayed');
-      assert.equal((await state()).state, activeMotion, 'Light ON forces walking even with Shift held');
-      if (light === 'on') assert.equal(await page.evaluate(() => {
+      assert.equal((await state()).state, activeMotion, 'Flashlight ON preserves the requested walk or sprint');
+      if (light === 'on' && sprinting) assert.equal(await page.evaluate(() => {
         animate(1, true); return sprite.dataset.state;
-      }), 'walk', 'Animation callers cannot force a flashlight-on run');
+      }), 'run', 'Flashlight ON supports the normal running animation');
       assert.equal(await active().getAttribute('id'), `${light === 'on' ? 'phone-' : ''}${activeMotion}-sheet`);
-      if (light === 'on') assert((await active().getAttribute('src')).endsWith(`${activeMotion}-eight-on.png`));
+      if (light === 'on') assert((await active().getAttribute('src')).endsWith(`${activeMotion}-${activeMotion === 'run' ? 'sixteen' : 'eight'}-on.png`));
       assert(await page.evaluate(running => Math.abs(Math.abs(body.velocity.x) - (running ? runSpeed : speed) / 60) < .01,
         activeMotion === 'run'), 'Physics speed matches the allowed gait');
       assert.equal(await page.locator('#world').getAttribute('data-flashlight'), light);
@@ -111,6 +112,7 @@ try {
     await page.clock.runFor(34);
   }
   await page.keyboard.press('f');
+  await page.clock.runFor(await page.evaluate(() => phoneLightDelayMs + 34));
   await page.keyboard.press('Space');
   await page.clock.runFor(150);
   assert.equal((await state()).state, 'jump');
@@ -144,6 +146,7 @@ try {
   await page.locator('#phone-button').click();
   await page.evaluate(() => { phoneBattery = 50; refreshPhone(); });
   await page.locator('#phone-light').click();
+  await page.clock.runFor(await page.evaluate(() => phoneLightDelayMs));
   await page.locator('#phone-close').click();
   await page.keyboard.down('a');
   await page.clock.runFor(100);
@@ -177,7 +180,7 @@ try {
     assert(front > 100 && rear < 20, `Directional mask ${facingDirection} illuminates ahead only: ${front}/${rear} at ${JSON.stringify(origin)}`);
   }
   assert.deepEqual(errors, []);
-  console.log('PASS: transparent sheets, every frame/LED, both directions, flashlight-only carrying, sprint gating, jump, automatic stow, battery, touch and directional light.');
+  console.log('PASS: transparent sheets, every frame/LED, both directions, flashlight carrying and sprinting, jump, automatic stow, battery, touch and directional light.');
 } finally {
   await browser.close();
 }

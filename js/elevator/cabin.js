@@ -60,7 +60,7 @@ panelFloors.forEach((floor, index) => {
         collectedItems.add('b2-restricted-seen');
         cabinStatus.textContent = 'B2 · ACCESS RESTRICTED · MANUAL OVERRIDE REQUIRED — 시설관리실에서 운행 제한을 해제해야 한다.';
         playGameSound('deny');
-      } else cabinStatus.textContent = '버튼을 눌렀으나 아무 반응도 없었다.';
+      } else cabinStatus.textContent = 'B2 운행 제한 중 · B1 방재 관제실의 승강기 제어반에서 해제해야 한다.';
       return;
     }
     if (selectedFloor !== null) return;
@@ -82,10 +82,11 @@ function enterCabin(carIndex) {
     return;
   }
   const car = elevatorCars[carIndex];
+  car.playerCall = true;
+  elevatorOpenTime[carIndex] = 0;
   // 닫혀 있으면 문만 연다. 타려면 한 번 더 상호작용한다(전력이 없어 문이 못 열릴 때는 바로 들어간다).
   if (!car.open && elevatorHasPower()) {
     car.open = true;
-    elevatorOpenTime[carIndex] = 0;
     playGameSound('elevator-door');
     refreshSceneElevatorDoors();
     return;

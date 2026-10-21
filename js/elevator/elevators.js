@@ -119,6 +119,7 @@ function updateElevators() {
     if (car.floor === car.destination) {
       car.travelling = false;
       car.open = true;
+      elevatorOpenTime[elevatorCars.indexOf(car)] = 0;
       if (car.rider) {
         playGameSound('elevator-arrive');
         selectedFloor = null;

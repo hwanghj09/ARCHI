@@ -26,8 +26,10 @@ try {
   const expected = await page.evaluate(() => mapInteractables().length);
   assert(expected > 0);
   assert.equal(await page.locator('#map-view .map-dot').count(), expected);
-  // 배경은 장면을 복제한 그림이다(소품 포함). 수호 자신은 복제본에서 빠진다.
-  assert(await page.evaluate(() => mapShadow.querySelectorAll('img').length > 0 && !mapShadow.querySelector('#player')));
+  // 약도는 장면의 이미지나 소품을 복제하지 않고 출입구 이름만 표시한다.
+  assert.equal(await page.locator('#map-view img, #map-view #world, #map-view .floor-prop').count(), 0);
+  assert.equal(await page.locator('#map-view .map-label').count(), expected);
+  assert.match(await page.locator('#map-window').innerText(), /출입구 약도/);
   // 얼굴 아이콘은 원형이다.
   assert.equal(await page.locator('#map-view .map-player').evaluate(el => getComputedStyle(el).borderRadius), '50%');
 

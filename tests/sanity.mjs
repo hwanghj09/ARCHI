@@ -12,7 +12,7 @@ try {
   await page.goto(new URL('../index.html', import.meta.url).href);
   await page.locator('#menu-start').click();
   if (await page.locator('#menu-new-confirm').isVisible()) await page.locator('#menu-new-confirm').click();
-  assert.equal(await page.locator('#sanity-meter').getAttribute('aria-valuenow'), '85', '새 게임은 안정 상태인 정신력 85%로 시작한다');
+  assert.equal(await page.locator('#sanity-meter').getAttribute('aria-valuenow'), String(await page.evaluate(() => newGameSanity)), '새 게임은 현재 정신력 설정으로 시작한다');
   assert(await page.locator('#sanity-hud').isHidden(), 'Opening hides the gameplay meter');
   await page.locator('#opening-skip').click();
   await page.clock.pauseAt(new Date('2026-10-04T00:01:00Z'));
@@ -27,6 +27,7 @@ try {
   // 어두운 곳: 3초에 1%(=1/3%/초)씩 준다.
   await page.clock.runFor(3000); near((await state()).sanity, 99);
   await page.keyboard.press('f');
+  await page.clock.runFor(await page.evaluate(() => phoneLightDelayMs));
   const shielded = await state();
   assert.equal(shielded.exposure, 'flashlight');
   // 어둠 속 플래시는 감소를 막지 못하고 절반(sanityFlashlightDrainFactor)으로 줄인다: 3초에 0.5%. 올려주지도 않는다.
@@ -49,7 +50,7 @@ try {
     phoneBattery = 1; phoneLightOn = true; phoneDrainAccumulator = 0; refreshPhone();
   });
   const untilEmpty = (await state()).sanity;
-  await page.clock.runFor(1000); near((await state()).sanity, untilEmpty);
+  await page.clock.runFor(1000); near((await state()).sanity, untilEmpty - 1 / 6);
   await page.clock.runFor(3000); assert((await state()).sanity < untilEmpty - .6, 'Depleted phone removes darkness protection');
 
   // ---- 단계별 공포 연출(fearTier) ----
@@ -80,7 +81,7 @@ try {
   await page.evaluate(() => { sanity = 100; guardPatrol.mode = 'chase'; bossFightActive = true; updateSanity(1000); });
   near((await state()).sanity, 100 - 1 / 3); // 보스전은 추격 감소만 제외하고 어둠의 기본 소모는 유지한다.
   await page.evaluate(() => { sanity = 100; phoneLightOn = true; phoneBattery = 100; updateSanity(1000); });
-  assert.equal((await state()).sanity, 100, '보스전 중 빛을 비추면 추격·어둠 감소가 모두 없다');
+  near((await state()).sanity, 100 - 1 / 6); // 보스전도 플래시는 어둠 소모를 절반으로만 줄인다.
   await page.evaluate(() => { guardPatrol.mode = 'patrol'; bossFightActive = false; phoneLightOn = false; });
 
   // ---- 추격 후 10%에서도 약을 찾으러 이동할 여유가 있다. 빛 유무와 무관하게 초당 0.1% 감소 ----
@@ -225,7 +226,7 @@ try {
   await page.locator('#hallucination-retry').click();
   const recovered = await state();
   assert.equal(recovered.caught, false);
-  assert(recovered.sanity > 0, '잡아먹힌 뒤에는 정신력을 조금 되찾고 같은 자리에서 다시 시작한다');
+  assert.equal(recovered.sanity, 0, '재시도로 정신력을 무료 회복할 수 없다');
   assert.equal(await page.locator('#hallucination-caught').isHidden(), true);
 
   assert.deepEqual(errors, []);

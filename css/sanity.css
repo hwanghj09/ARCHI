@@ -4,6 +4,7 @@
 #sanity-meter { height: 7px; margin: 7px 0 4px; border: 1px solid #3e534a; background: #050c10; }
 #sanity-fill { display: block; height: 100%; width: 100%; background: #8fbda3; }
 #sanity-state { color: #96aaa0; font-size: 10px; }
+#sanity-calm:not([hidden]) { display: block; margin-top: 4px; color: #b4dfba; font-size: 11px; }
 #sanity-hud[data-state="low"] { border-color: #ae9766; }
 #sanity-hud[data-state="low"] #sanity-fill { background: #c7aa75; }
 #sanity-hud[data-state="hallucinating"] { border-color: #986779; background: #22171fe8; }

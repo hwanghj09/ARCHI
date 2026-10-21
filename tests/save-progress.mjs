@@ -137,7 +137,7 @@ try {
   await page.locator('#menu-exit').tap();
   await page.locator('#menu-start').tap(); await page.locator('#menu-new-confirm').tap(); await page.locator('#opening-skip').click();
   const fresh = await state();
-  assert.equal(fresh.id, 'office'); assert.equal(fresh.battery, 100); assert.equal(fresh.sanity, 35);
+  assert.equal(fresh.id, 'office'); assert.equal(fresh.battery, 100); assert.equal(fresh.sanity, await page.evaluate(() => newGameSanity));
   assert.deepEqual(fresh.items, ['f17-badge']); assert.equal(fresh.dock, null); assert.equal(fresh.blackout, false); assert.equal(fresh.solarEnabled, false);
   assert.deepEqual((await stored()).items, ['f17-badge']);
   // Saves made before the badge became a starting item retain their location and other items.

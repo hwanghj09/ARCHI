@@ -46,8 +46,6 @@ function startItemUseAnimation() {
 }
 
 let phoneTime = 0;
-// 플래시를 켜고 달리는 시트(8컷)의 컷 순서.
-const phoneRunOnFrames = [0, 1, 2, 3, 4, 5, 6, 7];
 let phoneAwayTime = 0;
 let phoneRaising = false; // 플래시를 켜기 전 0.5초 동안 휴대폰을 드는 모션(phone.js가 켠다)
 
@@ -167,18 +165,18 @@ function animate(distance, sprinting = false, elapsed = 0) {
   const light = phoneLightOn ? 'on' : 'off';
   for (const [sheet, motion] of [[phoneWalkSheet, 'walk'], [phoneRunSheet, 'run']]) {
     const src = motion === 'walk' ? `assets/player/jeong-suho-phone-walk-eight-${light}.png` :
-      phoneLightOn ? (state === 'run' ? 'assets/player/jeong-suho-phone-run-on.png' : 'assets/player/jeong-suho-phone-jump-on.png') : 'assets/player/jeong-suho-phone-run-sixteen-off.png';
+      phoneLightOn && state !== 'run' ? 'assets/player/jeong-suho-phone-jump-on.png' : `assets/player/jeong-suho-phone-run-sixteen-${light}.png`;
     if (sheet.getAttribute('src') !== src) {
       sheet.setAttribute('src', src);
-      sheet.style.width = `${100 * (motion === 'walk' ? walkFrames : phoneLightOn ? (state === 'run' ? 8 : 2) : runFrames)}%`;
+      sheet.style.width = `${100 * (motion === 'walk' ? walkFrames : phoneLightOn && state !== 'run' ? 2 : runFrames)}%`;
     }
   }
   if (state === 'idle') showIdleFrame(index);
   if (state === 'push') pushSheet.style.transform = `translateX(${-index * 100 / pushFrames}%)`;
   if (state === 'crouch') crouchSheet.style.transform = `translateX(${-index * 25}%)`;
   if (state === 'walk') (holdingPhone ? phoneWalkSheet : walkSheet).style.transform = `translateX(${-index * 100 / walkFrames}%)`;
-  if (state === 'run') (holdingPhone ? phoneRunSheet : runSheet).style.transform = holdingPhone && phoneLightOn ? `translateX(${-phoneRunOnFrames[Math.floor(index * phoneRunOnFrames.length / runFrames)] * 100 / 8}%)` : `translateX(${-index * 100 / runFrames}%)`;
-  // The lit phone has a two-pose jump/fall sheet, never a running animation.
+  if (state === 'run') (holdingPhone ? phoneRunSheet : runSheet).style.transform = `translateX(${-index * 100 / runFrames}%)`;
+  // Jump/fall retains its separate two-pose lit sheet.
   if (holdingPhone && (state === 'jump' || state === 'fall')) phoneRunSheet.style.transform = phoneLightOn ?
     `translateX(${state === 'jump' ? 0 : -50}%)` : `translateX(${-(state === 'jump' ? 4 : 12) * 100 / runFrames}%)`;
   if (state === 'jump' || state === 'fall') jumpSheet.style.transform = `translateX(${-index * 50}%)`;

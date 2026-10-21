@@ -25,8 +25,8 @@ function updateInteraction() {
     // 전력이 들어온 채 감지했던 자리로 걸어 돌아가는('return') 로봇은 감지를 끈 채 움직이고 있어 바로 옆까지
     // 갈 수 있다. 정비 패널은 멈춘 로봇의 보조 배터리 화면이므로 그동안은 조사 대상에서 뺀다.
     const returningRobot = guardPatrolPowered(guardPatrol) && guardPatrol.mode === 'return' ? guardPatrol.door : null;
-    // hideWhenTaken 설비(16층 항불안제)는 챙기고 나면 사라지므로 더는 조사 대상이 아니다. 전력이 없는 층의 전자 장치도 빠진다(power.js).
-    const usable = door => door !== returningRobot && !(door.hideWhenTaken && collectedItems.has(door.gives)) && !deviceUnpowered(door);
+    // 챙긴 물건과 복귀 중 로봇만 제외한다. 꺼진 전자 장치도 전원이 없다는 안내는 보여 준다.
+    const usable = door => door !== returningRobot && !(door.hideWhenTaken && collectedItems.has(door.gives));
     const groups = [guardPatrol.door ? [guardPatrol.door] : [], currentDoors.filter(door => door.accessGate && door.solid),
       currentDoors.filter(door => door.phoneCharger), currentDoors.filter(door => !(door.accessGate && door.solid) && !door.phoneCharger)];
     // standYs: 설비를 조사할 수 있는 발 높이가 여럿일 때(16층 선반: 바닥에서, 또는 진라면 박스 위에서) 쓴다.
@@ -46,7 +46,7 @@ function updateInteraction() {
     ...officeDoors.filter(door => door.room === room)]] :
     [officeDoors.filter(door => door.room === room && door.phoneCharger),
       [...officeDoors.filter(door => door.room === room && !door.phoneCharger), officeComputer, ...(officePostit.element.hidden ? [] : [officePostit])]];
-  nearbyDoor = pickNearbyDoor(groups.map(group => group.filter(door => !deviceUnpowered(door))),
+  nearbyDoor = pickNearbyDoor(groups,
     () => grounded && Math.abs(body.bounds.max.y - floorY) < 2);
   if (!realBuildingBlackout() && room === 'corridor' && currentSceneFloor === 17 && nearbyDoor?.type === 'elevator') {
     startBlackoutScene(nearbyDoor);
@@ -64,6 +64,7 @@ function updateInteraction() {
 
 function doorHintText(door) {
   const key = bindingLabel('interact');
+  if (deviceUnpowered(door)) return `${key} · ${door.name} · 전원 없음`;
   if (door.type === 'computer') return floorHasPower(currentSceneFloor) ? `${key} · 컴퓨터 사용` : `${key} · 전원 없음`;
   if (door.type === 'power') return `${key} · 태양광 전력 제어`;
   if (door.phoneCharger) return phoneChargerHint(door);
@@ -78,9 +79,12 @@ function doorHintText(door) {
   if (door.type === 'stairs') return currentSceneFloor === 18 ? `${key} · 17층으로 내려가기` : `${key} · 옥상으로 올라가기`;
   if (door.type === 'panel') return `${key} · 조사`;
   if (door.type === 'elevator') {
+    if (needsF1Directory()) return `${key} · 옆 층별 안내판 확인 필요`;
     if (!elevatorHasPower()) return `${key} · 엘리베이터 전력 없음`;
     const car = elevatorCars[door.carIndex];
     if (car.travelling) return car.rider ? '이동 중…' : '호출 중…';
+    if (car.floor === currentSceneFloor && currentSceneFloor === 17 && !collectedItems.has('solar-app-installed')) return `${key} · 휴대폰에 전력 앱 설치 필요`;
+    if (car.floor === currentSceneFloor && currentObjective?.title === '1층 전력 켜기') return `${key} · 1층 조명 먼저 켜기`;
     if (car.floor === currentSceneFloor) return car.open ? `${key} · 탑승` : `${key} · 문 열기`;
     return `${key} · 호출`;
   }
@@ -93,6 +97,13 @@ function interact() {
   updateInteraction();
   if (blackoutSceneActive || cctvSceneActive) return;
   if (!nearbyDoor) return;
+  if (deviceUnpowered(nearbyDoor)) {
+    const floor = currentSceneFloor < 0 ? `B${-currentSceneFloor}` : `${currentSceneFloor}층`;
+    const message = nearbyDoor.type === 'computer' ? '컴퓨터 전원이 끊겼다. 옥상 비상 전력을 켜고 17층 관리실의 UPS 비상 회선을 연결하자.' :
+      `전원이 없어 작동하지 않는다. 휴대폰 전력 앱이나 옥상 배전반에서 ${floor}에 전력을 보내자.`;
+    openInspection(nearbyDoor.name, message);
+    return;
+  }
   // 레버·열쇠·전원선 같은 장치(control)는 먼저 직접 조작하게 하고, 다 하면 이 함수를 다시 불러 결과를 보인다(manual-control.js).
   if (needsControl(nearbyDoor)) { openControl(nearbyDoor); return; }
   if (nearbyDoor.type === 'computer') {

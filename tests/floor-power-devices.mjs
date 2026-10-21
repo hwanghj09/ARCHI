@@ -1,8 +1,7 @@
 import assert from 'node:assert/strict';
 import { chromium } from 'playwright';
 
-// 전력이 필요한 장치(power.js needsFloorPower)는 그 층에 태양광 전력이 들어오지 않으면 반응하지 않는다: 힌트·테두리가 없고
-// E를 눌러도 조사창·조작 창이 뜨지 않는다. 배터리·별도 회선 장치(selfPowered)와 지하(B1·B2)는 그대로 쓴다.
+// 전력이 필요한 장치는 전원 없음 힌트와 안내를 보여 주되 실제 조작은 막는다. 배터리·별도 회선 장치(selfPowered)와 지하(B1·B2)는 그대로 쓴다.
 const browser = await chromium.launch();
 try {
   const page = await browser.newPage({ viewport: { width: 1280, height: 720 } });
@@ -28,17 +27,17 @@ try {
     const near = nearbyDoor === door;
     const hintText = hint.hidden ? null : hint.textContent;
     if (press) interact();
-    const result = { near, hint: hintText, opened: usingInspection || usingControl || usingKeypad };
+    const result = { near, hint: hintText?.includes('전원 없음') ? '전원 없음' : hintText, opened: usingInspection || usingControl || usingKeypad };
     if (usingControl) closeControl();
     if (usingKeypad) closeKeypad();
     if (usingInspection) closeInspection();
     return result;
   }, [scene, match, powered, arrivalKey, press]);
-  const silent = { near: false, hint: null, opened: false };
+  const unpowered = { near: true, hint: '전원 없음', opened: true };
 
-  // 12층 모델 평가실 카드 리더기: 전력이 없으면 잠겼다는 문구조차 없다. 전력을 보내면 카드키 조작 창이 열린다.
+  // 12층 모델 평가실 카드 리더기: 전력이 없으면 전원 안내만 보인다. 전력을 보내면 카드키 조작 창이 열린다.
   await page.evaluate(() => collectedItems.add('f12-eval-keycard'));
-  assert.deepEqual(await tryDevice(await page.evaluate(() => floorId(12)), 'f12-eval', false), silent, '12F card reader is dead without power');
+  assert.deepEqual(await tryDevice(await page.evaluate(() => floorId(12)), 'f12-eval', false), unpowered, '12F card reader is dead without power');
   const lit12 = await tryDevice(await page.evaluate(() => floorId(12)), 'f12-eval', true);
   assert.equal(lit12.near, true);
   assert.match(lit12.hint, /카드키 태그/);
@@ -46,16 +45,16 @@ try {
   await page.evaluate(() => collectedItems.delete('f12-eval-keycard'));
   const lockedNoCard = await tryDevice(await page.evaluate(() => floorId(12)), 'f12-eval', true);
   assert.equal(lockedNoCard.opened, true, 'Powered: the locked message still shows without the card');
-  assert.deepEqual(await tryDevice(await page.evaluate(() => floorId(12)), 'f12-eval', false), silent, 'Unpowered: no locked message either');
+  assert.deepEqual(await tryDevice(await page.evaluate(() => floorId(12)), 'f12-eval', false), unpowered, 'Unpowered: explain missing power without operating the lock');
 
   // 출입 게이트, 야간 로그 단말기, 17층 관리실 도어락, 16층 키오스크도 같다.
-  assert.deepEqual(await tryDevice(await page.evaluate(() => floorId(13)), '13층 서쪽 인증 게이트', false), silent, 'Access gate is dead');
+  assert.deepEqual(await tryDevice(await page.evaluate(() => floorId(13)), '13층 서쪽 인증 게이트', false), unpowered, 'Access gate is dead');
   assert.equal((await tryDevice(await page.evaluate(() => floorId(13)), '13층 서쪽 인증 게이트', true)).near, true, 'Powered access gate responds');
-  assert.deepEqual(await tryDevice('f12-eval', '야간 로그 단말기', false, 'exit'), silent, 'Night log terminal is dead');
-  // 옆 게시판은 그대로 조사할 수 있다. 꺼진 키오스크만 건너뛴다.
+  assert.deepEqual(await tryDevice('f12-eval', '야간 로그 단말기', false, 'exit'), unpowered, 'Night log terminal is dead');
+  // 옆 게시판도 조사할 수 있고 꺼진 키오스크는 전원 안내를 보여 준다.
   const deadKiosk = await tryDevice('f16-cafe', '음성 주문 키오스크', false, 'exit');
-  assert.equal(deadKiosk.near, false, 'Kiosk is dead');
-  assert.doesNotMatch(deadKiosk.hint ?? '', /키오스크/);
+  assert.equal(deadKiosk.near, true, 'An unpowered kiosk explains its state');
+  assert.equal(deadKiosk.hint, '전원 없음');
   assert.equal(await page.evaluate(() => dynamicScene.querySelector('[data-powered-sprite]')?.dataset.spriteFrame), '0', 'Kiosk screen is off');
   assert.equal((await tryDevice('f16-cafe', '음성 주문 키오스크', true, 'exit')).opened, true, 'Powered kiosk responds');
 
@@ -67,11 +66,11 @@ try {
   await page.evaluate(() => collectedItems.add('f17-emergency-linked'));
   assert.equal((await tryDevice('f7-verify', '인터록 제어반', false, 'exit')).near, true, '7F interlock runs on the B2 line');
   assert.equal((await tryDevice('f7-verify', '망분리 백업 장비', false, 'exit')).near, true, '7F backup device runs on battery');
-  assert.equal((await tryDevice('f3-fitness', '비상 개방 버튼', false, 'exit')).near, true, '3F emergency button runs on battery');
+  assert.equal((await tryDevice('f14-archive', '작업등', false, 'exit')).near, true, '14F worklight runs on battery');
   assert.equal((await tryDevice('b2-main', 'ARCHI 메인 콘솔', false, 'exit')).opened, true, 'Basement devices always have power');
 
   assert.deepEqual(errors, []);
-  console.log('PASS: unpowered card readers, gates, terminals and kiosk stay silent; open doors, battery devices and basements still work.');
+  console.log('PASS: unpowered card readers, gates, terminals and kiosk explain missing power; open doors, battery devices and basements still work.');
 } finally {
   await browser.close();
 }

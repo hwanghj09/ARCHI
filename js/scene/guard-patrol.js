@@ -207,8 +207,8 @@ function updateRoamerTrip(delta) {
   const car = elevatorCars[roamer.car];
   const { trip } = roamer;
   const here = roamer.where === roamerHere();
-  // 기다리는 동안 수호를 보고 쫓아가거나 수호가 그 칸에 타면 그만두고 나중에 다시 부른다.
-  if (roamer.where !== null && (roamer.mode === 'chase' || car.rider)) { roamer.trip = roamer.car = null; return; }
+  // 타기 전 수호가 부른 칸은 양보한다. 이미 탔다면 호출 층까지 간 뒤 문 열림 시간을 보장한다.
+  if (roamer.where !== null && (roamer.mode === 'chase' || car.rider || car.playerCall)) { roamer.trip = roamer.car = null; return; }
   if (!elevatorHasPower() || car.rider) return;
   if (trip.phase === 'call') {
     if (car.travelling || car.floor !== floorById.get(roamer.where).floor) return;
@@ -224,6 +224,7 @@ function updateRoamerTrip(delta) {
     sendRoamerCar(car);
   } else if (trip.phase === 'close') {
     if (car.open) {
+      if (car.playerCall) return;
       sendRoamerCar(car);
       return;
     }
@@ -234,6 +235,7 @@ function updateRoamerTrip(delta) {
   } else if (trip.phase === 'ride' && !car.travelling) {
     Object.assign(trip, { phase: 'exit', time: elevatorDoorMs });
   } else if (trip.phase === 'exit') {
+    if (car.playerCall) return;
     if (car.travelling) { trip.phase = 'ride'; return; }
     if (!car.open) {
       car.open = true;

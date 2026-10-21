@@ -151,6 +151,7 @@ function focusNextComputerWindow() {
 
 function minimizeComputerWindow(state) {
   cancelComputerWindowDrag();
+  if (state.app === 'usbdrive') resetUsbVideo();
   state.minimized = true;
   state.element.hidden = state.view.hidden = true;
   focusNextComputerWindow();
@@ -159,6 +160,7 @@ function minimizeComputerWindow(state) {
 
 function closeComputerWindow(state) {
   cancelComputerWindowDrag();
+  if (state.app === 'usbdrive') resetUsbVideo();
   state.open = false;
   state.minimized = false;
   state.element.hidden = state.view.hidden = true;
@@ -341,7 +343,8 @@ function resetComputerDesktop() {
     state.element.hidden = state.view.hidden = true;
   }
   refreshComputerWindows();
-  if (typeof refreshUsbDrive === 'function') refreshUsbDrive(); // 13층 백업 장치를 가졌으면 바탕화면에 외부 저장 장치(usb-video.js)
+  if (typeof resetUsbVideo === 'function') resetUsbVideo();
+  if (typeof refreshUsbDrive === 'function') refreshUsbDrive();
 }
 // 게임 속은 자정이다: 휴대폰 상태 표시줄처럼 시각은 00:00으로 둔다(날짜만 오늘).
 function refreshComputerClock() {

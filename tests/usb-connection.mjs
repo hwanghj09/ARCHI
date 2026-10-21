@@ -97,7 +97,7 @@ try {
     assert.equal(await page.locator('#computer').evaluate(el => el.inert), false);
     assert(await page.locator('#computer-solar-transfer').isEnabled());
     await page.locator('#computer-solar-transfer').click();
-    await page.clock.runFor(4000);
+    await page.clock.runFor(await page.evaluate(() => solarTransferMs / 2));
     assert.equal(await page.locator('#computer-solar-transfer-progress').evaluate(el => el.value), 50);
     await page.evaluate(() => { buildingBlackout = true; updatePowerState(); });
     await page.clock.runFor(5000);

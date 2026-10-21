@@ -1,5 +1,4 @@
-// 휴대폰 메모의 단서 탭: 소품·고정물에 clue가 있으면 실제로 읽은 순간(어둡거나 필요한 물건이 없을 때는 제외)
-// 그 자리의 층·장소와 함께 한 번만 기록한다. 자동 저장(save.js)에 함께 남고 새 게임이면 비워진다.
+// 휴대폰 메모: 새 정보는 직접 적는다. 과거 저장에 단서가 있을 때만 단서 탭을 표시한다.
 const phoneClueTabs = { memo: document.getElementById('phone-tab-memo'), clues: document.getElementById('phone-tab-clues') };
 const phoneCluePanes = { memo: document.getElementById('phone-memo-pane'), clues: document.getElementById('phone-clue-pane') };
 const phoneClueList = document.getElementById('phone-clue-list');
@@ -8,6 +7,7 @@ const phoneClueCount = document.getElementById('phone-clue-count');
 let collectedClues = [];
 
 function showPhoneNoteTab(tab) {
+  if (tab === 'clues' && !collectedClues.length) tab = 'memo';
   for (const [name, button] of Object.entries(phoneClueTabs)) {
     button.setAttribute('aria-selected', String(name === tab));
     button.tabIndex = name === tab ? 0 : -1;
@@ -29,32 +29,15 @@ function renderClues() {
   }));
   phoneClueEmpty.hidden = collectedClues.length > 0;
   phoneClueCount.textContent = collectedClues.length ? String(collectedClues.length) : '';
+  phoneClueTabs.clues.hidden = !collectedClues.length;
+  if (!collectedClues.length) showPhoneNoteTab('memo');
 }
 
-// 장면을 만들 때 조사 대상에는 정해진 항목만 옮겨지므로, clue는 지금 장면 설정의 같은 소품·고정물에서 읽는다.
-function clueFor(door) {
-  if (door.clue) return door.clue;
-  const config = room === 'dynamic' ? floorById.get(dynamicFloorId) : null;
-  const source = [...(config?.props || []), ...(config?.fixtures || []), ...(config?.barriers || [])]
-    .find(entry => entry.clue && entry.name === door.name);
-  return source?.clue || null;
-}
+// 자동 수집은 지원하지 않는다. 기존 저장의 단서만 열람하고 새 정보는 개인 메모에 적는다.
+function recordClue(door) {}
 
-// 단서 획득은 없앴다: 조사해도 단서가 기록되지 않는다.
-function recordClue(door) {
-  return;
-  const text = clueFor(door);
-  if (text) addClue(door.name, text);
-}
-
-// 지금 장소에 단서 한 줄을 한 번만 남긴다(퍼즐 정답처럼 소품 clue가 아닌 단서도 여기로 온다).
-function addClue(name, text) {
-  return;
-  const place = document.querySelector('header span').textContent;
-  if (collectedClues.some(clue => clue.place === place && clue.name === name)) return;
-  collectedClues.push({ place, name, text });
-  renderClues();
-}
+// 이전 퍼즐 호출과 저장 형식은 유지하되 자동 수집하지 않는다.
+function addClue(name, text) {}
 
 function clueSnapshot() {
   return collectedClues.map(({ place, name, text }) => ({ place, name, text }));
@@ -72,6 +55,7 @@ for (const [name, button] of Object.entries(phoneClueTabs)) button.addEventListe
 });
 document.getElementById('phone-notes').querySelector('[role="tablist"]').addEventListener('keydown', event => {
   if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return;
+  if (!collectedClues.length) return;
   event.preventDefault();
   const next = phoneClueTabs.memo.getAttribute('aria-selected') === 'true' ? 'clues' : 'memo';
   showPhoneNoteTab(next);

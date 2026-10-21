@@ -54,7 +54,7 @@ function submitKeypad() {
     openWirePanel(() => {
       collectedItems.add('roof-wires-fixed');
       setSolarPower(true);
-      sayLine('불은 들어오는데… 엘리베이터는 그대로네. 승강기는 전기를 따로 받나 보다.', 5000);
+      sayLine('태양광 장치가 켜졌다. 배전반에서 17층을 고르자. 승강기 전기는 관리실에서 따로 연결해야 해.', 5000);
     });
   } else if (target.type === 'room') {
     unlockRoomDoor(target); // 먼저 열어야 closeKeypad의 updateInteraction이 "들어가기" 안내를 바로 띄운다

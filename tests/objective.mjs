@@ -59,7 +59,7 @@ try {
 
   const titleAfter = async change => {
     await page.evaluate(change);
-    await page.waitForTimeout(100);
+    await page.evaluate(() => refreshObjective());
     return page.evaluate(() => currentObjective.title);
   };
   assert.equal(await titleAfter(() => collectedItems.add('rooftop-key')), '정전', 'Picking up the rooftop key keeps the blackout objective');
@@ -71,9 +71,9 @@ try {
   assert.equal(await titleAfter(() => collectedItems.add('f17-manager-unlocked')), '회로 안내도 확인');
   assert.equal(await titleAfter(() => collectedItems.add('f17-circuit-guide-read')), '승강기 비상 회선 연결');
   assert.equal(await titleAfter(() => { collectedItems.add('f17-emergency-linked'); updatePowerState(); }), '전력 앱 내려받기');
-  await waitTyped('전력 앱 내려받기', '층마다 전력을 간편히 전환할 방법이 떠올랐다. 컴퓨터를 조사해보자.');
+  await waitTyped('전력 앱 내려받기', '17층 사무실의 내 자리 컴퓨터로 돌아가자. 블로그에서 전력 앱을 내려받을 수 있다.');
   assert.equal(await titleAfter(() => collectedItems.add('solar-app-downloaded')), '전력 앱 설치하기');
-  await waitTyped('전력 앱 설치하기', '받은 파일을 휴대폰으로 옮겨야 한다.');
+  await waitTyped('전력 앱 설치하기', '내 자리 컴퓨터의 파일 전송을 열고 USB를 연결해 휴대폰에 앱을 설치하자.');
 
   // 먼저 1층으로 가 버린 저장도, 설치를 마치기 전에는 정문으로 보내지 않는다.
   const beforeEarlyVisit = await page.evaluate(() => progressSnapshot());
@@ -176,7 +176,7 @@ try {
   assert.equal(await titleAfter(() => collectedItems.add('f7-training-time-solved')), '오늘만 다른 기록');
   assert.equal(await titleAfter(() => collectedItems.add('f7-external-connection-solved')), '외부 연결 통로 찾기');
   assert.equal(await titleAfter(() => collectedItems.add('f13-backup-device')), '장치 확인하기');
-  assert.match(await page.evaluate(() => currentObjective.text), /17층 전력을 켜고/);
+  assert.match(await page.evaluate(() => currentObjective.text), /17층 내 자리 컴퓨터의 외부 저장 장치/);
   assert.equal(await titleAfter(() => collectedItems.add('f17-usb-played')), '2층 조사하기');
   assert.equal(await titleAfter(() => collectedItems.add('f2-projected')), '지하에서 무슨 일이?');
   // 12층 이후 목표는 갈 곳(층·방)을 알려 준다.

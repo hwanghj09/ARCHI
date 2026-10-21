@@ -13,8 +13,8 @@ const OBJECTIVE_READS = {
   '1|층별 안내판': 'goal-f1-directory',
 };
 
-// 1층 추격 뒤 층별 안내판을 아직 안 봤다. 이 동안은 엘리베이터를 타지 않는다(interaction.js). 예전 저장으로 다른 층에 있으면 건너뛴다.
-const needsF1Directory = () => collectedItems.has('story-anxiety-seen') && !collectedItems.has('goal-f1-directory') &&
+// 1층 추격 뒤 편의점 위치를 모르면 안내판을 본다. PC 시설 안내를 읽었거나 다른 층에 있는 이전 저장이면 생략한다.
+const needsF1Directory = () => collectedItems.has('story-anxiety-seen') && !collectedItems.has('goal-f1-directory') && !collectedItems.has('goal-facilities-read') &&
   !collectedItems.has('story-robot-seen') && currentSceneFloor === 1;
 
 const OBJECTIVES = [
@@ -37,8 +37,8 @@ const OBJECTIVES = [
     text: 'ARCHI의 신호는 어디를 거쳐 밖으로 나가는 걸까? 보안 자료실에서 외부 통로를 찾아보자.' },
   // 13층 백업 장치를 17층 컴퓨터에 꽂아 깨진 리허설 영상을 봐야(f17-usb-played, usb-video.js) 2층에 갈 이유가 생긴다.
   { when: () => collectedItems.has('f7-external-connection-solved') && !collectedItems.has('f17-usb-played') && !collectedItems.has('f2-projected'),
-    title: '장치 확인하기', text: '이 장치에는 무엇이 들어 있을까? 17층 전력을 켜고 내 자리 컴퓨터에 장치를 꽂아 보자.' },
-  { when: () => collectedItems.has('f7-external-connection-solved') && !collectedItems.has('f2-projected'), title: '2층 조사하기',
+    title: '장치 확인하기', text: '13층에서 챙긴 USB를 확인하자. 17층 내 자리 컴퓨터의 외부 저장 장치를 열고 USB를 연결해 보자.' },
+  { when: () => collectedItems.has('f7-external-connection-solved') && collectedItems.has('f17-usb-played') && !collectedItems.has('f2-projected'), title: '2층 조사하기',
     text: '영상 속 새벽 3시 리허설에서 내 목소리가 나왔다. 원본이 04:00에 지워지기 전에 2층 서버실 녹화 NAS를 찾자.' },
   // 승강기 제어반은 관제실 CCTV 모니터 벽(소등 컷씬)을 본 뒤에야 돌릴 수 있다(floor-b1.js).
   { when: () => collectedItems.has('f7-external-connection-solved') && collectedItems.has('f13-backup-device') && collectedItems.has('f2-projected') &&
@@ -68,7 +68,7 @@ const OBJECTIVES = [
   { when: () => collectedItems.has('story-anxiety-seen') && !collectedItems.has('story-robot-seen'), title: '정신 불안', text: '머리가 어지럽다. 마음을 진정시킬 무언가가 필요하다. 편의점으로 가보자.' },
   { when: () => solarEnabled && !collectedItems.has('f17-emergency-linked') && !floorHasLighting(17),
     title: '17층 전등 켜기', text: '전력은 돌아왔지만 17층은 아직 어둡다.' },
-  { when: () => solarEnabled && !collectedItems.has('f17-emergency-linked') && !collectedItems.has('f17-manager-memo'),
+  { when: () => solarEnabled && !collectedItems.has('f17-emergency-linked') && !collectedItems.has('f17-manager-memo') && !collectedItems.has('f17-manager-unlocked'),
     title: '관리실 비밀번호 찾기', text: '관리실은 잠겨 있다. 누군가 비밀번호를 적어 두지 않았을까?' },
   { when: () => solarEnabled && !collectedItems.has('f17-emergency-linked') && !collectedItems.has('f17-manager-unlocked'),
     title: '관리실 열기', text: '이제 관리실에 들어갈 수 있을 것 같다.' },
@@ -77,9 +77,9 @@ const OBJECTIVES = [
   { when: () => solarEnabled && !collectedItems.has('f17-emergency-linked'),
     title: '승강기 비상 회선 연결', text: '승강기에도 전력을 보내야 한다.' },
   { when: () => collectedItems.has('f17-emergency-linked') && !collectedItems.has('f1-chase-ended') && !collectedItems.has('solar-app-installed') && !collectedItems.has('solar-app-downloaded'),
-    title: '전력 앱 내려받기', text: '층마다 전력을 간편히 전환할 방법이 떠올랐다. 컴퓨터를 조사해보자.' },
+    title: '전력 앱 내려받기', text: '17층 사무실의 내 자리 컴퓨터로 돌아가자. 블로그에서 전력 앱을 내려받을 수 있다.' },
   { when: () => collectedItems.has('f17-emergency-linked') && !collectedItems.has('f1-chase-ended') && !collectedItems.has('solar-app-installed'),
-    title: '전력 앱 설치하기', text: '받은 파일을 휴대폰으로 옮겨야 한다.' },
+    title: '전력 앱 설치하기', text: '내 자리 컴퓨터의 파일 전송을 열고 USB를 연결해 휴대폰에 앱을 설치하자.' },
   { when: () => collectedItems.has('f17-emergency-linked') && !collectedItems.has('f1-chase-ended') && !floorHasLighting(1),
     title: '1층 전력 켜기', text: '1층은 아직 어둠 속이다. 내려가기 전에 불을 밝혀야 한다.' },
   { when: () => collectedItems.has('f17-emergency-linked') && collectedItems.has('f1-reached'), title: '퇴근하기', text: '드디어 1층이다. 이제 집에 가자.' },

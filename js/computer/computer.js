@@ -20,6 +20,7 @@ function exitComputer() {
 function openComputerApp(app, documentId) {
   if (transitioning || !usingComputer) return;
   if (!computerWindows.has(app)) return;
+  if (app === 'usbdrive' && !usbDriveAvailable()) return;
   const record = app === 'document' ? officeDocuments.find(item => item.id === documentId) : null;
   if (app === 'document' && !record) return;
   const state = computerWindows.get(app);
@@ -36,8 +37,11 @@ function openComputerApp(app, documentId) {
     document.getElementById('computer-document-scroll').scrollTop = 0;
   }
   if (app === 'mail' && wasClosed) showComputerMailInbox();
-  if (app === 'usbdrive' && wasClosed) playUsbVideo(); // 열 때마다 처음부터 재생(usb-video.js)
-  if (app === 'building') refreshBuildingGuides();
+  if (app === 'usbdrive' && wasClosed) resetUsbVideo();
+  if (app === 'building') {
+    refreshBuildingGuides();
+    collectedItems.add('goal-facilities-read');
+  }
   refreshSolarDownload();
   if (app === 'browser' && wasClosed) document.getElementById('computer-browser').scrollTop = 0;
   (app === 'notes' ? computerNote : app === 'mail' ? computerMailSearch : app === 'calculator' ?
@@ -70,6 +74,7 @@ document.getElementById('computer-blog-list-back').addEventListener('click', () 
 function refreshSolarDownload() {
   const ready = floorHasPower(17);
   refreshComputerUsb();
+  if (typeof refreshUsbDrive === 'function') refreshUsbDrive();
   if (computerSolarTask && (transitioning || !usingComputer || !ready ||
       (computerSolarTask.kind === 'transfer' && !computerUsbConnected))) {
     clearInterval(computerSolarTask.timer);
@@ -108,7 +113,7 @@ function startSolarFileTask(kind) {
   if (!usingComputer || transitioning || !computerUsbPanel.hidden || computerWindow.hidden || document.getElementById(`computer-${transfer ? 'transfer' : 'browser'}`).hidden ||
       !floorHasPower(17) || (!transfer && document.getElementById('blog-post-solar').hidden) || computerSolarTask || collectedItems.has('solar-app-installed') ||
       (transfer ? !collectedItems.has('solar-app-downloaded') || !computerUsbConnected || !computerUsbAvailable() : collectedItems.has('solar-app-downloaded'))) return;
-  const task = { kind, elapsed: 0, duration: transfer ? 8000 : 5000, started: Date.now(), timer: null };
+  const task = { kind, elapsed: 0, duration: transfer ? solarTransferMs : solarDownloadMs, started: Date.now(), timer: null };
   computerSolarTask = task;
   task.timer = setInterval(() => {
     task.elapsed = Math.min(Date.now() - task.started, task.duration);

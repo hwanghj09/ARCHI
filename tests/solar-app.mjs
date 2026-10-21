@@ -22,6 +22,7 @@ try {
   await page.locator('#opening-skip').click();
   await page.clock.pauseAt(new Date(Date.now() + 1000));
   await page.clock.runFor(100);
+  const [downloadMs, transferMs] = await page.evaluate(() => [solarDownloadMs, solarTransferMs]);
   await page.keyboard.press('p');
   assert(await page.locator('[data-phone-app="solar"]').isHidden());
   await page.evaluate(() => openPhoneApp('solar'));
@@ -54,7 +55,7 @@ try {
     assert(await page.locator('#computer-blog-list-title').evaluate(el => el === document.activeElement));
   }
   await page.locator('#computer-solar-download').click();
-  await page.clock.runFor(1000);
+  await page.clock.runFor(downloadMs / 5);
   assert.equal(await page.locator('#computer-solar-download-progress').evaluate(el => el.value), 20, 'Downloading works before the blackout');
   await page.evaluate(() => { buildingBlackout = true; updatePowerState(); });
   assert(await page.locator('#computer-solar-page').isHidden());
@@ -102,7 +103,7 @@ try {
   const downloadStarted = await page.evaluate(() => computerSolarTask.started);
   await page.locator('#computer-solar-download').dispatchEvent('click');
   assert.equal(await page.evaluate(() => computerSolarTask.started), downloadStarted, 'Repeated clicks do not restart a download');
-  await page.clock.runFor(2000);
+  await page.clock.runFor(downloadMs * .4);
   assert.equal(await page.locator('#computer-solar-download-progress').evaluate(el => el.value), 40);
   assert(!(await page.evaluate(() => progressSnapshot())).items.includes('solar-app-downloaded'), 'Incomplete downloads are not saved');
   await page.evaluate(() => { collectedItems.delete('f17-emergency-linked'); solarEnabled = false; updatePowerState(); });
@@ -112,10 +113,10 @@ try {
   await page.evaluate(() => { collectedItems.add("f17-emergency-linked"); solarEnabled = true; updatePowerState(); });
   await page.locator('#computer-solar-download').click();
   await openApp('files');
-  await page.clock.runFor(4900);
+  await page.clock.runFor(downloadMs - 100);
   assert.equal(await page.evaluate(() => collectedItems.has('solar-app-downloaded')), false);
   await page.clock.runFor(100);
-  assert.equal(await page.evaluate(() => collectedItems.has('solar-app-downloaded')), true, 'Download completes after five seconds while switching apps');
+  assert.equal(await page.evaluate(() => collectedItems.has('solar-app-downloaded')), true, 'Download completes after the configured download time while switching apps');
   assert((await page.evaluate(() => progressSnapshot())).items.includes('solar-app-downloaded'));
   await openApp('transfer');
   await page.evaluate(() => { buildingBlackout = false; solarEnabled = false; updatePowerState(); });
@@ -146,8 +147,8 @@ try {
   await page.locator('#computer-solar-transfer').click();
   assert.equal(await page.evaluate(() => collectedItems.has('solar-app-installed')), false, 'Transfer is not instant');
   assert(await page.locator('[data-phone-app="solar"]').isHidden());
-  await page.clock.runFor(3000);
-  assert.equal(await page.locator('#computer-solar-transfer-progress').evaluate(el => el.value), 37);
+  await page.clock.runFor(transferMs * .4);
+  assert.equal(await page.locator('#computer-solar-transfer-progress').evaluate(el => el.value), 40);
   await page.screenshot({ path: '.local/solar-transfer-progress.png' });
   assert(!(await page.evaluate(() => progressSnapshot())).items.includes('solar-app-installed'), 'Incomplete transfers are not saved');
   await page.evaluate(() => { phoneBattery = 0; refreshSolarDownload(); });
@@ -156,7 +157,7 @@ try {
   await page.evaluate(() => { phoneBattery = 100; refreshSolarDownload(); });
   await connectUsb();
   await page.locator('#computer-solar-transfer').click();
-  await page.clock.runFor(7900);
+  await page.clock.runFor(transferMs - 100);
   await page.locator('#computer-exit').click();
   await finishSceneTransition(page);
   await page.clock.runFor(8000);
@@ -166,7 +167,7 @@ try {
   await openApp('transfer');
   await connectUsb();
   await page.locator('#computer-solar-transfer').click();
-  await page.clock.runFor(7900);
+  await page.clock.runFor(transferMs - 100);
   assert.equal(await page.evaluate(() => collectedItems.has('solar-app-installed')), false);
   await page.clock.runFor(100);
   assert.equal(await page.evaluate(() => collectedItems.has('solar-app-installed')), true);

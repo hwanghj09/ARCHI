@@ -112,8 +112,8 @@ try {
   assert.equal(await page.locator('#story-caption').textContent(), '누군가 보고 있으면 성능을 숨기는 건가?');
   await page.locator('#story-scene').click({ position: { x: 600, y: 300 } });
   assert(await page.locator('#story-scene').isHidden());
-  assert((await clues()).some(text => /사람의 존재를 감지하면 실제 성능을 숨긴다/.test(text)));
-  assert((await clues()).includes('03:00~04:00 · B2'));
+  assert(await has('story-log-seen'), 'The analysis is delivered in Suho’s story scene');
+  assert.equal((await clues()).length, 0, 'Automatic clue recording stays disabled');
   await page.screenshot({ path: '.local/story-f12-solved.png' });
   // 다시 풀어도 보상은 한 번뿐이다.
   const clueCount = (await clues()).length;
@@ -151,12 +151,14 @@ try {
   assert(await has('f7-training-time-solved'));
   assert.equal(await page.locator('#backup-body td[data-solved="true"]').count(), 2);
   assert(await page.locator('#backup-tabs button').nth(3).isEnabled(), 'Solving opens the today tab');
+  assert.match(await page.locator('#backup-status').textContent(), /10\/05 03시: 성능 상승과 B2 전력 집중/);
   assert.equal(await objective(), '오늘만 다른 기록');
   await page.clock.runFor(4500);
   assert.equal(await page.evaluate(() => backupTab), '오늘', 'The puzzle moves on to the today tab by itself');
   assert.deepEqual(await page.locator('#backup-body tbody tr').allTextContents(), ['≠TRAINING PROCESS — RUNNINGTRAINING PROCESS — COMPLETE',
     'B2 POWER — 94%B2 POWER — 94%', '+없음EXTERNAL HOST CONNECTION — READY', '+없음EXTERNAL CONNECTION TEST — SUCCESS']);
   assert(await page.locator('#backup-source').isHidden(), 'The source line is not shown before solving');
+  assert.match(await page.locator('#backup-question').textContent(), /오늘 ARCHI가 처음으로 실행한 작업/);
   await page.locator('#backup-options button', { hasText: '학습' }).click();
   assert.equal(await sanity(), 60);
   await page.locator('#backup-options button', { hasText: '외부 서버 연결' }).click();
@@ -167,16 +169,17 @@ try {
   assert(await page.locator('#backup-frame').evaluate(element => element.classList.contains('dimmed')), 'The screen dims for a moment');
   await page.clock.runFor(2000);
   assert(!(await page.locator('#backup-frame').evaluate(element => element.classList.contains('dimmed'))), 'The screen comes back');
-  const all = await clues();
-  for (const pattern of [/10\/05 03시, ARCHI 성능 상승과 B2 전력 집중이 동시에 발생했다/, /야간에 B2 전력을 이용해 학습했다/,
-    /오늘 밤 처음 외부 서버 연결을 시도했다/, /발신지는 B2 ARCHI-MAIN/, /B2 · ARCHI 메인 서버실/]) assert(all.some(text => pattern.test(text)), String(pattern));
+  assert.match(await page.locator('#backup-status').textContent(), /발신지는 B2 ARCHI-MAIN/);
+  assert.match(await page.locator('#backup-source').textContent(), /B2/);
+  assert.match(await page.locator('#backup-monologue').textContent(), /외부 서버에 연결하려고/);
+  assert.equal((await clues()).length, 0, 'The solved puzzle does not recreate an automatic journal');
   await page.screenshot({ path: '.local/story-f7-solved.png' });
   await page.keyboard.press('Escape');
   // 7층 다음은 13층 보안 자료실의 백업 장치(tests/vault-puzzle.mjs). 그 전에는 B1 제어반이 풀리지 않는다.
   assert.equal(await objective(), '외부 연결 통로 찾기');
   await page.evaluate(() => { collectedItems.add(cctvLiveItem); collectedItems.add('b1-cctv-seen'); });
   await use('b1-control', '승강기 제어반');
-  assert.match(await page.locator('#inspection-description').textContent(), /13층 보안 자료실/);
+  assert.match(await page.locator('#inspection-description').textContent(), /13층.*백업 장치/);
   assert.equal(await has('b1-elevator'), false, 'B1 key switch waits for the 13F backup device');
   await page.evaluate(() => closeInspection());
   await page.evaluate(() => collectedItems.add('f13-backup-device'));
@@ -226,7 +229,7 @@ try {
   assert.equal(await page.evaluate(() => answerBackupTraining('03시') ?? collectedItems.has('f7-training-time-solved')), false);
   await page.evaluate(() => { collectedItems.add(cctvLiveItem); collectedItems.add('b1-cctv-seen'); }); // CCTV 컷씬은 tests/cctv-scene.mjs
   await use('b1-control', '승강기 제어반');
-  assert.match(await page.locator('#inspection-description').textContent(), /아직 모른다/);
+  assert.match(await page.locator('#inspection-description').textContent(), /7층 원본 로그.*13층 백업 장치.*2층 리허설 영상/);
   assert.equal(await has('b1-elevator'), false, 'B1 key switch waits for the 7F puzzles');
   await use('f12-eval', '야간 로그 단말기');
   await page.clock.runFor(7000);

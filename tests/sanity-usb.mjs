@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { chromium } from 'playwright';
 
 // A. 항불안제를 먹으면 60초 동안 정신력이 닳지 않고, 그 뒤엔 평소대로 닳는다. 어둠 속 플래시는 감소를 절반으로 줄인다.
-// B. 13층 백업 장치를 가진 채 17층 컴퓨터를 켜면 '외부 저장 장치'가 생기고, 깨진 리허설 영상을 끝까지 보면
+// B. 13층 USB를 17층 수호의 컴퓨터에 직접 연결하고 깨진 리허설 영상을 끝까지 보면
 //    f17-usb-played가 남아 목표가 '장치 확인하기' → '2층 조사하기'로 넘어간다. 도중에 닫으면 남지 않는다.
 const browser = await chromium.launch();
 try {
@@ -46,28 +46,74 @@ try {
 
   // B. 17층 컴퓨터(17층 전력 필요). 장치가 없으면 아이콘도 없다.
   const openComputer = () => page.evaluate(() => {
+    collectedItems.add('f17-emergency-linked');
     solarEnabled = true; solarPoweredFloors = [17]; updatePowerState();
+    if (room !== 'office') { performFloorChange('f17'); performRoomChange(); }
     usingComputer = true; computer.hidden = false; resetComputerDesktop();
   });
   const shortcut = '#computer .computer-shortcuts [data-computer-app="usbdrive"]';
   await page.evaluate(() => collectedItems.add('f7-external-connection-solved'));
   await openComputer();
   assert(await page.locator(shortcut).isHidden(), 'No drive icon without the 13F device');
+  await page.evaluate(() => openComputerApp('usbdrive'));
+  assert.equal(await page.evaluate(() => computerWindows.get('usbdrive').open), false, 'Other launch paths cannot play a missing USB');
   await page.evaluate(() => { usingComputer = false; computer.hidden = true; collectedItems.add('f13-backup-device'); refreshObjective(); });
   await page.clock.runFor(200);
   assert.equal(await page.evaluate(() => currentObjective.title), '장치 확인하기');
-  assert.match(await page.evaluate(() => currentObjective.text), /17층 전력을 켜고 내 자리 컴퓨터에 장치를 꽂아 보자/);
+  assert.match(await page.evaluate(() => currentObjective.text), /17층 내 자리 컴퓨터의 외부 저장 장치/);
   await openComputer();
   assert(await page.locator(shortcut).isVisible(), 'The drive appears on the desktop');
   // 도중에 닫으면 기록하지 않는다.
   await page.locator(shortcut).dblclick();
+  assert(await page.locator('#usb-drive-plug').isVisible());
+  assert(await page.locator('#usb-video').isHidden(), 'Possessing the USB does not start playback');
+  await page.clock.runFor(10000);
+  assert.equal(await page.evaluate(() => collectedItems.has('f17-usb-played')), false);
+  await page.locator('#usb-drive-plug').click();
   await page.clock.runFor(4000);
   assert.equal(await page.evaluate(() => usbVideo.dataset.state === 'clear' || usbVideo.dataset.state === 'glitch'), true);
+  for (const [width, height] of [[844, 390], [390, 844]]) {
+    await page.setViewportSize({ width, height });
+    await page.clock.runFor(100);
+    assert(await page.evaluate(() => {
+      const caption = usbVideoCaption.getBoundingClientRect();
+      const view = computerWindows.get('usbdrive').view.getBoundingClientRect();
+      return caption.top >= view.top && caption.bottom <= view.bottom;
+    }), `Rehearsal subtitles fit the visible window at ${width}x${height}`);
+  }
+  await page.setViewportSize({ width: 1280, height: 720 });
   await page.evaluate(() => closeComputerWindow(computerWindows.get('usbdrive')));
   await page.clock.runFor(8000);
   assert.equal(await page.evaluate(() => collectedItems.has('f17-usb-played')), false, 'Closing early does not count');
+  // 최소화·전력 차단도 관람 완료로 처리하지 않는다. 다시 열면 연결부터 재시도할 수 있다.
+  await page.locator(shortcut).dblclick();
+  await page.locator('#usb-drive-plug').click();
+  await page.clock.runFor(4000);
+  await page.locator('[data-app="usbdrive"] [data-window-minimize]').click();
+  await page.clock.runFor(8000);
+  assert.equal(await page.evaluate(() => collectedItems.has('f17-usb-played')), false, 'Minimizing early does not count');
+  await page.locator('[data-computer-task-app="usbdrive"]').click();
+  await page.locator('#usb-drive-plug').click();
+  await page.clock.runFor(4000);
+  await page.evaluate(() => { collectedItems.delete('f17-emergency-linked'); updatePowerState(); });
+  await page.clock.runFor(8000);
+  assert.equal(await page.evaluate(() => collectedItems.has('f17-usb-played')), false, 'Unpowered playback cannot complete');
+  assert(await page.locator('#usb-drive-plug').isDisabled());
+  await page.evaluate(() => { collectedItems.add('f17-emergency-linked'); updatePowerState(); });
+  // 미완료 상태의 저장을 불러와도 2층 목표가 먼저 나오지 않는다.
+  await page.evaluate(() => { saveProgress(); restoreProgress(readProgress()); refreshObjective(); });
+  await page.clock.runFor(200);
+  assert.equal(await page.evaluate(() => currentObjective.title), '장치 확인하기');
+  assert.equal(await page.evaluate(() => collectedItems.has('f17-usb-played')), false);
+  await openComputer();
   // 끝까지 보면 오류 화면과 함께 기록·목표 변경.
   await page.locator(shortcut).dblclick();
+  // 터치나 키보드도 같은 연결 버튼을 사용한다.
+  await page.locator('#usb-drive-plug').focus();
+  await page.keyboard.press('Enter');
+  await page.clock.runFor(1000);
+  assert.match(await page.locator('.usb-video-footage').evaluate(el => getComputedStyle(el).backgroundImage), /floor02-hall-interior/);
+  await page.screenshot({ path: '.local/usb-rehearsal-playing.png' });
   const states = new Set();
   for (let t = 0; t < 10000; t += 250) { await page.clock.runFor(250); states.add(await page.evaluate(() => usbVideo.dataset.state)); }
   console.log('video states:', [...states].join(' → '));
@@ -79,6 +125,9 @@ try {
   await page.evaluate(() => { usingComputer = false; computer.hidden = true; });
   await page.clock.runFor(200);
   assert.equal(await page.evaluate(() => currentObjective.title), '2층 조사하기');
+  await page.evaluate(() => { saveProgress(); restoreProgress(readProgress()); refreshObjective(); });
+  await page.clock.runFor(200);
+  assert.equal(await page.evaluate(() => currentObjective.title), '2층 조사하기', 'Watched USB progress survives reload');
   assert.deepEqual(errors, []);
   console.log('Sanity calm/flashlight and 13F USB video checks passed.');
 } finally {

@@ -4,14 +4,14 @@ const INVENTORY_ITEMS = {
   'f17-badge': { name: '수호의 출입증', description: '늘 지니고 다니는 내 출입증. ARCHI · 정수호 · 개발팀.', image: 'assets/objects/id-cards/jeong-suho.png', look: 'badge' },
   'f16-badge': { name: '조현아 팀장 사원증', description: '16층 카페에서 챙긴 사원증. 12~15층의 인증 게이트에서 사용할 수 있다.', image: 'assets/objects/id-cards/jo-hyeon-a.png', look: 'badge',
     hint: '16층 Café에서 마지막 확인' },
-  'f16-antianxiety': { name: '항불안제', description: brandText('16층 VU 편의점 선반의 약품 칸에서 챙긴 항불안제. 먹으면 불안이 조금 가라앉을 것 같다.'), image: 'assets/objects/items/antianxiety-v2.png',
+  'f16-antianxiety': { name: '항불안제', description: brandText(`16층 VU 편의점 선반에서 챙긴 항불안제. 정신력을 ${antianxietyRestore}%p 회복하고 게임 시간 ${antianxietyCalmMs / 1000}초 동안 정신력 감소를 막는다. 효과가 끝나면 다시 감소한다.`), image: 'assets/objects/items/antianxiety-v2.png',
     usedFlag: 'f16-antianxiety-used', use: { label: '사용하기', sanity: antianxietyRestore, calm: true, animation: 'antianxiety' } },
   'f2-reel': { name: '리허설 녹화 디스크', description: '2층 서버실 녹화 NAS에서 챙긴 원본 디스크. 03:00 무관객 리허설이 녹화되어 있다. Harmony Hall의 배터리 영사기에 넣어 볼 수 있다.',
     image: 'assets/ui/manual-control/disc.png', usedFlag: 'f2-projected' },
   'f2-remote': { name: '영사기 리모컨', description: '2층 직원 휴게실 커피 테이블에서 챙긴 리모컨. Harmony Hall 천장의 배터리 영사기를 내릴 수 있다.',
     image: 'assets/objects/items/projector-remote-v2.png' },
   // B2 전력·냉각실(엔딩 준비): 먹으면 정신력이 최소 50%가 된다(minSanity).
-  'b2-antianxiety': { name: '항불안제', description: 'B2 전력·냉각실 캐비닛 위에서 챙긴 항불안제. 먹으면 정신력이 최소 50%까지 돌아온다.', image: 'assets/objects/items/antianxiety-v2.png',
+  'b2-antianxiety': { name: '항불안제', description: `B2 전력·냉각실 캐비닛 위에서 챙긴 항불안제. 정신력이 최소 50%까지 돌아오고 게임 시간 ${antianxietyCalmMs / 1000}초 동안 정신력 감소를 막는다.`, image: 'assets/objects/items/antianxiety-v2.png',
     usedFlag: 'b2-antianxiety-used', use: { label: '사용하기', minSanity: 50, calm: true, animation: 'antianxiety' } },
   'f12-lead-key': { name: '팀장실 보조키', description: '12층 책상 서랍에서 챙긴 열쇠. 꼬리표에 "팀장실 보조키"라고 적혀 있다.', image: 'assets/objects/items/lead-key.png' },
   'f12-eval-keycard': { name: '모델 평가실 카드키', description: '12층 개발실 맨 왼쪽 서랍의 종이 더미 밑에서 찾은 카드키. 모델 평가실 문을 열 수 있다.',
@@ -89,6 +89,7 @@ function openHydrant() {
   if (!collectedItems.has('rooftop-key')) {
     const key = itemButton('rooftop-key');
     key.setAttribute('aria-label', '낡은 열쇠 줍기');
+    key.querySelector('.item-name').textContent = '낡은 열쇠 줍기 · Enter';
     const describe = () => { description.textContent = INVENTORY_ITEMS['rooftop-key'].description + ' 눌러서 줍기.'; };
     key.addEventListener('pointerenter', describe);
     key.addEventListener('focus', describe);
@@ -104,6 +105,7 @@ function openHydrant() {
     description.textContent = '호스와 관창은 그대로다. 열쇠는 이미 챙겼다.';
   }
   openItemPanel('17층 소화전', description.textContent, 'hydrant', content);
+  cabinet.querySelector('button')?.focus({ preventScroll: true });
 }
 
 function openCleaningCart() {
@@ -283,7 +285,10 @@ function useInventoryItem(id) {
     sanity = Math.max(item.use.minSanity ?? 0, Math.min(100, sanity + (item.use.sanity ?? 0)));
     refreshSanity();
   }
-  if (item.use.calm) antianxietyCalm = antianxietyCalmMs; // 먹은 뒤 잠시 정신력이 닳지 않는다(sanity.js)
+  if (item.use.calm) {
+    antianxietyCalm = antianxietyCalmMs;
+    refreshSanity();
+  }
   playGameSound('item-use');
   refreshInventoryCount();
   if (withAnimation) closeInspection();

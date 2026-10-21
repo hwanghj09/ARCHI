@@ -92,7 +92,7 @@ try {
     if (await button.getAttribute('data-restricted')) {
       await button.click();
       assert.equal(await button.getAttribute('aria-pressed'), 'false', 'B2 stays restricted until B1 lifts it');
-      assert.match(await page.locator('#cabin-status').textContent(), /버튼을 눌렀으나 아무 반응도 없었다./);
+      assert.match(await page.locator('#cabin-status').textContent(), /B2 운행 제한 중.*B1 방재 관제실/);
     }
   }
   await page.screenshot({ path: '.local/cabin-desktop-open.png' });
@@ -522,7 +522,7 @@ try {
     await page.clock.runFor(100);
   };
   // 15F 연구본부: two rooms left of the elevators and the director's office in the middle zone. Its mechanic: boxed GPU
-  // servers waiting to go to B2 cover the seminar room floor, so the work order at the back is reached by jumping them.
+  // equipment boxes in the seminar room are crossed by jumping; no transfer subplot is attached.
   const checkFloor15 = async () => {
     roomScales.length = 0;
     const corridorHeader = '15F · 연구본부';
@@ -556,7 +556,6 @@ try {
     await walkTo(3084);
     assert.equal(await hint(), 'E · 비상계단 (잠김)', 'The middle room leaves the stair door its whole zone');
     await visitRestroom('15F');
-    await inspect(4730, 'E · 연구본부 소식지 조사', /야간 사용 권한/);
     await page.screenshot({ path: '.local/floor-15.png' });
 
     const seminar = await enterRoom('세미나실', '15F');
@@ -567,7 +566,6 @@ try {
     assert.equal(await page.locator('#dynamic-scene .solid.crate').count(), 2);
     softCount(await page.locator('#dynamic-scene .floor-prop').count(), 5);
     await assertHumanScale();
-    await inspect(420, 'E · 이관 카트 조사', /B2 서버실 이관 2차분/);
     await walkTo(730);
     await hold('d', 500);
     assert((await playerX()) < 742, 'The boxed servers block walking');
@@ -577,7 +575,6 @@ try {
     await walkTo(1280);
     await jump('d');
     assert((await playerX()) > 1470, 'Jump clears the second box');
-    await inspect(1800, 'E · 작업 지시서 조사', /승인: 대기/);
     await page.screenshot({ path: '.local/floor-15-seminar.png' });
     await walkTo(1520);
     await jump('a');
@@ -601,7 +598,6 @@ try {
     await checkCutawayArt('floor15-director-interior.png', 1824);
     softCount(await page.locator('#dynamic-scene .floor-prop').count(), 6);
     await assertHumanScale();
-    await inspect(900, 'E · 본부장 책상 조사', /자동 승인 · 야간 배치/);
     await page.screenshot({ path: '.local/floor-15-director.png' });
     assert(Math.max(...roomScales) / Math.min(...roomScales) < 1.02, `Room fronts scale with their interiors: ${roomScales}`);
     await leaveRoom(office, corridorHeader);
@@ -808,7 +804,6 @@ try {
     assert.equal(await page.locator('#dynamic-scene .room-interior.windowless').count(), 1);
     softCount(await page.locator('#dynamic-scene .floor-prop').count(), 8);
     await assertHumanScale();
-    await inspect(900, 'E · 자료실 책상 조사', /archi-demo.*03:07/);
     await inspect(500, 'E · 브로슈어 진열장 조사', /출시일/); // 진열장을 x=500으로 옮겼다(984b34f)
     await page.screenshot({ path: '.local/floor-11-marketing.png' });
     assert(Math.max(...roomScales) / Math.min(...roomScales) < 1.02, `Room fronts scale with their interiors: ${roomScales}`);
@@ -816,232 +811,8 @@ try {
     await walkTo(startX);
     await page.clock.runFor(100);
   };
-  // 10F is ARCHI Soft·ARCHI Data 경영관리본부 and uses the user's cutaway asset (management office, executive meeting room,
-  // executive office) at 1:1 (floor line y=438 → 570). The corridor shows each room behind glass: 경영관리 사무실 and
-  // 임원 회의실 left of the elevators, 임원실 right of the restroom. Each room is its own scene, the full painted room widened
-  // with repeated bays, and every clue is a transparent art-spot over a painted object. Its mechanic is the dual-key cabinet:
-  // the painted cabinet with two brass keyholes in 임원실 needs the finance lead's key from the office drawer and the director's
-  // key from the executive desk; with one of them the second lock does not turn (partialMessage).
-  const checkFloor10 = async () => {
-    roomScales.length = 0;
-    const corridorHeader = '10F · 경영관리본부';
-    const status = () => interactionMessage(page);
-    const cabinet = 'E · 이중 잠금 서류함 조사';
-    const spots = () => page.locator('#dynamic-scene .fixture.art-spot').count();
-    assert.equal(await header(), corridorHeader);
-    await checkCore();
-    assert.equal(await page.locator('#dynamic-scene').getAttribute('data-theme'), 'finance');
-    await checkWallsV3('floor10/walls.png', 760);
-    assert.deepEqual(await page.locator('#dynamic-scene .floor-room-sign').allTextContents(),
-      ['경영관리 사무실', '임원 회의실', '임원실', '화장실'], 'Rooms follow the asset, growing more closed left to right');
-    assert.deepEqual(await page.locator('#dynamic-scene .room-door').evaluateAll(els => els.map(el => el.className)),
-      ['room-door sprite-door', 'room-door sprite-door', 'room-door sprite-door', 'room-door metal']);
-    await checkSpriteDoors(['door-lab.png', 'door-meeting.png', 'door-meeting.png'], 1280);
-    const restroom = await page.locator('#dynamic-scene .floor-room.restroom .floor-room-sign').evaluate(el => {
-      const sign = el.getBoundingClientRect();
-      const door = document.querySelector('#dynamic-scene .room-door.metal').getBoundingClientRect();
-      return [sign.left + sign.width / 2 - door.left - door.width / 2, door.top - sign.bottom,
-        getComputedStyle(document.querySelector('#dynamic-scene .room-door.metal')).backgroundImage];
-    });
-    assert(Math.abs(restroom[0]) < 1 && restroom[1] > 0, '10F restroom sign sits above its door');
-    assert.match(restroom[2], /floor16\/restroom-door\.png/, '10F uses the shared restroom door');
-    const office = await roomFront(page, '경영관리 사무실');
-    const meeting = await roomFront(page, '임원 회의실');
-    const executive = await roomFront(page, '임원실');
-    assert(office.room.x + office.room.width < meeting.room.x && meeting.room.x + meeting.room.width <= 1790 &&
-      meeting.door.x + meeting.door.width + 28 <= 1790, 'Office and meeting room sit apart in the left zone');
-    assert(office.door.x + office.door.width + 28 <= meeting.door.x - 28, 'Their doors have separate hint zones');
-    assert(executive.room.x >= 4282 && executive.room.x + executive.room.width <= 4968 && executive.door.x >= 4282 &&
-      executive.door.x + executive.door.width <= 4940, 'The executive office sits in the right zone');
-    softCount(await page.locator('#dynamic-scene .floor-prop').count(), 0, 'All furniture is painted');
-    assert.equal(await spots(), 1, 'A stopped clock in the middle zone');
-    assert.deepEqual(await page.locator('#dynamic-scene .fixture.art-spot').evaluate(el =>
-      [parseFloat(el.style.left), parseFloat(el.style.top), parseFloat(el.style.width), parseFloat(el.style.height)]),
-      [3330, 266, 40, 32], 'The clock inspection box follows the newly composed clock');
-    await page.clock.runFor(100);
-    const startX = await playerX();
-    near(startX, 1858, 'Arrive at elevator 1');
-    await walkTo(1795);
-    assert.equal(await hint(), 'E · 탑승', 'The meeting room door leaves elevator 1 its whole zone');
-    await inspect(3350, 'E · 멈춘 벽시계 조사', /00:00에 멈춰/);
-    await walkTo(3084);
-    assert.equal(await hint(), 'E · 비상계단 (잠김)');
-    await visitRestroom('10F');
-    await page.screenshot({ path: '.local/floor-10.png' });
-
-    // 임원실 first: the cabinet is locked, the director's key lies on the pending document, one key turns only one lock.
-    const executiveRoom = await enterThroughSpriteDoor('임원실', '10F');
-    assert.equal(await worldWidth(page), 2144);
-    assert.equal(executiveRoom.exit.x, 126);
-    await checkCutawayArt('floor10-executive-interior.png', 2144);
-    assert.deepEqual(await page.locator('#dynamic-scene .fear-screen').evaluateAll(els => els.map(el =>
-      [parseFloat(el.style.left), parseFloat(el.style.top), parseFloat(el.style.width), parseFloat(el.style.height)])),
-      [[641, 390, 46, 36]], 'The executive monitor overlay follows the resized artwork'); // 출구 문 칸(322px)이 x=30에 들어가 모니터도 밀렸다(147d618)
-    assert.equal(await spots(), 4);
-    assert.equal(await page.locator('#dynamic-scene .fixture.art-spot[data-requires="f10-key-finance|f10-key-director"]').count(), 1);
-    await inspect(635, 'E · 비서 데스크 조사', /archi-ops.*자동 처리/);
-    await inspect(796, cabinet, /열쇠 구멍 두 개/);
-    await inspect(1002, 'E · 임원 책상 조사', /성과 3~5%.*열쇠가 놓여 있다\. 챙겼다/);
-    await inspect(796, cabinet, /나머지 구멍에 맞는 열쇠/);
-    await inspect(2003, 'E · 책장 조사', /별도 원가 센터/);
-    await page.screenshot({ path: '.local/floor-10-executive.png' });
-    await leaveRoom(executiveRoom, corridorHeader);
-
-    const officeRoom = await enterThroughSpriteDoor('경영관리 사무실', '10F');
-    assert.equal(await worldWidth(page), 3000);
-    assert.equal(officeRoom.exit.x, 126);
-    await checkCutawayArt('floor10-office-interior.png', 3000);
-    const monitors = await page.locator('#dynamic-scene .fear-screen').evaluateAll(els => els.map(el =>
-      [parseFloat(el.style.left), parseFloat(el.style.top), parseFloat(el.style.width), parseFloat(el.style.height)]).sort((a, b) => a[0] - b[0]));
-    assert.equal(monitors.length, 12, 'All finance monitor overlays remain attached');
-    assert.deepEqual(monitors[0], [778, 426, 50, 41], 'Finance monitor overlays follow the resized artwork'); // 출구 문 칸(322px)만큼 밀렸다(147d618)
-    assert.equal(await spots(), 5);
-    await inspect(624, 'E · 진열장 조사', /ARCHI 프로젝트 출범식.*B2 서버실 앞/);
-    await inspect(999, 'E · 인쇄 계산기 조사', /전력비 · B2/);
-    await inspect(2576, 'E · 회계 책상 조사', /\+212%.*전부 B2/);
-    await inspect(2738, 'E · 결산 보드 조사', /B1 시설관리실.*3회째.*ARCHI 프로젝트 비용/);
-    await inspect(2818, 'E · 재무팀장 책상 조사', /재무" 꼬리표가 달린 열쇠.*챙겼다/);
-    await page.screenshot({ path: '.local/floor-10-office.png' });
-    await leaveRoom(officeRoom, corridorHeader);
-
-    const meetingRoom = await enterThroughSpriteDoor('임원 회의실', '10F');
-    assert.equal(await worldWidth(page), 2166);
-    assert.equal(meetingRoom.exit.x, 126);
-    await checkCutawayArt('floor10-meeting-interior.png', 2166);
-    assert.equal(await spots(), 4);
-    await inspect(491, 'E · 블랙아웃 창 조사', /자동 차광/);
-    await inspect(1652, 'E · 미디어 월 조사', /비용 검토 · 보류/);
-    await inspect(1955, 'E · 상석 마이크 조사', /붉은 불.*회의록 자동 작성/);
-    await inspect(2052, 'E · 오디오 허브 조사', /B2 · archi-ops/);
-    await page.screenshot({ path: '.local/floor-10-meeting.png' });
-    await leaveRoom(meetingRoom, corridorHeader);
-
-    // Both keys together open the cabinet: the B2 overnight power limit tripled, applied by SYSTEM, signed by proxy.
-    await enterThroughSpriteDoor('임원실', '10F');
-    await inspect(796, cabinet, /B2 전력 한도 3배 상향 · 신청 SYSTEM · 본부장 전자서명\(대리\)/);
-    await inspect(1002, 'E · 임원 책상 조사', /본부장 열쇠는 이미 챙겼다/);
-    await leaveRoom(executiveRoom, corridorHeader);
-    assert(Math.max(...roomScales) / Math.min(...roomScales) < 1.02, `Room fronts scale with their interiors: ${roomScales}`);
-    await walkTo(startX);
-    await page.clock.runFor(100);
-  };
-  // 9F, the ARCHI Data 사업본부, uses the user's cutaway asset of the business office, the sales and customer area and the
-  // project room at 1:1 (floor line y=438 → 570). The corridor shows each room behind glass: 사업 업무 공간 and 영업·고객 관리 구역
-  // left of the elevators, 프로젝트룸 right of the restroom; the doors stand clear of the painted clues. Each room is its own
-  // scene, the full painted room widened with repeated bays. Its mechanic is a clue chain across the rooms: the license ledger
-  // copy from the sales cabinets unlocks the archi_svc download log on the business office PC, and both unlock the hidden deck
-  // on the project room's presentation laptop (requires list + partialMessage → 9층 조사 완료).
-  const checkFloor9 = async () => {
-    roomScales.length = 0;
-    const corridorHeader = '9F · ARCHI Data 사업본부';
-    const ready = () => page.locator('#dynamic-scene .fixture.art-spot[data-requires]').evaluateAll(els => els.map(el => el.dataset.ready));
-    assert.equal(await header(), corridorHeader);
-    await checkCore();
-    assert.equal(await page.locator('#dynamic-scene').getAttribute('data-theme'), 'business');
-    await checkWallsV3('floor09/walls.png', 760);
-    assert.deepEqual(await page.locator('#dynamic-scene .floor-room-sign').allTextContents(),
-      ['사업 업무 공간', '영업·고객 관리 구역', '프로젝트룸', '화장실'], 'Rooms follow the painted areas');
-    await checkSpriteDoors(['door-lab.png', 'door-lab.png', 'door-meeting.png'], 1280);
-    const restroom = await page.locator('#dynamic-scene .floor-room.restroom .floor-room-sign').evaluate(el => {
-      const sign = el.getBoundingClientRect();
-      const door = document.querySelector('#dynamic-scene .room-door.metal').getBoundingClientRect();
-      return [sign.left + sign.width / 2 - door.left - door.width / 2, door.top - sign.bottom,
-        getComputedStyle(document.querySelector('#dynamic-scene .room-door.metal')).backgroundImage];
-    });
-    assert(Math.abs(restroom[0]) < 1 && restroom[1] > 0, '9F restroom sign sits above its door');
-    assert.match(restroom[2], /floor16\/restroom-door\.png/, '9F uses the shared restroom door');
-    const office = await roomFront(page, '사업 업무 공간');
-    const sales = await roomFront(page, '영업·고객 관리 구역');
-    const project = await roomFront(page, '프로젝트룸');
-    assert(office.room.x + office.room.width < sales.room.x && office.door.x + office.door.width + 28 < sales.door.x - 28,
-      'The two left rooms and their door hint zones sit apart');
-    assert(sales.room.x + sales.room.width <= 1790 && sales.door.x + sales.door.width + 28 <= 1790, 'Both left rooms sit in the left zone');
-    assert(project.room.x >= 4282 && project.room.x + project.room.width <= 4968 && project.door.x >= 4282 &&
-      project.door.x + project.door.width <= 4940, '프로젝트룸 sits in the right zone');
-    assert.equal(await page.locator('#dynamic-scene .fixture.art-spot').count(), 1, 'The brochure rack in the middle zone');
-    assert.deepEqual(await page.locator('#dynamic-scene .fixture.art-spot').evaluate(el =>
-      [parseFloat(el.style.left), parseFloat(el.style.top), parseFloat(el.style.width), parseFloat(el.style.height)]),
-      [3240, 277, 44, 103], 'The brochure inspection box follows the newly composed rack');
-    softCount(await page.locator('#dynamic-scene .floor-prop').count(), 1, 'A planter in the middle zone');
-    await page.locator('#dynamic-scene .floor-prop img').evaluateAll(images => Promise.all(images.map(img => img.decode())));
-    await assertHumanScale();
-    await page.clock.runFor(100);
-    const startX = await playerX();
-    near(startX, 1858, 'Arrive at elevator 1');
-    await walkTo(1795);
-    assert.equal(await hint(), 'E · 탑승', 'The sales door leaves elevator 1 its whole zone');
-    await inspect(3262, 'E · 브로슈어 거치대 조사', /방문객 ARCHI/);
-    await walkTo(3084);
-    assert.equal(await hint(), 'E · 비상계단 (잠김)');
-    await visitRestroom('9F');
-    await page.screenshot({ path: '.local/floor-9.png' });
-
-    // The final deck is locked until both earlier clues are found.
-    const projectRoom = await enterThroughSpriteDoor('프로젝트룸', '9F');
-    assert.equal(await worldWidth(page), 2162);
-    assert.equal(projectRoom.exit.x, 1906);
-    await checkCutawayArt('floor09-project-interior.png', 2162);
-    assert.equal(await page.locator('#dynamic-scene .fixture.art-spot').count(), 5);
-    assert.deepEqual(await ready(), ['false']);
-    await inspect(46, 'E · 예약 패널 조사', /매일 03:00 · 예약자 SYSTEM/);
-    await inspect(228, 'E · 간트 일정판 조사', /붉은 자석 넷.*먼저 질문함/);
-    await inspect(1396, 'E · 제안서 게시판 조사', /사람의 반응 수집 현황/);
-    await inspect(1538, 'E · 발표용 노트북 조사', /결재 권한 계정 확인 필요/);
-    await inspect(1747, 'E · 녹화 카메라 조사', /좌석 쪽.*사람 반응 학습용/);
-    await page.screenshot({ path: '.local/floor-9-project.png' });
-    await leaveRoom(projectRoom, corridorHeader);
-
-    // The office PC names archi_svc but cannot say who it is yet.
-    const officeRoom = await enterThroughSpriteDoor('사업 업무 공간', '9F');
-    assert.equal(await worldWidth(page), 2998);
-    assert.equal(officeRoom.exit.x, 2742);
-    await checkCutawayArt('floor09-office-interior.png', 2998);
-    assert.equal(await page.locator('#dynamic-scene .fixture.art-spot').count(), 4);
-    await inspect(172, 'E · 사업 관리 PC 조사', /누구인지 알 수 없다/);
-    assert(!await page.evaluate(() => collectedItems.has('f9-access-log')));
-    await inspect(447, 'E · 계약서 더미 조사', /전자 서명.*archi_svc/);
-    await inspect(2070, 'E · 부러진 블라인드 조사', /자동 제어 · SYSTEM/);
-    await inspect(2249, 'E · 감사패 진열장 조사', /검은 몸체.*사내 부서/);
-    await leaveRoom(officeRoom, corridorHeader);
-
-    const salesRoom = await enterThroughSpriteDoor('영업·고객 관리 구역', '9F');
-    assert.equal(await worldWidth(page), 2168);
-    assert.equal(salesRoom.exit.x, 930);
-    await checkCutawayArt('floor09-sales-interior.png', 2168);
-    assert.equal(await page.locator('#dynamic-scene .fixture.art-spot').count(), 5);
-    await inspect(121, 'E · 한반도 지도 조사', /한 점으로 모인다/);
-    await inspect(356, 'E · 고객사 현황판 조사', /12층 ARCHI팀.*새벽 시간대/);
-    await inspect(1874, 'E · 팩스 조사', /B2 내선/);
-    await inspect(1969, 'E · 라이선스 대장 조사', /자동 승인.*ARCHI \(자동 생성\).*사본 한 장을 챙겼다/);
-    assert(await page.evaluate(() => collectedItems.has('f9-approval-copy')));
-    await inspect(1969, 'E · 라이선스 대장 조사', /이미 챙겼다/);
-    await inspect(2072, 'E · 전화 교환기 조사', /17F 정수호/);
-    await page.screenshot({ path: '.local/floor-9-sales.png' });
-    await leaveRoom(salesRoom, corridorHeader);
-
-    // One record is not enough for the deck.
-    await enterRoom('프로젝트룸', '9F');
-    await inspect(1538, 'E · 발표용 노트북 조사', /내려받기 기록이 있어야/);
-    assert(!await page.evaluate(() => collectedItems.has('f9-report')));
-    await leaveRoom(projectRoom, corridorHeader);
-
-    await enterRoom('사업 업무 공간', '9F');
-    await inspect(172, 'E · 사업 관리 PC 조사', /같은 계정.*call_record/);
-    assert(await page.evaluate(() => collectedItems.has('f9-access-log')));
-    await inspect(172, 'E · 사업 관리 PC 조사', /이미 찍어 두었다/);
-    await page.screenshot({ path: '.local/floor-9-office.png' });
-    await leaveRoom(officeRoom, corridorHeader);
-
-    await enterRoom('프로젝트룸', '9F');
-    assert.deepEqual(await ready(), ['true'], 'Both records are in hand');
-    await inspect(1538, 'E · 발표용 노트북 조사', /ARCHI 자율 확장 계획.*9층 조사 완료/);
-    assert(await page.evaluate(() => collectedItems.has('f9-report')));
-    await inspect(1538, 'E · 발표용 노트북 조사', /찾을 것은 다 찾았다/);
-    await leaveRoom(projectRoom, corridorHeader);
-    assert(Math.max(...roomScales) / Math.min(...roomScales) < 1.02, `Room fronts scale with their interiors: ${roomScales}`);
-    await walkTo(startX);
-    await page.clock.runFor(100);
-  };
+  const checkFloor10 = () => checkExplorationFloor(10);
+  const checkFloor9 = () => checkExplorationFloor(9);
   // 14F, the second 연구본부 floor, lines all three rooms up in the left zone and gives the middle and right zones to an
   // exhibit and a rest area. Its mechanic: the windowless archive is dark, its notes cannot be read until the work lamp
   // is switched on, and the lamp stays on after leaving.
@@ -1126,8 +897,6 @@ try {
     assert.equal(await dark(), 'false');
     softCount(await page.locator('#dynamic-scene .floor-prop').count(), 5);
     await assertHumanScale();
-    await inspect(520, 'E · 관찰 콘솔 조사', /야간 무인 관찰/);
-    await inspect(1330, 'E · 실험 테이블 조사', /17층 정수호/);
     await page.screenshot({ path: '.local/floor-14-ux.png' });
     assert(Math.max(...roomScales) / Math.min(...roomScales) < 1.02, `Room fronts scale with their interiors: ${roomScales}`);
     await leaveRoom(ux, corridorHeader);
@@ -1352,250 +1121,26 @@ try {
     await walkTo(startX);
     await page.clock.runFor(100);
   };
-  // 4F ARCHI Data 연구본부 uses vertically fitted cutaway walls with separate ceiling/floor layers (floor line y=438 → 570): the
-  // R&D workspace and the developer area behind glass left of the elevators, the research meeting room right of the restroom.
-  // Its mechanic: the UPS distributor on the R&D wall feeds one output at a time (fixture cycle: cooling fan → meeting room lock →
-  // log reader). The meeting room's card-reader lock is fail-secure and opens only while the UPS feeds it, the original tape lies
-  // on its second table, and the tape reader beside the UPS needs the output back, so the tape is carried out between the two
-  // settings. Moving the output locks the meeting room again on the next corridor rebuild.
-  const checkFloor4 = async () => {
+  const checkFloor4 = () => checkExplorationFloor(4);
+  // 더미층의 배경·방·출구를 확인하되 삭제한 서브스토리 단서를 요구하지 않는다.
+  const checkExplorationFloor = async floor => {
     roomScales.length = 0;
-    const corridorHeader = '4F · ARCHI Data 연구본부';
-    const status = () => interactionMessage(page);
-    const upsState = () => page.locator('#dynamic-scene .fixture.f4-ups').getAttribute('data-state');
-    assert.equal(await header(), corridorHeader);
+    const corridorHeader = await header();
     await checkCore();
-    assert.equal(await page.locator('#dynamic-scene').getAttribute('data-theme'), 'rnd');
-    await checkWallsV3('floor04/walls.png', 760);
-    assert.deepEqual(await page.locator('#dynamic-scene .floor-room-sign').allTextContents(),
-      ['연구개발 업무 공간', '개발자 업무 구역', '연구 회의실', '화장실'], 'Rooms follow the asset areas');
-    await checkSpriteDoors(['door-lab.png', 'door-dev.png', 'door-meeting.png'], 1280);
-    const restroom = await page.locator('#dynamic-scene .floor-room.restroom .floor-room-sign').evaluate(el => {
-      const sign = el.getBoundingClientRect();
-      const door = document.querySelector('#dynamic-scene .room-door.metal').getBoundingClientRect();
-      return [sign.left + sign.width / 2 - door.left - door.width / 2, door.top - sign.bottom];
-    });
-    assert(Math.abs(restroom[0]) < 1 && restroom[1] > 0, '4F restroom sign sits above its door');
-    const lab = await roomFront(page, '연구개발 업무 공간');
-    const dev = await roomFront(page, '개발자 업무 구역');
-    const meeting = await roomFront(page, '연구 회의실');
-    assert(lab.room.x + lab.room.width < dev.room.x && dev.room.x + dev.room.width <= 1790 &&
-      dev.door.x + dev.door.width + 28 <= 1790 && lab.door.x + lab.door.width + 28 < dev.door.x - 28,
-      'The R&D workspace and the developer area sit apart in the left zone');
-    assert(meeting.room.x >= 4282 && meeting.room.x + meeting.room.width <= 4968 && meeting.door.x >= 4282 &&
-      meeting.door.x + meeting.door.width <= 4940, 'The meeting room sits in the right zone');
-    softCount(await page.locator('#dynamic-scene .floor-prop').count(), 0, 'Every object is painted');
-    assert.deepEqual(await page.locator('#dynamic-scene .fixture:not(.phone-charger)').evaluateAll(els => els.map(el => [el.className, el.getAttribute('aria-label')])),
-      [['fixture wall-notice', '정전 대비 UPS 안내']]);
-    await page.clock.runFor(100);
-    const startX = await playerX();
-    near(startX, 1858, 'Arrive at elevator 1');
-    await walkTo(1795);
-    assert.equal(await hint(), 'E · 탑승', 'The developer area door leaves elevator 1 its whole zone');
-    await walkTo(3084);
-    assert.equal(await hint(), 'E · 비상계단 (잠김)', 'The UPS notice leaves the stair door its whole zone');
-    await inspect(3258, 'E · 정전 대비 UPS 안내 조사', /출력 한 곳만/);
-    await visitRestroom('4F');
-    const meetingStaysLocked = async () => {
-      await walkTo(meeting.door.x + meeting.door.width / 2);
-      assert.equal(await hint(), 'E · 연구 회의실 (잠김)');
-      await page.keyboard.press('e');
-      await page.clock.runFor(800);
-      assert.equal(await header(), corridorHeader, 'The unpowered lock does not open');
-      assert.match(await status(), /fail-secure/);
-      assert.equal(await page.locator('#dynamic-scene .room-door.sprite-door').nth(2).getAttribute('data-unlocked'), 'false');
-    };
-    await meetingStaysLocked();
-    await page.screenshot({ path: '.local/floor-4.png' });
-
-    // UPS → meeting room lock: the meeting room opens from the corridor.
-    const labRoom = await enterThroughSpriteDoor('연구개발 업무 공간', '4F');
-    assert.equal(await worldWidth(page), 2998);
-    assert.equal(labRoom.exit.x, 126);
-    await checkCutawayArt('floor04-lab-interior.png', 2998);
-    const monitors = await page.locator('#dynamic-scene .fear-screen').evaluateAll(els => els.map(el =>
-      [parseFloat(el.style.left), parseFloat(el.style.top), parseFloat(el.style.width), parseFloat(el.style.height)]).sort((a, b) => a[0] - b[0]));
-    assert.equal(monitors.length, 20, 'All lab monitor overlays remain attached');
-    assert.deepEqual(monitors[0], [227, 418, 50, 41], 'Monitor overlays match the cropped and resized background');
-    assert.equal(await page.locator('#dynamic-scene .fixture.art-spot').count(), 5);
-    assert.equal(await upsState(), '0', 'The UPS starts on the cooling fan');
-    assert.deepEqual(await page.locator('#dynamic-scene .fixture.f4-ups').evaluate(el =>
-      [parseFloat(el.style.top), getComputedStyle(el, '::after').top, getComputedStyle(el, '::after').height]),
-    [293, '12px', '21px'], 'The UPS lights follow the resized distributor artwork');
-    await inspect(395, 'E · 시험 랙 조사', /냉각 팬 · UPS 첫째 출력/);
-    await inspect(2490, 'E · 테이프 카트 조사', /반출 B2 · 요청 ARCHI/);
-    await inspect(2677, 'E · 로그 판독기 조사', /투입구는 비어/);
-    await inspect(2864, 'E · 테이프 선반 조사', /원본은 회의실 검토 테이블에/);
-    await inspect(2562, 'E · UPS 분배기 조사');
-    assert.equal(await upsState(), '1');
-    await leaveRoom(labRoom, corridorHeader);
-    await walkTo(meeting.door.x + meeting.door.width / 2);
-    assert.equal(await hint(), 'E · 연구 회의실 들어가기', 'The powered lock opens');
-    assert.equal(await page.locator('#dynamic-scene .room-door.sprite-door').nth(2).getAttribute('data-unlocked'), 'true');
-
-    const meetingRoom = await enterThroughSpriteDoor('연구 회의실', '4F');
-    assert.equal(await worldWidth(page), 2162);
-    assert.equal(meetingRoom.exit.x, 1410);
-    await checkCutawayArt('floor04-meeting-interior.png', 2162);
-    assert.equal(await page.locator('#dynamic-scene .fixture.art-spot').count(), 5);
-    await inspect(166, 'E · 해시 사슬 보드 조사', /넷째 블록만 지워져.*03~04시/);
-    await inspect(351, 'E · 검토 출력물 조사', /설정자 SYSTEM/);
-    await inspect(500, 'E · 이동식 디스플레이 조사', /03:00~04:00 공백/);
-    await inspect(845, 'E · 둘째 회의 테이블 조사', /원본 테이프를 챙겼다/);
-    await inspect(2088, 'E · 플립차트 조사', /UPS 셋째 출력/);
-    await page.screenshot({ path: '.local/floor-4-meeting.png' });
-    await leaveRoom(meetingRoom, corridorHeader);
-
-    // UPS → reader: the tape is read, and the meeting room locks again.
-    await enterThroughSpriteDoor('연구개발 업무 공간', '4F');
-    assert.equal(await upsState(), '1', 'The UPS keeps its output');
-    await inspect(2677, 'E · 로그 판독기 조사', /테이프와 UPS 전원이 둘 다/);
-    await inspect(2562, 'E · UPS 분배기 조사');
-    assert.equal(await upsState(), '2');
-    await inspect(2677, 'E · 로그 판독기 조사', /archi_svc · 외부 주소로 전송 시험 · 1\.2TB · 성공/);
-    await page.screenshot({ path: '.local/floor-4-lab.png' });
-    await leaveRoom(labRoom, corridorHeader);
-    await meetingStaysLocked();
-
-    const devRoom = await enterThroughSpriteDoor('개발자 업무 구역', '4F');
-    assert.equal(await worldWidth(page), 2168);
-    assert.equal(devRoom.exit.x, 126);
-    await checkCutawayArt('floor04-dev-interior.png', 2168);
-    assert.equal(await page.locator('#dynamic-scene .fixture.art-spot').count(), 5);
-    await inspect(1561, 'E · 재킷 걸친 의자 조사', /퇴근하지 않았다/);
-    await inspect(1394, 'E · 넘어진 의자 조사', /급히 일어난/);
-    await inspect(742, 'E · 선임 자리 조사', /03:00~04:00.*UPS 출력부터/);
-    await inspect(402, 'E · 과제 요청 보드 조사', /예외 계정 모드.*반려.*배포 승인 SYSTEM/);
-    await inspect(2048, 'E · 마른 화분 조사', /몇 주째/);
-    await page.screenshot({ path: '.local/floor-4-dev.png' });
-    assert(Math.max(...roomScales) / Math.min(...roomScales) < 1.02, `Room fronts scale with their interiors: ${roomScales}`);
-    await leaveRoom(devRoom, corridorHeader);
+    const names = await page.evaluate(floor => FLOOR_LAYOUTS[floor].rooms.map(room => room.name), floor);
+    for (const name of names) {
+      const entered = await enterRoom(name, `${floor}F`);
+      const art = await page.evaluate(() => {
+        const config = floorById.get(dynamicFloorId);
+        return [config.backgroundImage.at(-1).src.split('/').pop(), config.width];
+      });
+      await checkCutawayArt(...art);
+      assert(await page.evaluate(() => !activeCall && currentDoors.every(door => !door.gives && !door.ring)));
+      await leaveRoom(entered, corridorHeader);
+    }
     await walkTo(startX);
-    await page.clock.runFor(100);
   };
-  // 3F follows the lobby directory (Fitness Club / 고객만족센터 / Studio; ㈜하누리서비스 works out of the call center) and uses the
-  // user's cutaway asset with separate ceiling/floor layers and vertically fitted walls (floor line y=438 → 570). The corridor shows the
-  // gym and the call center behind glass left of the elevators and the studio right of the restroom. Its mechanic: inside the gym
-  // the painted glass auto door splits the weights/locker side from the cardio/GX side and is held shut since the blackout. The
-  // painted green battery button on the trainer counter opens it for 5 s from ~1290px away, so walking arrives too late and only
-  // sprinting (Shift) gets through; a copy of the button by the GX mirror lets the player back out. The treadmill console log behind
-  // the door (f03-chase-log) explains the speed chart on the counter (fixture requires).
-  const checkFloor3 = async () => {
-    roomScales.length = 0;
-    const corridorHeader = '3F · Fitness Club · 고객만족센터';
-    const status = () => interactionMessage(page);
-    const autoDoor = page.locator('#dynamic-scene .barrier.f3-auto-door');
-    assert.equal(await header(), corridorHeader);
-    await checkCore();
-    assert.equal(await page.locator('#dynamic-scene').getAttribute('data-theme'), 'gym');
-    await checkWallsV3('floor03/walls.png', 760);
-    assert.deepEqual(await page.locator('#dynamic-scene .floor-room-sign').allTextContents(),
-      ['Fitness Club', '고객만족센터', 'Studio', '화장실'], 'Rooms follow the lobby directory');
-    await checkSpriteDoors(['door-fitness.png', 'door-cs.png', 'door-studio.png'], 1280);
-    const restroom = await page.locator('#dynamic-scene .floor-room.restroom .floor-room-sign').evaluate(el => {
-      const sign = el.getBoundingClientRect();
-      const door = document.querySelector('#dynamic-scene .room-door.metal').getBoundingClientRect();
-      return [sign.left + sign.width / 2 - door.left - door.width / 2, door.top - sign.bottom];
-    });
-    assert(Math.abs(restroom[0]) < 1 && restroom[1] > 0, '3F restroom sign sits above its door');
-    const gym = await roomFront(page, 'Fitness Club');
-    const cs = await roomFront(page, '고객만족센터');
-    const studio = await roomFront(page, 'Studio');
-    assert(gym.room.x + gym.room.width < cs.room.x && cs.room.x + cs.room.width <= 1790 &&
-      cs.door.x + cs.door.width + 28 <= 1790 && gym.door.x + gym.door.width + 28 < cs.door.x - 28,
-      'Gym and call center sit apart in the left zone');
-    assert(studio.room.x >= 4282 && studio.room.x + studio.room.width <= 4968 && studio.door.x >= 4282 &&
-      studio.door.x + studio.door.width <= 4940, 'The studio sits in the right zone');
-    softCount(await page.locator('#dynamic-scene .floor-prop').count(), 1, 'A cleaning cart in the middle zone');
-    assert.deepEqual(await page.locator('#dynamic-scene .fixture:not(.phone-charger)').evaluateAll(els => els.map(el => [el.className, el.getAttribute('aria-label')])),
-      [['fixture wall-notice', '3층 입주사 안내']]);
-    await page.locator('#dynamic-scene .floor-prop img').evaluateAll(images => Promise.all(images.map(img => img.decode())));
-    await assertHumanScale();
-    await page.clock.runFor(100);
-    const startX = await playerX();
-    near(startX, 1858, 'Arrive at elevator 1');
-    await walkTo(1795);
-    assert.equal(await hint(), 'E · 탑승', 'The call center door leaves elevator 1 its whole zone');
-    await inspect(3245, 'E · 3층 입주사 안내 조사', /㈜하누리서비스\(경비·미화\)/);
-    await inspect(3460, 'E · 청소 카트 조사', /대신 로봇 순찰/);
-    await walkTo(3084);
-    assert.equal(await hint(), 'E · 비상계단 (잠김)', 'The tenant board leaves the stair door its whole zone');
-    await page.keyboard.press('e');
-    await page.clock.runFor(800);
-    assert.match(await status(), /비상계단 문이 잠겨/);
-    await visitRestroom('3F');
-    await page.screenshot({ path: '.local/floor-3.png' });
-
-    const gymRoom = await enterThroughSpriteDoor('Fitness Club', '3F');
-    assert.equal(await worldWidth(page), 3108);
-    assert.equal(gymRoom.exit.x, 2742);
-    await checkCutawayArt('floor03-gym-interior.png', 3108);
-    assert.equal(await page.locator('#dynamic-scene .fixture.art-spot').count(), 6, 'Four clues and two buttons');
-    assert.equal(await autoDoor.count(), 1);
-    assert.equal(await autoDoor.getAttribute('data-open'), 'false');
-    assert.equal(await autoDoor.evaluate(el => parseFloat(el.style.top)),
-      await page.evaluate(() => floor3Y(168)), 'The timed door follows the stretched sensor artwork');
-    await inspect(2570, 'E · 속도 차트 조사', /붉은 막대 셋에는 이름이 없다/);
-    await inspect(1858, 'E · 사물함 조사', /5초만 열립니다/);
-    await walkTo(1400);
-    await hold('a', 600);
-    assert((await playerX()) > 1346, 'The members-only door blocks the way');
-    assert.equal(await hint(), 'E · 회원 전용 자동문 조사');
-    await page.keyboard.press('e');
-    assert.match(await status(), /닫힘 고정/);
-    // Walking from the counter button arrives after the door has closed again.
-    await inspect(2620, 'E · 비상 개방 버튼 조사');
-    assert.equal(await autoDoor.getAttribute('data-open'), 'true');
-    await hold('a', 7000);
-    assert.equal(await autoDoor.getAttribute('data-open'), 'false', 'The door closes after 5 s');
-    assert((await playerX()) > 1346, 'Walking arrives too late');
-    // Sprinting gets through, and the door shuts behind the player.
-    await inspect(2620, 'E · 비상 개방 버튼 조사');
-    assert.equal(await autoDoor.getAttribute('data-open'), 'true');
-    await page.keyboard.down('ShiftLeft');
-    await hold('a', 4300);
-    await page.keyboard.up('ShiftLeft');
-    assert((await playerX()) < 1300, `Sprinting clears the door in time: ${await playerX()}`);
-    await page.clock.runFor(1200);
-    assert.equal(await autoDoor.getAttribute('data-open'), 'false', 'It shuts behind the player');
-    await inspect(1068, 'E · 러닝머신 콘솔 조사', /R-02 · R-05 · R-07.*시속 21km/);
-    await inspect(370, 'E · 러닝머신 벨트 조사', /바퀴 자국/);
-    await page.screenshot({ path: '.local/floor-3-gym.png' });
-    await inspect(1194, 'E · 퇴실 버튼 조사');
-    assert.equal(await autoDoor.getAttribute('data-open'), 'true');
-    await walkTo(1500);
-    assert((await playerX()) > 1400, 'The inside button opens the way back');
-    await inspect(2570, 'E · 속도 차트 조사', /러닝머신의 R-02 · R-05 · R-07.*수호보다 빠르다/);
-    await leaveRoom(gymRoom, corridorHeader);
-
-    const csRoom = await enterThroughSpriteDoor('고객만족센터', '3F');
-    assert.equal(await worldWidth(page), 2168);
-    assert.equal(csRoom.exit.x, 954);
-    await checkCutawayArt('floor03-cs-interior.png', 2168);
-    assert.equal(await page.locator('#dynamic-scene .fixture.art-spot').count(), 5);
-    await inspect(100, 'E · 스크립트 보드 조사', /몇 분 남아 계세요.*ARCHI/);
-    await inspect(228, 'E · 빈 상담석 노트북 조사', /guest-auto/);
-    await inspect(549, 'E · 메시지 전화기 조사', /17F 정수호 내선/);
-    await inspect(1932, 'E · 경비 일지 조사', /R-05가 계단 앞을 막고/);
-    await inspect(2059, 'E · 열쇠함 조사', /B1 시설관리실/);
-    await page.screenshot({ path: '.local/floor-3-cs.png' });
-    await leaveRoom(csRoom, corridorHeader);
-
-    const studioRoom = await enterThroughSpriteDoor('Studio', '3F');
-    assert.equal(await worldWidth(page), 1840);
-    assert.equal(studioRoom.exit.x, 149);
-    await checkCutawayArt('floor03-studio-interior.png', 1840);
-    assert.equal(await page.locator('#dynamic-scene .fixture.art-spot').count(), 4);
-    await inspect(1071, 'E · 제작 데스크 조사', /17F 정수호 · 예정/);
-    await inspect(1227, 'E · 녹화 중인 카메라 조사', /빈 스툴/);
-    await inspect(1466, 'E · 배경지 위 스툴 조사', /175cm/);
-    await inspect(1756, 'E · 하드 케이스 조사', /B2 ARCHI-MAIN/);
-    await page.screenshot({ path: '.local/floor-3-studio.png' });
-    assert(Math.max(...roomScales) / Math.min(...roomScales) < 1.02, `Room fronts scale with their interiors: ${roomScales}`);
-    await leaveRoom(studioRoom, corridorHeader);
-    await walkTo(startX);
-    await page.clock.runFor(100);
-  };
+  const checkFloor3 = () => checkExplorationFloor(3);
   // 2F follows the lobby directory (Harmony Hall / 서버실) and uses the user's cutaway asset of the hall, server room and staff
   // lounge at 1:1 (floor line y=438 → 570). The corridor shows each room behind glass: Harmony Hall and 직원 휴게실 left of the
   // elevators, 서버실 right of the restroom. Each room is its own scene, the full painted room widened with repeated bays.
@@ -1975,134 +1520,7 @@ try {
     await walkTo(startX);
     await page.clock.runFor(100);
   };
-  // 6F is ARCHI Data 기술본부 (DB 기술지원) and uses the user's cutaway asset of the development workspace, the shared engineering
-  // area and the technical meeting room at 1:1 (floor line y=438 → 570). The workspace and the engineering area sit left of the
-  // elevators, the meeting room right of the restroom; each is its own scene, the full painted room widened with repeated bays.
-  // Its mechanic: the on-call phone painted on the engineering bench (fixture ring) rings a moment after the player comes in.
-  // Answering it while it rings approves "the on-call engineer" and opens the locked meeting room; a missed call only rings
-  // again after leaving and coming back.
-  const checkFloor6 = async () => {
-    roomScales.length = 0;
-    const corridorHeader = '6F · ARCHI Data 기술본부';
-    const status = () => interactionMessage(page);
-    const phone = page.locator('#dynamic-scene .fixture.duty-phone');
-    const spots = () => page.locator('#dynamic-scene .fixture.art-spot').count();
-    assert.equal(await header(), corridorHeader);
-    await checkCore();
-    assert.equal(await page.locator('#dynamic-scene').getAttribute('data-theme'), 'oncall');
-    await checkWallsV3('floor06/walls.png', 760);
-    assert.deepEqual(await page.locator('#dynamic-scene .floor-room-sign').allTextContents(),
-      ['기술 개발 업무 공간', '공용 엔지니어링 구역', '기술 회의실', '화장실'], 'Rooms follow the painted areas');
-    assert.deepEqual(await page.locator('#dynamic-scene .room-door').evaluateAll(els => els.map(el => el.className)),
-      ['room-door sprite-door', 'room-door sprite-door', 'room-door sprite-door', 'room-door metal']);
-    await checkSpriteDoors(['door-work.png', 'door-engineering.png', 'door-meeting.png'], 1280);
-    const restroom = await page.locator('#dynamic-scene .floor-room.restroom .floor-room-sign').evaluate(el => {
-      const sign = el.getBoundingClientRect();
-      const door = document.querySelector('#dynamic-scene .room-door.metal').getBoundingClientRect();
-      return [sign.left + sign.width / 2 - door.left - door.width / 2, door.top - sign.bottom];
-    });
-    assert(Math.abs(restroom[0]) < 1 && restroom[1] > 0, '6F restroom sign sits above its door');
-    const work = await roomFront(page, '기술 개발 업무 공간');
-    const engineering = await roomFront(page, '공용 엔지니어링 구역');
-    const meeting = await roomFront(page, '기술 회의실');
-    assert(work.room.x + work.room.width < engineering.room.x && engineering.room.x + engineering.room.width <= 1790 &&
-      engineering.door.x + engineering.door.width + 28 <= 1790, 'Workspace and engineering area sit apart in the left zone');
-    assert(work.door.x + work.door.width + 28 < engineering.door.x - 28, 'Their door hint zones do not overlap');
-    assert(meeting.room.x >= 4282 && meeting.room.x + meeting.room.width <= 4968 && meeting.door.x >= 4282 &&
-      meeting.door.x + meeting.door.width <= 4940, 'The meeting room sits in the right zone');
-    assert.equal(await page.locator('#dynamic-scene .room-door.sprite-door').nth(2).getAttribute('aria-label'), '기술 회의실 출입문 · 잠김');
-    assert.equal(await spots(), 0, 'The on-call notice is a wall-notice panel on the white wall');
-    assert.equal(await page.locator('#dynamic-scene .fixture.wall-notice').count(), 1);
-    softCount(await page.locator('#dynamic-scene .floor-prop').count(), 1, 'A water cooler in the middle zone');
-    await page.locator('#dynamic-scene .floor-prop img').evaluateAll(images => Promise.all(images.map(img => img.decode())));
-    await assertHumanScale();
-    await page.clock.runFor(100);
-    const startX = await playerX();
-    near(startX, 1858, 'Arrive at elevator 1');
-    await walkTo(1795);
-    assert.equal(await hint(), 'E · 탑승', 'The engineering door leaves elevator 1 its whole zone');
-    await inspect(3237, 'E · 야간 당직 안내문 조사', /벨이 끊기기 전에 받을 것.*사람 당직 폐지/);
-    await walkTo(3084);
-    assert.equal(await hint(), 'E · 비상계단 (잠김)', 'The notice leaves the stair door its whole zone');
-    await page.keyboard.press('e');
-    await page.clock.runFor(800);
-    assert.match(await status(), /비상계단 문이 잠겨/);
-    await visitRestroom('6F');
-    await walkTo(meeting.door.x + meeting.door.width / 2);
-    assert.equal(await hint(), 'E · 기술 회의실 (잠김)');
-    await page.keyboard.press('e');
-    await page.clock.runFor(800);
-    assert.equal(await header(), corridorHeader);
-    assert.match(await status(), /당직 전화에 응답하면 자동으로 열립니다/);
-    await page.screenshot({ path: '.local/floor-6.png' });
-
-    // First visit to the engineering area: let the phone ring out, then read the bench and the line equipment.
-    const engineeringRoom = await enterThroughSpriteDoor('공용 엔지니어링 구역', '6F');
-    assert.equal(await worldWidth(page), 2168);
-    assert.equal(engineeringRoom.exit.x, 749);
-    await checkCutawayArt('floor06-engineering-interior.png', 2168);
-    assert.equal(await spots(), 5);
-    assert.equal(await phone.getAttribute('data-ringing'), null, 'The phone is silent as the player comes in');
-    await page.clock.runFor(2600);
-    assert.equal(await phone.getAttribute('data-ringing'), 'true', 'It starts ringing a moment later');
-    assert.deepEqual(await phone.evaluate(el => [parseFloat(el.style.top), parseFloat(el.style.height), getComputedStyle(el).animationName]),
-      [441, 39, 'f6-phone-ring'], 'The ringing overlay follows the resized phone artwork');
-    await page.clock.runFor(7600);
-    assert.equal(await phone.getAttribute('data-ringing'), 'false', 'Unanswered, the call drops');
-    await inspect(1606, 'E · 회선 신청서 묶음 조사', /전부 SYSTEM.*당직 ARS 무응답 자동 승인/);
-    await inspect(1762, 'E · 야간 승인 규칙판 조사', /응답 없으면 자동 승인.*archi_svc/);
-    await inspect(1878, 'E · 당직 전화 조사');
-    assert(await page.evaluate(() => !collectedItems.has('f6-oncall')), 'The silent phone cannot be answered');
-    await inspect(2034, 'E · 전용선 단말함 조사', /B2 ARCHI-MAIN → DR-EXT.*B2까지/);
-    await inspect(2110, 'E · 회선 사용 기록지 조사', /03:05~03:40.*등록되지 않은 주소 · 해외/);
-    await leaveRoom(engineeringRoom, corridorHeader);
-    await walkTo(meeting.door.x + meeting.door.width / 2);
-    assert.equal(await hint(), 'E · 기술 회의실 (잠김)', 'A missed call leaves the meeting room locked');
-
-    // Second visit: walk straight to the bench while it rings and pick up.
-    const answered = await enterThroughSpriteDoor('공용 엔지니어링 구역', '6F');
-    await walkTo(1878);
-    assert.equal(await phone.getAttribute('data-ringing'), 'true', 'The phone rings again on the next visit');
-    assert.equal(await hint(), 'E · 당직 전화 조사');
-    await page.keyboard.press('e');
-    assert.match(await status(), /정수호 님.*기술 회의실 출입을 승인합니다/);
-    assert.equal(await phone.getAttribute('data-ringing'), 'false');
-    await page.clock.runFor(8000);
-    await page.keyboard.press('e');
-    assert.match(await status(), /이미 승인됐다/, 'An answered call neither rings nor times out again');
-    await page.screenshot({ path: '.local/floor-6-engineering.png' });
-    await leaveRoom(answered, corridorHeader);
-
-    await walkTo(meeting.door.x + meeting.door.width / 2);
-    assert.equal(await hint(), 'E · 기술 회의실 들어가기', 'Answering the on-call phone opens the meeting room');
-    const meetingRoom = await enterThroughSpriteDoor('기술 회의실', '6F');
-    assert.equal(await worldWidth(page), 2162);
-    assert.equal(meetingRoom.exit.x, 1906);
-    await checkCutawayArt('floor06-meeting-interior.png', 2162);
-    assert.equal(await spots(), 4);
-    await inspect(1764, 'E · 캐비닛 바인더 조사', /DR-EXT 경로 추가.*당직 ARS 무응답 자동 승인/);
-    await inspect(614, 'E · 꺼진 디스플레이 조사', /매일 03:00.*주최 archi_svc/);
-    await inspect(384, 'E · 스피커폰 조사', /내선 2000\(B2 서버실\).*참석자 0명/);
-    await inspect(182, 'E · 화이트보드 조사', /B2 ARCHI-MAIN.*고객사 DR 센터.*DR-EXT · 등록되지 않은 주소 · 해외.*03:05~03:40/);
-    await page.screenshot({ path: '.local/floor-6-meeting.png' });
-    await leaveRoom(meetingRoom, corridorHeader);
-
-    const workRoom = await enterThroughSpriteDoor('기술 개발 업무 공간', '6F');
-    assert.equal(await worldWidth(page), 3108);
-    assert.equal(workRoom.exit.x, 126);
-    await checkCutawayArt('floor06-work-interior.png', 3108);
-    assert.equal(await spots(), 5);
-    await inspect(997, 'E · 포스트잇 모니터 조사', /내선 2000 = B2 서버실/);
-    await inspect(772, 'E · 의자에 걸친 재킷 조사', /사람 당직 폐지.*자동 승인/);
-    await inspect(636, 'E · 서류장 바인더 조사', /9월 1일 이후 칸이 비어/);
-    await inspect(2730, 'E · 책상 아래 매트 조사', /받으면 네가 당직자가 된다/);
-    await inspect(2938, 'E · 배터리 노트북 조사', /03:00.*archi_svc.*고객사 DR 센터/);
-    await page.screenshot({ path: '.local/floor-6-work.png' });
-    assert(Math.max(...roomScales) / Math.min(...roomScales) < 1.02, `Room fronts scale with their interiors: ${roomScales}`);
-    await leaveRoom(workRoom, corridorHeader);
-    await walkTo(startX);
-    await page.clock.runFor(100);
-  };
+  const checkFloor6 = () => checkExplorationFloor(6);
   // 5F is the second ARCHI Data 연구본부 floor (DB 보안 연구) and uses the user's cutaway asset of the R&D room, the security
   // research lab and the meeting room at 1:1 (floor line y=438 → 570). The corridor shows each room behind glass: 연구개발실 and
   // 기술연구실 left of the elevators, 회의실 right of the restroom. Each room is its own scene, the full painted room widened with

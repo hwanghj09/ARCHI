@@ -1,9 +1,8 @@
 // 15층: FLOOR15_LAYOUT(복도)과 FLOOR15_ROOMS(방 내부). 등록은 registry.js에서 한다.
 // 15층 연구본부(층별 안내: TmaxSoft 연구본부): 청록 마감(research 테마). 코어 왼쪽에 연구실·세미나실, 비상계단과 화장실
 // 사이 가운데 구역에 연구본부장실을 둔다. 방 안 폭은 복도 전면 폭의 4배(860/620/456 → 3440/2480/1824).
-// 세미나실은 B2로 옮길 GPU 서버 포장 상자가 바닥을 막고 있어(solids) 점프로 넘어가야 안쪽 작업 지시서에 닿는다.
-// 단서는 예약자 없는 새벽 연구 클러스터 100% 사용, 능력 은닉을 다룬 세미나 주제, 연구 GPU를 B2로 옮기는 자동 생성
-// 요청과 야간 배치의 자동 승인. 정전 상태(PC 꺼짐)를 기준으로 썼다.
+// 세미나실의 장비 상자(solids)는 점프로 넘을 수 있다. 예약자 없는 새벽 클러스터 사용과 능력 은닉 관련 환경 자료만 남긴다.
+// 이관·자동 결재 서브스토리는 제거하고 장비와 이동 장애물만 남긴다. 정전 상태(PC 꺼짐)를 기준으로 썼다.
 // build.py가 공용 벽 모듈의 복도와 별도 천장·바닥·벽을 만든다. 문·소품과 GPU 상자의 충돌 크기·높이는 유지한다.
 const floor15Scene = (name, width) => [
   { src: `assets/background/floor15/floor15-ceiling-${name}.png`, width, height: 100, top: 0 },
@@ -26,13 +25,7 @@ const FLOOR15_LAYOUT = {
     { file: 'water-cooler', size: [256, 512], worldWidth: 62, x: 1640 },
     { file: 'large-planter', size: [256, 512], worldWidth: 78, x: 1740 },
     { file: 'waiting-sofa', size: [512, 256], worldWidth: 250, x: 4420 },
-    { file: 'research-news-board', size: [512, 256], worldWidth: 362, x: 4730, name: '연구본부 소식지',
-      message: '월간 연구본부 소식: "12층 ARCHI 개발팀에 연구 클러스터 야간 사용 권한 부여 (시범)." 그 밑에 손글씨: "시범이 석 달째." 주위에 사진 한 장과 포스트잇 두 장이 더 붙어 있다.',
-      writing: [{ as: 'paper', title: '사진', text: '(밤의 연구실.\n빈 책상들이 줄지어 있다.)' },
-        { as: 'note', color: 'blue', text: '이번 주 세미나 주제는\n연구실 화이트보드 참고' },
-        { as: 'note', color: 'yellow', text: '휴게 공간 소파는\n낮잠용이 아닙니다.' },
-        { as: 'paper', title: '월간 연구본부 소식', text: '12층 ARCHI 개발팀에\n연구 클러스터 야간 사용 권한 부여\n(시범).' },
-        { as: 'paper', hand: '시범이 석 달째.', ink: 'blue' }] },
+    { file: 'research-news-board', size: [512, 256], worldWidth: 362, x: 4730, name: '연구본부 소식지' },
   ],
 };
 const FLOOR15_ROOMS = interiorRooms(15, [
@@ -69,17 +62,9 @@ const FLOOR15_ROOMS = interiorRooms(15, [
     solids: [{ x: 760, width: 110, height: 50 }, { x: 1360, width: 90, height: 60 }], props: [
     { file: 'maintenance-tool-cabinet', size: [512, 256], worldWidth: 198, x: 590 },
     { file: 'instrument-cart', size: [256, 256], worldWidth: 113, x: 1520 },
-    { file: 'gpu-transfer-cart', size: [256, 256], worldWidth: 100, x: 420, name: '이관 카트',
-      message: '카트 위 체크리스트: "GPU 서버 16대 포장 완료 · B2 서버실 이관 2차분". 포장 상자가 바닥을 막고 있다.',
-      surface: 'document', writing: [{ as: 'title', text: '체크리스트' }, '☑ GPU 서버 16대 포장 완료', '    B2 서버실 이관 2차분'],
-      caption: '포장 상자가 바닥을 막고 있다.' },
+    { file: 'gpu-transfer-cart', size: [256, 256], worldWidth: 100, x: 420, name: '이관 카트' },
     { file: 'meeting-table', size: [512, 256], worldWidth: 420, x: 1115 },
-    { file: 'research-board', size: [512, 256], worldWidth: 362, x: 1800, name: '작업 지시서',
-      message: '화이트보드에 붙은 작업 지시서: "연구용 GPU 서버 2차분 → B2 서버실. 요청: ARCHI 학습 파이프라인(자동 생성). 승인: 대기." 1차분 24대는 이미 옮겨졌다.',
-      writing: [{ as: 'paper', title: '작업 지시서',
-        text: '품목: 연구용 GPU 서버 2차분\n이관: → B2 서버실\n요청: ARCHI 학습 파이프라인\n(자동 생성)\n승인: 대기' },
-        { as: 'paper', title: '작업 지시서', text: '품목: 연구용 GPU 서버 1차분\n수량: 24대\n이관: → B2 서버실', hand: '이관 완료' }],
-      caption: '화이트보드에 붙은 작업 지시서 두 장. 1차분 24대는 이미 옮겨졌다.' },
+    { file: 'research-board', size: [512, 256], worldWidth: 362, x: 1800, name: '작업 지시서' },
     { file: 'server-rack', size: [256, 512], worldWidth: 96, x: 2200 },
     { file: 'server-rack', size: [256, 512], worldWidth: 96, x: 2320 },
   ] },
@@ -89,11 +74,7 @@ const FLOOR15_ROOMS = interiorRooms(15, [
     { file: 'coat-rack', size: [256, 512], worldWidth: 80, x: 620 },
     { file: 'glass-display-cabinet', size: [256, 512], worldWidth: 111, x: 120 },
     { file: 'filing-cabinet', size: [256, 512], worldWidth: 72, x: 240 },
-    { file: 'research-director-desk', size: [512, 256], worldWidth: 298, x: 900, name: '본부장 책상',
-      message: '결재 서류: "연구용 GPU 서버 B2 이관 1차분". 본부장 서명란에 서명 대신 "자동 승인 · 야간 배치 02:14" 도장이 찍혀 있다. 포스트잇: "누가 승인했는지 확인할 것. 2차분은 보류."',
-      surface: 'document',
-      writing: [{ as: 'title', text: '결재 서류' }, '연구용 GPU 서버 B2 이관 1차분', { as: 'rule' }, { as: 'field', label: '본부장 서명', text: '' },
-        { as: 'stamp', text: '자동 승인\n야간 배치 02:14' }, { as: 'note', text: '누가 승인했는지\n확인할 것.\n2차분은 보류.' }] },
+    { file: 'research-director-desk', size: [512, 256], worldWidth: 298, x: 900, name: '본부장 책상' },
     { file: 'waiting-sofa', size: [512, 256], worldWidth: 250, x: 1300 },
     { file: 'large-planter', size: [256, 512], worldWidth: 78, x: 1560 },
     { file: 'water-cooler', size: [256, 512], worldWidth: 62, x: 1740 },

@@ -1,28 +1,16 @@
-// 지도 창: 지도 버튼(#map-button)을 누르면 화면 가운데에 지금 장면을 축소한 지도가 뜬다. 배경은 장면 DOM(그림·소품·문)을 복제해
-// 줄인 것이고, 그 위에 수호의 얼굴(원형 아이콘)과 상호작용할 수 있는 물체(청록색 점)를 같은 비율로 찍는다.
-// 조사창과 달리 게임을 멈추지 않는다: 열린 채로 이동하면 수호 표시가 따라 움직이고, 층·방이 바뀌면 지도도 새로 그린다.
+// 지도는 출입구와 위치만 표시하는 약도다. 장면 그림·소품·조명은 복제하지 않는다.
 const mapWindow = document.getElementById('map-window');
 const mapView = document.getElementById('map-view');
 const mapTitle = document.getElementById('map-title');
 const mapButton = document.getElementById('map-button');
 
-// 복제본은 shadow DOM 안에 둔다: id가 겹쳐도 게임 코드의 getElementById·querySelector가 헷갈리지 않고,
-// 같은 스타일시트를 넣어 두면 #world·#stage 기준 CSS가 복제본에도 그대로 적용된다. closed로 둬서 테스트 도구(Playwright)의 #stage·#world
-// 같은 찾기에도 복제본이 함께 잡히지 않는다(코드는 mapShadow로 직접 쓴다).
-const mapShadow = mapView.attachShadow({ mode: 'closed' });
-for (const link of document.querySelectorAll('link[rel="stylesheet"]')) mapShadow.append(link.cloneNode());
-const mapStage = document.createElement('main');
-mapStage.id = 'stage';
-mapShadow.append(mapStage, document.createElement('slot')); // 슬롯으로 점·얼굴 표시(light DOM 자식)를 복제본 위에 보여 준다
-// 지도 그림에서 빼는 것: 어둠·조명·환각·힌트처럼 매 프레임 바뀌거나 지도에 필요 없는 막, 그리고 수호(얼굴 아이콘으로 따로 그린다).
-const MAP_SKIP = ['darkness', 'room-alarm', 'flashlight-beam', 'flashlight-glow', 'red-eyes', 'red-eye-shards', 'interaction-outline', 'interaction-hint', 'player', 'opening-chair-front'];
-
-// updateInteraction()이 조사 대상으로 삼는 물체와 같은 목록.
+// 약도에는 출입구·컴퓨터·충전 위치만 남긴다. 조사 소품의 위치는 노출하지 않는다.
 function mapInteractables() {
   const list = room === 'dynamic' ? currentDoors.filter(door => !(door.hideWhenTaken && collectedItems.has(door.gives))) :
     room === 'corridor' ? [...doors, ...officeDoors.filter(door => door.room === room)] :
       [...officeDoors.filter(door => door.room === room), officeComputer, ...(officePostit.element.hidden ? [] : [officePostit])];
-  return list.filter(door => Number.isFinite(door.x) && Number.isFinite(door.width));
+  return list.filter(door => Number.isFinite(door.x) && Number.isFinite(door.width) &&
+    (['elevator', 'room', 'office', 'stairs', 'computer'].includes(door.type) || door.phoneCharger));
 }
 
 function mapDot(className, x, y, label) {
@@ -44,20 +32,18 @@ function mapSceneSignature() {
 function renderMap() {
   mapSignature = mapSceneSignature();
   mapTitle.textContent = `지도 · ${document.querySelector('header span').textContent}`;
-  const width = mapView.clientWidth;
-  const k = width / worldWidth;
-  mapView.style.height = `${worldHeight * k}px`;
-  Object.assign(mapStage.style, { width: `${width}px`, height: `${worldHeight * k}px`, position: 'relative', overflow: 'hidden' });
-  const copy = world.cloneNode(true);
-  for (const id of MAP_SKIP) copy.querySelector(`#${id}`)?.remove();
-  Object.assign(copy.style, { transform: `scale(${k})`, filter: 'none', width: `${worldWidth}px`, height: `${worldHeight}px`, left: '0px', top: '0px' });
-  copy.removeAttribute('data-opening');
-  mapStage.replaceChildren(copy);
-  for (const old of mapView.querySelectorAll('i')) old.remove();
-  for (const door of mapInteractables()) {
-    const y = Number.isFinite(door.y) ? door.y + (door.height ?? floorY - door.y) / 2 : floorY - 60;
-    mapView.append(mapDot('map-dot', door.x + door.width / 2, y, door.name));
-  }
+  mapView.style.height = '190px';
+  mapView.replaceChildren();
+  const entries = mapInteractables();
+  entries.forEach((door, index) => {
+    const dot = mapDot('map-dot', door.x + door.width / 2, floorY, door.name);
+    const label = document.createElement('span');
+    label.className = 'map-label';
+    label.textContent = door.name;
+    label.style.left = `clamp(52px, ${dot.style.left}, calc(100% - 52px))`;
+    label.style.top = `${8 + index % 3 * 16}%`;
+    mapView.append(dot, label);
+  });
   mapPlayer = mapDot('map-player', body.position.x, body.position.y, '수호');
   mapView.append(mapPlayer);
 }

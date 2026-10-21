@@ -23,7 +23,7 @@ try {
   assert.equal(await badge.textContent(), '플래시 꺼짐');
 
   await page.keyboard.press('f');
-  await page.clock.runFor(34);
+  await page.clock.runFor(await page.evaluate(() => phoneLightDelayMs + 34));
   assert(await glow.isVisible(), 'The source remains visible in a lit room');
   assert(await page.locator('#flashlight-beam').isHidden(), 'Keep the large beam limited to darkness');
   assert.equal(await badge.textContent(), '플래시 켜짐');
@@ -47,11 +47,13 @@ try {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.locator('#phone-button').tap();
   await page.locator('#phone-light').tap();
+  await page.clock.runFor(await page.evaluate(() => phoneLightDelay ? phoneLightDelayMs : 0));
   await page.locator('#phone-close').tap();
   assert(await glow.isHidden());
   assert.equal(await badge.textContent(), '플래시 꺼짐');
   await page.locator('#phone-button').tap();
   await page.locator('#phone-light').tap();
+  await page.clock.runFor(await page.evaluate(() => phoneLightDelay ? phoneLightDelayMs : 0));
   await page.locator('#phone-close').tap();
   assert(await glow.isVisible());
   assert.equal(await badge.textContent(), '플래시 켜짐');

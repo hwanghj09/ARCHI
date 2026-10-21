@@ -156,7 +156,7 @@ for (const variant of ['', '-off', '-on']) {
   console.log(`${name}: eight consistent walking phases.`);
 }
 
-// Flashlight ON has no running cycle; retain only its original jump/fall artwork.
+// The legacy eight-frame lit source supplies jump/fall only. Rebuild the new lit run with prepare-flashlight-run.mjs.
 const litOriginal = await sharp(`${root}jeong-suho-phone-run-on.png`).ensureAlpha().raw()
   .toBuffer({ resolveWithObject: true });
 const airborne = Buffer.alloc(512 * 256 * 4);
