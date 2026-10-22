@@ -125,7 +125,7 @@ try {
   await page.evaluate(() => openPowerPanel()); await page.locator('#power-lever').click(); await page.keyboard.press('Escape');
   await place(at); await page.keyboard.press('e');
   assert.equal((await state()).dock, null); assert.equal((await state()).light, false);
-  await page.keyboard.press('f'); await page.clock.runFor(1100); assert.equal((await state()).battery, 99);
+  await page.keyboard.press('f'); await page.clock.runFor(await page.evaluate(() => phoneLightDelayMs) + 1100); assert.equal((await state()).battery, 99);
   await page.keyboard.press('f');
   // Shared interaction guards reject distant, airborne and modal docking.
   await page.evaluate(() => { collectedItems.add("f17-emergency-linked"); solarEnabled = true; solarPoweredFloors = [12]; updatePowerState(); });

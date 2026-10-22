@@ -227,7 +227,7 @@ try {
   // B1 CCTV 모니터 벽: 설비의 fullImage(cctv-wall.png)가 있으면 조사창은 글자 화면이나 image(cctv-wall-screen.png) 대신
   // CCTV 그림을 화면 전체에 띄운다(js/scene/cctv-event.js의 openFullImage). image와 caption은 글자 화면용 데이터로 남겨 둔다.
   // 첫 입장 컷씬과 처음 볼 때의 연출(잡음·소등 컷씬)은 tests/cctv-scene.mjs가 맡으므로, 여기서는 이미 본 상태로 배치만 확인한다.
-  const cctvCaption = '한 칸에 이 관제실이 비친다. 화면 속 수호가 모니터를 올려다보고 있다. 구석 글씨: "추적 대상 1 · 정수호". 다른 칸들은 17층부터 수호가 지나온 층을 되감는다. B2 칸만 검다.';
+  const cctvCaption = '한 칸에 이 관제실이 비친다. 화면 속 수호가 모니터를 올려다보고 있다. 구석 글씨: "추적 대상 1 · 정수호". 지나온 곳과 아직 가본 기억이 없는 곳의 내 모습이 뒤섞인다. 기록인지 예측인지 알 수 없다. B2 칸만 검다.';
   assert(await readFile('js/floors/floor-b1.js', 'utf8').then(source => source.includes(`caption: '${cctvCaption}'`)), 'floor-b1.js keeps the caption for the artwork');
   const cctvSeenBefore = await page.evaluate(() => ['b1-cctv-live', 'b1-cctv-seen', 'b1-lights-out'].filter(item => collectedItems.has(item)));
   await page.evaluate(() => { for (const item of ['b1-cctv-live', 'b1-cctv-seen', 'b1-lights-out']) collectedItems.add(item); });

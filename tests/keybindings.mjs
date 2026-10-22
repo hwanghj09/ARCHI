@@ -92,6 +92,7 @@ try {
   await page.keyboard.press('o');
   assert(await page.evaluate(() => usingPhone));
   await page.keyboard.press('g');
+  await page.clock.runFor(await page.evaluate(() => phoneLightDelayMs) + 20);
   assert(await page.evaluate(() => phoneLightOn));
   await page.evaluate(() => openPhoneApp('notes'));
   await page.locator('#phone-note').fill('qoilg');

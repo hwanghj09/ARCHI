@@ -32,7 +32,8 @@ function performFloorChange(destId, carIndex = 0, arrivalKey = null) {
   if (cctvSceneActive) finishCctvScene();
   cameraZoom = 1;
   if (playerCaught) releaseGuardCapture();
-  guardPatrol.mode = 'patrol'; guardPatrol.lostTime = 0;
+  if (guardPatrol.mode !== 'dock') guardPatrol.mode = 'patrol';
+  guardPatrol.lostTime = 0;
   guardPatrol.door = null;
   guardPatrol.image = null;
   Composite.remove(engine.world, currentTerrain);

@@ -36,7 +36,7 @@ try {
     Body.setVelocity(body, { x: 0, y: 0 }); grounded = true;
     cameraX = cameraTarget(); render(); interact();
   });
-  assert.equal(await page.locator('#inspection-title').textContent(), '카페 테이블');
+  assert.equal(await page.locator('#inspection-title').textContent(), '조현아 팀장 사원증 획득');
   assert.equal(await page.locator('#inspection').getAttribute('data-surface'), 'card', 'First inspection displays the ID card');
   assert(await page.locator('#inspection').evaluate(panel => {
     const layer = Number(getComputedStyle(panel).zIndex);

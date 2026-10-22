@@ -37,7 +37,7 @@ try {
   };
   await page.evaluate(() => triggerBuildingBlackout());
   assert.deepEqual(await state(), { lift: false, equipment: false, lights: false, solved: false });
-  // 도구를 모두 치운 뒤 직접 메모를 집어야 비밀번호가 보이고 가방에 들어간다.
+  // 메모를 가린 양동이만 치운 뒤 직접 메모를 집으면 비밀번호가 보이고 가방에 들어간다.
   const cartStart = await page.evaluate(() => progressSnapshot());
   for (const [input, viewport] of [
     ['mouse', { width: 1280, height: 720 }], ['touch', { width: 390, height: 844 }], ['keyboard', { width: 844, height: 390 }],
@@ -68,8 +68,7 @@ try {
     })), 'Tools remain usable on desktop, portrait and landscape screens');
     await page.screenshot({ path: `.local/floor17-cart-${input}.png` });
     const touchSession = input === 'touch' ? await page.context().newCDPSession(page) : null;
-    const dragTool = async (outside, cancel = false) => {
-      const tool = tools.first();
+    const dragTool = async (outside, cancel = false, tool = tools.first()) => {
       const r = await tool.boundingBox();
       const cart = await page.locator('.cleaning-cart-tray').boundingBox();
       const start = { x: r.x + r.width / 2, y: r.y + r.height / 2 };
@@ -96,24 +95,32 @@ try {
         assert.equal(await tools.count(), 3, 'Canceled touch cannot clear a tool');
       }
     }
-    const clearTool = async () => {
-      if (input === 'keyboard') { await tools.first().focus(); await page.keyboard.press('Enter'); }
-      else await dragTool(true);
+    const clearTool = async (tool = tools.first()) => {
+      if (input === 'keyboard') { await tool.focus(); await page.keyboard.press('Enter'); }
+      else await dragTool(true, false, tool);
     };
+    // The upper-shelf tools cannot uncover the lower-shelf memo.
     await clearTool();
+    assert(await pickup.isHidden());
+    await clearTool();
+    assert(await pickup.isHidden(), 'The bucket still covers the memo after both upper tools are removed');
+    await page.evaluate(data => restoreProgress(data), cartStart);
+    await approach('청소 카트');
+    await clearTool(page.getByRole('button', { name: '양동이 치우기' }));
+    assert.equal(await tools.count(), 2, 'Removing only the bucket leaves the other tools in place');
+    assert(await pickup.isVisible(), 'The bucket alone uncovers the memo');
     await page.keyboard.press('Escape');
     await approach('청소 카트');
     assert.equal(await tools.count(), 2, 'Closing the cart preserves cleared tools');
+    assert(await pickup.isVisible(), 'The uncovered memo remains available after reopening');
     const partial = await page.evaluate(() => readProgress());
-    assert(partial.items.includes('f17-cart-tool-0'));
+    assert(partial.items.includes('f17-cart-tool-2'));
+    assert(!partial.items.includes('f17-cart-tool-0') && !partial.items.includes('f17-cart-tool-1'));
     await clearTool();
     await page.evaluate(data => restoreProgress(data), partial);
     await approach('청소 카트');
     assert.equal(await tools.count(), 2, 'Loading restores partially cleared tools');
-    await clearTool();
-    assert(await pickup.isHidden(), 'One remaining tool still hides the memo');
-    await clearTool();
-    assert(await pickup.isVisible());
+    assert(await pickup.isVisible(), 'Loading preserves a memo uncovered by only the bucket');
     assert.equal(await page.evaluate(() => collectedItems.has('f17-manager-memo')), false, 'Uncovering is separate from collecting');
     assert.doesNotMatch(await page.locator('#inspection').textContent(), /1706/);
     if (input === 'touch') await pickup.tap();
@@ -141,7 +148,7 @@ try {
   await page.screenshot({ path: '.local/floor17-power-memo.png' });
   await page.keyboard.press('Escape');
   await approach('청소 카트');
-  assert.equal(await page.locator('#inspection-description').textContent(), '아무것도 없다.', 'The emptied cart has nothing left');
+  assert.equal(await page.locator('#inspection-description').textContent(), '메모는 이미 챙겼다.', 'The cart reports the collected memo even with tools remaining');
   await page.keyboard.press('Escape');
   await page.locator('#inventory-button').click();
   await page.locator('[data-item="f17-manager-memo"]').click();

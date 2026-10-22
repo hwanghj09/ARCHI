@@ -47,7 +47,7 @@ doors.push({ name: '소화전', type: 'inspect', x: 4023, y: 248, width: 145,
   element: document.getElementById('floor17-hydrant'), container: 'hydrant',
   message: '소화전 안에 호스와 관창이 정리되어 있다. 아래 선반에 작은 열쇠가 있다.' });
 
-// 확장 복도 오른쪽 끝 청소 카트. 도구를 치워야 관리실 비상 출입 메모를 챙길 수 있다.
+// 확장 복도 오른쪽 끝 청소 카트. 메모를 가린 양동이를 치우면 관리실 비상 출입 메모를 챙길 수 있다.
 const cleaningCart = document.createElement('div');
 cleaningCart.id = 'floor17-cleaning-cart';
 cleaningCart.setAttribute('role', 'img');

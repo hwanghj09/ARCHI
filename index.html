@@ -38,6 +38,7 @@
     <link rel="preload" as="image" href="assets/player/jeong-suho-phone-jump-on.png" />
     <link rel="stylesheet" href="css/game.css" />
     <link rel="stylesheet" href="css/debug.css" />
+    <link rel="stylesheet" href="css/interface.css" />
     <script src="assets/vendor/matter.min.js" defer></script>
     <!-- 게임 스크립트는 모두 일반 스크립트라 최상위 선언(전역)을 서로 함께 쓴다. 불러오는 순서가 곧 의존 순서다:
          설정·상태 → 층 데이터 → 엘리베이터·17층 고정 장면·물리 → 기능별 로직 → 입력 → main.js(첫 화면과 루프 시작). -->
@@ -176,21 +177,22 @@
         <div id="opening-chair-front" aria-hidden="true"></div>
       </div>
     </main>
-      <header><span>17F · 사무실</span><label id="floor17-light-switch"><input id="floor17-lights" type="checkbox" checked aria-label="17층 조명" /><output id="floor17-light-state">조명 켜짐</output></label><button id="map-button" type="button" aria-label="지도" title="지도"></button></header>
+      <header><span>17F · 사무실</span><label id="floor17-light-switch"><input id="floor17-lights" type="checkbox" checked aria-label="17층 조명" /><output id="floor17-light-state">조명 켜짐</output></label><button id="map-button" type="button" aria-label="지도" title="지도"></button><button id="pause-button" type="button" aria-label="일시정지 메뉴" title="일시정지 · Esc" aria-keyshortcuts="Escape"><span aria-hidden="true">Ⅱ</span></button></header>
       <nav aria-label="플레이어 조작">
         <button id="interact" type="button" aria-label="상호작용" title="상호작용 (E)">E</button>
-        <button id="flash-button" type="button" aria-label="플래시 켜기 (F)" title="플래시 (F)" aria-pressed="false"></button>
-        <button id="phone-button" type="button" aria-label="휴대폰" title="휴대폰 (P)"><span id="phone-flash-state" aria-hidden="true">플래시 꺼짐</span></button>
+        <button id="flash-button" type="button" aria-label="플래시 켜기 (F)" title="플래시 (F)" aria-pressed="false"><span class="hud-action-label" aria-hidden="true">플래시</span></button>
+        <button id="phone-button" type="button" aria-label="휴대폰" title="휴대폰 (P)"><span class="hud-action-label" aria-hidden="true">휴대폰</span><span id="phone-flash-state" aria-hidden="true">플래시 꺼짐</span></button>
       </nav>
     <section id="main-menu" role="dialog" aria-modal="true" aria-label="ARCHI 메인 메뉴" data-view="home">
       <div class="menu-backdrop" aria-hidden="true"></div>
-      <div class="menu-topline"><span>ARCHI</span><span>17F</span></div>
+      <div class="menu-topline"><span>ARCHI / AFTER HOURS</span><span>17F · 야간 잔류</span></div>
       <div class="menu-content">
         <div id="menu-home" class="menu-view">
+          <p class="menu-eyebrow">건물은 아직 깨어 있다</p>
           <h1 class="menu-title">ARCHI</h1>
           <p class="menu-story">퇴근할 시간이다.<br />아직, 건물은 잠들지 않았다.</p>
           <div class="menu-actions">
-            <button id="menu-continue" class="menu-primary" type="button" hidden><span>계속하기</span><span aria-hidden="true">↗</span></button>
+            <button id="menu-continue" class="menu-primary" type="button" hidden><span>계속하기</span><span aria-hidden="true">→</span></button>
             <button id="menu-start" class="menu-primary" type="button"><span>새 게임</span><span aria-hidden="true">01</span></button>
             <button id="menu-settings-button" type="button"><span>설정</span><span aria-hidden="true">02</span></button>
             <button id="menu-slots-button" type="button"><span>저장 · 불러오기</span><span aria-hidden="true">03</span></button>
@@ -198,8 +200,11 @@
           <p id="menu-save-info" class="menu-note" role="status" aria-live="polite">진행 상황은 자동으로 저장됩니다.</p>
         </div>
         <div id="menu-pause" class="menu-view" hidden>
+          <p class="menu-eyebrow">PAUSED</p>
+          <h2>일시정지</h2>
           <div class="menu-actions">
             <button id="menu-resume" class="menu-primary" type="button">계속하기</button>
+            <button id="menu-pause-settings-button" type="button">설정</button>
             <button id="menu-exit" type="button">나가기</button>
           </div>
         </div>
@@ -234,6 +239,7 @@
         </div>
       </div>
       <div class="menu-floor-mark" aria-hidden="true"><span>17</span><small>FLOOR / AFTER HOURS</small></div>
+      <footer class="menu-footer"><span>2D SURVIVAL HORROR</span><span>키보드 · 마우스 · 터치</span></footer>
     </section>
     <section id="opening" role="region" aria-label="퇴근 오프닝 컷씬" hidden>
       <p id="opening-label">17F · 야근이 끝난 뒤</p>
@@ -503,7 +509,7 @@
         <div class="game-over-actions"><button id="hallucination-retry" type="button">다시 정신 차리기</button><button class="game-over-load" type="button">불러오기</button></div>
       </div>
     </section>
-    <button id="inventory-button" type="button" aria-controls="inspection" aria-expanded="false" aria-label="가방 · Tab" title="가방 · Tab"></button>
+    <button id="inventory-button" type="button" aria-controls="inspection" aria-expanded="false" aria-label="가방 · Tab" title="가방 · Tab"><span class="hud-action-label" aria-hidden="true">가방</span><span class="hud-count" aria-hidden="true"></span></button>
     <section id="objective" aria-labelledby="objective-heading" aria-live="polite">
       <h2 id="objective-heading" hidden>목표</h2>
       <strong id="objective-title"></strong>

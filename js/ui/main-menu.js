@@ -27,6 +27,9 @@ function refreshKeyBindingUI() {
   document.getElementById('phone-button').title = `휴대폰 (${bindingLabel('phone')})`;
   for (const next of document.querySelectorAll('.scene-next, #story-next')) next.textContent = `클릭 · ${bindingLabel('interact')}로 계속 ▸`;
   refreshInventoryCount();
+  for (const [id, action] of [['flash-button', 'light'], ['phone-button', 'phone'], ['inventory-button', 'inventory']]) {
+    document.getElementById(id).dataset.key = keyLabel(keyBindings[action][0]);
+  }
 }
 
 function cancelKeyBinding() {
@@ -92,7 +95,7 @@ function refreshContinue() {
   const saved = readProgress();
   menuContinue.hidden = !saved && !gameStarted;
   mainMenu.dataset.hasSave = String(!menuContinue.hidden);
-  menuStart.lastElementChild.textContent = menuContinue.hidden ? '↗' : '01';
+  menuStart.lastElementChild.textContent = menuContinue.hidden ? '→' : '01';
   const info = document.getElementById('menu-save-info');
   if (progressSaveFailed) info.textContent = '진행 상황을 저장하지 못했습니다. 현재 게임은 계속할 수 있습니다.';
   else if (saved) {
@@ -124,6 +127,7 @@ function openGameMenu() {
   document.body.dataset.mainMenu = 'true';
   showMainMenu('pause');
 }
+document.getElementById('pause-button').addEventListener('click', openGameMenu);
 
 function showMenuView(view) {
   cancelKeyBinding();
@@ -170,14 +174,19 @@ document.getElementById('menu-exit').addEventListener('click', () => {
   menuReturnButton = menuContinue;
   showMenuView('home');
 });
-document.getElementById('menu-settings-button').addEventListener('click', event => {
-  menuReturnButton = event.currentTarget;
-  showMenuView('settings');
-});
+for (const id of ['menu-settings-button', 'menu-pause-settings-button']) {
+  document.getElementById(id).addEventListener('click', event => {
+    menuReturnButton = event.currentTarget;
+    document.querySelector('#menu-settings .menu-back').textContent = id === 'menu-pause-settings-button' ? '← 일시정지로' : '← 메인으로';
+    showMenuView('settings');
+  });
+}
 function backMenuView() {
   const fromControls = mainMenu.dataset.view === 'controls';
-  showMenuView(fromControls ? 'settings' : 'home');
+  const fromPauseSettings = mainMenu.dataset.view === 'settings' && menuReturnButton.id === 'menu-pause-settings-button';
+  showMenuView(fromControls ? 'settings' : fromPauseSettings ? 'pause' : 'home');
   if (fromControls) document.getElementById('menu-keybindings-button').focus({ preventScroll: true });
+  else if (fromPauseSettings) menuReturnButton.focus({ preventScroll: true });
 }
 for (const back of mainMenu.querySelectorAll('.menu-back')) back.addEventListener('click', backMenuView);
 for (const input of [menuVolume, menuBrightness]) input.addEventListener('input', () => {

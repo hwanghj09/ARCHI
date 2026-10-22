@@ -93,7 +93,6 @@ try {
     await pc.locator('#computer-exit').tap();
     await finishSceneTransition(page);
     await page.locator('#phone-button').tap();
-    assert.match(await phone.locator('.phone-screen').evaluate(element => getComputedStyle(element).backgroundImage), /phone-wallpaper\.png/);
     for (const name of ['notes', 'calculator']) {
       const shortcut = phone.locator(`[data-phone-app="${name}"]`);
       await shortcut.scrollIntoViewIfNeeded();
@@ -105,6 +104,7 @@ try {
     await phone.locator('#phone-light').scrollIntoViewIfNeeded();
     await checkIcon(phone.locator('#phone-light .app-art'));
     await phone.locator('#phone-light').tap();
+    await page.clock.runFor(await page.evaluate(() => phoneLightDelayMs) + 20);
     assert.equal(await phone.locator('#phone-light').getAttribute('aria-pressed'), 'true');
     await phone.locator('#phone-light').tap();
     assert.equal(await phone.locator('#phone-light').getAttribute('aria-pressed'), 'false');

@@ -23,8 +23,9 @@ const roamerStay = { corridor: 30000, room: 15000, ride: 6000 };
 const roamerSpeed = { patrol: 70, chase: 220 }; // R-01(순찰 80, 추격 270)보다 느리다. 걷기 200·달리기 340
 // 수호가 문으로 나오자마자 붙잡히지 않게, 수호가 들어온 문 앞에서 이만큼은 떨어져 있는다(전방 센서보다 멀다).
 const roamerSafeDistance = 800;
-const roamer = { name: 'R-03', where: 'f9', next: 'elevator', lastFloor: null, stay: 60000, car: null, trip: null, roomsLeft: 0, x: 0, facing: -1, wait: 0, elapsed: 0,
-  mode: 'patrol', lostTime: 0, captureTime: 0, door: null, image: null, chaseOriginX: null, spottedX: null, firstEncounter: false, selfPowered: true,
+const roamerInitialState = { where: 'f9', next: 'elevator', lastFloor: null, stay: 60000, car: null, trip: null, roomsLeft: 0, x: 0, facing: -1, wait: 0, elapsed: 0,
+  mode: 'patrol', lostTime: 0, captureTime: 0, door: null, image: null, chaseOriginX: null, spottedX: null, firstEncounter: false };
+const roamer = { name: 'R-03', ...roamerInitialState, selfPowered: true,
   followToElevator: true, chaseSpeed: () => roamerSpeed.chase,
   sensor: 480 }; // 화면 절반(640px)보다 짧아, 감지되기 전에 화면에서 먼저 보인다
 // R-03은 엘리베이터 앞에서도 쫓아오고, 칸에 탄 수호를 따라 문을 억지로 연다(cabin-pry.js).

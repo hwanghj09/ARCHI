@@ -40,7 +40,7 @@ function progressSnapshot() {
     elevators: elevatorCars.map(({ name, ...car }) => ({ ...car })),
     cabin: selectingFloor ? { index: cabinCarIndex, selectedFloor, autoClose: cabinAutoClose,
       amount: cabinDoorAmount, phase: cabinScene.dataset.door } : null,
-    guard: { x: playerCaught ? 4530 : guardPatrol.x, facing: guardPatrol.facing, wait: guardPatrol.wait, elapsed: guardPatrol.elapsed },
+    guard: { x: playerCaught ? 4530 : guardPatrol.x, facing: guardPatrol.facing, wait: guardPatrol.wait, elapsed: guardPatrol.elapsed, mode: guardPatrol.mode },
     runtime: { sequences: [...sequenceProgress],
       moving: movingParts.map(part => ({ position: { ...part.body.position }, velocity: { ...part.body.velocity } })),
       timed: timedBarriers.map(door => ({ name: door.name, remaining: door.closesIn })),
@@ -105,6 +105,10 @@ function restoreProgress(data) {
     updateAuditoryHallucinations(0, false);
     ambientSeenScene = null;
     resetB2Ending();
+    // R-03의 임시 운행은 저장하지 않으므로, 이전 판의 탑승 상태를 복원 차량에 연결하지 않는다.
+    Object.assign(roamer, roamerInitialState);
+    hideCabinPry();
+    elevatorOpenTime.fill(0);
     clearInterval(inspectionTypingTimer);
     wirePanel.hidden = true;
     wireDrag = wireArmed = wireOnSolved = null;
@@ -166,7 +170,7 @@ function restoreProgress(data) {
       const floor = savedFloor(saved?.floor) ? saved.floor : 1;
       const destination = savedFloor(saved?.destination) ? saved.destination : null;
       return { floor, destination, travelling: saved?.travelling === true && destination !== null && destination !== floor,
-        elapsed: savedNumber(saved?.elapsed, 0, 0, elevatorFloorTime), rider: false, open: saved?.open === true, pendingDestId: null };
+        elapsed: savedNumber(saved?.elapsed, 0, 0, elevatorFloorTime), rider: false, open: saved?.open === true, pendingDestId: null, playerCall: false };
     });
     elevatorCars.forEach((car, index) => Object.assign(car, cars[index]));
     for (const door of doors.filter(door => door.type === 'room')) {
@@ -215,7 +219,8 @@ function restoreProgress(data) {
     facing = data.scene.facing === -1 ? -1 : 1;
     grounded = false;
     Object.assign(guardPatrol, { x: savedNumber(data.guard?.x, 4530, 114, corridorWidth - 114), facing: data.guard?.facing === 1 ? 1 : -1,
-      wait: savedNumber(data.guard?.wait, 0, 0, 2000), elapsed: savedNumber(data.guard?.elapsed, 0, 0, 1e9), mode: 'patrol', lostTime: 0, captureTime: 0 });
+      wait: savedNumber(data.guard?.wait, 0, 0, 2000), elapsed: savedNumber(data.guard?.elapsed, 0, 0, 1e9),
+      mode: !data.guard || data.guard.mode === 'dock' ? 'dock' : 'patrol', lostTime: 0, captureTime: 0, chaseOriginX: null, spottedX: null });
     openingActive = false;
     setOfficeComputerPower(data.computerPower === 'on' ? 'on' : 'off');
     if (data.cabin && Number.isInteger(data.cabin.index) && data.cabin.index >= 0 && data.cabin.index < 3) {

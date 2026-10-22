@@ -77,11 +77,16 @@ try {
   await reloadContinue();
   assert.equal((await state()).id, 'f5-rnd'); assert.equal((await state()).x, 1600);
   assert.equal(await page.evaluate(() => movingParts[0].body.position.x), 1600);
-  // Temporary doors restore before the player's physics body, avoiding a closed-door trap.
-  await page.evaluate(() => { performFloorChange('f3-fitness', null, 'exit'); openTimedBarrier(currentDoors.find(door => door.opens)); });
-  const timerSave = await reloadContinue();
-  assert.equal(await page.evaluate(() => timedBarriers.length), 1);
-  assert.equal(await page.evaluate(() => timedBarriers[0].closesIn), timerSave.runtime.timed[0].remaining);
+  // Old saves may still contain the removed 3F automatic-door puzzle.
+  await page.evaluate(() => {
+    performFloorChange('f3-fitness', null, 'exit');
+    const data = progressSnapshot();
+    data.runtime.timed = [{ name: 'retired-f3-door', remaining: 5000 }];
+    localStorage.setItem(progressKey, JSON.stringify(data));
+  });
+  await page.reload(); await page.locator('#menu-continue').click();
+  assert.equal((await state()).id, 'f3-fitness');
+  assert.equal(await page.evaluate(() => timedBarriers.length), 0, 'Retired puzzle timers cannot recreate deleted barriers');
   // A selected cabin destination resumes while its doors are closing, then completes the trip.
   await page.evaluate(() => { performFloorChange('f16'); elevatorCars[0].floor = 16; showCabin(0); });
   await page.locator('#cabin-floor-buttons [data-floor="15"]').click(); await page.locator('#cabin-close').click();

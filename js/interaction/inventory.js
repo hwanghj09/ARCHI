@@ -28,7 +28,8 @@ const inventoryButton = document.getElementById('inventory-button');
 
 function refreshInventoryCount() {
   const count = ownedInventoryIds().length;
-  inventoryButton.ariaLabel = inventoryButton.title = `${count ? `가방 (${count})` : '가방'} · ${bindingLabel('inventory')}`; // 화면에는 그림만 보이고 글자는 접근성 이름으로만 남는다
+  inventoryButton.querySelector('.hud-count').textContent = count;
+  inventoryButton.ariaLabel = inventoryButton.title = `${count ? `가방 (${count})` : '가방'} · ${bindingLabel('inventory')}`;
 }
 
 function showItemAcquired(id, message) {
@@ -110,7 +111,7 @@ function openHydrant() {
 
 function openCleaningCart() {
   const item = 'f17-manager-memo';
-  if (collectedItems.has(item)) { openInspection('청소 카트', '아무것도 없다.'); return; }
+  if (collectedItems.has(item)) { openInspection('청소 카트', '메모는 이미 챙겼다.'); return; }
   const content = writingNode('div', 'item-panel');
   const tray = writingNode('div', 'cleaning-cart-tray');
   const cart = new Image();
@@ -124,11 +125,11 @@ function openCleaningCart() {
   const memo = itemButton(item);
   memo.setAttribute('aria-label', '관리실 비상 출입 메모 줍기');
   tray.append(memo);
+  const covered = () => !collectedItems.has('f17-cart-tool-2');
   const refresh = () => {
-    const remaining = tray.querySelectorAll('.cleaning-tool').length;
-    memo.hidden = memo.disabled = remaining > 0;
-    description.textContent = remaining ? `도구를 잡아 카트 밖으로 끌어내자. (${remaining}개 남음) · 키보드: 도구 선택 후 Enter` :
-      '도구들 밑에서 접힌 메모를 찾았다. 눌러서 챙기자.';
+    memo.hidden = memo.disabled = covered();
+    description.textContent = memo.hidden ? '도구를 잡아 카트 밖으로 끌어내자. · 키보드: 도구 선택 후 Enter' :
+      '양동이 밑에서 접힌 메모를 찾았다. 눌러서 챙기자.';
     inspectionDescription.textContent = description.textContent;
   };
   ['분무기', '세제통', '양동이'].forEach((label, index) => {
@@ -144,7 +145,7 @@ function openCleaningCart() {
       collectedItems.add(flag);
       tool.remove();
       refresh();
-      (tray.querySelector('.cleaning-tool') || memo).focus();
+      (memo.hidden ? tray.querySelector('.cleaning-tool') : memo).focus();
       saveProgress();
     };
     let drag = null;
@@ -175,7 +176,7 @@ function openCleaningCart() {
     tray.append(tool);
   });
   const collect = () => {
-    if (tray.querySelector('.cleaning-tool') || collectedItems.has(item)) return;
+    if (covered() || collectedItems.has(item)) return;
     collectedItems.add(item);
     playGameSound('item-get');
     refreshInventoryCount();
@@ -188,7 +189,7 @@ function openCleaningCart() {
   content.append(tray, description);
   openItemPanel('17층 청소 카트', '청소 도구들이 카트 선반을 가리고 있다.', 'cleaning-cart', content);
   refresh();
-  (tray.querySelector('.cleaning-tool') || memo).focus();
+  (memo.hidden ? tray.querySelector('.cleaning-tool') : memo).focus();
 }
 
 function openRooftopLock() {

@@ -91,9 +91,10 @@ try {
   await acquired('f12-eval-keycard');
   await page.keyboard.press('Escape');
   await page.evaluate(() => {
-    for (let index = 0; index < 3; index++) collectedItems.add(`f17-cart-tool-${index}`);
+    collectedItems.add('f17-cart-tool-2');
     openCleaningCart();
   });
+  assert.equal(await page.locator('.cleaning-tool').count(), 2, 'The memo can be collected with the upper tools still on the cart');
   await page.getByRole('button', { name: '관리실 비상 출입 메모 줍기' }).click();
   await acquired('f17-manager-memo');
   assert((await page.locator('#inspection-description').textContent()).includes(await page.evaluate(() => MANAGER_MEMO_TEXT)), 'The acquired memo keeps its puzzle clue');
