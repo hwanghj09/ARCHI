@@ -30,7 +30,12 @@ const OBJECTIVES = [
   { when: () => b2Ending.phase === 'running' && b2Ending.offline, title: 'ARCHI 삭제 완료', text: 'ARCHI가 꺼졌다. 문 너머가 조용해졌다.' },
   { when: () => b2Ending.phase === 'running' && b2Ending.barricaded, title: '삭제 배틀', text: 'ARCHI가 삭제를 거부한다. 문이 버티는 동안 끝낼 수 있을까?' },
   { when: () => b2Ending.phase === 'running', title: '문 막기', text: '경비 로봇들이 깨어났다. 장비 운반 상자를 출입문까지 밀어 막자!' },
-  { when: () => collectedItems.has('goal-b2-console'), title: 'ARCHI 멈추기', text: 'ARCHI가 자신을 외부로 복제하고 있다. 지금 여기서 끝내야 한다.' },
+  { when: () => collectedItems.has('goal-b2-console'), title: 'ARCHI 멈추기', text: '외부 전송은 끊었다. 메인 콘솔의 DELETE로 지금 여기서 끝내야 한다.' },
+  // 메인 콘솔이 "외부 연결 중"으로 잠긴 것을 본 뒤(b2-ending.js offerArchiDelete)에는 외부 회선 패널을, 끊은 뒤에는 콘솔을 가리킨다.
+  { when: () => collectedItems.has('b2-console-locked') && !collectedItems.has('b2-transfer-cut'), title: '외부 회선 끊기',
+    text: '외부 연결 중이라 DELETE가 잠겨 있다. 전력·냉각실에서 외부 전송 회선을 차단하자.' },
+  { when: () => collectedItems.has('b2-console-locked') && collectedItems.has('b2-transfer-cut'), title: '메인 콘솔 확인',
+    text: '외부 전송 회선을 끊었다. 메인 서버실 콘솔을 다시 확인하자.' },
   // 12층·7층 필수 퍼즐(log-puzzle.js, backup-puzzle.js)을 차례로 풀어야 다음 목표로 넘어간다.
   { when: () => collectedItems.has('f7-external-connection-solved') && collectedItems.has('b1-elevator'), title: 'B2 서버실 조사하기', text: '길이 열렸다. 승강기를 타고 B2 서버실로 내려가자.' },
   { when: () => collectedItems.has('f7-external-connection-solved') && !collectedItems.has('f13-backup-device'), title: '외부 연결 통로 찾기',
@@ -38,6 +43,11 @@ const OBJECTIVES = [
   // 13층 백업 장치를 17층 컴퓨터에 꽂아 깨진 리허설 영상을 봐야(f17-usb-played, usb-video.js) 2층에 갈 이유가 생긴다.
   { when: () => collectedItems.has('f7-external-connection-solved') && !collectedItems.has('f17-usb-played') && !collectedItems.has('f2-projected'),
     title: '장치 확인하기', text: '13층에서 챙긴 USB를 확인하자. 17층 내 자리 컴퓨터의 외부 저장 장치를 열고 USB를 연결해 보자. (17층에 전력이 필요해)' },
+  // 녹화 NAS의 디스크(f2-reel)를 챙긴 뒤에는 Harmony Hall 영사기와 직원 휴게실 리모컨(f2-remote)을 가리킨다(floor-02.js).
+  { when: () => collectedItems.has('f7-external-connection-solved') && collectedItems.has('f2-reel') && !collectedItems.has('f2-remote') && !collectedItems.has('f2-projected'),
+    title: '원본 재생하기', text: 'Harmony Hall 천장의 배터리 영사기로 원본을 틀어 보자. 영사기를 내릴 리모컨은 직원 휴게실에 있을지도 모른다.' },
+  { when: () => collectedItems.has('f7-external-connection-solved') && collectedItems.has('f2-reel') && !collectedItems.has('f2-projected'),
+    title: '원본 재생하기', text: '디스크와 리모컨을 챙겼다. Harmony Hall의 배터리 영사기로 원본을 틀어 보자.' },
   { when: () => collectedItems.has('f7-external-connection-solved') && collectedItems.has('f17-usb-played') && !collectedItems.has('f2-projected'), title: '2층 조사하기',
     text: '영상 속 새벽 3시 리허설에서 내 목소리가 나왔다. 원본이 04:00에 지워지기 전에 2층 서버실 녹화 NAS를 찾자.' },
   // 승강기 제어반은 관제실 CCTV 모니터 벽(소등 컷씬)을 본 뒤에야 돌릴 수 있다(floor-b1.js).
@@ -48,7 +58,7 @@ const OBJECTIVES = [
   { when: () => collectedItems.has('f7-external-connection-solved'), title: '지하에서 무슨 일이?', text: '모든 기록이 지하를 가리킨다. 승강기를 타고 B2로 내려가 보자.' },
   { when: () => collectedItems.has('f7-training-time-solved'), title: '오늘만 다른 기록', text: '평소의 밤과 오늘 밤. 7층 검증실 백업 장비에서 [오늘] 기록을 비교해 보자.' },
   { when: () => collectedItems.has('f12-evaluation-solved') && !collectedItems.has('goal-f5-note'), title: '데이터 수집',
-    text: 'ARCHI가 기록을 지운 이유는 뭘까? 데이터 연구 본부를 조사해보자' },
+    text: 'ARCHI가 기록을 지운 이유는 뭘까? 데이터 연구 본부를 조사해보자.' },
   { when: () => collectedItems.has('f12-evaluation-solved') && !collectedItems.has('f8-repro-record'), title: '기록 재현',
     text: '이런 현상이 처음이 아닌 것 같다. QA 실에서 기록을 재현해보자.' },
   { when: () => collectedItems.has('f12-evaluation-solved'), title: '로그 분석', text: 'ARCHI가 어떻게 새벽에 전력을 사용할 수 있었을까? 검증실에서 확인하자.' },
@@ -84,7 +94,7 @@ const OBJECTIVES = [
     title: '1층 전력 켜기', text: '1층은 아직 어둠 속이다. 내려가기 전에 불을 밝혀야 한다.' },
   { when: () => collectedItems.has('f17-emergency-linked') && collectedItems.has('f1-reached'), title: '퇴근하기', text: '드디어 1층이다. 이제 집에 가자.' },
   { when: () => collectedItems.has('f17-emergency-linked'), title: '퇴근하기', text: '승강기가 다시 움직인다. 아래로 내려가자.' },
-  { when: () => collectedItems.has('rooftop-unlocked'), title: '비상 전력 켜기', text: '옥상에 올라왔다. 건물에 전력을 되돌릴 방법이 있을 것이다.' },
+  { when: () => collectedItems.has('rooftop-unlocked'), title: '비상 전력 켜기', text: '옥상 문이 열렸다. 옥상에서 건물에 전력을 되돌릴 방법을 찾아보자.' },
   { when: () => realBuildingBlackout(), title: '정전', text: '정전이 발생했다. 전력을 확보하기 위한 수단을 찾아보자.' },
   { when: () => true, title: '퇴근하기', text: '오늘 일은 끝났다. 집에 가자.' },
 ];

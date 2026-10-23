@@ -77,6 +77,7 @@ let b2EscapeBlocked = [];
 function offerArchiDelete(door) {
   if (b2Ending.phase !== 'idle' || dynamicFloorId !== 'b2-main' || door.name !== 'ARCHI 메인 콘솔') return;
   const ready = collectedItems.has('b2-transfer-cut');
+  if (!ready) collectedItems.add('b2-console-locked'); // 목표가 외부 회선 패널을 가리킨다(objective.js)
   b2DeleteButton.disabled = !ready;
   b2DeleteButton.textContent = ready ? 'DELETE' : 'DELETE · 외부 전송 회선 연결 중 · 회선 패널에서 먼저 차단하십시오';
   b2DeleteButton.hidden = false;
@@ -558,7 +559,9 @@ document.getElementById('b2-checkpoint').addEventListener('click', () => {
   restoreProgress(data);
   saveProgress();
 });
-document.getElementById('b2-escape-menu').addEventListener('click', () => {
+// TRUE END의 [메인 메뉴로]와 배드 엔딩의 [메인 메뉴]. 배드 엔딩에서는 DELETE 직전의 이어하기 저장이 남아 있어 '계속하기'로 돌아온다.
+// ([불러오기]는 .game-over-load라 main-menu.js가 저장 칸 창을 연다.)
+for (const id of ['b2-escape-menu', 'b2-bad-menu']) document.getElementById(id).addEventListener('click', () => {
   // TRUE END에서 이어하기 저장을 지웠으므로 메뉴에는 '계속하기' 대신 클리어 표시가 보인다(main-menu.js). 저장 칸은 그대로 불러올 수 있다.
   resetB2Ending();
   gameStarted = false;

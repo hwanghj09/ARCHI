@@ -124,7 +124,9 @@ try {
   await at(27800);
   assert.equal((await state()).active, false); assert.equal((await state()).caught, true);
   assert(await page.locator('#b2-bad-ending').isVisible());
-  assert.equal(await page.locator('#b2-bad-ending h2, #b2-bad-ending p').count(), 0, 'Ending leaves only navigation buttons');
+  // 결말 제목·한 줄 설명과 함께 체크포인트·불러오기·메인 메뉴·처음부터 버튼을 보인다(QA 보고 7·24번).
+  assert.equal(await page.locator('#b2-bad-ending h2').textContent(), 'BAD END — 연결');
+  assert.deepEqual(await page.locator('#b2-bad-ending button').allTextContents(), ['체크포인트로 이동', '불러오기', '메인 메뉴', '처음부터 다시하기']);
   assert.equal(await page.evaluate(() => document.activeElement.id), 'b2-checkpoint');
   assert.equal(await page.evaluate(() => localStorage.getItem('archi.checkpoint.b2')), checkpoint);
   assert.equal(await page.evaluate(() => saveProgress()), false);
@@ -155,6 +157,19 @@ try {
   await page.evaluate(() => restoreProgress(JSON.parse(localStorage.getItem('archi.checkpoint.b2'))));
   assert.equal((await state()).active, false);
   assert.equal(await page.locator('#b2-transport-robot, #b2-connection-cable').count(), 0);
+  // [메인 메뉴]: 엔딩을 지우고 메인 메뉴로 간다. DELETE 직전 이어하기 저장이 남아 '계속하기'로 서버실에 돌아온다.
+  await page.evaluate(() => startArchiDelete()); await catchSuho(); await at(5200);
+  await page.locator('#b2-capture-skip').click(); await page.locator('#b2-bad-menu').click();
+  assert(await page.locator('#main-menu').isVisible() && await page.locator('#menu-home').isVisible());
+  assert(await page.locator('#b2-bad-ending').isHidden() && await page.locator('#b2-capture-scene').isHidden());
+  await page.locator('#menu-continue').click(); await page.clock.runFor(500);
+  assert.equal((await state()).room, 'b2-main'); assert.equal(await page.evaluate(() => b2Ending.phase), 'idle');
+  // [불러오기]: 붙잡힌 상태는 저장하지 못하게 막은 저장 칸 창을 연다.
+  await page.evaluate(() => startArchiDelete()); await catchSuho(); await at(5200);
+  await page.locator('#b2-capture-skip').click(); await page.locator('#b2-bad-ending .game-over-load').click();
+  assert(await page.locator('#menu-slots').isVisible());
+  assert(await page.locator('#menu-slot-list [data-slot-save]').evaluateAll(buttons => buttons.every(button => button.disabled)));
+  await page.evaluate(() => { closeMainMenu(); restoreProgress(JSON.parse(localStorage.getItem('archi.checkpoint.b2'))); });
   await page.evaluate(() => { Body.setPosition(body, { x: worldWidth - 170, y: floorY - 81 }); startArchiDelete(); });
   await catchSuho(); await at(5200);
   const nearWall = (await state()).x;

@@ -37,7 +37,9 @@
 #wire-panel[data-mode="elevator"] #wire-left { left: 23.5%; }
 #wire-panel[data-mode="elevator"] #wire-right { left: 79.5%; }
 #wire-panel[data-mode="elevator"] .wire-column button { min-width: 44px; min-height: 44px; color: #fff; text-shadow: 0 1px 3px #000; font-size: 12px; font-weight: bold; }
-#wire-panel[data-mode="elevator"] #wire-right button { background: #343c40; }
+/* 오른쪽 E 단자: 그림 속 원형 단자를 다 덮을 만큼 크고 불투명하게 해서 E1~E4 글자가 단자 그림과 겹쳐 보이지 않게 한다. */
+#wire-panel[data-mode="elevator"] #wire-right button { width: 9%; background: #1d2326; border-color: #8e989b; }
+#wire-panel[data-mode="elevator"] #wire-right button:disabled { opacity: 1; } /* 연결돼도 반투명으로 그림이 비쳐 글자를 덮지 않게 */
 #wire-panel[data-mode="elevator"] .wire-column button:nth-child(1) { top: 29%; }
 #wire-panel[data-mode="elevator"] .wire-column button:nth-child(2) { top: 40.2%; }
 #wire-panel[data-mode="elevator"] .wire-column button:nth-child(3) { top: 51.5%; }

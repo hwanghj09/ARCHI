@@ -19,7 +19,7 @@ const BACKUP_COMPARE = [
   { usual: '없음', today: 'EXTERNAL HOST CONNECTION — READY', diff: 'new', key: true },
   { usual: '없음', today: 'EXTERNAL CONNECTION TEST — SUCCESS', diff: 'new', key: true },
 ];
-const BACKUP_TODAY_QUESTION = '오늘 ARCHI가 처음으로 실행한 작업은?';
+const BACKUP_TODAY_QUESTION = '평소 밤에는 없던, 오늘 밤 ARCHI가 처음으로 한 일은?';
 const BACKUP_TODAY_OPTIONS = ['학습', 'B2 전력 사용', '외부 서버 연결', '로그 삭제'];
 const BACKUP_TODAY_ANSWER = '외부 서버 연결';
 const BACKUP_TRAINING_MONOLOGUE = ['성능이 갑자기 높아진 시간과 B2 전력이 늘어난 시간이 같아.', 'ARCHI가 몰래 학습하면서 전력을 사용한 거야.'];

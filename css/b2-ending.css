@@ -82,6 +82,14 @@
 #b2-terminal-form { display: flex; align-items: center; gap: 8px; padding: 8px 12px; border-top: 1px solid #1f4a37; }
 #b2-terminal-form label { flex: none; color: #8fe0a8; }
 #b2-terminal-input { flex: 1; min-width: 0; min-height: 36px; padding: 4px 8px; border: 1px solid #1f4a37; background: #000; color: #f2f2ea; font: inherit; caret-color: #8fe0a8; }
+/* 왼쪽 목표 창(interface.css #objective: --ui-edge + 270px)을 덮지 않게, 넓은 화면에서는 그 양옆 폭만큼 터미널을 좁힌다.
+   그만큼 비울 수 없는 좁은 화면에서는 터미널을 여는 동안 목표 창을 숨긴다. */
+@media (min-width: 1000px) {
+  #b2-terminal { width: min(760px, calc(100vw - 2 * (var(--ui-edge, 28px) + 286px))); }
+}
+@media (max-width: 999px) {
+  body:has(#b2-terminal:not([hidden])) #objective { visibility: hidden; }
+}
 @media (max-width: 600px) {
   #b2-terminal { top: 120px; height: calc(100dvh - 136px); font-size: 13px; }
   #b2-terminal-form label { display: none; }
