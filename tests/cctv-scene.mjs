@@ -197,7 +197,7 @@ try {
   await page.screenshot({ path: '.local/cctv-lights-on.png' });
   assert.equal(await page.locator('#world').getAttribute('data-dark'), 'false', 'Not a dark room: the red light comes back');
   assert.match(await page.locator('#world').evaluate(el => getComputedStyle(el).filter), /brightness\(0\.4\)/, 'Darker under the red light');
-  assert.equal(await page.evaluate(() => sanity), Math.max(0, sanityBefore - 35), 'Sanity drops at once');
+  assert.equal(await page.evaluate(() => sanity), sanityBefore >= 30 ? Math.max(30, sanityBefore - 35) : sanityBefore, 'Sanity drops at once, never below 30%');
   await advance(8700);
   now = await state();
   assert.equal(now.active, false); assert.equal(now.inert, false);

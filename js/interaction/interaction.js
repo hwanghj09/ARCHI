@@ -32,8 +32,17 @@ function updateInteraction() {
     // standYs: 설비를 조사할 수 있는 발 높이가 여럿일 때(16층 선반: 바닥에서, 또는 진라면 박스 위에서) 쓴다.
     nearbyDoor = pickNearbyDoor(groups.map(group => group.filter(usable)), door => grounded &&
       [].concat(door.standYs ?? door.standY ?? floorY).some(y => Math.abs(body.bounds.max.y - y) < 2));
+    // B2 문 막기: 상자 쪽에 있으면 조사 안내 대신 달리며 밀라는 안내를 보인다(b2-ending.js).
+    const crateHint = b2CrateHint();
+    if (crateHint) nearbyDoor = null;
     for (const door of currentDoors) door.element.classList.toggle('near', door === nearbyDoor);
     updateOutline();
+    if (crateHint) {
+      Object.assign(hint.style, { left: `${crateHint.x}px`, top: `${crateHint.y}px` });
+      hint.textContent = crateHint.text;
+      hint.hidden = false;
+      return;
+    }
     hint.hidden = !nearbyDoor;
     if (nearbyDoor) {
       hint.style.left = `${nearbyDoor.x + nearbyDoor.width / 2}px`;

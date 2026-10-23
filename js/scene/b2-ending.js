@@ -35,7 +35,7 @@ const b2WrongProgress = 2;
 const b2FinaleDelay = 4000; // OFFLINE 뒤 TRUE END까지
 
 const b2AwakeDelay = 2000; // 깨어난 로봇이 움직이기 시작하기까지의 지연(ms)
-const b2CrateChaseRatio = 1.25; // 문 막기 동안 로봇은 수호보다 이만큼 빠르다
+const b2CrateChaseRatio = 1.05; // 문 막기 동안 로봇은 수호보다 이만큼 빠르다(달려서 밀면 여유 있게, 걸어서 밀면 아슬아슬하게 늦는다)
 
 function b2ChaseSpeed() {
   const suho = (sanity > 0 ? runSpeed : speed) * sanitySpeedFactor();
@@ -208,6 +208,17 @@ function updateB2Robots(delta) {
 // 문을 막는 상자와 서버실 출구. 상자가 출구 폭을 다 가리면 막힌 것이다.
 function b2Crate() {
   return movingParts.find(part => part.barricadeSpec);
+}
+
+// 문 막기 동안 상자 왼쪽(콘솔 쪽)에 있으면 상자 위에 달리며 밀라는 안내를 띄운다(interaction.js가 그린다). 걸어서 밀면 늦는다.
+function b2CrateHint() {
+  if (b2Ending.phase !== 'running' || b2Ending.barricaded || dynamicFloorId !== 'b2-main') return null;
+  const crate = b2Crate();
+  if (!crate) return null;
+  const gap = crate.body.bounds.min.x - body.position.x;
+  if (gap < -60 || gap > 700) return null;
+  const run = keyLabel(keyBindings.run[0]);
+  return { x: crate.body.position.x, y: crate.body.bounds.min.y - 42, text: `${run}를 누른 채 달리면서 밀어라!` };
 }
 
 function b2ExitDoor() {

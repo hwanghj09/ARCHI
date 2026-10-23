@@ -50,6 +50,7 @@ const cctvLightsLines = [[400, '…뭐지. 그동안 계속 날 지켜보고 있
 const cctvLightsGate = createSceneGate(cctvScene, [cctvLightsGlitchAt, cctvLightsLength]);
 // 소등 뒤 정신력이 한 번에 깎이는 양. 깎였는지는 cctvLightsOutItem으로 기억한다.
 const cctvLightsSanityLoss = 35;
+const cctvLightsSanityFloor = 30; // 소등으로는 이 아래로 떨어지지 않는다
 const cctvLightsOutItem = 'b1-lights-out';
 
 function shouldStartCctvScene() {
@@ -257,7 +258,8 @@ function commitCctvLightsOut() {
   if (collectedItems.has(cctvLightsOutItem)) return;
   collectedItems.add(cctvLightsOutItem);
   updatePowerState(); // 지하(B1·B2)의 전등이 모두 꺼진다(power.js)
-  sanity = Math.max(0, sanity - cctvLightsSanityLoss);
+  // 30% 이상이면 30% 밑으로는 떨어뜨리지 않고, 이미 30% 미만이면 그대로 둔다.
+  if (sanity >= cctvLightsSanityFloor) sanity = Math.max(cctvLightsSanityFloor, sanity - cctvLightsSanityLoss);
   refreshSanity();
 }
 
