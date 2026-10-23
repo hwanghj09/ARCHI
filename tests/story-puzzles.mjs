@@ -158,7 +158,7 @@ try {
   assert.deepEqual(await page.locator('#backup-body tbody tr').allTextContents(), ['≠TRAINING PROCESS — RUNNINGTRAINING PROCESS — COMPLETE',
     'B2 POWER — 94%B2 POWER — 94%', '+없음EXTERNAL HOST CONNECTION — READY', '+없음EXTERNAL CONNECTION TEST — SUCCESS']);
   assert(await page.locator('#backup-source').isHidden(), 'The source line is not shown before solving');
-  assert.match(await page.locator('#backup-question').textContent(), /오늘 ARCHI가 처음으로 실행한 작업/);
+  assert.match(await page.locator('#backup-question').textContent(), /오늘 밤 ARCHI가 처음으로 한 일/);
   await page.locator('#backup-options button', { hasText: '학습' }).click();
   assert.equal(await sanity(), 60);
   await page.locator('#backup-options button', { hasText: '외부 서버 연결' }).click();

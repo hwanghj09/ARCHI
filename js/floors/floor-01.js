@@ -60,7 +60,7 @@ const FLOOR1_LAYOUT = {
         'B1  시설 관리실',
         'B2  AI 서버실',
       ],
-      message: '층별 안내판이다. 12F 기술본부 · ARCHI 개발팀, 7F AI 테스트·검증실, B2 AI 서버실.',
+      message: '층별 안내판이다. 16F VU 편의점, 12F 기술본부 · ARCHI 개발팀, 7F AI 테스트·검증실, B2 AI 서버실.',
       surface: 'document', look: 'sign',
       writing: [{ as: 'title', text: '층별 안내' },
         { text: '17F  TmaxSoft 사업테스트본부\n16F  The Kitchen / VU 편의점 / Café\n15F  TmaxSoft 연구본부\n14F  TmaxSoft 연구본부\n' +

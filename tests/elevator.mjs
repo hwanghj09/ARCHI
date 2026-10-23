@@ -1350,7 +1350,7 @@ try {
     near(startX, 1988, 'Arrive at the adjusted 1F elevator 1');
     await walkTo(1925);
     assert.equal(await hint(), 'E · 탑승', 'The directory leaves elevator 1 its whole zone');
-    await inspect(1560, 'E · 층별 안내판 조사', /12F 기술본부 · ARCHI 개발팀, 7F AI 테스트·검증실, B2 AI 서버실/);
+    await inspect(1560, 'E · 층별 안내판 조사', /16F VU 편의점, 12F 기술본부 · ARCHI 개발팀, 7F AI 테스트·검증실, B2 AI 서버실/);
     await walkTo(2970);
     assert.equal(await hint(), 'E · 비상계단 (잠김)', 'The info desk leaves the stair door its whole zone');
     await page.keyboard.press('e');
