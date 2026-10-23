@@ -125,6 +125,8 @@ body :is(#opening-caption, #blackout-caption, #story-caption, #cctv-caption) { b
 .phone-statusbar { color: #c7d0c4; font: 10px var(--ui-mono); }
 .phone-owner { margin: 28px 0 24px; text-align: left; }
 .phone-clock { color: #eeede4; font: 400 54px/1.1 var(--ui-mono); letter-spacing: -.08em; }
+/* 1280×720처럼 높이가 760px 이하면 시계와 여백을 줄여 맨 아래 앱 이름이 닫기 안내·홈 막대에 가리지 않게 한다. */
+@media (max-height: 760px) { .phone-owner { margin: 14px 0 10px; } .phone-clock { font-size: 40px; } }
 #phone #phone-title { margin-top: 10px; color: #adb6aa; font-size: 11px; }
 .phone-section-label { margin-bottom: 10px; color: #abb6a6; font-size: 10px; letter-spacing: .08em; }
 .phone-controls > .phone-section-label:not(:first-child) { margin-top: 18px; }
@@ -219,4 +221,26 @@ body :is(#opening-caption, #blackout-caption, #story-caption, #cctv-caption) { b
 @media (max-width: 359px) { #sanity-hud { width: 100px; padding-inline: 8px; } }
 @media (prefers-reduced-motion: reduce) {
   :is(#main-menu, #inspection, #phone, #map-window, #keypad) :is(button, input, textarea, select) { transition: none; }
+}
+/* 높이가 낮은 창(1024×576 등)에서 설정 화면의 [조작키 설정]·안내 문구가 화면 아래로 넘어가지 않게 간격을 줄인다. */
+@media (max-height: 680px) {
+  #main-menu[data-view="settings"] .menu-content { padding: 12px 0; }
+  #main-menu #menu-settings .menu-back { margin-bottom: 6px; }
+  #menu-settings h2 { margin-bottom: 8px; font-size: 28px; }
+  #menu-settings .menu-setting { padding: 8px 0; }
+  #menu-settings .menu-setting input { height: 22px; margin-top: 4px; }
+  #main-menu #menu-settings .menu-screen-button { min-height: 40px; margin-top: 8px; padding: 8px 14px; }
+  #menu-settings .menu-note { margin: 8px 0 0; }
+}
+/* 휴대폰 가로처럼 더 낮으면 왼쪽(제목·음량·밝기)과 오른쪽(버튼·안내) 두 칸으로 나눈다. */
+@media (max-height: 500px) and (orientation: landscape) {
+  #menu-settings:not([hidden]) { display: grid; grid-auto-flow: column; grid-template-rows: repeat(4, auto); grid-template-columns: 1fr 1fr;
+    column-gap: 32px; align-content: start; align-items: start; width: min(760px, 100%); }
+}
+/* 휴대폰 가로처럼 낮은 화면의 가방: 칸을 넓게 펴고 낮춰서 아이템 이름이 아래에서 잘리지 않게 한다. */
+@media (max-height: 480px) and (orientation: landscape) {
+  #inspection[data-surface="inventory"] { width: min(820px, calc(100vw - 24px)); }
+  .inventory-grid { grid-template-columns: repeat(auto-fill, minmax(112px, 1fr)); gap: 6px; }
+  .inventory-grid .inventory-item { min-height: 92px; padding: 8px 6px; gap: 6px; }
+  .inventory-grid .item-key { width: 40px; height: 40px; }
 }

@@ -4,6 +4,7 @@
 //   key·crank·clock — 시계 방향으로 turn도까지 돌린다. selector — 4층 UPS처럼 cycle 칸 하나를 골라 놓는다. press — 누른다.
 // 마우스·터치로 끌거나 방향키(·WASD)로 움직이고, 버튼·선택은 Enter/Space/E로 누른다. 다 하면 원래 조사(문구·gives)가 이어진다.
 // doneBy: gives가 없는 설비가 이미 조작됐는지 보는 물건(B1 CCTV는 seenBy). when: 지금만 조작하는 설비(12층 네트워크 랙).
+// 단계의 keeps: 그 단계를 끝내면 남겨 두는 물건(11층 방화셔터에 꽂은 핸들). 창을 닫거나 불러와도 그 단계는 다시 하지 않는다.
 const manualControl = document.getElementById('manual-control');
 const manualControlDevice = document.getElementById('manual-control-device');
 const manualControlLabel = document.getElementById('manual-control-label');
@@ -32,7 +33,7 @@ function needsControl(door) {
 
 function openControl(door) {
   controlDoor = door;
-  controlSteps = [].concat(door.shutterLever ? shutterLeverStep(door) : door.control);
+  controlSteps = [].concat(door.shutterLever ? shutterLeverStep(door) : door.control).filter(step => !(step.keeps && collectedItems.has(step.keeps)));
   usingControl = true;
   releaseInput();
   hint.hidden = true;
@@ -133,6 +134,7 @@ function completeControlStep() {
   renderControl();
   manualControlDevice.dataset.done = 'true';
   controlDrag = null;
+  if (step.spec.keeps && !collectedItems.has(step.spec.keeps)) { collectedItems.add(step.spec.keeps); saveProgress(); }
   const cue = step.spec.kind === 'card' ? 'card-scan' : step.spec.kind === 'plug' ? 'plug' :
     ['selector', 'key', 'crank', 'clock'].includes(step.spec.kind) ? 'dial' : step.spec.kind === 'press' ? 'mouse-click' : 'lever';
   playGameSound(cue);

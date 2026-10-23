@@ -198,7 +198,9 @@ function interact() {
     }
     const missing = !unreadable && lacking && nearbyDoor.missingMessage &&
       (lacking < required.length && nearbyDoor.partialMessage || nearbyDoor.missingMessage);
-    const inspectionMessage = unreadable || missing || (gives && collectedItems.has(gives) ? nearbyDoor.takenMessage : nearbyDoor.message);
+    // poweredMessage: 휴대폰·옥상 배전반으로 그 층에 전력을 넣어 불이 켜져 있으면 '정전 중' 문구 대신 쓴다.
+    const message = nearbyDoor.poweredMessage && floorHasLighting(currentSceneFloor) ? nearbyDoor.poweredMessage : nearbyDoor.message;
+    const inspectionMessage = unreadable || missing || (gives && collectedItems.has(gives) ? nearbyDoor.takenMessage : message);
     // 글이 적힌 소품은 지금 보이는 문구에 맞는 표면을 펼친다(message는 소품, takenMessage·missingMessage는 그 sheet).
     // fullImage가 있는 설비(B1 CCTV 모니터 벽)는 그 그림을 화면 전체에 띄운다.
     if (nearbyDoor.fullImage && !unreadable && !missing) openFullImage(nearbyDoor, inspectionMessage);
