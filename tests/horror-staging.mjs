@@ -18,7 +18,7 @@ try {
     await page.locator('#opening-skip').click();
     await page.clock.pauseAt(new Date('2026-10-18T00:01:00Z'));
     assert.deepEqual(errors, [], 'Game starts without script errors');
-    assert.equal(await page.evaluate(() => sanity), 50);
+    assert.equal(await page.evaluate(() => sanity), 70, 'A new game starts at 70% sanity (newGameSanity)');
     const layout = await page.evaluate(() => {
       performFloorChange('b1');
       clearHallucinationEvents();
@@ -51,8 +51,9 @@ try {
     });
     assert(Math.abs(fixed.movement - fixed.expected) < .1, 'Camera moves past the apparition without screen clamping');
 
+    // 주변 환각은 정신력 15% 미만에서만 나온다(1fbff36).
     const rhythm = await page.evaluate(() => {
-      endHallucinationSighting();
+      endHallucinationSighting(); sanity = 10;
       const cooldown = ambientNextIn;
       updateAmbientSighting(180000, false);
       const sameRoom = hallucinationMode;

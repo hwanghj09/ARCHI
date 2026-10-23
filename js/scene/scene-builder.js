@@ -354,7 +354,7 @@ function buildDynamicScene(config) {
     if (prop.cycle) element.dataset.state = String(cycleState(prop.cycle));
     doorList.push({ name: prop.name, type: 'inspect', message: prop.message, gives: prop.gives,
       hideWhenTaken: prop.hideWhenTaken, photo: prop.photo, clue: prop.clue,
-      takenMessage: prop.takenMessage, darkMessage: prop.darkMessage, requires: prop.requires,
+      takenMessage: prop.takenMessage, darkMessage: prop.darkMessage, poweredMessage: prop.poweredMessage, requires: prop.requires,
       missingMessage: prop.missingMessage, partialMessage: prop.partialMessage, element, standY: floorY - base,
       code: prop.code, codePrompt: prop.codePrompt, cycle: prop.cycle, opens: prop.opens, control: prop.control, shutterLever: prop.shutterLever,
       animation: prop.animation, poweredSprite: prop.poweredSprite, powerCircuit: prop.powerCircuit, needsPower: prop.needsPower, selfPowered: prop.selfPowered,
