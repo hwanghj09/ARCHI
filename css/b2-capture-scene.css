@@ -27,8 +27,6 @@
 #b2-connection-cable path { fill: none; stroke-linecap: round; }
 #b2-connection-cable .cable-jacket { stroke: #101416; stroke-width: 8px; }
 #b2-connection-cable .cable-core { stroke: #39494b; stroke-width: 2px; }
-#b2-connection-cable .connector { fill: #899b9b; stroke: #192326; stroke-width: 2px; }
-#b2-connection-cable[data-connected="true"] .connector { fill: #83d3ca; filter: drop-shadow(0 0 3px #83d3ca); }
 #world[data-b2-capture] .guard-bot { visibility: hidden; }
 body:has(#b2-capture-scene:not([hidden])) #world #darkness { display: none; }
 body:has(#b2-capture-scene:not([hidden])) :is(header, nav, #debug-sidebar, #inventory-button, #objective, #sanity-hud, #game-menu-button, #interaction-hint, #interaction-outline, #suho-line, #b2-delete-bar, #b2-barricade-line, #room-alarm) { visibility: hidden; }

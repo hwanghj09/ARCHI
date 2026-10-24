@@ -10,6 +10,7 @@ const b2CaptureArt = {
   player: 'assets/player/jeong-suho-unconscious.png',
   drag: 'assets/player/jeong-suho-drag-four.png',
   robot: 'assets/objects/guard-robot/guard-transport.png',
+  spike: 'assets/ending/b2-capture/spike.png',
 };
 const b2CaptureShots = [
   { at: 0, phase: 'strike', frame: 0, sound: 'robot-servo' },
@@ -18,20 +19,19 @@ const b2CaptureShots = [
   { at: 1750, phase: 'strike', frame: 3, sound: 'cctv-hit' },
   { at: 2150, phase: 'black', room: 'origin', sound: 'heartbeat' },
   { at: 4800, phase: 'drag', route: 'origin', duration: 1400, sound: 'robot-step' },
-  { at: 6200, phase: 'black', room: 'b2' },
-  { at: 8000, phase: 'drag', route: 'corridor', duration: 1200, sound: 'robot-servo' },
-  { at: 9200, phase: 'black', sound: 'heartbeat' },
-  { at: 11100, phase: 'drag', route: 'door', duration: 1500, sound: 'robot-step' },
-  { at: 12600, phase: 'black', room: 'b2-link', sound: 'door' },
-  { at: 14600, phase: 'drag', route: 'lab', duration: 1300, sound: 'robot-step' },
-  { at: 15900, phase: 'black' },
-  { at: 17400, phase: 'black', sound: 'robot-servo' },
-  { at: 18800, phase: 'black', sound: 'shutter' },
-  { at: 20100, phase: 'connect', duration: 2200, sound: 'robot-servo' },
-  { at: 22300, phase: 'black', sound: 'cctv-beep' },
-  { at: 24400, phase: 'connected', duration: 2000, sound: 'cctv-on' },
-  { at: 26400, phase: 'black' },
-  { at: 27400, phase: 'end' },
+  { at: 6200, phase: 'black', room: 'b2', sound: 'heartbeat' },
+  // 복도를 끌려가는 두 번째 장면은 뺐다(route 'corridor'는 쓰지 않는다).
+  { at: 8000, phase: 'drag', route: 'door', duration: 1500, sound: 'robot-step' },
+  { at: 9500, phase: 'black', room: 'b2-link', sound: 'door' },
+  { at: 11500, phase: 'drag', route: 'lab', duration: 1300, sound: 'robot-step' },
+  { at: 12800, phase: 'black' },
+  { at: 14300, phase: 'black', sound: 'robot-servo' },
+  { at: 15700, phase: 'black', sound: 'shutter' },
+  { at: 17000, phase: 'connect', duration: 2200, sound: 'robot-servo' },
+  { at: 19200, phase: 'black', sound: 'cctv-beep' },
+  { at: 21300, phase: 'connected', duration: 2000, sound: 'cctv-on' },
+  { at: 23300, phase: 'black' },
+  { at: 24300, phase: 'end' },
 ];
 let b2CaptureActive = false;
 let b2CaptureElapsed = 0;
@@ -123,19 +123,32 @@ function showB2TransportRobot(frame, x) {
   b2TransportRobot.firstElementChild.style.transform = `translateX(${-frame * 25}%)`;
 }
 
+// 연결 장면: 기존 케이블 끝에 가는 바늘이 달려 있고, 케이블에 끌려온 바늘이 수호의 머리를 옆으로 곧게 통과한다.
+// 머리는 연결 장면의 수호(쓰러진 그림 3번째 컷, 몸 x 930)에서 월드 약 (976, 473)이다. 바늘 끝은 머리 앞에서 시작해 머리 안쪽(반대쪽으로 나오기 전)에서 멈춘다.
+const b2SpikeLength = 38; // 바늘 그림 길이(그림 비율 524:31을 얇게 눌렀다)
+const b2SpikeThickness = 1.8;
+const b2SpikeSource = { x: 1240, y: 475 }; // 케이블이 나오는 기계 쪽
+const b2SpikeTip = { from: { x: 1052, y: 470 }, to: { x: 972, y: 473 } };
+
 function showB2Connection(amount) {
   if (!b2ConnectionCable) {
     b2ConnectionCable = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
     b2ConnectionCable.id = 'b2-connection-cable';
     b2ConnectionCable.setAttribute('viewBox', `0 0 ${worldWidth} 720`);
     b2ConnectionCable.setAttribute('aria-hidden', 'true');
-    b2ConnectionCable.innerHTML = '<path class="cable-jacket"/><path class="cable-core"/><circle class="connector" r="5"/>';
+    b2ConnectionCable.innerHTML = '<path class="cable-jacket"/><path class="cable-core"/>' +
+      `<image class="spike" href="assets/ending/b2-capture/spike.png" preserveAspectRatio="none" width="${b2SpikeLength}" height="${b2SpikeThickness}" y="${-b2SpikeThickness / 2}"/>`;
     world.append(b2ConnectionCable);
   }
-  const x = 1045 - 58 * amount, y = 444 + 20 * amount;
-  for (const path of b2ConnectionCable.querySelectorAll('path')) path.setAttribute('d', `M 1240 475 C 1170 427 1090 455 ${x} ${y}`);
-  const connector = b2ConnectionCable.querySelector('circle');
-  connector.setAttribute('cx', x); connector.setAttribute('cy', y);
+  const ease = amount * amount * (3 - 2 * amount);
+  const tip = { x: b2SpikeTip.from.x + (b2SpikeTip.to.x - b2SpikeTip.from.x) * ease, y: b2SpikeTip.from.y + (b2SpikeTip.to.y - b2SpikeTip.from.y) * ease };
+  // 바늘은 끝에서 기계 쪽을 향해 눕고, 케이블은 바늘 뒤쪽 끝에서 같은 방향으로 이어져 휘어 기계로 간다.
+  const toSource = Math.atan2(b2SpikeSource.y - tip.y, b2SpikeSource.x - tip.x);
+  const ux = Math.cos(toSource), uy = Math.sin(toSource);
+  const back = { x: tip.x + ux * b2SpikeLength, y: tip.y + uy * b2SpikeLength };
+  b2ConnectionCable.querySelector('.spike').setAttribute('transform', `translate(${tip.x} ${tip.y}) rotate(${toSource * 180 / Math.PI})`);
+  const d = `M ${b2SpikeSource.x} ${b2SpikeSource.y} C ${b2SpikeSource.x - 70} ${b2SpikeSource.y - 48} ${back.x + ux * 55} ${back.y + uy * 55 + 22} ${back.x} ${back.y}`;
+  for (const path of b2ConnectionCable.querySelectorAll('.cable-jacket, .cable-core')) path.setAttribute('d', d);
   b2ConnectionCable.dataset.connected = String(amount >= 1);
 }
 

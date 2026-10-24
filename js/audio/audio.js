@@ -378,7 +378,7 @@ function stopB2PhaseDoorSound() {
 }
 
 // B2 2페이즈 보스의 발이 땅에 닿을 때마다 나는 발소리(b2-ending.js). 보스가 가까울수록 크다.
-const b2BossStepElement = new Audio('assets/audio/b2-boss-step.mp3');
+const b2BossStepElement = new Audio('assets/audio/b2-boss-step.wav');
 b2BossStepElement.preload = 'auto';
 
 function playB2BossStep(x) {

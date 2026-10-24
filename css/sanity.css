@@ -138,8 +138,8 @@ body[data-hallucinating="true"] #stage { animation: screen-tremor .16s steps(2) 
 #dark-face { position: fixed; z-index: 9; left: 16%; top: 50%; height: min(52vh, 400px); max-width: 40vw; image-rendering: pixelated; object-fit: contain; transform: translate(-50%, -50%); pointer-events: none;
   mix-blend-mode: screen; mask-image: radial-gradient(ellipse closest-side, #000 75%, transparent 100%); animation: dark-face 2s ease-in-out forwards; }
 #dark-face[hidden] { display: none; }
-@keyframes dark-face { 0%, 100% { opacity: 0; filter: blur(5px); } 50% { opacity: 1; filter: blur(0) contrast(1.15) brightness(1.2); } }
-@media (prefers-reduced-motion: reduce) { #dark-face { animation: none; opacity: .7; } }
+@keyframes dark-face { 0%, 100% { opacity: 0; filter: blur(7px) brightness(.4); } 50% { opacity: .62; filter: blur(2.5px) contrast(.9) brightness(.5); } }
+@media (prefers-reduced-motion: reduce) { #dark-face { animation: none; opacity: .45; filter: blur(2.5px) brightness(.5); } }
 
 /* 환각에게 삼켜질 때의 영상: 화면의 모든 요소(컷씬·창 포함) 앞에서 재생되고, 끝나면 사라져 기존 화면(게임 오버 창)이 드러난다. */
 #devoured-video { position: fixed; inset: 0; z-index: 1000; width: 100vw; height: 100dvh; object-fit: cover; background: #000; pointer-events: auto; }

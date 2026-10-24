@@ -511,7 +511,8 @@ function updateRedEyes() {
 // ---- 15% 미만, 불이 꺼진 어둠 속(플래시 없음): 9초마다 얼굴 하나가 2초 동안 흐릿 → 선명 → 흐릿하게 나타난다 ----
 // 직전에 나온 얼굴은 다음에 제외하고 그다음부터 다시 나올 수 있다. 플래시·조명·엘리베이터 조명으로 밝아지거나 창·컷씬으로 멈추면 즉시 사라진다.
 const darkFace = document.getElementById('dark-face');
-const DARK_FACE_IMAGES = [1, 2, 3].map(n => `assets/ui/hallucination/dark-face-${n}.png`);
+// 그림을 늘리려면 번호를 추가한다(dark-face-<번호>.png). 직전에 나온 그림은 빼고 무작위로 고른다.
+const DARK_FACE_IMAGES = [3, 4, 5, 6, 7, 8, 9].map(n => `assets/ui/hallucination/dark-face-${n}.png`);
 let darkFaceTimer = 0;
 let darkFaceLife = 0;
 let darkFaceLast = -1;
@@ -521,10 +522,11 @@ let darkFaceForced = false; // 콘솔의 점프스케어 버튼으로 낸 얼굴
 // 얼굴 하나를 왼쪽이나 오른쪽 가장자리에 띄운다(직전 얼굴은 제외).
 function showDarkFace() {
   darkFaceTimer = darkFaceLife = 0;
-  const choices = DARK_FACE_IMAGES.map((_, index) => index).filter(index => index !== darkFaceLast);
+  const others = DARK_FACE_IMAGES.map((_, index) => index).filter(index => index !== darkFaceLast);
+  const choices = others.length ? others : [0]; // 그림이 하나뿐이면 계속 같은 얼굴이다
   darkFaceLast = choices[Math.floor(Math.random() * choices.length)];
   darkFace.src = DARK_FACE_IMAGES[darkFaceLast];
-  darkFace.style.left = Math.random() < .5 ? '16%' : '84%';
+  darkFace.style.left = Math.random() < .5 ? '16%' : '84%'; // 왼쪽·오른쪽 가장자리에 50%씩
   darkFace.hidden = false;
   darkFace.style.animation = 'none'; void darkFace.offsetWidth; darkFace.style.animation = ''; // 애니메이션을 처음부터 다시
 }
