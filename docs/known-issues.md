@@ -48,7 +48,7 @@
 - ARCHI OFFLINE 뒤 Esc로 일시정지 메뉴를 열면 크레딧과 메뉴가 겹치던 문제를 수정했다. 종료 전환·엔딩 중에는 일시정지 메뉴를 열지 않는다.
 - USB 영상을 보는 중 탭을 숨겨도 관람 완료를 얻던 문제를 수정했다. 탭을 숨기면 최소화·창 닫기와 동일하게 재생을 중단하고 다시 연결해 처음부터 관람한다.
 - B2 체크포인트에 일반 저장과 같은 검증을 적용한다. 손상된 JSON·소지품·장면·버전은 현재 엔딩과 진행 상태를 바꾸지 않고 거부하며 정상 체크포인트는 복구한다.
-- 회귀 검사: `session-transition`, `robot-save-reset`, `puzzle-world-pause`, `b2-ending`, `sanity-usb`, `checkpoint-load`, `phone-movement`, `crouching`, `phone-ui`에서 각 상태 전환을 확인했다. Chromium과 Firefox의 주요 경로를 검사 중이며 전체 검사 결과는 후속 기록에 추가한다.
+- 회귀 검사: `session-transition`, `robot-save-reset`, `puzzle-world-pause`, `b2-ending`, `sanity-usb`, `checkpoint-load`, `phone-movement`, `crouching`, `phone-ui`에서 각 상태 전환을 확인했다. Chromium과 Firefox의 주요 경로를 통과했다. 원격 QA 변경을 통합한 뒤 문법 92/92·웅크리기·휴대폰 이동·세션 전환을 다시 통과했다. 전체 검사는 사용자 마무리 요청으로 중단하여 최종 결과가 미확정이다.
 - 기존 검사의 오래된 선택자·그림 좌표·삭제된 서브스토리·UI 배치 기대값을 현재 구현에 맞췄다. 실제 입력 자동 플레이는 새 게임부터 옥상·UPS·앱 설치·1층 추격·16층 약 복용·사원증 획득까지 진행했으며 워프·아이템 지급·진행 플래그 변경을 사용하지 않았다. 실기기 모바일과 전체 엔딩 연속 플레이는 아직 미검증이다.
 
 ### 2026-10-23. 조작키 충돌·게임 오버 저장 우회
