@@ -603,8 +603,9 @@ body { margin: 0; overflow: hidden; background: #27292b; color: #eee; font: 14px
 #dynamic-scene[data-theme="rnd"] .fixture.art-spot.f4-ups[data-state="2"]::after { left: 40px; }
 /* 8F QA실: 재현 절차(설비 sequence)를 끝낸 그림 속 장치 위에 작은 초록 표시등(data-done). 장치가 작아 상자 위에 띄운다. */
 #dynamic-scene[data-theme="qa"] .fixture.art-spot[data-done="true"]::after { content: ''; position: absolute; left: 50%; top: -14px; width: 8px; height: 8px; margin-left: -4px; border-radius: 50%; background: #8fe06a; box-shadow: 0 0 8px #8fe06a; }
-/* 재현 벤치 화면의 실패 로그(puzzles.js advanceSequence): 단계를 건너뛰면 벤치 위에 작은 단말 화면처럼 뜬다. */
-#dynamic-scene .fixture .sequence-log { position: absolute; left: 0; bottom: calc(100% + 22px); width: 230px; padding: 6px 8px; border: 1px solid #7a2c26; border-radius: 3px; background: #0a0f10ee; color: #ff9d8f; font: 12px/1.45 monospace; text-shadow: 0 0 6px #ff5a4a66; word-break: keep-all; pointer-events: none; }
+/* 재현 벤치 화면의 실패 로그(puzzles.js advanceSequence): 단계를 건너뛰면 벤치 오른쪽에 작은 단말 화면처럼 뜬다.
+   벤치 위쪽은 조사 안내(E · 재현 벤치 조사)가 뜨는 자리라 옆에 둔다. */
+#dynamic-scene .fixture .sequence-log { position: absolute; left: calc(100% + 10px); top: -4px; width: 220px; white-space: normal; padding: 6px 8px; border: 1px solid #7a2c26; border-radius: 3px; background: #0a0f10ee; color: #ff9d8f; font: 12px/1.45 monospace; text-shadow: 0 0 6px #ff5a4a66; word-break: keep-all; pointer-events: none; }
 .room-door.badge { border-color: #5a5a64; background: linear-gradient(90deg, transparent 80%, #a8a8b4 80% 84%, transparent 84%), linear-gradient(#2e2d35, #232228); box-shadow: inset 0 0 0 4px #141318; }
 /* 9F 문 스프라이트(assets/objects/floor9/, 9F.md 6장). 라이선스실 문 옆 사원증 리더(badge::after)는 CSS로 남긴다. */
 #dynamic-scene[data-theme="wine"] .room-door:is(.push-bar, .wine, .badge, .metal) { border: 0; box-shadow: none; background-color: #1c1216; background-size: 100% 100%; background-repeat: no-repeat; background-position: 0 0; image-rendering: pixelated; }
