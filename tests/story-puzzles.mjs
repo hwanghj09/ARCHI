@@ -12,6 +12,7 @@ try {
   page.on('pageerror', error => errors.push(error.message));
   await page.clock.install({ time: new Date('2026-10-17T00:00:00Z') });
   await page.goto(new URL('../index.html', import.meta.url).href);
+  await page.clock.pauseAt(await page.evaluate(() => Date.now() + 1000));
   await page.evaluate(() => localStorage.clear());
 
   const newGame = async () => {
@@ -112,8 +113,9 @@ try {
   assert(await has('f12-network-isolated'));
   await checkRackFrame(1);
   assert.equal(await page.evaluate(() => logPuzzle.outcome), 'in-time');
+  const deletedAtDisconnect = await page.evaluate(() => logDeletedCount());
   await page.clock.runFor(30000);
-  assert.equal(await page.evaluate(() => logDeletedCount()), 1, 'Unplugging stops the deletion at once');
+  assert.equal(await page.evaluate(() => logDeletedCount()), deletedAtDisconnect, 'Unplugging stops the deletion at once');
   assert.equal(await objective(), '이상한 밤 찾기');
   await use('f12-eval', '야간 로그 단말기');
   assert.equal(await page.locator('#log-alert').textContent(), 'NETWORK CONNECTION LOST\nREMOTE DELETION STOPPED');

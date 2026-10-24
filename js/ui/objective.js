@@ -85,6 +85,8 @@ const OBJECTIVES = [
     title: '승강기 비상 회선 연결', text: '승강기에도 전력을 보내야 한다.' },
   // 1층에서 퇴근이 막히는 흐름(floor-01.js): 정문 확인 → 안내 데스크 앱 → 1층 전력. 제목을 '퇴근하기'로 두어 승강기는 1층만 눌린다(cabin.js).
   { when: () => collectedItems.has('f17-emergency-linked') && !collectedItems.has('f1-reached'), title: '퇴근하기', text: '승강기가 다시 움직인다. 아래로 내려가자.' },
+  { when: () => collectedItems.has('f17-emergency-linked') && !collectedItems.has('f1-chase-ended') && phoneDock && phoneDock.floor !== currentSceneFloor,
+    title: '퇴근하기', text: '휴대폰을 다른 층 충전기에 두고 왔다. 휴대폰 표시에서 위치를 확인하고 승강기를 타고 돌아가 챙기자.' },
   // 승강기는 1층만 눌리니, 1층에서 휴대폰이 꺼지면 안내 데스크 콘센트(floor-01.js)를 알려 준다.
   { when: () => collectedItems.has('f1-reached') && !collectedItems.has('f1-chase-ended') && !floorHasLighting(1) && phoneBattery <= 0 && !phoneDock,
     title: '퇴근하기', text: '휴대폰이 꺼졌다. 안내 데스크 왼쪽 콘센트에서 충전하자.' },

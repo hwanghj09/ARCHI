@@ -98,10 +98,10 @@ try {
 
   // 안내 데스크 PC를 켜서 블로그 앱을 받고 USB로 설치한다(다운로드·전송 화면은 solar-app.mjs·usb-connection.mjs가 다룬다).
   await inspectNamed('안내 데스크');
-  await page.clock.runFor(1200);
+  await page.waitForFunction(() => !transitioning && usingComputer && !computer.hidden);
   assert.equal(await page.evaluate(() => usingComputer && !computer.hidden), true, 'The lobby desk opens the computer');
   await page.evaluate(() => { ['solar-app-downloaded', 'solar-app-installed'].forEach(item => collectedItems.add(item)); refreshSolarDownload(); exitComputer(); });
-  await page.clock.runFor(1200);
+  await page.waitForFunction(() => !transitioning && !usingComputer);
   await waitTyped('퇴근하기', '휴대폰 전력 앱으로 1층에 전력을 보내자.');
 
   // 1층에 전력을 넣으면 1초 뒤 컷씬: 정문 화면에 내 이름이 뜨고, 깨어난 경비 로봇에게 쫓겨 1번 엘리베이터 앞까지 달아나고, 혼잣말을 한다.
@@ -120,7 +120,7 @@ try {
   await page.waitForFunction(() => storyCaption.textContent === '헉.. 헉.. 저 로봇 왜 저래?', null, { timeout: 20000 });
   assert.deepEqual(await page.evaluate(() => [collectedItems.has('f1-chase-ended'), playerCaught, guardPatrol.mode !== 'chase',
     Math.abs(body.position.x - f1EscapeX()) < 10]), [true, false, true, true], 'Suho escapes to elevator 1 and the robot gives up');
-  for (const line of ['정문엔 내 이름이 떠 있고, 로봇은 나만 쫓아왔어..', '으윽.. 야근해서 힘든 와중에 이런 일을 겪으니 너무 힘들다..',
+  for (const line of ['정문엔 내 이름이 떠 있고, 나만 나갈 수 없게 되어 있어..', '으윽.. 야근해서 힘든 와중에 이런 일을 겪으니 너무 힘들다..',
     '항불안제라도 먹어야겠어..', '편의점이 몇 층이었더라?']) {
     await page.locator('#story-caption').click();
     assert.equal(await page.locator('#story-caption').textContent(), line);
@@ -176,7 +176,7 @@ try {
   assert.equal(await titleAfter(() => collectedItems.add('f7-training-time-solved')), 'ARCHI의 흔적');
   assert.equal(await titleAfter(() => collectedItems.add('f7-external-connection-solved')), '외부 연결 통로 찾기');
   assert.equal(await titleAfter(() => collectedItems.add('f13-backup-device')), '장치 확인하기');
-  assert.match(await page.evaluate(() => currentObjective.text), /17층 내 자리 컴퓨터의 외부 저장 장치/);
+  assert.match(await page.evaluate(() => currentObjective.text), /13층.*원격지원 PC.*1층 안내 데스크 PC/);
   assert.equal(await titleAfter(() => collectedItems.add('f17-usb-played')), '2층 조사하기');
   assert.equal(await titleAfter(() => collectedItems.add('f2-projected')), '지하에서 무슨 일이?');
   // 12층 이후 목표는 갈 곳(층·방)을 알려 준다.

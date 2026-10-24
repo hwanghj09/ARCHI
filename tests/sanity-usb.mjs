@@ -62,7 +62,7 @@ try {
   await page.evaluate(() => { usingComputer = false; computer.hidden = true; collectedItems.add('f13-backup-device'); refreshObjective(); });
   await page.clock.runFor(200);
   assert.equal(await page.evaluate(() => currentObjective.title), '장치 확인하기');
-  assert.match(await page.evaluate(() => currentObjective.text), /17층 내 자리 컴퓨터의 외부 저장 장치/);
+  assert.match(await page.evaluate(() => currentObjective.text), /13층.*원격지원 PC.*1층 안내 데스크 PC/);
   await openComputer();
   assert(await page.locator(shortcut).isVisible(), 'The drive appears on the desktop');
   // 도중에 닫으면 기록하지 않는다.
