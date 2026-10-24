@@ -14,7 +14,8 @@ try {
   assert.equal(await page.evaluate(() => guardPatrol.mode), 'dock', 'New games keep R-01 in its dock');
 
   await page.evaluate(() => {
-    buildingBlackout = true; collectedItems.add('f17-emergency-linked');
+    // 1층 조명은 휴대폰 전력 앱의 태양광 공급으로 켜져 있다. R-01은 이 1층 회선을 쓴다(guard-patrol.js guardPatrolPowered).
+    buildingBlackout = true; collectedItems.add('f17-emergency-linked'); solarEnabled = true; solarPoweredFloors = [1];
     for (const scene of STORY_SCENES) collectedItems.add(scene.flag);
     performFloorChange('f1');
     Body.setPosition(body, { x: 1500, y: floorY - 81 }); Body.setVelocity(body, { x: 0, y: 0 });
