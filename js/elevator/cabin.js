@@ -55,12 +55,12 @@ panelFloors.forEach((floor, index) => {
       return;
     }
     if (button.dataset.restricted && selectedFloor !== floor && !collectedItems.has(restrictionItem)) {
-      // 7층에서 B2가 목적지라는 걸 안 뒤에는 제한 화면과 함께 B1 시설관리실로 안내한다(objective.js).
+      // 7층에서 B2가 목적지라는 걸 안 뒤에 눌러 보면 B1 시설관리실로 가는 목표가 열린다(objective.js).
       if (collectedItems.has('f7-external-connection-solved')) {
         collectedItems.add('b2-restricted-seen');
-        cabinStatus.textContent = 'B2 · ACCESS RESTRICTED · MANUAL OVERRIDE REQUIRED — 시설관리실에서 운행 제한을 해제해야 한다.';
         playGameSound('deny');
-      } else cabinStatus.textContent = 'B2 운행 제한 중 · B1 방재 관제실의 승강기 제어반에서 해제해야 한다.';
+      }
+      cabinStatus.textContent = '버튼을 눌렀으나 아무런 일도 일어나지 않았다.';
       return;
     }
     if (selectedFloor !== null) return;

@@ -229,8 +229,8 @@ try {
   await page.evaluate(() => collectedItems.add('f17-usb-played'));
   assert.equal(await objective(), '2층 조사하기');
   await page.evaluate(() => collectedItems.add('f2-projected'));
-  // B1에 있으면 관제실 CCTV 모니터 벽(소등 컷씬)을 먼저 보라고 한다. 보기 전에는 제어반도 돌아가지 않는다.
-  assert.equal(await objective(), '관제실 CCTV');
+  // 관제실 CCTV 모니터 벽(소등 컷씬)을 보기 전에는 제어반이 돌아가지 않는다.
+  assert.equal(await objective(), '지하에서 무슨 일이?');
   await use('b1-control', '승강기 제어반');
   assert.match(await page.locator('#inspection-description').textContent(), /CCTV 모니터 벽/);
   assert.equal(await has('b1-elevator'), false, 'B1 key switch waits for the CCTV wall');
@@ -240,7 +240,7 @@ try {
   // ---- B1·B2 ----
   await page.evaluate(() => { triggerBuildingBlackout(); solarEnabled = true; collectedItems.add('f17-emergency-linked'); performFloorChange('f17'); showCabin(0); elevatorCars[0].floor = 17; refreshCabin(); });
   await page.locator('[data-floor="-2"].cabin-hit').click();
-  assert.match(await page.locator('#cabin-status').textContent(), /B2 · ACCESS RESTRICTED · MANUAL OVERRIDE REQUIRED/);
+  assert.match(await page.locator('#cabin-status').textContent(), /버튼을 눌렀으나 아무런 일도 일어나지 않았다./);
   assert.equal(await page.evaluate(() => selectedFloor), null, 'B2 stays restricted');
   assert.equal(await objective(), 'B2 운행 제한 해제');
   await page.evaluate(() => { collectedItems.add('b1-elevator'); });

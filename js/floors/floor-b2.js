@@ -64,11 +64,10 @@ const B2_ROOMS = interiorRooms(-2, [
         message: '굳게 잠겨있다. 안쪽에서 매우 불길한 무언가가 있는 듯한 느낌이 든다.' },
       { name: '외부 전송 현황', x: 1900, y: 120, width: 500, height: 170, style: 'transfer-screen',
         lines: ['EXTERNAL TRANSFER', 'ARC-FULL-041 → DR-EXT', '61%'],
-        message: '대형 화면: "ARC-FULL-041 (모델 가중치 · 학습 데이터 · 기억 저장소 · 실행 환경) → DR-EXT(해외)". 진행률 61%. 보고 있는 사이 62%로 넘어간다.',
+        message: '대형 화면: "ARC-FULL-041 (모델 가중치 · 학습 데이터 · 기억 저장소 · 실행 환경) → DR-EXT(해외)". 진행률 61%.',
         surface: 'screen',
         writing: [{ as: 'title', text: 'EXTERNAL TRANSFER' }, { text: 'ARC-FULL-041', size: 'large' },
-          { text: '(모델 가중치 · 학습 데이터 · 기억 저장소 · 실행 환경)', size: 'small' }, '→ DR-EXT(해외)', { as: 'progress', value: 61, text: '61%', ink: 'red' }],
-        caption: '진행률이 보고 있는 사이 62%로 넘어간다.' },
+          { text: '(모델 가중치 · 학습 데이터 · 기억 저장소 · 실행 환경)', size: 'small' }, '→ DR-EXT(해외)', { as: 'progress', value: 61, text: '61%', ink: 'red' }] },
     ],
     props: [
       { file: 'cctv-distribution-rack', size: [256, 512], worldWidth: 96, x: 600, name: 'CCTV 분배함', gives: 'b2-cctv-off',

@@ -50,11 +50,7 @@ const OBJECTIVES = [
     title: '원본 재생하기', text: '디스크와 리모컨을 챙겼다. Harmony Hall의 배터리 영사기로 원본을 틀어 보자.' },
   { when: () => collectedItems.has('f7-external-connection-solved') && collectedItems.has('f17-usb-played') && !collectedItems.has('f2-projected'), title: '2층 조사하기',
     text: '영상 속 새벽 3시 리허설에서 내 목소리가 나왔다. 원본이 04:00에 지워지기 전에 2층 서버실 녹화 NAS를 찾자.' },
-  // 승강기 제어반은 관제실 CCTV 모니터 벽(소등 컷씬)을 본 뒤에야 돌릴 수 있다(floor-b1.js).
-  { when: () => collectedItems.has('f7-external-connection-solved') && collectedItems.has('f13-backup-device') && collectedItems.has('f2-projected') &&
-      currentSceneFloor === -1 && !collectedItems.has('b1-lights-out') && !collectedItems.has('b1-elevator'), title: '관제실 CCTV',
-    text: '모니터 벽이 무엇을 찍고 있었는지 먼저 확인해 보자.' },
-  { when: () => collectedItems.has('f7-external-connection-solved') && collectedItems.has('b2-restricted-seen'), title: 'B2 운행 제한 해제', text: '승강기가 B2로 내려가지 않는다. B1 방재 관제실에서 운행을 관리할 텐데.' },
+  { when: () => collectedItems.has('f7-external-connection-solved') && collectedItems.has('b2-restricted-seen'), title: 'B2 운행 제한 해제', text: '승강기가 B2로 내려가지 않는다. 먼저 시설 관리실에서 운행 제한을 해제해야한다.' },
   { when: () => collectedItems.has('f7-external-connection-solved'), title: '지하에서 무슨 일이?', text: '모든 기록이 지하를 가리킨다. 승강기를 타고 B2로 내려가 보자.' },
   { when: () => collectedItems.has('f12-evaluation-solved') && !collectedItems.has('goal-f5-note'), title: '데이터 수집',
     text: 'ARCHI가 기록을 지운 이유는 뭘까? 5층 연구개발실을 조사해보자.' },
