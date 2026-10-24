@@ -1,9 +1,10 @@
-// 17층 사무실 컴퓨터: 파일, 업무 메모, 사내 메일, 계산기, 건물 안내.
+// 컴퓨터 화면(1층 안내 데스크 PC·13층 상황실 원격지원 PC에서 연다): 파일, 업무 메모, 사내 메일, 계산기, 건물 안내, 블로그, 파일 전송.
 const computer = document.getElementById('computer');
 const computerWindow = document.getElementById('computer-window');
 const computerNote = document.getElementById('computer-note');
 const computerSaveStatus = document.getElementById('computer-save-status');
 let computerReturnFocus = null;
+let computerSolarTask = null;
 
 function exitComputer() {
   if (transitioning || !usingComputer) return;
@@ -52,7 +53,8 @@ function openComputerApp(app, documentId) {
 const computerBlogPosts = [...document.querySelectorAll('[data-blog-article]')];
 function openComputerBlogPost(id) {
   const selected = computerBlogPosts.find(post => post.dataset.blogArticle === id);
-  if (!usingComputer || transitioning || !floorHasPower(17) || !selected) return;
+  // 블로그는 1층 안내 데스크 PC(사내망 UPS로 늘 켜져 있다)에서 본다. 켜진 컴퓨터를 쓰는 중이면 글을 바꾼다.
+  if (!usingComputer || transitioning || !selected) return;
   for (const post of computerBlogPosts) post.hidden = post !== selected;
   for (const button of document.querySelectorAll('[data-blog-post]')) {
     if (button.dataset.blogPost === id) button.setAttribute('aria-current', 'true');
@@ -71,13 +73,69 @@ document.getElementById('computer-blog-list-back').addEventListener('click', () 
   heading.focus({ preventScroll: true });
 });
 
+// 컴퓨터는 1층 안내 데스크·13층 상황실 PC에서 사내망 UPS로 켜지므로, 켜져 있는 동안은 층 전력과 상관없이 연결돼 있다.
 function refreshSolarDownload() {
+  const ready = usingComputer;
+  refreshComputerUsb();
   if (typeof refreshUsbDrive === 'function') refreshUsbDrive();
-  const ready = floorHasPower(17);
-  document.getElementById('computer-internet-status').textContent = ready ? '연결됨' :
-    '17층 전력이 끊겨 연결할 수 없습니다.';
+  if (computerSolarTask && (transitioning || !ready ||
+      (computerSolarTask.kind === 'transfer' && !computerUsbConnected))) {
+    clearInterval(computerSolarTask.timer);
+    computerSolarTask = null;
+  }
+  const downloaded = collectedItems.has('solar-app-downloaded');
+  const installed = collectedItems.has('solar-app-installed');
+  const task = computerSolarTask;
+  const percent = task ? Math.floor(task.elapsed / task.duration * 100) : 0;
+  document.getElementById('computer-internet-status').textContent = ready ? '연결됨' : '연결할 수 없습니다.';
   document.getElementById('computer-solar-page').hidden = !ready;
+  document.getElementById('computer-solar-download').disabled = !ready || downloaded || installed || Boolean(task);
+  document.getElementById('computer-solar-transfer').disabled = !ready || !downloaded || installed || Boolean(task) || !computerUsbConnected;
+  const connectButton = document.getElementById('computer-usb-open');
+  connectButton.disabled = !computerUsbAvailable() || computerUsbConnected;
+  connectButton.textContent = computerUsbConnected ? 'USB 연결됨' : '휴대폰 연결';
+  for (const kind of ['download', 'transfer']) {
+    const progress = document.getElementById(`computer-solar-${kind}-progress`);
+    progress.hidden = task?.kind !== kind;
+    progress.value = percent;
+  }
+  document.getElementById('computer-solar-status').textContent = task?.kind === 'download' ? `다운로드 ${percent}%` :
+    downloaded || installed ? '다운로드 완료 · 파일 전송 앱에서 설치' : '';
+  document.getElementById('computer-transfer-file').hidden = !downloaded && !installed;
+  document.getElementById('computer-transfer-status').textContent = installed ? '등록 완료 · 휴대폰에서 전력 제어 가능' :
+    task?.kind === 'transfer' ? `설치 ${percent}%` :
+    !downloaded ? '블로그에서 앱 다운로드 필요' :
+    phoneDock ? '충전하던 책상에서 휴대폰을 가져오세요.' : phoneBattery <= 0 ? '휴대폰 충전 필요' :
+    !computerUsbConnected ? '휴대폰 연결 필요' :
+    '';
 }
+
+function startSolarFileTask(kind) {
+  const transfer = kind === 'transfer';
+  if (!usingComputer || transitioning || !computerUsbPanel.hidden || computerWindow.hidden || document.getElementById(`computer-${transfer ? 'transfer' : 'browser'}`).hidden ||
+      (!transfer && document.getElementById('blog-post-solar').hidden) || computerSolarTask || collectedItems.has('solar-app-installed') ||
+      (transfer ? !collectedItems.has('solar-app-downloaded') || !computerUsbConnected || !computerUsbAvailable() : collectedItems.has('solar-app-downloaded'))) return;
+  const task = { kind, elapsed: 0, duration: transfer ? solarTransferMs : solarDownloadMs, started: Date.now(), timer: null };
+  computerSolarTask = task;
+  task.timer = setInterval(() => {
+    task.elapsed = Math.min(Date.now() - task.started, task.duration);
+    refreshSolarDownload();
+    if (computerSolarTask !== task || task.elapsed < task.duration) return;
+    clearInterval(task.timer);
+    computerSolarTask = null;
+    collectedItems.add(transfer ? 'solar-app-installed' : 'solar-app-downloaded');
+    if (transfer) {
+      playGameSound('phone');
+      refreshPhone();
+    }
+    refreshSolarDownload();
+    saveProgress();
+  }, 100);
+  refreshSolarDownload();
+}
+
+document.getElementById('computer-solar-download').addEventListener('click', () => startSolarFileTask('download'));
+document.getElementById('computer-solar-transfer').addEventListener('click', () => startSolarFileTask('transfer'));
 
 function closeComputerApp() {
   if (computerActiveWindow) closeComputerWindow(computerActiveWindow);

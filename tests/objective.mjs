@@ -96,11 +96,12 @@ try {
   await page.keyboard.press('Escape');
   await waitTyped('퇴근하기', '정문에 전기가 없다. 안내 데스크에 로비 전원을 켤 방법이 있을지도.');
 
-  // 안내 데스크 QR로 전력 앱이 설치된다.
+  // 안내 데스크 PC를 켜서 블로그 앱을 받고 USB로 설치한다(다운로드·전송 화면은 solar-app.mjs·usb-connection.mjs가 다룬다).
   await inspectNamed('안내 데스크');
-  assert.equal(await page.locator('#inspection-title').textContent(), '안내 데스크');
-  assert.equal(await page.evaluate(() => collectedItems.has('solar-app-installed')), true, 'The lobby desk installs the power app');
-  await page.keyboard.press('Escape');
+  await page.clock.runFor(1200);
+  assert.equal(await page.evaluate(() => usingComputer && !computer.hidden), true, 'The lobby desk opens the computer');
+  await page.evaluate(() => { ['solar-app-downloaded', 'solar-app-installed'].forEach(item => collectedItems.add(item)); refreshSolarDownload(); exitComputer(); });
+  await page.clock.runFor(1200);
   await waitTyped('퇴근하기', '휴대폰 전력 앱으로 1층에 전력을 보내자.');
 
   // 1층에 전력을 넣으면 1초 뒤 컷씬: 정문 화면에 내 이름이 뜨고, 깨어난 경비 로봇에게 쫓겨 1번 엘리베이터 앞까지 달아나고, 혼잣말을 한다.

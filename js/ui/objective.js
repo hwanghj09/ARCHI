@@ -39,10 +39,10 @@ const OBJECTIVES = [
   // 12층·7층 필수 퍼즐(log-puzzle.js, backup-puzzle.js)을 차례로 풀어야 다음 목표로 넘어간다.
   { when: () => collectedItems.has('f7-external-connection-solved') && collectedItems.has('b1-elevator'), title: 'B2 서버실 조사하기', text: '길이 열렸다. 승강기를 타고 B2 서버실로 내려가자.' },
   { when: () => collectedItems.has('f7-external-connection-solved') && !collectedItems.has('f13-backup-device'), title: '외부 연결 통로 찾기',
-    text: 'ARCHI의 신호는 어디를 거쳐 밖으로 나가는 걸까? 13층 보안 자료실에서 외부 통로를 찾아보자.' },
-  // 13층 백업 장치를 17층 컴퓨터에 꽂아 깨진 리허설 영상을 봐야(f17-usb-played, usb-video.js) 2층에 갈 이유가 생긴다.
+    text: 'ARCHI의 신호는 어디를 거쳐 밖으로 나가는 걸까? 보안 자료실에서 외부 통로를 찾아보자.' },
+  // 13층 백업 장치를 컴퓨터(13층 상황실·1층 안내 데스크 PC)에 꽂아 깨진 리허설 영상을 봐야(f17-usb-played, usb-video.js) 2층에 갈 이유가 생긴다.
   { when: () => collectedItems.has('f7-external-connection-solved') && !collectedItems.has('f17-usb-played') && !collectedItems.has('f2-projected'),
-    title: '장치 확인하기', text: '보안 자료실에서 챙긴 USB를 확인하자. 13층 기술지원 상황실의 원격지원 PC나 17층 내 자리 컴퓨터의 외부 저장 장치로 열 수 있다.' },
+    title: '장치 확인하기', text: '13층에서 챙긴 USB를 확인하자. 이 층 기술지원 상황실의 원격지원 PC나 1층 안내 데스크 PC의 외부 저장 장치로 열 수 있다.' },
   // 녹화 NAS의 디스크(f2-reel)를 챙긴 뒤에는 Harmony Hall 영사기와 직원 휴게실 리모컨(f2-remote)을 가리킨다(floor-02.js).
   { when: () => collectedItems.has('f7-external-connection-solved') && collectedItems.has('f2-reel') && !collectedItems.has('f2-remote') && !collectedItems.has('f2-projected'),
     title: '원본 재생하기', text: 'Harmony Hall 천장의 배터리 영사기로 원본을 틀어 보자. 영사기를 내릴 리모컨은 직원 휴게실에 있을지도 모른다.' },
@@ -58,14 +58,14 @@ const OBJECTIVES = [
   { when: () => collectedItems.has('f7-external-connection-solved'), title: '지하에서 무슨 일이?', text: '모든 기록이 지하를 가리킨다. 승강기를 타고 B2로 내려가 보자.' },
   // 7층 시간 퍼즐 뒤: 게임 밖 ARCHI 소개 페이지(archi.html)에서 SSH 정보를 찾아 컴퓨터 터미널로 접속한다(terminal.js).
   { when: () => collectedItems.has('f7-training-time-solved'), title: 'ARCHI의 흔적',
-    text: `오늘 밤 기록은 B2 ARCHI-MAIN 서버에만 있다. ARCHI가 자정 직전에 들른 회사 홈페이지(${ARCHI_SITE_URL})를 확인하고, 컴퓨터 터미널로 서버에 접속하자.` },
+    text: `오늘 밤 기록은 B2 ARCHI-MAIN 서버에만 있다. ARCHI가 자정 직전에 들른 회사 홈페이지(${ARCHI_SITE_URL})를 확인하고, 1층 안내 데스크 PC의 터미널로 서버에 접속하자.` },
   { when: () => collectedItems.has('f12-evaluation-solved') && !collectedItems.has('goal-f5-note'), title: '데이터 수집',
     text: 'ARCHI가 기록을 지운 이유는 뭘까? 5층 연구개발실을 조사해보자.' },
   { when: () => collectedItems.has('f12-evaluation-solved') && !collectedItems.has('f8-repro-record'), title: '기록 재현',
     text: '이런 현상이 처음이 아닌 것 같다. 8층 QA 시험실에서 기록을 재현해보자.' },
   { when: () => collectedItems.has('f12-evaluation-solved'), title: '로그 분석', text: 'ARCHI가 어떻게 새벽에 전력을 사용할 수 있었을까? 7층 검증실에서 확인하자.' },
   { when: () => collectedItems.has('f12-network-isolated') && !logRecordsReady() && !collectedItems.has('f12-paper-backup'), title: '종이 백업 찾기', text: '화면 속 기록은 믿을 수 없다. 모델 평가실 평가 벤치에 출력해 둔 기록이 있을지도.' },
-  { when: () => collectedItems.has('f12-network-isolated'), title: '이상한 밤 찾기', text: '기록은 지켜 냈다. 야간 로그 단말기에서 그날 밤 무슨 일이 있었는지 확인하자.' },
+  { when: () => collectedItems.has('f12-network-isolated'), title: '이상한 밤 찾기', text: '기록은 지켜 냈다. 야간 로그 단말기의 터미널에서 로그 파일을 찾아 그날 밤 무슨 일이 있었는지 확인하자.' },
   { when: () => logDeleting(), title: '로그 삭제를 막아라', text: '누군가 기록을 지우고 있다! 연결을 끊어야 한다.' },
   // 게이트 컷씬(story-badge-seen)이 사원증 위치를 알려 주므로 바로 16층 카페를 가리킨다.
   { when: () => collectedItems.has('story-badge-seen') && !collectedItems.has('f16-badge'), title: '출입증 쌔비기',
@@ -90,6 +90,8 @@ const OBJECTIVES = [
     title: '퇴근하기', text: '휴대폰이 꺼졌다. 건강관리실 간호사 책상 콘센트에서 충전하자.' },
   { when: () => collectedItems.has('f17-emergency-linked') && !collectedItems.has('f1-chase-ended') && !collectedItems.has('solar-app-installed') && !collectedItems.has('f1-door-checked'),
     title: '퇴근하기', text: '드디어 1층이다. 정문으로 나가자.' },
+  { when: () => collectedItems.has('f17-emergency-linked') && !collectedItems.has('f1-chase-ended') && collectedItems.has('solar-app-downloaded') && !collectedItems.has('solar-app-installed'),
+    title: '퇴근하기', text: '앱을 받았다. 안내 데스크 PC의 파일 전송에서 휴대폰을 USB로 연결해 설치하자.' },
   { when: () => collectedItems.has('f17-emergency-linked') && !collectedItems.has('f1-chase-ended') && !collectedItems.has('solar-app-installed'),
     title: '퇴근하기', text: '정문에 전기가 없다. 안내 데스크에 로비 전원을 켤 방법이 있을지도.' },
   { when: () => collectedItems.has('f17-emergency-linked') && !collectedItems.has('f1-chase-ended') && !floorHasLighting(1),

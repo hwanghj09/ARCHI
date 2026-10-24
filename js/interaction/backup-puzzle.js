@@ -22,7 +22,7 @@ const BACKUP_TODAY_ROWS = [
 ];
 const BACKUP_TRAINING_MONOLOGUE = ['성능이 갑자기 높아진 시간과 B2 전력이 늘어난 시간이 같아.', 'ARCHI가 몰래 학습하면서 전력을 사용한 거야.'];
 const BACKUP_TODAY_MONOLOGUE = ['오늘 밤 기록만 비어 있어.', 'ARCHI가 자정 직전에 우리 회사 홈페이지에 들렀다고?',
-  '거기에 뭔가 남아 있을지도 몰라. 서버에 들어갈 방법을 찾으면 컴퓨터 터미널로 볼 수 있을 거야.'];
+  '거기에 뭔가 남아 있을지도 몰라. 서버에 들어갈 방법을 찾으면 1층 안내 데스크 PC 터미널로 볼 수 있을 거야.'];
 
 const backupPanel = document.getElementById('backup-panel');
 const backupFrame = document.getElementById('backup-frame');

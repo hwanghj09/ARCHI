@@ -18,6 +18,18 @@ export async function finishSceneTransition(page) {
   assert.equal(await page.locator('#room-transition').evaluate(el => getComputedStyle(el).opacity), '0');
 }
 
+// 컴퓨터는 1층 안내 데스크 PC에서 켠다(17층 내 자리 컴퓨터는 장식). 데스크 앞에 세워 E를 누를 수 있게 한다.
+export async function goToDeskComputer(page) {
+  await page.evaluate(() => performFloorChange('f1', 0));
+  await page.clock.runFor(1200);
+  await page.evaluate(() => {
+    const desk = currentDoors.find(door => door.deskComputer);
+    Body.setPosition(body, { x: desk.x + desk.width / 2, y: floorY - 81 });
+    Body.setVelocity(body, { x: 0, y: 0 }); grounded = true; updateInteraction();
+  });
+  await page.clock.runFor(50);
+}
+
 export async function collectRooftopKey(page) {
   const position = () => page.locator('#player').evaluate(el => new DOMMatrix(getComputedStyle(el).transform).m41 + 96);
   const start = await position();

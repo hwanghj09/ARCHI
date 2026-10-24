@@ -1,4 +1,4 @@
-// 컴퓨터 터미널: 17층 내 자리 컴퓨터나 13층 상황실 원격지원 PC에서 SSH로 B2 ARCHI-MAIN에 접속한다.
+// 컴퓨터 터미널: 1층 안내 데스크 PC나 13층 상황실 원격지원 PC에서 SSH로 B2 ARCHI-MAIN에 접속한다(둘 다 사내망 UPS).
 // 접속 정보는 게임 밖 ARCHI 소개 페이지(archi.html)의 임시 저장 글에 ARCHI가 실수로 남겨 두었다.
 // external.log를 읽으면 오늘 밤 외부 연결이 드러나고 7층 다음 단계가 풀린다(f7-external-connection-solved, objective.js).
 const ARCHI_SSH = { user: 'archi_svc', host: '10.0.2.24', password: 'archi_night03' };
@@ -20,7 +20,7 @@ const ARCHI_MAIN_FILES = {
     '[오늘  00:03] SOURCE — B2 ARCHI-MAIN',
   ].join('\n'),
 };
-const TERMINAL_LOCAL_PROMPT = 'suho@office-pc:~$';
+const TERMINAL_LOCAL_PROMPT = 'user@desk-pc:~$';
 const TERMINAL_REMOTE_PROMPT = `${ARCHI_SSH.user}@archi-main:~$`;
 
 const terminalView = document.getElementById('computer-terminal');
@@ -34,10 +34,9 @@ let terminalLogin = null;
 let terminalTries = 0;
 let terminalTimers = [];
 
+// 컴퓨터 화면을 여는 PC는 모두 사내망 UPS에 물려 있어(interaction.js) 화면이 켜져 있으면 접속할 수 있다.
 function terminalOnline() {
-  const office = room === 'office' && currentSceneFloor === 17 && floorHasPower(17);
-  const opsPc = room === 'dynamic' && dynamicFloorId === 'f13-ops' && collectedItems.has('f13-ups');
-  return usingComputer && !computer.hidden && (office || opsPc);
+  return usingComputer && !computer.hidden;
 }
 
 function printTerminal(text) {

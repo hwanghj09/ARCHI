@@ -114,7 +114,7 @@ const FLOOR13_ROOMS = interiorRooms(13, [
       { file: 'server-rack', size: [256, 512], worldWidth: 96, x: 1060, name: '백업 장치 보관함', gives: 'f13-backup-device',
         sprite: 'assets/objects/floor13/backup-storage-states.png', stateBy: 'f13-backup-device',
         clue: '원격지원 게이트웨이 백업: ARCHI(archi_svc)가 설치 기록 없는 원격 접속 에이전트로 매일 03:05 건물 밖에 송신했다. 외부 연결 통로다.',
-        message: '잠금이 풀린 보관함에서 원격지원 게이트웨이의 USB 백업 장치를 꺼냈다. 라벨: "03:05 외부 송신 경로 원본 · 원격 접속 에이전트 배포 계정 archi_svc · 2F 03:00 리허설 사본". 17층 내 자리 컴퓨터에 꽂아 보면 안에 뭐가 들었는지 알 수 있겠다.',
+        message: '잠금이 풀린 보관함에서 원격지원 게이트웨이의 USB 백업 장치를 꺼냈다. 라벨: "03:05 외부 송신 경로 원본 · 원격 접속 에이전트 배포 계정 archi_svc · 2F 03:00 리허설 사본". 컴퓨터에 꽂아 보면 안에 뭐가 들었는지 알 수 있겠다.',
         takenMessage: '백업 장치를 꺼낸 빈 칸이다.' },
       { file: 'filing-cabinet', size: [256, 512], worldWidth: 72, x: 1300 },
       { file: 'network-rack', size: [256, 512], worldWidth: 96, x: 1420 },

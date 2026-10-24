@@ -79,7 +79,16 @@
 .blog-post .blog-post-meta { margin: 0 0 28px; padding-bottom: 20px; border-bottom: 1px solid #eef1ef; color: #88938c; font-size: 11px; }
 .blog-post h3 { margin: 26px 0 8px; font-size: 15px; }
 .blog-post :is(ul, ol) { padding-left: 22px; }
+.blog-attachment { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; padding: 16px; margin-top: 20px; border: 1px solid #d7e6dc; border-radius: 4px; background: #f6fbf8; }
+.blog-file-icon { color: #03a94c; font-size: 28px; }
+.blog-attachment > div { flex: 1; min-width: 0; }
+.blog-attachment strong, .blog-attachment > div span { display: block; }
+.blog-attachment strong { font-size: 13px; }
+.blog-attachment > div span { color: #849188; font-size: 11px; }
+#computer #computer-solar-download { border: 1px solid #b8d8c3; background: white; color: #14873f; font-size: 12px; }
+.solar-file-progress { display: block; width: 100%; height: 16px; margin-top: 16px; accent-color: #03a94c; }
 #computer .naver-blog button:disabled { opacity: .5; cursor: default; }
+.blog-install-status { display: block; margin-top: 12px; color: #64766a; font-size: 12px; }
 .blog-post .blog-post-footer { margin: 28px 0 0; padding-top: 18px; border-top: 1px solid #eef1ef; color: #678873; font-size: 12px; }
 @media (max-width: 800px) {
   .blog-layout { grid-template-columns: minmax(0, 1fr); gap: 16px; padding: 16px; }
@@ -197,6 +206,8 @@
   #computer .computer-shortcuts button { width: 96px; height: 64px; gap: 2px; }
   #computer .computer-shortcuts .app-art { width: 38px; height: 38px; }
 }
+
+:is(#computer-solar-status, #computer-transfer-status):empty { display: none; }
 
 #computer-files button[data-selected="true"] { background: #e5f1ff; border-color: #99c7ef; }
 
