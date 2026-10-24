@@ -16,7 +16,7 @@
 #debug-sidebar button { cursor: pointer; }
 #debug-sidebar button:hover, #debug-sidebar button[aria-pressed="true"] { background: #344c3d; border-color: #bdce94; }
 #debug-sidebar :focus-visible { outline: 2px solid #e6cf90; outline-offset: 2px; }
-#debug-restore, #debug-console button { width: 100%; }
+#debug-restore, #debug-item-all, #debug-console button { width: 100%; }
 #debug-console-panel { display: grid; gap: 8px; margin-top: 8px; }
 #debug-console-panel[hidden] { display: none; }
 body:has(#debug-sidebar:not([hidden]):not([inert])) #objective { visibility: hidden; }

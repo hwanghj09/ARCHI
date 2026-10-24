@@ -128,6 +128,7 @@
     <script src="js/debug/floor-select.js" defer></script>
     <script src="js/debug/puzzle-skip.js" defer></script>
     <script src="js/debug/sanity-debug.js" defer></script>
+    <script src="js/debug/item-give.js" defer></script>
     <script src="js/scene/scene-gate.js" defer></script>
     <script src="js/scene/opening.js" defer></script>
     <script src="js/scene/blackout.js" defer></script>
@@ -558,6 +559,12 @@
         </form>
         <label class="debug-battery" for="debug-battery">배터리<input id="debug-battery" type="number" min="0" max="100" value="100" /></label>
         <button id="debug-restore" type="button">정신력·배터리 100% 회복</button>
+      </section>
+      <section><h3>아이템</h3>
+        <form id="debug-item" aria-label="테스트용 아이템 획득">
+          <label for="debug-item-select">아이템</label><select id="debug-item-select"></select><button type="submit">획득</button>
+        </form>
+        <button id="debug-item-all" type="button">모든 아이템 획득</button>
       </section>
       <section id="debug-console"><h3>이벤트·전력</h3>
         <button id="debug-console-toggle" type="button" aria-expanded="false" aria-controls="debug-console-panel">이벤트 펼치기</button>
