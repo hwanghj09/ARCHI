@@ -36,7 +36,6 @@ function deviceUnpowered(door) {
 
 function openEmergencyCircuit() {
   if (collectedItems.has('f17-emergency-linked')) return openInspection('비상 전력 분배반', '회선 네 가닥이 올바르게 연결되어 있다. 별도 UPS가 승강기와 비상 설비에 전력을 공급한다.');
-  if (!collectedItems.has('f17-circuit-guide-read')) return openInspection('비상 전력 분배반', '단자 표기가 서로 다르다. 옆 책상의 비상 전력 회로 안내도를 먼저 확인하자.');
   openWirePanel(() => {
     collectedItems.add('f17-emergency-linked');
     updatePowerState();

@@ -153,6 +153,7 @@ function interact() {
       openHydrant();
       return;
     }
+    if (nearbyDoor.container === 'key-box') { openKeyBox(); return; }
     if (nearbyDoor.container === 'cleaning-cart') { openCleaningCart(); return; }
     if (nearbyDoor.powerCircuit) { openEmergencyCircuit(); return; }
     if (handleB2Console(nearbyDoor)) return; // B2 삭제 중 메인 콘솔: 문을 막은 뒤면 루트 터미널(b2-ending.js)

@@ -86,10 +86,8 @@ try {
   await walkTo(4095);
   assert.equal(await hint(), 'E · 소화전 조사');
   await page.keyboard.press('e');
-  await page.getByRole('button', { name: '낡은 열쇠 줍기' }).click();
-  await page.keyboard.press('Escape');
-  await page.keyboard.press('e');
   assert.match(await interactionMessage(page), /호스와 관창/);
+  assert.equal(await page.getByRole('button', { name: '낡은 열쇠 줍기' }).count(), 0, 'The rooftop key lives in the key box by the roof door');
   await page.screenshot({ path: '.local/floor17-extension.png' });
   // 정전된 층의 도어락은 전력이 없으면 조사 대상에서 빠진다(power.js). 태양광으로 17층을 켠 뒤 잠긴 문을 확인한다.
   await page.evaluate(() => { solarEnabled = true; solarPoweredFloors = [17]; updatePowerState(); });
@@ -111,6 +109,11 @@ try {
   await page.setViewportSize({ width: 1280, height: 720 });
   await walkTo(4990);
   assert(Math.abs(await position() - 4948) < 1, 'Extended corridor ends at the new wall');
+  await walkTo(2834);
+  assert.equal(await hint(), 'E · 비상 열쇠함 조사', 'The rooftop key box sits right beside the roof door');
+  await page.keyboard.press('e');
+  await page.getByRole('button', { name: '낡은 열쇠 줍기' }).click();
+  await page.keyboard.press('Escape');
   await walkTo(2996);
   await page.keyboard.press('e');
   await page.getByRole('button', { name: '열쇠 사용하기', exact: true }).click();

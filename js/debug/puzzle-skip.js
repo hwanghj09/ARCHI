@@ -2,7 +2,7 @@
 // 순서는 objective.js의 본편 목표 순서를 따른다. items는 그 퍼즐을 풀면 남는 플래그다.
 const PUZZLE_STEPS = [
   { label: '17F 정전 컷씬', at: 'office' },
-  { label: '17F 소화전 열쇠·옥상문', at: 'f17', items: ['rooftop-key', 'rooftop-unlocked'] },
+  { label: '17F 비상 열쇠함 열쇠·옥상문', at: 'f17', items: ['rooftop-key', 'rooftop-unlocked'] },
   { label: 'RF 태양광 비밀번호·전선', at: 'rooftop', items: ['roof-wires-fixed'], solar: [17] },
   { label: '17F 관리실 비밀번호·비상 회선', at: 'f17', items: ['f17-manager-memo', 'f17-manager-unlocked', 'f17-circuit-guide-read', 'f17-emergency-linked'] },
   { label: '1F 정문·안내 데스크 전력 앱', at: 'f1', items: ['f1-reached', 'f1-door-checked', 'story-f1-door-seen', 'solar-app-installed'], solar: [1] },

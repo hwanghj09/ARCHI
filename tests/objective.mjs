@@ -72,8 +72,7 @@ try {
   await waitTyped('17층 전등 켜기', '전력은 돌아왔지만 17층은 아직 어둡다.');
   assert.equal(await titleAfter(() => supplySolarFloor(17)), '관리실 비밀번호 찾기');
   assert.equal(await titleAfter(() => collectedItems.add('f17-manager-memo')), '관리실 열기');
-  assert.equal(await titleAfter(() => collectedItems.add('f17-manager-unlocked')), '회로 안내도 확인');
-  assert.equal(await titleAfter(() => collectedItems.add('f17-circuit-guide-read')), '승강기 비상 회선 연결');
+  assert.equal(await titleAfter(() => collectedItems.add('f17-manager-unlocked')), '승강기 비상 회선 연결');
   assert.equal(await titleAfter(() => { collectedItems.add('f17-emergency-linked'); updatePowerState(); }), '퇴근하기');
   await waitTyped('퇴근하기', '승강기가 다시 움직인다. 아래로 내려가자.');
 

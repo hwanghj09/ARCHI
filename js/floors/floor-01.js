@@ -101,13 +101,16 @@ const FLOOR1_LAYOUT = {
       poweredMessage: '자동문 화면이 켜졌지만 문은 열리지 않는다: "출입 차단 · 미등록 출입증 · 17F 정수호 · 명령 SYSTEM." 내 이름이다.',
       surface: 'screen', look: 'lcd', writing: [{ text: '출입 통제 중 · SYSTEM.', size: 'large', align: 'center' }],
       caption: '회전문도 옆 자동문도 멈춰 있다. 유리 너머 거리의 가로등은 멀쩡히 켜져 있다. 문틀 위 작은 표시창만 배터리로 깜빡인다.' },
+    // 안내 데스크 왼쪽 상판(그림 y 127, 오른쪽 낮은 상판은 화분에 가린다)의 충전 콘센트.
+    // 휴대폰이 꺼진 채 1층에 갇혀도(승강기는 1층만 눌린다) 여기서 충전해 전력 앱을 쓴다.
+    { ...phoneChargerFixture(3365, floorY - (256 - 8 - 127) * 322 / 512), floor: 1 },
   ],
   props: [
     { file: 'waiting-sofa', size: [512, 256], worldWidth: 240, x: 4080 },
     { file: 'large-planter', size: [256, 512], worldWidth: 78, x: 1300 },
     // 안내 데스크: 정문이 안 열린 뒤 로비 전원을 켤 앱을 여기서 받는다(사내 Wi-Fi QR). 외부 통신은 끊겼고 사내망만 UPS로 살아 있다.
     { file: 'reception-counter', size: [512, 256], worldWidth: 322, x: 3310, name: '안내 데스크', gives: 'solar-app-installed', sound: 'phone',
-      condition: () => phoneBattery > 0 && !phoneDock, missingMessage: '시설팀 안내문에 QR 코드가 있다. 휴대폰이 없으면 찍을 수 없다.',
+      condition: () => phoneBattery > 0 && !phoneDock, missingMessage: '시설팀 안내문에 QR 코드가 있다. 켜진 휴대폰이 있어야 찍을 수 있다. 배터리가 없으면 데스크 콘센트에서 충전하자.',
       message: '안내 데스크 모니터 옆 시설팀 안내문: "정전 시 로비 출입문 전원은 \'비상 전력 제어\' 앱으로 복구하세요. 사내 Wi-Fi(UPS)에 연결해 QR을 찍으면 설치됩니다." 휴대폰을 대자 사내 Wi-Fi가 잡히고 앱이 설치됐다.',
       takenMessage: '시설팀 안내문이다. 휴대폰의 \'비상 전력 제어\' 앱으로 1층에 전력을 보내면 출입문이 다시 움직일 것이다.' },
     { file: 'large-planter', size: [256, 512], worldWidth: 78, x: 3515 },
