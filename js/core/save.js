@@ -33,7 +33,7 @@ function progressSnapshot() {
   if (openingActive) Object.assign(scene, { id: 'office', x: 656, y: floorY - 81, velocity: { x: 0, y: 0 } });
   if (playerCaught) Object.assign(scene, { id: caughtBy === roamer ? floorId(currentSceneFloor) : 'f1', x: BUILDING_CORE.elevators[0].x + 40, y: floorY - 81, velocity: { x: 0, y: 0 } });
   return { version: 1, powerCircuitVersion: 1, storyPuzzleVersion: 1, savedAt: Date.now(), scene, items: [...collectedItems], clues: clueSnapshot(), photos: photoSnapshot(),
-    battery: phoneBattery, sanity, logPuzzle: { ...logPuzzle }, light: phoneLightOn, dock: phoneDock && { ...phoneDock },
+    battery: phoneBattery, clock: gameClock, sanity, logPuzzle: { ...logPuzzle }, light: phoneLightOn, dock: phoneDock && { ...phoneDock },
     phoneChargeAccumulator, phoneDrainAccumulator,
     blackout: realBuildingBlackout() || blackoutSceneActive, solarEnabled, solarPoweredFloors: [...solarPoweredFloors],
     lights: world.dataset.lights, computerPower: openingActive ? 'off' : officeComputer.element.dataset.power,
@@ -155,6 +155,7 @@ function restoreProgress(data) {
     world.dataset.lights = data.lights === 'off' ? 'off' : 'on';
     document.getElementById('floor17-lights').checked = world.dataset.lights === 'on';
     phoneBattery = savedNumber(data.battery, 100, 0, 100);
+    gameClock = savedNumber(data.clock, 0, 0, 864e7);
     sanity = savedNumber(data.sanity, 100, 0, 100);
     phoneDock = null;
     if (data.dock && Number.isFinite(data.dock.x)) {
@@ -166,7 +167,7 @@ function restoreProgress(data) {
     phoneLightOn = data.light === true && phoneBattery > 0 && !phoneDock;
     phoneAwayTime = phoneTime = 0;
     phoneChargeAccumulator = savedNumber(data.phoneChargeAccumulator, 0, 0, 999);
-    phoneDrainAccumulator = savedNumber(data.phoneDrainAccumulator, 0, 0, 999);
+    phoneDrainAccumulator = savedNumber(data.phoneDrainAccumulator, 0, 0, 1) % 1;
     const cars = elevatorCars.map((car, index) => {
       const saved = data.elevators?.[index];
       const floor = savedFloor(saved?.floor) ? saved.floor : 1;

@@ -40,6 +40,12 @@ let usingControl = false;
 // 조작창·키패드·회선 퍼즐이 닫힌 시각(performance.now). 저절로 닫힌 직후 닫으려고 누른 Esc가 일시정지 메뉴를 열지 않게 한다(keyboard.js).
 let modalClosedAt = -Infinity;
 let phoneBattery = 100;
+// 게임 속 시각: 00:00에서 시작해 게임 시간(ms)만큼 흐른다. 휴대폰·컴퓨터 시계가 쓴다.
+let gameClock = 0;
+function gameClockText() {
+  const minutes = Math.floor(gameClock / 60000) % 1440;
+  return `${String(Math.floor(minutes / 60)).padStart(2, '0')}:${String(minutes % 60).padStart(2, '0')}`;
+}
 // 휴대폰을 충전하는 방·층·콘센트 위치. 맡긴 방의 같은 자리에서 찾아간다.
 let phoneDock = null;
 let sanity = 100;

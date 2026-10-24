@@ -20,6 +20,7 @@ function fallDuringStoryScene() {
 function update() {
   updateGameAudio(step);
   if (mainMenuActive) return;
+  gameClock += step;
   if (b2CaptureActive || !b2CaptureScene.hidden) { updateB2CaptureScene(step); return; }
   updatePhoneCharging(step);
   if (solarRestoreActive) { updateSolarRestoreScene(step); return; }

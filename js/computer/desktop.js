@@ -346,12 +346,13 @@ function resetComputerDesktop() {
   if (typeof resetUsbVideo === 'function') resetUsbVideo();
   if (typeof refreshUsbDrive === 'function') refreshUsbDrive();
 }
-// 게임 속은 자정이다: 휴대폰 상태 표시줄처럼 시각은 00:00으로 둔다(날짜만 오늘).
+// 휴대폰 시계와 같은 게임 속 시각(오늘 00:00부터 흐름)을 보여 준다.
 function refreshComputerClock() {
-  const midnight = new Date();
-  midnight.setHours(0, 0, 0, 0);
-  document.getElementById('computer-clock').textContent = `00:00\n${midnight.toLocaleDateString('ko-KR')}`;
-  document.getElementById('computer-clock').dateTime = midnight.toISOString();
+  const now = new Date();
+  now.setHours(0, 0, 0, 0);
+  now.setTime(now.getTime() + gameClock);
+  document.getElementById('computer-clock').textContent = `${gameClockText()}\n${now.toLocaleDateString('ko-KR')}`;
+  document.getElementById('computer-clock').dateTime = now.toISOString();
 }
 refreshComputerClock();
-setInterval(refreshComputerClock, 60000);
+setInterval(refreshComputerClock, 1000);

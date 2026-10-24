@@ -229,18 +229,28 @@ function updatePhone(elapsed) {
     refreshPhone();
     elapsed -= raisingTime;
   }
-  if (!phoneLightOn) return;
-  phoneDrainAccumulator += elapsed;
-  if (phoneDrainAccumulator < 1000) return;
-  phoneBattery = Math.max(0, phoneBattery - Math.floor(phoneDrainAccumulator / 1000));
-  phoneDrainAccumulator %= 1000;
+  if (phoneDock || phoneBattery <= 0) return;
+  // 1%가 닳는 시간: 플래시 1초, 화면 보기 1분, 그냥 들고 다니기 3분.
+  phoneDrainAccumulator += elapsed / (phoneLightOn ? 1000 : usingPhone ? 60000 : 180000);
+  if (phoneDrainAccumulator < 1) return;
+  phoneBattery = Math.max(0, phoneBattery - Math.floor(phoneDrainAccumulator));
+  phoneDrainAccumulator %= 1;
   if (phoneBattery === 0) {
-    phoneLightOn = false;
     sayLine('배터리가 나갔어… 충전할 데를 찾아야 해.');
-    phoneAwayTime = usingPhone ? 0 : 360;
+    if (phoneLightOn) phoneAwayTime = usingPhone ? 0 : 360;
+    phoneLightOn = false;
   }
   refreshPhone();
 }
+
+// 상태 표시줄과 잠금 화면 시계는 게임 속 시각(00:00부터 흐름)을 보여 준다.
+function refreshPhoneClock() {
+  const time = gameClockText();
+  phonePanel.querySelector('.phone-statusbar > span').textContent = time;
+  phonePanel.querySelector('.phone-clock').textContent = time;
+}
+refreshPhoneClock();
+setInterval(refreshPhoneClock, 1000);
 
 // 휴대폰 밖을 누르면 닫는다. 캡처 단계라 휴대폰 버튼 자체의 토글보다 먼저 돌고, 그 버튼은 제외한다.
 document.addEventListener('pointerdown', event => {
