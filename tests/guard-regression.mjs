@@ -85,7 +85,7 @@ try {
       const captured = await state(); assert(captured.caught);
       await page.screenshot({ path: `.local/guard-boundary-${direction}.png` });
       assert(captured.min >= 31.9 && captured.max <= captured.width - 31.9, JSON.stringify(captured));
-      assert.equal(Math.round(Math.abs(captured.playerX - captured.x)), 82, 'Grippers retain their alignment');
+      assert.equal(Math.round(Math.abs(captured.playerX - captured.x)), 104, 'Grippers retain their alignment');
     }
   });
   await check('Phone keeps an active chase running and closes on capture', async () => {
@@ -165,8 +165,8 @@ try {
     assert(escape.x > escape.before && escape.x - escape.before <= escape.limit + 1e-9, `No teleport on escape: ${JSON.stringify(escape)}`);
     assert(escape.x < 3100, 'The chase carried the robot well away from its detection point');
     const returning = await sprite();
-    assert.equal(returning.src, 'assets/objects/guard-robot/guard-patrol.png', 'Returning uses the patrol sheet, not the capture sheet');
-    assert.equal(returning.phase, 'move'); assert.equal(returning.width, '160px'); assert.equal(returning.flip, 'scaleX(1)');
+    assert.equal(returning.src, 'assets/objects/guard-robot/guard-humanoid-v2-walk.png', 'Returning uses the patrol sheet, not the capture sheet');
+    assert.equal(returning.phase, 'move'); assert.equal(returning.width, '224px'); assert.equal(returning.flip, 'scaleX(1)');
     // 전력이 들어온 채 돌아가는 로봇 바로 옆에서도 정비 패널(보조 배터리 화면)은 열리지 않는다. 수호가 비상계단과
     // 안내 데스크 조사 범위 사이(3068~3121)에 서도록 로봇이 3125를 지날 때 30px 뒤에 세운다.
     const panel = await page.evaluate(() => {
@@ -204,8 +204,8 @@ try {
     assert(trip.frames >= Math.floor((trip.origin - trip.start) / trip.limit), `Takes the whole walk: ${trip.frames} frames`);
     assert(trip.min >= trip.left && trip.max <= trip.right, 'Stays inside the patrol bounds');
     assert.equal(trip.caught, false); assert.deepEqual(trip.modes, ['return', 'patrol'], 'Undisturbed, the walk finishes on its own');
-    assert.deepEqual(trip.srcs, ['assets/objects/guard-robot/guard-patrol.png'], 'Walking back uses the patrol sheet, not the capture sheet');
-    assert.deepEqual(trip.cells, ['0', '1', '2', '3'], 'Returning animates the patrol wheel frames');
+    assert.deepEqual(trip.srcs, ['assets/objects/guard-robot/guard-humanoid-v2-walk.png'], 'Walking back uses the patrol sheet, not the capture sheet');
+    assert.deepEqual(trip.cells, ['0', '1', '2', '3', '4', '5', '6', '7'], 'Returning animates the eight walk frames');
     assert.equal(trip.x, trip.origin); assert.equal(trip.mode, 'patrol'); assert.equal(trip.wait, trip.pause);
     assert.equal(trip.facing, 1); assert.equal((await sprite()).phase, 'scan', 'Arrival scans before patrolling on');
     const resumed = await page.evaluate(() => {
@@ -263,7 +263,7 @@ try {
       // 100ms 안에 고정 간격 업데이트가 7번까지 몰릴 수 있다.
       assert(now.x >= previous && now.x - previous <= 80 * 7 / 60 + 1e-9, `Gradual live return: ${previous} -> ${now.x}`);
       assert.equal(now.mode, 'return'); assert.equal(now.caught, false);
-      assert.equal(look.src, 'assets/objects/guard-robot/guard-patrol.png'); assert.equal(look.phase, 'move');
+      assert.equal(look.src, 'assets/objects/guard-robot/guard-humanoid-v2-walk.png'); assert.equal(look.phase, 'move');
       previous = now.x;
       if (i === 10) await page.screenshot({ path: '.local/guard-returning.png' });
     }
@@ -281,7 +281,7 @@ try {
     const back = await state();
     assert.equal(back.x, midway.x, 'Leaving mid-return keeps the robot where it was');
     assert.equal(back.mode, 'patrol'); assert.equal(await page.locator('.guard-robot-sprite').count(), 1);
-    assert.equal((await sprite()).src, 'assets/objects/guard-robot/guard-patrol.png');
+    assert.equal((await sprite()).src, 'assets/objects/guard-robot/guard-humanoid-v2-walk.png');
     await page.evaluate(() => Body.setPosition(body, { x: 1000, y: floorY - 81 }));
     await page.clock.runFor(1000);
     const after = await state();

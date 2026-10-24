@@ -684,7 +684,7 @@ body { margin: 0; overflow: hidden; background: #27292b; color: #eee; font: 14px
 #dynamic-scene .fixture.core-plaque { padding: 12px; border: 2px solid #4a9ac8; background: #070a0d; color: #8fc8e8; font: bold 13px Arial, sans-serif; text-align: center; letter-spacing: 1px; }
 #dynamic-scene .fixture.core-plaque span:first-child { margin-bottom: 6px; font-size: 18px; color: #d8f0ff; letter-spacing: 3px; }
 #dynamic-scene .fixture.dormant-bots { background: url('../assets/objects/floor-kit/robot-charging-dock.png') 0 100% / 60px 60px repeat-x; image-rendering: pixelated; }
-.dormant-bots .docked-robot { position: absolute; top: 12px; }
+.dormant-bots .docked-robot { position: absolute; top: -53.5px; }
 .dormant-bots[data-active="true"] .docked-robot { visibility: hidden; }
 #dynamic-scene .fixture.transfer-screen { padding: 18px 20px; border: 8px solid #1a2229; background: #04080b; color: #5ad0ff; font: bold 16px monospace; box-shadow: 0 0 30px #4a9ac833; }
 #dynamic-scene .fixture.transfer-screen span:last-child { margin-top: 10px; font-size: 42px; color: #ff8a6a; }

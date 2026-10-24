@@ -55,8 +55,8 @@ function catchPlayer(robot = guardPatrol) {
   robot.facing = body.position.x >= robot.x ? 1 : -1;
   // Keep the held body inside the 32px walls without shortening the arm reach.
   const margin = 32 + (body.bounds.max.x - body.bounds.min.x) / 2;
-  const heldX = Math.max(margin, Math.min(worldWidth - margin, robot.x + robot.facing * 82));
-  robot.x = heldX - robot.facing * 82;
+  const heldX = Math.max(margin, Math.min(worldWidth - margin, robot.x + robot.facing * 104));
+  robot.x = heldX - robot.facing * 104;
   facing = -robot.facing;
   phoneLightOn = false;
   refreshPhone();
@@ -92,7 +92,7 @@ function mountRobot(robot, className, patrol) {
   const sprite = document.createElement('div');
   sprite.className = 'guard-robot-sprite';
   const image = new Image();
-  image.src = 'assets/objects/guard-robot/guard-patrol.png';
+  image.src = 'assets/objects/guard-robot/guard-humanoid-v2-walk.png';
   image.alt = ''; image.draggable = false;
   sprite.append(image);
   element.append(sprite);
@@ -314,7 +314,7 @@ function mountGuardPatrol() {
   const window = document.createElement('div');
   window.className = 'guard-robot-sprite';
   const image = new Image();
-  image.src = 'assets/objects/guard-robot/guard-patrol.png';
+  image.src = 'assets/objects/guard-robot/guard-humanoid-v2-walk.png';
   image.alt = ''; image.draggable = false;
   window.append(image);
   guardPatrol.door.element.replaceChildren(window);
@@ -351,7 +351,7 @@ function updateRobot(robot, delta) {
     // 다른 로봇이 붙잡는 동안 나머지는 제자리에 선다.
   } else if (playerCaught) {
     robot.captureTime += delta;
-    Body.setPosition(body, { x: robot.x + robot.facing * 82, y: floorY - 81 });
+    Body.setPosition(body, { x: robot.x + robot.facing * 104, y: floorY - 81 });
     Body.setVelocity(body, { x: 0, y: 0 });
     grounded = true;
     if (robot.captureTime >= 1100 && (robot.onCaught ? robot.mode === 'grab' : guardCapturePanel.hidden)) {
@@ -438,25 +438,28 @@ function updateRobot(robot, delta) {
     }
   }
   if (delta > 0) updateRobotMovementSound(robot, powered && !playerCaught ? Math.abs(robot.x - oldX) : 0);
-  // 돌아가는 중('return')은 붙잡기 시트가 아니라 순찰 시트의 바퀴 프레임으로 걷는다.
   const attack = powered && !['patrol', 'dock', 'return'].includes(robot.mode);
-  const frame = !powered ? 7 : robot.mode === 'chase' ? Math.floor(robot.elapsed / 120) % 2 :
-    playerCaught ? 2 + Math.min(5, Math.floor(robot.captureTime / 160)) :
-    robot.mode === 'dock' ? 4 :
-    robot.wait > 0 ? 4 + Math.min(2, Math.floor((pause - robot.wait) / (pause / 3))) : Math.floor(robot.elapsed / 120) % 4;
+  const grabbing = powered && ['grab', 'caught'].includes(robot.mode);
+  const running = powered && robot.mode === 'chase';
+  const frames = grabbing ? 4 : 8;
+  const frame = grabbing ? Math.min(3, Math.floor(robot.captureTime / 275)) :
+    !powered || robot.mode === 'dock' || robot.wait > 0 ? 0 : Math.floor(robot.elapsed / (running ? 90 : 120)) % 8;
   const { door } = robot;
   door.x = robot.x - door.width / 2;
-  door.y = floorY - 124;
-  door.outline = [robot.x - 39, floorY - 124, 78, 124];
-  Object.assign(door.element.style, { left: `${robot.x - 80}px`, top: `${floorY - 237 * .625}px`, width: '160px', height: '160px' });
+  door.y = floorY - 198;
+  door.outline = [robot.x - 70, floorY - 198, 140, 198];
+  Object.assign(door.element.style, { left: `${robot.x - 112}px`, top: `${floorY - 244 * .875}px`, width: '224px', height: '224px' });
   door.element.dataset.patrol = !powered ? 'off' : attack ? robot.mode : robot.mode === 'dock' ? 'scan' : robot.wait > 0 ? 'scan' : 'move';
   door.element.dataset.frame = String(frame);
-  door.element.firstElementChild.style.transform = `scaleX(${robot.facing})`;
-  door.element.firstElementChild.style.width = attack ? '240px' : '160px';
-  const src = `assets/objects/guard-robot/${attack ? 'guard-capture' : 'guard-patrol'}.png`;
+  Object.assign(door.element.firstElementChild.style, {
+    transform: `scaleX(${grabbing ? -robot.facing : robot.facing})`,
+    width: grabbing ? '336px' : '224px', left: grabbing ? '-56px' : '0px',
+    transformOrigin: grabbing ? '168px center' : '112px center'
+  });
+  const src = `assets/objects/guard-robot/guard-humanoid-v2-${grabbing ? 'grab' : running ? 'run' : 'walk'}.png`;
   if (robot.image.getAttribute('src') !== src) robot.image.src = src;
-  robot.image.style.width = '800%';
-  robot.image.style.transform = `translateX(${-frame * 100 / 8}%)`;
+  robot.image.style.width = `${frames * 100}%`;
+  robot.image.style.transform = `translateX(${-frame * 100 / frames}%)`;
   // The nearby target remains the same object while its outline follows the moving sprite.
   if (outlinedDoor === door) outlinedDoor = null;
 }

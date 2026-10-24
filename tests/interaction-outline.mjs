@@ -76,7 +76,7 @@ try {
   // Art doors and fixtures use measured boxes; relocated exits move the highlight with the painted door.
   assert.deepEqual((await stand('f1', 'Harmony Hall')).outline, [204, 261, 237, 296]);
   const robot = await stand('f1', '경비 로봇');
-  assert.deepEqual(robot.outline, await page.evaluate(() => [guardPatrol.x - 39, floorY - 124, 78, 124]));
+  assert.deepEqual(robot.outline, await page.evaluate(() => [guardPatrol.x - 70, floorY - 198, 140, 198]));
   assert.deepEqual((await stand('f1-harmony', '복도')).outline, [903, 257, 265, 311]);
   // Without an outline the element box is used.
   const elevator = await stand('f5', '1번 엘리베이터');

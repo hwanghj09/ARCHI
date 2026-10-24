@@ -21,7 +21,7 @@ try {
   const robot = page.locator('.fixture.guard-bot');
   const state = () => page.evaluate(() => ({ x: guardPatrol.x, facing: guardPatrol.facing, wait: guardPatrol.wait,
     phase: guardPatrol.door?.element.dataset.patrol, frame: guardPatrol.door?.element.dataset.frame }));
-  const source = `data:image/png;base64,${(await readFile('assets/objects/guard-robot/guard-patrol.png')).toString('base64')}`;
+  const source = `data:image/png;base64,${(await readFile('assets/objects/guard-robot/guard-humanoid-v2-walk.png')).toString('base64')}`;
   const frames = await page.evaluate(async src => {
     const image = new Image(); image.src = src; await image.decode();
     const canvas = document.createElement('canvas'); canvas.width = image.width; canvas.height = image.height;
@@ -38,7 +38,7 @@ try {
     }) };
   }, source);
   assert.deepEqual(frames.size, [2048, 256]);
-  assert(frames.bounds.every(b => b.edge === 0 && Math.abs(b.bottom - 237) <= 1 && b.top >= 30), 'All eight cells have intact margins and the same wheel baseline');
+  assert(frames.bounds.every(b => b.edge === 0 && Math.abs(b.bottom - 244) <= 1 && b.top > 0), 'All eight cells have intact margins and the same foot baseline');
   assert.equal((await state()).phase, 'off');
   const stopped = await state(); await page.clock.runFor(2000); assert.deepEqual(await state(), stopped);
   await page.locator('#dynamic-scene img').evaluateAll(imgs => Promise.all(imgs.map(img => img.decode())));
@@ -47,7 +47,7 @@ try {
   const robotPixel = async () => {
     const clip = await page.evaluate(() => {
       const rect = world.getBoundingClientRect();
-      return { x: Math.round(rect.left + guardPatrol.x * scale), y: Math.round(rect.top + (floorY - 60) * scale), width: 1, height: 1 };
+      return { x: Math.round(rect.left + guardPatrol.x * scale), y: Math.round(rect.top + (floorY - 100) * scale), width: 1, height: 1 };
     });
     const shot = await page.screenshot({ clip });
     return page.evaluate(async src => {
@@ -74,10 +74,10 @@ try {
     guardPatrol.mode = 'patrol'; Body.setPosition(body, { x: 1500, y: floorY - 81 });
   });
   const before = await state(); await page.clock.runFor(1000);
-  assert(Math.abs(before.x - (await state()).x - 80) < 3, 'Powered patrol rolls at 80 pixels per second');
+  assert(Math.abs(before.x - (await state()).x - 80) < 3, 'Powered patrol walks at 80 pixels per second');
   const usedFrames = new Set();
-  for (let i = 0; i < 12; i++) { await page.clock.runFor(50); usedFrames.add((await state()).frame); }
-  assert.equal(usedFrames.size, 4, 'Moving patrol animates every wheel frame');
+  for (let i = 0; i < 24; i++) { await page.clock.runFor(50); usedFrames.add((await state()).frame); }
+  assert.equal(usedFrames.size, 8, 'Moving patrol animates all eight walk frames');
   await page.evaluate(() => { Body.setPosition(body, { x: guardPatrol.x - 180, y: floorY - 81 }); cameraX = cameraTarget(); render(); });
   await page.screenshot({ path: '.local/guard-patrol-left.png' });
   // Keep the real simulation clock; only place it close to the endpoint to shorten the trip.
@@ -86,12 +86,12 @@ try {
   assert.equal((await state()).x, 3040);
   const scanFrames = new Set();
   for (let i = 0; i < 12; i++) { scanFrames.add((await state()).frame); await page.clock.runFor(100); }
-  assert.deepEqual([...scanFrames].sort(), ['4', '5', '6']);
+  assert.deepEqual([...scanFrames].sort(), ['0']);
   await page.clock.runFor(400); assert.equal((await state()).facing, 1);
   assert((await state()).x > 3040, 'Endpoint scan finishes by turning around');
   await page.evaluate(() => { collectedItems.delete("f17-emergency-linked"); solarPoweredFloors = [2]; updatePowerState(); });
   const unpowered = await state(); await page.clock.runFor(1000); assert.deepEqual(await state(), unpowered);
-  assert.equal(unpowered.frame, '7');
+  assert.equal(unpowered.frame, '0');
   await page.evaluate(() => { collectedItems.add("f17-emergency-linked"); solarPoweredFloors = [1]; updatePowerState(); togglePhone(); });
   const reading = await state(); await page.clock.runFor(1000);
   assert(Math.abs((await state()).x - reading.x - 80) < 3, 'Phone keeps the powered patrol running');
@@ -113,7 +113,7 @@ try {
   });
   assert.match(await page.locator('#interaction-hint').textContent(), /경비 로봇/);
   await page.clock.runFor(100);
-  assert(await page.evaluate(() => Math.abs(parseFloat(interactionOutline.style.left) - guardPatrol.x + 39) < .01),
+  assert(await page.evaluate(() => Math.abs(parseFloat(interactionOutline.style.left) - guardPatrol.x + 70) < .01),
     'The powered-down robot retains its correct maintenance outline');
   await page.keyboard.press('e'); assert(await page.locator('#keypad').isVisible(), 'Maintenance interaction moves with the robot');
   const maintenance = await state(); await page.clock.runFor(700); assert.deepEqual(await state(), maintenance);
@@ -133,5 +133,5 @@ try {
   await page.evaluate(() => performFloorChange('f17'));
   assert.equal(await robot.count(), 0); assert.equal(await page.locator('.robot-dock-patch').count(), 0);
   assert.deepEqual(errors, []);
-  console.log('PASS: eight aligned frames, rolling/scan/turn, power pause/resume, phone continues, inventory pause, room persistence, moving maintenance target, scene cleanup and mobile.');
+  console.log('PASS: eight aligned walking frames, pause/turn, power pause/resume, phone continues, inventory pause, room persistence, moving maintenance target, scene cleanup and mobile.');
 } finally { await browser.close(); }
