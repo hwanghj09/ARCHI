@@ -27,7 +27,7 @@ const B2_LAYOUT = {
   cameras: [
     { name: 'B2 복도 카메라', x: 1180, y: 140, spans: [[1240, 1760], [840, 1120]], period: 4000, guards: 'b2-main', lockMs: 5000,
       disabledBy: 'b2-cctv-off',
-      detectedMessage: '천장 카메라가 끼익 돌아와 수호에게서 멈춘다. 렌즈 옆에 붉은 불. 메인 서버실 문에서 잠금 소리가 난다.',
+      spottedLine: '카메라가 날 보고 있었어… 시선을 피해야 해.',
       lockedMessage: '문이 잠겨 있다. 문 위 카메라가 아직 수호를 보고 있다. 시야에서 벗어나 있으면 다시 풀릴 것 같다.' },
   ],
   fixtures: [
