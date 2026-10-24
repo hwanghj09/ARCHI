@@ -124,7 +124,6 @@ function restoreProgress(data) {
     // 자신의 출입증은 기본 소지품이며, 이전 저장에도 진행 상황을 유지한 채 추가한다.
     collectedItems.add('f17-badge');
     for (const item of data.items) collectedItems.add(item);
-    officePostit.element.hidden = !collectedItems.has('story-badge-seen'); // 새 게임·불러오기 직후 오프닝 동안(목표 갱신이 막혀 있다)에도 옆자리 포스트잇이 이전 판 상태로 남지 않게 한다
     // 새 퍼즐이 없던 저장이 다른 층·이동 중인 객실에서 시작하면 귀환 수단을 보존한다.
     if (data.powerCircuitVersion !== 1 && data.blackout &&
         ((floorById.get(data.scene.id)?.floor < 17) || (data.cabin && data.elevators?.[data.cabin.index]?.travelling))) {
@@ -134,7 +133,9 @@ function restoreProgress(data) {
     if (data.storyPuzzleVersion !== 1) {
       if (collectedItems.has('f12-log-hint')) ['f12-network-isolated', 'f12-evaluation-solved'].forEach(item => collectedItems.add(item));
       if (collectedItems.has('goal-f7-log') || collectedItems.has('b1-elevator')) {
-        for (const item of ['f12-network-isolated', 'f12-evaluation-solved', 'f7-training-time-solved', 'f7-external-connection-solved']) collectedItems.add(item);
+        // 층 이동 혼잣말(story-repro-seen·story-external-seen)은 불러오자마자 나오지 않게 본 것으로 둔다.
+        for (const item of ['f12-network-isolated', 'f12-evaluation-solved', 'f7-training-time-solved', 'f7-external-connection-solved',
+          'story-repro-seen', 'story-external-seen']) collectedItems.add(item);
       }
     }
     // 13층 백업 장치가 B1 제어반 조건이 되기 전에 B2 제한을 이미 푼 저장은 장치를 챙긴 것으로 친다.

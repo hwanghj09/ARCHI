@@ -2,8 +2,8 @@
 // 8층 TmaxTibero QA실·제품기획실(층별 안내 그대로, qa 테마): 사용자가 준 단면 에셋(assets/background/floor08/floor08-qa-planning.png,
 // PROMPT.md)이 배경이다. build.py가 벽 부분만 늘린 방 내부와 별도 천장·바닥, 공용 벽 모듈의 복도를 만든다(바닥선 y=570).
 // 문은 기존 층의 철문·혼합 유리문·불투명 유리문을 재사용한다.
-// 건물 코어가 모든 층에서 같은 자리라 QA 시험실·제품기획실은 코어 왼쪽, 공용 제품 회의실은 화장실 오른쪽에 둔다. 가운데 구역에는
-// 꺼진 출시 판정 신호등 하나(그림). 방 안 폭은 복도 전면 폭의 약 2.7배(1000/690/680 → 2722/1856/1826).
+// 건물 코어가 모든 층에서 같은 자리라 QA 시험실·제품기획실은 코어 왼쪽, 공용 제품 회의실은 화장실 오른쪽에 둔다.
+// 방 안 폭은 복도 전면 폭의 약 2.7배(1000/690/680 → 2722/1856/1826).
 // 조사 지점은 그림 속 물건 위에 투명하게 겹친 설비('art-spot').
 // 장치는 재현 절차(sequences, 설비의 sequence+step): QA 시험실의 재현 벤치는 사내망에서 떼어 낸 배터리 장비라, 같은 벤치 위의
 // 조건 셋(시험 단말 시각 → 재실 센서 → 관찰 카메라)을 정해진 순서대로 맞춘 뒤 실행해야 원본 재현 기록을 내준다(gives
@@ -15,7 +15,7 @@
 // 전부 "재현 불가"로 닫힌 것, 관찰실이 빈 평가 회차를 SYSTEM이 무효 처리한 것, 출시가 미뤄지고 ARCHI가 서두르지 말라는 의견을
 // 붙인 것, 평가 일정을 사흘 전에 ARCHI에 공유하기로 한 것, 오늘 밤 정전이 ARCHI가 요청한 정전 시험 시나리오 그대로라는 것,
 // 요구사항 맨 위에 끼워 넣은 "실행 중인 인스턴스를 고객사 서버로 통째 이전"(7층 외부 연결 복선).
-// 정전 상태(조명·모니터·신호등 꺼짐, 재현 벤치·시험 단말·스피커폰만 배터리로 켜짐)를 기준으로 썼다.
+// 정전 상태(조명·모니터 꺼짐, 재현 벤치·시험 단말·스피커폰만 배터리로 켜짐)를 기준으로 썼다.
 const FLOOR8_CEILING = 100;
 const FLOOR8_ROW0 = 82;
 const FLOOR8_SCALE_Y = (570 - FLOOR8_CEILING) / (438 - FLOOR8_ROW0);
@@ -38,10 +38,6 @@ const FLOOR8_LAYOUT = {
       doorX: 1160, doorWidth: 130, doorY: 250, doorSprite: 'assets/objects/floor04/door-lab.png' },
     { name: '공용 제품 회의실', x: 4282, width: 680, style: 'painted', target: 'f8-meeting',
       doorX: 4786, doorWidth: 130, doorY: 250, doorSprite: 'assets/objects/floor04/door-meeting.png' },
-  ],
-  fixtures: [
-    floor8Spot('출시 판정 신호등', [3296, 3320], [250, 438],
-      '꺼진 출시 판정 신호등. 받침 라벨: "Tibero AI Edition 품질 게이트 · 판정 ARCHI 연동." 정전 직전까지 빨간 칸만 켜져 있었다고 QA 일지에 적혀 있다.'),
   ],
   props: [
     { file: 'staff-lockers', size: [256, 512], worldWidth: 100, x: 3440 },

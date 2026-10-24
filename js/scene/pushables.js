@@ -35,8 +35,9 @@ function pushPushables(direction, velocityX) {
 }
 
 // 플레이어가 그 상자 위(발이 윗면)에 서 있는가: 16층 선반 항불안제의 손 닿는 조건(상자를 어디까지 밀었는지는 상관없다).
+// name이 없으면 아무 상자나 본다(경비 로봇은 상자 위의 수호에게 손이 닿지 않는다, guard-patrol.js).
 function playerOnPushable(name) {
-  return movingParts.some(part => pushableOf(part) && part.name === name &&
+  return movingParts.some(part => pushableOf(part) && (!name || part.name === name) &&
     Math.abs(body.bounds.max.y - (part.body.position.y - part.height / 2)) < 3 &&
     Math.abs(body.position.x - part.body.position.x) < part.width / 2 + 20);
 }

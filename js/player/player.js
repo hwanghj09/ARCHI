@@ -3,6 +3,7 @@ const idleSheet = document.getElementById('idle-sprite');
 const walkSheet = document.getElementById('walk-sheet');
 const runSheet = document.getElementById('run-sheet');
 const crouchSheet = document.getElementById('crouch-sheet');
+const phoneCrouchSheet = document.getElementById('phone-crouch-sheet');
 const jumpSheet = document.getElementById('jump-sheet');
 const interactSheet = document.getElementById('interact-sheet');
 const phoneSheet = document.getElementById('phone-sheet');
@@ -163,17 +164,17 @@ function animate(distance, sprinting = false, elapsed = 0) {
   sprite.dataset.frame = index;
   sprite.dataset.phoneHeld = String(holdingPhone);
   const light = phoneLightOn ? 'on' : 'off';
-  for (const [sheet, motion] of [[phoneWalkSheet, 'walk'], [phoneRunSheet, 'run']]) {
-    const src = motion === 'walk' ? `assets/player/jeong-suho-phone-walk-eight-${light}.png` :
+  for (const [sheet, motion] of [[phoneCrouchSheet, 'crouch'], [phoneWalkSheet, 'walk'], [phoneRunSheet, 'run']]) {
+    const src = motion === 'crouch' ? `assets/player/jeong-suho-phone-crouch-${light}.png` : motion === 'walk' ? `assets/player/jeong-suho-phone-walk-eight-${light}.png` :
       phoneLightOn && state !== 'run' ? 'assets/player/jeong-suho-phone-jump-on.png' : `assets/player/jeong-suho-phone-run-sixteen-${light}.png`;
     if (sheet.getAttribute('src') !== src) {
       sheet.setAttribute('src', src);
-      sheet.style.width = `${100 * (motion === 'walk' ? walkFrames : phoneLightOn && state !== 'run' ? 2 : runFrames)}%`;
+      sheet.style.width = `${100 * (motion === 'crouch' ? 4 : motion === 'walk' ? walkFrames : phoneLightOn && state !== 'run' ? 2 : runFrames)}%`;
     }
   }
   if (state === 'idle') showIdleFrame(index);
   if (state === 'push') pushSheet.style.transform = `translateX(${-index * 100 / pushFrames}%)`;
-  if (state === 'crouch') crouchSheet.style.transform = `translateX(${-index * 25}%)`;
+  if (state === 'crouch') (holdingPhone ? phoneCrouchSheet : crouchSheet).style.transform = `translateX(${-index * 25}%)`;
   if (state === 'walk') (holdingPhone ? phoneWalkSheet : walkSheet).style.transform = `translateX(${-index * 100 / walkFrames}%)`;
   if (state === 'run') (holdingPhone ? phoneRunSheet : runSheet).style.transform = `translateX(${-index * 100 / runFrames}%)`;
   // Jump/fall retains its separate two-pose lit sheet.

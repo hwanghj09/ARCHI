@@ -3,6 +3,8 @@
 // 정문은 동쪽 끝(화장실 오른쪽 구역)의 회전문이고, 그 앞에 정전으로 날개가 풀린 스피드 게이트와 충전 도크의 경비 로봇 R-01이 선다.
 // 방 셋은 모두 엘리베이터 왼쪽 서쪽 날개에 벽을 맞대고 선다(왼쪽 3): Harmony Hall 1층 객석, Vision Hall, 건강관리실.
 // 1번 엘리베이터 앞에 층별 안내판(17F~B2), 비상계단 옆 가운데 구역에 안내 데스크가 있다. 여성휴게실은 건강관리실 안쪽의 잠긴 문이다.
+// 퇴근 흐름: 어두운 1층에서 정문이 안 열린다(f1-door-checked) → 안내 데스크에서 전력 앱 설치 → 휴대폰으로 1층 전력을 켜면
+// 정문 화면에 차단 대상(정수호)이 뜨고 같은 전력으로 R-01이 기동해 추격 컷씬(story-scene.js)이 시작된다.
 // 복도 전면은 그림 속 칸막이 범위에 맞춘다. 내부 문은 그 전면의 문 좌우 벽 비율을 따른다.
 // 장치는 경비 로봇 정비 패널의 네 자리 번호(설비 fixture의 code): 패널 스티커는 "정비 코드 = 제작일(월일)"이라 Vision Hall 진열장의
 // 제작일(11월 7일, 1107)을 넣게 만들지만 옛 번호다. 건강관리실 점검표가 로비 배치(9월 14일) 때 배치일로 바꿨다고 알려 주어 0914가
@@ -94,14 +96,21 @@ const FLOOR1_LAYOUT = {
       caption: '정비 패널이 열린다.',
       takenMessage: '정비 패널은 다시 꺼져 있다. 방금 읽은 줄이 떠오른다. 차단 대상 17F 정수호. 사각형 센서 헤드 아래 작은 카메라가 보인다.' },
     { name: '정문', x: 4610, y: 140, width: 320, style: 'revolving-door', lines: ['TMAXSOFT TOWER'], outline: [4618, 138, 352, 418], selfPowered: true, // 표시창은 배터리
-      message: '회전문도 옆 자동문도 멈춰 있다. 유리 너머 거리의 가로등은 멀쩡히 켜져 있다. 문틀 위 작은 표시창만 배터리로 깜빡인다: "출입 통제 중 · SYSTEM."',
+      message: '회전문도 옆 자동문도 멈춰 있다. 전기가 없으니 자동문 잠금도 풀리지 않는다. 유리 너머 거리의 가로등은 멀쩡히 켜져 있다. 문틀 위 작은 표시창만 배터리로 깜빡인다: "출입 통제 중 · SYSTEM."',
+      // 로비에 전력이 들어오면(1층 도착 컷씬) 표시창이 차단 대상을 밝힌다. R-01 정비 기록(0914)과 같은 내용이다.
+      poweredMessage: '자동문 화면이 켜졌지만 문은 열리지 않는다: "출입 차단 · 미등록 출입증 · 17F 정수호 · 명령 SYSTEM." 내 이름이다.',
       surface: 'screen', look: 'lcd', writing: [{ text: '출입 통제 중 · SYSTEM.', size: 'large', align: 'center' }],
       caption: '회전문도 옆 자동문도 멈춰 있다. 유리 너머 거리의 가로등은 멀쩡히 켜져 있다. 문틀 위 작은 표시창만 배터리로 깜빡인다.' },
   ],
   props: [
     { file: 'waiting-sofa', size: [512, 256], worldWidth: 240, x: 4080 },
     { file: 'large-planter', size: [256, 512], worldWidth: 78, x: 1300 },
-    { file: 'reception-counter', size: [512, 256], worldWidth: 322, x: 3310 },
+    // 안내 데스크: 정문이 안 열린 뒤 로비 전원을 켤 앱을 여기서 받는다. 데스크 PC는 사내망 UPS로 켜져 있고,
+    // 조사하면 휴대폰을 USB로 꽂는 화면(usb-connection.js)이 먼저 열린다. 꽂으면 앱이 설치되고 아래 message가 나온다.
+    { file: 'reception-counter', size: [512, 256], worldWidth: 322, x: 3310, name: '안내 데스크', gives: 'solar-app-installed', sound: 'phone', usbInstall: true,
+      condition: () => phoneBattery > 0 && !phoneDock, missingMessage: '데스크 PC에 USB 케이블이 꽂혀 있다. 휴대폰이 없으면 연결할 수 없다.',
+      message: '안내 데스크 모니터 옆 시설팀 안내문: "정전 시 로비 출입문 전원은 \'비상 전력 제어\' 앱으로 복구하세요. 데스크 PC(UPS)에 휴대폰을 USB로 연결하면 설치됩니다." 케이블을 꽂자 PC가 휴대폰을 잡고 앱이 설치됐다.',
+      takenMessage: '시설팀 안내문이다. 휴대폰의 \'비상 전력 제어\' 앱으로 1층에 전력을 보내면 출입문이 다시 움직일 것이다.' },
     { file: 'large-planter', size: [256, 512], worldWidth: 78, x: 3515 },
   ],
 };

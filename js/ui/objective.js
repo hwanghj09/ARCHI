@@ -6,11 +6,11 @@ const objectiveText = document.getElementById('objective-text');
 
 // 읽으면 진행도가 넘어가는 이야기 소품(층 번호 + 소품 이름 → collectedItems에 남길 플래그).
 const OBJECTIVE_READS = {
-  '17|포스트잇': 'goal-postit-read',
   '12|팀장 책상': 'goal-f12-memo', // 읽은 기록만 남긴다. 12층 진행은 모델 평가실 퍼즐(f12-evaluation-solved)로 넘어간다.
   '5|서가 꼭대기': 'goal-f5-note', // 5층 연구 노트: 8층 재현 기록과 함께 7층 백업 장비의 조건(backup-puzzle.js)
   '-2|ARCHI 메인 콘솔': 'goal-b2-console',
   '1|층별 안내판': 'goal-f1-directory',
+  '1|정문': 'f1-door-checked', // 퇴근하려다 문이 안 열리는 것을 확인했다(story-scene.js 혼잣말 → 안내 데스크)
 };
 
 // 1층 추격 뒤 편의점 위치를 모르면 안내판을 본다. PC 시설 안내를 읽었거나 다른 층에 있는 이전 저장이면 생략한다.
@@ -42,7 +42,7 @@ const OBJECTIVES = [
     text: 'ARCHI의 신호는 어디를 거쳐 밖으로 나가는 걸까? 보안 자료실에서 외부 통로를 찾아보자.' },
   // 13층 백업 장치를 17층 컴퓨터에 꽂아 깨진 리허설 영상을 봐야(f17-usb-played, usb-video.js) 2층에 갈 이유가 생긴다.
   { when: () => collectedItems.has('f7-external-connection-solved') && !collectedItems.has('f17-usb-played') && !collectedItems.has('f2-projected'),
-    title: '장치 확인하기', text: '13층에서 챙긴 USB를 확인하자. 17층 내 자리 컴퓨터의 외부 저장 장치를 열고 USB를 연결해 보자. (17층에 전력이 필요해)' },
+    title: '장치 확인하기', text: '13층에서 챙긴 USB를 확인하자. 이 층 기술지원 상황실의 원격지원 PC나 17층 내 자리 컴퓨터의 외부 저장 장치로 열 수 있다.' },
   // 녹화 NAS의 디스크(f2-reel)를 챙긴 뒤에는 Harmony Hall 영사기와 직원 휴게실 리모컨(f2-remote)을 가리킨다(floor-02.js).
   { when: () => collectedItems.has('f7-external-connection-solved') && collectedItems.has('f2-reel') && !collectedItems.has('f2-remote') && !collectedItems.has('f2-projected'),
     title: '원본 재생하기', text: 'Harmony Hall 천장의 배터리 영사기로 원본을 틀어 보자. 영사기를 내릴 리모컨은 직원 휴게실에 있을지도 모른다.' },
@@ -65,13 +65,10 @@ const OBJECTIVES = [
   { when: () => collectedItems.has('f12-network-isolated') && !logRecordsReady() && !collectedItems.has('f12-paper-backup'), title: '종이 백업 찾기', text: '화면 속 기록은 믿을 수 없다. 모델 평가실 평가 벤치에 출력해 둔 기록이 있을지도.' },
   { when: () => collectedItems.has('f12-network-isolated'), title: '이상한 밤 찾기', text: '기록은 지켜 냈다. 야간 로그 단말기에서 그날 밤 무슨 일이 있었는지 확인하자.' },
   { when: () => logDeleting(), title: '로그 삭제를 막아라', text: '누군가 기록을 지우고 있다! 연결을 끊어야 한다.' },
-  // 포스트잇을 읽고 닫으면(goal-postit) 사원증이 있는 곳을 가리킨다.
-  { when: () => collectedItems.has('story-badge-seen') && !collectedItems.has('f16-badge') && collectedItems.has('goal-postit'), title: '출입증 쌔비기',
+  // 게이트 컷씬(story-badge-seen)이 사원증 위치를 알려 주므로 바로 16층 카페를 가리킨다.
+  { when: () => collectedItems.has('story-badge-seen') && !collectedItems.has('f16-badge'), title: '출입증 쌔비기',
     text: '팀장은 16층 카페에 사원증을 자주 두고 간다. 카페에 가 보자.' },
-  { when: () => collectedItems.has('story-badge-seen') && !collectedItems.has('f16-badge'), title: '출입증 쌔비기', text: '출입증이 필요하다. 내 자리 옆 사원의 자리를 조사해보자.' },
-  { when: () => collectedItems.has('story-robot-seen') && !collectedItems.has('f1-robot-log'), title: '이상 행동',
-    text: '경비 로봇은 왜 나를 노렸을까? ARCHI 개발 팀을 조사해보자.' },
-  { when: () => collectedItems.has('story-robot-seen'), title: '이상 행동', text: '경비 로봇은 왜 나를 노렸을까? ARCHI 개발 팀을 조사해보자.' },
+  { when: () => collectedItems.has('story-robot-seen'), title: '나갈 방법 찾기', text: '정문은 SYSTEM이 내 이름으로 막아 두었다. 12층 ARCHI 개발팀을 조사해 보자.' },
   { when: needsF1Directory, title: '편의점은 몇 층?', text: '항불안제를 사러 편의점에 가야 한다. 엘리베이터 옆 층별 안내판을 확인하자.' },
   { when: () => collectedItems.has('story-anxiety-seen') && !collectedItems.has('story-robot-seen') && collectedItems.has('f16-antianxiety') && !collectedItems.has('f16-antianxiety-used'),
     title: '정신 불안', text: '항불안제를 복용하자.' },
@@ -86,14 +83,15 @@ const OBJECTIVES = [
     title: '회로 안내도 확인', text: '전선을 함부로 건드릴 순 없다. 어떻게 이어야 할지 먼저 알아야 한다.' },
   { when: () => solarEnabled && !collectedItems.has('f17-emergency-linked'),
     title: '승강기 비상 회선 연결', text: '승강기에도 전력을 보내야 한다.' },
-  { when: () => collectedItems.has('f17-emergency-linked') && !collectedItems.has('f1-chase-ended') && !collectedItems.has('solar-app-installed') && !collectedItems.has('solar-app-downloaded'),
-    title: '전력 앱 내려받기', text: '17층 사무실의 내 자리 컴퓨터로 돌아가자. 블로그에서 전력 앱을 내려받을 수 있다.' },
+  // 1층에서 퇴근이 막히는 흐름(floor-01.js): 정문 확인 → 안내 데스크 앱 → 1층 전력. 제목을 '퇴근하기'로 두어 승강기는 1층만 눌린다(cabin.js).
+  { when: () => collectedItems.has('f17-emergency-linked') && !collectedItems.has('f1-reached'), title: '퇴근하기', text: '승강기가 다시 움직인다. 아래로 내려가자.' },
+  { when: () => collectedItems.has('f17-emergency-linked') && !collectedItems.has('f1-chase-ended') && !collectedItems.has('solar-app-installed') && !collectedItems.has('f1-door-checked'),
+    title: '퇴근하기', text: '드디어 1층이다. 정문으로 나가자.' },
   { when: () => collectedItems.has('f17-emergency-linked') && !collectedItems.has('f1-chase-ended') && !collectedItems.has('solar-app-installed'),
-    title: '전력 앱 설치하기', text: '내 자리 컴퓨터의 파일 전송을 열고 USB를 연결해 휴대폰에 앱을 설치하자.' },
+    title: '퇴근하기', text: '정문에 전기가 없다. 안내 데스크에 로비 전원을 켤 방법이 있을지도.' },
   { when: () => collectedItems.has('f17-emergency-linked') && !collectedItems.has('f1-chase-ended') && !floorHasLighting(1),
-    title: '1층 전력 켜기', text: '1층은 아직 어둠 속이다. 내려가기 전에 불을 밝혀야 한다.' },
-  { when: () => collectedItems.has('f17-emergency-linked') && collectedItems.has('f1-reached'), title: '퇴근하기', text: '드디어 1층이다. 이제 집에 가자.' },
-  { when: () => collectedItems.has('f17-emergency-linked'), title: '퇴근하기', text: '승강기가 다시 움직인다. 아래로 내려가자.' },
+    title: '퇴근하기', text: '휴대폰 전력 앱으로 1층에 전력을 보내자.' },
+  { when: () => collectedItems.has('f17-emergency-linked'), title: '퇴근하기', text: '로비에 불이 들어왔다. 정문으로 가자.' },
   { when: () => collectedItems.has('rooftop-unlocked'), title: '비상 전력 켜기', text: '옥상 문이 열렸다. 옥상에서 건물에 전력을 되돌릴 방법을 찾아보자.' },
   { when: () => realBuildingBlackout(), title: '정전', text: '정전이 발생했다. 전력을 확보하기 위한 수단을 찾아보자.' },
   { when: () => true, title: '퇴근하기', text: '오늘 일은 끝났다. 집에 가자.' },
@@ -133,9 +131,6 @@ function refreshObjective() {
   // 메뉴·오프닝·정전 컷씬 동안은 목표 창이 가려져 있으니, 보이게 된 뒤에 새 목표를 쳐 넣는다.
   // 컷씬이 곧 시작되거나 진행 중이면 컷씬이 끝난 뒤에 목표를 바꾼다.
   if (mainMenuActive || openingActive || blackoutSceneActive || storySceneActive || storyScenePending()) return;
-  officePostit.element.hidden = !collectedItems.has('story-badge-seen'); // 출입증 쌔비기 목표가 시작되면 옆자리 포스트잇이 생긴다
-  // 포스트잇을 읽고 조사창을 닫으면(닫기·Esc·E) 그때 목표 내용이 바뀐다.
-  if (!usingInspection && collectedItems.has('goal-postit-read')) collectedItems.add('goal-postit');
   // 1층에 한 번 내려오면 다시 다른 층에 가도 '정문으로 나가자'가 유지되도록 남겨 둔다(자동 저장에 함께 남는다).
   if (currentSceneFloor === 1) collectedItems.add('f1-reached');
   const objective = OBJECTIVES.find(entry => entry.when());

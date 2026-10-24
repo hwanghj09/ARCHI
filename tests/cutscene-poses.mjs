@@ -59,7 +59,7 @@ try {
   // Real dialogue entries select their own acting poses and return control without a stale pose.
   const sceneCount = await page.evaluate(() => STORY_SCENES.length);
   for (let index = -1; index < sceneCount; index++) {
-    if (index === 0) continue; // Movement and waits are checked below, without summoning a live robot.
+    if (await page.evaluate(index => STORY_SCENES[index]?.skip === skipF1Chase, index)) continue; // Movement and waits are checked below, without summoning a live robot.
     await page.evaluate(index => startStoryScene(index < 0 ? BLACKOUT_MONOLOGUE : STORY_SCENES[index]), index);
     while (await page.evaluate(() => storySceneActive)) {
       const expected = await page.evaluate(() => storySteps[storyStep].pose);
@@ -97,10 +97,14 @@ try {
     triggerBuildingBlackout(); collectedItems.add('f17-emergency-linked');
     solarEnabled = true; solarPoweredFloors = [1]; updatePowerState();
     collectedItems.delete('f1-chase-ended'); collectedItems.delete('story-anxiety-seen');
-    performFloorChange('f1', 0); startStoryScene(STORY_SCENES[0]);
+    performFloorChange('f1', 0); startStoryScene(STORY_SCENES.find(scene => scene.skip === skipF1Chase));
   });
   await visible('relieved'); await page.locator('#story-scene').click();
-  for (let i = 0; i < 250 && await pose() !== 'pant'; i++) await page.clock.runFor(100);
+  for (let i = 0; i < 250 && await pose() !== 'pant'; i++) {
+    // 정문 화면을 읽는 대사는 클릭으로 넘긴다(연출 단계는 저절로 넘어간다).
+    if (await page.evaluate(() => storySteps[storyStep]?.say !== undefined)) await page.locator('#story-scene').click();
+    await page.clock.runFor(100);
+  }
   await visible('pant');
   assert.deepEqual(await page.evaluate(() => [playerCaught, collectedItems.has('f1-chase-ended')]), [false, true]);
   await page.clock.runFor(1300);

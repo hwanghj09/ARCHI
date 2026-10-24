@@ -1,4 +1,5 @@
-// 케이블은 컴퓨터를 사용하는 동안만 연결된다. 앱 설치 기록과 달리 저장하지 않는다.
+// 1층 안내 데스크 PC(floor-01.js의 usbInstall)에 휴대폰을 USB로 꽂는 화면. 꽂으면 창을 닫고 데스크를 다시 조사해
+// 전력 앱 설치(gives)와 안내문을 보인다. 케이블 연결 자체는 저장하지 않는다.
 const computerUsbBoard = document.getElementById('computer-usb-board');
 const computerUsbPanel = document.getElementById('computer-usb-panel');
 const computerUsbPhone = document.getElementById('computer-usb-phone');
@@ -15,7 +16,6 @@ let computerUsbGeometry = null;
 function openComputerUsbConnection() {
   if (!computerUsbAvailable() || computerUsbConnected || !computerUsbPanel.hidden) return;
   computerUsbPositions = { phone: { x: .4, y: .42 }, plug: { x: .62, y: .84 } };
-  computer.hidden = true;
   computerUsbPanel.hidden = false;
   computerUsbBlocked = [...document.body.children].filter(element => element !== computerUsbPanel && element.tagName !== 'SCRIPT' && !element.inert);
   for (const element of computerUsbBlocked) element.inert = true;
@@ -31,14 +31,22 @@ function closeComputerUsbConnection() {
   computerUsbPanel.hidden = true;
   for (const element of computerUsbBlocked) element.inert = false;
   computerUsbBlocked = [];
-  computer.hidden = !usingComputer;
-  refreshSolarDownload();
-  const target = document.getElementById(computerUsbConnected ? 'computer-solar-transfer' : 'computer-usb-open');
-  (target.disabled ? document.getElementById('computer-window-close') : target).focus({ preventScroll: true });
+  releaseInput();
+  document.getElementById('stage').focus({ preventScroll: true });
+  if (!computerUsbConnected) return;
+  interact(); // 연결된 채 다시 조사하면 handleDeskUsbInteract를 건너뛰고 앱을 설치한다
+  computerUsbConnected = false;
 }
 
 function computerUsbAvailable() {
-  return usingComputer && !transitioning && floorHasPower(17) && !phoneDock && phoneBattery > 0;
+  return !transitioning && !phoneDock && phoneBattery > 0;
+}
+
+// 데스크 PC는 사내망 UPS로 켜져 있어 1층이 정전이어도 쓸 수 있다. 휴대폰이 없으면 false를 돌려 missingMessage를 보이게 한다.
+function handleDeskUsbInteract(door) {
+  if (!door.usbInstall || computerUsbConnected || collectedItems.has(door.gives) || !computerUsbAvailable()) return false;
+  openComputerUsbConnection();
+  return true;
 }
 
 function drawComputerUsb() {
@@ -130,7 +138,7 @@ function refreshComputerUsb() {
   computerUsbPhone.disabled = computerUsbPlug.disabled = computerUsbPort.disabled = !available || computerUsbConnected;
   computerUsbPlug.setAttribute('aria-pressed', String(computerUsbArmed || computerUsbConnected));
   computerUsbStatus.textContent = computerUsbConnected ? 'USB 연결됨' :
-    !available ? '전력 또는 휴대폰 배터리 부족' : computerUsbArmed ? '휴대폰 아래 포트를 선택하세요.' : '';
+    !available ? '휴대폰 배터리 부족' : computerUsbArmed ? '휴대폰 아래 포트를 선택하세요.' : '';
   drawComputerUsb();
 }
 
@@ -190,7 +198,6 @@ computerUsbPort.addEventListener('click', () => { if (computerUsbArmed) connectC
 window.addEventListener('blur', cancelComputerUsbDrag);
 new ResizeObserver(drawComputerUsb).observe(computerUsbBoard);
 for (const img of computerUsbBoard.querySelectorAll('img')) img.addEventListener('load', drawComputerUsb);
-document.getElementById('computer-usb-open').addEventListener('click', openComputerUsbConnection);
 document.getElementById('computer-usb-close').addEventListener('click', closeComputerUsbConnection);
 computerUsbPanel.addEventListener('keydown', event => {
   if (event.code === 'Escape') { event.preventDefault(); event.stopPropagation(); closeComputerUsbConnection(); }

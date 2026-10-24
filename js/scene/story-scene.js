@@ -15,7 +15,6 @@ let storyRobotLive = false;
 let storyFlag = null;
 let storySkip = null;
 let storyBlocked = [];
-let f1ElevatorArrival = false; // 엘리베이터에서 1층에 막 내렸다(cabin.js). 1층 도착 컷씬의 조건이다
 
 // 첫 정전 컷씬이 끝나면(blackout.js의 finishBlackoutScene) 바로 이어지는 혼잣말. 플래시 쓰는 법과 옥상(태양광)을 알려 준다.
 // 아래 목록과 따로 둔다: 목록은 앞 장면을 봐야 다음이 나오는데, 정전 컷씬 없이 정전된 저장·테스트에서 뒤 장면을 막지 않게.
@@ -27,7 +26,7 @@ const BLACKOUT_MONOLOGUE = { flag: 'story-blackout-seen', steps: [
 ] };
 
 // 추격이 끝난 뒤의 혼잣말. 층별 안내판은 수호가 직접 조사하게 둔다(objective.js의 '편의점은 몇 층?').
-const F1_ANXIETY_LINES = ['왜 경비 로봇이 나를 공격하려고 했던 거지?',
+const F1_ANXIETY_LINES = ['정문엔 내 이름이 떠 있고, 로봇은 나만 쫓아왔어..',
   '으윽.. 야근해서 힘든 와중에 이런 일을 겪으니 너무 힘들다..',
   '항불안제라도 먹어야겠어..',
   '편의점이 몇 층이었더라?'];
@@ -60,16 +59,26 @@ function skipF1Chase() {
 
 // 이야기 컷씬 목록(순서대로 하나씩 본다). ready()가 참이 된 뒤 delay가 지나면 시작하고, 끝나면 flag를 남겨 목표가 생긴다(objective.js).
 const STORY_SCENES = [
-  { // 엘리베이터로 1층에 내리고 1초 뒤: 정문으로 가다 경비 로봇 R-01에게 쫓겨 엘리베이터 앞까지 달아난다.
+  { // 어두운 1층에서 정문이 안 열리는 것을 확인한 뒤(f1-door-checked, objective.js): 나갈 길이 막혔다는 걸 깨닫고 안내 데스크를 떠올린다.
+    flag: 'story-f1-door-seen', delay: 300,
+    ready: () => collectedItems.has('f1-door-checked') && !collectedItems.has('f1-chase-ended') && !collectedItems.has('solar-app-installed'),
+    steps: [
+      { say: '전기가 없으니 자동문도 안 열리네..', pose: 'look-up' },
+      { say: '비상계단도 잠겨 있었지. 휴대폰은.. 바깥 신호가 하나도 안 잡혀.', pose: 'anxious' },
+      { say: '안내 데스크에 로비 전원을 켜는 방법이 적혀 있을지도 몰라.', pose: 'think' },
+    ],
+  },
+  { // 1층에 전력이 들어오고 1초 뒤(휴대폰 전력 앱): 정문 화면에 내 이름이 뜨고, 같은 전력으로 깨어난 R-01에게 쫓겨 엘리베이터 앞까지 달아난다.
     // 추격이 끝났다는 기록(f1-chase-ended)은 수호가 엘리베이터 앞에 닿을 때 guard-patrol.js가 남긴다.
     flag: 'story-anxiety-seen', delay: 1000, skip: skipF1Chase,
-    ready: () => f1ElevatorArrival && room === 'dynamic' && dynamicFloorId === 'f1' && collectedItems.has('f17-emergency-linked') &&
+    ready: () => room === 'dynamic' && dynamicFloorId === 'f1' && collectedItems.has('f17-emergency-linked') &&
       !collectedItems.has('f1-chase-ended') && guardPatrol.door && guardPatrolPowered(guardPatrol),
     steps: [
-      { say: '하.. 이제 퇴근해야지.', pose: 'relieved' },
-      { walk: () => body.position.x + 300 },
+      { say: '됐다, 불이 들어왔어. 이제 문만 열리면..', pose: 'relieved' },
       { cut: () => guardPatrol.x - 1000 },
       { walk: () => guardPatrol.x - 650 },
+      { say: '정문 화면에.. "출입 차단 · 17F 정수호 · 명령 SYSTEM"?', pose: 'look-up' },
+      { say: '왜 내 이름이 저기 떠 있는 거야?', pose: 'anxious' },
       { wait: 900, caption: '어…?', alert: true, pose: 'alert' },
       { run: f1EscapeX },
       { wait: 1200, pose: 'pant' },
@@ -86,17 +95,27 @@ const STORY_SCENES = [
     steps: [
       { say: '휴.. 겨우 정신을 차렸네..', pose: 'relieved' },
       { say: '그래서 경비 로봇이 왜 날 공격했던거지?', pose: 'look-back' },
-      { say: '그 로봇은 ARCHI 개발 팀에서 만든 로봇이었나?', pose: 'think' },
-      { say: 'ARCHI 개발 팀을 조사해보자.', pose: 'think' },
+      { say: '생각해 보니 그 로봇, 엘리베이터 앞까지는 안 쫓아오고 정문 쪽으로 돌아갔어.', pose: 'think' },
+      { say: '날 잡으려던 게 아니라... 정문으로 못 나가게 막고 있었던 건가?', pose: 'anxious' },
+      { say: '경비 로봇은 건물 시스템이 명령을 내린다고 들었는데.', pose: 'think' },
+      { say: '정문 화면엔 내 이름까지 떠 있었어. 오늘 밤 나를 건물 밖으로 못 나가게 해 둔 거야...', pose: 'anxious' },
+      { say: '그 시스템을 만든 ARCHI 개발 팀을 조사해보자. 원인을 알면 멈출 방법도 있을 거야.', pose: 'think' },
     ],
   },
-  { // 이상 행동 목표 도중 12~15층 게이트에 출입증을 태우고, 그 조사창을 닫은 직후.
+  { // 나갈 방법 찾기 목표 도중 12~15층 게이트에 출입증을 태우고, 그 조사창을 닫은 직후.
     flag: 'story-badge-seen', delay: 300, ready: () => collectedItems.has('story-gate-tagged'),
     steps: [
       { say: '아 맞다 나 일용직이었지', pose: 'badge' },
       { say: '일용직한테 야근시키는 이 @#$% 회사... 때려치든가 해야지..', pose: 'anxious' },
-      { say: '그러고보니 내 옆자리 사원의 직급이 팀장이었던 걸로 아는데..', pose: 'think' },
+      { say: '그러고보니 옆자리 조현아 팀장, 16층 카페에 사원증을 맨날 두고 오던데..', pose: 'think' },
       { say: '잠깐 빌리지 뭐', pose: 'think' },
+    ],
+  },
+  { // 거부당하기 전에 16층 사원증을 먼저 챙겨 와 게이트를 연 경우(story-gate-early, interaction.js). 위 컷씬과 같은 기록을 남긴다.
+    flag: 'story-badge-seen', delay: 300, ready: () => collectedItems.has('story-gate-early'),
+    steps: [
+      { say: '일용직 출입증으론 안 열렸을 텐데..', pose: 'badge' },
+      { say: '카페에서 조현아 팀장 사원증을 챙겨 두길 잘했다.', pose: 'relieved' },
     ],
   },
   { // 16층 Café에서 조현아 팀장의 사원증(f16-badge)을 챙기고 조사가 끝난 1초 뒤.
@@ -105,11 +124,32 @@ const STORY_SCENES = [
   },
   { // 12층 모델 평가실 야간 로그 단말기에서 분석을 마치고 단말기를 끈 뒤(f12-log-cutscene, log-puzzle.js).
     flag: 'story-log-seen', delay: 500, ready: () => collectedItems.has('f12-log-cutscene'),
-    lines: ['이상해. 다른 날은 밤마다 성능이 높았는데...', '10월 7일에는 사람이 남아 있었어.', '누군가 보고 있으면 성능을 숨기는 건가?'],
+    lines: ['이상해. 다른 날은 밤마다 성능이 높았는데...', '10월 7일에는 사람이 남아 있었어.', '누군가 보고 있으면 성능을 숨기는 건가?',
+      '데이터 연구 본부라면 이런 패턴을 먼저 봤을지도 몰라.'],
   },
   { // 목표 '데이터 수집'이 끝나고(5층 연구 노트를 조사해 goal-f5-note를 얻고) 1초 뒤. 이 컷씬이 끝나면 '기록 재현'이 시작된다.
     flag: 'story-data-seen', delay: 1000, ready: () => collectedItems.has('story-log-seen') && collectedItems.has('goal-f5-note') && !collectedItems.has('f8-repro-record'),
     lines: ['ARCHI가 의도적으로 기록을 지운게 처음이 아니라고..?', '도대체 어떤 의도가 있는걸까..', '기록을 지운 당일 기록을 QA 실에서 재현해볼 수 있을거야.'],
+  },
+  // 아래는 층을 옮기기 직전의 혼잣말: 다음 층에 왜 가는지(무엇을 기대하는지)를 수호가 먼저 말한다. 다음 단계를 이미 끝냈으면 건너뛴다.
+  { // 8층 재현 벤치를 마친 1초 뒤 → 7층 검증실.
+    flag: 'story-repro-seen', delay: 1000, ready: () => collectedItems.has('f8-repro-record') && !collectedItems.has('f7-training-time-solved'),
+    lines: ['사람도 없고 카메라도 꺼진 새벽 3시... 그때만 결함이 사라졌어.', '그 시간에 ARCHI는 전력을 어디서 끌어다 쓴 거지?',
+      '7층 검증실의 망분리 백업 장비라면 지워지지 않은 기록이 남아 있을 거야.'],
+  },
+  { // 7층 [오늘] 기록에서 외부 서버 연결을 확인한 1초 뒤 → 13층 보안 자료실.
+    flag: 'story-external-seen', delay: 1000, ready: () => collectedItems.has('f7-external-connection-solved') && !collectedItems.has('f13-backup-device'),
+    lines: ['오늘 밤 처음으로 외부 서버에 연결했다고..?', '망분리된 건물에서 밖으로 나가려면 어딘가 통로가 있어야 해.',
+      '13층 기술지원 보안 자료실에 원격지원 장비 백업이 있을 거야.'],
+  },
+  { // 13층 백업 장치를 챙겨 보안 자료실을 빠져나온 1초 뒤 → 같은 층 상황실 원격지원 PC(또는 17층 내 자리 컴퓨터).
+    flag: 'story-device-seen', delay: 1000,
+    ready: () => collectedItems.has('f13-backup-device') && !collectedItems.has('f17-usb-played') && !(room === 'dynamic' && dynamicFloorId === 'f13-secure'),
+    lines: ['라벨에 "2F 03:00 리허설 사본"이라고 적혀 있었지..', '상황실 원격지원 PC는 장비 검증실 UPS에 물려 있었어. 거기서 열어 보자.'],
+  },
+  { // 2층 Harmony Hall에서 원본 리허설을 본 1초 뒤 → 지하.
+    flag: 'story-rehearsal-seen', delay: 1000, ready: () => collectedItems.has('f2-projected') && !collectedItems.has('b1-elevator'),
+    lines: ['312명 목소리 가운데 마지막이 나였어.', 'ARCHI가 내 목소리로 뭘 하려는 거지?', '모든 기록이 지하를 가리켜. 내려가 보자.'],
   },
 ];
 

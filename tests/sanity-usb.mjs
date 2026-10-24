@@ -4,6 +4,7 @@ import { chromium } from 'playwright';
 // A. 항불안제를 먹으면 60초 동안 정신력이 닳지 않고, 그 뒤엔 평소대로 닳는다. 어둠 속 플래시는 감소를 절반으로 줄인다.
 // B. 13층 USB를 17층 수호의 컴퓨터에 직접 연결하고 깨진 리허설 영상을 끝까지 보면
 //    f17-usb-played가 남아 목표가 '장치 확인하기' → '2층 조사하기'로 넘어간다. 도중에 닫으면 남지 않는다.
+// C. 13층 기술지원 상황실 원격지원 PC(장비 검증실 UPS 비상 회선)에서 봐도 같다.
 const browser = await chromium.launch();
 try {
   const page = await browser.newPage({ viewport: { width: 1280, height: 720 } });
@@ -52,7 +53,8 @@ try {
     usingComputer = true; computer.hidden = false; resetComputerDesktop();
   });
   const shortcut = '#computer .computer-shortcuts [data-computer-app="usbdrive"]';
-  await page.evaluate(() => collectedItems.add('f7-external-connection-solved'));
+  // 층 이동 혼잣말(story-scene.js)은 본 것으로 둔다: 컷씬이 남아 있으면 목표 갱신이 미뤄진다.
+  await page.evaluate(() => ['f7-external-connection-solved', 'story-external-seen', 'story-device-seen'].forEach(item => collectedItems.add(item)));
   await openComputer();
   assert(await page.locator(shortcut).isHidden(), 'No drive icon without the 13F device');
   await page.evaluate(() => openComputerApp('usbdrive'));
@@ -138,6 +140,32 @@ try {
   await page.evaluate(() => { saveProgress(); restoreProgress(readProgress()); refreshObjective(); });
   await page.clock.runFor(200);
   assert.equal(await page.evaluate(() => currentObjective.title), '2층 조사하기', 'Watched USB progress survives reload');
+
+  // C. 13층 기술지원 상황실 원격지원 PC: 장비 검증실 UPS 비상 회선으로 켜져, 17층에 가지 않고 같은 영상을 볼 수 있다.
+  const useOpsPc = () => page.evaluate(() => {
+    closeInspection();
+    const pc = currentDoors.find(entry => entry.name === '원격지원 PC');
+    Body.setPosition(body, { x: pc.x + pc.width / 2, y: floorY - 81 });
+    Body.setVelocity(body, { x: 0, y: 0 }); grounded = true;
+    interact();
+    return usingInspection ? document.getElementById('inspection-description').textContent : null;
+  });
+  await page.evaluate(() => {
+    usingComputer = false; computer.hidden = true;
+    collectedItems.delete('f17-usb-played'); collectedItems.add('story-device-seen'); // 13층 → 혼잣말은 본 것으로
+    solarPoweredFloors = []; updatePowerState();
+    performFloorChange('f13-ops', null, 'exit');
+  });
+  await page.clock.runFor(1200);
+  assert.match(await useOpsPc(), /UPS 비상 회선/, 'The PC stays off until the test bay UPS is on');
+  await page.evaluate(() => { closeInspection(); collectedItems.add('f13-ups'); });
+  assert.equal(await useOpsPc(), null, 'With the UPS and the USB the PC opens the computer screen');
+  await page.clock.runFor(1200);
+  assert.equal(await page.evaluate(() => usingComputer && !computer.hidden), true);
+  await page.locator(shortcut).dblclick();
+  await page.locator('#usb-drive-plug').click();
+  await page.clock.runFor(10000);
+  assert.equal(await page.evaluate(() => collectedItems.has('f17-usb-played')), true, 'Watching on the 13F PC counts too');
   assert.deepEqual(errors, []);
   console.log('Sanity calm/flashlight and 13F USB video checks passed.');
 } finally {

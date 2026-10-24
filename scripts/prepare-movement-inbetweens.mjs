@@ -246,3 +246,5 @@ for (const spec of specs) {
     .png().toFile(`${root}jeong-suho-${spec.output}.png`);
   console.log(`${spec.output}: ${spec.base === 'run-eight' ? 'nine' : 'eight'} whole-body poses, sixteen timing cells.`);
 }
+
+await import('./prepare-phone-poses.mjs');

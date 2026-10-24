@@ -124,6 +124,8 @@ try {
   for (let i = 0; i < 2; i++) await page.locator('#story-scene').click({ position: { x: 600, y: 300 } });
   assert.equal(await page.locator('#story-caption').textContent(), '누군가 보고 있으면 성능을 숨기는 건가?');
   await page.locator('#story-scene').click({ position: { x: 600, y: 300 } });
+  assert.equal(await page.locator('#story-caption').textContent(), '데이터 연구 본부라면 이런 패턴을 먼저 봤을지도 몰라.', 'The last line points to the next floor');
+  await page.locator('#story-scene').click({ position: { x: 600, y: 300 } });
   assert(await page.locator('#story-scene').isHidden());
   assert(await has('story-log-seen'), 'The analysis is delivered in Suho’s story scene');
   assert.equal((await clues()).length, 0, 'Automatic clue recording stays disabled');
@@ -134,7 +136,7 @@ try {
   assert.equal((await clues()).length, clueCount);
   assert.equal(await objective(), '데이터 수집');
   // 7층 백업 장비는 5층 연구 노트와 8층 재현 기록 뒤에 열린다(backup-puzzle.js).
-  await page.evaluate(() => { collectedItems.add('goal-f5-note'); collectedItems.add('f8-repro-record'); });
+  await page.evaluate(() => { collectedItems.add('goal-f5-note'); collectedItems.add('f8-repro-record'); collectedItems.add('story-repro-seen'); }); // 8층 → 7층 혼잣말은 본 것으로
   // 이미 뽑은 랙은 다시 삭제를 시작하지 않는다.
   assert.deepEqual(await use('f12-eval', '네트워크 랙'), { control: false, inspection: true, log: false, backup: false });
   assert.match(await page.locator('#inspection-description').textContent(), /포트에서 빠져 있다/);
@@ -191,6 +193,10 @@ try {
   assert.equal((await clues()).length, 0, 'The solved puzzle does not recreate an automatic journal');
   await page.screenshot({ path: '.local/story-f7-solved.png' });
   await page.keyboard.press('Escape');
+  // 패널을 닫으면 13층으로 가는 이유를 혼잣말로 먼저 말한다(story-scene.js).
+  await page.clock.runFor(1200);
+  assert.equal(await page.locator('#story-caption').textContent(), '오늘 밤 처음으로 외부 서버에 연결했다고..?', 'The 7F → 13F monologue plays');
+  await page.keyboard.press('Escape');
   // 7층 다음은 13층 보안 자료실의 백업 장치(tests/vault-puzzle.mjs). 그 전에는 B1 제어반이 풀리지 않는다.
   assert.equal(await objective(), '외부 연결 통로 찾기');
   await page.evaluate(() => { collectedItems.add(cctvLiveItem); collectedItems.add('b1-cctv-seen'); });
@@ -198,7 +204,7 @@ try {
   assert.match(await page.locator('#inspection-description').textContent(), /13층.*백업 장치/);
   assert.equal(await has('b1-elevator'), false, 'B1 key switch waits for the 13F backup device');
   await page.evaluate(() => closeInspection());
-  await page.evaluate(() => collectedItems.add('f13-backup-device'));
+  await page.evaluate(() => { collectedItems.add('f13-backup-device'); collectedItems.add('story-device-seen'); collectedItems.add('story-rehearsal-seen'); }); // 층 이동 혼잣말은 본 것으로
   assert.equal(await objective(), '장치 확인하기');
   await page.evaluate(() => collectedItems.add('f17-usb-played'));
   assert.equal(await objective(), '2층 조사하기');
@@ -280,7 +286,7 @@ try {
   await page.locator('#log-quiz-options button', { hasText: '건물에 사람이 있었음' }).click();
   assert(await has('f12-evaluation-solved'));
   assert.equal(await has('f12-log-hint'), false, 'A late unplug gives no extra hint');
-  await page.evaluate(() => { collectedItems.add('goal-f5-note'); collectedItems.add('f8-repro-record'); });
+  await page.evaluate(() => { collectedItems.add('goal-f5-note'); collectedItems.add('f8-repro-record'); collectedItems.add('story-repro-seen'); }); // 8층 → 7층 혼잣말은 본 것으로
   await use('f7-verify', '망분리 백업 장비');
   await page.locator('#backup-tabs button', { hasText: '10/05' }).click();
   assert.equal(await page.locator('#backup-body td[data-hinted="true"]').count(), 0, 'No hint, no outline');

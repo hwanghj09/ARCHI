@@ -92,15 +92,6 @@ try {
       const window = await state('document').boundingBox();
       assert(window.x >= 0 && window.y >= 0 && window.x + window.width <= width + 1 && window.y + window.height <= height - 55, 'Mobile windows fit above the taskbar');
     }
-    await page.evaluate(() => { collectedItems.add('solar-app-downloaded'); refreshSolarDownload(); });
-    await launch('transfer');
-    await page.locator('#computer-usb-open').click();
-    await page.locator('#computer-usb-plug').click(); await page.locator('#computer-usb-port').click();
-    await page.locator('#computer-solar-transfer').click();
-    await state('transfer').locator('[data-window-minimize]').click();
-    await launch('notes');
-    await page.clock.runFor(8000);
-    assert.equal(await page.evaluate(() => collectedItems.has('solar-app-installed')), true, 'A minimized transfer finishes while another app is open');
     assert.deepEqual(await page.evaluate(() => ({ x: body.position.x, battery: phoneBattery, sanity })), initial, 'Desktop input stays isolated from the player and paused survival timers');
     await page.evaluate(data => restoreProgress(data), await page.evaluate(() => progressSnapshot()));
     assert.equal(await page.evaluate(() => [...computerWindows.values()].some(state => state.open)), false, 'Restore clears transient desktop windows');

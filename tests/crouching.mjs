@@ -92,10 +92,46 @@ try {
   await page.clock.runFor(100);
   assert.equal((await state()).animation, 'crouch', 'Raising the phone preserves the crouching pose');
   assert.equal((await state()).flash, 'off');
+  assert.equal(await page.locator('#player img:visible').getAttribute('id'), 'phone-crouch-sheet');
+  assert((await page.locator('#phone-crouch-sheet').getAttribute('src')).endsWith('crouch-off.png'));
   await page.clock.runFor(await page.evaluate(() => phoneLightDelayMs));
   assert.equal((await state()).animation, 'crouch');
   assert.equal((await state()).flash, 'on');
+  await page.locator('#phone-crouch-sheet').evaluate(image => image.decode());
+  assert((await page.locator('#phone-crouch-sheet').getAttribute('src')).endsWith('crouch-on.png'));
+  for (const direction of ['d', 'a']) {
+    await page.keyboard.down(direction);
+    const litFrames = new Set();
+    for (let i = 0; i < 12; i++) {
+      await page.clock.runFor(100);
+      pose = await state();
+      litFrames.add(pose.frame);
+      assert.equal(pose.animation, 'crouch');
+      assert.equal(pose.facing, direction === 'd' ? 1 : -1);
+      assert.equal(await page.locator('#player img:visible').count(), 1);
+      assert.equal(await page.locator('#player img:visible').getAttribute('id'), 'phone-crouch-sheet');
+      assert(await page.locator('#phone-crouch-sheet').evaluate(image =>
+        Math.abs(new DOMMatrix(getComputedStyle(image).transform).m41 + Number(sprite.dataset.frame) * 192) < .01));
+      assert(await page.evaluate(() => {
+        const lamp = crouchPhoneLamps[Number(sprite.dataset.frame)];
+        return Math.abs(parseFloat(world.style.getPropertyValue('--beam-x')) - body.position.x - (lamp[0] * .75 - 96) * facing) < .01 &&
+          Math.abs(parseFloat(world.style.getPropertyValue('--beam-y')) - body.bounds.max.y + 178 - lamp[1] * .75) < .01;
+      }), 'Crouched light follows the current phone LED in both directions');
+    }
+    assert.equal(litFrames.size, 4, 'Lit crouching reaches every original movement phase');
+    await page.keyboard.up(direction);
+  }
+  await page.clock.runFor(100);
+  await page.screenshot({ path: '.local/crouch-flashlight.png' });
   await page.keyboard.press('f');
+  await page.clock.runFor(34);
+  assert.equal(await page.locator('#player img:visible').getAttribute('id'), 'crouch-sheet', 'Turning off restores the empty-handed crouch');
+  await page.keyboard.press('f');
+  await page.clock.runFor(100);
+  await page.keyboard.press('f');
+  await page.clock.runFor(await page.evaluate(() => phoneLightDelayMs + 34));
+  assert.equal((await state()).flash, 'off', 'Cancelling the raising delay leaves no light or phone sprite');
+  assert.equal(await page.locator('#player img:visible').getAttribute('id'), 'crouch-sheet');
 
   await page.evaluate(() => {
     window.crouchTestCeiling = Bodies.rectangle(body.position.x, floorY - 120, 220, 20, { isStatic: true });

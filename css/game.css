@@ -934,10 +934,10 @@ body { margin: 0; overflow: hidden; background: #27292b; color: #eee; font: 14px
 #player #run-sheet, #player #phone-run-sheet { width: 1600%; height: 100%; }
 #player .action-sheet { width: 200%; height: 100%; }
 #player #antianxiety-sheet { width: 600%; height: 100%; }
-#player #crouch-sheet { width: 400%; height: 100%; }
+#player #crouch-sheet, #player #phone-crouch-sheet { width: 400%; height: 100%; }
 #player #cutscene-sheet { width: 1000%; height: 100%; }
 #player[data-state="cutscene"] #cutscene-sheet { display: block; }
-#player[data-state="crouch"] #crouch-sheet { display: block; }
+#player:not([data-phone-held="true"])[data-state="crouch"] #crouch-sheet { display: block; }
 #player[data-state="consume"] #antianxiety-sheet { display: block; }
 #player[data-state="idle"] #idle-sprite,
 #player:not([data-phone-held="true"])[data-state="walk"] #walk-sheet,
@@ -945,6 +945,7 @@ body { margin: 0; overflow: hidden; background: #27292b; color: #eee; font: 14px
 #player:not([data-phone-held="true"])[data-state="jump"] #jump-sheet,
 #player:not([data-phone-held="true"])[data-state="fall"] #jump-sheet,
 #player[data-state="interact"] #interact-sheet { display: block; }
+#player[data-phone-held="true"][data-state="crouch"] #phone-crouch-sheet,
 #player[data-phone-held="true"][data-state="walk"] #phone-walk-sheet,
 #player[data-phone-held="true"][data-state="run"] #phone-run-sheet,
 #player[data-phone-held="true"][data-state="jump"] #phone-run-sheet,
@@ -1034,9 +1035,6 @@ body :is(#story-next, .scene-next) { bottom: max(72px, calc(env(safe-area-inset-
   nav button { width: 48px; height: 44px; }
 }
 
-/* 17층 사무실 옆자리 포스트잇(office17.js의 officePostit): 출입증 쌔비기 목표가 시작되면 나타난다. */
-.office-postit { position: absolute; background: url(../assets/objects/floor17/postit.png) center / 100% 100% no-repeat; pointer-events: none; }
-.office-postit[hidden], #world:not([data-room="office"]) .office-postit { display: none; }
 /* 마우스로 글자를 고르거나 그림을 끌지 못하게 한다(js/input/no-copy.js). 플레이어가 쓰는 입력 칸은 그대로 고를 수 있다. */
 body { -webkit-user-select: none; user-select: none; }
 input, textarea, [contenteditable="true"] { -webkit-user-select: text; user-select: text; }
