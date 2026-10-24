@@ -32,7 +32,14 @@
 #world[data-b2-capture] .guard-bot { visibility: hidden; }
 body:has(#b2-capture-scene:not([hidden])) #world #darkness { display: none; }
 body:has(#b2-capture-scene:not([hidden])) :is(header, nav, #debug-sidebar, #inventory-button, #objective, #sanity-hud, #game-menu-button, #interaction-hint, #interaction-outline, #suho-line, #b2-delete-bar, #b2-barricade-line, #room-alarm) { visibility: hidden; }
-#b2-bad-ending { z-index: 19; border: 0; background: transparent; box-shadow: none; }
+/* 배드 엔딩: 화면 전체를 검게 덮고 흰 글씨로 제목·설명(위), 크레딧(가운데, b2-ending.css), 버튼(아래)을 둔다. */
+#b2-bad-ending { z-index: 19; inset: 0; transform: none; width: auto; display: flex; flex-direction: column; justify-content: space-between;
+  padding: 8vh 16px; border: 0; background: #000; box-shadow: none; color: #fff; }
+#b2-bad-ending[hidden] { display: none; }
+#b2-bad-ending :is(h2, p, .b2-ending-actions) { position: relative; z-index: 1; }
+#b2-bad-ending h2 { font: 700 clamp(24px, 4vw, 44px)/1.2 Georgia, serif; letter-spacing: .06em; }
+#b2-bad-ending > p { max-width: 560px; margin: 0 auto auto; font-size: 15px; }
+#b2-bad-ending #b2-credits { inset: 30vh 0 22vh; }
 @media (prefers-reduced-motion: reduce) {
   #b2-capture-scene #b2-capture-view { transform: none !important; }
   #b2-capture-eyelids { clip-path: none; opacity: calc(1 - var(--eye-open, 1)); }

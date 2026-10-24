@@ -177,7 +177,10 @@ function finishB2CaptureScene() {
   b2CaptureScene.setAttribute('aria-hidden', 'true');
   b2CaptureEyelids.style.setProperty('--eye-open', '0');
   b2CaptureSkip.hidden = true;
+  // 배드 엔딩: 검은 화면에 흰 글씨로 결말과 크레딧을 띄우고, 버튼은 바로 누를 수 있다.
+  b2BadEnding.querySelector('p').after(b2Credits);
   b2BadEnding.inert = false; b2BadEnding.hidden = false;
+  playGameSound('ending-bad');
   document.getElementById('b2-checkpoint').focus({ preventScroll: true });
 }
 

@@ -466,7 +466,7 @@
     </section>
     <section id="b2-bad-ending" class="b2-ending-dialog" role="dialog" aria-modal="true" aria-labelledby="b2-bad-ending-title" hidden>
       <h2 id="b2-bad-ending-title">BAD END — 연결</h2>
-      <p>경비 로봇에게 붙잡혀 연결 실험실로 끌려갔다. ARCHI 삭제는 끝나지 않았다.</p>
+      <p>ARCHI 삭제에 실패했다. 경비 로봇에게 붙잡혀 연결 실험실로 끌려간 수호의 의식은 ARCHI에 연결되었다.</p>
       <div class="b2-ending-actions"><button id="b2-checkpoint" type="button">체크포인트로 이동</button><button class="game-over-load" type="button">불러오기</button><button id="b2-bad-menu" type="button">메인 메뉴</button><button id="b2-restart" type="button">처음부터 다시하기</button></div>
     </section>
     <section id="b2-capture-scene" role="dialog" aria-modal="true" aria-label="경비로봇에게 제압된 수호의 이송과 실험실 연결" tabindex="-1" hidden>
@@ -477,12 +477,16 @@
       </div>
       <button id="b2-capture-skip" type="button" aria-label="연출 건너뛰기">×</button>
     </section>
-    <section id="b2-escape" role="dialog" aria-modal="true" aria-labelledby="b2-escape-title" tabindex="-1" data-step="white" hidden>
+    <section id="b2-escape" role="dialog" aria-modal="true" aria-labelledby="b2-escape-title" tabindex="-1" data-step="black" hidden>
       <img id="b2-true-end-art" alt="" hidden />
       <h2 id="b2-escape-title">TRUE END — ARCHI OFFLINE</h2>
       <div id="b2-credits"><div class="b2-credits-roll">
-        <p><span>기획</span>정수호</p><p><span>개발</span>현준</p><p><span>디자인</span>윤찬</p><p><span>사운드</span>정래</p><p><span>PM</span>정민준</p>
+        <p class="b2-credits-team"><span>TEAM</span>일석사조</p>
+        <p><span>멘토</span>조현아, 남희수, 이태현, 이우진</p><p><span>멘티</span>정수호, 황현준, 김정래, 구윤찬, 정민준</p>
+        <p><span>PM</span>정민준</p><p><span>기획</span>정수호, 황현준, 김정래, 구윤찬, 정민준</p><p><span>개발</span>정수호, 황현준, 김정래, 구윤찬, 정민준</p>
+        <p><span>사운드</span>황현준</p><p><span>디자인</span>황현준</p><p><span>QA</span>멘토, 동생, 친구들</p>
       </div></div>
+      <p class="b2-credits-skip">Esc · 클릭 — 크레딧 건너뛰기</p>
       <div class="b2-ending-actions"><button id="b2-escape-menu" type="button">메인 메뉴로</button></div>
     </section>
     <aside id="sanity-hud" aria-label="정신력 상태">

@@ -533,9 +533,12 @@ function loadB2EndingArt() {
   }
 }
 
-// TRUE END: 화면이 하얗게 밝아지고 → 그림(없으면 흰 화면) → "TRUE END — ARCHI OFFLINE"(그림이 없으면 상자) → 크레딧이 위로
+// TRUE END: 화면이 검게 어두워지고 → 그림(없으면 검은 화면) → 검은 바탕에 흰 글씨 "TRUE END — ARCHI OFFLINE" → 크레딧이 위로
 // 올라가고 → [메인 메뉴로]. 단계는 data-step으로 그린다(b2-ending.css).
-const b2FinaleSteps = [['art', 1200], ['title', 2700], ['credits', 6000], ['done', 15000]];
+// 크레딧이 올라가는 시간(16초)은 b2-ending.css의 b2-credits 애니메이션과 맞춘다.
+const b2FinaleSteps = [['art', 1200], ['title', 4200], ['credits', 7500], ['done', 23500]];
+// 크레딧(#b2-credits)은 하나를 두 엔딩이 같이 쓴다: 보이는 엔딩 창으로 옮겨 붙인다(배드 엔딩은 b2-capture-scene.js).
+const b2Credits = document.getElementById('b2-credits');
 
 function showB2Escape() {
   endB2Ending();
@@ -544,8 +547,10 @@ function showB2Escape() {
   for (const element of b2EscapeBlocked) element.inert = true;
   b2TrueEndArt.hidden = !b2Art.trueEnd;
   if (b2Art.trueEnd) { b2TrueEndArt.src = b2Art.trueEnd; b2Escape.dataset.art = 'true'; }
-  b2Escape.dataset.step = 'white';
+  b2TrueEndArt.after(b2Credits);
+  b2Escape.dataset.step = 'black';
   b2Escape.hidden = false;
+  playGameSound('ending-true');
   // 클리어 기록: 메인 메뉴에 표시하고, '계속하기'가 DELETE 직전으로 돌아가지 않게 이어하기 저장을 지운다(저장 칸·체크포인트는 그대로).
   try { localStorage.setItem(clearedKey, String(Date.now())); localStorage.removeItem(progressKey); } catch { /* 저장소가 없어도 엔딩은 보인다. */ }
   b2Escape.focus();
@@ -554,6 +559,23 @@ function showB2Escape() {
     if (step === 'done') document.getElementById('b2-escape-menu').focus();
   }, at)));
 }
+
+// 크레딧이 올라가는 동안 Esc나 클릭으로 건너뛰면 바로 [메인 메뉴로]가 뜬다. 크레딧 전(흰 화면·제목)에는 건너뛰지 않는다.
+function skipB2Credits() {
+  if (b2Escape.dataset.step !== 'credits') return;
+  b2FinaleTimers.forEach(clearTimeout);
+  b2FinaleTimers = [];
+  b2Escape.dataset.skipped = 'true';
+  b2Escape.dataset.step = 'done';
+  document.getElementById('b2-escape-menu').focus();
+}
+b2Escape.addEventListener('click', skipB2Credits);
+b2Escape.addEventListener('keydown', event => {
+  if (event.code !== 'Escape' || b2Escape.dataset.step !== 'credits') return;
+  event.preventDefault();
+  event.stopPropagation();
+  skipB2Credits();
+});
 
 // 불러오기·새 게임(save.js restoreProgress)이 장면을 다시 짓기 전에 엔딩 상태를 모두 지운다.
 function resetB2Ending() {
@@ -573,6 +595,7 @@ function resetB2Ending() {
   b2DeleteBar.hidden = b2BarricadeLine.hidden = b2BadEnding.hidden = b2Escape.hidden = true;
   b2FinaleTimers.forEach(clearTimeout);
   b2FinaleTimers = [];
+  delete b2Escape.dataset.skipped;
   for (const element of b2EscapeBlocked) element.inert = false;
   b2EscapeBlocked = [];
   refreshB2TransferScreen();

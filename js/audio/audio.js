@@ -103,7 +103,7 @@ function gameAudioBuffer(name, variant = 0) {
     'door-metal': .65, 'door-wood': .72, 'door-glass': .52, 'door-slide': .9,
     paper: .42, 'bag-zip': .48, drawer: .62, lever: .3, plug: .26, 'card-scan': .34, dial: .18,
     keyboard: .09, 'mouse-click': .075, 'power-relay': .65, 'water-drop': .5, 'pipe-tick': .55,
-    'hallucination-footsteps': 1.6, 'hallucination-knock': 1.5, 'hallucination-whisper': 2.8 };
+    'hallucination-footsteps': 1.6, 'hallucination-knock': 1.5, 'hallucination-whisper': 2.8, 'ending-true': 7, 'ending-bad': 7 };
   const loop = ['office', 'dark', 'wind', 'motor', 'cctv-bgm', 'cctv-dread',
     'server-room', 'electrical-room', 'plumbing', 'hall-room'].includes(name);
   const duration = loop ? 8 : durations[name];
@@ -217,6 +217,12 @@ function gameAudioBuffer(name, variant = 0) {
         .06 * (sin(880, t) + sin(932.33, t)) * (.6 + .4 * sin(.25, t)) +
         .045 * Math.sin(2 * Math.PI * 1318.5 * t + 4 * Math.sin(2 * Math.PI * .5 * t)) * (.5 + .5 * sin(.125, t)) +
         .14 * soft * hit(t % 2, .3, 3) * Math.min(1, (t % 2) / .3 * 3); break;
+      // B2 엔딩 화면(b2-ending.js · b2-capture-scene.js). TRUE END: 천천히 부풀었다 사라지는 밝은 장화음.
+      case 'ending-true': sample = Math.min(1, t / 1.5) * Math.exp(-Math.max(0, t - 2.5) * .7) *
+        (.07 * (sin(261.63, t) + sin(329.63, t) + sin(392, t)) + .05 * sin(130.81, t) + .035 * sin(523.25, t) * (.5 + .5 * sin(.5, t))); break;
+      // BAD END: 쿵 하는 저음 뒤에 반음 차이로 긁히는 낮은 울림과 떨리는 높은 음이 남는다.
+      case 'ending-bad': sample = .42 * sin(41, t) * hit(t, 0, 1.4) + .3 * low * hit(t, 0, 2.5) + Math.min(1, t / 1.2) * Math.exp(-Math.max(0, t - 3) * .8) *
+        (.07 * (sin(110, t) + sin(116.54, t)) + .03 * Math.sin(2 * Math.PI * 1244.5 * t + 3 * Math.sin(2 * Math.PI * .7 * t))); break;
       case 'office': sample = .6 * low + .09 * sin(62.5, t) + .025 * sin(125, t); break;
       case 'dark': sample = .46 * low + .065 * sin(37.5, t) * (1 + .18 * sin(.125, t)); break;
       case 'wind': sample = .95 * low * (.65 + .2 * sin(.25, t) + .12 * sin(.625, t)); break;

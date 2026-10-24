@@ -22,26 +22,37 @@
 #b2-delete-bar[data-offline="true"] #b2-delete-fill { background: #8fbda3; }
 #inspection .b2-action:disabled { border-color: #5d6461; background: #2a2e2d; color: #8d9692; cursor: not-allowed; }
 /* 엔딩 그림(assets/ending, b2-ending.js의 loadB2EndingArt). */
-/* TRUE END: 하얗게 밝아짐(white) → 그림(art) → 제목(title) → 크레딧(credits) → 메뉴 버튼(done). 그림이 없으면 제목은 상자로. */
-#b2-escape { position: fixed; z-index: 14; inset: 0; display: grid; place-items: center; overflow: hidden; background: #fff; color: #eee5d6; outline: none;
-  animation: b2-white-in 1.2s ease-out both; transition: background 1.5s; }
+/* TRUE END: 검게 어두워짐(black) → 그림(art) → 검은 바탕 흰 글씨 제목(title) → 크레딧(credits) → 메뉴 버튼(done). */
+#b2-escape { position: fixed; z-index: 14; inset: 0; display: grid; place-items: center; overflow: hidden; background: #000; color: #fff; outline: none;
+  animation: b2-black-in 1.2s ease-out both; }
 #b2-escape[hidden] { display: none; }
-@keyframes b2-white-in { from { background: #fff0; } to { background: #fff; } }
+@keyframes b2-black-in { from { background: #0000; } to { background: #000; } }
 #b2-true-end-art { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity 1.5s; }
 #b2-true-end-art[hidden] { display: none; }
-#b2-escape:not([data-step="white"]) #b2-true-end-art { opacity: 1; }
-#b2-escape-title { position: relative; margin: 0; padding: 20px 28px; opacity: 0; transition: opacity 1s; font: 700 clamp(24px, 4vw, 44px)/1.2 Georgia, serif;
-  letter-spacing: .06em; text-align: center; background: #111b20f8; border: 2px solid #ad7666; }
-#b2-escape[data-art] #b2-escape-title { background: none; border: 0; color: #fff; text-shadow: 0 2px 14px #000d; }
+#b2-escape[data-step="art"] #b2-true-end-art { opacity: 1; }
+#b2-escape-title { position: relative; margin: 0; padding: 20px 28px; opacity: 0; transition: opacity 1s; color: #fff; font: 700 clamp(24px, 4vw, 44px)/1.2 Georgia, serif;
+  letter-spacing: .06em; text-align: center; }
 #b2-escape[data-step="title"] #b2-escape-title { opacity: 1; }
-#b2-escape:is([data-step="credits"], [data-step="done"]) { animation: none; background: #050708; }
-#b2-escape:is([data-step="credits"], [data-step="done"]) #b2-true-end-art { opacity: .2; }
 #b2-credits { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
-.b2-credits-roll { position: absolute; left: 0; right: 0; top: 100%; color: #f1f1e5; font: 24px/1.4 Arial, sans-serif; text-align: center; }
-.b2-credits-roll p { margin: 0 0 30px; }
-.b2-credits-roll span { display: block; color: #9fb0a8; font-size: 13px; letter-spacing: .2em; }
-#b2-escape:is([data-step="credits"], [data-step="done"]) .b2-credits-roll { animation: b2-credits 9s linear forwards; }
+.b2-credits-roll { position: absolute; left: 0; right: 0; top: 100%; color: #fff; font: 24px/1.4 Arial, sans-serif; text-align: center; }
+.b2-credits-roll p { margin: 0 0 30px; font-size: inherit; }
+.b2-credits-roll span { display: block; color: #bbb; font-size: 13px; letter-spacing: .2em; }
+.b2-credits-roll .b2-credits-team { margin-bottom: 56px; font: 700 clamp(32px, 5vw, 52px)/1.2 Georgia, serif; letter-spacing: .12em; }
+/* 크레딧 시간(16초)은 b2-ending.js의 b2FinaleSteps('credits'→'done')와 맞춘다. 건너뛰면(data-skipped) 크레딧을 치우고 메뉴 버튼만 둔다. */
+#b2-escape:is([data-step="credits"], [data-step="done"]) .b2-credits-roll, #b2-bad-ending .b2-credits-roll { animation: b2-credits 16s linear forwards; }
+#b2-escape[data-skipped] .b2-credits-roll { visibility: hidden; }
 @keyframes b2-credits { to { transform: translateY(calc(-50vh - 50%)); } }
+.b2-credits-skip { position: absolute; right: 24px; bottom: 16px; margin: 0; color: #9fb0a8; font: 13px Arial, sans-serif; visibility: hidden; }
+#b2-escape[data-step="credits"] { cursor: pointer; }
+#b2-escape[data-step="credits"] .b2-credits-skip { visibility: visible; }
+/* 움직임 줄이기: 밝아짐·페이드 없이 단계만 바꾸고, 크레딧은 올리지 않고 가운데에 두 줄로 한 번에 보인다. */
+@media (prefers-reduced-motion: reduce) {
+  #b2-escape, #b2-true-end-art, #b2-escape-title { animation: none; transition: none; }
+  #b2-escape:is([data-step="credits"], [data-step="done"]) .b2-credits-roll, #b2-bad-ending .b2-credits-roll { animation: none; top: 50%; transform: translateY(-50%); columns: 2; column-gap: 48px;
+    width: min(760px, calc(100vw - 32px)); margin: 0 auto; font-size: 18px; }
+  .b2-credits-roll p { break-inside: avoid; margin-bottom: 18px; }
+  .b2-credits-roll .b2-credits-team { column-span: all; margin-bottom: 28px; font-size: 32px; }
+}
 #b2-escape .b2-ending-actions { position: absolute; left: 0; right: 0; bottom: 8%; visibility: hidden; }
 #b2-escape[data-step="done"] .b2-ending-actions { visibility: visible; }
 /* 서버실 출입문을 막는 장비 운반 상자(floor-b2.js movables, 밀 수 있는 정적 충돌체). 로봇이 두드리면 문과 상자가 흔들린다:
