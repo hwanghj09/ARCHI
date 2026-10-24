@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { chromium } from 'playwright';
-import { finishSceneTransition } from './scene-transition.mjs';
+import { finishSceneTransition, goToDeskComputer } from './scene-transition.mjs';
 
 const browser = await chromium.launch();
 try {
@@ -44,6 +44,7 @@ try {
     await page.clock.runFor(50);
   };
 
+  await goToDeskComputer(page);
   await page.keyboard.press('e');
   await finishSceneTransition(page);
   assert(await pc.isVisible());

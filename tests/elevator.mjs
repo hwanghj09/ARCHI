@@ -1311,7 +1311,6 @@ try {
       await page.keyboard.press('Enter');
       await page.clock.runFor(100);
     };
-    const robot = { x: 4520, width: 72 };
     assert.equal(await header(), corridorHeader);
     await checkCore();
     assert.equal(await page.locator('#dynamic-scene').getAttribute('data-theme'), 'atrium');
@@ -1330,7 +1329,7 @@ try {
       'All three rooms sit in the west wing');
     assert.deepEqual(await page.locator('#dynamic-scene .fixture').evaluateAll(els => els.map(el => [el.className, el.getAttribute('aria-label')])),
       [['fixture directory-board', '층별 안내판'], ['fixture speed-gates', '스피드 게이트'], ['fixture guard-bot', '경비 로봇'],
-        ['fixture revolving-door', '정문']]);
+        ['fixture revolving-door', '정문'], ['fixture phone-charger', '휴대폰 충전 콘센트 · 전력 공급 중']]); // 안내 데스크 옆 콘센트
     const directory = await page.locator('#dynamic-scene .fixture.directory-board span').allTextContents();
     assert.equal(directory.length, 15, 'The directory lists 17F to B2 with minor floors grouped as "···"');
     assert.equal(directory[0], '17F  ARCHI Soft 사업테스트본부');
@@ -1368,16 +1367,26 @@ try {
     await page.keyboard.press('e');
     await page.clock.runFor(800);
     assert.match(await status(), /비상계단 문이 잠겨/);
-    // 추격 컷씬 뒤 R-01은 순찰하며 수호를 쫓는다(추격은 guard-patrol·guard-regression 검사가 본다). 이 경로 검사는 층의 길과
-    // 소품만 보므로, 0914로 정비 패널을 열어 R-01을 끌 때까지 R-01만 제자리에 세워 둔다.
+    // 추격 컷씬 뒤 R-01은 순찰하며 수호를 쫓는다. 게임에서 이 시점은 정전 중이고, 1층 조명은 휴대폰 전력 앱의 태양광 공급으로
+    // 켜져 있으며, 승강기는 17층 비상 회선(UPS)으로 움직인다. 그 상태로 맞춘 뒤 실제 방법으로 R-01을 멈춘다.
+    // R-03은 정전 중에만 무작위로 층을 옮겨 다닌다(updateRoamer). 이 경로 검사 동안 엘리베이터를 가져가거나 지하로 내려가지 않게
+    // 9층 대기 자리에 붙들어 둔다(R-03 검사는 robot-save-reset 등이 따로 본다).
     await page.evaluate(() => {
-      window.updateRobotForTest = updateRobot;
-      window.updateRobot = (robot, delta) => (robot === guardPatrol ? undefined : window.updateRobotForTest(robot, delta));
+      window.powerBeforeF1Test = { buildingBlackout, solarEnabled, solarPoweredFloors: [...solarPoweredFloors] };
+      Object.assign(roamer, roamerInitialState, { stay: Infinity });
+      buildingBlackout = true; solarEnabled = true; collectedItems.add('f17-emergency-linked');
+      solarPoweredFloors = [1]; updatePowerState();
     });
-    await visitRestroom('1F');
-    await inspect(4390, 'E · 스피드 게이트 조사', /미등록 출입증/);
-    // The panel sticker points at the build date, which is the old code.
-    await walkTo(robot.x + robot.width / 2);
+    assert.equal(await page.evaluate(() => guardPatrolPowered(guardPatrol)), true, 'Solar lighting on 1F powers R-01');
+    // ① 1층 전력 끊기(휴대폰 전력 앱 = supplySolarFloor): R-01은 그 자리에 선다. 승강기는 UPS라 그대로 움직인다.
+    await page.evaluate(() => supplySolarFloor(1));
+    const stoppedAt = await page.evaluate(() => guardPatrol.x);
+    await page.clock.runFor(3000);
+    assert.equal(await page.evaluate(() => guardPatrolPowered(guardPatrol)), false, 'Cutting 1F power stops R-01');
+    assert.equal(await page.evaluate(() => guardPatrol.x), stoppedAt, 'R-01 stays where it stopped');
+    assert.equal(await page.evaluate(() => elevatorHasPower()), true, 'The elevators keep their UPS power');
+    // ② 멈춘 R-01에게 다가가 정비 패널을 연다. 스티커의 제작일은 옛 코드라 틀리고, 9월 14일 → 0914가 맞는다.
+    await walkTo(stoppedAt);
     assert.equal(await hint(), 'E · 경비 로봇 조사');
     await page.keyboard.press('e');
     await page.clock.runFor(100);
@@ -1386,10 +1395,17 @@ try {
     assert.match(await page.locator('#keypad-text').textContent(), /정비 코드 = 제작일/);
     await enterCode('1107');
     assert.equal(await page.locator('#keypad-error').textContent(), '비밀번호가 맞지 않는다.', 'The build date is the old code');
-    await page.keyboard.press('Escape');
-    await page.clock.runFor(100);
-    assert.equal(await keypad.isVisible(), false);
-    await inspect(4790, 'E · 정문 조사', /출입 통제 중 · SYSTEM/);
+    await enterCode('0914');
+    assert.equal(await keypad.isVisible(), false, 'The right code closes the keypad');
+    assert.match(await status(), /차단 대상: 미등록 출입증 1명\(17F 정수호\).*B2 서버실/);
+    // ③ 0914로 꺼진 R-01은 1층 전력을 다시 넣어도 서 있다. 이제 밝은 로비를 둘러본다.
+    await page.evaluate(() => supplySolarFloor(1));
+    await page.clock.runFor(3000);
+    assert.equal(await page.evaluate(() => [floorHasLighting(1), guardPatrolPowered(guardPatrol), guardPatrol.x]).then(String),
+      String([true, false, stoppedAt]), 'The maintenance code keeps R-01 off with the lights back on');
+    await visitRestroom('1F');
+    await inspect(4390, 'E · 스피드 게이트 조사', /미등록 출입증/);
+    await inspect(4790, 'E · 정문 조사', /출입 차단 · 미등록 출입증 · 17F 정수호/); // 불이 들어온 로비의 poweredMessage
     await page.screenshot({ path: '.local/floor-1.png' });
 
     const visionRoom = await enterRoom('Vision Hall', '1F');
@@ -1425,22 +1441,21 @@ try {
     assert(Math.max(...roomScales) / Math.min(...roomScales) < 1.02, `Room fronts scale with their interiors: ${roomScales}`);
     await leaveRoom(clinicRoom, corridorHeader);
 
-    // 9월 14일 → 0914 opens the panel; the log stays readable afterwards without the keypad.
-    await walkTo(robot.x + robot.width / 2);
-    await page.keyboard.press('e');
-    await page.clock.runFor(100);
-    await enterCode('0914');
-    assert.equal(await keypad.isVisible(), false, 'The right code closes the keypad');
-    assert.match(await status(), /차단 대상: 미등록 출입증 1명\(17F 정수호\).*B2 서버실/);
+    // The log stays readable afterwards without the keypad.
+    await walkTo(stoppedAt);
     await page.keyboard.press('e');
     await page.clock.runFor(100);
     assert.equal(await keypad.isVisible(), false, 'An opened panel needs no code again');
     assert.match(await status(), /방금 읽은 줄/);
-    // 0914로 R-01이 꺼졌으니 원래 움직임으로 되돌려도 서 있다.
-    await page.evaluate(() => { window.updateRobot = window.updateRobotForTest; });
-    assert.equal(await page.evaluate(() => guardPatrolPowered(guardPatrol)), false, 'The maintenance code turns R-01 off');
     await walkTo(startX);
     await page.clock.runFor(100);
+    // 지하 검사는 이 테스트의 원래 전력 상태(정전 없음)로 이어가고, R-03도 새 게임처럼 9층 대기 상태로 둔다.
+    await page.evaluate(() => {
+      ({ buildingBlackout, solarEnabled, solarPoweredFloors } = window.powerBeforeF1Test);
+      Object.assign(roamer, roamerInitialState);
+      updatePowerState();
+    });
+    assert.deepEqual(await page.evaluate(() => [roamer.where, roamer.trip]), ['f9', null], 'R-03 waits on 9F again');
   };
   // 7F is Lounge / VIP Room and the story's AI test/verification floor. Guests see the lounge and the VIP Room left of the
   // elevators; the AI 테스트실 and the windowless 검증실 share a wall right of the restroom, behind a restricted-area sign.
@@ -1726,6 +1741,8 @@ try {
     await inspect(1700, 'E · 승강기 제어반 조사', /B2 진입 준비가 아직 끝나지 않았다.*7층 원본 로그 분석.*13층 게이트웨이 백업 장치.*2층 리허설 영상/);
     await page.evaluate(() => { // 7층·13층·2층 퍼즐(story-puzzles, vault-puzzle)
       collectedItems.add('f7-external-connection-solved'); collectedItems.add('f13-backup-device'); collectedItems.add('f2-projected');
+      // 그 층들에서 퍼즐을 풀며 이미 봤을 이동 혼잣말(story-scene.js)이 여기서 뒤늦게 시작되지 않게 본 것으로 둔다.
+      for (const scene of STORY_SCENES) collectedItems.add(scene.flag);
     });
     await inspect(1700, 'E · 승강기 제어반 조사', /B2 운행 제한.*초록으로/);
     await page.keyboard.press('e');

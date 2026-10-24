@@ -78,7 +78,7 @@ try {
     assert.equal(await page.evaluate(id => ownedInventoryIds().filter(item => item === id).length, id), 1);
   }
 
-  await page.evaluate(() => { closeInspection(); performFloorChange('f17', null); openHydrant(); });
+  await page.evaluate(() => { closeInspection(); performFloorChange('f17', null); openKeyBox(); });
   await page.clock.runFor(250);
   await page.getByRole('button', { name: '낡은 열쇠 줍기' }).click();
   await acquired('rooftop-key');

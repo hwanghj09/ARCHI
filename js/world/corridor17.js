@@ -45,16 +45,27 @@ for (const entry of FLOOR17.rooms) {
 }
 doors.push({ name: '소화전', type: 'inspect', x: 4023, y: 248, width: 145,
   element: document.getElementById('floor17-hydrant'), container: 'hydrant',
-  message: '소화전 안에 호스와 관창이 정리되어 있다. 아래 선반에 작은 열쇠가 있다.' });
+  message: '소화전 안에 호스와 관창이 정리되어 있다.' });
 
-// 확장 복도 오른쪽 끝 청소 카트. 메모를 가린 양동이를 치우면 관리실 비상 출입 메모를 챙길 수 있다.
+// 옥상문 바로 옆 벽의 붉은 비상 열쇠함(배경 그림). 옥상문 열쇠가 여기 있어 잠긴 문 앞에서 되돌아가지 않는다.
+const keyBox = document.createElement('div');
+keyBox.id = 'floor17-key-box';
+keyBox.setAttribute('role', 'img');
+keyBox.setAttribute('aria-label', '비상 열쇠함');
+Object.assign(keyBox.style, { position: 'absolute', left: '2812px', top: '437px', width: '44px', height: '70px', pointerEvents: 'none' });
+world.insertBefore(keyBox, sprite);
+doors.push({ name: '비상 열쇠함', type: 'inspect', x: 2812, y: 437, width: 44, element: keyBox,
+  container: 'key-box', message: '옥상문 옆 비상 열쇠함이다.' });
+
+// 관리자실 문 바로 왼쪽 청소 카트(배경 그림). 복도를 따라가면 카트를 먼저 지나고 관리자실에 닿는다.
+// 메모를 가린 양동이를 치우면 관리실 비상 출입 메모를 챙길 수 있다.
 const cleaningCart = document.createElement('div');
 cleaningCart.id = 'floor17-cleaning-cart';
 cleaningCart.setAttribute('role', 'img');
 cleaningCart.setAttribute('aria-label', '청소 카트');
-Object.assign(cleaningCart.style, { position: 'absolute', left: '4784px', top: '382px', width: '171px', height: '186px', pointerEvents: 'none' });
+Object.assign(cleaningCart.style, { position: 'absolute', left: '4190px', top: '382px', width: '171px', height: '186px', pointerEvents: 'none' });
 world.insertBefore(cleaningCart, sprite);
-doors.push({ name: '청소 카트', type: 'inspect', x: 4784, y: 382, width: 171, element: cleaningCart,
+doors.push({ name: '청소 카트', type: 'inspect', x: 4190, y: 382, width: 171, element: cleaningCart,
   container: 'cleaning-cart', message: '청소 도구들이 카트 선반을 가리고 있다.' });
 
 // 배경에 그려진 CCTV 아래 게시판의 위치에 조사 영역만 겹친다.

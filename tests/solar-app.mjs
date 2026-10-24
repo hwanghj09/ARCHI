@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { chromium } from 'playwright';
-import { finishSceneTransition } from './scene-transition.mjs';
+import { finishSceneTransition, goToDeskComputer } from './scene-transition.mjs';
 
 const browser = await chromium.launch();
 try {
@@ -19,19 +19,19 @@ try {
   await page.evaluate(() => openPhoneApp('solar'));
   assert.equal(await page.evaluate(() => currentPhoneApp), null, 'An uninstalled app cannot open');
   await page.keyboard.press('Escape');
+  // 1층 안내 데스크 PC(사내망 UPS): 정전 중에도 블로그에서 앱을 받고 파일 전송에서 USB로 설치한다.
+  await page.evaluate(() => { buildingBlackout = true; updatePowerState(); });
+  await goToDeskComputer(page);
   await page.keyboard.press('e');
   await finishSceneTransition(page);
   await openApp('browser');
   assert.equal(await page.locator('[data-computer-task-app="browser"]').getAttribute('aria-label'), '블로그');
   assert.equal(await page.locator('#computer-window-title').textContent(), '블로그');
   assert.equal(await page.locator('#computer-internet-connect').count(), 0, 'The blog needs no connect button');
-  assert.equal(await page.evaluate(() => buildingBlackout), false);
-  assert.equal(await page.evaluate(() => solarEnabled), false);
-  assert(await page.locator('#computer-solar-page').isVisible(), 'Normal mains power connects the blog without enabling solar');
+  assert(await page.locator('#computer-solar-page').isVisible(), 'The desk PC stays online through the outage');
   assert.match(await page.locator('#computer-internet-status').textContent(), /연결됨/);
-  const blogIds = ['charging', 'stairs', 'rooftop', 'night'];
-  assert.equal(await page.locator('[data-blog-post]').count(), 4);
-  assert.equal(await page.locator('[data-blog-article="solar"]').count(), 0, 'The power app is no longer a blog attachment');
+  const blogIds = ['charging', 'stairs', 'rooftop', 'night', 'solar'];
+  assert.equal(await page.locator('[data-blog-post]').count(), 5);
   assert(await page.locator('[data-blog-article="night"]').isVisible());
   for (const id of blogIds) {
     await page.locator(`[data-blog-post="${id}"]`).click();
@@ -42,17 +42,20 @@ try {
     await page.locator('#computer-blog-list-back').click();
     assert(await page.locator('#computer-blog-list-title').evaluate(el => el === document.activeElement));
   }
-  await page.evaluate(() => { buildingBlackout = true; updatePowerState(); });
-  assert(await page.locator('#computer-solar-page').isHidden());
-  assert.match(await page.locator('#computer-internet-status').textContent(), /전력이 끊겨/);
-  await page.evaluate(() => { collectedItems.add('f17-emergency-linked'); solarEnabled = true; solarPoweredFloors = [17]; updatePowerState(); });
-  assert(await page.locator('#computer-solar-page').isVisible(), 'Restoring power opens the blog automatically');
+  await page.locator('[data-blog-post="solar"]').click();
+  await page.locator('#computer-solar-download').click();
+  await page.clock.runFor(await page.evaluate(() => solarDownloadMs + 200));
+  assert.equal(await page.evaluate(() => collectedItems.has('solar-app-downloaded')), true, 'The blog attachment downloads');
+  assert.equal(await page.evaluate(() => collectedItems.has('solar-app-installed')), false, 'Downloading alone does not install');
+  await openApp('transfer');
+  assert(await page.locator('#computer-solar-transfer').isDisabled(), 'Transfer waits for the USB cable');
+  await page.locator('#computer-usb-open').click();
+  await page.locator('#computer-usb-plug').click(); await page.locator('#computer-usb-port').click();
+  assert.equal(await page.evaluate(() => computerUsbConnected), true);
+  await page.locator('#computer-solar-transfer').click();
+  await page.clock.runFor(await page.evaluate(() => solarTransferMs + 200));
+  assert.equal(await page.evaluate(() => collectedItems.has('solar-app-installed')), true, 'USB transfer installs the app');
   await page.locator('#computer-exit').click();
-  await finishSceneTransition(page);
-  assert.equal(await page.evaluate(() => collectedItems.has('solar-app-installed')), false, 'The computer no longer grants the app');
-  await page.evaluate(() => { collectedItems.add('solar-app-installed'); refreshPhone(); });
-  await page.keyboard.press('Escape');
-  await page.keyboard.press('Escape');
   await finishSceneTransition(page);
   await page.evaluate(() => { buildingBlackout = true; collectedItems.add("f17-emergency-linked"); solarEnabled = true; solarPoweredFloors = [17]; updatePowerState(); });
   await page.keyboard.press('p');
@@ -89,5 +92,5 @@ try {
   assert.deepEqual(await floors(), [17]);
   assert.equal(await page.evaluate(() => collectedItems.has('solar-app-installed')), true);
   assert.deepEqual(errors, []);
-  console.log('PASS: normal-power connectivity, blackout/recovery, four readable blog posts, remote power control and saved installed app.');
+  console.log('PASS: lobby desk PC online during the outage, five readable blog posts, download and USB install, remote power control and saved installed app.');
 } finally { await browser.close(); }

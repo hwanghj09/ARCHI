@@ -8,9 +8,9 @@ const mapButton = document.getElementById('map-button');
 function mapInteractables() {
   const list = room === 'dynamic' ? currentDoors.filter(door => !(door.hideWhenTaken && collectedItems.has(door.gives))) :
     room === 'corridor' ? [...doors, ...officeDoors.filter(door => door.room === room)] :
-      [...officeDoors.filter(door => door.room === room), officeComputer];
+      officeDoors.filter(door => door.room === room);
   return list.filter(door => Number.isFinite(door.x) && Number.isFinite(door.width) &&
-    (['elevator', 'room', 'office', 'stairs', 'computer'].includes(door.type) || door.phoneCharger));
+    (['elevator', 'room', 'office', 'stairs', 'computer'].includes(door.type) || door.phoneCharger || door.deskComputer));
 }
 
 function mapDot(className, x, y, label) {

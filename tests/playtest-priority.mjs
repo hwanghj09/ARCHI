@@ -19,7 +19,7 @@ try {
     performFloorChange('f17-manager', null, 'exit');
     refreshObjective();
   });
-  assert.equal(await page.evaluate(() => currentObjective.title), '회로 안내도 확인', 'A known code skips the memo objective after unlocking');
+  assert.equal(await page.evaluate(() => currentObjective.title), '승강기 비상 회선 연결', 'A known code skips the memo objective after unlocking');
   await page.evaluate(() => {
     collectedItems.add('f17-emergency-linked');
     updatePowerState(); refreshObjective();

@@ -575,8 +575,9 @@ function updateSanity(elapsed) {
     const previousCalm = antianxietyCalm;
     antianxietyCalm = Math.max(0, antianxietyCalm - elapsed);
     if (previousCalm > 0 && antianxietyCalm === 0) sayLine('진정 효과가 끝났다. 어둠 속에서는 다시 정신력이 줄어든다.');
+    const darkDrain = sanityDarkDrainPerSecond * (solarEnabled ? 1 : sanityPreSolarDrainFactor);
     const rate = antianxietyCalm > 0 ? 0 : chasing ? -sanityChaseDrainPerSecond : anxiety ? -sanityAnxietyDrainPerSecond :
-      exposure === 'dark' ? -sanityDarkDrainPerSecond : exposure === 'flashlight' ? -sanityDarkDrainPerSecond * sanityFlashlightDrainFactor : 0;
+      exposure === 'dark' ? -darkDrain : exposure === 'flashlight' ? -darkDrain * sanityFlashlightDrainFactor : 0;
     // 쫓기는 동안의 감소는 10%에서 멈춘다(이미 10% 아래면 쫓겨서는 더 줄지 않는다).
     const lowest = chasing ? Math.min(sanity, sanityChaseFloor) : 0;
     sanity = Math.max(lowest, Math.min(100, sanity + rate * elapsed / 1000));

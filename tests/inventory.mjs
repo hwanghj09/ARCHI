@@ -16,7 +16,7 @@ try {
   await page.clock.pauseAt(new Date(Date.now() + 1000));
   const approach = type => page.evaluate(type => {
     performFloorChange('f17', null);
-    const door = doors.find(d => type === 'hydrant' ? d.container === 'hydrant' : d.type === type);
+    const door = doors.find(d => d.container === type || d.type === type);
     Body.setPosition(body, { x: door.x + door.width / 2, y: floorY - 81 });
     Body.setVelocity(body, { x: 0, y: 0 }); grounded = true;
     cameraX = cameraTarget(); render(); updateInteraction();
@@ -104,6 +104,9 @@ try {
   await approach('hydrant');
   await page.keyboard.press('e');
   assert.equal((await panel()).surface, 'hydrant');
+  await page.locator('.hydrant-cabinet > img').evaluate(image => image.decode());
+  assert(await page.locator('.hydrant-cabinet > img').evaluate(image => image.naturalWidth === 256 && image.naturalHeight === 256 &&
+    getComputedStyle(image).imageRendering === 'pixelated'), 'Cabinet uses the 256x256 pixel-art sprite specification');
   await page.keyboard.press('e');
   assert(await page.locator('#inspection').isHidden(), 'A later non-bag inspection closes instead of reopening the bag');
   await approach('stairs');
@@ -113,9 +116,9 @@ try {
   assert.equal(await page.evaluate(() => currentSceneFloor), 17);
   await page.keyboard.press('Escape');
   assert(await page.locator('#inspection').isHidden(), 'Esc closes a plain inspection');
-  await approach('hydrant');
+  await approach('key-box');
   await page.keyboard.press('e');
-  assert.equal(await ownsKey(), false, 'Opening the cabinet does not collect the key');
+  assert.equal(await ownsKey(), false, 'Opening the key box does not collect the key');
   assert.equal(await page.locator('#inspection-sheet').getAttribute('aria-hidden'), null);
   await page.keyboard.press('Escape');
   assert.equal(await ownsKey(), false, 'Closing without a click leaves the key');
@@ -124,12 +127,9 @@ try {
   await key.locator('img').evaluate(image => image.decode());
   assert(await key.locator('img').evaluate(image => image.naturalWidth === 256 && image.naturalHeight === 256 &&
     getComputedStyle(image).imageRendering === 'pixelated'), 'Key uses a loaded 256x256 pixel-art sprite');
-  await page.locator('.hydrant-cabinet > img').evaluate(image => image.decode());
-  assert(await page.locator('.hydrant-cabinet > img').evaluate(image => image.naturalWidth === 256 && image.naturalHeight === 256 &&
-    getComputedStyle(image).imageRendering === 'pixelated'), 'Cabinet uses the 256x256 pixel-art sprite specification');
   await key.hover();
   assert.match(await page.locator('#item-description').textContent(), /옥상문.*더럽다/);
-  await page.screenshot({ path: '.local/hydrant-desktop.png' });
+  await page.screenshot({ path: '.local/key-box-desktop.png' });
   for (const viewport of [{ width: 390, height: 844 }, { width: 844, height: 390 }]) {
     await page.setViewportSize(viewport);
     await key.scrollIntoViewIfNeeded();
@@ -137,8 +137,8 @@ try {
     assert(await page.locator('#inspection').evaluate(el => {
       const r = el.getBoundingClientRect();
       return r.left >= 0 && r.right <= innerWidth && r.top >= 0 && r.bottom <= innerHeight;
-    }), 'Cabinet fits the viewport');
-    await page.screenshot({ path: `.local/hydrant-${viewport.width}.png` });
+    }), 'Key box fits the viewport');
+    await page.screenshot({ path: `.local/key-box-${viewport.width}.png` });
   }
   await page.setViewportSize({ width: 1280, height: 720 });
   await page.locator('#inspection-close').focus();

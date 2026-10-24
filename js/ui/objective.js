@@ -40,9 +40,9 @@ const OBJECTIVES = [
   { when: () => collectedItems.has('f7-external-connection-solved') && collectedItems.has('b1-elevator'), title: 'B2 서버실 조사하기', text: '길이 열렸다. 승강기를 타고 B2 서버실로 내려가자.' },
   { when: () => collectedItems.has('f7-external-connection-solved') && !collectedItems.has('f13-backup-device'), title: '외부 연결 통로 찾기',
     text: 'ARCHI의 신호는 어디를 거쳐 밖으로 나가는 걸까? 보안 자료실에서 외부 통로를 찾아보자.' },
-  // 13층 백업 장치를 17층 컴퓨터에 꽂아 깨진 리허설 영상을 봐야(f17-usb-played, usb-video.js) 2층에 갈 이유가 생긴다.
+  // 13층 백업 장치를 컴퓨터(13층 상황실·1층 안내 데스크 PC)에 꽂아 깨진 리허설 영상을 봐야(f17-usb-played, usb-video.js) 2층에 갈 이유가 생긴다.
   { when: () => collectedItems.has('f7-external-connection-solved') && !collectedItems.has('f17-usb-played') && !collectedItems.has('f2-projected'),
-    title: '장치 확인하기', text: '13층에서 챙긴 USB를 확인하자. 이 층 기술지원 상황실의 원격지원 PC나 17층 내 자리 컴퓨터의 외부 저장 장치로 열 수 있다.' },
+    title: '장치 확인하기', text: '13층에서 챙긴 USB를 확인하자. 이 층 기술지원 상황실의 원격지원 PC나 1층 안내 데스크 PC의 외부 저장 장치로 열 수 있다.' },
   // 녹화 NAS의 디스크(f2-reel)를 챙긴 뒤에는 Harmony Hall 영사기와 직원 휴게실 리모컨(f2-remote)을 가리킨다(floor-02.js).
   { when: () => collectedItems.has('f7-external-connection-solved') && collectedItems.has('f2-reel') && !collectedItems.has('f2-remote') && !collectedItems.has('f2-projected'),
     title: '원본 재생하기', text: 'Harmony Hall 천장의 배터리 영사기로 원본을 틀어 보자. 영사기를 내릴 리모컨은 직원 휴게실에 있을지도 모른다.' },
@@ -79,14 +79,14 @@ const OBJECTIVES = [
     title: '관리실 비밀번호 찾기', text: '관리실은 잠겨 있다. 누군가 비밀번호를 적어 두지 않았을까?' },
   { when: () => solarEnabled && !collectedItems.has('f17-emergency-linked') && !collectedItems.has('f17-manager-unlocked'),
     title: '관리실 열기', text: '이제 관리실에 들어갈 수 있을 것 같다.' },
-  { when: () => solarEnabled && !collectedItems.has('f17-emergency-linked') && !collectedItems.has('f17-circuit-guide-read'),
-    title: '회로 안내도 확인', text: '전선을 함부로 건드릴 순 없다. 어떻게 이어야 할지 먼저 알아야 한다.' },
   { when: () => solarEnabled && !collectedItems.has('f17-emergency-linked'),
     title: '승강기 비상 회선 연결', text: '승강기에도 전력을 보내야 한다.' },
   // 1층에서 퇴근이 막히는 흐름(floor-01.js): 정문 확인 → 안내 데스크 앱 → 1층 전력. 제목을 '퇴근하기'로 두어 승강기는 1층만 눌린다(cabin.js).
   { when: () => collectedItems.has('f17-emergency-linked') && !collectedItems.has('f1-reached'), title: '퇴근하기', text: '승강기가 다시 움직인다. 아래로 내려가자.' },
   { when: () => collectedItems.has('f17-emergency-linked') && !collectedItems.has('f1-chase-ended') && !collectedItems.has('solar-app-installed') && !collectedItems.has('f1-door-checked'),
     title: '퇴근하기', text: '드디어 1층이다. 정문으로 나가자.' },
+  { when: () => collectedItems.has('f17-emergency-linked') && !collectedItems.has('f1-chase-ended') && collectedItems.has('solar-app-downloaded') && !collectedItems.has('solar-app-installed'),
+    title: '퇴근하기', text: '앱을 받았다. 안내 데스크 PC의 파일 전송에서 휴대폰을 USB로 연결해 설치하자.' },
   { when: () => collectedItems.has('f17-emergency-linked') && !collectedItems.has('f1-chase-ended') && !collectedItems.has('solar-app-installed'),
     title: '퇴근하기', text: '정문에 전기가 없다. 안내 데스크에 로비 전원을 켤 방법이 있을지도.' },
   { when: () => collectedItems.has('f17-emergency-linked') && !collectedItems.has('f1-chase-ended') && !floorHasLighting(1),
