@@ -19,6 +19,8 @@ const INVENTORY_ITEMS = {
   'f13-backup-device': { name: '원격지원 게이트웨이 백업 장치', description: '13층 보안 자료실에서 가져온 USB 백업 장치. 라벨: "03:05 외부 송신 경로 원본 · 원격 접속 에이전트 배포 계정 archi_svc · 2F 03:00 리허설 사본". 컴퓨터에 꽂으면 안을 볼 수 있을 것 같다.',
     image: 'assets/objects/items/backup-device.png', hint: '13층 보안 자료실 백업 장치 보관함' },
   'rooftop-key': { name: '낡은 열쇠', description: '옥상문을 열 수 있을 것만 같다… 조금 더럽다.' },
+  'f17-crowbar': { name: '빠루', description: '17층 관리자실 공구 사물함에서 챙긴 빠루. 나사로 박힌 덮개쯤은 뜯어낼 수 있을 것 같다.',
+    image: 'assets/objects/items/crowbar.png', hint: '17층 관리자실 사물함' },
   'f17-manager-memo': { name: '관리실 비상 출입 메모', image: 'assets/ui/floor17/manager-memo.png',
     description: MANAGER_MEMO_TEXT, sheet: MANAGER_MEMO_SHEET },
 };

@@ -36,10 +36,25 @@ function addPaintedWalls(config, doors) {
   layer.className = 'painted-wall';
   layer.dataset.material = art.material;
   layer.setAttribute('aria-hidden', 'true');
-  const windows = (config.exteriorWindows || []).map(({ x, y, width, height }) => [x, y, width, height]);
-  const pillars = (art.pillars || []).map(x => [x - 24, 100, 48, 456]);
   const openings = doors.filter(door => ['room', 'stairs', 'elevator'].includes(door.type))
     .map(door => [door.x, door.y, door.width, door.height ?? floorY - door.y]);
+  layer.style.clipPath = paintedWallClip(config, openings);
+  // 각 타일은 같은 크기의 아틀라스 칸을 사용한다. 끝 타일도 원본 비율을 유지한 채 잘린다.
+  for (let x = 32; x < config.width - 32; x += 912) {
+    const tile = document.createElement('div');
+    tile.className = 'painted-wall-tile';
+    tile.style.left = `${x}px`;
+    layer.append(tile);
+  }
+  dynamicScene.insertBefore(layer, dynamicScene.querySelector('.exterior-window, .solid'));
+}
+
+// 칠한 벽의 clip-path: 원래 그림을 보존할 곳(유리 전면·관찰창 preserve, 외부 창, 기둥)과 openings(문 개구부)를 뺀다.
+// 환풍구 안 화면(guard-patrol.js)은 맞은편 벽을 보이려고 openings 없이 다시 계산한다.
+function paintedWallClip(config, openings) {
+  const art = config.wallArt;
+  const windows = (config.exteriorWindows || []).map(({ x, y, width, height }) => [x, y, width, height]);
+  const pillars = (art.pillars || []).map(x => [x - 24, 100, 48, 456]);
   let rects = [[32, 100, config.width - 64, 456]];
   // 겹친 기둥·문 개구부도 다시 칠해지지 않도록 벽에서 직사각형을 차례로 뺀다.
   for (const [x, y, w, h] of [...(art.preserve || []), ...windows, ...pillars, ...openings]) {
@@ -52,15 +67,7 @@ function addPaintedWalls(config, doors) {
         .filter(([, , width, height]) => width > 0 && height > 0);
     });
   }
-  layer.style.clipPath = `path(evenodd, "${rects.map(([x, y, w, h]) => `M${x} ${y}h${w}v${h}h${-w}Z`).join(' ')}")`;
-  // 각 타일은 같은 크기의 아틀라스 칸을 사용한다. 끝 타일도 원본 비율을 유지한 채 잘린다.
-  for (let x = 32; x < config.width - 32; x += 912) {
-    const tile = document.createElement('div');
-    tile.className = 'painted-wall-tile';
-    tile.style.left = `${x}px`;
-    layer.append(tile);
-  }
-  dynamicScene.insertBefore(layer, dynamicScene.querySelector('.exterior-window, .solid'));
+  return `path(evenodd, "${rects.map(([x, y, w, h]) => `M${x} ${y}h${w}v${h}h${-w}Z`).join(' ')}")`;
 }
 
 function buildDynamicScene(config) {
@@ -298,6 +305,13 @@ function buildDynamicScene(config) {
     // (seenBy)로는 벽 전체가 켜져 있다(data-live="all").
     if (fixture.liveBy) element.dataset.live = collectedItems.has(fixture.seenBy) ? 'all' : String(collectedItems.has(fixture.liveBy));
     dynamicScene.append(element);
+    // 숨을 수 있는 환풍구(hideSpot): 처음엔 덮개가 닫혀 있어 빠루로 뜯고(vent-pry.js), 연 뒤로는 앉아서 E로 들어간다(guard-patrol.js).
+    if (fixture.hideSpot) {
+      const vent = { ...fixture, type: 'vent', element };
+      doorList.push(vent);
+      dressVent(vent);
+      continue;
+    }
     if (!fixture.message) continue;
     // 그림에 그려진 장치(단면 에셋 층)도 소품처럼 sequence·ring·cycle을 쓸 수 있다(아래 소품 설명 참고).
     const sequence = fixture.sequence && config.sequences.find(entry => entry.id === fixture.sequence);

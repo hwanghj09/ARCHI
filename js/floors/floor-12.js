@@ -34,6 +34,10 @@ const FLOOR12_LAYOUT = {
       doorX: 4508, doorWidth: 137, doorY: 298, doorStyle: 'blinds', locked: true, unlockedBy: 'f12-lead-key',
       message: '팀장실 문이 잠겨 있다. 카드키가 아니라 열쇠 구멍이 있는 문이다.' },
   ],
+  fixtures: [
+    // 숨는 환풍구(모델 평가실 문과 화장실 사이 벽). 안에서는 맞은편 철문이 보인다.
+    wallVent(3436, 3230),
+  ],
   props: [
     { file: 'waiting-sofa', size: [512, 256], worldWidth: 250, x: 4120 },
     { file: 'large-planter', size: [256, 512], worldWidth: 78, x: 1050 },

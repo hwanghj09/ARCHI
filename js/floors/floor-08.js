@@ -39,6 +39,10 @@ const FLOOR8_LAYOUT = {
     { name: '공용 제품 회의실', x: 4282, width: 680, style: 'painted', target: 'f8-meeting',
       doorX: 4786, doorWidth: 130, doorY: 250, doorSprite: 'assets/objects/floor04/door-meeting.png' },
   ],
+  fixtures: [
+    // 숨는 환풍구(서쪽 끝 벽). 안에서는 철판 벽과 난간이 보인다(유리 전면은 피했다).
+    wallVent(300, 2500),
+  ],
   props: [
     { file: 'staff-lockers', size: [256, 512], worldWidth: 100, x: 3440 },
     { file: 'waiting-sofa', size: [512, 256], worldWidth: 250, x: 3980 },
@@ -67,8 +71,7 @@ const FLOOR8_ROOMS = interiorRooms(8, [
       control: { kind: 'switch', dir: 'down', label: '관찰 카메라의 녹화 전원을 내리자.', ends: ['REC', 'OFF'] },
       message: '관찰창 위 카메라의 녹화 전원이 꺼졌다. 렌즈에는 이미 덮개와 노란 테이프가 감겨 있다. 아래 반사 유리는 이쪽에서 까만 거울일 뿐이다. 벤치 화면: "조건 3/3 · 관찰 카메라".' }),
     floor8Spot('결함 현황판', [334, 576], [190, 308],
-      '앞의 세 칸은 비어 있고, 마지막 "재현 불가 종료" 칸에 ARCHI 연동 결함 카드 47장이 몰려 있다. 닫힌 시각은 모두 새벽 3시 무렵, 처리자는 SYSTEM. 구석에 QA 담당의 쪽지: "원본은 재현 벤치 안에. 사내망에서 뗐음. 조건 맞추는 순서는 회의실 화이트보드에. 순서 틀리면 벤치가 처음부터 다시 받는다."'),
-  ], { windowless: true, exitX: 2788, exitBay: 322, sequences: [{ id: 'f8-repro-steps', steps: 4, gives: 'f8-repro-record',
+      '앞의 세 칸은 비어 있고, 마지막 "재현 불가 종료" 칸에 ARCHI 연동 결함 카드 47장이 몰려 있다. 닫힌 시각은 모두 새벽 3시 무렵, 처리자는 SYSTEM. 구석에 QA 담당의 쪽지: "원본은 재현 벤치 안에. 사내망에서 뗐음. 조건 맞추는 순서는 회의실 화이트보드에. 순서 틀리면 벤치가 처음부터 다시 받는다."'),  ], { windowless: true, exitX: 2788, exitBay: 322, sequences: [{ id: 'f8-repro-steps', steps: 4, gives: 'f8-repro-record',
     // 단계를 건너뛰면 벤치 화면에 실패 로그가 뜬다: 그 순간 아직 맞추지 않은 조건(단계 1~3의 원래 상태)을 보여 준다(puzzles.js).
     unmet: ['시험 단말 시각 00:14', '재실 센서 "3명"', '관찰 카메라 REC'],
     failLine: '누가 보고 있으면 안 되는 건가…?' }] }),

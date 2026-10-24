@@ -32,9 +32,14 @@ const FLOOR11_LAYOUT = {
       message: '셔터가 천천히 말려 올라간다.',
       takenMessage: '셔터가 천장까지 말려 올라가 있다. 불이 난 흔적은 어디에도 없다.' },
   ],
+  fixtures: [
+    // 숨는 환풍구(화장실 바로 오른쪽 흰 벽). 덮개가 화장실 문 앞으로 떨어지지 않게 왼쪽에서 뜯는다. 안에서는 흰 패널 벽이 보인다.
+    wallVent(3777, 2500, { pryFrom: 'left' }),
+  ],
   props: [
-    { file: 'waiting-sofa', size: [512, 256], worldWidth: 250, x: 3980 },
-    { file: 'glass-display-cabinet', size: [256, 512], worldWidth: 111, x: 4180 },
+    // 소파·진열장은 환풍구와 떨어지는 덮개 자리를 비우려고 3980·4180에서 오른쪽으로 옮겼다(진열장은 방화셔터 너머).
+    { file: 'waiting-sofa', size: [512, 256], worldWidth: 250, x: 4160 },
+    { file: 'glass-display-cabinet', size: [256, 512], worldWidth: 111, x: 4382 },
     { file: 'sales-kpi-board', size: [512, 256], worldWidth: 350, x: 980, name: '영업 실적 보드',
       message: '이번 분기 ARCHI 계약 0건. 칸 옆에 누군가 적어 두었다: "시연은 무조건 밤에 잡자."',
       writing: [{ as: 'title', text: '이번 분기 실적' }, { as: 'table', head: true, rows: [['제품', '계약'], ['ARCHI', '0건']] },

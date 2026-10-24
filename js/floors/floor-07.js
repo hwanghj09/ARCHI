@@ -43,6 +43,8 @@ const FLOOR7_LAYOUT = {
       writing: [{ as: 'title', text: 'AI 테스트·검증실' }, { text: '관계자 외 출입 금지 →', ink: 'red' }, { as: 'rule' },
         { text: '검증실은 사내망과 분리된 격리 구역입니다.', size: 'small' }, { text: '12층 ARCHI 개발팀 원본 로그 백업 보관 중.', size: 'small' },
         { text: '시험 세션 중에는 입실하면 문이 잠길 수 있습니다.', size: 'small' }] },
+    // 숨는 환풍구(검증실 쪽 콘크리트 벽). 안에서는 라운지 야경 창이 보인다.
+    wallVent(4100, 850),
   ],
   props: [
     { file: 'large-planter', size: [256, 512], worldWidth: 78, x: 72 },

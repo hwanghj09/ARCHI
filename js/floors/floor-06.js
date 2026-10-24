@@ -22,7 +22,10 @@ const FLOOR6_LAYOUT = {
     { name: '기술 회의실', x: 4282, width: 680, style: 'painted', target: 'f6-meeting',
       doorX: 4782, doorWidth: 130, doorY: 250, doorSprite: 'assets/objects/floor06/door-meeting.png' },
   ],
-  fixtures: [],
+  fixtures: [
+    // 숨는 환풍구(엔지니어링 구역 문과 엘리베이터 사이 흰 벽). 안에서는 서쪽 기둥과 흰 벽이 보인다.
+    wallVent(1572, 1300),
+  ],
   props: [
     { file: 'waiting-sofa', size: [512, 256], worldWidth: 240, x: 3250 },
     { file: 'waiting-sofa', size: [512, 256], worldWidth: 250, x: 3980 },
@@ -34,6 +37,7 @@ const floor6Room = (id, name, art, width, fixtures, extra = {}) => ({ id, name, 
   backgroundWallsOnly: true, backgroundImage: floor6Scene(art, width), fixtures, ...extra });
 const FLOOR6_ROOMS = interiorRooms(6, [
   floor6Room('f6-work', '기술 개발 업무 공간', 'work', 3108, [], { exitX: 126, exitBay: 432 }),
-  floor6Room('f6-engineering', '공용 엔지니어링 구역', 'engineering', 2168, [], { exitX: 749, exitBay: 322 }),
+  // 숨는 환풍구: 출구 오른쪽, 사물함 사이의 맨 벽(그림 975~1165). 안에서는 사물함과 작업대 쪽 벽이 보인다.
+  floor6Room('f6-engineering', '공용 엔지니어링 구역', 'engineering', 2168, [wallVent(1004, 1300)], { exitX: 749, exitBay: 322 }),
   floor6Room('f6-meeting', '기술 회의실', 'meeting', 2162, [], { windowless: true, exitX: 1906, exitBay: 322 }),
 ]);

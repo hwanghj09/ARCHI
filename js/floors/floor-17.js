@@ -30,7 +30,10 @@ const FLOOR17_ROOMS = interiorRooms(17, [
   { id: 'f17-restroom', ...restroomInterior },
   { id: 'f17-manager', name: '관리자실', width: 1040, windowless: true, exitStyle: 'office-solid',
     backgroundWallsOnly: true, backgroundImage: { src: 'assets/background/floor17/floor17-manager-finished.png', height: 760, top: 0 }, props: [
-    { file: 'staff-lockers', size: [256, 512], worldWidth: 100, x: 90 },
+    // 빠루(f17-crowbar): 환풍구 덮개를 뜯는 공구. 로봇이 없는 17층에서 초반에 챙겨 간다.
+    { file: 'staff-lockers', size: [256, 512], worldWidth: 100, x: 90, name: '공구 사물함', gives: 'f17-crowbar',
+      message: '사물함 안쪽 고리에 빠루가 걸려 있다. 손잡이에 붙은 테이프: "덕트 점검용 · 그릴 나사 다 녹슬었음." 챙겼다.',
+      takenMessage: '빠루를 걸어 두던 고리만 남아 있다.' },
     { file: 'janitor-cart', size: [256, 512], worldWidth: 78, x: 968 },
     { file: 'electrical-panel', size: [480, 626], worldWidth: 122, x: 500, name: '비상 전력 분배반',
       sprite: 'assets/ui/floor17/emergency-panel-states.png', stateBy: 'f17-emergency-linked', powerCircuit: true,

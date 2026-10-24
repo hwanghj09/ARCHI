@@ -165,6 +165,31 @@ try {
   await page.clock.runFor(2200);
   assert.equal((await state()).where, 'f5', 'Comes in once Suho moves away');
 
+  // 쫓기던 수호가 방으로 들어가면 조금 뒤 같은 문으로 따라 들어와 계속 쫓는다.
+  const followed = await page.evaluate(() => {
+    Object.assign(roamer, { mode: 'chase', lostTime: 0, stay: 99999 });
+    performFloorChange('f5-rnd', 0, 'exit');
+    const exitX = sceneDoorX('f5-rnd', 'f5');
+    Body.setPosition(body, { x: exitX < worldWidth / 2 ? worldWidth - 100 : 100, y: floorY - 81 }); grounded = true;
+    return { where: roamer.where, follow: roamer.follow, sprites: document.querySelectorAll('.roaming-guard-bot').length };
+  });
+  assert.deepEqual(followed, { where: 'f5', follow: true, sprites: 0 }, 'R-03 is still outside right after Suho enters');
+  await page.clock.runFor(1700);
+  s = await state();
+  assert.deepEqual([s.where, s.mode, s.mounted], ['f5-rnd', 'chase', true], 'R-03 follows Suho into the room and keeps chasing');
+  // 등 뒤에서 잠기는 방(7층 검증실)에도 따라 들어간다.
+  await page.evaluate(() => {
+    roamer.where = 'f7'; performFloorChange('f7');
+    Object.assign(roamer, { mode: 'chase', lostTime: 0, stay: 99999 });
+    performFloorChange('f7-verify', 0, 'exit');
+    const exitX = sceneDoorX('f7-verify', 'f7');
+    Body.setPosition(body, { x: exitX < worldWidth / 2 ? worldWidth - 100 : 100, y: floorY - 81 }); grounded = true;
+  });
+  await page.clock.runFor(1700);
+  s = await state();
+  assert.deepEqual([s.where, s.mode, s.mounted], ['f7-verify', 'chase', true], 'R-03 follows into the self-locking room too');
+  await page.evaluate(() => { Object.assign(roamer, { mode: 'patrol', where: 'f5' }); performFloorChange('f5'); Body.setPosition(body, { x: 4700, y: floorY - 81 }); });
+
   // 켜진 층을 더 자주 고른다(가중치 3배).
   const picks = await page.evaluate(() => {
     let seed = 7; Math.random = () => (seed = (seed * 16807) % 2147483647) / 2147483647;

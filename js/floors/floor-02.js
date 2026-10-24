@@ -45,6 +45,8 @@ const FLOOR2_LAYOUT = {
     // 연주회 포스터: Harmony Hall 앞 흰 벽의 알루미늄 액자 포스터(assets/objects/floor02/harmony-hall-poster.png, 벽 밝기 필터를 구워 넣은 판).
     { name: '정기 연주회 포스터', style: 'harmony-poster', x: 454, width: 100, y: 300, height: 140, message:
       '피아노 건반과 파형만 그려진 사내 정기 연주회 포스터. 아래 작은 글씨: "반주 ARCHI · 무대 연출 자동화." 볼펜 낙서: "리허설은 새벽에 혼자 한다던데."' },
+    // 숨는 환풍구(동쪽 끝 흰 벽, 서버실 문 너머). 안에서는 흰 벽과 동쪽 기둥이 보인다.
+    wallVent(4690, 4300),
   ],
   props: [
     { file: 'large-planter', size: [256, 512], worldWidth: 78, x: 3170 },

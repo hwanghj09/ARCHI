@@ -22,6 +22,8 @@ const B1_LAYOUT = {
       doorX: 4820, doorWidth: 100, doorStyle: 'hv-door' },
   ],
   fixtures: [
+    // 숨는 환풍구(서쪽 끝 벽, 시설관리 구역 표지 아래). 안에서는 시설 구역 흰 벽이 보인다.
+    wallVent(184, 2000),
     { name: '천장 배관', x: 32, y: 58, width: 4936, height: 30, style: 'pipe-run' },
     { name: '시설관리 구역 표지', x: 120, y: 290, width: 240, height: 80, style: 'utility-plaque',
       lines: ['B1 시설관리', '보안 로봇 충전 구역'] },

@@ -22,7 +22,10 @@ const FLOOR3_LAYOUT = {
     { name: 'Studio', x: 4282, width: 680, style: 'painted', target: 'f3-studio',
       doorX: 4321, doorWidth: 130, doorY: 250, doorStyle: 'office-solid' },
   ],
-  fixtures: [],
+  fixtures: [
+    // 숨는 환풍구(동쪽 끝 벽, 고객만족센터 문 너머). 안에서는 철판 벽과 동쪽 기둥이 보인다.
+    wallVent(4660, 4300),
+  ],
   props: [
     { file: 'water-cooler', size: [256, 512], worldWidth: 62, x: 3360 },
     { file: 'waiting-sofa', size: [512, 256], worldWidth: 250, x: 3980 },

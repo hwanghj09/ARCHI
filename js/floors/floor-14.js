@@ -21,6 +21,10 @@ const FLOOR14_LAYOUT = {
     { name: '사용자 실험실', x: 1216, width: 560, style: 'mirror', target: 'f14-ux',
       doorX: 1420, doorWidth: 130, doorY: 256, doorStyle: 'observe' },
   ],
+  fixtures: [
+    // 숨는 환풍구(화장실 동쪽 벽). 안에서는 철판 벽과 난간이 보인다(유리 전면은 피했다).
+    wallVent(3990, 2500),
+  ],
   props: [
     { file: 'patent-display-cabinet', size: [256, 512], worldWidth: 111, x: 3250, name: '연구 성과 전시장',
       message: '특허 증서가 진열돼 있다. 가장 최근 것: "행동 패턴 기반 사용자 의도 예측 방법" · 공동 연구 12층 ARCHI 개발팀.',

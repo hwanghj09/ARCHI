@@ -82,6 +82,7 @@
     <script src="js/scene/prop-outlines.js" defer></script>
     <script src="js/scene/scene-builder.js" defer></script>
     <script src="js/scene/guard-patrol.js" defer></script>
+    <script src="js/interaction/vent-pry.js" defer></script>
     <script src="js/scene/floor-change.js" defer></script>
     <script src="js/interaction/puzzles.js" defer></script>
     <script src="js/interaction/cctv.js" defer></script>
@@ -176,6 +177,19 @@
           <img id="phone-away-sheet" class="phone-sheet" src="assets/player/jeong-suho-phone-away.png" alt="" width="512" height="256" draggable="false" />
         </div>
         <div id="opening-chair-front" aria-hidden="true"></div>
+      </div>
+      <!-- 환풍구에 숨은 동안 덕트 안에서 구멍 밖 복도를 내다보는 화면(guard-patrol.js setVentHiding) -->
+      <div id="vent-view" hidden><div id="vent-outside"><div id="vent-world"></div><div id="vent-robot" hidden><div class="vent-robot-sprite"><img src="assets/objects/guard-robot/guard-patrol.png" alt="" draggable="false" /></div></div></div><div class="vent-duct"></div><p id="vent-view-text" role="status"></p></div>
+      <!-- 빠루로 환풍구 덮개 뜯기: 타이밍 스킬체크(js/interaction/vent-pry.js) -->
+      <div id="vent-pry-gauge" role="group" aria-labelledby="vent-pry-label" hidden>
+        <span id="vent-pry-label">흰 칸에서 스페이스·Enter · Esc 그만두기</span>
+        <svg id="vent-pry-dial" viewBox="0 0 100 100" aria-hidden="true">
+          <circle cx="50" cy="50" r="40" class="vent-pry-ring" />
+          <path id="vent-pry-zone" /><path id="vent-pry-great" />
+          <line id="vent-pry-needle" x1="50" y1="50" x2="50" y2="2" />
+        </svg>
+        <span id="vent-pry-status" role="status"></span>
+        <button id="vent-pry-push" type="button">지금!</button>
       </div>
     </main>
       <header><span>17F · 사무실</span><label id="floor17-light-switch"><input id="floor17-lights" type="checkbox" checked aria-label="17층 조명" /><output id="floor17-light-state">조명 켜짐</output></label><button id="map-button" type="button" aria-label="지도" title="지도"></button><button id="pause-button" type="button" aria-label="일시정지 메뉴" title="일시정지 · Esc" aria-keyshortcuts="Escape"><span aria-hidden="true">Ⅱ</span></button></header>

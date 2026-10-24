@@ -23,5 +23,66 @@
 #cabin-pry-fill { display: block; width: 0; height: 100%; background: #f5d478; }
 #cabin-pry-push { min-height: 44px; min-width: 140px; border: 1px solid #f5d478; background: #3a1714; color: #fff; font: inherit; cursor: pointer; touch-action: manipulation; }
 #cabin-pry-push:focus-visible { outline: 3px solid #eac47d; outline-offset: 3px; }
+/* 덮개가 떨어진 환풍구(층 fixtures의 wall-vent, assets/objects/wall-vent). 앉아서 E로 들어가 숨는다. */
+#dynamic-scene .fixture.wall-vent { background: url('../assets/objects/wall-vent/vent-open.png') 0 0 / 100% 100% no-repeat; }
+/* 덮개 뜯기(js/interaction/vent-pry.js): 닫힘 → 빠루로 뜯는 중(오른쪽 아래 모서리가 들림) → 열림. 누를 때마다 덮개가 떨린다. */
+#dynamic-scene .fixture.wall-vent[data-vent="closed"] { background-image: url('../assets/objects/wall-vent/vent-closed.png'); }
+#dynamic-scene .fixture.wall-vent[data-vent="prying"] { background-image: url('../assets/objects/wall-vent/vent-prying.png'); }
+/* 왼쪽에서 뜯는 환풍구(pryFrom: 'left')는 들리는 모서리가 왼쪽 아래가 되게 그림을 좌우로 뒤집는다(루버·나사는 좌우 대칭). */
+#dynamic-scene .fixture.wall-vent[data-side="left"] { --flip: -1; transform: scaleX(-1); }
+#dynamic-scene .fixture.wall-vent[data-shake="0"] { transform: scaleX(var(--flip, 1)) translate(-1px, 1px) rotate(-.5deg); }
+#dynamic-scene .fixture.wall-vent[data-shake="1"] { transform: scaleX(var(--flip, 1)) translate(1.5px, -1px) rotate(.6deg); }
+/* 빠루: 날 끝(그림 오른쪽, 좌우 뒤집음)을 덮개 오른쪽 아래 모서리에 끼우고 그 점을 받침으로 게이지(--pry)만큼 손잡이를 눌러 젖힌다. */
+.vent-crowbar { position: absolute; z-index: 7; width: 88px; height: 26px; transform-origin: 0 50%;
+  transform: rotate(calc(-32deg + var(--pry, 0) * 40deg)); pointer-events: none; }
+.vent-crowbar[data-side="left"] { transform: scaleX(-1) rotate(calc(-32deg + var(--pry, 0) * 40deg)); } /* 왼쪽 아래 모서리에서 왼쪽 위로 */
+.vent-crowbar::before { content: ''; position: absolute; inset: 0; transform: scaleX(-1);
+  background: url('../assets/objects/wall-vent/crowbar.png') center / 100% 100% no-repeat; filter: brightness(.85); }
+#player[data-pry-push="true"] { margin: 3px 0 0 -4px; } /* 연타할 때마다 빠루에 체중을 실어 환풍구 쪽으로 들썩인다 */
+/* 떨어진 덮개: 환풍구 왼쪽(수호가 뜯는 반대편) 바닥에 비스듬히 기대 있다. 막 뜯었을 때는 구멍에서 빠져나와 떨어진다. */
+.vent-cover-fallen { position: absolute; width: 132px; height: 108px; transform: rotate(-9deg); transform-origin: 0 100%;
+  background: url('../assets/objects/wall-vent/vent-cover-removed.png') 0 0 / 100% 100% no-repeat; pointer-events: none; }
+.vent-cover-fallen[data-falling="true"] { animation: vent-cover-fall .55s cubic-bezier(.5, 0, .9, .6) both; }
+@keyframes vent-cover-fall {
+  0% { transform: translate(112px, -12px) rotate(0); }
+  55% { transform: translate(40px, -2px) rotate(-16deg); }
+  80% { transform: translate(5px, 0) rotate(-6deg); }
+  100% { transform: rotate(-9deg); } }
+/* 왼쪽에서 뜯으면 덮개는 오른쪽 바닥으로 떨어져 기댄다. */
+.vent-cover-fallen[data-side="left"] { transform: rotate(9deg); transform-origin: 100% 100%; }
+.vent-cover-fallen[data-side="left"][data-falling="true"] { animation-name: vent-cover-fall-right; }
+@keyframes vent-cover-fall-right {
+  0% { transform: translate(-112px, -12px) rotate(0); }
+  55% { transform: translate(-40px, -2px) rotate(16deg); }
+  80% { transform: translate(-5px, 0) rotate(6deg); }
+  100% { transform: rotate(9deg); } }
+@media (prefers-reduced-motion: reduce) { .vent-cover-fallen[data-falling="true"] { animation: none; } }
+/* 덮개 뜯기 스킬체크: 검은 원판 위 흰 원, 흰 성공 칸(앞쪽 끝 '완벽' 칸은 노랗게), 12시에서 도는 빨간 바늘. 화면 위쪽 가운데. */
+#vent-pry-gauge { position: absolute; z-index: 9; left: 50%; top: 8%; width: min(300px, 80vw); transform: translateX(-50%); padding: 10px 12px;
+  display: flex; flex-direction: column; align-items: center; gap: 6px;
+  background: #0b0b0cf0; border: 1px solid #5a5450; color: #ece6dc; font-size: 13px; font-weight: 700; line-height: 1.4; text-align: center; }
+#vent-pry-gauge[hidden] { display: none; }
+#vent-pry-dial { width: 132px; height: 132px; overflow: visible; }
+.vent-pry-ring { fill: #000; stroke: #f2ede6; stroke-width: 1.2; }
+#vent-pry-zone { fill: none; stroke: #f2ede6; stroke-width: 7; }
+#vent-pry-great { fill: none; stroke: #f5d478; stroke-width: 7; }
+#vent-pry-needle { stroke: #e3221e; stroke-width: 2.6; stroke-linecap: round; }
+#vent-pry-gauge[data-waiting="true"] #vent-pry-dial { opacity: .35; } /* 다음 체크를 기다리는 동안은 흐리다 */
+#vent-pry-status { min-height: 1.4em; color: #ffd9d3; }
+#vent-pry-push { min-height: 44px; min-width: 140px; border: 1px solid #f5d478; background: #3a1714; color: #fff; font: inherit; cursor: pointer; touch-action: manipulation; }
+#vent-pry-push:focus-visible { outline: 3px solid #eac47d; outline-offset: 3px; }
+/* 숨은 동안: 엘리베이터 칸처럼 덕트 안 그림(duct-view.png, source/make_duct_view.py)의 구멍 너머로 그 층 복도 배경 그림을
+   잘라 보이고(#vent-outside, 문틈처럼), 근처 로봇은 실제 위치에 맞춰 그 위에 그린다(guard-patrol.js updateVentView).
+   #vent-outside의 자리는 그림의 투명한 구멍(1920×1080 중 x 509–1411, y 292–950)과 같다. */
+#vent-view { position: absolute; inset: 0; z-index: 8; overflow: hidden; pointer-events: none; background: #050607; }
+#vent-view[hidden] { display: none; }
+#vent-outside { position: absolute; left: 26.51%; top: 27.04%; width: 46.98%; height: 60.93%; overflow: hidden; background-color: #20272a; }
+#vent-world { position: absolute; left: 0; top: 0; height: 760px; transform-origin: 0 0; } /* 장면 벽 복제(월드 좌표) */
+#vent-robot { position: absolute; left: 0; top: 0; width: 160px; height: 160px; transform-origin: 0 0; }
+#vent-robot[hidden] { display: none; }
+/* 실제 로봇(.guard-robot-sprite)과 같은 모양이지만 클래스는 따로 둔다: 로봇 수를 세는 코드·테스트가 사본을 세지 않게. */
+.vent-robot-sprite { width: 160px; height: 160px; overflow: hidden; transform-origin: 80px center; image-rendering: pixelated; }
+.vent-robot-sprite img { display: block; width: 800%; height: 100%; max-width: none; }
+#vent-view .vent-duct { position: absolute; inset: 0; background: url('../assets/objects/wall-vent/duct-view.png') center / 100% 100% no-repeat; }#vent-view-text { position: absolute; z-index: 1; left: 0; right: 0; bottom: 5%; margin: 0; color: #b9c2c0; font: 600 15px/1.4 sans-serif; text-align: center; letter-spacing: .04em; }
 #player #caught-sheet { width: 400%; height: 100%; }
 #player[data-state="caught"] #caught-sheet { display: block; }

@@ -54,7 +54,7 @@ try {
   for (const [floor, id] of [
     ['f2-server', 'f2-reel'], ['f2-lounge', 'f2-remote'],
     ['f16-cu', 'f16-antianxiety'], ['f16-cafe', 'f16-badge'], ['f12-dev', 'f12-lead-key'],
-    ['f13-secure', 'f13-backup-device'], ['b2-power', 'b2-antianxiety'],
+    ['f13-secure', 'f13-backup-device'], ['b2-power', 'b2-antianxiety'], ['f17-manager', 'f17-crowbar'],
   ]) {
     await approach(floor, id);
     await page.keyboard.press('e');
@@ -102,7 +102,7 @@ try {
   await page.keyboard.press('Tab');
   assert.equal(await page.locator('#inspection').getAttribute('data-acquired-item'), null, 'Opening the bag resets acquisition styling');
   assert.deepEqual(errors, []);
-  console.log('PASS: all 10 collectible items show image/name/acquisition, keep clues, avoid duplicates, and fit desktop/mobile.');
+  console.log('PASS: all 11 collectible items show image/name/acquisition, keep clues, avoid duplicates, and fit desktop/mobile.');
 } finally {
   await browser.close();
 }

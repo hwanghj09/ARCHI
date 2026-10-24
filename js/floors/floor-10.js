@@ -20,7 +20,10 @@ const FLOOR10_LAYOUT = {
     { name: '임원실', x: 4282, width: 680, style: 'painted', target: 'f10-executive',
       doorX: 4321, doorWidth: 130, doorY: 250, doorSprite: 'assets/objects/floor04/door-meeting.png' },
   ],
-  fixtures: [],
+  fixtures: [
+    // 숨는 환풍구(동쪽 끝 벽, 임원 회의실 문 너머). 안에서는 철판 벽과 동쪽 기둥이 보인다.
+    wallVent(4600, 4300),
+  ],
   props: [
     { file: 'waiting-sofa', size: [512, 256], worldWidth: 240, x: 3260 },
     { file: 'large-planter', size: [256, 512], worldWidth: 78, x: 3500 },
