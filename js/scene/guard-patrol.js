@@ -13,18 +13,21 @@ const guardPatrol = { x: 4530, facing: -1, wait: 0, elapsed: 0, mode: 'dock',
 // onCaught — 붙잡는 연출이 끝나면 '다시 시도' 창 대신 부른다. selfPowered — 층 전력과 상관없이 움직인다.
 // 옵션이 없는 R-01은 예전과 똑같이 움직인다.
 // 순찰 로봇 R-03(roamer): 1층(R-01 담당)·17층·B2를 뺀 층을 엘리베이터로 옮겨 다닌다. 자체 배터리라 층 전력과 상관없이
-// 돈다. 전등이 켜진 층에서는 복도와 방 네 곳(roamerRooms)을 둘러보고, 꺼진 층에서는 복도만 돈다. 다음 층은 켜진 층을 3배 더 자주 고른다.
+// 돈다. 엘리베이터에서 내리면 왼쪽으로 걸어가며 그쪽 방을 차례로 들르고(전등이 켜진 층만, toVisit) 왼쪽 끝까지 간 뒤,
+// 오른쪽으로 돌아서 같은 식으로 오른쪽 끝까지 보고 엘리베이터로 간다(endsLeft: 아직 안 간 복도 끝, 앞이 지금 방향).
+// 꺼진 층에서는 방에 들르지 않고 복도 양쪽 끝만 본다. 다음 층은 켜진 층을 3배 더 자주 고른다.
 // 정전 뒤에만 움직이고 B2 엔딩 중에는 멈춘다. 수호와 다른 장면에 있는 동안에는 머무는 시간(stay)만 줄다가
 // 다 되면 바로 다음 장면으로 옮긴다. 같은 장면이면 나갈 문(엘리베이터)까지 걸어가서 나간다.
 // 층을 옮길 때는 진짜 엘리베이터(elevatorCars)를 쓴다: 비어 있는 칸을 불러 문이 열리면 타고(trip 'call' → 'board'),
 // 문이 완전히 닫힌 뒤 운행하고('close' → 'ride'), 도착해 문이 완전히 열리면 내린다('exit'). 승강기 전력이 없으면 이 층을 계속 돈다.
 const roamerFloors = [-1, ...Array.from({ length: 15 }, (_, index) => index + 2)];
-const roamerRooms = 4; // 전등이 켜진 층에서 둘러볼 방 수
-const roamerStay = { corridor: 30000, room: 15000, ride: 6000 };
-const roamerSpeed = { patrol: 70, chase: 220 }; // R-01(순찰 80, 추격 270)보다 느리다. 걷기 200·달리기 340
+// hall: 수호와 같은 복도에서 다음 목적지로 걷기 전에 머무는 시간, look: 복도 끝에서 둘러보는 시간.
+// 수호가 없는 복도에서는 다음 목적지까지 걸어갈 시간만큼 머문다(roamerTravel).
+const roamerStay = { hall: 1000, look: 1400, room: 10000, ride: 6000 };
+const roamerSpeed = { patrol: 140, chase: 220 }; // 추격은 R-01(270)보다 느리다. 걷기 200·달리기 340
 // 수호가 문으로 나오자마자 붙잡히지 않게, 수호가 들어온 문 앞에서 이만큼은 떨어져 있는다(전방 센서보다 멀다).
 const roamerSafeDistance = 800;
-const roamerInitialState = { where: 'f9', next: 'elevator', lastFloor: null, stay: 60000, car: null, trip: null, roomsLeft: 0, x: 0, facing: -1, wait: 0, elapsed: 0,
+const roamerInitialState = { where: 'f9', next: 'elevator', lastFloor: null, stay: 60000, car: null, trip: null, toVisit: [], endsLeft: [], x: 0, facing: -1, wait: 0, elapsed: 0,
   mode: 'patrol', lostTime: 0, captureTime: 0, door: null, image: null, chaseOriginX: null, spottedX: null, firstEncounter: false, follow: false };
 // 쫓기던 수호가 방 문(복도 ↔ 방)으로 빠져나가면 R-03은 이만큼 뒤에 같은 문으로 따라 들어와 계속 쫓는다(follow).
 const roamerFollowDelay = 1500;
@@ -204,27 +207,85 @@ const roamerHasExit = config => floorById.get(config.parent).rooms.some(entry =>
 function roamerCanGo(sceneId, next) {
   const config = floorById.get(sceneId);
   const link = config.links?.find(entry => entry.target === next);
-  return link ? roamerLinkOpen(config, link) : next === 'elevator' || !config.interior || roamerHasExit(config);
+  return link ? roamerLinkOpen(config, link) : next === 'elevator' || roamerEnds.includes(next) || !config.interior || roamerHasExit(config);
 }
 
-// 방은 아직 둘러볼 방이 남았으면 절반 확률로 연결문 너머 옆방으로, 아니면 복도로 나간다. 복도 출구가 없는 방(보안 자료실)은
+const roamerEnds = ['left', 'right'];
+// 복도 끝 x(순찰 구간 끝, mountRoamer와 같다). 복도는 폭이 모두 corridorWidth다.
+const roamerEndX = end => end === 'left' ? 80 : corridorWidth - 80;
+
+// 복도에서 다음 목적지(방 문·복도 끝·엘리베이터)의 x.
+function roamerTargetX(sceneId, next) {
+  return roamerEnds.includes(next) ? roamerEndX(next) : next === 'elevator' ? roamerElevatorX(roamer.car ?? 0, sceneId) : sceneDoorX(sceneId, next);
+}
+
+// 수호가 없는 복도에서 다음 목적지까지 걸어가는 시간만큼 머문다.
+const roamerTravel = (sceneId, next) => Math.abs(roamerTargetX(sceneId, next) - roamer.x) / roamerSpeed.patrol * 1000;
+
+// 이 층에서 한 바퀴 돌 때 들를 방: 복도에 딸린 방 전부(연결문으로만 들어가는 방 포함). 잠기는 방(exitLock)은 뺀다.
+function roamerFloorRooms(config) {
+  if (!roamerFloorLit(config.floor)) return [];
+  return [...floorById.values()].filter(entry => entry.interior && entry.parent === config.id && !entry.exitLock).map(entry => entry.id);
+}
+
+// 한 바퀴를 새로 시작한다: 왼쪽 끝, 오른쪽 끝 순서로 복도를 훑으며 방을 모두 들른다.
+function startRoamerRound(config) {
+  Object.assign(roamer, { toVisit: roamerFloorRooms(config), endsLeft: [...roamerEnds] });
+}
+
+// 방은 아직 안 들른 옆방이 연결문 너머에 있으면 그리로, 아니면 복도로 나간다. 복도 출구가 없는 방(보안 자료실)은
 // 들어온 연결문으로 되돌아 나간다. 나갈 길이 모두 막혔으면 null(이 방에 더 머문다).
-// 복도는 아직 둘러볼 방이 남았으면 그 방으로, 아니면 엘리베이터로 나간다.
+// 복도는 지금 향하는 끝(endsLeft[0]) 쪽에 아직 안 들른 방이 있으면 가장 가까운 그 방으로, 없으면 그 끝으로 간다.
+// 양쪽 끝을 다 봤으면 남은 방(가까운 순), 그것도 없으면 엘리베이터로 간다.
 function pickRoamerNext(config, from = null) {
   if (config.interior) {
     const open = (config.links ?? []).filter(link => roamerLinkOpen(config, link));
-    const onward = open.filter(link => link.target !== from);
-    const exit = roamerHasExit(config);
-    if (onward.length && (!exit || (roamer.roomsLeft > 0 && Math.random() < .5))) {
-      roamer.roomsLeft--;
-      return onward[Math.floor(Math.random() * onward.length)].target;
-    }
-    return exit ? config.parent : open[0]?.target ?? null;
+    const unvisited = open.find(link => roamer.toVisit.includes(link.target));
+    if (unvisited) return unvisited.target;
+    if (roamerHasExit(config)) return config.parent;
+    return (open.find(link => link.target === from) ?? open[0])?.target ?? null;
   }
-  const rooms = config.rooms.filter(entry => floorById.has(entry.target) && !floorById.get(entry.target).exitLock);
-  if (roamer.roomsLeft <= 0 || !rooms.length) return 'elevator';
-  roamer.roomsLeft--;
-  return rooms[Math.floor(Math.random() * rooms.length)].target;
+  const end = roamer.endsLeft[0];
+  const direction = end === 'left' ? -1 : 1;
+  const offset = entry => sceneDoorX(config.id, entry.target) - roamer.x;
+  const rooms = config.rooms.filter(entry => roamer.toVisit.includes(entry.target) && (!end || offset(entry) * direction >= 0))
+    .sort((a, b) => Math.abs(offset(a)) - Math.abs(offset(b)));
+  return rooms[0]?.target ?? end ?? 'elevator';
+}
+
+// 다음 목적지를 정하고 그 장면에 머물 시간을 정한다.
+function setRoamerNext(config, from = null) {
+  roamer.next = pickRoamerNext(config, from);
+  if (config.interior) roamer.stay = roamerStay.room;
+  else roamer.stay = config.id === roamerHere() || roamer.next === null ? roamerStay.hall : roamerTravel(config.id, roamer.next);
+}
+
+// 복도 끝에 닿았다(수호와 같은 장면이면 걸어서, 아니면 걸어갈 시간이 지나서): 잠깐 둘러보고 다음 목적지로.
+function roamerToEnd() {
+  const x = roamerEndX(roamer.next);
+  if (roamer.door && roamer.x !== x) {
+    if (roamer.mode === 'patrol') Object.assign(roamer, { mode: 'return', chaseOriginX: x, wait: 0 });
+    return;
+  }
+  if (roamer.door && roamer.mode !== 'patrol') return;
+  roamer.x = x;
+  roamer.endsLeft = roamer.endsLeft.filter(end => end !== roamer.next);
+  setRoamerNext(floorById.get(roamer.where));
+  if (roamer.door) roamer.stay = roamerStay.look;
+}
+
+// sceneId 장면에서 other 장면으로 이어진 문(지금 장면에 그려져 있을 때만).
+function roamerDoor(sceneId, other) {
+  if (sceneId !== roamerHere() || other === 'elevator') return null;
+  const config = floorById.get(sceneId);
+  const key = !config.interior ? `room:${other}` : other === config.parent ? 'exit' : `link:${other}`;
+  return currentDoors.find(entry => entry.key === key) ?? null;
+}
+
+function openRoamerDoor(door) {
+  if (!door) return;
+  door.element.dataset.open = 'true';
+  setTimeout(() => { if (door.element.isConnected) door.element.dataset.open = 'false'; }, 900);
 }
 
 function roamerEnter(sceneId, from) {
@@ -232,20 +293,15 @@ function roamerEnter(sceneId, from) {
   const follow = roamer.follow;
   Object.assign(roamer, { where: sceneId, mode: 'patrol', wait: 0, lostTime: 0, follow: false });
   roamer.x = from === 'elevator' ? roamerElevatorX() : sceneDoorX(sceneId, from);
-  if (from === 'elevator') roamer.roomsLeft = roamerFloorLit(config.floor) ? roamerRooms : 0;
-  roamer.stay = from === 'elevator' ? roamerStay.corridor : roamerStay.room;
-  roamer.next = pickRoamerNext(config, from);
+  if (from === 'elevator') startRoamerRound(config);
+  roamer.toVisit = roamer.toVisit.filter(id => id !== sceneId);
+  setRoamerNext(config, from);
   // 수호가 있는 층에 엘리베이터로 오면 도착음을 거리와 상관없이 들려준다(그 층의 방 안에서도). 로봇이 왔다는 신호다.
   if (from === 'elevator' && room === 'dynamic' && currentSceneFloor === config.floor) playGameSound('elevator-arrive');
   if (sceneId !== roamerHere()) return;
   mountRoamer();
   roamer.facing = roamer.x < worldWidth / 2 ? 1 : -1;
-  const key = !config.interior ? `room:${from}` : from === config.parent ? 'exit' : `link:${from}`;
-  const door = from === 'elevator' ? null : currentDoors.find(entry => entry.key === key);
-  if (door) {
-    door.element.dataset.open = 'true';
-    setTimeout(() => { if (door.element.isConnected) door.element.dataset.open = 'false'; }, 900);
-  }
+  openRoamerDoor(roamerDoor(sceneId, from));
   if (from !== 'elevator') playGameSound('door', { x: roamer.x });
   if (follow) Object.assign(roamer, { mode: 'chase', chaseOriginX: roamer.x, spottedX: body.position.x });
 }
@@ -260,6 +316,8 @@ function roamerCanFollow(sceneId) {
 function roamerLeave() {
   const { where, next } = roamer;
   if (roamer.door) {
+    // 문을 열고 나간다. 예전엔 문 앞에서 스프라이트만 지워져 갑자기 사라진 것처럼 보였다.
+    openRoamerDoor(roamerDoor(where, next));
     roamer.door.element.remove();
     roamer.door = roamer.image = null;
     playGameSound('door', { x: roamer.x });
@@ -287,9 +345,8 @@ function sendRoamerCar(car) {
 function roamerToElevator() {
   const config = floorById.get(roamer.where);
   if (!elevatorHasPower()) { // 승강기가 멈춰 있으면 이 층을 한 바퀴 더 돈다
-    roamer.roomsLeft = roamerFloorLit(config.floor) ? roamerRooms : 0;
-    roamer.next = pickRoamerNext(config);
-    roamer.stay = roamerStay.corridor;
+    startRoamerRound(config);
+    setRoamerNext(config);
     return;
   }
   roamer.car ??= pickRoamerCar(config.floor);
@@ -376,6 +433,7 @@ function updateRoamer(delta) {
     }
     else if ((roamer.stay -= delta) > 0) { /* 아직 이 장면에 머문다 */ }
     else if (roamer.next === 'elevator') roamerToElevator();
+    else if (roamerEnds.includes(roamer.next)) roamerToEnd();
     else {
       const exitX = sceneDoorX(roamer.where, roamer.next);
       // 수호가 있는 장면으로 들어올 문 바로 앞에 수호가 서 있으면 조금 뒤에 들어온다.
@@ -412,7 +470,11 @@ function mountGuardPatrol() {
   roamer.mode = 'patrol'; roamer.lostTime = 0; roamer.follow = false;
   if (chasing && roamerCanFollow(roamerHere())) {
     Object.assign(roamer, { next: roamerHere(), stay: roamerFollowDelay, follow: true, trip: null, car: null });
-  } else if (roamer.where && roamer.where === roamerHere()) { keepRoamerClear(); mountRoamer(); }
+  } else if (roamer.where && roamer.where === roamerHere()) {
+    // 복도에서 걸어갈 시간을 기다리던 중이면 이제 직접 걸어간다.
+    if (!floorById.get(roamer.where).interior && roamer.next !== 'elevator') roamer.stay = Math.min(roamer.stay, roamerStay.hall);
+    keepRoamerClear(); mountRoamer();
+  }
   guardPatrol.door = room === 'dynamic' && dynamicFloorId === 'f1' ?
     currentDoors.find(door => door.style === 'guard-bot') : null;
   guardPatrol.image = null;
