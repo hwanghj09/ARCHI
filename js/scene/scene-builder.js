@@ -288,11 +288,11 @@ function buildDynamicScene(config) {
         const robot = document.createElement('span');
         robot.className = 'docked-robot guard-robot-sprite';
         robot.setAttribute('aria-hidden', 'true');
-        robot.style.left = `${index * 60 - 50}px`;
+        robot.style.left = `${index * 60 - 82}px`;
         const image = new Image();
-        image.src = 'assets/objects/guard-robot/guard-patrol.png';
+        image.src = 'assets/objects/guard-robot/guard-humanoid-v2-idle.png';
         image.alt = ''; image.draggable = false;
-        image.style.transform = 'translateX(-50%)';
+        image.style.width = '100%';
         robot.append(image); element.append(robot);
       }
     }

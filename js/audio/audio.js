@@ -258,6 +258,7 @@ function playGameSound(name, options = {}) {
   if (distance >= 800) return;
   const interval = name === 'step' ? (options.running ? .21 : .29) : name === 'robot-step' ? 0 : name === 'robot-alert' ? 1.2 : name === 'robot-servo' ? 1.1 : .08;
   if (now - (gameAudioLastPlayed.get(name) ?? -Infinity) < interval || gameAudioEffects.size >= 6) return;
+  if (name === 'robot-step') return playRobotStepFile(distance);
   const cue = gameAudioCue(name, options);
   const varied = name === 'step' || name === 'door' || ['paper', 'keyboard', 'water-drop', 'pipe-tick'].includes(cue);
   const last = gameAudioLastVariant.get(cue) || 1;
@@ -321,8 +322,7 @@ function updateRobotMovementSound(robot, distance) {
   robot.soundDistance = distance > 0 ? (robot.soundDistance ?? 0) + distance : 0;
   if (robot.soundDistance < 38) return;
   robot.soundDistance %= 38;
-  playGameSound('robot-step', { x: robot.x });
-  playGameSound('robot-servo', { x: robot.x });
+  playGameSound('robot-servo', { x: robot.x }); // 발소리는 걷기 컷에 맞춰 updateRobot이 낸다
 }
 
 function stopGameAudioSource(sound) {
@@ -387,6 +387,27 @@ function playB2BossStep(x) {
   b2BossStepElement.volume = Math.max(0, Math.min(1, gameVolume * near));
   b2BossStepElement.currentTime = 0;
   b2BossStepElement.play().catch(() => {});
+}
+
+// 경비 로봇의 발이 땅에 닿을 때의 발소리(guard-patrol.js가 걷기·달리기 컷에 맞춰 'robot-step'을 부른다).
+// 한 발(0.9초)이 다음 발(달리기 360ms 간격)보다 길어서 세 개를 돌려 쓴다.
+const robotStepElements = [0, 1, 2].map(() => {
+  const element = new Audio('assets/audio/robot-step.mp3');
+  element.preload = 'auto';
+  element.preservesPitch = false;
+  return element;
+});
+let robotStepNext = 0;
+
+function playRobotStepFile(distance) {
+  const element = robotStepElements[robotStepNext];
+  robotStepNext = (robotStepNext + 1) % robotStepElements.length;
+  // 원본이 수호 발소리(step-tile, 걷기)보다 약 30배 커서, 바로 옆에서 수호 발소리의 약 2.4배가 되게 줄인다.
+  element.volume = Math.max(0, Math.min(1, gameVolume * .08 * (1 - distance / 800)));
+  element.playbackRate = .94 + Math.random() * .12;
+  element.currentTime = 0;
+  element.play().catch(() => {});
+  return true;
 }
 
 // B2 보스의 쇠공이 머리 위를 지나갈 때 공기를 가르는 "우웅" 소리(b2-ending.js). 파일 없이 바로 만든다:
@@ -526,7 +547,7 @@ function pauseGameAudio() {
   sanityMusicElement.pause();
   sanityMusicGain = sanityMusicTarget = 0;
   sanityMusicElement.volume = 0;
-  if (document.hidden || mainMenuActive || !gameStarted) for (const element of [hallucinationSoundElement, ...hallucinationSightingElements, hallucinationDevouredElement, redEyeBreakDragonElement, redEyeBreakUniversElement, doorPryElement, b2PhaseDoorElement, b2BossStepElement, b2BossWindupElement, b2SirenElement]) element.pause();
+  if (document.hidden || mainMenuActive || !gameStarted) for (const element of [hallucinationSoundElement, ...hallucinationSightingElements, hallucinationDevouredElement, redEyeBreakDragonElement, redEyeBreakUniversElement, doorPryElement, b2PhaseDoorElement, b2BossStepElement, ...robotStepElements, b2BossWindupElement, b2SirenElement]) element.pause();
   if (!gameAudioContext) return;
   for (const sound of gameAudioAmbience.values()) stopGameAudioSource(sound);
   gameAudioAmbience.clear();

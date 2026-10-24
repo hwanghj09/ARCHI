@@ -1,12 +1,12 @@
 .robot-dock-patch { position: absolute; left: 4440px; top: 330px; width: 256px; height: 256px; clip-path: inset(66px 100px 42px 78px); pointer-events: none; image-rendering: pixelated; }
 #dynamic-scene .fixture.guard-bot { background: none; }
 #dynamic-scene .fixture.guard-bot::before, #dynamic-scene .fixture.guard-bot::after { content: none; }
-.guard-robot-sprite { width: 160px; height: 160px; overflow: hidden; transform-origin: 80px center; pointer-events: none; image-rendering: pixelated; }
+.guard-robot-sprite { position: relative; width: 224px; height: 224px; overflow: hidden; transform-origin: 112px center; pointer-events: none; image-rendering: pixelated; }
 .guard-robot-sprite img { display: block; width: 800%; height: 100%; max-width: none; }
 /* 순찰 중에도(move/scan) 휴대폰 충전함 같은 벽 소품보다 항상 앞에 그려야 한다 — 기본 스태킹(DOM 순서)만
    쓰면 뒤늦게 추가되는 충전함 fixture가 로봇 위로 그려져서 로봇이 소품 "안으로" 들어가 보였다. */
 #dynamic-scene .fixture.guard-bot { z-index: 2; }
-/* 붙잡는 동안(grab/caught)은 두 팔이 수호의 허리를 앞에서 감싸야 하므로 수호(6)보다 위로 올린다. 포획은 그 층에 전력이
+/* 붙잡는 동안(grab/caught)은 돌아선 수호의 양팔뚝을 잡아야 하므로 수호(6)보다 위로 올린다. 포획은 그 층에 전력이
    있을 때만 일어나서 정전 어둠 막(5)과 겹칠 일이 없다. 전체 겹침 순서는 index.html의 #darkness 주석 참고. */
 #dynamic-scene .fixture.guard-bot:is([data-patrol="grab"], [data-patrol="caught"]) { z-index: 7; }
 /* 순찰 로봇 R-03은 스프라이트만 그린다. game.css가 뒤에 읽혀서 CSS로 그린 대체 몸통(회색 상자)이 겹쳐 보였다. */
