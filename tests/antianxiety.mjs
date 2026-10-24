@@ -93,7 +93,8 @@ try {
   await page.evaluate(() => useInventoryItem('f16-antianxiety'));
   assert.equal(await page.evaluate(() => itemUseTime), 0, 'A used item cannot restart the animation');
 
-  await page.evaluate(() => { buildingBlackout = true; phoneLightOn = false; updatePowerState(); });
+  // 16층에 오려면 옥상 태양광을 켠 뒤다(태양광 전의 절반 감소 sanityPreSolarDrainFactor는 적용되지 않는다).
+  await page.evaluate(() => { buildingBlackout = true; solarEnabled = true; phoneLightOn = false; updatePowerState(); });
   const restored = await page.evaluate(() => sanity);
   await page.clock.runFor(3000);
   assert.equal(await page.evaluate(() => sanity), restored, '복용 뒤 60초(antianxietyCalmMs) 동안은 어둠에서도 닳지 않는다');

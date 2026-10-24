@@ -33,7 +33,7 @@ export async function goToDeskComputer(page) {
 export async function collectRooftopKey(page) {
   const position = () => page.locator('#player').evaluate(el => new DOMMatrix(getComputedStyle(el).transform).m41 + 96);
   const start = await position();
-  for (const target of [4095, start]) {
+  for (const target of [2834, start]) {
     const wasDark = await page.evaluate(() => buildingBlackout);
     const x = await position();
     const key = target > x ? 'd' : 'a';
@@ -51,7 +51,7 @@ export async function collectRooftopKey(page) {
       await page.keyboard.up(resumeKey);
       await page.clock.runFor(34);
     }
-    if (target === 4095) {
+    if (target === 2834) { // 옥상문 옆 비상 열쇠함(corridor17.js)
       await page.keyboard.press('e');
       await page.getByRole('button', { name: '낡은 열쇠 줍기' }).click();
       await page.keyboard.press('Escape');

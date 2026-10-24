@@ -24,28 +24,28 @@ try {
   await page.clock.runFor(2000); assert.equal((await state()).sanity, 100, '밝은 곳에서는 정신력이 100을 넘지 않는다');
   await page.evaluate(() => triggerBuildingBlackout());
   assert.equal((await state()).exposure, 'dark');
-  // 어두운 곳: 3초에 1%(=1/3%/초)씩 준다.
-  await page.clock.runFor(3000); near((await state()).sanity, 99);
+  // 옥상 태양광을 켜기 전에는 어둠 감소가 절반(sanityPreSolarDrainFactor): 3초에 0.5%.
+  await page.clock.runFor(3000); near((await state()).sanity, 99.5);
   await page.keyboard.press('f');
   await page.clock.runFor(await page.evaluate(() => phoneLightDelayMs));
   const shielded = await state();
   assert.equal(shielded.exposure, 'flashlight');
-  // 어둠 속 플래시는 감소를 막지 못하고 절반(sanityFlashlightDrainFactor)으로 줄인다: 3초에 0.5%. 올려주지도 않는다.
-  await page.clock.runFor(3000); near((await state()).sanity, shielded.sanity - .5);
+  // 어둠 속 플래시는 감소를 막지 못하고 절반(sanityFlashlightDrainFactor)으로 줄인다: 태양광 전이라 3초에 0.25%. 올려주지도 않는다.
+  await page.clock.runFor(3000); near((await state()).sanity, shielded.sanity - .25);
   assert((await state()).battery < shielded.battery, 'Protection still consumes the phone battery');
   await page.keyboard.press('f');
   await page.keyboard.press('p');
   const reading = (await state()).sanity;
-  await page.clock.runFor(5000); near((await state()).sanity, reading - 5 / 3);
+  await page.clock.runFor(5000); near((await state()).sanity, reading - 5 / 6);
   await page.keyboard.press('Escape');
   await page.evaluate(() => openInspection('메모', '읽는 동안에는 정신력이 줄지 않는다.'));
-  await page.clock.runFor(4000); near((await state()).sanity, reading - 5 / 3);
+  await page.clock.runFor(4000); near((await state()).sanity, reading - 5 / 6);
   await page.keyboard.press('Escape');
   await page.evaluate(() => { solarEnabled = true; solarPoweredFloors = [17]; updatePowerState(); });
-  await page.clock.runFor(2500); near((await state()).sanity, reading - 5 / 3); // 밝은 곳에서는 더 이상 회복되지 않는다
+  await page.clock.runFor(2500); near((await state()).sanity, reading - 5 / 6); // 밝은 곳에서는 더 이상 회복되지 않는다
   // 17층 조명 스위치는 화면에서 숨겨졌으니 같은 change 처리기로 끈다.
   await page.locator('#floor17-lights').evaluate(el => { el.checked = false; el.dispatchEvent(new Event('change')); });
-  await page.clock.runFor(3000); near((await state()).sanity, reading - 5 / 3 - 1);
+  await page.clock.runFor(3000); near((await state()).sanity, reading - 5 / 6 - 1); // 태양광을 켠 뒤 어둠 감소는 원래 속도(3초에 1%)
   await page.evaluate(() => {
     phoneBattery = 1; phoneLightOn = true; phoneDrainAccumulator = 0; refreshPhone();
   });

@@ -259,8 +259,8 @@ try {
   await page.keyboard.up('d');
   await hold('d', 15000);
   near((await state()).x, 4948, 'Interaction must preserve movement and boundaries');
-  // 오른쪽 끝벽 앞에는 청소 카트(관리실 메모, corridor17.js)가 있어 엘리베이터 안내 대신 카트 안내가 뜬다.
-  assert.match(await page.locator('#interaction-hint').textContent(), /^E · 청소 카트/, 'Walking away replaces the elevator prompt');
+  // 오른쪽 끝벽 앞에는 조사할 것이 없다(청소 카트는 관리자실 문 왼쪽, corridor17.js). 엘리베이터 안내는 사라진다.
+  assert(await page.locator('#interaction-hint').isHidden(), 'Walking away clears the elevator prompt');
 
   const beforeResize = await state();
   await page.setViewportSize({ width: 390, height: 844 });

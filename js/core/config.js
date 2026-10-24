@@ -35,6 +35,7 @@ const antianxietyCalmMs = 60000; // 항불안제를 먹은 뒤 정신력이 전�
 const solarDownloadMs = 5000;
 const solarTransferMs = 8000;
 const sanityFlashlightDrainFactor = .5; // 어둠 속에서 플래시를 켜면 어둠 감소(sanityDarkDrainPerSecond)의 이 배율로 줄어든다
+const sanityPreSolarDrainFactor = .5; // 옥상 태양광을 켜기 전(첫 정전 탐색)에는 어둠 감소를 이 배율로 늦춘다. 1층 추격 전에 바닥나지 않게.
 // 50/40/30/20/10% 미만 구간의 공포 연출 단계(1~5). sanityTierOf()가 이 경계로 계산한다.
 const sanityTierThresholds = [50, 40, 30, 20, 10];
 const sanitySlowSpeedFactor = .92; // 30% 미만 이동 속도

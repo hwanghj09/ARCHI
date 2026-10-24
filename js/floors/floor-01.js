@@ -101,6 +101,9 @@ const FLOOR1_LAYOUT = {
       poweredMessage: '자동문 화면이 켜졌지만 문은 열리지 않는다: "출입 차단 · 미등록 출입증 · 17F 정수호 · 명령 SYSTEM." 내 이름이다.',
       surface: 'screen', look: 'lcd', writing: [{ text: '출입 통제 중 · SYSTEM.', size: 'large', align: 'center' }],
       caption: '회전문도 옆 자동문도 멈춰 있다. 유리 너머 거리의 가로등은 멀쩡히 켜져 있다. 문틀 위 작은 표시창만 배터리로 깜빡인다.' },
+    // 안내 데스크 왼쪽 상판(그림 y 127, 오른쪽 낮은 상판은 화분에 가린다)의 충전 콘센트.
+    // 휴대폰이 꺼진 채 1층에 갇혀도(승강기는 1층만 눌린다) 여기서 충전해 전력 앱을 쓴다.
+    { ...phoneChargerFixture(3365, floorY - (256 - 8 - 127) * 322 / 512), floor: 1 },
   ],
   props: [
     { file: 'waiting-sofa', size: [512, 256], worldWidth: 240, x: 4080 },

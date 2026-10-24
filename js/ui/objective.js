@@ -79,8 +79,6 @@ const OBJECTIVES = [
     title: '관리실 비밀번호 찾기', text: '관리실은 잠겨 있다. 누군가 비밀번호를 적어 두지 않았을까?' },
   { when: () => solarEnabled && !collectedItems.has('f17-emergency-linked') && !collectedItems.has('f17-manager-unlocked'),
     title: '관리실 열기', text: '이제 관리실에 들어갈 수 있을 것 같다.' },
-  { when: () => solarEnabled && !collectedItems.has('f17-emergency-linked') && !collectedItems.has('f17-circuit-guide-read'),
-    title: '회로 안내도 확인', text: '전선을 함부로 건드릴 순 없다. 어떻게 이어야 할지 먼저 알아야 한다.' },
   { when: () => solarEnabled && !collectedItems.has('f17-emergency-linked'),
     title: '승강기 비상 회선 연결', text: '승강기에도 전력을 보내야 한다.' },
   // 1층에서 퇴근이 막히는 흐름(floor-01.js): 정문 확인 → 안내 데스크 앱 → 1층 전력. 제목을 '퇴근하기'로 두어 승강기는 1층만 눌린다(cabin.js).
