@@ -78,11 +78,8 @@ function refreshSolarDownload() {
   const ready = usingComputer;
   refreshComputerUsb();
   if (typeof refreshUsbDrive === 'function') refreshUsbDrive();
-  if (computerSolarTask && (transitioning || !ready ||
-      (computerSolarTask.kind === 'transfer' && !computerUsbConnected))) {
-    clearInterval(computerSolarTask.timer);
-    computerSolarTask = null;
-  }
+  // 다운로드는 컴퓨터를 나가도 백그라운드에서 이어서 받는다. USB 전송만 연결이 끊기면 중단한다.
+  if (computerSolarTask?.kind === 'transfer' && (transitioning || !ready || !computerUsbConnected)) cancelSolarFileTask();
   const downloaded = collectedItems.has('solar-app-downloaded');
   const installed = collectedItems.has('solar-app-installed');
   const task = computerSolarTask;
@@ -108,6 +105,12 @@ function refreshSolarDownload() {
     phoneDock ? '충전하던 책상에서 휴대폰을 가져오세요.' : phoneBattery <= 0 ? '휴대폰 충전 필요' :
     !computerUsbConnected ? '휴대폰 연결 필요' :
     '';
+}
+
+function cancelSolarFileTask() {
+  if (!computerSolarTask) return;
+  clearInterval(computerSolarTask.timer);
+  computerSolarTask = null;
 }
 
 function startSolarFileTask(kind) {

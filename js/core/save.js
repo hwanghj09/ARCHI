@@ -89,6 +89,7 @@ function restoreProgress(data) {
     hideDevouredVideo();
     cancelPhotoCapture();
     closeComputerUsbConnection();
+    cancelSolarFileTask(); // 백그라운드 다운로드가 불러온 판에 완료되지 않게 한다.
     resetComputerDesktop();
     releaseInput();
     // 재개할 때 조사·휴대폰 등의 창은 닫는다. 퍼즐 진행과 실제 게임 상태는 복원한다.
