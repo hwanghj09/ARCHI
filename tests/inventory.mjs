@@ -167,7 +167,7 @@ try {
   await page.screenshot({ path: '.local/inventory-mobile.png' });
   await page.keyboard.press('Escape');
   await approach('stairs');
-  await page.evaluate(() => rooftopBackground.decode());
+  await page.evaluate(() => Promise.all([rooftopCity.decode(), rooftopBackground.decode()]));
   await page.keyboard.press('e');
   const useKey = page.getByRole('button', { name: '열쇠 사용하기', exact: true });
   assert(await useKey.isVisible());

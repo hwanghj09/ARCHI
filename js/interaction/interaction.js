@@ -284,7 +284,7 @@ function interact() {
       else openInspection('옥상문', '문 위 표지판: "옥상 · 태양광 비상전원 설비". 문이 잠겨 있다. 비상용 열쇠라면… 비상 장비 근처에 두지 않았을까?');
       return;
     }
-    if (destId === 'rooftop' && (!rooftopBackground.complete || !rooftopBackground.naturalWidth)) {
+    if (destId === 'rooftop' && [rooftopCity, rooftopBackground].some(image => !image.complete || !image.naturalWidth)) {
       return;
     }
     playGameSound('door', { door: nearbyDoor });

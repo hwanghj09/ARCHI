@@ -42,6 +42,7 @@ function render() {
   const roomInset = Math.max(0, (stage.clientWidth - worldWidth * scale) / 2);
   world.style.transform = `translate(${roomInset - cameraX * scale - cameraFocus.x * scale * zoomed + cameraShake.x}px, ` +
     `${stage.clientHeight - worldHeight * scale - cameraFocus.y * scale * zoomed + cameraShake.y}px) scale(${scale * cameraZoom})`;
+  updateRooftopParallax();
   renderHallucination();
   updateRedEyes();
 }

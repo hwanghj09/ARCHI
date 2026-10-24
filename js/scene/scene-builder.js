@@ -101,7 +101,7 @@ function buildDynamicScene(config) {
       backgroundPosition: `${-450 - window.x % 1450}px ${-170 - (17 - config.floor) * 7}px` });
     dynamicScene.append(element);
   }
-  if (config.id === 'rooftop') dynamicScene.append(rooftopBackground);
+  if (config.id === 'rooftop') dynamicScene.append(rooftopCity, rooftopBackground);
   const layout = [
     { kind: 'floor', x: 0, y: floorY, width: config.width, height: 150 },
     { kind: 'boundary', x: 0, y: 0, width: 32, height: worldHeight },
@@ -183,15 +183,15 @@ function buildDynamicScene(config) {
     supply.setAttribute('role', 'img');
     supply.setAttribute('aria-label', `태양광 임시 전력장치 · ${solarEnabled ? '전원 켜짐' : '전원 꺼짐'}`);
     // The first 887px cell has transparent padding; its bottom edge is y=691.
-    Object.assign(supply.style, { left: '720px', top: `${floorY - 691 * 360 / 887}px` });
+    Object.assign(supply.style, { left: '810px', top: `${floorY - 691 * 360 / 887}px` });
     const image = new Image();
     image.src = 'assets/objects/power/solar-supply-off-on.png';
     image.alt = '';
     image.draggable = false;
     supply.append(image);
     dynamicScene.append(supply);
-    doorList.push({ name: '태양광 발전기', type: 'power', element: supply, x: 720, y: 250, width: 360,
-      outline: spriteOutline(image.getAttribute('src'), 720, floorY - 691 * 360 / 887, 360, 360) });
+    doorList.push({ name: '태양광 발전기', type: 'power', element: supply, x: 810, y: 250, width: 360,
+      outline: spriteOutline(image.getAttribute('src'), 810, floorY - 691 * 360 / 887, 360, 360) });
   }
   if (config.interior) {
     const backdrop = document.createElement('div');
@@ -403,7 +403,9 @@ function buildDynamicScene(config) {
   // 그 층 그림 속 비상계단 벽감이 BUILDING_CORE.stairs 좌표와 어긋날 때만 그 층의 판정 위치·크기를
   // 보정한다(다른 층은 그대로).
   const sceneDoors = config.id === 'rooftop' ?
-    [{ name: '17층 계단', type: 'stairs', x: 160, y: 232, width: 180 }] : !isFloor ? [] : [
+    // 옥상 계단문은 17층과 같은 assets/objects/floor17/stairs.png(256x512 두 칸)를 쓴다.
+    // 계단실 지붕 테두리(y≈268) 아래에 맞춘 150x296.
+    [{ name: '17층 계단', type: 'stairs', x: 175, y: 274, width: 150 }] : !isFloor ? [] : [
       ...BUILDING_CORE.elevators
         .map((car, carIndex) => ({ name: elevatorCars[carIndex].name, type: 'elevator', carIndex,
         x: car.x + (config.elevatorOffsets?.[carIndex] ?? 0),
@@ -426,7 +428,7 @@ function buildDynamicScene(config) {
       left: `${door.x}px`, top: `${door.y}px`, width: `${door.width}px`, height: `${door.height ?? floorY - door.y}px`,
     });
     const image = new Image();
-    image.src = `assets/objects/floor17/${door.type}.png`;
+    image.src = door.sprite ?? `assets/objects/floor17/${door.type}.png`;
     image.alt = '';
     image.draggable = false;
     door.element.append(image);
