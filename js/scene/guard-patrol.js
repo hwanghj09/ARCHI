@@ -445,6 +445,9 @@ function updateRobot(robot, delta) {
   const frames = grabbing ? 4 : idle ? 1 : 8;
   const frame = grabbing ? Math.min(3, Math.floor(robot.captureTime / 275)) :
     idle ? 0 : Math.floor(robot.elapsed / (running ? 90 : 120)) % 8;
+  // 걷기·달리기 시트 모두 0번과 4번 컷에서 앞발이 땅에 닿는다. 그 컷으로 넘어갈 때마다 발소리를 낸다.
+  if (!grabbing && !idle && robot.stepFrame !== undefined && frame !== robot.stepFrame && frame % 4 === 0) playGameSound('robot-step', { x: robot.x });
+  robot.stepFrame = frame;
   const { door } = robot;
   door.x = robot.x - door.width / 2;
   door.y = floorY - 198;

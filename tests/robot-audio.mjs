@@ -31,10 +31,11 @@ try {
   const robotSteps = async (mode, wait = 0, delta = 1000 / 60) => page.evaluate(({ mode, wait, delta }) => {
     performFloorChange('f5'); solarEnabled = false; updatePowerState();
     roamerEnter('f5', 'elevator');
-    Object.assign(roamer, { x: 3000, facing: 1, mode, wait, stay: 60000, soundDistance: 0, lostTime: 0 });
+    Object.assign(roamer, { x: 3000, facing: 1, mode, wait, stay: 60000, soundDistance: 0, lostTime: 0, elapsed: 0, stepFrame: 0 });
     Body.setPosition(body, { x: 3600, y: floorY - 400 }); grounded = false;
     audioEvents.length = 0;
-    for (let i = 0; i < 60; i++) updateGuardPatrol(delta);
+    // 발소리는 발이 닿는 컷마다 난다(걷기 480ms, 달리기 360ms 간격): 1.67초면 걷기 3번, 달리기 4번.
+    for (let i = 0; i < 100; i++) updateGuardPatrol(delta);
     return audioEvents.filter(name => name === 'robot-step').length;
   }, { mode, wait, delta });
   const patrolSteps = await robotSteps('patrol');

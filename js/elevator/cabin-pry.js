@@ -35,6 +35,7 @@ function updateRoamerCabin(delta) {
   roamer.facing = stop >= roamer.x ? 1 : -1;
   const distance = Math.min(Math.abs(stop - roamer.x), roamer.chaseSpeed() * delta / 1000);
   roamer.x += roamer.facing * distance;
+  roamer.elapsed += delta; // 달리기 컷과 발소리가 진행되게 한다
   updateRobotMovementSound(roamer, distance);
   updateRobot(roamer, 0);
 }
