@@ -48,8 +48,8 @@ panelFloors.forEach((floor, index) => {
       cabinStatus.textContent = elevatorPowerMessage;
       return;
     }
-    // 퇴근하기 목표 도중(정전 전의 첫 '엘리베이터로 가자.'는 제외)에는 1층 버튼만 눌린다.
-    if (currentObjective?.title === '퇴근하기' && currentObjective.text !== '엘리베이터로 가자.' && floor !== 1) {
+    // 퇴근 도중에도 충전기에 두고 온 휴대폰은 회수하러 갈 수 있다.
+    if (currentObjective?.title === '퇴근하기' && currentObjective.text !== '엘리베이터로 가자.' && floor !== 1 && floor !== phoneDock?.floor) {
       cabinStatus.textContent = '1층으로 가서 퇴근하자.';
       playGameSound('deny');
       return;

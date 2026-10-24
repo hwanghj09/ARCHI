@@ -7,7 +7,7 @@ const objectiveText = document.getElementById('objective-text');
 // 읽으면 진행도가 넘어가는 이야기 소품(층 번호 + 소품 이름 → collectedItems에 남길 플래그).
 const OBJECTIVE_READS = {
   '12|팀장 책상': 'goal-f12-memo', // 읽은 기록만 남긴다. 12층 진행은 모델 평가실 퍼즐(f12-evaluation-solved)로 넘어간다.
-  '5|서가 꼭대기': 'goal-f5-note', // 5층 연구 노트: 8층 재현 기록과 함께 7층 백업 장비의 조건(backup-puzzle.js)
+  '5|서가 꼭대기': 'goal-f5-note', // 5층 연구 노트: 8층 재현 기록과 함께 ARCHI-MAIN 터미널 접속의 조건(terminal.js)
   '-2|ARCHI 메인 콘솔': 'goal-b2-console',
   '1|층별 안내판': 'goal-f1-directory',
   '1|정문': 'f1-door-checked', // 퇴근하려다 문이 안 열리는 것을 확인했다(story-scene.js 혼잣말 → 안내 데스크)
@@ -36,7 +36,7 @@ const OBJECTIVES = [
     text: '외부 연결 중이라 DELETE가 잠겨 있다. 전력·냉각실에서 외부 전송 회선을 차단하자.' },
   { when: () => collectedItems.has('b2-console-locked') && collectedItems.has('b2-transfer-cut'), title: '메인 콘솔 확인',
     text: '외부 전송 회선을 끊었다. 메인 서버실 콘솔을 다시 확인하자.' },
-  // 12층·7층 필수 퍼즐(log-puzzle.js, backup-puzzle.js)을 차례로 풀어야 다음 목표로 넘어간다.
+  // 12층 필수 퍼즐(log-puzzle.js)과 ARCHI-MAIN 터미널(terminal.js)을 차례로 풀어야 다음 목표로 넘어간다.
   { when: () => collectedItems.has('f7-external-connection-solved') && collectedItems.has('b1-elevator'), title: 'B2 서버실 조사하기', text: '길이 열렸다. 승강기를 타고 B2 서버실로 내려가자.' },
   { when: () => collectedItems.has('f7-external-connection-solved') && !collectedItems.has('f13-backup-device'), title: '외부 연결 통로 찾기',
     text: 'ARCHI의 신호는 어디를 거쳐 밖으로 나가는 걸까? 보안 자료실에서 외부 통로를 찾아보자.' },
@@ -56,14 +56,13 @@ const OBJECTIVES = [
     text: '모니터 벽이 무엇을 찍고 있었는지 먼저 확인해 보자.' },
   { when: () => collectedItems.has('f7-external-connection-solved') && collectedItems.has('b2-restricted-seen'), title: 'B2 운행 제한 해제', text: '승강기가 B2로 내려가지 않는다. B1 방재 관제실에서 운행을 관리할 텐데.' },
   { when: () => collectedItems.has('f7-external-connection-solved'), title: '지하에서 무슨 일이?', text: '모든 기록이 지하를 가리킨다. 승강기를 타고 B2로 내려가 보자.' },
-  // 7층 시간 퍼즐 뒤: 게임 밖 ARCHI 소개 페이지(archi.html)에서 SSH 정보를 찾아 컴퓨터 터미널로 접속한다(terminal.js).
-  { when: () => collectedItems.has('f7-training-time-solved'), title: 'ARCHI의 흔적',
-    text: '오늘 밤 기록은 B2 ARCHI-MAIN에만 있다. 1층 로비 ARCHI 포스터의 QR을 휴대폰으로 찍어 ARCHI가 들른 소개 페이지를 확인하고, 안내 데스크 PC 터미널로 서버에 접속하자.' },
   { when: () => collectedItems.has('f12-evaluation-solved') && !collectedItems.has('goal-f5-note'), title: '데이터 수집',
     text: 'ARCHI가 기록을 지운 이유는 뭘까? 5층 연구개발실을 조사해보자.' },
   { when: () => collectedItems.has('f12-evaluation-solved') && !collectedItems.has('f8-repro-record'), title: '기록 재현',
     text: '이런 현상이 처음이 아닌 것 같다. 8층 QA 시험실에서 기록을 재현해보자.' },
-  { when: () => collectedItems.has('f12-evaluation-solved'), title: '로그 분석', text: 'ARCHI가 어떻게 새벽에 전력을 사용할 수 있었을까? 7층 검증실에서 확인하자.' },
+  // 5층·8층 기록 뒤: 게임 밖 ARCHI 소개 페이지(archi.html)에서 SSH 정보를 찾아 컴퓨터 터미널로 접속한다(terminal.js).
+  { when: () => collectedItems.has('f12-evaluation-solved'), title: 'ARCHI의 흔적',
+    text: '오늘 밤 기록은 B2 ARCHI-MAIN에만 있다. 1층 로비 ARCHI 포스터의 QR을 휴대폰으로 찍어 ARCHI가 들른 소개 페이지를 확인하고, 안내 데스크 PC 터미널로 서버에 접속하자.' },
   { when: () => collectedItems.has('f12-network-isolated') && !logRecordsReady() && !collectedItems.has('f12-paper-backup'), title: '종이 백업 찾기', text: '화면 속 기록은 믿을 수 없다. 모델 평가실 평가 벤치에 출력해 둔 기록이 있을지도.' },
   { when: () => collectedItems.has('f12-network-isolated'), title: '이상한 밤 찾기', text: '기록은 지켜 냈다. 야간 로그 단말기의 터미널에서 로그 파일을 찾아 그날 밤 무슨 일이 있었는지 확인하자.' },
   { when: () => logDeleting(), title: '로그 삭제를 막아라', text: '누군가 기록을 지우고 있다! 연결을 끊어야 한다.' },
@@ -85,6 +84,8 @@ const OBJECTIVES = [
     title: '승강기 비상 회선 연결', text: '승강기에도 전력을 보내야 한다.' },
   // 1층에서 퇴근이 막히는 흐름(floor-01.js): 정문 확인 → 안내 데스크 앱 → 1층 전력. 제목을 '퇴근하기'로 두어 승강기는 1층만 눌린다(cabin.js).
   { when: () => collectedItems.has('f17-emergency-linked') && !collectedItems.has('f1-reached'), title: '퇴근하기', text: '승강기가 다시 움직인다. 아래로 내려가자.' },
+  { when: () => collectedItems.has('f17-emergency-linked') && !collectedItems.has('f1-chase-ended') && phoneDock && phoneDock.floor !== currentSceneFloor,
+    title: '퇴근하기', text: '휴대폰을 다른 층 충전기에 두고 왔다. 휴대폰 표시에서 위치를 확인하고 승강기를 타고 돌아가 챙기자.' },
   // 승강기는 1층만 눌리니, 1층에서 휴대폰이 꺼지면 안내 데스크 콘센트(floor-01.js)를 알려 준다.
   { when: () => collectedItems.has('f1-reached') && !collectedItems.has('f1-chase-ended') && !floorHasLighting(1) && phoneBattery <= 0 && !phoneDock,
     title: '퇴근하기', text: '휴대폰이 꺼졌다. 안내 데스크 왼쪽 콘센트에서 충전하자.' },

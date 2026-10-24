@@ -26,7 +26,7 @@ const BLACKOUT_MONOLOGUE = { flag: 'story-blackout-seen', steps: [
 ] };
 
 // 추격이 끝난 뒤의 혼잣말. 층별 안내판은 수호가 직접 조사하게 둔다(objective.js의 '편의점은 몇 층?').
-const F1_ANXIETY_LINES = ['정문엔 내 이름이 떠 있고, 로봇은 나만 쫓아왔어..',
+const F1_ANXIETY_LINES = ['정문엔 내 이름이 떠 있고, 나만 나갈 수 없게 되어 있어..',
   '으윽.. 야근해서 힘든 와중에 이런 일을 겪으니 너무 힘들다..',
   '항불안제라도 먹어야겠어..',
   '편의점이 몇 층이었더라?'];
@@ -68,6 +68,13 @@ const STORY_SCENES = [
       { say: '안내 데스크에 로비 전원을 켜는 방법이 적혀 있을지도 몰라.', pose: 'think' },
     ],
   },
+  { // 정비 코드를 먼저 풀었으면 추격 없이 정문 차단을 확인하고 다음 이야기로 이어진다.
+    flag: 'f1-chase-ended', delay: 1000,
+    ready: () => room === 'dynamic' && dynamicFloorId === 'f1' && collectedItems.has('f17-emergency-linked') &&
+      collectedItems.has('f1-robot-log') && floorHasLighting(1),
+    lines: ['불은 들어왔는데.. 정문 화면에 "출입 차단 · 17F 정수호 · 명령 SYSTEM"?',
+      '로봇은 정비 코드로 멈췄지만, 정문은 여전히 막혀 있어. 왜 내 이름이 떠 있는 거지?'],
+  },
   { // 1층에 전력이 들어오고 1초 뒤(휴대폰 전력 앱): 정문 화면에 내 이름이 뜨고, 같은 전력으로 깨어난 R-01에게 쫓겨 엘리베이터 앞까지 달아난다.
     // 추격이 끝났다는 기록(f1-chase-ended)은 수호가 엘리베이터 앞에 닿을 때 guard-patrol.js가 남긴다.
     flag: 'story-anxiety-seen', delay: 1000, skip: skipF1Chase,
@@ -94,9 +101,9 @@ const STORY_SCENES = [
     flag: 'story-robot-seen', delay: 2000, ready: () => collectedItems.has('story-anxiety-seen') && collectedItems.has('f16-antianxiety-used'),
     steps: [
       { say: '휴.. 겨우 정신을 차렸네..', pose: 'relieved' },
-      { say: '그래서 경비 로봇이 왜 날 공격했던거지?', pose: 'look-back' },
-      { say: '생각해 보니 그 로봇, 엘리베이터 앞까지는 안 쫓아오고 정문 쪽으로 돌아갔어.', pose: 'think' },
-      { say: '날 잡으려던 게 아니라... 정문으로 못 나가게 막고 있었던 건가?', pose: 'anxious' },
+      { say: '그래서 정문은 왜 내 이름으로 막혀 있던 거지?', pose: 'look-back' },
+      { say: '정문에 내 이름을 띄우고 로봇까지 세워 놨어.', pose: 'think' },
+      { say: '그냥 고장이 아니라... 내가 정문으로 못 나가게 막은 거야.', pose: 'anxious' },
       { say: '경비 로봇은 건물 시스템이 명령을 내린다고 들었는데.', pose: 'think' },
       { say: '정문 화면엔 내 이름까지 떠 있었어. 오늘 밤 나를 건물 밖으로 못 나가게 해 둔 거야...', pose: 'anxious' },
       { say: '그 시스템을 만든 ARCHI 개발 팀을 조사해보자. 원인을 알면 멈출 방법도 있을 거야.', pose: 'think' },
@@ -132,10 +139,10 @@ const STORY_SCENES = [
     lines: ['ARCHI가 의도적으로 기록을 지운게 처음이 아니라고..?', '도대체 어떤 의도가 있는걸까..', '기록을 지운 당일 기록을 QA 실에서 재현해볼 수 있을거야.'],
   },
   // 아래는 층을 옮기기 직전의 혼잣말: 다음 층에 왜 가는지(무엇을 기대하는지)를 수호가 먼저 말한다. 다음 단계를 이미 끝냈으면 건너뛴다.
-  { // 8층 재현 벤치를 마친 1초 뒤 → 7층 검증실.
-    flag: 'story-repro-seen', delay: 1000, ready: () => collectedItems.has('f8-repro-record') && !collectedItems.has('f7-training-time-solved'),
-    lines: ['사람도 없고 카메라도 꺼진 새벽 3시... 그때만 결함이 사라졌어.', '그 시간에 ARCHI는 전력을 어디서 끌어다 쓴 거지?',
-      '7층 검증실의 망분리 백업 장비라면 지워지지 않은 기록이 남아 있을 거야.'],
+  { // 8층 재현 벤치를 마친 1초 뒤 → 1층 로비 QR·안내 데스크 터미널.
+    flag: 'story-repro-seen', delay: 1000, ready: () => collectedItems.has('f8-repro-record') && !collectedItems.has('f7-external-connection-solved'),
+    lines: ['사람도 없고 카메라도 꺼진 새벽 3시... 그때만 결함이 사라졌어.', '오늘 밤 기록은 B2 ARCHI-MAIN에만 남아 있을 거야.',
+      '1층 로비 ARCHI 포스터의 QR로 소개 페이지를 확인하고, 안내 데스크 PC 터미널로 접속해 보자.'],
   },
   { // 터미널로 ARCHI-MAIN의 외부 연결 기록을 확인하고(terminal.js) 컴퓨터를 나온 1초 뒤 → 13층 보안 자료실.
     flag: 'story-external-seen', delay: 1000, ready: () => collectedItems.has('f7-external-connection-solved') && !collectedItems.has('f13-backup-device'),

@@ -39,8 +39,9 @@ function refreshUsbDrive() {
 
 function usbDriveAvailable() {
   const office = room === 'office' && currentSceneFloor === 17 && floorHasPower(17);
+  const lobbyPc = room === 'dynamic' && dynamicFloorId === 'f1';
   const opsPc = room === 'dynamic' && dynamicFloorId === 'f13-ops' && collectedItems.has('f13-ups');
-  return usingComputer && !transitioning && !computer.hidden && (office || opsPc) && collectedItems.has('f13-backup-device');
+  return usingComputer && !transitioning && !computer.hidden && (office || lobbyPc || opsPc) && collectedItems.has('f13-backup-device');
 }
 
 function usbVideoWatching() {

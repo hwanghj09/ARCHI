@@ -13,12 +13,13 @@ const guardPatrol = { x: 4530, facing: -1, wait: 0, elapsed: 0, mode: 'dock',
 // onCaught — 붙잡는 연출이 끝나면 '다시 시도' 창 대신 부른다. selfPowered — 층 전력과 상관없이 움직인다.
 // 옵션이 없는 R-01은 예전과 똑같이 움직인다.
 // 순찰 로봇 R-03(roamer): 1층(R-01 담당)·17층·B2를 뺀 층을 엘리베이터로 옮겨 다닌다. 자체 배터리라 층 전력과 상관없이
-// 돈다. 전등이 켜진 층에서는 복도와 방 두 곳을 둘러보고, 꺼진 층에서는 복도만 돈다. 다음 층은 켜진 층을 3배 더 자주 고른다.
+// 돈다. 전등이 켜진 층에서는 복도와 방 네 곳(roamerRooms)을 둘러보고, 꺼진 층에서는 복도만 돈다. 다음 층은 켜진 층을 3배 더 자주 고른다.
 // 정전 뒤에만 움직이고 B2 엔딩 중에는 멈춘다. 수호와 다른 장면에 있는 동안에는 머무는 시간(stay)만 줄다가
 // 다 되면 바로 다음 장면으로 옮긴다. 같은 장면이면 나갈 문(엘리베이터)까지 걸어가서 나간다.
 // 층을 옮길 때는 진짜 엘리베이터(elevatorCars)를 쓴다: 비어 있는 칸을 불러 문이 열리면 타고(trip 'call' → 'board'),
 // 문이 완전히 닫힌 뒤 운행하고('close' → 'ride'), 도착해 문이 완전히 열리면 내린다('exit'). 승강기 전력이 없으면 이 층을 계속 돈다.
 const roamerFloors = [-1, ...Array.from({ length: 15 }, (_, index) => index + 2)];
+const roamerRooms = 4; // 전등이 켜진 층에서 둘러볼 방 수
 const roamerStay = { corridor: 30000, room: 15000, ride: 6000 };
 const roamerSpeed = { patrol: 70, chase: 220 }; // R-01(순찰 80, 추격 270)보다 느리다. 걷기 200·달리기 340
 // 수호가 문으로 나오자마자 붙잡히지 않게, 수호가 들어온 문 앞에서 이만큼은 떨어져 있는다(전방 센서보다 멀다).
@@ -140,7 +141,7 @@ function roamerEnter(sceneId, from) {
   const config = floorById.get(sceneId);
   Object.assign(roamer, { where: sceneId, mode: 'patrol', wait: 0, lostTime: 0 });
   roamer.x = from === 'elevator' ? roamerElevatorX() : sceneDoorX(sceneId, from);
-  if (from === 'elevator') roamer.roomsLeft = roamerFloorLit(config.floor) ? 2 : 0;
+  if (from === 'elevator') roamer.roomsLeft = roamerFloorLit(config.floor) ? roamerRooms : 0;
   roamer.stay = from === 'elevator' ? roamerStay.corridor : roamerStay.room;
   roamer.next = pickRoamerNext(config);
   // 수호가 있는 층에 엘리베이터로 오면 도착음을 거리와 상관없이 들려준다(그 층의 방 안에서도). 로봇이 왔다는 신호다.
@@ -186,7 +187,7 @@ function sendRoamerCar(car) {
 function roamerToElevator() {
   const config = floorById.get(roamer.where);
   if (!elevatorHasPower()) { // 승강기가 멈춰 있으면 이 층을 한 바퀴 더 돈다
-    roamer.roomsLeft = roamerFloorLit(config.floor) ? 2 : 0;
+    roamer.roomsLeft = roamerFloorLit(config.floor) ? roamerRooms : 0;
     roamer.next = pickRoamerNext(config);
     roamer.stay = roamerStay.corridor;
     return;

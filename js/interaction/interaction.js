@@ -160,8 +160,8 @@ function interact() {
     if (nearbyDoor.powerCircuit) { openEmergencyCircuit(); return; }
     if (handleB2Console(nearbyDoor)) return; // B2 삭제 중 메인 콘솔: 문을 막은 뒤면 루트 터미널(b2-ending.js)
     if (handleLogTerminalInteract(nearbyDoor)) return; // 12층 야간 로그 단말기·네트워크 랙(log-puzzle.js)
-    if (handleBackupDeviceInteract(nearbyDoor)) return; // 7층 망분리 백업 장비(backup-puzzle.js)
-    if (handleVaultInteract(nearbyDoor)) return; // 13층 보안 자료실 크랭크(vault-puzzle.js)    if (dynamicFloorId === 'f12-dev' && nearbyDoor.name === '맨 왼쪽 서랍') { openDrawerPuzzle(); return; }
+    if (handleVaultInteract(nearbyDoor)) return; // 13층 보안 자료실 크랭크(vault-puzzle.js)
+    if (dynamicFloorId === 'f12-dev' && nearbyDoor.name === '맨 왼쪽 서랍') { openDrawerPuzzle(); return; }
     const { gives } = nearbyDoor;
     // 도어락(code): 잠긴 문이나 아직 열지 못한 소품은 키패드를 연다. 맞는 번호를 넣으면 문이 열리거나 gives를 챙긴다.
     if (nearbyDoor.code && (nearbyDoor.type === 'room' ? nearbyDoor.locked : !collectedItems.has(gives))) {

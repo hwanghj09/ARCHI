@@ -67,7 +67,7 @@ try {
   await page.locator('#debug-puzzle button').click();
   await finishSceneTransition(page);
   assert.deepEqual(await page.evaluate(() => [currentSceneFloor, realBuildingBlackout(), solarEnabled,
-    collectedItems.has('f7-training-time-solved'), collectedItems.has('f7-external-connection-solved')]), [1, true, true, true, false]);
+    collectedItems.has('f8-repro-record'), collectedItems.has('f7-external-connection-solved')]), [1, true, true, true, false]);
   await page.locator('#debug-puzzle-select').selectOption({ index: 0 });
   await page.locator('#debug-puzzle button').click();
   await finishSceneTransition(page);

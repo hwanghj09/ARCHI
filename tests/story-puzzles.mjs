@@ -1,5 +1,5 @@
-// 12층·7층 필수 스토리 퍼즐(js/interaction/log-puzzle.js, backup-puzzle.js): 로그 삭제와 LAN 케이블, 종이 백업 복구,
-// 이상한 밤 찾기, 학습 시간 찾기, 오늘만 다른 기록 찾기, B1·B2 진행 조건, 저장·불러오기.
+// 12층 필수 스토리 퍼즐(js/interaction/log-puzzle.js): 로그 삭제와 LAN 케이블, 종이 백업 복구,
+// 이상한 밤 찾기, ARCHI-MAIN 터미널, B1·B2 진행 조건, 저장·불러오기.
 import assert from 'node:assert/strict';
 import { mkdir } from 'node:fs/promises';
 import { chromium } from 'playwright';
@@ -12,6 +12,7 @@ try {
   page.on('pageerror', error => errors.push(error.message));
   await page.clock.install({ time: new Date('2026-10-17T00:00:00Z') });
   await page.goto(new URL('../index.html', import.meta.url).href);
+  await page.clock.pauseAt(await page.evaluate(() => Date.now() + 1000));
   await page.evaluate(() => localStorage.clear());
 
   const newGame = async () => {
@@ -30,13 +31,13 @@ try {
   };
   // 장면에 가서 소품 앞에 선 다음 E(interact)를 누른다.
   const use = (id, name) => page.evaluate(({ id, name }) => {
-    closeInspection(); closeControl(); closeLogPuzzle(); closeBackupPuzzle();
+    closeInspection(); closeControl(); closeLogPuzzle();
     if (dynamicFloorId !== id || room !== 'dynamic') performFloorChange(id, null, floorById.get(id).interior ? 'exit' : null);
     const door = currentDoors.find(entry => entry.name === name);
     Body.setPosition(body, { x: door.x + door.width / 2, y: (door.standY ?? floorY) - 81 });
     Body.setVelocity(body, { x: 0, y: 0 }); grounded = true;
     interact();
-    return { control: usingControl, inspection: usingInspection, log: !logPanel.hidden, backup: !backupPanel.hidden };
+    return { control: usingControl, inspection: usingInspection, log: !logPanel.hidden };
   }, { id, name });
   const has = item => page.evaluate(item => collectedItems.has(item), item);
   const objective = async () => { await page.clock.runFor(100); return page.evaluate(() => currentObjective.title); };
@@ -75,7 +76,7 @@ try {
 
   // ---- A. 제때 뽑기(마우스 끌기): 기록 보존 → 터미널로 로그 파일 찾기 → 추가 힌트 ----
   await newGame();
-  assert.deepEqual(await use('f12-eval', '네트워크 랙'), { control: false, inspection: true, log: false, backup: false },
+  assert.deepEqual(await use('f12-eval', '네트워크 랙'), { control: false, inspection: true, log: false },
     'Before the log opens the rack is a plain inspection');
   await checkRackFrame(0);
   assert.equal((await use('f12-eval', '야간 로그 단말기')).log, true, 'The terminal opens the log screen');
@@ -112,8 +113,9 @@ try {
   assert(await has('f12-network-isolated'));
   await checkRackFrame(1);
   assert.equal(await page.evaluate(() => logPuzzle.outcome), 'in-time');
+  const deletedAtDisconnect = await page.evaluate(() => logDeletedCount());
   await page.clock.runFor(30000);
-  assert.equal(await page.evaluate(() => logDeletedCount()), 1, 'Unplugging stops the deletion at once');
+  assert.equal(await page.evaluate(() => logDeletedCount()), deletedAtDisconnect, 'Unplugging stops the deletion at once');
   assert.equal(await objective(), '이상한 밤 찾기');
   await use('f12-eval', '야간 로그 단말기');
   assert.equal(await page.locator('#log-alert').textContent(), 'NETWORK CONNECTION LOST\nREMOTE DELETION STOPPED');
@@ -158,54 +160,18 @@ try {
   await page.evaluate(() => checkLogAnalysis());
   assert.equal((await clues()).length, clueCount);
   assert.equal(await objective(), '데이터 수집');
-  // 7층 백업 장비는 5층 연구 노트와 8층 재현 기록 뒤에 열린다(backup-puzzle.js).
-  await page.evaluate(() => { collectedItems.add('goal-f5-note'); collectedItems.add('f8-repro-record'); collectedItems.add('story-repro-seen'); }); // 8층 → 7층 혼잣말은 본 것으로
+  // ARCHI-MAIN 터미널은 5층 연구 노트와 8층 재현 기록 뒤에 열린다(terminal.js).
+  await page.evaluate(() => { collectedItems.add('goal-f5-note'); collectedItems.add('f8-repro-record'); collectedItems.add('story-repro-seen'); }); // 8층 → 1층 혼잣말은 본 것으로
   // 이미 뽑은 랙은 다시 삭제를 시작하지 않는다.
-  assert.deepEqual(await use('f12-eval', '네트워크 랙'), { control: false, inspection: true, log: false, backup: false });
+  assert.deepEqual(await use('f12-eval', '네트워크 랙'), { control: false, inspection: true, log: false });
   assert.match(await page.locator('#inspection-description').textContent(), /포트에서 빠져 있다/);
   await page.evaluate(() => closeInspection());
   await continueGame();
   await checkRackFrame(1);
 
-  // ---- 7층: 학습 시간(힌트 있음) → [오늘] 탭 → 홈페이지 → 터미널 ----
-  await use('f7-verify', '망분리 백업 장비');
-  assert(await page.locator('#backup-panel').isVisible());
-  assert.deepEqual(await page.locator('#backup-tabs button').allTextContents(), ['[09/28]', '[09/30]', '[10/05]', '[오늘 · 잠김]']);
-  assert(await page.locator('#backup-tabs button').nth(3).isDisabled(), 'The today tab starts locked');
-  for (const [tab, perf, power] of [['09/28', '4%5%86%4%', '12%91%93%14%'], ['09/30', '4%4%88%31%', '13%38%95%16%'], ['10/05', '4%5%87%4%', '12%40%94%15%']]) {
-    await page.locator('#backup-tabs button', { hasText: tab }).click();
-    const rows = await page.locator('#backup-body tbody tr').allTextContents();
-    assert.deepEqual(rows, [`ARCHI 성능${perf}`, `B2 전력 사용${power}`], `${tab} table`);
-  }
-  assert.equal(await page.locator('#backup-body td[data-hinted="true"][data-hour="03시"]').count(), 2, 'The 12F hint outlines 10/05 03시');
-  assert(await page.locator('#backup-hint').isVisible());
-  // 키보드로 탭을 옮긴다.
-  await page.locator('#backup-tabs button', { hasText: '10/05' }).focus();
-  await page.keyboard.press('ArrowLeft');
-  assert.equal(await page.evaluate(() => backupTab), '09/30');
-  await page.locator('#backup-options button', { hasText: '01시' }).hover();
-  assert.equal(await page.locator('#backup-body [data-picked="true"]').count(), 3, 'Pointing at an option highlights its hour column');
-  await page.locator('#backup-options button', { hasText: '01시' }).click();
-  assert.equal(await sanity(), 75, 'A wrong 7F answer costs 5% (the 12F terminal costs nothing)');
-  assert.equal(await has('f7-training-time-solved'), false);
-  await page.locator('#backup-options button', { hasText: '03시' }).click();
-  assert(await has('f7-training-time-solved'));
-  assert.equal(await page.locator('#backup-body td[data-solved="true"]').count(), 2);
-  assert(await page.locator('#backup-tabs button').nth(3).isEnabled(), 'Solving opens the today tab');
-  assert.match(await page.locator('#backup-status').textContent(), /10\/05 03시: 성능 상승과 B2 전력 집중/);
   assert.equal(await objective(), 'ARCHI의 흔적');
   assert.match(await page.evaluate(() => currentObjective.text), /포스터의 QR을 휴대폰으로 찍어/, 'The objective points to the 1F QR poster');
-  await page.clock.runFor(4500);
-  assert.equal(await page.evaluate(() => backupTab), '오늘', 'The puzzle moves on to the today tab by itself');
-  // [오늘] 탭은 문제 없이 기록 상태만 보여 준다: 오늘 원본은 ARCHI-MAIN에만 있고, 23:58에 회사 홈페이지에 들렀다.
-  const todayRows = await page.locator('#backup-body tbody tr').allTextContents();
-  assert.equal(todayRows.length, 3);
-  assert.match(todayRows[1], /23:58 VMAX 홈페이지/);
-  assert.match(todayRows[2], /archi\.html/);
-  assert(await page.locator('#backup-question').isHidden(), 'The today tab asks nothing');
-  assert(await page.locator('#backup-options').isHidden());
   assert.equal(await has('f7-external-connection-solved'), false);
-  await page.keyboard.press('Escape');
 
   // ---- 홈페이지 → 17층 컴퓨터 터미널 SSH ----
   // 홈페이지(archi.html)의 임시 저장 글과 터미널 계정이 같아야 한다.
@@ -251,7 +217,7 @@ try {
   await page.clock.runFor(1200);
   assert.equal(await page.locator('#story-caption').textContent(), '오늘 밤 처음으로 외부 서버에 연결했다고..?', 'The terminal → 13F monologue plays');
   await page.keyboard.press('Escape');
-  // 7층 다음은 13층 보안 자료실의 백업 장치(tests/vault-puzzle.mjs). 그 전에는 B1 제어반이 풀리지 않는다.
+  // ARCHI-MAIN 터미널 다음은 13층 보안 자료실의 백업 장치(tests/vault-puzzle.mjs). 그 전에는 B1 제어반이 풀리지 않는다.
   assert.equal(await objective(), '외부 연결 통로 찾기');
   await page.evaluate(() => { collectedItems.add(cctvLiveItem); collectedItems.add('b1-cctv-seen'); });
   await use('b1-control', '승강기 제어반');
@@ -293,22 +259,18 @@ try {
 
   // 저장·불러오기 후에도 진행이 남는다.
   await continueGame();
-  for (const item of ['f12-network-isolated', 'f12-evaluation-solved', 'f7-training-time-solved', 'f7-external-connection-solved']) assert(await has(item), item);
+  for (const item of ['f12-network-isolated', 'f12-evaluation-solved', 'f7-external-connection-solved']) assert(await has(item), item);
   assert.equal(await page.evaluate(() => logPuzzle.outcome), 'in-time');
   assert.equal(await page.evaluate(() => logDeleting()), false, 'Loading never restarts the deletion');
   await use('f12-eval', '네트워크 랙');
   await checkRackFrame(1);
 
-  // ---- B. 늦게 뽑기(키보드) + 삭제 도중 저장·불러오기 + 힌트 없는 7층 ----
+  // ---- B. 늦게 뽑기(키보드) + 삭제 도중 저장·불러오기 ----
   await newGame();
-  await use('f7-verify', '망분리 백업 장비');
-  assert(await page.locator('#backup-panel').isHidden(), 'The backup device stays shut before 12F');
-  assert.match(await page.locator('#inspection-description').textContent(), /12층 모델 평가실의 야간 평가 기록부터/);
-  assert.equal(await page.evaluate(() => answerBackupTraining('03시') ?? collectedItems.has('f7-training-time-solved')), false);
   await page.evaluate(() => { collectedItems.add(cctvLiveItem); collectedItems.add('b1-cctv-seen'); }); // CCTV 컷씬은 tests/cctv-scene.mjs
   await use('b1-control', '승강기 제어반');
-  assert.match(await page.locator('#inspection-description').textContent(), /7층 원본 로그.*13층 백업 장치.*2층 리허설 영상/);
-  assert.equal(await has('b1-elevator'), false, 'B1 key switch waits for the 7F puzzles');
+  assert.match(await page.locator('#inspection-description').textContent(), /ARCHI-MAIN 외부 연결 기록.*13층 백업 장치.*2층 리허설 영상/);
+  assert.equal(await has('b1-elevator'), false, 'B1 key switch waits for the story progress');
   await use('f12-eval', '야간 로그 단말기');
   await page.clock.runFor(7000);
   await continueGame();
@@ -344,12 +306,6 @@ try {
   assert.match(await run('cat /var/log/archi/eval/night-1007.log'), /종이 기록 대조로 복원됨/);
   assert(await has('f12-evaluation-solved'), 'The access log read earlier still counts once the night log is back');
   assert.equal(await has('f12-log-hint'), false, 'A late unplug gives no extra hint');
-  await page.evaluate(() => { collectedItems.add('goal-f5-note'); collectedItems.add('f8-repro-record'); collectedItems.add('story-repro-seen'); }); // 8층 → 7층 혼잣말은 본 것으로
-  await use('f7-verify', '망분리 백업 장비');
-  await page.locator('#backup-tabs button', { hasText: '10/05' }).click();
-  assert.equal(await page.locator('#backup-body td[data-hinted="true"]').count(), 0, 'No hint, no outline');
-  await page.locator('#backup-options button', { hasText: '03시' }).click();
-  assert(await has('f7-training-time-solved'), 'Without the hint the tables still solve it');
 
   // ---- C. 다 지워진 뒤 뽑기 → 종이 백업 ----
   await newGame();
@@ -369,17 +325,6 @@ try {
   await run('cat /var/log/archi/eval/night-1007.log /srv/security/sync/badge/access-1007.log');
   assert(await has('f12-evaluation-solved'), 'Even a fully erased log can be solved from paper');
 
-  // 정신력 0에서도 오답은 0 아래로 내려가지 않고, 퍼즐 창이 열린 동안 0% 추격이 시작되지 않는다.
-  await newGame();
-  await page.evaluate(() => { sanity = 3; refreshSanity(); collectedItems.add('f12-evaluation-solved'); collectedItems.add('goal-f5-note'); collectedItems.add('f8-repro-record'); });
-  await use('f7-verify', '망분리 백업 장비');
-  await page.locator('#backup-options button', { hasText: '00시' }).click();
-  assert.equal(await sanity(), 0);
-  await page.clock.runFor(15000);
-  assert.equal(await page.evaluate(() => zeroEventPhase), 'idle', 'The 0% chase waits while the analyser is open');
-  await page.locator('#backup-options button', { hasText: '03시' }).click();
-  assert(await has('f7-training-time-solved'));
-
   // 예전 저장(새 퍼즐 이전에 7층 로그까지 읽은 저장)은 네 퍼즐을 푼 것으로 이어진다.
   await page.evaluate(() => {
     const data = progressSnapshot();
@@ -391,17 +336,13 @@ try {
   await page.reload();
   await page.locator('#menu-continue').click();
   await page.clock.runFor(500);
-  for (const item of ['f12-network-isolated', 'f12-evaluation-solved', 'f7-training-time-solved', 'f7-external-connection-solved']) assert(await has(item), `migrated ${item}`);
+  for (const item of ['f12-network-isolated', 'f12-evaluation-solved', 'f7-external-connection-solved']) assert(await has(item), `migrated ${item}`);
   assert.equal(await objective(), '외부 연결 통로 찾기', 'Old saves past 7F still need the new 13F backup device');
 
-  // 휴대폰 크기에서도 두 창이 화면 안에 들어오고 가로로 넘치지 않는다.
+  // 휴대폰 크기에서도 로그 창이 화면 안에 들어오고 가로로 넘치지 않는다.
   await page.setViewportSize({ width: 375, height: 812 });
   await use('f12-eval', '야간 로그 단말기');
   await page.screenshot({ path: '.local/story-f12-mobile.png' });
-  await use('f7-verify', '망분리 백업 장비');
-  const overflow = await page.evaluate(() => backupFrame.scrollWidth - backupFrame.clientWidth);
-  assert(overflow <= 1, `backup panel overflows by ${overflow}px`);
-  await page.screenshot({ path: '.local/story-f7-mobile.png' });
 
   assert.deepEqual(errors, []);
   console.log('story puzzles: all checks passed');

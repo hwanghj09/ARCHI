@@ -105,11 +105,11 @@ function runRemoteCommand(command, args) {
   printTerminal(`-bash: ${command}: command not found`);
 }
 
-// 외부 연결 기록을 읽었다. 7층 시간 퍼즐을 풀기 전이면 무슨 뜻인지 몰라 진행하지 않는다.
+// 외부 연결 기록을 읽었다. 5층 연구 노트·8층 재현 기록을 보기 전이면 무슨 뜻인지 몰라 진행하지 않는다.
 // 읽고 나면 ARCHI가 알아채고 세션을 끊는다(화면 경고, 감시 카메라 도는 소리).
 function revealExternalConnection() {
-  if (!collectedItems.has('f7-training-time-solved')) {
-    printTerminal('\n(무슨 기록인지 아직 모르겠다. 7층 검증실 백업 장비부터 확인해 보자.)');
+  if (!collectedItems.has('goal-f5-note') || !collectedItems.has('f8-repro-record')) {
+    printTerminal('\n(무슨 기록인지 아직 모르겠다. 5층 연구개발실과 8층 QA 시험실의 기록부터 확인해 보자.)');
     return;
   }
   if (!collectedItems.has('f7-external-connection-solved')) {
