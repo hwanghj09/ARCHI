@@ -184,20 +184,20 @@ const b2Hook = { x: b2MonsterStartX, mode: 'wait', timer: 0, reach: 0, elapsed: 
 // 서 있는 머리 윗면(floorY - 162)과 웅크린 머리 윗면(floorY - 96) 사이로 공 중심이 지나가는 높이(수호의 위치에서)
 const b2BallAimY = () => floorY - 96 - b2BallSize.radius - b2BallSize.clearance;
 // 근접 공격: 9컷을 b2MeleeMs 동안 재생한다. hands는 컷마다 손 위치(380×339 컷 기준), angles는 컷 경계마다 공이 손에서 뻗은 각도(도, 아래쪽이 +).
-// 4번째 컷(5°)에서 공이 서 있는 몸 높이로 내려오고, 그 뒤로는 바로 위로 올라가 웅크린 머리에 닿지 않는다.
+// 5번째 컷(25°)에서 공이 몸 높이까지 내려와 서 있든 웅크렸든 맞는다.
 const b2MeleeMs = 1000;
 const b2MeleeShift = -40; // 걷는 그림과 허리판 위치를 맞추려고 근접 그림을 왼쪽으로 옮긴 양
 const b2MeleeChain = 230;
-const b2MeleeReach = 260; // 손에서 이만큼 안에 수호가 들어오면 휘두른다
+const b2MeleeReach = 160; // 손에서 이만큼 안에 수호가 들어오면 휘두른다. 휘두른 공이 4번째 컷에 닿을 때 아직 이 안이면 웅크려도 맞는다
 const b2MeleeHands = [[95, 185], [334, 81], [311, 90], [315, 87], [336, 99], [311, 163], [286, 157], [291, 172], [232, 128]];
-const b2MeleeAngles = [-150, -110, -60, -20, 5, -45, -80, -120, -150, -160];
+const b2MeleeAngles = [-150, -110, -60, -20, 25, 10, -50, -110, -150, -160];
 
 function updateB2Monster(delta) {
   const monster = dynamicScene.querySelector('#b2-monster');
   if (!monster) return;
   const hook = dynamicScene.querySelector('#b2-hook');
   const rope = dynamicScene.querySelector('#b2-hook-rope');
-  const melee = b2Hook.mode === 'melee';
+  let melee = b2Hook.mode === 'melee';
   // 멈추지 않고 수호 쪽으로 걸어온다(예고·던지기·휘두르는 동안은 서 있다). 그림 전체 범위 안에 수호가 들어오면 붙잡힌다.
   const toPlayer = body.position.x - b2MonsterWidth.walk / 2 - b2Hook.x;
   if (b2Hook.mode === 'wait') b2Hook.x += Math.sign(toPlayer) * Math.min(Math.abs(toPlayer), b2MonsterSpeed * delta / 1000);
@@ -211,14 +211,18 @@ function updateB2Monster(delta) {
   let hand = { x: b2Hook.x + b2HookHand.x, y: floorY - 339 + b2HookHand.y };
   let ball = { x: hand.x, y: b2BallAimY(), spin: 0 };
   let frame = 0;
+  // 수호가 손이 닿는 거리 안에 있으면 던지는 중이든 아니든 언제나 근접 공격(휘두르기)을 한다.
+  if (b2Hook.mode !== 'melee' && b2InMeleeRange()) {
+    Object.assign(b2Hook, { mode: 'melee', elapsed: 0, reach: 0 });
+    melee = true;
+    closeB2Terminal();
+    playGameSound('cctv-beep');
+    if (performance.now() - (b2Hook.said ?? -1e9) > 4000) sayLine('쇠공을 휘두른다! 웅크려!', 2200);
+    b2Hook.said = performance.now();
+  }
   if (b2Hook.mode === 'wait') {
     b2Hook.timer -= delta;
-    if (b2Hook.timer <= 0 && body.bounds.max.x > b2Hook.x && body.bounds.min.x < b2Hook.x + b2MeleeShift + b2MeleeHands[1][0] + b2MeleeReach) {
-      Object.assign(b2Hook, { mode: 'melee', elapsed: 0 });
-      closeB2Terminal();
-      playGameSound('cctv-beep');
-      sayLine('쇠공을 휘두른다! 웅크려!', 2200);
-    } else if (b2Hook.timer <= 0) {
+    if (b2Hook.timer <= 0) {
       Object.assign(b2Hook, { mode: 'aim', timer: b2HookAimMs });
       closeB2Terminal();
       playGameSound('cctv-beep');
@@ -248,6 +252,11 @@ function updateB2Monster(delta) {
     hand = { x: b2Hook.x + b2MeleeShift + b2MeleeHands[frame][0], y: floorY - 339 + b2MeleeHands[frame][1] };
     ball = { x: hand.x + Math.cos(angle) * b2MeleeChain, y: hand.y + Math.sin(angle) * b2MeleeChain, spin: angle };
     if (hitB2Ball(ball)) return;
+    if (u >= 4 && !playerCaught && b2InMeleeRange()) { // 공이 내려온 순간 아직 범위 안이면 웅크려도 맞는다
+      playGameSound('robot-grab', { x: body.position.x });
+      showB2BadEnding();
+      return;
+    }
     if (b2Hook.elapsed >= b2MeleeMs) Object.assign(b2Hook, { mode: 'wait', timer: Math.max(b2Hook.timer, 1500) });
   }
   monster.style.left = `${b2Hook.x}px`;
@@ -260,9 +269,20 @@ function updateB2Monster(delta) {
   if (!shown) return;
   const { radius } = b2BallSize;
   // 공은 굴러가듯 돌고, 사슬은 손에서 공 중심까지 이어진다(공 뒤에 깔린다).
+  let scale = 1;
+  if (!melee) { // 던질 때·돌아올 때: 손 가까이에서는 공이 손으로 빨려 들어가듯 작아지며 손 높이로 모인다
+    const k = Math.min(1, b2Hook.reach / 180);
+    ball = { x: hand.x + b2Hook.reach, y: hand.y + (b2BallAimY() - hand.y) * k, spin: 0 };
+    scale = .4 + .6 * k;
+  }
   const spin = melee ? ball.spin : b2Hook.reach / (radius * 1.7);
-  Object.assign(hook.style, { left: `${ball.x - radius}px`, top: `${ball.y - radius}px`, transform: `rotate(${spin}rad)` });
+  Object.assign(hook.style, { left: `${ball.x - radius}px`, top: `${ball.y - radius}px`, transform: `rotate(${spin}rad) scale(${scale})` });
   Object.assign(rope.style, { left: `${hand.x}px`, top: `${hand.y - b2HookRopeHeight / 2}px`, width: `${Math.hypot(ball.x - hand.x, ball.y - hand.y)}px`, transform: `rotate(${Math.atan2(ball.y - hand.y, ball.x - hand.x)}rad)` });
+}
+
+// 수호의 몸이 보스 손에서 앞쪽 b2MeleeReach 안에 있는가
+function b2InMeleeRange() {
+  return body.bounds.max.x > b2Hook.x && body.bounds.min.x < b2Hook.x + b2MeleeShift + b2MeleeHands[1][0] + b2MeleeReach;
 }
 
 // 공(원)이 수호의 몸(사각형)에 닿았으면 붙잡히고 true를 돌려준다.

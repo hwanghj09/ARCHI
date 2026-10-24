@@ -148,6 +148,8 @@ devouredVideo.addEventListener('ended', hideDevouredVideo);
 devouredVideo.addEventListener('error', hideDevouredVideo);
 function playDevouredVideo() {
   devouredVideo.currentTime = 0;
+  devouredVideo.muted = gameVolume <= 0; // 영상에 소리가 들어 있으니 게임 음량을 따른다
+  devouredVideo.volume = Math.max(0, Math.min(1, gameVolume));
   devouredVideo.hidden = false;
   devouredVideo.play().catch(hideDevouredVideo);
 }
@@ -161,7 +163,6 @@ function triggerDevoured() {
   endHallucinationSighting();
   phoneLightOn = false;
   refreshPhone();
-  playHallucinationDevouredSound();
   playDevouredVideo();
   releaseInput();
   Body.setVelocity(body, { x: 0, y: 0 });
@@ -501,7 +502,7 @@ let darkFaceTimer = 0;
 let darkFaceLife = 0;
 let darkFaceLast = -1;
 
-let darkFaceForced = false; // 콘솔의 점프스케어 버튼으로 낸 얼굴: 조건과 상관없이 2초 동안 보인다
+let darkFaceForced = false; // 콘솔의 점프스케어 버튼으로 낸 얼굴: 체력·쿨타임과 상관없이 2초 동안 보이지만, 불이 꺼진 어둠 속이 아니면 나오지 않는다
 
 // 얼굴 하나를 왼쪽이나 오른쪽 가장자리에 띄운다(직전 얼굴은 제외).
 function showDarkFace() {
@@ -515,6 +516,7 @@ function showDarkFace() {
 }
 
 function updateDarkFace(elapsed, fsmPaused) {
+  if (darkFaceForced && sanityExposure() !== 'dark') { darkFace.hidden = true; darkFaceForced = false; return; }
   if (darkFaceForced) {
     darkFaceLife += elapsed;
     if (darkFaceLife >= 2000) { darkFace.hidden = true; darkFaceForced = false; }
@@ -555,6 +557,7 @@ function debugTriggerEyeFlash() {
 }
 
 function debugTriggerJumpscare() {
+  if (sanityExposure() !== 'dark') return false;
   if (hallucinationEventBlocked()) return false;
   darkFaceForced = true;
   showDarkFace();
