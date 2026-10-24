@@ -22,11 +22,14 @@ const FLOOR4_LAYOUT = {
     { name: '연구 회의실', x: 4282, width: 680, style: 'painted', target: 'f4-meeting',
       doorX: 4786, doorWidth: 130, doorY: 250, doorSprite: 'assets/objects/floor04/door-meeting.png' },
   ],
-  fixtures: [],
+  fixtures: [
+    // 숨는 환풍구(화장실 오른쪽 흰 벽). 안에서는 흰 패널 벽이 보인다.
+    wallVent(3900, 2500),
+  ],
   props: [
     { file: 'waiting-sofa', size: [512, 256], worldWidth: 240, x: 3290 },
     { file: 'large-planter', size: [256, 512], worldWidth: 78, x: 3500 },
-    { file: 'glass-display-cabinet', size: [256, 512], worldWidth: 111, x: 3960 },
+    { file: 'glass-display-cabinet', size: [256, 512], worldWidth: 111, x: 4300 }, // 환풍구 자리를 비우려고 3960에서 옮겼다
     { file: 'large-planter', size: [256, 512], worldWidth: 78, x: 4190 },
   ],
 };

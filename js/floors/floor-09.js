@@ -20,7 +20,10 @@ const FLOOR9_LAYOUT = {
     { name: '프로젝트룸', x: 4282, width: 680, style: 'painted', target: 'f9-project',
       doorX: 4608, doorWidth: 130, doorY: 250, doorSprite: 'assets/objects/floor04/door-meeting.png' },
   ],
-  fixtures: [],
+  fixtures: [
+    // 숨는 환풍구(비상계단 오른쪽 벽). 안에서는 철판 벽과 난간이 보인다.
+    wallVent(3212, 3300),
+  ],
   props: [
     { file: 'waiting-sofa', size: [512, 256], worldWidth: 250, x: 3980 },
     { file: 'brochure-rack', size: [256, 512], worldWidth: 100, x: 4190 },

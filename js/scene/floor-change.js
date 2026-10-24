@@ -32,6 +32,8 @@ function performFloorChange(destId, carIndex = 0, arrivalKey = null) {
   if (cctvSceneActive) finishCctvScene();
   cameraZoom = 1;
   if (playerCaught) releaseGuardCapture();
+  if (hidingInVent) setVentHiding(false);
+  stopVentPry();
   if (guardPatrol.mode !== 'dock') guardPatrol.mode = 'patrol';
   guardPatrol.lostTime = 0;
   guardPatrol.door = null;

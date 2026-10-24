@@ -26,9 +26,14 @@ const FLOOR13_LAYOUT = {
     { name: '고객 교육장', x: 4620, width: 320, style: 'classroom', target: 'f13-training',
       doorX: 4788, doorWidth: 120, doorStyle: 'office-wood' },
   ],
+  fixtures: [
+    // 숨는 환풍구(화장실 바로 오른쪽 흰 벽). 덮개가 화장실 문 앞으로 떨어지지 않게 왼쪽에서 뜯는다. 안에서는 흰 패널 벽이 보인다.
+    wallVent(3777, 2400, { pryFrom: 'left' }),
+  ],
   props: [
-    { file: 'waiting-sofa', size: [512, 256], worldWidth: 250, x: 3980 },
-    { file: 'large-planter', size: [256, 512], worldWidth: 78, x: 4190 },
+    // 소파·화분은 환풍구와 떨어지는 덮개 자리를 비우려고 3980·4190에서 오른쪽으로 옮겼다.
+    { file: 'waiting-sofa', size: [512, 256], worldWidth: 250, x: 4154 },
+    { file: 'large-planter', size: [256, 512], worldWidth: 78, x: 4520 },
     { file: 'large-planter', size: [256, 512], worldWidth: 78, x: 100 },
     { file: 'filing-cabinet', size: [256, 512], worldWidth: 72, x: 200 },
     { file: 'filing-cabinet', size: [256, 512], worldWidth: 72, x: 280 },
@@ -74,7 +79,9 @@ const FLOOR13_ROOMS = interiorRooms(13, [
     { file: 'water-cooler', size: [256, 512], worldWidth: 62, x: 2540 },
   ] },
   { id: 'f13-testbay', name: '장비 검증실 - 보안 자료실', width: 1824, windowless: true,
-    fixtures: [{ name: '장비 배선 트레이', style: 'service-tray', x: 240, y: 170, width: 1320, height: 30 }],
+    fixtures: [{ name: '장비 배선 트레이', style: 'service-tray', x: 240, y: 170, width: 1320, height: 30 },
+      // 숨는 환풍구: 서쪽 콘크리트 벽, 그림 속 환기구(135~240) 바로 오른쪽. 안에서는 배관이 지나는 콘크리트 벽이 보인다.
+      wallVent(240, 420)],
     backgroundWallsOnly: true, backgroundImage: floor13Scene('testbay', 1824), props: [
     { file: 'testbay-ups', size: [256, 256], worldWidth: 107, x: 520, name: 'UPS', gives: 'f13-ups',
       control: { kind: 'switch', dir: 'up', label: '비상 출력 스위치를 올리자.', ends: ['ON', 'OFF'] },

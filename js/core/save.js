@@ -49,7 +49,8 @@ function progressSnapshot() {
 
 function saveProgress() {
   // B2 삭제가 시작된 뒤(b2-ending.js)에는 저장하지 않는다. 저장 칸은 DELETE 직전 상태로 남는다.
-  if (!gameStarted || mainMenuActive || restoringProgress || b2Ending.phase !== 'idle') return false;
+  // 환각에 붙잡힌 상태(정신력 0)는 저장하지 않는다. 저장하면 '계속하기'가 곧바로 다시 게임 오버가 된다.
+  if (!gameStarted || mainMenuActive || restoringProgress || hallucinationCaught || b2Ending.phase !== 'idle') return false;
   try {
     localStorage.setItem(progressKey, JSON.stringify(progressSnapshot()));
     progressSaveFailed = false;

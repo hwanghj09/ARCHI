@@ -56,6 +56,24 @@ function update() {
     updateElevators();
     return;
   }
+  if (hidingInVent) { // 환풍구에 숨은 동안 수호는 움직이지 않고 로봇·엘리베이터만 돈다(guard-patrol.js)
+    updatePhone(step);
+    updateGuardPatrol(step);
+    updateB2Ending(step);
+    updateElevators();
+    updateVentView();
+    return;
+  }
+  if (ventPrying()) { // 빠루로 환풍구 덮개를 뜯는 동안 수호는 웅크린 채 제자리이고 세상은 돈다(vent-pry.js)
+    updatePhone(step);
+    updateVentPry(step);
+    updateGuardPatrol(step);
+    updateB2Ending(step);
+    updateElevators();
+    animate(0, false, step);
+    cameraX += (cameraTarget() - cameraX) * .13;
+    return;
+  }
   if (selectingFloor) {
     updatePhone(step); // 엘리베이터 안에서도 플래시가 배터리를 쓴다
     updateElevators();

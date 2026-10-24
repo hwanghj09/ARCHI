@@ -147,6 +147,14 @@ window.addEventListener('keydown', event => {
     }
     return;
   }
+  // 빠루로 환풍구 덮개 뜯기(vent-pry.js): 스페이스·Enter 연타(꾹 누르기는 치지 않는다), Esc·이동 키로 그만둔다.
+  if (ventPrying()) {
+    event.preventDefault();
+    if (['Enter', 'Space'].includes(event.code)) { if (!event.repeat) pushVentPry(); }
+    else if (event.code === 'Escape' || Object.hasOwn(movementKeys, event.code)) stopVentPry();
+    else if (keyMatches('interact', event.code) && !event.repeat) interact();
+    return;
+  }
   if (event.code === 'Escape') {
     event.preventDefault();
     if (!event.repeat && performance.now() - modalClosedAt > 700) openGameMenu();

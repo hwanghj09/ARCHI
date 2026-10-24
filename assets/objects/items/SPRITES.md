@@ -7,6 +7,9 @@
 | `lead-key.png` | 종이 꼬리표가 달린 팀장실 보조키 | 획득 화면, 가방, 물건 상세 |
 | `eval-keycard.png` | 청록 띠·접점·바코드가 있는 모델 평가실 카드키 | 서랍, 획득 화면, 가방, 카드 리더기 조작 |
 | `backup-device.png` | 금속 USB 백업 장치 | 획득 화면, 가방, 물건 상세 |
+| `crowbar.png` | 검은 거위목·회색 링·빨간 손잡이의 빠루 (848×834) | 획득 화면, 가방, 물건 상세 |
+
+`crowbar.png`는 2026-10-24 `archi-item-crowbar.zip`의 `item-crowbar.png`다. 생성 스크립트는 `source/make_crowbar_item.py`. 함께 온 256×256 아이콘과 미리보기는 쓰지 않아 넣지 않았다.
 
 경로는 모두 `assets/objects/items/` 기준이다. 글자와 단서는 게임 UI가 표시하며 새 그림에 읽을 수 있는 문구를 넣지 않는다. 생성 원본의 투명 영역과 해상도를 그대로 보존하고 게임에서는 기존 크기와 `image-rendering: pixelated`로 표시한다.
 

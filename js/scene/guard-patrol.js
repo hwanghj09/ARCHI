@@ -25,11 +25,72 @@ const roamerSpeed = { patrol: 70, chase: 220 }; // R-01(순찰 80, 추격 270)�
 // 수호가 문으로 나오자마자 붙잡히지 않게, 수호가 들어온 문 앞에서 이만큼은 떨어져 있는다(전방 센서보다 멀다).
 const roamerSafeDistance = 800;
 const roamerInitialState = { where: 'f9', next: 'elevator', lastFloor: null, stay: 60000, car: null, trip: null, roomsLeft: 0, x: 0, facing: -1, wait: 0, elapsed: 0,
-  mode: 'patrol', lostTime: 0, captureTime: 0, door: null, image: null, chaseOriginX: null, spottedX: null, firstEncounter: false };
+  mode: 'patrol', lostTime: 0, captureTime: 0, door: null, image: null, chaseOriginX: null, spottedX: null, firstEncounter: false, follow: false };
+// 쫓기던 수호가 방 문(복도 ↔ 방)으로 빠져나가면 R-03은 이만큼 뒤에 같은 문으로 따라 들어와 계속 쫓는다(follow).
+const roamerFollowDelay = 1500;
 const roamer = { name: 'R-03', ...roamerInitialState, selfPowered: true,
   followToElevator: true, chaseSpeed: () => roamerSpeed.chase,
   sensor: 480 }; // 화면 절반(640px)보다 짧아, 감지되기 전에 화면에서 먼저 보인다
 // R-03은 엘리베이터 앞에서도 쫓아오고, 칸에 탄 수호를 따라 문을 억지로 연다(cabin-pry.js).
+// 환풍구(층 설정 fixtures의 hideSpot): 앞에 앉아서 E를 누르면 엘리베이터처럼 화면을 전환해 안에 숨는다. 숨은 동안 수호는
+// 그려지지 않고 덕트 안에서 밖을 내다보는 화면(#vent-view)이 덮이며, 로봇은 계속 움직이지만 보지도 붙잡지도 못한다. E로 나온다.
+// 구멍 너머는 엘리베이터 칸의 문틈처럼 맞은편 벽을 보인다: 지금 장면의 배경 그림(복도 한 장, 방은 천장·바닥·벽 여러 겹),
+// 그 위에 칠한 실내 벽(painted-wall)·외부 창을 복제한다. 문·엘리베이터·소품은 빼고, 칠한 벽은 문 개구부까지 채운다
+// (유리 전면·기둥은 원래 그림 그대로).
+// 어느 부분을 보일지는 환풍구의 viewX(월드 x, 없으면 환풍구 자리)이고, 로봇은 환풍구와의 거리만큼 그 위에 옮겨 그린다.
+let hidingInVent = false;
+let ventSpot = null;
+const ventView = document.getElementById('vent-view');
+const ventOutside = document.getElementById('vent-outside');
+const ventWorld = document.getElementById('vent-world');
+const ventRobot = document.getElementById('vent-robot');
+const playerHidden = () => hidingInVent;
+function setVentHiding(value, spot = null) {
+  hidingInVent = value;
+  ventSpot = spot;
+  ventView.hidden = !value;
+  sprite.style.visibility = value ? 'hidden' : '';
+  hint.hidden = interactionOutline.hidden = true;
+  document.getElementById('vent-view-text').textContent = value ? `환풍구 안에 숨어 있다 · ${bindingLabel('interact')} 나가기` : '';
+  if (!value) { ventWorld.replaceChildren(); return; }
+  const walls = dynamicScene.querySelectorAll(':scope > .floor-background, :scope > .floor-art-crop, :scope > .painted-wall, :scope > .exterior-window');
+  ventWorld.replaceChildren(...[...walls].map(element => element.cloneNode(true)));
+  const painted = ventWorld.querySelector('.painted-wall');
+  if (painted) painted.style.clipPath = paintedWallClip(floorById.get(dynamicFloorId), []);
+  Object.assign(ventWorld.style, { width: `${worldWidth}px`, background: dynamicScene.style.background });
+  ventOutside.style.filter = floorHasLighting(currentSceneFloor) ? '' : 'brightness(.3)'; // 불 꺼진 층은 어둡게
+  updateVentView();
+}
+const enterVent = spot => transitionScene(() => setVentHiding(true, spot));
+const leaveVent = () => transitionScene(() => setVentHiding(false));
+
+function updateVentView() {
+  if (!hidingInVent) return;
+  const { width, height } = ventOutside.getBoundingClientRect();
+  // 복제한 벽은 월드 좌표(바닥 y 570) 그대로다. 복도 바로 앞에 웅크린 시점이라 층 높이 전체가 아니라
+  // 바닥 쪽 380px만 구멍에 채우고(층 전체의 2배 확대), 바닥선을 구멍 높이의 80%에 둔다.
+  const zoom = height / 380;
+  const center = ventSpot.x + ventSpot.width / 2;
+  const viewX = ventSpot.viewX ?? center;
+  const offset = width / 2 - viewX * zoom;
+  const top = height * .8 - floorY * zoom;
+  ventWorld.style.transform = `translate(${offset}px, ${top}px) scale(${zoom})`;
+  // 가장 가까운 로봇 하나를 환풍구와의 거리만큼 옮겨 같은 모습(프레임·방향)으로 그린다.
+  const robot = [guardPatrol, roamer, ...b2Robots].filter(entry => entry.door)
+    .sort((a, b) => Math.abs(a.x - center) - Math.abs(b.x - center))[0];
+  ventRobot.hidden = !robot;
+  if (!robot) return;
+  // 로봇만 배경의 2배로 키운다(구멍 바로 앞을 지나가는 느낌). 위치는 배경 배율 그대로, 바퀴는 바닥선에 붙인다.
+  const robotZoom = zoom * 2;
+  const x = offset + (viewX + robot.x - center) * zoom - 80 * robotZoom;
+  const y = top + floorY * zoom - 237 * .625 * robotZoom;
+  ventRobot.style.transform = `translate(${x}px, ${y}px) scale(${robotZoom})`;
+  const [from, to] = [robot.door.element.firstElementChild, ventRobot.firstElementChild];
+  to.style.cssText = from.style.cssText;
+  const [image, copy] = [robot.image, to.firstElementChild];
+  if (copy.getAttribute('src') !== image.getAttribute('src')) copy.src = image.getAttribute('src');
+  copy.style.cssText = image.style.cssText;
+}
 const guardCapturePanel = document.getElementById('guard-capture');
 let guardBlocked = [];
 let b2Robots = [];
@@ -47,6 +108,7 @@ function releaseGuardCapture() {
 }
 
 function catchPlayer(robot = guardPatrol) {
+  stopVentPry(); // 환풍구 덮개를 뜯다가 들키면 그만둔다(vent-pry.js)
   cancelPhoneLightDelay();
   closePhone();
   playGameSound('robot-grab', { x: robot.x });
@@ -105,6 +167,8 @@ function mountRobot(robot, className, patrol) {
 // sceneId 장면에서 toward 장면으로 가는 문의 가운데 x. 방 안의 출구 위치는 scene-builder.js와 같은 식으로 구한다.
 function sceneDoorX(sceneId, toward) {
   const config = floorById.get(sceneId);
+  const link = config.links?.find(entry => entry.target === toward);
+  if (link) return link.x + (link.width ?? 120) / 2;
   const corridor = config.interior ? floorById.get(config.parent) : config;
   const outside = corridor.rooms.find(entry => entry.target === (config.interior ? sceneId : toward));
   if (!config.interior) return outside.doorX + (outside.doorWidth ?? 120) / 2;
@@ -128,9 +192,35 @@ function pickRoamerFloor() {
   return floorId(options.find((floor, index) => (roll -= weights[index]) < 0) ?? options.at(-1));
 }
 
-// 방은 복도로 나가고, 복도는 아직 둘러볼 방이 남았으면 그 방으로, 아니면 엘리베이터로 나간다.
-function pickRoamerNext(config) {
-  if (config.interior) return config.parent;
+// 같은 층 방끼리의 연결문(links)도 R-03이 지나간다. 이쪽에서 잠긴 연결문(16층 편의점→주방 반입문)과
+// 13층 보안 자료실 연결문의 전자 잠금·셔터(vault-puzzle.js vaultLinkLocked)는 수호와 똑같이 막힌다.
+function roamerLinkOpen(config, link) {
+  return !link.locked && floorById.get(link.target)?.floor === config.floor && !vaultLinkLocked(link.target);
+}
+
+const roamerHasExit = config => floorById.get(config.parent).rooms.some(entry => entry.target === config.id);
+
+// 지금 그 길로 갈 수 있는지. 갈 곳을 정한 뒤 셔터가 내려가면 다시 고른다.
+function roamerCanGo(sceneId, next) {
+  const config = floorById.get(sceneId);
+  const link = config.links?.find(entry => entry.target === next);
+  return link ? roamerLinkOpen(config, link) : next === 'elevator' || !config.interior || roamerHasExit(config);
+}
+
+// 방은 아직 둘러볼 방이 남았으면 절반 확률로 연결문 너머 옆방으로, 아니면 복도로 나간다. 복도 출구가 없는 방(보안 자료실)은
+// 들어온 연결문으로 되돌아 나간다. 나갈 길이 모두 막혔으면 null(이 방에 더 머문다).
+// 복도는 아직 둘러볼 방이 남았으면 그 방으로, 아니면 엘리베이터로 나간다.
+function pickRoamerNext(config, from = null) {
+  if (config.interior) {
+    const open = (config.links ?? []).filter(link => roamerLinkOpen(config, link));
+    const onward = open.filter(link => link.target !== from);
+    const exit = roamerHasExit(config);
+    if (onward.length && (!exit || (roamer.roomsLeft > 0 && Math.random() < .5))) {
+      roamer.roomsLeft--;
+      return onward[Math.floor(Math.random() * onward.length)].target;
+    }
+    return exit ? config.parent : open[0]?.target ?? null;
+  }
   const rooms = config.rooms.filter(entry => floorById.has(entry.target) && !floorById.get(entry.target).exitLock);
   if (roamer.roomsLeft <= 0 || !rooms.length) return 'elevator';
   roamer.roomsLeft--;
@@ -139,22 +229,32 @@ function pickRoamerNext(config) {
 
 function roamerEnter(sceneId, from) {
   const config = floorById.get(sceneId);
-  Object.assign(roamer, { where: sceneId, mode: 'patrol', wait: 0, lostTime: 0 });
+  const follow = roamer.follow;
+  Object.assign(roamer, { where: sceneId, mode: 'patrol', wait: 0, lostTime: 0, follow: false });
   roamer.x = from === 'elevator' ? roamerElevatorX() : sceneDoorX(sceneId, from);
   if (from === 'elevator') roamer.roomsLeft = roamerFloorLit(config.floor) ? roamerRooms : 0;
   roamer.stay = from === 'elevator' ? roamerStay.corridor : roamerStay.room;
-  roamer.next = pickRoamerNext(config);
+  roamer.next = pickRoamerNext(config, from);
   // 수호가 있는 층에 엘리베이터로 오면 도착음을 거리와 상관없이 들려준다(그 층의 방 안에서도). 로봇이 왔다는 신호다.
   if (from === 'elevator' && room === 'dynamic' && currentSceneFloor === config.floor) playGameSound('elevator-arrive');
   if (sceneId !== roamerHere()) return;
   mountRoamer();
   roamer.facing = roamer.x < worldWidth / 2 ? 1 : -1;
-  const door = from === 'elevator' ? null : currentDoors.find(entry => entry.key === (config.interior ? 'exit' : `room:${from}`));
+  const key = !config.interior ? `room:${from}` : from === config.parent ? 'exit' : `link:${from}`;
+  const door = from === 'elevator' ? null : currentDoors.find(entry => entry.key === key);
   if (door) {
     door.element.dataset.open = 'true';
     setTimeout(() => { if (door.element.isConnected) door.element.dataset.open = 'false'; }, 900);
   }
   if (from !== 'elevator') playGameSound('door', { x: roamer.x });
+  if (follow) Object.assign(roamer, { mode: 'chase', chaseOriginX: roamer.x, spottedX: body.position.x });
+}
+
+// 쫓던 R-03은 문 하나로 이어진 장면(복도·방·연결문 너머 방, 잠기는 방 포함)이면 어디든 따라 들어간다.
+// 엘리베이터·계단으로 옮긴 경우만 놓친다. 지금 장면(currentDoors)에 R-03이 있던 장면으로 가는 방 문이 있는지로 본다.
+function roamerCanFollow(sceneId) {
+  return sceneId !== null && sceneId !== roamer.where &&
+    currentDoors.some(door => door.type === 'room' && door.target === roamer.where);
 }
 
 function roamerLeave() {
@@ -267,12 +367,19 @@ function updateRoamer(delta) {
   const active = buildingBlackout && typeof b2Ending !== 'undefined' && b2Ending.phase === 'idle' && !bossFightActive;
   if (active && !playerCaught && delta > 0) { // delta 0은 그리기만(장면 교체 중에는 수호 위치가 아직 옛 장면이다)
     if (roamer.trip) updateRoamerTrip(delta);
+    else if (!roamerCanGo(roamer.where, roamer.next)) {
+      // 갈 길이 막혔다(셔터가 내려갔다): 머무는 시간을 기다리지 않고 바로 다른 곳으로 순찰하러 간다.
+      // 나갈 길이 모두 막혔으면(null) 매 프레임 다시 보다가 열리는 즉시 나간다. 수호를 따라가던 중이었으면 추격도 끝난다.
+      roamer.follow = false;
+      roamer.next = pickRoamerNext(floorById.get(roamer.where));
+      if (roamer.next !== null) roamer.stay = 0;
+    }
     else if ((roamer.stay -= delta) > 0) { /* 아직 이 장면에 머문다 */ }
     else if (roamer.next === 'elevator') roamerToElevator();
     else {
       const exitX = sceneDoorX(roamer.where, roamer.next);
       // 수호가 있는 장면으로 들어올 문 바로 앞에 수호가 서 있으면 조금 뒤에 들어온다.
-      if (!roamer.door && roamerNearSuho(roamer.next, sceneDoorX(roamer.next, roamer.where))) roamer.stay = 2000;
+      if (!roamer.door && !roamer.follow && roamerNearSuho(roamer.next, sceneDoorX(roamer.next, roamer.where))) roamer.stay = 2000;
       else if (!roamer.door || (roamer.mode === 'patrol' && roamer.x === exitX)) roamerLeave();
       else if (roamer.mode === 'patrol') { roamer.mode = 'return'; roamer.chaseOriginX = exitX; }
     }
@@ -299,9 +406,13 @@ function keepRoamerClear() {
 function mountGuardPatrol() {
   guardPatrol.soundDistance = 0;
   // 장면을 옮기면 R-03은 쫓던 것을 그만두고, 같은 장면에 있으면 다시 그린다.
+  // 다만 쫓기던 수호가 방 문으로 나갔으면 roamerFollowDelay 뒤에 같은 문으로 따라 들어온다.
+  const chasing = roamer.where && (roamer.follow || (roamer.mode === 'chase' && roamer.door));
   roamer.door = roamer.image = null;
-  roamer.mode = 'patrol'; roamer.lostTime = 0;
-  if (roamer.where && roamer.where === roamerHere()) { keepRoamerClear(); mountRoamer(); }
+  roamer.mode = 'patrol'; roamer.lostTime = 0; roamer.follow = false;
+  if (chasing && roamerCanFollow(roamerHere())) {
+    Object.assign(roamer, { next: roamerHere(), stay: roamerFollowDelay, follow: true, trip: null, car: null });
+  } else if (roamer.where && roamer.where === roamerHere()) { keepRoamerClear(); mountRoamer(); }
   guardPatrol.door = room === 'dynamic' && dynamicFloorId === 'f1' ?
     currentDoors.find(door => door.style === 'guard-bot') : null;
   guardPatrol.image = null;
@@ -366,7 +477,8 @@ function updateRobot(robot, delta) {
     const dx = body.position.x - robot.x;
     // 밀 수 있는 상자(16층 인라면 박스) 위의 수호에게는 손이 닿지 않는다: 감지하지 않고, 쫓던 중이면 놓친 것으로 친다.
     // 예전엔 상자 밑에 붙어 서서 끝까지 기다려, 내려오는 순간 붙잡혔다.
-    const sameLevel = Math.abs(body.bounds.max.y - floorY) < 180 && !playerOnPushable();
+    // 환풍구에 숨은 수호도 같은 식으로 보이지 않는다(playerHidden).
+    const sameLevel = Math.abs(body.bounds.max.y - floorY) < 180 && !playerOnPushable() && !playerHidden();
     // 전방 센서(720px, sensor)만 순찰 구간 밖(비상계단 왼쪽, left 미만)을 가리지 않는다 — 그 구역은 로봇이
     // 애초에 돌지 않는 곳이라, 저 멀리서 서성이는 수호를 센서 사거리만으로 감지해서 쫓아오는 것은
     // 담당 구역 밖 추격이라 부당하다. 바로 옆 근접 감지(130px)는 구간과 무관하게 그대로 둔다 —
@@ -408,7 +520,7 @@ function updateRobot(robot, delta) {
           const distance = Math.min(Math.abs(dx), (robot.chaseSpeed?.() ?? 270) * delta / 1000);
           robot.x = Math.max(80, Math.min(worldWidth - 80, robot.x + robot.facing * distance));
           robot.elapsed += delta;
-          if (grounded && Math.abs(body.bounds.max.y - floorY) < 3 && Math.abs(body.position.x - robot.x) <= 84) catchPlayer(robot);
+          if (sameLevel && grounded && Math.abs(body.bounds.max.y - floorY) < 3 && Math.abs(body.position.x - robot.x) <= 84) catchPlayer(robot);
         }
       }
     }

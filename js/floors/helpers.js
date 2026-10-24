@@ -4,7 +4,9 @@
 // exitBay: 2~10층 방 그림에 출구 문 자리로 끼운 앞벽 칸의 폭(cutaway_kit.door_bay). 방 폭 비율 검사에서만 뺀다.
 const floorId = floor => floor < 0 ? `b${-floor}` : `f${floor}`;
 const floorName = floor => floor < 0 ? `지하 ${-floor}층` : `${floor}층`;
-const interiorRooms = (floor, rooms) => rooms.map(entry => ({ ...entry, floor, interior: true, parent: floorId(floor),
+// 숨는 환풍구(.claude/skills/archi-wall-vent): x는 왼쪽 끝, viewX는 안에서 내다보이는 배경 그림의 x(가운데).
+// 크기·높이는 고정(구멍 아래 끝 y=556). extra의 pryFrom: 'left'면 왼쪽에서 뜯고 덮개가 오른쪽으로 떨어진다.
+const wallVent = (x, viewX, extra = {}) => ({ name: '환풍구', x, y: 454, width: 132, height: 108, style: 'wall-vent', hideSpot: true, viewX, ...extra });const interiorRooms = (floor, rooms) => rooms.map(entry => ({ ...entry, floor, interior: true, parent: floorId(floor),
   label: entry.name, arrival: `${entry.name}에 들어왔습니다.`,
   header: `${floor < 0 ? `B${-floor}` : `${floor}F`} · ${entry.name}`, aria: `${floorName(floor)} ${entry.name}`, width: 2400, background: '#151c20', ...entry }));
 

@@ -20,6 +20,10 @@ const FLOOR15_LAYOUT = {
     { name: '연구본부장실', x: 3092, width: 456, style: 'director', target: 'f15-director',
       doorX: 3160, doorWidth: 120, doorY: 240, doorStyle: 'director' },
   ],
+  fixtures: [
+    // 숨는 환풍구(화장실 동쪽 흰 벽). 안에서는 연구본부장실 쪽 흰 벽과 기둥이 보인다.
+    wallVent(3950, 3050),
+  ],
   props: [
     { file: 'glass-display-cabinet', size: [256, 512], worldWidth: 111, x: 3420 },
     { file: 'water-cooler', size: [256, 512], worldWidth: 62, x: 1640 },

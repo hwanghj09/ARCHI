@@ -45,6 +45,8 @@ const FLOOR5_LAYOUT = {
       message: '공지문: "AI 계정 권한 등급 기준 v2, 3월 4일 시행. 평가 성능 30% 이상은 고위험 등급으로 외부망 차단, 전력·GPU 할당 제한. 10% 미만은 연구 보조 등급." 문의: 기술연구실(보안 연구).' },
     { name: '연구본부 5F 표지', x: 3370, y: 300, width: 170, height: 70, style: 'archive-plaque',
       lines: ['TmaxTibero', '연구본부 · DB 보안'] },
+    // 숨는 환풍구(기술연구실 앞 흰 벽). 안에서는 흰 기본벽 패널이 보인다.
+    wallVent(1560, 2600),
   ],
   props: [
     { file: 'waiting-sofa', size: [512, 256], worldWidth: 240, x: 3260 },

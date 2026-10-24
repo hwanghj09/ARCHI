@@ -82,6 +82,8 @@ function doorHintText(door) {
   // 12층 야간 로그 삭제가 진행 중일 때만 네트워크 랙의 힌트를 "뽑기"로 바꿔 지금 할 일을 알려 준다(log-puzzle.js).
   if (door.name === '네트워크 랙' && dynamicFloorId === 'f12-eval' && logDeleting()) return `${key} · LAN 케이블 뽑기`;
   if (door.shutterLever) return collectedItems.has(door.shutterLever) ? `${key} · 셔터 내리기` : `${key} · 셔터 올리기`;
+  if (door.type === 'vent' && !ventIsOpen(door)) return collectedItems.has('f17-crowbar') ? `${key} · 빠루로 덮개 뜯기` : `${key} · 환풍구 조사`;
+  if (door.type === 'vent') return crouching ? `${key} · 환풍구에 숨기` : `${bindingLabel('crouch')} · 앉아서 들어가기`;
   if (door.type === 'inspect') return `${key} · ${door.name} 조사`;
   if (door.locked && door.control && [].concat(door.requires || []).every(item => collectedItems.has(item))) return `${key} · ${door.name} 카드키 태그`;
   if (door.locked) return `${key} · ${door.name} (잠김)`;
@@ -102,6 +104,8 @@ function doorHintText(door) {
 function interact() {
   if (!wirePanel.hidden) return;
   if (photoCaptureTime > 0 || itemUseTime > 0 || openingActive || blackoutSceneActive || cctvSceneActive || playerCaught || hallucinationCaught || transitioning || selectingFloor || usingComputer || usingKeypad || usingControl || usingPhone || usingPowerPanel || usingInspection) return;
+  if (hidingInVent) { leaveVent(); return; }
+  if (ventPrying()) { pushVentPry(); return; } // 덮개를 뜯는 중에는 E(모바일 조작 버튼)도 연타로 친다
   updateInteraction();
   if (blackoutSceneActive || cctvSceneActive) return;
   if (!nearbyDoor) return;
@@ -141,6 +145,12 @@ function interact() {
   }
   if (nearbyDoor.type === 'power') {
     openPowerPanel();
+    return;
+  }
+  if (nearbyDoor.type === 'vent') { // 닫힌 환풍구는 빠루로 덮개를 뜯고(vent-pry.js), 연 환풍구는 앉아야(Ctrl) 들어간다
+    if (ventIsOpen(nearbyDoor)) { if (crouching) enterVent(nearbyDoor); }
+    else if (collectedItems.has('f17-crowbar')) startVentPry(nearbyDoor);
+    else openInspection('환풍구', '루버 덮개가 나사 네 개로 단단히 박혀 있다. 손으로는 꿈쩍도 않는다. 빠루 같은 게 있으면 뜯어낼 수 있을 것 같다.');
     return;
   }
   if (nearbyDoor.type === 'inspect' || nearbyDoor.locked) {
