@@ -59,7 +59,7 @@ try {
       triggerDevoured();
       return result;
     });
-    await page.locator('#hallucination-retry').dispatchEvent('click');
+    await page.evaluate(() => releaseHallucinationCapture());
     assert.deepEqual(await page.evaluate(() => ({ sanity, items: [...collectedItems], x: body.position.x,
       caught: hallucinationCaught, phase: zeroEventPhase, timer: zeroEventTimer })),
     { sanity: 0, ...before, caught: false, phase: 'idle', timer: 0 }, 'Repeated retries never create free healing or remove progress');

@@ -33,7 +33,7 @@ debugConsoleToggle.addEventListener('click', () => {
   debugConsoleToggle.setAttribute('aria-expanded', String(!debugConsolePanel.hidden));
   debugConsoleToggle.textContent = debugConsolePanel.hidden ? '이벤트 펼치기' : '이벤트 접기';
 });
-for (const [id, trigger] of [['debug-chase-hallucination', debugTriggerChaseHallucination], ['debug-spawn-hallucination', debugTriggerAmbientHallucination], ['debug-jumpscare', debugTriggerJumpscare], ['debug-auditory-hallucination', debugTriggerAuditoryHallucination]]) {
+for (const [id, trigger] of [['debug-chase-hallucination', debugTriggerChaseHallucination], ['debug-spawn-hallucination', debugTriggerAmbientHallucination], ['debug-jumpscare', debugTriggerJumpscare], ['debug-eye-flash', debugTriggerEyeFlash], ['debug-b2-phase2', debugB2Progress60], ['debug-auditory-hallucination', debugTriggerAuditoryHallucination]]) {
   document.getElementById(id).addEventListener('click', () => {
     trigger();
     stage.focus({ preventScroll: true }); // 버튼에 포커스가 남아 이동 키가 막히지 않게 한다

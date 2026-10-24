@@ -48,7 +48,7 @@ function b2Pace() {
 }
 // phase: idle → running → over. barricaded: 상자로 출입문을 막았다. progress: 삭제 %. barricade: 바리케이드 내구도 %.
 // offline: 삭제 완료. bang: 다음 쾅 소리까지 ms.
-const b2Ending = { phase: 'idle', barricaded: false, progress: 0, barricade: 100, offline: false, bang: 0 };
+const b2Ending = { phase: 'idle', barricaded: false, progress: 0, barricade: 100, offline: false, bang: 0, phase2: false };
 // 배틀: started(터미널을 처음 열었다), threat(지금 막아야 할 방해), next(다음 방해까지 ms), seen(대응법을 알려 준 방해 종류),
 // said(한 번만 하는 ARCHI의 말).
 const b2Battle = { started: false, threat: null, next: 0, last: null, seen: new Set(), said: new Set() };
@@ -99,7 +99,7 @@ function startArchiDelete() {
   try { localStorage.setItem(b2CheckpointKey, JSON.stringify(progressSnapshot())); }
   catch { /* 체크포인트 없이도 삭제는 진행한다. */ }
   closeInspection();
-  Object.assign(b2Ending, { phase: 'running', barricaded: false, progress: 0, barricade: 100, offline: false, bang: 0 });
+  Object.assign(b2Ending, { phase: 'running', barricaded: false, progress: 0, barricade: 100, offline: false, bang: 0, phase2: false });
   b2Robots = b2DockX.map((x, index) => ({ name: ['R-02', 'R-05', 'R-07'][index], where: floorId(-2), x, facing: -1, wait: 0, elapsed: 0,
     mode: 'dock', hold: b2WakeDelay + index * 700, lostTime: 0, captureTime: 0, door: null, image: null, chaseOriginX: null, spottedX: null,
     firstEncounter: false, pursuit: true, followToElevator: true, banging: false, chaseSpeed: b2ChaseSpeed, onCaught: showB2BadEnding }));
@@ -131,6 +131,7 @@ function refreshB2TransferScreen() {
 
 // 장면을 새로 그릴 때(floor-change.js) 같은 장면에 있는 로봇만 붙인다. 상자는 삭제 시작 뒤 문을 막기 전까지 밀린다.
 function mountB2Robots() {
+  refreshB2Phase2();
   refreshB2TransferScreen();
   for (const robot of b2Robots) robot.door = robot.image = null;
   for (const part of movingParts) {
@@ -145,6 +146,181 @@ function mountB2Robots() {
   const stairs = currentDoors.find(door => door.type === 'stairs');
   if (stairs) stairs.message = 'ARCHI가 비상계단을 잠갔다. 문 위 표시등이 붉게 깜빡인다.';
   for (const robot of b2Robots) if (robot.where === dynamicFloorId) mountB2Robot(robot);
+}
+
+// ---- 2페이즈: 삭제 진행이 60%가 되면 메인 서버실에 검붉은 조명이 들어와 방이 어두워지고, 방 맨 왼쪽에 괴물이 나타난다 ----
+const b2Phase2At = 60;
+const b2Phase2Light = document.createElement('div');
+b2Phase2Light.id = 'b2-phase2-light';
+b2Phase2Light.setAttribute('aria-hidden', 'true');
+world.append(b2Phase2Light);
+
+function startB2Phase2() {
+  b2Ending.phase2 = true;
+  playGameSound('blackout');
+  b2Log('sys', 'ARCHI-MAIN 보조 개체 가동 · 서버실 조명이 비상 모드로 전환됐다');
+  b2Log('archi', '삭제는 끝나지 않습니다. 제가 지키던 것이 문 안쪽에 있으니까요.');
+  sayLine('불이 붉게 바뀌었어… 저건 뭐지?', 5000);
+  Object.assign(b2Hook, { x: b2MonsterStartX, mode: 'wait', timer: b2HookGap[0], reach: 0 });
+  refreshB2Phase2();
+}
+
+// 괴물은 문 앞에서 천천히 다가오며 쇠공을 던진다. 쏘는 순간 손을 뻗은 자세로 바뀌고, 쇠공은 사슬에 매달려 오른쪽으로
+// 일정한 높이로 일직선으로 날아간다. 공이 커서 서 있으면 맞고, 웅크리면 공 아래로 피할 수 있는 높이로 지나간다.
+// 쏘기 직전(예고)에는 터미널이 닫히니 그때 웅크려야 한다. 공이 수호에게 닿으면 붙잡힌다.
+// 수호가 손이 닿는 거리까지 가까워지면 던지지 않고 쇠공을 크게 휘두른다(근접 공격, phase2-boss-melee.png 9컷).
+const b2MonsterStartX = 220; // 문(x 135~491)의 가운데 앞
+const b2MonsterSpeed = 30; // px/s
+const b2MonsterWidth = { walk: 187, aim: 342 }; // 그림 폭(css의 #b2-monster·.b2-boss와 같다). 이 안에 수호가 들어오면 붙잡힌다
+const b2HookAimMs = 800;
+const b2HookFlySpeed = 2550; // px/s
+const b2HookBackSpeed = 1100;
+const b2HookGap = [5000, 7000]; // 다음 발사까지(ms)
+// 쇠공: radius는 그림 반지름, hit는 판정 반지름. 공 중심이 수호 위치를 지나는 높이는 웅크린 머리 윗면(floorY - 96)보다 공 아래쪽이 clearance만큼 위가 되게 한다.
+const b2BallSize = { radius: 90, hit: 86, clearance: 24 };
+const b2HookRopeHeight = 24;
+const b2HookHand = { x: 322, y: 73 }; // 손을 뻗은 그림(phase2-boss-aim.png)에서 손의 위치(괴물 왼쪽·위 기준)
+const b2Hook = { x: b2MonsterStartX, mode: 'wait', timer: 0, reach: 0, elapsed: 0 };
+// 서 있는 머리 윗면(floorY - 162)과 웅크린 머리 윗면(floorY - 96) 사이로 공 중심이 지나가는 높이(수호의 위치에서)
+const b2BallAimY = () => floorY - 96 - b2BallSize.radius - b2BallSize.clearance;
+// 근접 공격: 9컷을 b2MeleeMs 동안 재생한다. hands는 컷마다 손 위치(380×339 컷 기준), angles는 컷 경계마다 공이 손에서 뻗은 각도(도, 아래쪽이 +).
+// 5번째 컷(25°)에서 공이 몸 높이까지 내려와 서 있든 웅크렸든 맞는다.
+const b2MeleeMs = 1000;
+const b2MeleeShift = -40; // 걷는 그림과 허리판 위치를 맞추려고 근접 그림을 왼쪽으로 옮긴 양
+const b2MeleeChain = 230;
+const b2MeleeReach = 160; // 손에서 이만큼 안에 수호가 들어오면 휘두른다. 휘두른 공이 4번째 컷에 닿을 때 아직 이 안이면 웅크려도 맞는다
+const b2MeleeHands = [[95, 185], [334, 81], [311, 90], [315, 87], [336, 99], [311, 163], [286, 157], [291, 172], [232, 128]];
+const b2MeleeAngles = [-150, -110, -60, -20, 25, 10, -50, -110, -150, -160];
+
+function updateB2Monster(delta) {
+  const monster = dynamicScene.querySelector('#b2-monster');
+  if (!monster) return;
+  const hook = dynamicScene.querySelector('#b2-hook');
+  const rope = dynamicScene.querySelector('#b2-hook-rope');
+  let melee = b2Hook.mode === 'melee';
+  // 멈추지 않고 수호 쪽으로 걸어온다(예고·던지기·휘두르는 동안은 서 있다). 그림 전체 범위 안에 수호가 들어오면 붙잡힌다.
+  const toPlayer = body.position.x - b2MonsterWidth.walk / 2 - b2Hook.x;
+  if (b2Hook.mode === 'wait') b2Hook.x += Math.sign(toPlayer) * Math.min(Math.abs(toPlayer), b2MonsterSpeed * delta / 1000);
+  const boxWidth = b2Hook.mode === 'aim' ? b2MonsterWidth.aim : b2MonsterWidth.walk;
+  if (!playerCaught && body.bounds.max.x > b2Hook.x && body.bounds.min.x < b2Hook.x + boxWidth) {
+    playGameSound('robot-grab', { x: body.position.x });
+    showB2BadEnding();
+    return;
+  }
+  // hand: 줄이 나가는 손, ball: 공 중심, spin: 공이 도는 각(rad). 공이 보이는 동안만 쓴다.
+  let hand = { x: b2Hook.x + b2HookHand.x, y: floorY - 339 + b2HookHand.y };
+  let ball = { x: hand.x, y: b2BallAimY(), spin: 0 };
+  let frame = 0;
+  // 수호가 손이 닿는 거리 안에 있으면 던지는 중이든 아니든 언제나 근접 공격(휘두르기)을 한다.
+  if (b2Hook.mode !== 'melee' && b2InMeleeRange()) {
+    Object.assign(b2Hook, { mode: 'melee', elapsed: 0, reach: 0 });
+    melee = true;
+    closeB2Terminal();
+    playGameSound('cctv-beep');
+    if (performance.now() - (b2Hook.said ?? -1e9) > 4000) sayLine('쇠공을 휘두른다! 웅크려!', 2200);
+    b2Hook.said = performance.now();
+  }
+  if (b2Hook.mode === 'wait') {
+    b2Hook.timer -= delta;
+    if (b2Hook.timer <= 0) {
+      Object.assign(b2Hook, { mode: 'aim', timer: b2HookAimMs });
+      closeB2Terminal();
+      playGameSound('cctv-beep');
+      sayLine('쇠공이 날아온다! 웅크려!', 2200);
+    }
+  } else if (b2Hook.mode === 'aim') {
+    b2Hook.timer -= delta;
+    if (b2Hook.timer <= 0) {
+      b2Hook.mode = 'fly'; b2Hook.reach = 0;
+    }
+  } else if (b2Hook.mode === 'fly') {
+    b2Hook.reach += b2HookFlySpeed * delta / 1000;
+    ball.x = hand.x + b2Hook.reach; // 공은 수호 쪽이 아니라 오른쪽으로 일직선(고정 높이)
+    if (hitB2Ball(ball)) return;
+    if (ball.x > body.position.x + 260) b2Hook.mode = 'back'; // 수호보다 오른쪽까지 날아간 뒤 돌아온다
+  } else if (b2Hook.mode === 'back') {
+    b2Hook.reach -= b2HookBackSpeed * delta / 1000;
+    if (b2Hook.reach <= 0) {
+      const [min, max] = b2HookGap;
+      Object.assign(b2Hook, { mode: 'wait', reach: 0, timer: min + Math.random() * (max - min) });
+    }
+  } else if (melee) {
+    b2Hook.elapsed += delta;
+    const u = Math.min(b2Hook.elapsed / b2MeleeMs, .9999) * 9;
+    frame = Math.floor(u);
+    const angle = (b2MeleeAngles[frame] + (b2MeleeAngles[frame + 1] - b2MeleeAngles[frame]) * (u - frame)) * Math.PI / 180;
+    hand = { x: b2Hook.x + b2MeleeShift + b2MeleeHands[frame][0], y: floorY - 339 + b2MeleeHands[frame][1] };
+    ball = { x: hand.x + Math.cos(angle) * b2MeleeChain, y: hand.y + Math.sin(angle) * b2MeleeChain, spin: angle };
+    if (hitB2Ball(ball)) return;
+    if (u >= 4 && !playerCaught && b2InMeleeRange()) { // 공이 내려온 순간 아직 범위 안이면 웅크려도 맞는다
+      playGameSound('robot-grab', { x: body.position.x });
+      showB2BadEnding();
+      return;
+    }
+    if (b2Hook.elapsed >= b2MeleeMs) Object.assign(b2Hook, { mode: 'wait', timer: Math.max(b2Hook.timer, 1500) });
+  }
+  monster.style.left = `${b2Hook.x}px`;
+  monster.dataset.pose = b2Hook.mode === 'wait' ? 'walk' : b2Hook.mode === 'melee' ? 'melee' : 'aim';
+  monster.dataset.aim = String(b2Hook.mode === 'aim');
+  monster.dataset.walk = String(b2Hook.mode === 'wait'); // 던지는 동안에는 걷는 컷을 멈춘다
+  monster.style.setProperty('--melee-frame', frame);
+  const shown = b2Hook.mode === 'fly' || b2Hook.mode === 'back' || b2Hook.mode === 'melee';
+  hook.hidden = rope.hidden = !shown;
+  if (!shown) return;
+  const { radius } = b2BallSize;
+  // 공은 굴러가듯 돌고, 사슬은 손에서 공 중심까지 이어진다(공 뒤에 깔린다).
+  let scale = 1;
+  if (!melee) { // 던질 때·돌아올 때: 손 가까이에서는 공이 손으로 빨려 들어가듯 작아지며 손 높이로 모인다
+    const k = Math.min(1, b2Hook.reach / 180);
+    ball = { x: hand.x + b2Hook.reach, y: hand.y + (b2BallAimY() - hand.y) * k, spin: 0 };
+    scale = .4 + .6 * k;
+  }
+  const spin = melee ? ball.spin : b2Hook.reach / (radius * 1.7);
+  Object.assign(hook.style, { left: `${ball.x - radius}px`, top: `${ball.y - radius}px`, transform: `rotate(${spin}rad) scale(${scale})` });
+  Object.assign(rope.style, { left: `${hand.x}px`, top: `${hand.y - b2HookRopeHeight / 2}px`, width: `${Math.hypot(ball.x - hand.x, ball.y - hand.y)}px`, transform: `rotate(${Math.atan2(ball.y - hand.y, ball.x - hand.x)}rad)` });
+}
+
+// 수호의 몸이 보스 손에서 앞쪽 b2MeleeReach 안에 있는가
+function b2InMeleeRange() {
+  return body.bounds.max.x > b2Hook.x && body.bounds.min.x < b2Hook.x + b2MeleeShift + b2MeleeHands[1][0] + b2MeleeReach;
+}
+
+// 공(원)이 수호의 몸(사각형)에 닿았으면 붙잡히고 true를 돌려준다.
+function hitB2Ball(ball) {
+  const { min, max } = body.bounds;
+  const nearX = Math.max(min.x, Math.min(ball.x, max.x));
+  const nearY = Math.max(min.y, Math.min(ball.y, max.y));
+  if (playerCaught || Math.hypot(ball.x - nearX, ball.y - nearY) > b2BallSize.hit) return false;
+  playGameSound('robot-grab', { x: body.position.x });
+  showB2BadEnding();
+  return true;
+}
+
+// 서버실 안에서만 검붉은 조명과 괴물이 보인다. 장면을 새로 그릴 때와 2페이즈가 시작될 때 부른다.
+function refreshB2Phase2() {
+  const inMain = Boolean(b2Ending.phase2) && b2Ending.phase === 'running' && !b2Ending.offline && room === 'dynamic' && dynamicFloorId === 'b2-main';
+  world.dataset.b2Phase2 = String(inMain);
+  let monster = dynamicScene.querySelector('#b2-monster');
+  if (!inMain) { monster?.remove(); dynamicScene.querySelector('#b2-hook')?.remove(); dynamicScene.querySelector('#b2-hook-rope')?.remove(); return; }
+  if (monster) return;
+  monster = document.createElement('div');
+  monster.id = 'b2-monster';
+  monster.setAttribute('aria-hidden', 'true');
+  const sprite = document.createElement('div');
+  sprite.className = 'b2-boss';
+  monster.append(sprite);
+  Object.assign(monster.style, { left: `${b2Hook.x}px`, top: `${floorY - 339}px` }); // 맨 왼쪽 문 앞에서 시작해 다가온다
+  const rope = document.createElement('div');
+  rope.id = 'b2-hook-rope';
+  const hook = new Image();
+  hook.id = 'b2-hook';
+  hook.src = 'assets/objects/b2/phase2-ball.png';
+  hook.alt = '';
+  hook.draggable = false;
+  rope.hidden = hook.hidden = true;
+  Object.assign(hook.style, { width: `${b2BallSize.radius * 2}px`, height: `${b2BallSize.radius * 2}px` });
+  rope.style.height = `${b2HookRopeHeight}px`;
+  dynamicScene.append(monster, rope, hook);
 }
 
 function mountB2Robot(robot) {
@@ -164,6 +340,7 @@ function updateB2Ending(delta) {
   updateB2Robots(delta);
   if (b2Ending.phase !== 'running') return; // 바리케이드가 무너져 붙잡혔다
   if (b2Battle.started) updateB2Battle(delta);
+  if (b2Ending.phase2 && b2Ending.phase === 'running') updateB2Monster(delta);
   refreshB2Bar();
 }
 
@@ -292,6 +469,11 @@ function breakB2Barricade() {
 
 // 메인 콘솔을 조사하면(interaction.js): 삭제 중에는 조사창 대신 이 처리를 한다. 문을 막은 뒤면 루트 터미널을 연다.
 function handleB2Console(door) {
+  // 맨 왼쪽 문: 2페이즈 전에는 잠겨 있고, 2페이즈에는 열려 있다.
+  if (door.name === '굳게 닫힌 문' && dynamicFloorId === 'b2-main') {
+    openInspection(door.name, b2Ending.phase2 ? '문이 활짝 열려 있다. 안쪽의 어둠 속에서 무언가가 걸어 나온다.' : door.message);
+    return true;
+  }
   if (b2Ending.phase !== 'running' || dynamicFloorId !== 'b2-main' || door.name !== 'ARCHI 메인 콘솔') return false;
   if (b2Ending.offline) return true;
   if (b2Ending.barricaded) openB2Terminal();
@@ -374,6 +556,7 @@ function updateB2Battle(delta) {
       b2Battle.said.add(at);
       b2Log('archi', text);
     }
+    if (!b2Ending.phase2 && b2Ending.progress >= b2Phase2At) startB2Phase2();
     if (b2Ending.progress >= 100) { finishArchiDelete(); return; }
     b2Battle.next -= delta;
     if (b2Battle.next <= 0) startB2Threat();
@@ -468,6 +651,8 @@ function refreshB2Terminal() {
 // 삭제 완료: ARCHI — OFFLINE. 로봇이 멈추고, 잠시 뒤 TRUE END.
 function finishArchiDelete() {
   Object.assign(b2Ending, { offline: true, progress: 100 });
+  b2Ending.phase2 = false;
+  refreshB2Phase2();
   refreshB2TransferScreen();
   b2Battle.threat = null;
   setB2Siren(false);
@@ -581,7 +766,8 @@ b2Escape.addEventListener('keydown', event => {
 function resetB2Ending() {
   resetB2CaptureScene();
   setB2Siren(false);
-  Object.assign(b2Ending, { phase: 'idle', barricaded: false, progress: 0, barricade: 100, offline: false, bang: 0 });
+  Object.assign(b2Ending, { phase: 'idle', barricaded: false, progress: 0, barricade: 100, offline: false, bang: 0, phase2: false });
+  refreshB2Phase2();
   Object.assign(b2Battle, { started: false, threat: null, next: 0, last: null });
   b2Battle.seen.clear();
   b2Battle.said.clear();
@@ -621,3 +807,16 @@ for (const id of ['b2-escape-menu', 'b2-bad-menu']) document.getElementById(id).
   document.body.dataset.mainMenu = 'true';
   showMainMenu();
 });
+
+// 개발 콘솔 버튼: 삭제 진행을 곧바로 60%로 올려 2페이즈를 시작한다. 삭제 전이면 메인 서버실에서 삭제를 시작한 것으로 친다.
+function debugB2Progress60() {
+  if (b2Ending.phase === 'idle') {
+    if (room !== 'dynamic' || dynamicFloorId !== 'b2-main') { sayLine('B2 ARCHI 메인 서버실 안에서 눌러야 한다.', 4000); return false; }
+    startArchiDelete();
+  }
+  if (b2Ending.phase !== 'running' || b2Ending.offline) return false;
+  b2Ending.progress = Math.max(b2Ending.progress, b2Phase2At);
+  if (!b2Ending.phase2) startB2Phase2();
+  refreshB2Bar();
+  return true;
+}

@@ -41,6 +41,7 @@ let zeroEventSide = 1;
 let zeroEventEvasions = 0;
 let zeroEventForced = false; // 콘솔 버튼으로 시작한 추격: 정신력이 0%보다 커도 이어진다. 단 시작할 때보다 정신력이 오르면 중지한다
 let zeroEventForcedFrom = 0;
+let zeroEventTravel = 0; // 추격 환각이 시작부터 걸어온 거리(걸음 그림을 이 거리에 맞춘다)
 let zeroEventGhostX = 0; // 돌진 환각의 월드 x 좌표(수호를 따라다니지 않고 일정한 속도로 다가온다)
 const zeroEventGhostStartGap = 320; // 돌진 환각이 나타날 때 수호와의 거리
 const zeroEventReachGap = 30; // 이 거리 안으로 오면 닿은 것으로 친다
@@ -117,6 +118,7 @@ function startZeroCharge() {
   zeroEventPhase = 'charging';
   zeroEventTimer = zeroEventLightTime = zeroEventStepTimer = 0;
   zeroEventGhostX = hallucinationSpawnX(zeroEventGhostStartGap);
+  zeroEventTravel = 0;
   zeroEventSide = Math.sign(zeroEventGhostX - body.position.x) || 1;
   beginHallucinationSighting('charge', zeroEventSide, Math.abs(zeroEventGhostX - body.position.x));
   const side = zeroEventSide < 0 ? '왼쪽' : '오른쪽';
@@ -146,6 +148,8 @@ devouredVideo.addEventListener('ended', hideDevouredVideo);
 devouredVideo.addEventListener('error', hideDevouredVideo);
 function playDevouredVideo() {
   devouredVideo.currentTime = 0;
+  devouredVideo.muted = gameVolume <= 0; // 영상에 소리가 들어 있으니 게임 음량을 따른다
+  devouredVideo.volume = Math.max(0, Math.min(1, gameVolume));
   devouredVideo.hidden = false;
   devouredVideo.play().catch(hideDevouredVideo);
 }
@@ -159,7 +163,6 @@ function triggerDevoured() {
   endHallucinationSighting();
   phoneLightOn = false;
   refreshPhone();
-  playHallucinationDevouredSound();
   playDevouredVideo();
   releaseInput();
   Body.setVelocity(body, { x: 0, y: 0 });
@@ -167,7 +170,7 @@ function triggerDevoured() {
   hallucinationBlocked = [...document.body.children].filter(element => element !== hallucinationCapturePanel && element.tagName !== 'SCRIPT' && !element.inert);
   for (const element of hallucinationBlocked) element.inert = true;
   hallucinationCapturePanel.hidden = false;
-  document.getElementById('hallucination-retry').focus();
+  hallucinationCapturePanel.querySelector('.game-over-load').focus();
 }
 
 function releaseHallucinationCapture() {
@@ -184,10 +187,6 @@ function releaseHallucinationCapture() {
   animate(0);
   stage.focus();
 }
-document.getElementById('hallucination-retry').addEventListener('click', () => {
-  if (!hallucinationCaught) return;
-  releaseHallucinationCapture();
-});
 
 function updateZeroEvent(elapsed, fsmPaused) {
   // B2 삭제 배틀(문 막기·삭제 진행) 동안에는 환각 추격이 일어나지 않고, 진행 중이던 것도 끝낸다.
@@ -238,9 +237,10 @@ function updateZeroEvent(elapsed, fsmPaused) {
     }
     if (zeroEventTimer <= zeroEventWarningMs) return;
     const gap = body.position.x - zeroEventGhostX;
-    if (Math.abs(gap) > hallucinationStartDistance + 240) { resolveZeroEvasion(); return; }
     const movingMs = Math.min(elapsed, zeroEventTimer - zeroEventWarningMs);
-    zeroEventGhostX += Math.sign(gap) * Math.min(Math.abs(gap), hallucinationStartDistance / zeroEventCrawlMs * Math.exp((zeroEventTimer - zeroEventWarningMs) / zeroEventAccelMs) * movingMs);
+    const stepPx = Math.min(Math.abs(gap), hallucinationStartDistance / zeroEventCrawlMs * Math.exp((zeroEventTimer - zeroEventWarningMs) / zeroEventAccelMs) * movingMs);
+    zeroEventGhostX += Math.sign(gap) * stepPx;
+    zeroEventTravel += stepPx;
     if (Math.abs(body.position.x - zeroEventGhostX) <= zeroEventReachGap) triggerDevoured();
   }
 }
@@ -502,7 +502,7 @@ let darkFaceTimer = 0;
 let darkFaceLife = 0;
 let darkFaceLast = -1;
 
-let darkFaceForced = false; // 콘솔의 점프스케어 버튼으로 낸 얼굴: 조건과 상관없이 2초 동안 보인다
+let darkFaceForced = false; // 콘솔의 점프스케어 버튼으로 낸 얼굴: 체력·쿨타임과 상관없이 2초 동안 보이지만, 불이 꺼진 어둠 속이 아니면 나오지 않는다
 
 // 얼굴 하나를 왼쪽이나 오른쪽 가장자리에 띄운다(직전 얼굴은 제외).
 function showDarkFace() {
@@ -516,6 +516,7 @@ function showDarkFace() {
 }
 
 function updateDarkFace(elapsed, fsmPaused) {
+  if (darkFaceForced && sanityExposure() !== 'dark') { darkFace.hidden = true; darkFaceForced = false; return; }
   if (darkFaceForced) {
     darkFaceLife += elapsed;
     if (darkFaceLife >= 2000) { darkFace.hidden = true; darkFaceForced = false; }
@@ -534,7 +535,29 @@ function updateDarkFace(elapsed, fsmPaused) {
   if (darkFaceTimer >= 9000) showDarkFace();
 }
 
+// 정신력 0%의 눈 연출: 깜빡일 때마다 30% 확률로 눈 그림 넷 중 하나가 화면 전체를 0.1초 덮는다(깜빡임 화면 대신).
+const eyeFlash = document.getElementById('eye-flash');
+const eyeFlashImage = eyeFlash.querySelector('img');
+const eyeFlashSources = [1, 2, 3, 4].map(n => `assets/ui/hallucination/eye-flash-${n}.jpg`);
+const eyeFlashChance = .3;
+const eyeFlashMs = 100;
+let eyeFlashTimer = 0;
+for (const src of eyeFlashSources) new Image().src = src; // 미리 받아 둬서 0.1초 안에 바로 뜬다
+
+function showEyeFlash() {
+  eyeFlashImage.src = eyeFlashSources[Math.floor(Math.random() * eyeFlashSources.length)];
+  eyeFlash.dataset.active = 'true';
+  eyeFlashTimer = eyeFlashMs;
+}
+
+function debugTriggerEyeFlash() {
+  if (hallucinationEventBlocked()) return false;
+  showEyeFlash();
+  return true;
+}
+
 function debugTriggerJumpscare() {
+  if (sanityExposure() !== 'dark') return false;
   if (hallucinationEventBlocked()) return false;
   darkFaceForced = true;
   showDarkFace();
@@ -546,14 +569,19 @@ function updateBlink(elapsed, fsmPaused) {
     blinkFlashTimer -= elapsed;
     if (blinkFlashTimer <= 0) blinkFlash.dataset.active = 'false';
   }
+  if (eyeFlashTimer > 0) {
+    eyeFlashTimer -= elapsed;
+    if (eyeFlashTimer <= 0) eyeFlash.dataset.active = 'false';
+  }
   if (fsmPaused || fearTier < 2) { blinkTimer = 0; return; }
   if (!Number.isFinite(blinkNextIn) || blinkNextIn === Infinity) blinkNextIn = randomBetween(blinkIntervalRangeByTier[fearTier] || blinkIntervalRangeByTier[2]);
   blinkTimer += elapsed;
   if (blinkTimer < blinkNextIn) return;
   blinkTimer = 0;
   blinkNextIn = randomBetween(blinkIntervalRangeByTier[fearTier] || blinkIntervalRangeByTier[2]);
-  blinkFlash.dataset.active = 'true';
-  blinkFlashTimer = 180;
+  // 정신력 0%에서는 깜빡임 화면 대신 30% 확률로 눈 그림이 잠깐 화면을 덮는다.
+  if (sanity <= 0) { if (Math.random() < eyeFlashChance) showEyeFlash(); }
+  else { blinkFlash.dataset.active = 'true'; blinkFlashTimer = 180; }
   if (fearTier >= 4) spawnRedEyes();
 }
 
@@ -564,7 +592,7 @@ function updateSanity(elapsed) {
   const fsmPaused = paused || selectingFloor || usingPhone;
   // 휴대폰을 연 것만으로는 진행 중인 추격 환각을 지우지 않는다(추격은 휴대폰을 연 채로도 이어진다).
   const chaseHalt = paused || selectingFloor;
-  if ((zeroEventPhase === 'charging' ? chaseHalt : fsmPaused) &&(hallucinationMode || !darkFace.hidden || blinkFlashTimer > 0 || redEyeShards.childElementCount)) clearHallucinationEvents();
+  if ((zeroEventPhase === 'charging' ? chaseHalt : fsmPaused) &&(hallucinationMode || !darkFace.hidden || blinkFlashTimer > 0 || eyeFlashTimer > 0 || redEyeShards.childElementCount)) clearHallucinationEvents();
   const exposure = sanityExposure();
   // B2 엔딩 중에는 R-01에게 쫓겨도 줄지 않는다: 정신력은 로봇 속도(45% 규칙, b2-ending.js)를 정하는 데 쓰인다.
   const chasing = (guardPatrol.mode === 'chase' || roamer.mode === 'chase') && !bossFightActive && b2Ending.phase !== 'running';
@@ -610,18 +638,50 @@ function renderHallucination() {
   const life = charging ? zeroEventTimer : hallucinationLife;
   const x = charging ? zeroEventGhostX : hallucinationAnchorX;
   const fadeOut = charging ? 1 : Math.min(1, (ambientSightingLifeMs - life) / 600) * (1 - ambientLightFade / ambientLightFadeMs);
-  hallucinationShadow.style.opacity = String(Math.max(0, Math.min(1, life / zeroEventGhostFadeInMs) * fadeOut));
+  // 추격 환각의 선명도: 수호가 보는 쪽에 있으면 거의 곧바로 비교적 선명하고, 등 뒤에 있으면 처음엔 거의 흐릿하다가 가까워질수록 뚜렷해진다.
+  let visibility = 1, fadeInMs = zeroEventGhostFadeInMs;
+  if (charging) {
+    const closeness = Math.max(0, Math.min(1, 1 - Math.abs(body.position.x - x) / (hallucinationStartDistance || zeroEventGhostStartGap)));
+    const inView = Math.sign(x - body.position.x) === facing;
+    visibility = inView ? .65 + .35 * closeness : .08 + .92 * Math.pow(closeness, 1.4);
+    if (inView) fadeInMs = 120;
+    hallucinationShadow.style.setProperty('--ghost-blur', ((1 - visibility) * 3).toFixed(2) + 'px');
+  }
+  hallucinationShadow.style.opacity = String(Math.max(0, Math.min(1, life / fadeInMs) * fadeOut * visibility));
   hallucinationShadow.style.left = (x - 96) + 'px';
   hallucinationShadow.style.top = (floorY - 178) + 'px';
   hallucinationShadow.style.transform = 'scaleX(' + (charging ? Math.sign(body.position.x - x) || 1 : -hallucinationSide) + ')';
   const walking = charging && life > zeroEventWarningMs;
   hallucinationShadow.dataset.walking = String(walking);
-  // 추격(돌진)은 유령 그림(ghost-face.png), 멀리 보이는 형상은 수호의 그림자 형태다.
+  // 추격(돌진)은 걷고 달리는 형상(ghost-chase.png), 멀리 보이는 형상은 수호의 그림자 형태다.
   hallucinationShadow.dataset.form = charging ? 'ghost' : 'shadow';
   if (charging) {
-    const ghostWidth = 500, ghostHeight = ghostWidth * 2 / 3;
+    // 추격 환각: 똑바로 서 있다가(정지) 점점 몸을 숙이며 달려온다. 그림은 왼쪽을 보고 있어서 수호가 오른쪽에 있으면 뒤집는다.
+    const ghostWidth = 380, ghostHeight = ghostWidth * 330 / 300; // 칸 300×330, 발이 칸 아래에서 4px 위
+    const moving = Math.max(0, life - zeroEventWarningMs);
+    // 정지 중에는 서 있는 자세(chase 0번), 처음 달려올 때는 chase 1~9번을 순서대로, 그다음부터는 run 0~9번을 반복한다.
+    // 걸음은 시간이 아니라 걸어온 거리에 맞춘다: 천천히 올 때는 느리게, 빨라질수록 빨리 바뀌어 발이 미끄러져 보이지 않는다.
+    const transitionPx = 9 * ghostPoseStepPx;
+    const travel = zeroEventTravel;
+    // 지금 칸과 다음 칸 둘을 겹쳐 사이를 섞는다(blend 0~1): 칸이 툭툭 바뀌지 않고 부드럽게 이어진다.
+    let pose, frame, poseNext, frameNext, blend = 0;
+    if (moving === 0) { pose = poseNext = 'chase'; frame = frameNext = 0; }
+    else if (travel < transitionPx) {
+      const u = travel / ghostPoseStepPx; frame = 1 + Math.floor(u); blend = u - Math.floor(u); pose = 'chase';
+      if (frame < 9) { poseNext = 'chase'; frameNext = frame + 1; } else { poseNext = 'run'; frameNext = 0; }
+    } else {
+      const v = (travel - transitionPx) / ghostRunStepPx; frame = Math.floor(v) % 10; blend = v - Math.floor(v); pose = poseNext = 'run'; frameNext = (frame + 1) % 10;
+    }
+    hallucinationShadow.dataset.pose = pose;
+    hallucinationShadow.dataset.poseNext = poseNext;
+    hallucinationShadow.style.setProperty('--frame', String(frame));
+    hallucinationShadow.style.setProperty('--frame-next', String(frameNext));
+    hallucinationShadow.style.setProperty('--blend', blend.toFixed(3));
+    const flip = -(Math.sign(body.position.x - x) || 1); // 그림은 왼쪽을 본다: 수호가 오른쪽이면 -1로 뒤집는다
+    hallucinationShadow.style.transform = 'scaleX(' + flip + ')';
+    const headX = ghostWidth * 105 / 300; // 시트에서 머리가 있는 자리(칸 왼쪽에서 105px)가 환각의 위치 x에 오도록 맞춘다
     Object.assign(hallucinationShadow.style, { width: ghostWidth + 'px', height: ghostHeight + 'px',
-      left: (x - ghostWidth / 2) + 'px', top: (floorY - ghostHeight + 15) + 'px' });
+      left: (x - (flip === 1 ? headX : ghostWidth - headX)) + 'px', top: (floorY - ghostHeight * 326 / 330) + 'px' });
   } else {
     Object.assign(hallucinationShadow.style, { width: '192px', height: '192px', left: (x - 96) + 'px', top: (floorY - 178) + 'px' });
   }
@@ -680,10 +740,13 @@ function clearHallucinationEvents() {
   zeroEventLightTime = zeroEventStepTimer = 0;
   darkFace.hidden = true; darkFaceForced = false; darkFaceTimer = darkFaceLife = 0;
   blinkFlash.dataset.active = 'false'; blinkFlashTimer = 0;
+  eyeFlash.dataset.active = 'false'; eyeFlashTimer = 0;
   redEyeShards.replaceChildren();
 }
 
 // 플래시가 닿는 동안 유령 표면(빛과 맞닿는 수호 쪽 가장자리)에서 하얀 입자가 위로 올라가며 사라진다.
+const ghostPoseStepPx = 26; // 서 있다가 달리기로 넘어가는 9컷이 한 칸 바뀌는 데 걷는 거리(px)
+const ghostRunStepPx = 40; // 달리기 한 칸이 바뀌는 데 걷는 거리(px)
 let ghostParticleTimer = 0;
 function emitGhostLightParticles(elapsed) {
   ghostParticleTimer += elapsed;
@@ -691,7 +754,7 @@ function emitGhostLightParticles(elapsed) {
     ghostParticleTimer -= 28;
     const dot = document.createElement('i');
     const size = 2 + Math.random() * 3;
-    Object.assign(dot.style, { left: `${zeroEventGhostX - zeroEventSide * 150 + (Math.random() - .5) * 40}px`,
+    Object.assign(dot.style, { left: `${zeroEventGhostX - zeroEventSide * 40 + (Math.random() - .5) * 40}px`,
       top: `${floorY - 60 - Math.random() * 120}px`, width: `${size}px`, height: `${size}px`,
       animationDuration: `${.6 + Math.random() * .5}s` });
     dot.style.setProperty('--dx', `${(Math.random() - .5) * 30}px`);

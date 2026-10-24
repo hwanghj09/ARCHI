@@ -118,6 +118,7 @@ window.addEventListener('keydown', event => {
       event.preventDefault();
       return;
     }
+    if (inspectionPanel.dataset.photoOnly === 'true') { event.preventDefault(); return; } // 사진 찍기 전에는 닫지 못한다
     // 이동을 시작하면 조사 UI를 자연스럽게 접고 해당 입력은 그대로 게임에 전달한다.
     if (Object.hasOwn(movementKeys, event.code) || jumpKeys.has(event.code)) closeInspection();
     else {

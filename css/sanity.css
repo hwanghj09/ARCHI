@@ -18,9 +18,16 @@
 #hallucination-shadow[data-walking="true"]::before { background-image: url(../assets/player/jeong-suho-walk-eight.png); background-size: 1536px 192px; background-position: var(--stride) 0; clip-path: none; }
 #hallucination-shadow::after { content: ''; position: absolute; left: 65px; top: 174px; width: 66px; height: 9px; border-radius: 50%; background: #0005; filter: blur(3px); }
 /* 환각 추격: 예전 유령 그림이 바닥 위에 떠서 쫓아온다(sanity.js의 data-form="ghost"). 걷는 그림자(::before의 수호 그림)와 바닥 그림자는 끈다. */
-#hallucination-shadow[data-form="ghost"] { width: 500px; height: 333px; }
-#hallucination-shadow[data-form="ghost"]::before { background: url(../assets/ui/hallucination/ghost-face.png) center / contain no-repeat; clip-path: none; filter: blur(.8px) drop-shadow(0 0 10px #9aa4b0aa); image-rendering: auto; }
-#hallucination-shadow[data-form="ghost"]::after { display: none; }
+#hallucination-shadow[data-form="ghost"] { width: 380px; height: 418px; transition: opacity .12s linear; }
+/* 스프라이트 시트(가로 10칸, 칸 300×330). ghost-chase.png: 0번 칸이 똑바로 선 자세, 1~9번 칸이 처음 달려오는 동안. ghost-run.png: 그 뒤 반복해서 쓰는 달리기. */
+#hallucination-shadow[data-form="ghost"]::before, #hallucination-shadow[data-form="ghost"]::after { background: url(../assets/ui/hallucination/ghost-chase.png) no-repeat; background-size: 1000% 100%;
+  clip-path: none; filter: brightness(.55) blur(var(--ghost-blur, 0px)) drop-shadow(0 0 5px #9aa4b044); image-rendering: auto; }
+/* ::before는 지금 칸, ::after는 다음 칸이고 투명도(--blend)만큼 섞어 칸 사이를 부드럽게 잇는다. */
+#hallucination-shadow[data-form="ghost"]::before { background-position: calc(var(--frame, 0) * 100% / 9) 0; }
+#hallucination-shadow[data-form="ghost"]::after { left: 0; top: 0; width: 100%; height: 100%; border-radius: 0; opacity: var(--blend, 0);
+  background-position: calc(var(--frame-next, 0) * 100% / 9) 0; }
+#hallucination-shadow[data-form="ghost"][data-pose="run"]::before { background-image: url(../assets/ui/hallucination/ghost-run.png); }
+#hallucination-shadow[data-form="ghost"][data-pose-next="run"]::after { background-image: url(../assets/ui/hallucination/ghost-run.png); }
 .floor-prop, .office-desk-backdrop, #office-workstation, #office-computer { z-index: 1; }
 #hallucination-effects { position: fixed; z-index: 11; inset: 0; overflow: hidden; pointer-events: none; background: radial-gradient(ellipse at center, transparent 38%, #2714266b 78%, #130b20bd); }
 #hallucination-effects[hidden] { display: none; }
@@ -28,7 +35,7 @@ body:has(#world[data-opening]) #sanity-hud,
 body:has(#world[data-blackout-scene]) #sanity-hud,
 body:has(#world[data-opening]) #fear-overlay, body:has(#world[data-opening]) #fear-overlay-red,
 body:has(#world[data-blackout-scene]) #fear-overlay, body:has(#world[data-blackout-scene]) #fear-overlay-red,
-body:has(#world[data-opening]) #blink-flash, body:has(#world[data-blackout-scene]) #blink-flash,
+body:has(#world[data-opening]) :is(#blink-flash, #eye-flash), body:has(#world[data-blackout-scene]) :is(#blink-flash, #eye-flash),
 body:has(#world[data-opening]) :is(#red-eyes, #red-eye-shards), body:has(#world[data-blackout-scene]) :is(#red-eyes, #red-eye-shards) { visibility: hidden; }
 @media (max-width: 480px) { #sanity-hud { width: 136px; padding: 8px 10px; } }
 @media (max-height: 480px) { #sanity-hud { top: 56px; } }
@@ -48,6 +55,10 @@ body[data-fear-tier="5"] #fear-overlay { opacity: .8; filter: blur(3.2px); }
 /* 눈 깜빡임: 40% 미만부터 가끔 화면이 짧게 어두워진다. */
 #blink-flash { position: fixed; z-index: 13; inset: 0; pointer-events: none; background: #000; opacity: 0; }
 #blink-flash[data-active="true"] { opacity: 1; transition: opacity .07s ease-in; }
+/* 정신력 0%: 깜빡임 대신 가끔 눈 그림이 화면 전체를 0.1초 덮는다(sanity.js의 showEyeFlash). */
+#eye-flash { position: fixed; z-index: 14; inset: 0; pointer-events: none; background: #000; display: none; }
+#eye-flash[data-active="true"] { display: block; }
+#eye-flash img { display: block; width: 100%; height: 100%; object-fit: cover; }
 #blink-flash:not([data-active="true"]) { transition: opacity .22s ease-out; }
 
 /* 10% 미만: 깜빡일 때마다 월드의 일반 배경 위에 붉은 눈이 하나씩 더 생긴다(sanity.js의 spawnRedEye). 어둠 막(z-index 5)보다 문서 순서가 뒤라
