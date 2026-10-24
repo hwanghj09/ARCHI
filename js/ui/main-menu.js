@@ -329,3 +329,36 @@ menuSlotList.addEventListener('click', event => {
     }
   }
 });
+
+// 스크린샷 모드(일시정지 창): 화면의 UI를 모두 숨기고 게임은 멈춘 채로 둔다. 키보드나 마우스를 아무거나 누르면 일시정지 창으로 돌아온다.
+// 돌아오게 한 입력은 게임이나 메뉴가 받지 않도록 삼키고, 뒤이어 오는 click도 잠깐 삼킨다(마우스를 떼거나 Space를 뗄 때 버튼이 눌리지 않게).
+let screenshotModeEndedAt = -Infinity;
+
+function endScreenshotMode(event) {
+  event.preventDefault();
+  event.stopImmediatePropagation();
+  delete document.body.dataset.screenshot;
+  screenshotModeEndedAt = performance.now();
+  window.removeEventListener('keydown', endScreenshotMode, true);
+  window.removeEventListener('mousedown', endScreenshotMode, true);
+  window.removeEventListener('touchstart', endScreenshotMode, true);
+  document.getElementById('menu-screenshot').focus({ preventScroll: true });
+}
+
+document.getElementById('menu-screenshot').addEventListener('click', () => {
+  if (performance.now() - screenshotModeEndedAt < 500) return;
+  document.body.dataset.screenshot = 'true';
+  document.activeElement?.blur();
+  // 이 클릭이 끝난 뒤에 듣기 시작해야 같은 클릭이 바로 모드를 끝내지 않는다.
+  setTimeout(() => {
+    window.addEventListener('keydown', endScreenshotMode, true);
+    window.addEventListener('mousedown', endScreenshotMode, true);
+    window.addEventListener('touchstart', endScreenshotMode, true);
+  }, 0);
+});
+window.addEventListener('click', event => {
+  if (performance.now() - screenshotModeEndedAt < 500) { event.preventDefault(); event.stopImmediatePropagation(); }
+}, true);
+window.addEventListener('keyup', event => {
+  if (performance.now() - screenshotModeEndedAt < 500) { event.preventDefault(); event.stopImmediatePropagation(); }
+}, true);
