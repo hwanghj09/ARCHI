@@ -38,13 +38,19 @@ function f1EscapeX() {
 }
 
 // 1층 도착 컷씬을 건너뛰면 추격이 끝난 뒤처럼 맞춘다: 수호는 1번 엘리베이터 앞, R-01은 도크 자리에서 순찰.
-// 처음 쫓기는 컷씬에서 정신력이 한 번만 깎인다(로봇이 수호를 알아보는 순간, 건너뛰면 건너뛸 때).
+// 처음 쫓기는 컷씬: 들킨 순간부터 f1ChaseSanityMs 동안 f1ChaseSanity로 깎인다(건너뛰면 건너뛸 때 바로).
+// 이미 그보다 낮으면 그대로 둔다.
 let f1SanityHit = false;
-function hitF1Sanity() {
+let f1ChaseFrom = null; // 들킨 순간의 { sanity, time: 그 뒤 지난 ms }
+function drainF1Sanity(progress) {
   if (f1SanityHit) return;
-  f1SanityHit = true;
-  sanity = Math.max(0, sanity - f1EncounterSanityLoss);
+  const from = f1ChaseFrom?.sanity ?? sanity;
+  sanity = Math.min(sanity, from + (f1ChaseSanity - from) * Math.min(1, Math.max(0, progress)));
   refreshSanity();
+}
+function hitF1Sanity() {
+  drainF1Sanity(1);
+  f1SanityHit = true;
 }
 
 function skipF1Chase() {
@@ -134,7 +140,7 @@ function checkStoryScenes(elapsed) {
 }
 
 function startStoryScene({ lines, steps, flag, skip, pose = 'think' }) {
-  f1SanityHit = false;
+  f1SanityHit = false; f1ChaseFrom = null;
   storySceneActive = true;
   clearEventsForCutscene();
   usingInspection = true; // 이동·상호작용·메뉴·정신력 진행을 막는 기존 규칙을 그대로 쓴다
@@ -167,10 +173,10 @@ function nextStoryStep() {
   animate(0);
   if (grounded && current.pose) showCutscenePose(current.pose);
   if (current.alert) {
-    hitF1Sanity();
     Object.assign(guardPatrol, { mode: 'chase', lostTime: 0, chaseOriginX: guardPatrol.x, spottedX: body.position.x });
     playGameSound('robot-alert', { x: guardPatrol.x });
     storyRobotLive = true;
+    f1ChaseFrom = { sanity, time: 0 };
   }
   if (current.cut) {
     const x = current.cut();
@@ -194,6 +200,7 @@ function advanceStoryScene() {
 function updateStoryScene(elapsed) {
   const current = storySteps[storyStep];
   if (storyRobotLive) updateRobot(guardPatrol, elapsed);
+  if (f1ChaseFrom) drainF1Sanity((f1ChaseFrom.time += elapsed) / f1ChaseSanityMs);
   if (storyMoveX !== null) storyMove(elapsed, current.run !== undefined);
   else if (current?.wait !== undefined) {
     animate(0, false, elapsed);

@@ -97,12 +97,17 @@ try {
     triggerBuildingBlackout(); collectedItems.add('f17-emergency-linked');
     solarEnabled = true; solarPoweredFloors = [1]; updatePowerState();
     collectedItems.delete('f1-chase-ended'); collectedItems.delete('story-anxiety-seen');
-    performFloorChange('f1', 0); startStoryScene(STORY_SCENES[0]);
+    performFloorChange('f1', 0); sanity = 70; startStoryScene(STORY_SCENES[0]);
   });
   await visible('relieved'); await page.locator('#story-scene').click();
-  for (let i = 0; i < 250 && await pose() !== 'pant'; i++) await page.clock.runFor(100);
+  const chaseSanity = [];
+  for (let i = 0; i < 250 && await pose() !== 'pant'; i++) { await page.clock.runFor(100); chaseSanity.push(await page.evaluate(() => [body.position.x, sanity])); }
   await visible('pant');
-  assert.deepEqual(await page.evaluate(() => [playerCaught, collectedItems.has('f1-chase-ended')]), [false, true]);
+  assert.deepEqual(await page.evaluate(() => [playerCaught, collectedItems.has('f1-chase-ended'), sanity]), [false, true, 20]);
+  assert(chaseSanity.some(([, value]) => value > 21 && value < 69), '쫓기는 동안 정신력이 서서히 20%로 깎인다');
+  const spotted = chaseSanity.findIndex(([, value]) => value < 70);
+  const reached = chaseSanity.findIndex(([, value]) => value === 20);
+  assert(reached - spotted >= 30 && reached - spotted <= 37, `들킨 뒤 3~4초 안에 20%가 된다(${(reached - spotted) / 10}초)`);
   await page.clock.runFor(1300);
   assert.match(await page.locator('#story-caption').textContent(), /헉/);
   await page.screenshot({ path: '.local/cutscene-chase-breathing.png' });
