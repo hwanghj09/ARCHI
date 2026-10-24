@@ -570,6 +570,7 @@
         <button type="button" data-computer-app="calculator"><span class="app-art" data-app-icon="calculator" aria-hidden="true"></span><span>계산기</span></button>
         <button type="button" data-computer-app="building"><span class="app-art" data-app-icon="building" aria-hidden="true"></span><span>시설 안내</span></button>
         <button type="button" data-computer-app="browser"><span class="app-art" data-app-icon="blog" aria-hidden="true"></span><span>블로그</span></button>
+        <button type="button" data-computer-app="transfer"><span class="app-art" data-app-icon="transfer" aria-hidden="true"></span><span>파일 전송</span></button>
       </div>
       <div id="computer-window" hidden>
         <template id="computer-window-frame">
@@ -681,15 +682,16 @@
                 <div class="blog-avatar" aria-hidden="true">A</div>
                 <strong>ARCHI 시설관리팀</strong><p>안녕하세요.<br>시설 점검과 비상 전력<br>사용법을 공유합니다.</p>
                 <span>archi_facility<br>시설관리 · 17F</span>
-                <div class="blog-categories"><strong>카테고리</strong><p>전체보기 (4)<br>시설 점검 (2)<br>사용 안내 (1)<br>일상 기록 (1)</p></div>
+                <div class="blog-categories"><strong>카테고리</strong><p>전체보기 (5)<br>시설 점검 (2)<br>사용 안내 (2)<br>일상 기록 (1)</p></div>
                 <p class="blog-visitors">TODAY 12 · TOTAL 1,248</p>
               </aside>
               <div class="blog-main">
                 <section class="blog-post-list" aria-labelledby="computer-blog-list-title">
-                  <h2 id="computer-blog-list-title" tabindex="-1">전체보기 <span>4개의 글</span></h2>
+                  <h2 id="computer-blog-list-title" tabindex="-1">전체보기 <span>5개의 글</span></h2>
                   <div class="blog-list-columns"><span>글 제목</span><span>작성일</span></div>
                   <button type="button" data-blog-post="night" aria-current="true"><span>야간 점검을 마치고, 오늘의 기록</span><time datetime="2026-10-09">2026. 10. 9.</time></button>
                   <button type="button" data-blog-post="charging"><span>휴대폰 충전함 이용 안내</span><time datetime="2026-10-08">2026. 10. 8.</time></button>
+                  <button type="button" data-blog-post="solar"><span>정전 대비 전력 조종 앱 공유 <small>첨부파일 1</small></span><time datetime="2026-10-07">2026. 10. 7.</time></button>
                   <button type="button" data-blog-post="stairs"><span>비상계단 문 점검 기록</span><time datetime="2026-10-06">2026. 10. 6.</time></button>
                   <button type="button" data-blog-post="rooftop"><span>옥상 태양광 장치 점검 메모</span><time datetime="2026-10-05">2026. 10. 5.</time></button>
                   <p class="blog-list-page">1</p>
@@ -700,6 +702,7 @@
                   <p class="blog-post-meta">ARCHI 시설관리팀 · 2026. 10. 9. 18:30</p>
                   <p>낮에는 바쁘게 오가는 사람들로 가득한 건물인데, 퇴근 시간이 지나면 복도가 조용해집니다. 오늘도 사무실 조명과 공용 설비를 확인하고 점검을 마쳤습니다.</p>
                   <p>작업용 컴퓨터의 전원과 와이파이는 정상입니다. 필요한 사용 안내는 이 블로그에 정리해 두었으니, 글 목록에서 찾아보세요.</p>
+                  <p>정전에 대비한 전력 조종 앱도 앞선 글에 올려 두었습니다. 시간이 있을 때 미리 받아 두면 좋겠습니다.</p>
                   <p class="blog-post-footer">#시설관리 #야간점검 #일상기록</p>
                 </article>
                 <article class="blog-post" data-blog-article="charging" aria-labelledby="blog-charging-title" hidden>
@@ -707,8 +710,25 @@
                   <h2 id="blog-charging-title" tabindex="-1">휴대폰 충전함 이용 안내</h2>
                   <p class="blog-post-meta">ARCHI 시설관리팀 · 2026. 10. 8. 09:20</p>
                   <p>배터리가 부족하면 전력이 공급되는 충전함에 휴대폰을 맡겨 주세요. 충전함에 맡겨 둔 동안에는 휴대폰 앱과 플래시를 사용할 수 없습니다.</p>
+                  <p>컴퓨터에서 파일을 전송하려면 휴대폰을 먼저 찾아와야 합니다. 충전이 끝난 뒤 휴대폰을 가져오는 것도 잊지 마세요.</p>
                   <p class="blog-post-footer">#충전함 #휴대폰 #사용안내</p>
                 </article>
+              <article id="blog-post-solar" class="blog-post" data-blog-article="solar" aria-labelledby="solar-blog-title" hidden>
+                <p class="blog-category">비상 전력 / 사용 안내</p>
+                <h2 id="solar-blog-title" tabindex="-1">정전 때 쓰는 태양광 제어 앱<br>다운로드 및 설치 방법</h2>
+                <p class="blog-post-meta">ARCHI 시설관리팀 · 2026. 10. 7. 14:10 · 첨부파일 1개</p>
+                <p>휴대폰에서 옥상 비상 전력을 제어하는 앱입니다. 한 번에 한 층에 전력을 공급할 수 있습니다.</p>
+                <p>휴대폰 배터리가 필요합니다. 로비 안내 데스크 PC는 사내망 UPS로 정전 중에도 켜져 있습니다.</p>
+                <ol><li>첨부파일 다운로드</li><li>‘파일 전송’에서 휴대폰 연결 후 설치</li><li>휴대폰의 ‘비상 전력 제어’ 실행</li></ol>
+                <div class="blog-attachment">
+                  <span class="blog-file-icon" aria-hidden="true">↓</span>
+                  <div><strong>ARCHI_태양광_제어앱.apk</strong><span>휴대폰용 · 비상 전력 제어</span></div>
+                  <button id="computer-solar-download" type="button">첨부파일 다운로드</button>
+                </div>
+                <progress id="computer-solar-download-progress" class="solar-file-progress" max="100" value="0" aria-label="앱 다운로드 진행률" hidden></progress>
+                <output id="computer-solar-status" class="blog-install-status" role="status" aria-live="polite"></output>
+                <p class="blog-post-footer">#태양광 #비상전력 #ARCHI #시설관리</p>
+              </article>
                 <article class="blog-post" data-blog-article="stairs" aria-labelledby="blog-stairs-title" hidden>
                   <p class="blog-category">시설 점검</p>
                   <h2 id="blog-stairs-title" tabindex="-1">비상계단 문 점검 기록</h2>
@@ -728,6 +748,15 @@
                 <button id="computer-blog-list-back" type="button">목록으로</button>
               </div>
             </div>
+          </div>
+        </div>
+        <div id="computer-transfer" class="computer-content" hidden>
+          <div class="solar-download-page">
+            <button id="computer-usb-open" type="button">휴대폰 연결</button>
+            <p id="computer-transfer-file" hidden><strong>ARCHI_태양광_제어앱.apk</strong><br>내 컴퓨터 → 정수호의 휴대폰</p>
+            <button id="computer-solar-transfer" type="button" disabled>휴대폰으로 전송·설치</button>
+            <progress id="computer-solar-transfer-progress" class="solar-file-progress" max="100" value="0" aria-label="휴대폰 전송·설치 진행률" hidden></progress>
+            <output id="computer-transfer-status" role="status" aria-live="polite"></output>
           </div>
         </div>
       </div>
@@ -754,7 +783,7 @@
     </div>
     <div id="computer-usb-panel" role="dialog" aria-modal="true" aria-labelledby="computer-usb-title" hidden>
       <section class="usb-desk">
-        <h2 id="computer-usb-title">안내 데스크 PC USB 연결</h2>
+        <h2 id="computer-usb-title">휴대폰 USB 연결</h2>
         <p id="computer-usb-instructions">휴대폰이나 단자를 끌어 연결하세요.</p>
         <div id="computer-usb-board" data-connected="false" aria-label="데스크 위 휴대폰과 USB-C 단자">
           <div id="computer-usb-cable" aria-hidden="true"></div>

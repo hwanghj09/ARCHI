@@ -54,7 +54,7 @@ function updateInteraction() {
   const groups = room === 'corridor' ? [doors.filter(door => door.phoneCharger), [...doors.filter(door => !door.phoneCharger),
     ...officeDoors.filter(door => door.room === room)]] :
     [officeDoors.filter(door => door.room === room && door.phoneCharger),
-      [...officeDoors.filter(door => door.room === room && !door.phoneCharger), officeComputer]];
+      officeDoors.filter(door => door.room === room && !door.phoneCharger)]; // 17층 내 자리 컴퓨터는 장식이다(컴퓨터는 1층 안내 데스크에서 켠다)
   nearbyDoor = pickNearbyDoor(groups,
     () => grounded && Math.abs(body.bounds.max.y - floorY) < 2);
   if (!realBuildingBlackout() && room === 'corridor' && currentSceneFloor === 17 && nearbyDoor?.type === 'elevator') {
@@ -75,6 +75,7 @@ function doorHintText(door) {
   const key = bindingLabel('interact');
   if (deviceUnpowered(door)) return `${key} · ${door.name} · 전원 없음`;
   if (door.type === 'computer') return floorHasPower(currentSceneFloor) ? `${key} · 컴퓨터 사용` : `${key} · 전원 없음`;
+  if (door.deskComputer) return `${key} · 컴퓨터 사용`;
   if (door.type === 'power') return `${key} · 태양광 전력 제어`;
   if (door.phoneCharger) return phoneChargerHint(door);
   if (door.accessGate) return door.element.dataset.open === 'true' ? '인증 완료 · 통과 가능' : `${key} · 출입증 태그`;
@@ -99,7 +100,7 @@ function doorHintText(door) {
 }
 
 function interact() {
-  if (!wirePanel.hidden || !computerUsbPanel.hidden) return;
+  if (!wirePanel.hidden) return;
   if (photoCaptureTime > 0 || itemUseTime > 0 || openingActive || blackoutSceneActive || cctvSceneActive || playerCaught || hallucinationCaught || transitioning || selectingFloor || usingComputer || usingKeypad || usingControl || usingPhone || usingPowerPanel || usingInspection) return;
   updateInteraction();
   if (blackoutSceneActive || cctvSceneActive) return;
@@ -126,8 +127,9 @@ function interact() {
     });
     return;
   }
-  // 13층 상황실 원격지원 PC(floor-13.js): UPS가 켜져 있고 백업 장치를 챙겼으면 같은 컴퓨터 화면을 열어 영상을 본다(usb-video.js).
-  if (nearbyDoor.usbTerminal && collectedItems.has('f13-ups') && collectedItems.has('f13-backup-device')) {
+  // 컴퓨터 화면을 여는 PC: 1층 안내 데스크 PC(floor-01.js의 deskComputer, 사내망 UPS라 늘 켜져 있다)와
+  // 13층 상황실 원격지원 PC(floor-13.js: UPS가 켜져 있고 백업 장치를 챙겼으면 영상을 본다, usb-video.js).
+  if (nearbyDoor.deskComputer || (nearbyDoor.usbTerminal && collectedItems.has('f13-ups') && collectedItems.has('f13-backup-device'))) {
     computerReturnFocus = document.activeElement;
     transitionScene(() => {
       usingComputer = true;
@@ -158,9 +160,7 @@ function interact() {
     if (handleB2Console(nearbyDoor)) return; // B2 삭제 중 메인 콘솔: 문을 막은 뒤면 루트 터미널(b2-ending.js)
     if (handleLogTerminalInteract(nearbyDoor)) return; // 12층 야간 로그 단말기·네트워크 랙(log-puzzle.js)
     if (handleBackupDeviceInteract(nearbyDoor)) return; // 7층 망분리 백업 장비(backup-puzzle.js)
-    if (handleVaultInteract(nearbyDoor)) return; // 13층 보안 자료실 크랭크(vault-puzzle.js)
-    if (handleDeskUsbInteract(nearbyDoor)) return; // 1층 안내 데스크 PC에 휴대폰 USB 연결(usb-connection.js)
-    if (dynamicFloorId === 'f12-dev' && nearbyDoor.name === '맨 왼쪽 서랍') { openDrawerPuzzle(); return; }
+    if (handleVaultInteract(nearbyDoor)) return; // 13층 보안 자료실 크랭크(vault-puzzle.js)    if (dynamicFloorId === 'f12-dev' && nearbyDoor.name === '맨 왼쪽 서랍') { openDrawerPuzzle(); return; }
     const { gives } = nearbyDoor;
     // 도어락(code): 잠긴 문이나 아직 열지 못한 소품은 키패드를 연다. 맞는 번호를 넣으면 문이 열리거나 gives를 챙긴다.
     if (nearbyDoor.code && (nearbyDoor.type === 'room' ? nearbyDoor.locked : !collectedItems.has(gives))) {

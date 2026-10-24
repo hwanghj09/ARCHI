@@ -3,7 +3,7 @@
 // 정문은 동쪽 끝(화장실 오른쪽 구역)의 회전문이고, 그 앞에 정전으로 날개가 풀린 스피드 게이트와 충전 도크의 경비 로봇 R-01이 선다.
 // 방 셋은 모두 엘리베이터 왼쪽 서쪽 날개에 벽을 맞대고 선다(왼쪽 3): Harmony Hall 1층 객석, Vision Hall, 건강관리실.
 // 1번 엘리베이터 앞에 층별 안내판(17F~B2), 비상계단 옆 가운데 구역에 안내 데스크가 있다. 여성휴게실은 건강관리실 안쪽의 잠긴 문이다.
-// 퇴근 흐름: 어두운 1층에서 정문이 안 열린다(f1-door-checked) → 안내 데스크에서 전력 앱 설치 → 휴대폰으로 1층 전력을 켜면
+// 퇴근 흐름: 어두운 1층에서 정문이 안 열린다(f1-door-checked) → 안내 데스크 PC에서 전력 앱을 받아 USB로 설치 → 휴대폰으로 1층 전력을 켜면
 // 정문 화면에 차단 대상(정수호)이 뜨고 같은 전력으로 R-01이 기동해 추격 컷씬(story-scene.js)이 시작된다.
 // 복도 전면은 그림 속 칸막이 범위에 맞춘다. 내부 문은 그 전면의 문 좌우 벽 비율을 따른다.
 // 장치는 경비 로봇 정비 패널의 네 자리 번호(설비 fixture의 code): 패널 스티커는 "정비 코드 = 제작일(월일)"이라 Vision Hall 진열장의
@@ -105,12 +105,12 @@ const FLOOR1_LAYOUT = {
   props: [
     { file: 'waiting-sofa', size: [512, 256], worldWidth: 240, x: 4080 },
     { file: 'large-planter', size: [256, 512], worldWidth: 78, x: 1300 },
-    // 안내 데스크: 정문이 안 열린 뒤 로비 전원을 켤 앱을 여기서 받는다. 데스크 PC는 사내망 UPS로 켜져 있고,
-    // 조사하면 휴대폰을 USB로 꽂는 화면(usb-connection.js)이 먼저 열린다. 꽂으면 앱이 설치되고 아래 message가 나온다.
-    { file: 'reception-counter', size: [512, 256], worldWidth: 322, x: 3310, name: '안내 데스크', gives: 'solar-app-installed', sound: 'phone', usbInstall: true,
-      condition: () => phoneBattery > 0 && !phoneDock, missingMessage: '데스크 PC에 USB 케이블이 꽂혀 있다. 휴대폰이 없으면 연결할 수 없다.',
-      message: '안내 데스크 모니터 옆 시설팀 안내문: "정전 시 로비 출입문 전원은 \'비상 전력 제어\' 앱으로 복구하세요. 데스크 PC(UPS)에 휴대폰을 USB로 연결하면 설치됩니다." 케이블을 꽂자 PC가 휴대폰을 잡고 앱이 설치됐다.',
-      takenMessage: '시설팀 안내문이다. 휴대폰의 \'비상 전력 제어\' 앱으로 1층에 전력을 보내면 출입문이 다시 움직일 것이다.' },
+    // 안내 데스크: 정문이 안 열린 뒤 로비 전원을 켤 앱을 여기서 받는다. 데스크 PC는 사내망 UPS로 켜져 있어 정전 중에도 쓴다.
+    // 조사하면 컴퓨터 화면이 열린다(interaction.js deskComputer): 블로그에서 앱 다운로드 → 파일 전송에서 USB 연결 → 설치.
+    { file: 'reception-counter', size: [512, 256], worldWidth: 322, x: 3310, name: '안내 데스크', deskComputer: true, selfPowered: true,
+      message: '안내 데스크 PC가 사내망 UPS로 켜져 있다.' },
+    // 데스크 낮은 단 위의 PC. 손님(복도) 쪽에서 보므로 모니터 뒷면이다(장식, 조사는 위의 안내 데스크가 받는다).
+    { sprite: 'assets/objects/floor01/reception-pc-back.png', frames: 1, size: [256, 256], worldWidth: 75, x: 3382, base: 58 },
     { file: 'large-planter', size: [256, 512], worldWidth: 78, x: 3515 },
   ],
 };

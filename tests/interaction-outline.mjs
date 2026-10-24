@@ -38,7 +38,7 @@ try {
         performFloorChange(scene, scene === 'rooftop' ? null : 0,
           dest.interior ? (fromCorridor ? 'exit' : `link:${dest.links[0].target}`) : null);
       }
-      const active = room === 'dynamic' ? currentDoors : room === 'corridor' ? [...doors, officeDoors[0]] : [officeDoors[1], officeComputer];
+      const active = room === 'dynamic' ? currentDoors : room === 'corridor' ? [...doors, officeDoors[0]] : [officeDoors[1]];
       for (const door of active) {
         const [x, y, width, height] = outlineBox(door);
         const label = `${scene} · ${door.name || door.type}`;

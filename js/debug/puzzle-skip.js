@@ -5,7 +5,7 @@ const PUZZLE_STEPS = [
   { label: '17F 소화전 열쇠·옥상문', at: 'f17', items: ['rooftop-key', 'rooftop-unlocked'] },
   { label: 'RF 태양광 비밀번호·전선', at: 'rooftop', items: ['roof-wires-fixed'], solar: [17] },
   { label: '17F 관리실 비밀번호·비상 회선', at: 'f17', items: ['f17-manager-memo', 'f17-manager-unlocked', 'f17-circuit-guide-read', 'f17-emergency-linked'] },
-  { label: '1F 정문·안내 데스크 전력 앱', at: 'f1', items: ['f1-reached', 'f1-door-checked', 'story-f1-door-seen', 'solar-app-installed'], solar: [1] },
+  { label: '1F 정문·안내 데스크 전력 앱', at: 'f1', items: ['f1-reached', 'f1-door-checked', 'story-f1-door-seen', 'solar-app-downloaded', 'solar-app-installed'], solar: [1] },
   { label: '1F 경비 로봇 추격', at: 'f1', items: ['f1-reached', 'f1-chase-ended', 'story-anxiety-seen', 'goal-f1-directory'] },
   { label: brandText('16F VU 항불안제'), at: 'f16', items: ['f16-cu', 'f16-antianxiety', 'f16-antianxiety-used', 'story-robot-seen'] },
   { label: '1F 로봇 정비 기록', at: 'f1', items: ['f1-robot-log'] },

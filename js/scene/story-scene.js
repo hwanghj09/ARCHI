@@ -142,7 +142,7 @@ const STORY_SCENES = [
     lines: ['오늘 밤 처음으로 외부 서버에 연결했다고..?', '망분리된 건물에서 밖으로 나가려면 어딘가 통로가 있어야 해.',
       '13층 기술지원 보안 자료실에 원격지원 장비 백업이 있을 거야.'],
   },
-  { // 13층 백업 장치를 챙겨 보안 자료실을 빠져나온 1초 뒤 → 같은 층 상황실 원격지원 PC(또는 17층 내 자리 컴퓨터).
+  { // 13층 백업 장치를 챙겨 보안 자료실을 빠져나온 1초 뒤 → 같은 층 상황실 원격지원 PC(또는 1층 안내 데스크 PC).
     flag: 'story-device-seen', delay: 1000,
     ready: () => collectedItems.has('f13-backup-device') && !collectedItems.has('f17-usb-played') && !(room === 'dynamic' && dynamicFloorId === 'f13-secure'),
     lines: ['라벨에 "2F 03:00 리허설 사본"이라고 적혀 있었지..', '상황실 원격지원 PC는 장비 검증실 UPS에 물려 있었어. 거기서 열어 보자.'],

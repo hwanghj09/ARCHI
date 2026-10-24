@@ -61,10 +61,7 @@ window.addEventListener('keydown', event => {
     if (event.code === 'Escape') { closeLogPuzzle(); closeBackupPuzzle(); }
     event.preventDefault();
     return;
-  }
-  // 1층 안내 데스크 USB 연결(usb-connection.js): 키는 창 안의 버튼이 받고, 뒤의 수호는 움직이지 않는다.
-  if (!computerUsbPanel.hidden) return;
-  if (keyMatches('inventory', event.code) && !(event.code === 'Tab' && event.shiftKey) && !usingComputer && !usingKeypad && !usingControl &&
+  }  if (keyMatches('inventory', event.code) && !(event.code === 'Tab' && event.shiftKey) && !usingComputer && !usingKeypad && !usingControl &&
       !usingPhone && !usingPowerPanel && (!usingInspection || inventoryShown())) {
     event.preventDefault();
     if (!event.repeat) toggleInventory();

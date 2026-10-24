@@ -1,4 +1,4 @@
-// 13층 USB를 17층 수호의 컴퓨터나 13층 상황실 원격지원 PC(UPS 비상 회선)에 연결한 뒤 손상된 리허설 녹화를 끝까지 봐야 2층 목표가 열린다.
+// 13층 USB를 1층 안내 데스크 PC나 13층 상황실 원격지원 PC(UPS 비상 회선)에 연결한 뒤 손상된 리허설 녹화를 끝까지 봐야 2층 목표가 열린다.
 const usbDriveShortcut = document.createElement('button');
 usbDriveShortcut.type = 'button';
 usbDriveShortcut.dataset.computerApp = 'usbdrive';

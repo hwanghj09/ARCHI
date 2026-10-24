@@ -64,7 +64,7 @@ function update() {
     updateCabin();
     return;
   }
-  if (usingComputer || usingKeypad || usingControl || usingPowerPanel || usingInspection || !wirePanel.hidden || !logPanel.hidden || !backupPanel.hidden || !computerUsbPanel.hidden) {
+  if (usingComputer || usingKeypad || usingControl || usingPowerPanel || usingInspection || !wirePanel.hidden || !logPanel.hidden || !backupPanel.hidden) {
     updateElevators();
     if (!usingInspection) updatePhone(step); // 조사창을 읽는 동안에는 정신력처럼 플래시 배터리도 닳지 않는다
     if (usingPhone || phoneRaising || phoneAwayTime > 0) animate(0, false, step);
