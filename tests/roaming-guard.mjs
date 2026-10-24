@@ -211,7 +211,7 @@ try {
   await page.clock.runFor(1500);
   assert(await page.locator('#guard-capture').isVisible(), 'R-03 catches Suho');
   assert.equal(await page.evaluate(() => dynamicFloorId), 'f5');
-  await page.locator('#guard-retry').click();
+  await page.evaluate(() => retryGuardCapture());
   const retry = await page.evaluate(() => ({ scene: dynamicFloorId, where: roamer.where, mounted: Boolean(roamer.door),
     atElevator: Math.abs(body.position.x - (currentDoors.find(door => door.carIndex === 0).x + 40)) < 1 }));
   assert.deepEqual([retry.scene, retry.atElevator, retry.mounted], ['f5', true, false], 'Retry starts at this floor\'s elevator without R-03');
@@ -257,7 +257,7 @@ try {
   await page.clock.runFor(6000);
   assert(await page.locator('#guard-capture').isVisible(), 'Losing the door fight gets Suho caught');
   assert.equal(await page.evaluate(() => selectingFloor), false);
-  await page.locator('#guard-retry').click();
+  await page.evaluate(() => retryGuardCapture());
 
   // 층을 안 고르고 문이 열린 채여도 같은 대결이 된다. 스페이스 연타로 이기면 문이 닫히고 칸은 그 층에 그대로 있다.
   await toCabin(null);

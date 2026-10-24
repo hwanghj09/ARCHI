@@ -87,14 +87,14 @@ try {
     return box.top === 0 && box.left === 0 && box.width === innerWidth && box.height === innerHeight;
   }), true, 'Game over covers the viewport');
   const pinned = (await state()).playerX;
-  await page.locator('#guard-retry').evaluate(button => button.blur());
+  await page.locator('#guard-capture .game-over-load').evaluate(button => button.blur());
   for (const key of ['d', 'a', 'Space', 'e', 'p', 'f', 'i', 'Escape']) await page.keyboard.press(key);
   await page.locator('nav #interact').dispatchEvent('pointerdown', { button: 0, pointerId: 1 });
   await page.clock.runFor(500);
   assert.equal((await state()).playerX, pinned, 'Caught player cannot escape using keyboard or touch');
   assert.equal(await page.evaluate(() => usingPhone || usingInspection || usingKeypad), false);
   await page.screenshot({ path: '.local/guard-caught-right.png' });
-  await page.locator('#guard-retry').focus(); await page.keyboard.press('Enter');
+  await page.evaluate(() => retryGuardCapture());
   assert.equal((await state()).caught, false); assert((await state()).playerX < 2000);
   assert(await page.evaluate(() => collectedItems.has('f16-badge') && phoneBattery === 73 && !stage.inert));
   // x=2790 is west of R-01's stairs-beat (left=3040), so it no longer self-detects from 'patrol' there;
@@ -104,13 +104,13 @@ try {
   assert.equal((await state()).caught, true);
   await page.setViewportSize({ width: 390, height: 844 }); await page.clock.runFor(100);
   assert(await page.locator('#guard-capture-title').evaluate(el => el.scrollWidth <= el.clientWidth), 'Title fits on mobile');
-  assert(await page.locator('#guard-retry').evaluate(el => {
+  assert(await page.locator('#guard-capture .game-over-load').evaluate(el => {
     const box = el.getBoundingClientRect();
     return box.top >= 0 && box.bottom <= innerHeight && box.left >= 0 && box.right <= innerWidth;
   }), 'Retry remains on screen on mobile');
   await page.screenshot({ path: '.local/guard-caught-left-mobile.png' });
   assert(await page.locator('.guard-robot-sprite').evaluate(el => new DOMMatrix(getComputedStyle(el).transform).m11 === -1));
-  await page.locator('#guard-retry').click(); assert.equal((await state()).caught, false);
+  await page.evaluate(() => retryGuardCapture()); assert.equal((await state()).caught, false);
   await arrange(); await page.clock.runFor(600);
   assert.equal((await state()).mode, 'grab', 'Cut power while the arms are still unfolding');
   await page.evaluate(() => { collectedItems.delete("f17-emergency-linked"); solarPoweredFloors = [2]; updatePowerState(); });

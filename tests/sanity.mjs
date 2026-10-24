@@ -223,7 +223,7 @@ try {
     const box = el.getBoundingClientRect();
     return box.top === 0 && box.left === 0 && box.width === innerWidth && box.height === innerHeight;
   }), true, 'Hallucination game over covers the viewport');
-  await page.locator('#hallucination-retry').click();
+  await page.evaluate(() => releaseHallucinationCapture());
   const recovered = await state();
   assert.equal(recovered.caught, false);
   assert.equal(recovered.sanity, 0, '재시도로 정신력을 무료 회복할 수 없다');

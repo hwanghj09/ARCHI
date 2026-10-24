@@ -110,3 +110,32 @@
 body:has(#b2-terminal:not([hidden])) #suho-line { top: auto; bottom: 8px; font-size: clamp(13px, 1.6vw, 16px); line-height: 1.4; }
 /* 좁은 화면에서는 위쪽 삭제 진행 막대가 왼쪽 위 장소 이름과 겹치므로, 막대가 떠 있는 동안 장소 이름을 숨긴다. */
 @media (max-width: 1099px) { body:has(#b2-delete-bar:not([hidden])) header > span:first-child { visibility: hidden; } }
+
+/* 삭제 배틀 2페이즈(b2-ending.js의 startB2Phase2): 서버실에 검붉은 조명이 들어와 방이 어두워 보이고, 방 맨 왼쪽에 괴물이 나타난다. */
+#b2-phase2-light { display: none; position: absolute; inset: 0; z-index: 7; pointer-events: none; mix-blend-mode: multiply;
+  background: radial-gradient(ellipse at 50% 62%, #c8636d 0%, #9a3540 60%, #682028 100%); }
+#world[data-b2-phase2="true"] #b2-phase2-light { display: block; animation: b2-phase2-pulse 3.2s ease-in-out infinite alternate; }
+@keyframes b2-phase2-pulse { from { filter: brightness(1); } to { filter: brightness(.9); } }
+#b2-monster { position: absolute; z-index: 3; width: 187px; height: 339px; pointer-events: none; animation: b2-monster-in 1.4s ease-out both; }
+#b2-monster .b2-boss { width: 100%; height: 100%; background: url(../assets/objects/b2/phase2-boss-walk.png) 0 0 / 1200% 100% no-repeat; }
+#b2-monster[data-walk="true"] .b2-boss { animation: b2-boss-walk 7s steps(12) infinite; }
+@keyframes b2-monster-in { from { opacity: 0; transform: translateX(-60px); } to { opacity: 1; transform: translateX(0); } }
+@keyframes b2-boss-walk { from { background-position: 0 0; } to { background-position: 109.0909% 0; } }
+@media (prefers-reduced-motion: reduce) { #b2-monster, #b2-monster .b2-boss, #world[data-b2-phase2="true"] #b2-phase2-light { animation: none; } }
+/* 2페이즈에는 정전의 어둠 막(#darkness)을 걷고 방이 붉은 조명으로 밝혀진다. */
+#world[data-b2-phase2="true"] #darkness { display: none !important; }
+
+/* 메인 서버실 맨 왼쪽의 문(floor-b2.js): 평소엔 닫힌 문, 2페이즈에는 열린 문 그림이다. */
+#dynamic-scene .fixture.b2-phase-door { background: url(../assets/objects/b2/phase2-door-closed.png) center / 100% 100% no-repeat; border: 0; }
+#world[data-b2-phase2="true"] #dynamic-scene .fixture.b2-phase-door { background-image: url(../assets/objects/b2/phase2-door-open.png); }
+
+/* 2페이즈 괴물의 갈고리: 줄(#b2-hook-rope)과 갈고리 이미지. 위치는 b2-ending.js(updateB2Monster)가 매 프레임 정한다. */
+#b2-hook-rope { position: absolute; z-index: 4; transform-origin: 0 50%; background: url(../assets/objects/b2/phase2-hook-rope.png) left center / auto 100% repeat-x; pointer-events: none; }
+#b2-hook { position: absolute; z-index: 5; display: block; pointer-events: none; }
+#b2-hook-rope[hidden], #b2-hook[hidden] { display: none; }
+#b2-monster[data-aim="true"] .b2-boss { animation: b2-monster-aim .12s linear infinite alternate; }
+@keyframes b2-monster-aim { from { transform: translateX(-3px); } to { transform: translateX(3px); } }
+/* 쇠공을 던지는 동안은 손을 뻗은 자세(phase2-boss-aim.png, 342×339)로 바뀐다. */
+#b2-monster[data-pose="aim"] .b2-boss { width: 342px; background: url(../assets/objects/b2/phase2-boss-aim.png) 0 0 / 100% 100% no-repeat; }
+/* 근접 공격(쇠공 휘두르기): 9컷(380×339)을 --melee-frame으로 고른다. 걷는 그림과 허리판이 겹치도록 왼쪽으로 40px 옮긴다. */
+#b2-monster[data-pose="melee"] .b2-boss { width: 380px; margin-left: -40px; background: url(../assets/objects/b2/phase2-boss-melee.png) calc(var(--melee-frame, 0) * -380px) 0 / 3420px 339px no-repeat; animation: none; }

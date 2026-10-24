@@ -34,7 +34,7 @@ try {
     await page.keyboard.press('Escape');
     await page.clock.runFor(2500);
     assert(await page.evaluate(() => playerCaught), `${type}: closing the panel resumes the pursuing robot`);
-    await page.locator('#guard-retry').click();
+    await page.evaluate(() => retryGuardCapture());
     assert(await page.evaluate(() => !playerCaught && logPanel.hidden && backupPanel.hidden && !stage.inert), 'Retry remains usable after the panel has closed');
   }
   assert.deepEqual(errors, []);

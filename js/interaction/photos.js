@@ -45,6 +45,11 @@ function offerInspectionPhoto(door, message) {
   inspectionPhotoButton.disabled = !photoSubjectAvailable() || hasPhoto(photo) || Boolean(phoneDock) || phoneBattery <= 0;
   inspectionPhotoButton.textContent = hasPhoto(photo) ? '갤러리에 저장됨' : phoneDock ? '사진 찍기 · 휴대폰 가져오기 필요' :
     phoneBattery <= 0 ? '사진 찍기 · 충전 필요' : '사진 찍기';
+  // 층별 안내판을 처음 볼 때(아직 사진이 없고 찍을 수 있을 때)는 닫기 버튼을 없애고 사진 찍기만 남긴다. 찍을 수 없으면 닫을 수 있다.
+  const photoOnly = !inspectionPhotoButton.disabled;
+  inspectionClose.hidden = photoOnly;
+  if (photoOnly) { inspectionPanel.dataset.photoOnly = 'true'; inspectionPhotoButton.focus(); }
+  else delete inspectionPanel.dataset.photoOnly;
 }
 
 function renderPhonePhoto(photo) {
@@ -128,6 +133,7 @@ function startPhotoCapture() {
   if (phoneDock || phoneBattery <= 0) return;
   if (hasPhoto(phoneCameraSubject.photo)) return;
   if (!phoneSheet.complete || !phoneSheet.naturalWidth || !phoneAwaySheet.complete || !phoneAwaySheet.naturalWidth) {
+    delete inspectionPanel.dataset.photoOnly; inspectionClose.hidden = false; // 찍지 못하면 닫을 수 있게
     return;
   }
   pendingPhoto = { ...phoneCameraSubject.photo };

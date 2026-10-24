@@ -106,8 +106,8 @@ try {
   await page.clock.runFor(2000);
   assert(await page.evaluate(() => playerCaught && !usingPhone), 'Robot keeps chasing and closes the phone when capturing the player');
   assert(await page.locator('#guard-capture').isVisible());
-  assert.equal(await page.evaluate(() => document.activeElement.id), 'guard-retry');
-  await page.locator('#guard-retry').click();
+  assert.equal(await page.evaluate(() => document.activeElement.className), 'game-over-load');
+  await page.evaluate(() => retryGuardCapture());
   assert(await page.evaluate(() => !playerCaught && !stage.inert && phonePanel.hidden), 'Retry restores gameplay input after capture during phone use');
   assert.deepEqual(errors, []);
   console.log('PASS: generated transparent device, native controls, modal input/focus, flashlight-only carrying, automatic stow, battery exhaustion, desktop/portrait/landscape and touch.');

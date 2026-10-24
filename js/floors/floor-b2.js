@@ -59,6 +59,9 @@ const B2_ROOMS = interiorRooms(-2, [
       pushable: { factor: .35, minX: 2045, maxX: 2865, barricade: true } }],
     fixtures: [
       { name: '서버실 배선 트레이', style: 'service-tray', x: 64, y: 144, width: 3022, height: 34 },
+      // 맨 왼쪽의 굳게 잠긴 문. 삭제 진행이 60%가 되는 2페이즈(b2-ending.js)에 열린 그림으로 바뀌고 괴물이 나온다.
+      { name: '굳게 닫힌 문', x: 121, y: 190, width: 385, height: 380, style: 'b2-phase-door',
+        message: '굳게 잠겨있다. 안쪽에서 매우 불길한 무언가가 있는 듯한 느낌이 든다.' },
       { name: '외부 전송 현황', x: 1900, y: 120, width: 500, height: 170, style: 'transfer-screen',
         lines: ['EXTERNAL TRANSFER', 'ARC-FULL-041 → DR-EXT', '61%'],
         message: '대형 화면: "ARC-FULL-041 (모델 가중치 · 학습 데이터 · 기억 저장소 · 실행 환경) → DR-EXT(해외)". 진행률 61%. 보고 있는 사이 62%로 넘어간다.',
@@ -68,10 +71,6 @@ const B2_ROOMS = interiorRooms(-2, [
         caption: '진행률이 보고 있는 사이 62%로 넘어간다.' },
     ],
     props: [
-      { file: 'server-rack', size: [256, 512], worldWidth: 96, x: 150 },
-      { file: 'server-rack', size: [256, 512], worldWidth: 96, x: 250 },
-      { file: 'server-rack', size: [256, 512], worldWidth: 96, x: 350 },
-      { file: 'server-rack', size: [256, 512], worldWidth: 96, x: 450 },
       { file: 'cctv-distribution-rack', size: [256, 512], worldWidth: 96, x: 600, name: 'CCTV 분배함', gives: 'b2-cctv-off',
         sprite: 'assets/objects/b2/cctv-distribution-states.png', stateBy: 'b2-cctv-off',
         control: { kind: 'plug', dir: 'out', label: '복도 카메라 전원선을 뽑자.', socket: 'B2 복도', item: 'CAM' },

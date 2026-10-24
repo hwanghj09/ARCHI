@@ -66,7 +66,8 @@ function catchPlayer(robot = guardPatrol) {
   for (const element of guardBlocked) element.inert = true;
 }
 
-document.getElementById('guard-retry').addEventListener('click', () => {
+// 붙잡힌 뒤 같은 자리에서 다시 시작하는 단계는 화면에서 없앴다(불러오기만 남는다). 테스트·내부에서만 부른다.
+function retryGuardCapture() {
   if (!playerCaught) return;
   // R-03에게 잡히면 그 층 엘리베이터 앞에서 다시 하고 R-03은 다른 층으로 보낸다. 1층 R-01은 로비에서 다시 한다.
   const byRoamer = caughtBy === roamer;
@@ -79,7 +80,7 @@ document.getElementById('guard-retry').addEventListener('click', () => {
   }
   performFloorChange(byRoamer ? sceneId : 'f1');
   releaseInput(); stage.focus();
-});
+}
 
 // 경비 로봇 스프라이트를 지금 장면에 붙인다(R-03, B2 엔딩 로봇).
 function mountRobot(robot, className, patrol) {
@@ -357,7 +358,7 @@ function updateRobot(robot, delta) {
       if (robot.onCaught) robot.onCaught();
       else {
         guardCapturePanel.hidden = false;
-        document.getElementById('guard-retry').focus();
+        guardCapturePanel.querySelector('.game-over-load').focus();
       }
     }
   } else if (delta > 0) {

@@ -42,7 +42,7 @@ let f1SanityHit = false;
 function hitF1Sanity() {
   if (f1SanityHit) return;
   f1SanityHit = true;
-  sanity = Math.max(0, sanity - f1EncounterSanityLoss);
+  sanity = Math.min(sanity, f1EncounterSanity);
   refreshSanity();
 }
 

@@ -130,7 +130,7 @@ try {
     });
     assert(failure.turned, 'Even at zero sanity, direction changes on the first input frame');
     assert(failure.safeDuringReaction && failure.caught, 'Unavoided contact still matters after a fair reaction window');
-    await page.locator('#hallucination-retry').click();
+    await page.evaluate(() => releaseHallucinationCapture());
     assert(await page.evaluate(() => sanity >= 50 && !hallucinationCaught), 'Retry provides a calm recovery');
 
     if (!mobile) {

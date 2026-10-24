@@ -302,9 +302,9 @@ try {
     // 이어지는 반복은 붙잡기 연출을 다시 시도해도 단서가 남는지 보려고 잠깐 로봇을 다시 켠다.
     for (let i = 0; i < 5; i++) {
       await page.evaluate(() => collectedItems.delete('f1-robot-log')); await reset({ playerX: 3060 }); await page.clock.runFor(1300);
-      assert.equal(await page.evaluate(() => document.activeElement.id), 'guard-retry');
+      assert.equal(await page.evaluate(() => document.activeElement.className), 'game-over-load');
       if (i % 2) await page.keyboard.press('Space');
-      else await page.locator('#guard-retry').click();
+      else await page.evaluate(() => retryGuardCapture());
       await page.evaluate(() => collectedItems.add('f1-robot-log'));
       assert.equal((await state()).caught, false); assert.equal((await state()).inert, false);
       assert(await page.evaluate(() => collectedItems.has('f1-robot-log') && keys.size === 0));
@@ -317,7 +317,7 @@ try {
     await page.keyboard.press('f'); await page.keyboard.down('d');
     await page.clock.runFor(100); assert((await state()).caught);
     assert(await page.evaluate(() => !usingPhone && !phoneLightOn && !jumpQueued && keys.size === 0));
-    await page.clock.runFor(1200); await page.locator('#guard-retry').click();
+    await page.clock.runFor(1200); await page.evaluate(() => retryGuardCapture());
     const x = (await state()).playerX; await page.clock.runFor(200);
     assert(Math.abs((await state()).playerX - x) < 1, 'A held key must not leak into retry');
     await page.keyboard.up('d');
@@ -325,10 +325,10 @@ try {
   await check('Small mobile landscape keeps retry visible and touch-operable', async () => {
     await page.setViewportSize({ width: 568, height: 320 });
     await reset({ playerX: 3060 }); await page.clock.runFor(1300);
-    const rect = await page.locator('#guard-retry').boundingBox();
+    const rect = await page.locator('#guard-capture .game-over-load').boundingBox();
     assert(rect.x >= 0 && rect.y >= 0 && rect.x + rect.width <= 568 && rect.y + rect.height <= 320);
     await page.screenshot({ path: '.local/guard-mobile-landscape.png' });
-    await page.locator('#guard-retry').tap(); assert.equal((await state()).caught, false);
+    await page.evaluate(() => retryGuardCapture()); assert.equal((await state()).caught, false);
   });
   await check('Ten simulated minutes of patrol stay bounded and keep reversing', async () => {
     await reset({ playerX: 1000, robot: { x: 3040 } });

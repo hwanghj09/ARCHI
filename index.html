@@ -374,8 +374,8 @@
       <div class="game-over-content">
         <h2 id="guard-capture-title">GAME OVER</h2>
         <strong>로봇에게 붙잡혔다</strong>
-        <p>이 층 엘리베이터 앞에서 다시 시도합니다. 수집한 단서는 유지됩니다.</p>
-        <div class="game-over-actions"><button id="guard-retry" type="button">다시 시도</button><button class="game-over-load" type="button">불러오기</button></div>
+        <p>로봇의 감지 범위에서 벗어나야한다.</p>
+        <div class="game-over-actions"><button class="game-over-load" type="button">불러오기</button></div>
       </div>
     </section>
     <section id="power-panel" role="dialog" aria-modal="true" aria-labelledby="power-title" aria-describedby="power-help" hidden>
@@ -503,6 +503,7 @@
     <div id="fear-overlay" aria-hidden="true"></div>
     <div id="fear-overlay-red" aria-hidden="true"></div>
     <div id="blink-flash" aria-hidden="true" data-active="false"></div>
+    <div id="eye-flash" aria-hidden="true" data-active="false"><img alt="" draggable="false" /></div>
     <div id="hallucination-effects" aria-hidden="true" hidden></div>
     <div id="hallucinations" aria-hidden="true" hidden>
       <div id="hallucination-shadow" hidden></div>
@@ -510,9 +511,9 @@
     <section id="hallucination-caught" class="game-over" role="dialog" aria-modal="true" aria-labelledby="hallucination-caught-title" hidden>
       <div class="game-over-content">
         <h2 id="hallucination-caught-title">GAME OVER</h2>
-        <strong>환각에게 삼켜졌다</strong>
-        <p>같은 자리에서 다시 정신을 차렸다. 정신력은 회복되지 않는다. 다음 발소리가 들리면 그쪽을 플래시(F)로 비추자. 이전 저장을 불러올 수도 있다.</p>
-        <div class="game-over-actions"><button id="hallucination-retry" type="button">다시 정신 차리기</button><button class="game-over-load" type="button">불러오기</button></div>
+        <strong>환각에 의해 정신을 잃었다</strong>
+        <p>다음 발소리가 들리면 그쪽을 플래시(F)로 비추자.</p>
+        <div class="game-over-actions"><button class="game-over-load" type="button">불러오기</button></div>
       </div>
     </section>
     <button id="inventory-button" type="button" aria-controls="inspection" aria-expanded="false" aria-label="가방 · Tab" title="가방 · Tab"><span class="hud-action-label" aria-hidden="true">가방</span><span class="hud-count" aria-hidden="true"></span></button>
@@ -553,6 +554,8 @@
           <button id="debug-chase-hallucination" type="button">환각 추격 이벤트</button>
           <button id="debug-spawn-hallucination" type="button">멀리 보이는 형상</button>
           <button id="debug-jumpscare" type="button">점프스케어 이벤트</button>
+          <button id="debug-eye-flash" type="button">눈 연출 (0% 이벤트)</button>
+          <button id="debug-b2-phase2" type="button">삭제 프로세스 60% (2페이즈)</button>
           <button id="debug-auditory-hallucination" type="button">환청 재생</button>
           <button id="debug-all-power" type="button" aria-pressed="false">모든 층 전력 활성화 · OFF</button>
         </div>

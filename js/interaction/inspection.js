@@ -21,6 +21,7 @@ function finishInspectionText() {
 
 // 한 단계 뒤로: 가방에서 연 카드(returnTo: 'inventory')는 가방 목록으로 돌아가고, 나머지는 닫는다.
 function stepBackInspection() {
+  if (inspectionPanel.dataset.photoOnly === 'true') return; // 층별 안내판을 처음 볼 때는 사진을 찍어야 닫힌다(photos.js)
   if (inspectionPanel.dataset.returnTo === 'inventory') closeInventoryCard();
   else if (inspectionPanel.dataset.returnTo === 'gallery') {
     closeInspection();
@@ -31,6 +32,7 @@ function stepBackInspection() {
 }
 
 function advanceInspection() {
+  if (inspectionPanel.dataset.photoOnly === 'true') return;
   if (inspectionTypingTimer !== null) finishInspectionText();
   else stepBackInspection();
 }
@@ -44,6 +46,7 @@ function openInspection(name, message, sheet) {
   delete inspectionPanel.dataset.acquiredItem;
   inspectionUse.hidden = true;
   document.getElementById('inspection-photo').hidden = true;
+  delete inspectionPanel.dataset.photoOnly;
   inspectionClose.hidden = false;
   for (const button of inspectionPanel.querySelectorAll('.b2-action')) button.hidden = true; // B2 DELETE·확인 버튼(b2-ending.js)
   const surface = hasWritingSheet(sheet) ? sheet.surface : null;
@@ -78,6 +81,7 @@ function openInspection(name, message, sheet) {
 }
 
 function closeInspection() {
+  delete inspectionPanel.dataset.photoOnly;
   clearInterval(inspectionTypingTimer);
   inspectionTypingTimer = null;
   usingInspection = false;
