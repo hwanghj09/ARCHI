@@ -1161,7 +1161,8 @@ try {
     roomScales.length = 0;
     const corridorHeader = '2F · Harmony Hall · 서버실';
     const cover = () => page.locator('#dynamic-scene .fixture.screen-cover').getAttribute('data-ready');
-    const checkArt = async (name, width) => {
+    // scene: 천장·바닥 그림 이름. 휴게실처럼 벽 그림(lounge-wall)과 이름이 다르면 따로 준다.
+    const checkArt = async (name, width, sceneName) => {
       assert.equal(await page.locator('#dynamic-scene').getAttribute('data-art'), 'walls');
       const art = await page.locator('#dynamic-scene .floor-background').evaluateAll(images => Promise.all(images.map(async img => {
         await img.decode();
@@ -1169,7 +1170,7 @@ try {
           top: parseFloat(img.style.top), height: parseFloat(img.style.height), natural: [img.naturalWidth, img.naturalHeight] };
       })));
       assert.equal(art.length, 3, 'Ceiling and floor layers around the cutaway walls, like 16F');
-      const scene = name === 'corridor' ? 'corridor' : name.replace('-interior', '');
+      const scene = sceneName ?? (name === 'corridor' ? 'corridor' : name.replace('-interior', ''));
       assert(art[0].src.endsWith(`floor02-ceiling-${scene}.png`), art[0].src);
       assert.deepEqual([art[0].left, art[0].width, art[0].top, art[0].height], [0, width, 0, 100],
         'The ceiling covers only the top of the screen, y=0..100');
@@ -1276,7 +1277,7 @@ try {
     const loungeRoom = await enterRoom('직원 휴게실', '2F');
     assert.equal(await worldWidth(page), 1846);
     assert.equal(loungeRoom.exit.x, 1400);
-    await checkArt('lounge-wall', 1846);
+    await checkArt('lounge-wall', 1846, 'lounge'); // floor-02.js: floor2Scene('lounge', 'lounge-wall', 1846)
     assert.equal(await page.locator('#dynamic-scene .fixture.art-spot').count(), 3);
     await inspect(140, 'E · 음료 자판기 조사', /ARCHI 시범 운영/);
     await inspect(412, 'E · 커피 테이블 조사', /리모컨을 챙겼다/);
@@ -1287,7 +1288,7 @@ try {
 
     await enterRoom('Harmony Hall', '2F');
     assert.equal(await cover(), 'false');
-    await inspect(565, 'E · 배터리 영사기 조사', /영사기가 돌기 시작/);
+    await inspect(565, 'E · 배터리 영사기 조사', /영사기가 디스크를 물고 돌기 시작/);
     assert.equal(await cover(), 'true', 'The screen cover lifts at once');
     await inspect(310, 'E · 객석 스크린 조사', /화자 표본 312명.*17F 정수호/);
     await page.screenshot({ path: '.local/floor-2-hall.png' });
@@ -1354,6 +1355,9 @@ try {
     softCount(await page.locator('#dynamic-scene .floor-prop').count(), 3, 'Info desk and planters');
     await page.locator('#dynamic-scene .floor-prop img').evaluateAll(images => Promise.all(images.map(img => img.decode())));
     await assertHumanScale();
+    // 1층에 내리고 1초 뒤 R-01 추격 컷씬이 시작된다. 건너뛰면 수호는 1번 엘리베이터 앞에 선다(story-scene.js skipF1Chase).
+    await page.clock.runFor(1200);
+    if (await page.locator('#story-scene').isVisible()) await page.locator('#story-skip').click();
     await page.clock.runFor(100);
     const startX = await playerX();
     near(startX, 1988, 'Arrive at the adjusted 1F elevator 1');
@@ -1365,6 +1369,12 @@ try {
     await page.keyboard.press('e');
     await page.clock.runFor(800);
     assert.match(await status(), /비상계단 문이 잠겨/);
+    // 추격 컷씬 뒤 R-01은 순찰하며 수호를 쫓는다(추격은 guard-patrol·guard-regression 검사가 본다). 이 경로 검사는 층의 길과
+    // 소품만 보므로, 0914로 정비 패널을 열어 R-01을 끌 때까지 R-01만 제자리에 세워 둔다.
+    await page.evaluate(() => {
+      window.updateRobotForTest = updateRobot;
+      window.updateRobot = (robot, delta) => (robot === guardPatrol ? undefined : window.updateRobotForTest(robot, delta));
+    });
     await visitRestroom('1F');
     await inspect(4390, 'E · 스피드 게이트 조사', /미등록 출입증/);
     // The panel sticker points at the build date, which is the old code.
@@ -1427,6 +1437,9 @@ try {
     await page.clock.runFor(100);
     assert.equal(await keypad.isVisible(), false, 'An opened panel needs no code again');
     assert.match(await status(), /방금 읽은 줄/);
+    // 0914로 R-01이 꺼졌으니 원래 움직임으로 되돌려도 서 있다.
+    await page.evaluate(() => { window.updateRobot = window.updateRobotForTest; });
+    assert.equal(await page.evaluate(() => guardPatrolPowered(guardPatrol)), false, 'The maintenance code turns R-01 off');
     await walkTo(startX);
     await page.clock.runFor(100);
   };
@@ -1602,7 +1615,7 @@ try {
       [parseFloat(el.style.left), parseFloat(el.style.top), parseFloat(el.style.width), parseFloat(el.style.height)]).sort((a, b) => a[0] - b[0]));
     assert.deepEqual(monitors, [[832, 422, 56, 45], [888, 422, 56, 45]], 'Security monitor overlays follow the resized artwork (출구 칸 322px만큼 밀림)');
     assert.equal(await page.locator('#dynamic-scene .fixture.art-spot').count(), 5);
-    await inspect(398, 'E · 보안 캐비닛 조사', /키패드가 꺼져/);
+    await inspect(398, 'E · 보안 캐비닛 조사', /키패드 화면은 켜져 있지만 번호를 모르면/); // 전력이 들어온 층은 poweredMessage
     await inspect(854, 'E · 보안 연구원 자리 조사', /214번/);
     await inspect(972, 'E · 로그 모니터 조사', /연구 보조.*archi_svc 하나뿐/);
     await inspect(1352, 'E · 감사 로그 프린터 조사', /감사 대상 0건/);
@@ -1710,8 +1723,11 @@ try {
     assert.equal(await page.evaluate(() => cctvSceneActive), true);
     await page.keyboard.press('Escape');
     assert.equal(await page.locator('#world').getAttribute('data-alarm'), 'true');
-    await inspect(1700, 'E · 승강기 제어반 조사', /아직 모른다/);
-    await page.evaluate(() => { collectedItems.add('f7-external-connection-solved'); collectedItems.add('f13-backup-device'); }); // 7층·13층 퍼즐(story-puzzles, vault-puzzle)
+    // CCTV 소등까지 봤어도 7층·13층·2층 조사가 남아 있으면 남은 준비를 알려 준다.
+    await inspect(1700, 'E · 승강기 제어반 조사', /B2 진입 준비가 아직 끝나지 않았다.*7층 원본 로그 분석.*13층 게이트웨이 백업 장치.*2층 리허설 영상/);
+    await page.evaluate(() => { // 7층·13층·2층 퍼즐(story-puzzles, vault-puzzle)
+      collectedItems.add('f7-external-connection-solved'); collectedItems.add('f13-backup-device'); collectedItems.add('f2-projected');
+    });
     await inspect(1700, 'E · 승강기 제어반 조사', /B2 운행 제한.*초록으로/);
     await page.keyboard.press('e');
     assert.match(await status(), /수동 해제됨/);
@@ -1720,7 +1736,7 @@ try {
 
     const officeRoom = await enterRoom('시설관리팀 사무실', 'B1');
     assert.equal(await worldWidth(page), 2064);
-    assert.equal(officeRoom.exit.x, 468);
+    assert.equal(officeRoom.exit.x, 497); // 복도 문 doorX 4322(배경 그림에 맞춤)를 방 폭에 비례해 옮긴 자리
     assert.equal(await page.locator('#dynamic-scene .room-interior.facility-office').count(), 1);
     softCount(await page.locator('#dynamic-scene .floor-prop').count(), 6);
     await assertHumanScale();
@@ -1824,14 +1840,24 @@ try {
     await page.screenshot({ path: '.local/floor-b2.png' });
     const mainRoom = await enterRoom('ARCHI 메인 서버실', 'B2');
     assert.equal(await worldWidth(page), 3150);
-    assert.equal(mainRoom.exit.x, 2850);
+    assert.equal(mainRoom.exit.x, 2785); // floor-b2.js: 출구 문 2785~2945
     assert.equal(await page.locator('#dynamic-scene .room-interior.core-hall.windowless').count(), 1);
     softCount(await page.locator('#dynamic-scene .floor-prop').count(), 15);
     await assertHumanScale();
     await inspect(2150, 'E · 외부 전송 현황 조사', /ARC-FULL-041.*DR-EXT.*61%/);
+    // 엔딩용 장비 운반 상자(1950~2140)가 출구 쪽과 콘솔 쪽을 가른다. DELETE 전에는 밀리지 않으니 뛰어넘는다.
+    // 한 번 뛰면 상자 위에 올라서고, 그대로 걸어 내려간다.
+    await walkTo(2230);
+    await jump('a');
+    await walkTo(1800);
+    assert(await playerX() < 1950, 'Over the equipment crate on the way to the console');
     await inspect(1400, 'E · ARCHI 메인 콘솔 조사', /낮 평가 3~5% 유지.*외부 호스트 연결 시험 성공.*자기 복제.*DELETE ARCHI/);
     await inspect(600, 'E · CCTV 분배함 조사', /전원선이 빠졌다/);
     await page.screenshot({ path: '.local/floor-b2-main.png' });
+    await walkTo(1860);
+    await jump('d');
+    await walkTo(2300);
+    assert(await playerX() > 2140, 'Back over the crate toward the exit');
     await leaveRoom(mainRoom, corridorHeader);
     assert.equal(await camera.getAttribute('data-off'), 'true', 'With its power pulled the camera stays off');
     assert.equal(await cones.count(), 0);
@@ -1982,9 +2008,13 @@ try {
   await page.locator('#cabin-alarm').click();
   assert.equal(await page.locator('#cabin-status').textContent(), '비상벨 작동');
   await page.screenshot({ path: '.local/cabin-mobile.png' });
+  // Tab은 가방 단축키라 엘리베이터 안에서도 가방을 연다. Esc로 닫으면 초점은 엘리베이터 창으로 돌아온다.
   await page.locator('#cabin-exit').focus();
   await page.keyboard.press('Tab');
-  assert(await page.evaluate(() => document.getElementById('elevator-cabin').contains(document.activeElement)));
+  assert.equal(await page.locator('#inspection-title').textContent(), '가방', 'Tab opens the bag inside the cabin');
+  await page.keyboard.press('Escape');
+  assert.equal(await page.locator('#inspection').isHidden(), true);
+  assert(await page.evaluate(() => document.getElementById('elevator-cabin').contains(document.activeElement)), 'Focus returns to the cabin');
   await page.locator('#cabin-exit').click();
   await finishSceneTransition(page);
   assert.equal(await page.locator('#stage').evaluate(el => el.inert), false);
