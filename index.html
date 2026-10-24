@@ -413,21 +413,26 @@
         <div id="log-screen">
           <h2 id="log-title">평가실 PC · 야간 자동 평가 로그</h2>
           <p id="log-network" data-connected="true"></p>
-          <div id="log-rows"></div>
-          <p id="log-access" hidden></p>
           <pre id="log-alert" role="alert" hidden></pre>
           <p id="log-status" role="status" aria-live="polite"></p>
           <div id="log-recovery" role="group" aria-label="로그 복구" hidden>
             <button id="log-remaining" type="button">[남은 로그 확인]</button>
             <button id="log-restore" type="button">[종이 기록 대조 및 복원]</button>
           </div>
-          <div id="log-quiz" hidden>
-            <p id="log-quiz-question"></p>
-            <div id="log-quiz-options" role="group" aria-label="10/07 밤 성능 저하 원인"></div>
-          </div>
-          <div id="log-monologue" aria-live="polite" hidden></div>
+          <ol id="log-term" aria-live="polite" aria-label="터미널 출력"></ol>
+          <form id="log-term-form"><label id="log-term-prompt" for="log-term-input">eval@eval-pc:~$</label><input id="log-term-input" type="text" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="send" lang="en" /></form>          <div id="log-monologue" aria-live="polite" hidden></div>
           <p id="log-hint-record" hidden>03:41 · B2 전력 할당 기록 — 야간 학습 관련 로그 보존</p>
         </div>
+        <aside id="log-memo" aria-label="모니터에 붙은 메모">
+          <p class="log-memo-title">신입용 리눅스 메모</p>
+          <dl>
+            <dt>ls /</dt><dd>맨 위 폴더 보기</dd>
+            <dt>find 단어</dt><dd>이름에 단어가 든 파일 찾기</dd>
+            <dt>grep 단어</dt><dd>내용에 단어가 든 줄 찾기</dd>
+            <dt>cat 파일</dt><dd>파일 읽기</dd>
+          </dl>
+          <p class="log-memo-foot">화면에 나온 이름은 클릭하면 열린다!</p>
+        </aside>
         <button id="log-close" type="button">나가기 · Esc</button>
       </div>
     </section>

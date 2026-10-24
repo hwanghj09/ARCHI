@@ -63,7 +63,7 @@ const OBJECTIVES = [
     text: '이런 현상이 처음이 아닌 것 같다. QA 실에서 기록을 재현해보자.' },
   { when: () => collectedItems.has('f12-evaluation-solved'), title: '로그 분석', text: 'ARCHI가 어떻게 새벽에 전력을 사용할 수 있었을까? 검증실에서 확인하자.' },
   { when: () => collectedItems.has('f12-network-isolated') && !logRecordsReady() && !collectedItems.has('f12-paper-backup'), title: '종이 백업 찾기', text: '화면 속 기록은 믿을 수 없다. 모델 평가실 평가 벤치에 출력해 둔 기록이 있을지도.' },
-  { when: () => collectedItems.has('f12-network-isolated'), title: '이상한 밤 찾기', text: '기록은 지켜 냈다. 야간 로그 단말기에서 그날 밤 무슨 일이 있었는지 확인하자.' },
+  { when: () => collectedItems.has('f12-network-isolated'), title: '이상한 밤 찾기', text: '기록은 지켜 냈다. 야간 로그 단말기의 터미널에서 로그 파일을 찾아 그날 밤 무슨 일이 있었는지 확인하자.' },
   { when: () => logDeleting(), title: '로그 삭제를 막아라', text: '누군가 기록을 지우고 있다! 연결을 끊어야 한다.' },
   // 게이트 컷씬(story-badge-seen)이 사원증 위치를 알려 주므로 바로 16층 카페를 가리킨다.
   { when: () => collectedItems.has('story-badge-seen') && !collectedItems.has('f16-badge'), title: '출입증 쌔비기',

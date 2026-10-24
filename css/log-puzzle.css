@@ -1,9 +1,7 @@
 /* 12층 모델 평가실 "야간 로그 단말기" 퍼즐 창. #cctv-scene처럼 화면 전체를 덮는 레터박스 위에,
    컴퓨터 모니터를 바짝 당겨 본 그림(assets/ui/log-puzzle/log-terminal.png, 1448x1086)을 원래
-   비율(4:3) 그대로 최대 크기로 띄운다. 그림 속 실제 화면 영역에만 로그 줄·퀴즈를 퍼센트 좌표로
-   얹는다 — 글자는 늘 DOM이 그리고 그림 쪽은 비어 있다(와이어 퍼즐이 전선 색은 비우고 소켓 자리만
-   그리는 것과 같은 이유). 퀴즈가 뜬 동안에는 그 아래쪽에 보기 4칸 테두리만 그린 투명 오버레이
-   (log-quiz-slots.png, 1499x1049)를 한 장 더 겹친다. 실측값은 각 규칙 위 주석과
+   비율(4:3) 그대로 최대 크기로 띄운다. 그림 속 실제 화면 영역에만 경고·리눅스 터미널을 퍼센트 좌표로
+   얹는다 — 글자는 늘 DOM이 그리고 그림 쪽은 비어 있다. 실측값은 각 규칙 위 주석과
    assets/ui/log-puzzle/PROMPT.md 참고. */
 #log-panel { position: fixed; inset: 0; z-index: 13; /* HUD(최대 11) 위, 전선 퍼즐과 같은 층 */ display: grid; place-items: center; background: #000; }
 #log-panel[hidden] { display: none; }
@@ -11,24 +9,16 @@
   background: url('../assets/ui/log-puzzle/log-terminal.png') center / 100% 100% no-repeat, #0d1417; color: #cfd9d3; }
 /* 화면 영역 실측(log-terminal.png, 1448x1086): x=33~1414px(2.28%~97.65%), y=40~985px(3.68%~90.70%). */
 #log-screen { position: absolute; left: 2.3%; top: 3.7%; width: 95.3%; height: 87%; box-sizing: border-box;
-  padding: 2% 3%; display: flex; flex-direction: column; justify-content: center; text-align: center; overflow: hidden; }
-#log-title { margin: 0 0 2%; flex: none; color: #e2d2b8; font-size: clamp(16px, 2.6vw, 28px); }
-#log-rows { display: flex; flex-direction: column; align-items: center; gap: .3em; margin: 0 0 2%; flex: none; }
-.log-row { margin: 0; font: clamp(15px, 2.1vw, 23px)/1.5 monospace; color: #9fe0b0; white-space: pre; }
-.log-row[data-anomaly="true"] { color: #f2d689; }
-.log-row[data-deleted="true"] { color: #5c6a63; font-style: italic; }
-.log-row.log-head { color: #7d8f86; font-size: clamp(12px, 1.6vw, 18px); }
-.log-row[data-restored="true"] { color: #c9d6a4; }
-.log-row[data-highlight="true"], #log-access[data-highlight="true"] { background: #f2d68933; outline: 1px solid #f2d689; }
+  padding: 2% 3%; display: flex; flex-direction: column; text-align: center; overflow: hidden; }
+#log-title { margin: 0 0 1%; flex: none; color: #e2d2b8; font-size: clamp(16px, 2.6vw, 28px); }
 #log-network { flex: none; margin: 0 0 1%; font: clamp(11px, 1.4vw, 15px) monospace; color: #e08a7a; }
 #log-network[data-connected="false"] { color: #7d8f86; }
-#log-access { flex: none; margin: 0 auto 1.5%; padding: 0 .4em; color: #9fe0b0; font: clamp(12px, 1.6vw, 18px) monospace; }
-#log-alert { flex: none; margin: 0 0 1.5%; color: #ff6a5c; font: bold clamp(11px, 1.5vw, 17px)/1.35 monospace;
+#log-alert { flex: none; margin: 0 0 1%; color: #ff6a5c; font: bold clamp(11px, 1.5vw, 17px)/1.35 monospace;
   white-space: pre-wrap; animation: log-alert-blink 1s steps(2, end) infinite; }
 #log-alert[data-outcome="in-time"] { color: #9fe0b0; animation: none; }
 #log-alert[data-outcome="too-late"], #log-alert[data-outcome="erased"] { color: #f2d689; animation: none; }
 @keyframes log-alert-blink { 50% { opacity: .55; } }
-#log-recovery { flex: none; display: flex; flex-wrap: wrap; justify-content: center; gap: 1em; margin: 0 0 2%; }
+#log-recovery { flex: none; display: flex; flex-wrap: wrap; justify-content: center; gap: 1em; margin: 0 0 1.5%; }
 #log-recovery[hidden], #log-monologue[hidden] { display: none; }
 #log-recovery button { min-height: 32px; padding: .2em .8em; border: 1px solid #647579; border-radius: 4px; background: #0d1417cc;
   color: #cfd9d3; font: clamp(13px, 1.7vw, 18px) monospace; cursor: pointer; }
@@ -36,29 +26,38 @@
 #log-monologue { flex: none; color: #e2d2b8; font-size: clamp(13px, 1.8vw, 19px); line-height: 1.5; }
 #log-monologue p { margin: 0; animation: log-line-in .4s ease-out; }
 @keyframes log-line-in { from { opacity: 0; transform: translateY(4px); } }
-#log-hint-record { flex: none; margin: 1.5% 0 0; color: #f2d689; font: clamp(12px, 1.5vw, 16px) monospace; }
-.log-row[data-glitching="true"] { animation: log-row-glitch .5s steps(2, end) 2; }
-@keyframes log-row-glitch {
-  0%, 100% { transform: translateX(0); opacity: 1; }
-  25% { transform: translateX(-3px); opacity: .4; color: #e08a7a; }
-  50% { transform: translateX(3px); opacity: .8; }
-  75% { transform: translateX(-2px); opacity: .5; }
-}
-#log-status { flex: none; min-height: 1.3em; margin: 0 0 2%; line-height: 1.5; color: #e08a7a;
-  font-size: clamp(14px, 1.9vw, 20px); }
-#log-quiz { position: relative; flex: 1 1 auto; min-height: 9em;
-  background: url('../assets/ui/log-puzzle/log-quiz-slots.png') center / 100% 100% no-repeat; }
-#log-quiz[hidden] { display: none; }
-#log-quiz-question { position: absolute; left: 0; top: 3%; width: 100%; margin: 0; line-height: 1.4;
-  font-size: clamp(14px, 1.9vw, 20px); }
-/* 보기 4칸 실측(log-quiz-slots.png, 1499x1049): 왼쪽 칸 x=56~731px, 오른쪽 칸 x=770~1445px,
-   위쪽 줄 y=315~508px, 아래쪽 줄 y=585~778px — 그 바깥 틀(left/top/width/height)과 칸 사이
-   간격(column-gap/row-gap)을 그 비율 그대로 퍼센트로 옮겼다. */
-#log-quiz-options { position: absolute; left: 3.74%; top: 30.03%; width: 92.66%; height: 44.17%;
-  display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; column-gap: 2.8%; row-gap: 16.6%; }
-#log-quiz-options button { padding: 0; border: 0; background: none; color: inherit; cursor: pointer;
-  font: clamp(14px, 1.9vw, 20px) Arial, sans-serif; }
-#log-quiz-options button:hover, #log-quiz-options button:focus-visible { color: #b9e89c; outline: none; }
+#log-hint-record { flex: none; margin: 1% 0 0; color: #f2d689; font: clamp(12px, 1.5vw, 16px) monospace; }
+#log-status { flex: none; min-height: 1.3em; margin: 0 0 1.5%; line-height: 1.5; color: #e08a7a;
+  font-size: clamp(13px, 1.7vw, 18px); }
+/* 리눅스 터미널: 출력은 남은 공간을 채우고 넘치면 스크롤, 아래에 프롬프트 한 줄. */
+#log-term { flex: 1 1 auto; min-height: 6em; margin: 0; padding: .6em .9em; overflow-y: auto; list-style: none; text-align: left;
+  border: 1px solid #2c3d36; background: #050a08cc; font: clamp(12px, 1.5vw, 17px)/1.45 monospace; white-space: pre-wrap; overflow-wrap: anywhere; }
+.log-term-out { color: #cfd9d3; }
+.log-term-user { color: #9fe0b0; }
+.log-term-err { color: #e08a7a; }
+.log-term-sys { color: #f2d689; }
+.log-term-archi { color: #ff6a5c; }
+/* 출력 속 파일·폴더 이름: 누르면 열린다. */
+.log-term-link { padding: 0; border: 0; background: none; color: #8ad7ff; font: inherit; text-decoration: underline dotted; cursor: pointer; }
+.log-term-link:hover, .log-term-link:focus-visible { color: #f2d689; outline: none; text-decoration-style: solid; }
+#log-term-form { flex: none; display: flex; align-items: center; gap: .5em; padding: .4em .9em; border: 1px solid #2c3d36; border-top: 0;
+  background: #050a08cc; font: clamp(12px, 1.5vw, 17px) monospace; }
+#log-term-prompt { flex: none; color: #9fe0b0; }
+#log-term-input { flex: 1; min-width: 0; min-height: 28px; padding: 2px 4px; border: 0; background: transparent; color: #f2f2ea;
+  font: inherit; caret-color: #9fe0b0; }
+#log-term-input:focus-visible { outline: 1px solid #f2d689; }
+/* 모니터 오른쪽에 붙은 포스트잇: 명령어 사용법만 적혀 있다(무엇을 찾을지는 상태 줄이 알려 준다).
+   터미널은 오른쪽을 비워 메모에 가리지 않게 한다. */
+#log-term, #log-term-form { margin-right: 23%; }
+#log-memo { position: absolute; right: 3.5%; top: 34%; width: 21%; box-sizing: border-box; padding: 1% 1.2%;
+  background: #f3e27a; color: #2e2a1c; transform: rotate(1.5deg); box-shadow: 2px 4px 10px #0009;
+  font: clamp(10px, 1.15vw, 14px)/1.35 'Comic Sans MS', 'Nanum Pen Script', cursive, sans-serif; text-align: left; }
+#log-memo::before { content: ''; position: absolute; left: 35%; top: -.6em; width: 30%; height: 1.2em; background: #ffffff66; transform: rotate(-2deg); }
+.log-memo-title { margin: 0 0 .4em; font-weight: 700; border-bottom: 1px solid #2e2a1c55; }
+#log-memo dl { margin: 0; }
+#log-memo dt { margin-top: .35em; font-family: monospace; font-weight: 700; color: #1f3a8a; overflow-wrap: anywhere; }
+#log-memo dd { margin: 0 0 0 .6em; }
+.log-memo-foot { margin: .5em 0 0; color: #a02a1f; }
 #log-frame.glitching { animation: log-panel-glitch .4s steps(2, end) 1; }
 @keyframes log-panel-glitch {
   0%, 100% { filter: none; }
@@ -73,7 +72,8 @@
 @media (max-aspect-ratio: 1/1) {
   #log-frame { width: 100vw; height: 100%; aspect-ratio: auto; background: #0d1417; overflow-y: auto; }
   #log-screen { position: static; width: auto; height: auto; min-height: calc(100% - 64px); padding: 20px 16px 8px; overflow: visible; }
-  #log-quiz { flex: none; height: 15em; }
+  #log-term { flex: none; height: 50vh; }
+  #log-term, #log-term-form { margin-right: 0; }
+  #log-memo { position: static; width: auto; margin: 0 16px 12px; padding: 10px 14px; transform: none; }
   #log-close { position: static; display: block; width: auto; margin: 8px auto 20px; padding: 8px 24px; border-color: #647579; }
-  .log-row { font-size: 14px; }
 }

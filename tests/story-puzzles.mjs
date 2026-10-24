@@ -41,7 +41,13 @@ try {
   const has = item => page.evaluate(item => collectedItems.has(item), item);
   const objective = async () => { await page.clock.runFor(100); return page.evaluate(() => currentObjective.title); };
   const sanity = () => page.evaluate(() => sanity);
-  const rowTexts = () => page.locator('#log-rows .log-row:not(.log-head)').allTextContents();
+  // 야간 로그 단말기 터미널에 명령을 치고, 그 명령이 찍은 출력만 돌려준다.
+  const run = async command => {
+    const before = await page.locator('#log-term li').count();
+    await page.locator('#log-term-input').fill(command);
+    await page.locator('#log-term-input').press('Enter');
+    return (await page.locator('#log-term li').allTextContents()).slice(before + 1).join('\n');
+  };
   const checkRackFrame = async frame => {
     const rack = page.locator('.floor-prop[aria-label="네트워크 랙"]');
     assert.equal(await rack.getAttribute('data-sprite-frame'), String(frame));
@@ -67,14 +73,20 @@ try {
     await page.clock.runFor(600);
   };
 
-  // ---- A. 제때 뽑기(마우스 끌기): 기록 보존 → 퀴즈 → 추가 힌트 ----
+  // ---- A. 제때 뽑기(마우스 끌기): 기록 보존 → 터미널로 로그 파일 찾기 → 추가 힌트 ----
   await newGame();
   assert.deepEqual(await use('f12-eval', '네트워크 랙'), { control: false, inspection: true, log: false, backup: false },
     'Before the log opens the rack is a plain inspection');
   await checkRackFrame(0);
   assert.equal((await use('f12-eval', '야간 로그 단말기')).log, true, 'The terminal opens the log screen');
-  assert.deepEqual(await rowTexts(), ['09/28    낮  3.9%    밤 87.1%', '09/30    낮  4.4%    밤 88.5%',
-    '10/05    낮  3.6%    밤 89.2%', '10/07    낮  3.7%    밤  4.2%']);
+  assert.equal(await page.evaluate(() => document.activeElement.id), 'log-term-input', 'The PC boots into a terminal');
+  assert.match(await page.locator('#log-term').textContent(), /\$ lsREADME\.txt/, 'Booting shows what is in the home folder');
+  assert.equal(await run('ls /'), 'home/  srv/  tmp/  var/', 'Folders end with /');
+  assert.match(await run('ls /nope'), /ls \/ 로 맨 위 폴더부터/);
+  assert.equal(await run('ls /var/log/archi/eval'), 'night-0928.log  night-0930.log  night-1005.log  night-1007.log');
+  assert.match(await run('pwd'), /^\/home\/eval$/);
+  assert.match(await run('ㅣㄴ'), /한\/영/, 'Korean IME input is explained');
+  assert.match(await run('foo'), /command not found/);
   assert(await page.locator('#log-alert').isHidden(), 'The warning comes a moment later');
   await page.clock.runFor(2200);
   assert.match(await page.locator('#log-alert').textContent(), /WARNING: UNAUTHORIZED LOG MODIFICATION\nSOURCE: SYSTEM\nDELETING NIGHT EVALUATION RECORDS/);
@@ -89,8 +101,9 @@ try {
   assert.equal(await page.evaluate(() => logDeletedCount()), 1, 'Deletion keeps running with the window closed');
   // 창을 다시 열어도 처음부터 다시 지우지 않는다.
   await use('f12-eval', '야간 로그 단말기');
-  assert.equal((await rowTexts())[0], '09/28    [DELETED]');
-  assert.equal(await page.locator('#log-rows .log-row[data-deleted="true"]').count(), 1);
+  assert.match(await page.locator('#log-term').textContent(), /\[SYSTEM\] rm \/var\/log\/archi\/eval\/night-0928\.log/);
+  assert.equal(await run('ls /var/log/archi/eval'), 'night-0930.log  night-1005.log  night-1007.log');
+  assert.match(await run('cat /var/log/archi/eval/night-0928.log'), /No such file/);
   const rack = await use('f12-eval', '네트워크 랙');
   assert.equal(rack.control, true, 'While deleting the rack opens the cable control');
   assert.equal(await page.locator('#interaction-hint').textContent(), 'E · LAN 케이블 뽑기');
@@ -104,19 +117,28 @@ try {
   assert.equal(await objective(), '이상한 밤 찾기');
   await use('f12-eval', '야간 로그 단말기');
   assert.equal(await page.locator('#log-alert').textContent(), 'NETWORK CONNECTION LOST\nREMOTE DELETION STOPPED');
-  assert(await page.locator('#log-quiz').isVisible(), 'Preserved logs go straight to the quiz');
-  assert.match(await page.locator('#log-access').textContent(), /10\/07 — 조현아 · 23:10 입실 · 05:02 퇴실/);
-  await page.locator('#log-quiz-options button', { hasText: '정전' }).click();
-  assert.equal(await sanity(), 75, 'A wrong answer costs 5% sanity');
-  assert.match(await page.locator('#log-status').textContent(), /다시 보자/);
-  assert.equal(await has('f12-evaluation-solved'), false);
-  await page.locator('#log-quiz-options button', { hasText: '업데이트' }).click();
-  assert.equal(await sanity(), 70, 'Each wrong answer can be retried');
-  await page.locator('#log-quiz-options button', { hasText: '건물에 사람이 있었음' }).click();
-  assert(await has('f12-evaluation-solved'));
+  assert.match(await run('cat README.txt'), /access가 들어갔던/, 'The README hints the file name, not the command');
+  assert(await page.locator('#log-memo').isVisible(), 'The sticky note teaches the commands');
+  assert.match(await page.locator('#log-status').textContent(), /날짜별 야간 평가 로그를 비교/, 'The status says what to look for');
+  assert.match(await run('cat nowhere/access-1007.log'), /다른 곳에 있다: cat \/srv\/security\/sync\/badge\/access-1007\.log/);
+  assert.match(await run('cd /var/log/archi/eval'), /^$/);
+  assert.equal(await page.locator('#log-term-prompt').textContent(), 'eval@eval-pc:/var/log/archi/eval$');
+  await page.locator('#log-term-input').fill('cat night-10');
+  await page.locator('#log-term-input').press('Tab');
+  assert.equal(await page.locator('#log-term-input').inputValue(), 'cat night-100', 'Tab completes the common prefix');
+  assert.match(await run('cat night-1007.log'), /밤 성능 {2}4\.2%/);
+  assert.equal(await has('f12-evaluation-solved'), false, 'The night log alone is not enough');
+  assert.match(await page.locator('#log-status').textContent(), /출입 기록 파일을 찾아/, 'The next goal is the access log');
+  assert.equal(await run('find / -name "*1007*"'), '/srv/security/sync/badge/access-1007.log\n/var/log/archi/eval/night-1007.log');
+  assert.equal(await run('find . -name "*.log"'), './night-0930.log\n./night-1005.log\n./night-1007.log');
+  assert.equal(await run('grep -r 조현아 /srv'), '/srv/security/sync/badge/access-1007.log:조현아 · 23:10 입실 · 05:02 퇴실');
+  assert(await has('f12-evaluation-solved'), 'Reading both 10/07 files solves the analysis');
   assert(await has('f12-log-hint'), 'Preserving the log in time gives the extra hint');
+  assert.equal(await sanity(), 80, 'The terminal never costs sanity');
+  assert.match(await page.locator('#log-term').textContent(), /\[분석\] 10\/07 밤 조현아/);
+  assert.equal(await page.evaluate(() => logPanel.hidden), false, 'The result stays on screen for a moment');
+  await page.clock.runFor(1600);
   assert.equal(await page.evaluate(() => logPanel.hidden), true, 'Finishing the analysis turns the terminal off');
-  assert.equal(await page.locator('#log-rows .log-row[data-highlight="true"]').count(), 1);
   assert.equal(await page.locator('#log-monologue p').count(), 0, 'The monologue no longer prints inside the terminal');
   await page.clock.runFor(1500);
   assert(await page.locator('#story-scene').isVisible(), 'The monologue plays as a cutscene');
@@ -132,7 +154,7 @@ try {
   await page.screenshot({ path: '.local/story-f12-solved.png' });
   // 다시 풀어도 보상은 한 번뿐이다.
   const clueCount = (await clues()).length;
-  await page.evaluate(() => answerLogQuiz('건물에 사람이 있었음'));
+  await page.evaluate(() => checkLogAnalysis());
   assert.equal((await clues()).length, clueCount);
   assert.equal(await objective(), '데이터 수집');
   // 7층 백업 장비는 5층 연구 노트와 8층 재현 기록 뒤에 열린다(backup-puzzle.js).
@@ -268,7 +290,11 @@ try {
   assert.equal(await page.evaluate(() => logPuzzle.outcome), 'too-late');
   await use('f12-eval', '야간 로그 단말기');
   assert.equal(await page.locator('#log-alert').textContent(), 'REMOTE DELETION STOPPED\nWARNING: RECORDS DAMAGED');
-  assert(await page.locator('#log-quiz').isHidden(), 'Damaged logs need the paper backup first');
+  assert.equal(await run('ls /var/log/archi/eval'), 'night-1005.log', 'Only the undeleted file is left');
+  assert.equal((await run('find access')).split('\n').length, 4, 'The short form "find word" searches every folder');
+  await page.locator('#log-term .log-term-link', { hasText: 'access-1007.log' }).last().click();
+  assert.match(await page.locator('#log-term').textContent(), /\$ cat \/srv\/security\/sync\/badge\/access-1007\.log출입 기록/, 'Clicking a listed file opens it');
+  assert.equal(await has('f12-evaluation-solved'), false, 'Damaged logs need the paper backup first');
   assert(await page.locator('#log-recovery').isHidden());
   assert.match(await page.locator('#log-status').textContent(), /평가 벤치/);
   assert.equal(await objective(), '종이 백업 찾기');
@@ -279,12 +305,12 @@ try {
   await use('f12-eval', '야간 로그 단말기');
   assert(await page.locator('#log-recovery').isVisible());
   await page.locator('#log-remaining').click();
-  assert.match(await page.locator('#log-status').textContent(), /남은 온라인 기록 1줄/);
+  assert.match(await page.locator('#log-status').textContent(), /남은 온라인 기록 1개/);
   await page.locator('#log-restore').click();
   assert(await has('f12-log-restored'));
-  assert.equal(await page.locator('#log-rows .log-row[data-restored="true"]').count(), 3);
-  await page.locator('#log-quiz-options button', { hasText: '건물에 사람이 있었음' }).click();
-  assert(await has('f12-evaluation-solved'));
+  assert.equal(await run('ls /var/log/archi/eval'), 'night-0928.log  night-0930.log  night-1005.log  night-1007.log');
+  assert.match(await run('cat /var/log/archi/eval/night-1007.log'), /종이 기록 대조로 복원됨/);
+  assert(await has('f12-evaluation-solved'), 'The access log read earlier still counts once the night log is back');
   assert.equal(await has('f12-log-hint'), false, 'A late unplug gives no extra hint');
   await page.evaluate(() => { collectedItems.add('goal-f5-note'); collectedItems.add('f8-repro-record'); collectedItems.add('story-repro-seen'); }); // 8층 → 7층 혼잣말은 본 것으로
   await use('f7-verify', '망분리 백업 장비');
@@ -307,8 +333,8 @@ try {
   await use('f12-eval', '평가 벤치');
   await use('f12-eval', '야간 로그 단말기');
   await page.locator('#log-restore').click();
-  assert.equal(await page.locator('#log-rows .log-row[data-restored="true"]').count(), 4);
-  await page.locator('#log-quiz-options button', { hasText: '건물에 사람이 있었음' }).click();
+  assert.equal((await run('grep 종이')).split('\n').length, 4, 'All four files come back from paper ("grep word" searches everywhere)');
+  await run('cat /var/log/archi/eval/night-1007.log /srv/security/sync/badge/access-1007.log');
   assert(await has('f12-evaluation-solved'), 'Even a fully erased log can be solved from paper');
 
   // 정신력 0에서도 오답은 0 아래로 내려가지 않고, 퍼즐 창이 열린 동안 0% 추격이 시작되지 않는다.

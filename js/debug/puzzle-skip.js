@@ -11,7 +11,7 @@ const PUZZLE_STEPS = [
   { label: '1F 로봇 정비 기록', at: 'f1', items: ['f1-robot-log'] },
   { label: '12F 게이트·출입증 쌔비기', at: 'f12', items: ['story-gate-tagged', 'story-badge-seen', 'f16-badge'] },
   { label: '12F 로그 삭제 막기', at: 'f12', items: ['f12-network-isolated', 'f12-log-restored'] }, // 복구한 기록으로 퀴즈를 바로 풀 수 있다
-  { label: '12F 모델 평가 퀴즈', at: 'f12', items: ['f12-log-hint', 'f12-evaluation-solved'] },
+  { label: '12F 로그 파일 찾기', at: 'f12', items: ['f12-log-hint', 'f12-evaluation-solved'] },
   { label: '5F 서가 꼭대기 노트', at: 'f5', items: ['goal-f5-note'] },
   { label: '8F 재현 기록', at: 'f8', items: ['f8-repro-record'] },
   { label: '7F 백업 장비 · 학습 시간', at: 'f7', items: ['f7-training-time-solved'] },
