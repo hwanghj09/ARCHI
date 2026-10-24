@@ -49,8 +49,6 @@ try {
     await page.screenshot({ path: `.local/power-notice-reading-${name}.png` });
     await page.keyboard.press('Escape');
   }
-  await page.evaluate(() => performFloorChange('rooftop', null));
-  assert.equal(await page.locator('.fixture.power-notice').evaluate(el => el.offsetHeight), 5, 'The flat rooftop instruction paper keeps its original size');
   assert.deepEqual(errors, []);
-  console.log('PASS: emergency notice contrast, complete lines, desktop/portrait/landscape inspection and rooftop paper');
+  console.log('PASS: emergency notice contrast, complete lines, desktop/portrait/landscape inspection');
 } finally { await browser.close(); }

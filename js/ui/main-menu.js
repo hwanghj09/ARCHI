@@ -330,35 +330,34 @@ menuSlotList.addEventListener('click', event => {
   }
 });
 
-// 스크린샷 모드(일시정지 창): 화면의 UI를 모두 숨기고 게임은 멈춘 채로 둔다. 키보드나 마우스를 아무거나 누르면 일시정지 창으로 돌아온다.
-// 돌아오게 한 입력은 게임이나 메뉴가 받지 않도록 삼키고, 뒤이어 오는 click도 잠깐 삼킨다(마우스를 떼거나 Space를 뗄 때 버튼이 눌리지 않게).
-let screenshotModeEndedAt = -Infinity;
-
-function endScreenshotMode(event) {
-  event.preventDefault();
-  event.stopImmediatePropagation();
-  delete document.body.dataset.screenshot;
-  screenshotModeEndedAt = performance.now();
-  window.removeEventListener('keydown', endScreenshotMode, true);
-  window.removeEventListener('mousedown', endScreenshotMode, true);
-  window.removeEventListener('touchstart', endScreenshotMode, true);
-  document.getElementById('menu-screenshot').focus({ preventScroll: true });
+// 스크린샷 모드: 화면의 UI를 모두 숨긴다(css/main-menu.css). \ 키를 누르면 어디서든 바로 켜지고, Esc나 \ 키를 다시 눌러야만 꺼진다.
+// 일시정지 창의 [스크린샷 모드] 버튼으로 켜면 게임은 멈춘 채로이고, 끄면 일시정지 창으로 돌아온다. \ 키로 켜면 게임은 그대로 진행된다.
+function setScreenshotMode(on) {
+  if (on) {
+    document.body.dataset.screenshot = 'true';
+    document.activeElement?.blur();
+  } else {
+    delete document.body.dataset.screenshot;
+    if (mainMenuActive) mainMenu.querySelector('.menu-view:not([hidden]) button')?.focus({ preventScroll: true }); // 메뉴가 열린 채였으면 메뉴로 돌아간다
+    else (selectingFloor ? cabin : stage).focus({ preventScroll: true });
+  }
 }
 
-document.getElementById('menu-screenshot').addEventListener('click', () => {
-  if (performance.now() - screenshotModeEndedAt < 500) return;
-  document.body.dataset.screenshot = 'true';
-  document.activeElement?.blur();
-  // 이 클릭이 끝난 뒤에 듣기 시작해야 같은 클릭이 바로 모드를 끝내지 않는다.
-  setTimeout(() => {
-    window.addEventListener('keydown', endScreenshotMode, true);
-    window.addEventListener('mousedown', endScreenshotMode, true);
-    window.addEventListener('touchstart', endScreenshotMode, true);
-  }, 0);
-});
-window.addEventListener('click', event => {
-  if (performance.now() - screenshotModeEndedAt < 500) { event.preventDefault(); event.stopImmediatePropagation(); }
-}, true);
-window.addEventListener('keyup', event => {
-  if (performance.now() - screenshotModeEndedAt < 500) { event.preventDefault(); event.stopImmediatePropagation(); }
+document.getElementById('menu-screenshot').addEventListener('click', () => setScreenshotMode(true));
+
+window.addEventListener('keydown', event => {
+  const screenshot = document.body.dataset.screenshot === 'true';
+  if (screenshot && event.code === 'Escape') { // 스크린샷 모드의 Esc는 일시정지 창을 열지 않고 모드만 끈다
+    event.preventDefault();
+    event.stopImmediatePropagation();
+    if (!event.repeat) setScreenshotMode(false);
+    return;
+  }
+  if (event.code !== 'Backslash' || event.ctrlKey || event.altKey || event.metaKey) return;
+  // 글자를 입력하는 칸이나 조작키를 바꾸는 중이거나 \를 조작키로 쓰고 있으면 건드리지 않는다.
+  if (event.target.closest?.('input, textarea, [contenteditable="true"]') || pendingKeyAction) return;
+  if (Object.values(keyBindings).some(keys => keys.includes('Backslash'))) return;
+  event.preventDefault();
+  event.stopImmediatePropagation();
+  if (!event.repeat) setScreenshotMode(!screenshot);
 }, true);

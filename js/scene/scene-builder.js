@@ -319,9 +319,7 @@ function buildDynamicScene(config) {
     if (fixture.cycle) element.dataset.state = String(cycleState(fixture.cycle));
     const fixtureDoor = { ...fixture, type: 'inspect', element, sequence: sequence && { ...sequence, step: fixture.step },
       ring: fixture.ring && !collectedItems.has(fixture.gives) ? { ...fixture.ring, elapsed: 0, state: 'waiting' } : null };
-    // 패널 위 설명서는 겹치는 발전기보다 먼저 조사할 수 있어야 한다.
-    if (config.id === 'rooftop' && fixture.style === 'power-notice') doorList.unshift(fixtureDoor);
-    else doorList.push(fixtureDoor);
+    doorList.push(fixtureDoor);
   }
   refreshReady();
   const isFloor = config.id !== 'rooftop' && !config.interior;

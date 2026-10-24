@@ -62,46 +62,7 @@ try {
   assert(await supply.evaluate(el => Math.abs(parseFloat(el.style.top) + 691 * el.clientWidth / 887 - 570) < 1),
     'Solar device rests on the roof floor');
   await page.screenshot({ path: '.local/rooftop-desktop.png' });
-  const manual = page.locator('#dynamic-scene .fixture[aria-label="태양광 작업 설명서"]');
-  assert.equal(await manual.count(), 1);
-  assert(await manual.isVisible());
-  assert(await manual.evaluate(el => el.offsetHeight === 5 && parseFloat(el.style.top) + el.offsetHeight === 415 &&
-    parseFloat(el.style.left) >= 780 && parseFloat(el.style.left) + el.offsetWidth <= 940),
-    'Manual rests on the solar panel top as a thin sheet');
-  await hold('d', 3300);
-  assert.equal(await page.locator('#interaction-hint').textContent(), 'E · 태양광 작업 설명서 조사');
-  await page.keyboard.press('e');
-  assert.equal(await page.locator('#inspection').getAttribute('data-surface'), 'document');
-  const manualLines = [
-    '태양광 임시 전력 장치 — 비상 운용 안내',
-    '① 비상 전력 레버를 내리십시오.',
-    '② 네 자리 승인번호를 입력하십시오.',
-    '③ 조명을 켤 층을 선택하십시오.',
-    // 17층 비상 UPS 회로(69e8dc6)가 생기며 조명 전용 안내와 관리실 메모 위치로 바뀌었다.
-    '태양광은 선택한 층의 전등만 공급합니다. 승강기는 17층 관리자실 비상 UPS 회선을 별도로 연결하십시오.',
-    '관리실 출입 메모: 17층 복도 청소 카트. 회로 안내도: 관리실 책상.',
-    '전용 앱을 설치하면 휴대폰으로 전력 공급 상태를 확인하고 원격으로 제어할 수 있습니다.',
-    '앱 다운로드 및 장치 등록에는 작업용 컴퓨터를 이용하십시오.',
-  ];
-  assert.deepEqual(await page.locator('#inspection-sheet .writing-item').allTextContents(), manualLines);
-  // 읽기용 설명(message)은 종이 문구와 따로 쓴 같은 제목으로 시작하는 요약이다.
-  assert.equal(await page.locator('#inspection-description').textContent(),
-    await page.evaluate(() => floorById.get('rooftop').fixtures[0].message));
-  assert.match(await page.locator('#inspection-description').textContent(), /^태양광 임시 전력 장치 — 비상 운용 안내\n\n/);
-  assert.equal(await page.locator('#inspection-sheet [data-bold="true"]').textContent(), manualLines[6]);
-  await page.screenshot({ path: '.local/solar-manual-desktop.png' });
-  await page.setViewportSize({ width: 390, height: 844 });
-  const mobileLayout = await page.locator('#inspection').evaluate(panel => {
-    const bounds = panel.getBoundingClientRect();
-    const close = document.getElementById('inspection-close').getBoundingClientRect();
-    const sheet = document.getElementById('inspection-sheet');
-    return bounds.left >= 0 && bounds.right <= innerWidth && bounds.top >= 0 && bounds.bottom <= innerHeight &&
-      close.bottom <= bounds.bottom && sheet.scrollWidth <= sheet.clientWidth + 1;
-  });
-  assert(mobileLayout, 'Manual and close button fit mobile without horizontal scrolling');
-  await page.screenshot({ path: '.local/solar-manual-mobile.png' });
-  await page.keyboard.press('Escape');
-  assert(await page.locator('#inspection').isHidden());
+  await hold('d', 3300); // 옛 태양광 작업 설명서 자리까지 걸어가던 이동은 태양광 장치 위치에 맞춰 그대로 둔다
   await hold('d', 900);
   await page.setViewportSize({ width: 390, height: 844 });
   await page.clock.runFor(100);

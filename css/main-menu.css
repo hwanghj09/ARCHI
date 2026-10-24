@@ -86,6 +86,6 @@ body[data-main-menu] :is(header, nav, #debug-sidebar, #inventory-button, #sanity
 .menu-slot-list button { min-height: 36px; padding: 6px 12px; border: 1px solid #5d7068; background: #182327; color: #dbe5d8; font-size: 12px; cursor: pointer; }
 .menu-slot-list button:disabled { opacity: .4; cursor: default; }
 
-/* 스크린샷 모드(일시정지 창의 [스크린샷 모드], js/ui/main-menu.js): 게임 화면 위의 UI를 모두 숨긴다. */
+/* 스크린샷 모드(백슬래시 키 또는 일시정지 창의 [스크린샷 모드], js/ui/main-menu.js): 게임 화면 위의 UI를 모두 숨긴다. */
 body[data-screenshot="true"] :is(#main-menu, header, nav, #suho-line, #sanity-hud, #flash-prompt, #inventory-button, #objective, #debug-sidebar, #b2-delete-bar, #interaction-hint, #interaction-outline, #photo-shutter) { visibility: hidden !important; }
 body[data-screenshot="true"] { cursor: none; }
