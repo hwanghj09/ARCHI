@@ -22,16 +22,18 @@ function updateCall() {
 // 차례대로 조사하는 소품: 다음 차례면 한 단계 나아가고(data-done), 마지막 단계에서 묶음의 gives를 준다. 같은 단계를 다시
 // 조사하면 그대로이고, 순서가 틀리면 처음부터다(첫 단계를 조사한 것이면 그 단계까지는 된 것으로 친다).
 function advanceSequence(door) {
-  const { id, step: order, steps, gives } = door.sequence;
+  const { id, step: order, steps, gives, unmet, failLine } = door.sequence;
   if (collectedItems.has(gives)) {
     if (door.takenSheet) openInspection(door.name, door.takenMessage || door.message, door.takenSheet);
     else if (order === steps) openInspection(door.name, door.message, door); // 마지막 단계(재현 벤치)는 챙긴 뒤에도 같은 기록을 다시 펼친다.
     return;
   }
   const progress = sequenceProgress.get(id) || 0;
+  const bench = currentDoors.find(entry => entry.sequence?.id === id && entry.sequence.step === steps);
   if (order === progress || order === progress + 1) {
     sequenceProgress.set(id, order);
     door.element.dataset.done = 'true';
+    bench?.element.querySelector('.sequence-log')?.remove();
     // 마지막 단계의 결과(8층 재현 벤치 출력지)는 조사 창으로 펼친다.
     if (order === steps) {
       collectedItems.add(gives);
@@ -43,6 +45,21 @@ function advanceSequence(door) {
   for (const entry of currentDoors) if (entry.sequence?.id === id) entry.element.dataset.done = 'false';
   sequenceProgress.set(id, order === 1 ? 1 : 0);
   if (order === 1) door.element.dataset.done = 'true';
+  // 단계를 건너뛰었으면 벤치 화면에 실패 로그: 그 순간 아직 맞추지 않은 조건과, 그 상태로 잰 낮은 성능. 정답 순서는 말하지 않는다.
+  if (!unmet || !bench || order <= progress + 1) return;
+  let log = bench.element.querySelector('.sequence-log');
+  if (!log) {
+    log = document.createElement('span');
+    log.className = 'sequence-log';
+    log.setAttribute('role', 'status');
+    bench.element.append(log);
+  }
+  log.textContent = `재현 실패 · ${unmet[progress]} 상태에서 측정 시작 · ARCHI 성능 ${(3.8 + progress * 0.3).toFixed(1)}%`;
+  playGameSound('deny');
+  if (failLine && !collectedItems.has(`${id}-failed`)) {
+    collectedItems.add(`${id}-failed`);
+    sayLine(failLine);
+  }
 }
 
 // 버튼(소품·설비의 opens: { barrier, duration })은 같은 장면의 장애물(barriers) 하나를 duration ms 동안 연다(3층 배터리 자동문).

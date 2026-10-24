@@ -1,5 +1,6 @@
 // 감시 카메라(층·방 설정 cameras, B2 메인 서버실 앞 복도): 천장 카메라가 spans의 구간을 period ms마다 차례로 비춘다.
-// 비추는 구간 안에 수호가 있으면 발각: guards 방의 복도 문을 잠근다(E를 누르면 lockedMessage).
+// 비추는 구간 안에 수호가 있으면 발각: guards 방의 복도 문을 잠근다(E를 누르면 lockedMessage). 처음 잠길 때 수호가 spottedLine을 혼잣말한다.
+// 지금 비추는 구간의 바닥에는 옅은 빨간 띠(cctv-floor)를 깔아 시야를 보인다.
 // 문은 수호가 시야에서 벗어나고 lockMs가 지나야 다시 열린다. 구간 사이의 빈틈은 사각지대다. disabledBy 물건을 챙기면
 // 카메라는 꺼진 채로 그려지고 아무것도 잠그지 않는다. 장면을 새로 그릴 때마다 첫 구간부터 다시 센다.
 let activeCameras = [];
@@ -15,7 +16,12 @@ function buildCameras(config, doorList) {
       cone.setAttribute('aria-hidden', 'true');
       Object.assign(cone.style, { left: `${left}px`, top: `${camera.y + 24}px`, width: `${Math.max(camera.x, to) - left}px`,
         height: `${floorY - camera.y - 24}px`, clipPath: `polygon(${camera.x - left}px 0, ${from - left}px 100%, ${to - left}px 100%)` });
-      dynamicScene.append(cone);
+      const floorBand = document.createElement('div');
+      floorBand.className = 'cctv-floor';
+      floorBand.setAttribute('aria-hidden', 'true');
+      Object.assign(floorBand.style, { left: `${from}px`, top: `${floorY - 10}px`, width: `${to - from}px` });
+      cone.floorBand = floorBand;
+      dynamicScene.append(cone, floorBand);
       return cone;
     });
     const element = document.createElement('div');
@@ -49,12 +55,17 @@ function updateCameras() {
     const span = Math.floor(camera.elapsed / camera.period) % camera.spans.length;
     if (span !== camera.span) {
       camera.span = span;
-      camera.cones.forEach((cone, index) => { cone.dataset.active = String(index === span); });
+      camera.cones.forEach((cone, index) => { cone.dataset.active = cone.floorBand.dataset.active = String(index === span); });
     }
     const [from, to] = camera.spans[span];
     if (body.position.x >= from && body.position.x <= to) {
       if (camera.lockLeft <= 0) {
         setCameraLock(camera, true);
+        const flag = `${camera.guards}-camera-spotted`;
+        if (camera.spottedLine && !collectedItems.has(flag)) {
+          collectedItems.add(flag);
+          sayLine(camera.spottedLine);
+        }
       }
       camera.lockLeft = camera.lockMs;
     } else if (camera.lockLeft > 0) {

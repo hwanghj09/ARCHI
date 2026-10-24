@@ -603,6 +603,9 @@ body { margin: 0; overflow: hidden; background: #27292b; color: #eee; font: 14px
 #dynamic-scene[data-theme="rnd"] .fixture.art-spot.f4-ups[data-state="2"]::after { left: 40px; }
 /* 8F QA실: 재현 절차(설비 sequence)를 끝낸 그림 속 장치 위에 작은 초록 표시등(data-done). 장치가 작아 상자 위에 띄운다. */
 #dynamic-scene[data-theme="qa"] .fixture.art-spot[data-done="true"]::after { content: ''; position: absolute; left: 50%; top: -14px; width: 8px; height: 8px; margin-left: -4px; border-radius: 50%; background: #8fe06a; box-shadow: 0 0 8px #8fe06a; }
+/* 재현 벤치 화면의 실패 로그(puzzles.js advanceSequence): 단계를 건너뛰면 벤치 오른쪽에 작은 단말 화면처럼 뜬다.
+   벤치 위쪽은 조사 안내(E · 재현 벤치 조사)가 뜨는 자리라 옆에 둔다. */
+#dynamic-scene .fixture .sequence-log { position: absolute; left: calc(100% + 10px); top: -4px; width: 220px; white-space: normal; padding: 6px 8px; border: 1px solid #7a2c26; border-radius: 3px; background: #0a0f10ee; color: #ff9d8f; font: 12px/1.45 monospace; text-shadow: 0 0 6px #ff5a4a66; word-break: keep-all; pointer-events: none; }
 .room-door.badge { border-color: #5a5a64; background: linear-gradient(90deg, transparent 80%, #a8a8b4 80% 84%, transparent 84%), linear-gradient(#2e2d35, #232228); box-shadow: inset 0 0 0 4px #141318; }
 /* 9F 문 스프라이트(assets/objects/floor9/, 9F.md 6장). 라이선스실 문 옆 사원증 리더(badge::after)는 CSS로 남긴다. */
 #dynamic-scene[data-theme="wine"] .room-door:is(.push-bar, .wine, .badge, .metal) { border: 0; box-shadow: none; background-color: #1c1216; background-size: 100% 100%; background-repeat: no-repeat; background-position: 0 0; image-rendering: pixelated; }
@@ -708,6 +711,9 @@ body { margin: 0; overflow: hidden; background: #27292b; color: #eee; font: 14px
 .cctv-cone { position: absolute; pointer-events: none; background: linear-gradient(#bfe6ff2e, #bfe6ff0a); opacity: 0; transition: opacity .3s; }
 .cctv-cone[data-active="true"] { opacity: 1; }
 .cctv-cone[data-alert="true"] { background: linear-gradient(#ff5a4a44, #ff5a4a12); }
+/* 카메라가 지금 비추는 바닥 구간: 옅은 빨간 띠(cctv.js). 구간 끝은 흐리게 풀어 둔다. */
+.cctv-floor { position: absolute; height: 14px; pointer-events: none; border-radius: 50%; background: radial-gradient(ellipse at center, #ff4a3a55, #ff4a3a22 60%, #ff4a3a00 100%); opacity: 0; transition: opacity .3s; }
+.cctv-floor[data-active="true"] { opacity: 1; }
 /* 7F Lounge / VIP Room · AI 테스트·검증실(vip 테마): 검은 석재 바닥과 샴페인색 테. 손님이 보는 라운지·VIP Room은 호박색 조명,
    화장실 너머 AI 테스트실(흰 패널)과 검증실(붉은 인터록 등이 켜진 강철 격벽)은 차가운 색. 테마 규칙은 테두리색만 바꾼다. */
 #dynamic-scene[data-theme="vip"] > .floor { background: linear-gradient(#3a3226 0 2px, transparent 2px), repeating-linear-gradient(90deg, #141311 0 180px, #1a1815 180px 182px); border-top-color: #a08a5a; }
