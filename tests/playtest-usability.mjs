@@ -57,7 +57,7 @@ try {
     collectedItems.add('f17-emergency-linked'); solarEnabled = true; solarPoweredFloors = [];
     performFloorChange('f17'); elevatorCars[0].floor = 17; refreshObjective();
   });
-  assert.match(await page.evaluate(() => doorHintText(doors.find(door => door.type === 'elevator'))), /전력 앱 설치 필요/);
+  assert.match(await page.evaluate(() => doorHintText(doors.find(door => door.type === 'elevator'))), /문 열기|탑승/, 'The 17F elevator no longer waits for the power app');
 
   if (await page.locator('#story-scene').isVisible()) await page.locator('#story-skip').click();
   await page.evaluate(() => {
@@ -83,7 +83,6 @@ try {
   }
   assert.deepEqual(await page.evaluate(() => solarPoweredFloors), []);
   assert.match(await page.locator('#suho-line').textContent(), /장치가 켜졌다.*17층을 고르자/);
-  assert.deepEqual(await page.evaluate(() => [solarDownloadMs, solarTransferMs]), [5000, 8000]);
   assert.deepEqual(errors, []);
   console.log('PASS: visible Enter pickup, responsive labels, calm countdown/expiry, facilities knowledge, gate hints, dark-room schematic and truthful solar activation feedback.');
 } finally { await browser.close(); }

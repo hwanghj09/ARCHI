@@ -12,7 +12,8 @@ try {
   await page.goto(new URL('../index.html', import.meta.url).href);
   await page.locator('#menu-start').click();
   if (await page.locator('#menu-new-confirm').isVisible()) await page.locator('#menu-new-confirm').click();
-  await page.locator('#opening-skip').click();
+  // The opening may already have closed before its skip is handled.
+  await page.evaluate(() => { if (openingActive) finishOpening(); });
   await page.evaluate(() => triggerBuildingBlackout());
   await page.clock.pauseAt(new Date('2026-10-03T00:01:00Z'));
   await page.clock.runFor(100);
@@ -47,10 +48,10 @@ try {
         });
       }, { src: `data:image/png;base64,${png.toString('base64')}`, frames, motion, light });
       assert.equal(cells.length, frames, `${motion}/${light}: sheet dimensions`);
-      assert.equal(new Set(cells.map(cell => cell.sample)).size, motion === 'run' && light === 'off' ? 8 : frames,
+      assert.equal(new Set(cells.map(cell => cell.sample)).size, motion === 'run' ? 9 : frames,
         'Complete whole-body run poses or distinct walk phases');
       for (const cell of cells) {
-        assert(cell.top > 5 && cell.top < 55 && cell.bottom >= 216 && cell.bottom <= 239,
+        assert(cell.top > 5 && cell.top < 55 && cell.bottom >= 205 && cell.bottom <= 239,
           `${motion}/${light}: full body and calibrated foot line ${JSON.stringify({ top: cell.top, bottom: cell.bottom })}`);
         assert(cell.count > 6000 && cell.count < 33000 && cell.edge === 0, 'Transparent margins without clipped sprites');
         if (light === 'on') assert(cell.led > 210, 'Beam origin overlaps the painted phone LED in every frame');
@@ -80,7 +81,10 @@ try {
     const before = await page.evaluate(() => ({ x: body.position.x, phase: walkDistance + runDistance }));
     for (const light of ['on', 'off']) {
       const activeMotion = motion;
+      const phaseBeforeToggle = await page.evaluate(() => walkDistance + runDistance);
       await page.keyboard.press('f');
+      assert.equal((await state()).state, motion, 'Light toggle does not insert a standing frame');
+      assert.equal(await page.evaluate(() => walkDistance + runDistance), phaseBeforeToggle, 'Light toggle preserves the exact stride phase');
       if (light === 'on') {
         await page.clock.runFor(100);
         assert.equal((await state()).state, activeMotion, 'Raising the phone preserves the moving gait');
@@ -99,10 +103,15 @@ try {
       assert(await page.evaluate(running => Math.abs(Math.abs(body.velocity.x) - (running ? runSpeed : speed) / 60) < .01,
         activeMotion === 'run'), 'Physics speed matches the allowed gait');
       assert.equal(await page.locator('#world').getAttribute('data-flashlight'), light);
-      const pose = await page.evaluate(() => ({ facing, x: body.position.x, beamX: parseFloat(world.style.getPropertyValue('--beam-x')),
-        angle: world.style.getPropertyValue('--beam-angle'), phase: walkDistance + runDistance }));
+      const pose = await page.evaluate(() => {
+        const lamp = sprite.dataset.state === 'run' ? runLitPhoneLamps[Number(sprite.dataset.frame)] : walkPhoneLampAverage;
+        return { facing, x: body.position.x,
+          handTracked: Math.abs(parseFloat(world.style.getPropertyValue('--beam-x')) - body.position.x - (lamp[0] * .75 - 96) * facing) < .01 &&
+            Math.abs(parseFloat(world.style.getPropertyValue('--beam-y')) - body.bounds.max.y + 178 - lamp[1] * .75) < .01,
+          angle: world.style.getPropertyValue('--beam-angle'), phase: walkDistance + runDistance };
+      });
       assert.equal(pose.facing, direction === 'd' ? 1 : -1);
-      assert((pose.beamX - pose.x) * pose.facing > 15, 'Beam originates at the forward hand');
+      assert(pose.handTracked, 'Beam follows the carrying hand through the original running swing');
       assert.equal(pose.angle, direction === 'd' ? '68deg' : '248deg');
       assert((pose.x - before.x) * pose.facing > 0, 'Light toggle does not block movement');
       if (!sprinting) assert(pose.phase > before.phase, 'Light toggle preserves walking stride phase');

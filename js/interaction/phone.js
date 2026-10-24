@@ -164,7 +164,11 @@ function cancelPhoneLightDelay() {
 }
 
 function togglePhoneLight() {
-  if (phoneLightDelay) { cancelPhoneLightDelay(); animate(0); return; } // 켜지는 중에 다시 누르면 취소
+  if (phoneLightDelay) {
+    cancelPhoneLightDelay();
+    if (usingPhone || Math.abs(body.velocity.x) < .01) animate(0);
+    return;
+  }
   if (photoCaptureTime > 0 || itemUseTime > 0 || playerCaught || hallucinationCaught || blackoutSceneActive || cctvSceneActive) return;
   if (phoneDock) return sayLine('아, 휴대폰은 충전기에 두고 왔지.');
   if (!phoneLightOn && phoneBattery <= 0) return sayLine('배터리가 다 됐어… 충전할 데를 찾아야 해.');
@@ -172,7 +176,7 @@ function togglePhoneLight() {
     playGameSound('phone');
     phoneRaising = true;
     phoneLightDelay = phoneLightDelayMs;
-    animate(0);
+    if (usingPhone || Math.abs(body.velocity.x) < .01) animate(0);
     return;
   }
   phoneLightOn = false;

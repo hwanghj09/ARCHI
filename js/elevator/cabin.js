@@ -233,7 +233,6 @@ function leaveCabin() {
   stage.inert = false;
   releaseInput();
   performFloorChange(destination.id, cabinCarIndex);
-  f1ElevatorArrival = destination.id === 'f1'; // 1층 도착 컷씬(story-scene.js)
   cabinCarIndex = null;
 }
 cabinOpen.addEventListener('click', () => setCabinDoor(true));

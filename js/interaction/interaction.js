@@ -54,7 +54,7 @@ function updateInteraction() {
   const groups = room === 'corridor' ? [doors.filter(door => door.phoneCharger), [...doors.filter(door => !door.phoneCharger),
     ...officeDoors.filter(door => door.room === room)]] :
     [officeDoors.filter(door => door.room === room && door.phoneCharger),
-      [...officeDoors.filter(door => door.room === room && !door.phoneCharger), officeComputer, ...(officePostit.element.hidden ? [] : [officePostit])]];
+      [...officeDoors.filter(door => door.room === room && !door.phoneCharger), officeComputer]];
   nearbyDoor = pickNearbyDoor(groups,
     () => grounded && Math.abs(body.bounds.max.y - floorY) < 2);
   if (!realBuildingBlackout() && room === 'corridor' && currentSceneFloor === 17 && nearbyDoor?.type === 'elevator') {
@@ -92,8 +92,6 @@ function doorHintText(door) {
     if (!elevatorHasPower()) return `${key} · 엘리베이터 전력 없음`;
     const car = elevatorCars[door.carIndex];
     if (car.travelling) return car.rider ? '이동 중…' : '호출 중…';
-    if (car.floor === currentSceneFloor && currentSceneFloor === 17 && !collectedItems.has('solar-app-installed')) return `${key} · 휴대폰에 전력 앱 설치 필요`;
-    if (car.floor === currentSceneFloor && currentObjective?.title === '1층 전력 켜기') return `${key} · 1층 조명 먼저 켜기`;
     if (car.floor === currentSceneFloor) return car.open ? `${key} · 탑승` : `${key} · 문 열기`;
     return `${key} · 호출`;
   }
@@ -121,6 +119,17 @@ function interact() {
     computerReturnFocus = document.activeElement;
     transitionScene(() => {
       setOfficeComputerPower('on');
+      usingComputer = true;
+      computer.hidden = false;
+      resetComputerDesktop();
+      hint.hidden = true;
+    });
+    return;
+  }
+  // 13층 상황실 원격지원 PC(floor-13.js): UPS가 켜져 있고 백업 장치를 챙겼으면 같은 컴퓨터 화면을 열어 영상을 본다(usb-video.js).
+  if (nearbyDoor.usbTerminal && collectedItems.has('f13-ups') && collectedItems.has('f13-backup-device')) {
+    computerReturnFocus = document.activeElement;
+    transitionScene(() => {
       usingComputer = true;
       computer.hidden = false;
       resetComputerDesktop();
@@ -192,8 +201,8 @@ function interact() {
       // 거부 화면은 미등록 출입증이라는 사실만 알려 준다(유효한 사원증의 단서는 컴퓨터 건물 안내 앱이 따로 준다).
       playGameSound('deny');
       openInspection(nearbyDoor.name, '정수호의 출입증을 태그했다. "미등록 출입증입니다, 팀장 이상의 직급이 요구됩니다." 칸막이가 열리지 않았다.');
-      // 이상 행동 목표 도중이면 이 조사창을 닫은 뒤 세 번째 컷씬(story-scene.js)이 이어진다.
-      if (currentObjective?.title === '이상 행동' && !collectedItems.has('story-badge-seen')) collectedItems.add('story-gate-tagged'); // 컷씬은 한 번만(이미 봤으면 다시 나오지 않는다)
+      // 나갈 방법 찾기 목표 도중이면 이 조사창을 닫은 뒤 세 번째 컷씬(story-scene.js)이 이어진다.
+      if (currentObjective?.title === '나갈 방법 찾기' && !collectedItems.has('story-badge-seen')) collectedItems.add('story-gate-tagged'); // 컷씬은 한 번만(이미 봤으면 다시 나오지 않는다)
       return;
     }
     const missing = !unreadable && lacking && nearbyDoor.missingMessage &&
@@ -214,6 +223,9 @@ function interact() {
     const alreadyCollected = gives && collectedItems.has(gives);
     if (gives) {
       collectedItems.add(gives);
+      // 거부당하기 전에 16층 사원증을 먼저 챙겨 왔으면 거부 컷씬 대신 짧은 혼잣말(story-scene.js)로 넘어간다.
+      // 거부 컷씬과 같은 조건(나갈 방법 찾기 목표 도중)일 때만이다.
+      if (nearbyDoor.accessGate && currentObjective?.title === '나갈 방법 찾기' && !collectedItems.has('story-badge-seen')) collectedItems.add('story-gate-early');
       // 처음 챙길 때의 효과음: requires를 써서 움직인 설비(인증 게이트·2층 영사기)는 사용음, 가방에 들어가는 소지품
       // (INVENTORY_ITEMS)은 획득음, 그 밖의 단서·진행은 pickup이다. sound가 있는 설비(11층 방화셔터)는 그 소리를 낸다.
       if (!alreadyCollected) playGameSound(nearbyDoor.sound || (required.length ? 'item-use' : INVENTORY_ITEMS[gives] ? 'item-get' : 'pickup'));
@@ -283,13 +295,6 @@ function interact() {
       return;
     }
     if (car.travelling) return;
-    // 17층을 떠나기 전에 휴대폰 설치까지 마친다. 다른 층의 이전 저장은 설치하러 돌아올 수 있다.
-    if (car.floor === currentSceneFloor && currentSceneFloor === 17 && !collectedItems.has('solar-app-installed')) {
-      openInspection('엘리베이터', '전력 앱을 휴대폰에 먼저 설치하자. 17층 내 자리 컴퓨터에서 앱을 내려받고 USB로 전송해야 한다.');
-      return;
-    }
-    // 1층 전력 켜기 목표 도중에는 칸이 와 있어도 탈 수 없다(호출은 된다).
-    if (car.floor === currentSceneFloor && currentObjective?.title === '1층 전력 켜기') { openInspection('엘리베이터', '1층 전력을 먼저 켜자.'); return; }
     interactionTime = 420;
     facing = body.position.x <= nearbyDoor.x + nearbyDoor.width / 2 ? 1 : -1;
     animate(0);

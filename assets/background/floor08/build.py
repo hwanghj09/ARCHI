@@ -77,13 +77,4 @@ finish_floor(HERE, {
     'planning': (plan, (88, 96, 100), (58, 74, 80)),
     'meeting': (meet, (76, 82, 84), (82, 76, 46)),
 }, BAYS)
-# 예전 벽색이 남지 않게 신호등만 원본에서 옮긴다.
-signal = A[250:438, 344:369].copy()
-mask = np.abs(signal[..., :3].astype(int) - A[250:438, 372:373, :3].astype(int)).sum(2) > 40
-signal[..., 3] = np.where(mask, 255, 0)
-light = Image.fromarray(signal).resize((25, 248), Image.Resampling.LANCZOS)
-with Image.open(HERE + 'walls.png') as walls:
-    corridor = walls.copy()
-corridor.alpha_composite(light, (3295, 322))
-corridor.save(HERE + 'walls.png')
 print('built 8F assets')

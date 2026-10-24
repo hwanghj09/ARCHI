@@ -185,6 +185,24 @@ try {
   }));
   assert.deepEqual(spotted, ['patrol', 'chase'], 'R-03 spots Suho within 480 px ahead');
 
+  // 16층 VU 편의점 인라면 박스 위의 수호에게는 손이 닿지 않는다: 감지하지 않고, 쫓던 중이면 놓치고 순찰로 돌아가 내려올 수 있다.
+  const onBox = await page.evaluate(() => {
+    roamer.where = 'f16-cu';
+    performFloorChange('f16-cu');
+    const box = movingParts.find(part => part.pushable);
+    const top = box.body.position.y - box.height / 2;
+    Body.setPosition(body, { x: box.body.position.x, y: top - (body.bounds.max.y - body.position.y) }); grounded = true;
+    const standing = playerOnPushable();
+    Object.assign(roamer, { x: box.body.position.x - 300, mode: 'patrol', facing: 1, stay: 99999, wait: 0 });
+    updateRobot(roamer, 16);
+    const ignored = roamer.mode;
+    Object.assign(roamer, { x: box.body.position.x, mode: 'chase', lostTime: 0 });
+    for (let t = 0; t < 2000; t += 16) updateRobot(roamer, 16);
+    return { standing, ignored, after: roamer.mode, caught: playerCaught };
+  });
+  assert.deepEqual(onBox, { standing: true, ignored: 'patrol', after: 'patrol', caught: false }, 'R-03 gives up on Suho standing on the box');
+  await page.evaluate(() => { roamer.where = 'f5'; performFloorChange('f5'); });
+
   // 붙잡히면 '다시 시도' 창이 뜨고 그 층(5층) 엘리베이터 앞에서 다시 한다. R-03은 다른 층으로 가고, 1층 추격 기록은 남기지 않는다.
   await page.evaluate(() => {
     roamer.x = 3000; roamer.mode = 'patrol'; roamer.facing = 1; roamer.stay = 99999; roamer.wait = 0;
@@ -202,6 +220,7 @@ try {
 
   // 쫓기다 엘리베이터에 타면 R-03이 문 앞까지 와서 문을 억지로 연다. 연타로 닫으면 고른 층으로 간다.
   const toCabin = (floor = '3') => page.evaluate(floor => {
+    collectedItems.add('story-robot-seen'); refreshObjective(); // 퇴근하기 도중에는 1층 버튼만 눌린다(cabin.js)
     performFloorChange('f5'); releaseInput();
     const door = currentDoors.find(entry => entry.type === 'elevator' && entry.carIndex === 0);
     const center = door.x + door.width / 2;

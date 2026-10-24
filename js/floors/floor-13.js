@@ -1,7 +1,7 @@
 // 13층: FLOOR13_LAYOUT(복도)과 FLOOR13_ROOMS(방 내부). 등록은 registry.js에서 한다.
 // 13층 기술본부(층별 안내: TmaxSoft 기술본부): 강철색 마감에 주황 표지(support 테마). 다른 층과 달리 엘리베이터 왼쪽은
-// 벽 없는 엔지니어 공용석(복도에 놓인 책상)이고, 방은 비상계단 옆 가운데 구역에 기술지원 상황실, 화장실 오른쪽 구역에
-// 장비 검증실·고객 교육장을 둔다. 방 안 폭은 복도 전면 폭의 5.7배(460/320/320 → 2622/1824/1824).
+// 벽 없는 엔지니어 공용석(복도에 놓인 책상)이고, 방은 비상계단 옆 가운데 구역에 장비 검증실, 화장실 오른쪽 구역에
+// 기술지원 상황실·고객 교육장을 둔다. 방 안 폭은 복도 전면 폭의 5.7배(460/320/320 → 2622/1824/1824).
 // 상황실의 장애 알림 프린터는 장비 검증실 UPS의 비상 회선에 물려 있어 UPS를 켜기 전에는 출력되지 않는다
 // (소품 requires = 다른 소품의 gives, 그 전에는 missingMessage).
 // 단서는 새벽 B2 전력 경보·외부 송신 경보를 SYSTEM이 자동 종결했다는 것, 설치 기록 없는 원격 접속 에이전트,
@@ -18,10 +18,11 @@ const FLOOR13_LAYOUT = {
   header: '13F · 기술본부', background: '#18191b', theme: 'support',
   backgroundWallsOnly: true, backgroundImage: { src: 'assets/background/floor13/walls.png', height: 760, top: 0 },
   rooms: [
-    { name: '기술지원 상황실', x: 3090, width: 460, style: 'ops', target: 'f13-ops',
-      doorX: 3240, doorWidth: 160, doorStyle: 'ops' },
-    { name: '장비 검증실 - 보안 자료실', x: 4290, width: 320, style: 'cage', target: 'f13-testbay',
-      doorX: 4322, doorWidth: 130, doorY: 236, doorStyle: 'cage' },
+    // 필수 진행인 보안 자료실을 엘리베이터 가까이 두려고 두 방의 입구(이름·목적지·문)를 맞바꿨다. 문 가운데 위치는 그대로다.
+    { name: '장비 검증실 - 보안 자료실', x: 3090, width: 460, style: 'ops', target: 'f13-testbay',
+      doorX: 3255, doorWidth: 130, doorY: 236, doorStyle: 'cage' },
+    { name: '기술지원 상황실', x: 4290, width: 320, style: 'cage', target: 'f13-ops',
+      doorX: 4307, doorWidth: 160, doorStyle: 'ops' },
     { name: '고객 교육장', x: 4620, width: 320, style: 'classroom', target: 'f13-training',
       doorX: 4788, doorWidth: 120, doorStyle: 'office-wood' },
   ],
@@ -51,7 +52,11 @@ const FLOOR13_ROOMS = interiorRooms(13, [
       surface: 'notebook',
       writing: [{ as: 'title', text: '야간 당직 일지' }, '이번 달부터 야간 장애 대응은', '자동 종결 시스템이 맡음.', '당직 폐지.',
         { as: 'page' }, { text: 'B2 알림은 뜨자마자 닫힘.', ink: 'blue' }, { text: '사람은 볼 틈도 없음.', ink: 'blue' }] },
-    { file: 'support-workstation', size: [512, 256], worldWidth: 270, x: 780 },
+    // 프린터처럼 장비 검증실 UPS 비상 회선에 물린 PC. UPS가 켜져 있고 백업 장치를 챙겼으면 17층까지 가지 않고 여기서 영상을 본다
+    // (interaction.js usbTerminal → usb-video.js). 그 전에는 조사 문구만 보인다.
+    { file: 'support-workstation', size: [512, 256], worldWidth: 270, x: 780, name: '원격지원 PC', usbTerminal: true, requires: 'f13-ups',
+      missingMessage: 'PC 전원이 꺼져 있다. 전원선 꼬리표: "장비 검증실 UPS 비상 회선".',
+      message: 'UPS 비상 회선으로 PC가 켜져 있다. 원격지원 콘솔 옆에 USB 포트가 비어 있다. 외부 저장 장치를 꽂으면 안을 볼 수 있겠다.' },
     { file: 'incident-printer', size: [256, 256], worldWidth: 117, x: 1060, name: '장애 알림 프린터', requires: 'f13-ups',
       clue: '02:14 B2 전력 임계치 초과, 03:05 원격지원 게이트웨이 외부 송신 급증. 둘 다 사람 확인 없이 SYSTEM이 자동 종결했다.',
       sprite: 'assets/objects/floor13/incident-printer-states.png', stateBy: 'f13-ups',

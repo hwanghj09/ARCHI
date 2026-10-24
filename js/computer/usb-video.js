@@ -1,4 +1,4 @@
-// 13층 USB를 17층 수호의 컴퓨터에 연결한 뒤 손상된 리허설 녹화를 끝까지 봐야 2층 목표가 열린다.
+// 13층 USB를 17층 수호의 컴퓨터나 13층 상황실 원격지원 PC(UPS 비상 회선)에 연결한 뒤 손상된 리허설 녹화를 끝까지 봐야 2층 목표가 열린다.
 const usbDriveShortcut = document.createElement('button');
 usbDriveShortcut.type = 'button';
 usbDriveShortcut.dataset.computerApp = 'usbdrive';
@@ -38,8 +38,9 @@ function refreshUsbDrive() {
 }
 
 function usbDriveAvailable() {
-  return usingComputer && !transitioning && !computer.hidden && room === 'office' && currentSceneFloor === 17 &&
-    floorHasPower(17) && collectedItems.has('f13-backup-device');
+  const office = room === 'office' && currentSceneFloor === 17 && floorHasPower(17);
+  const opsPc = room === 'dynamic' && dynamicFloorId === 'f13-ops' && collectedItems.has('f13-ups');
+  return usingComputer && !transitioning && !computer.hidden && (office || opsPc) && collectedItems.has('f13-backup-device');
 }
 
 function usbVideoWatching() {

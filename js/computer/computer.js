@@ -4,7 +4,6 @@ const computerWindow = document.getElementById('computer-window');
 const computerNote = document.getElementById('computer-note');
 const computerSaveStatus = document.getElementById('computer-save-status');
 let computerReturnFocus = null;
-let computerSolarTask = null;
 
 function exitComputer() {
   if (transitioning || !usingComputer) return;
@@ -72,68 +71,12 @@ document.getElementById('computer-blog-list-back').addEventListener('click', () 
 });
 
 function refreshSolarDownload() {
-  const ready = floorHasPower(17);
-  refreshComputerUsb();
   if (typeof refreshUsbDrive === 'function') refreshUsbDrive();
-  if (computerSolarTask && (transitioning || !usingComputer || !ready ||
-      (computerSolarTask.kind === 'transfer' && !computerUsbConnected))) {
-    clearInterval(computerSolarTask.timer);
-    computerSolarTask = null;
-  }
-  const downloaded = collectedItems.has('solar-app-downloaded');
-  const installed = collectedItems.has('solar-app-installed');
-  const task = computerSolarTask;
-  const percent = task ? Math.floor(task.elapsed / task.duration * 100) : 0;
+  const ready = floorHasPower(17);
   document.getElementById('computer-internet-status').textContent = ready ? '연결됨' :
     '17층 전력이 끊겨 연결할 수 없습니다.';
   document.getElementById('computer-solar-page').hidden = !ready;
-  document.getElementById('computer-solar-download').disabled = !ready || downloaded || installed || Boolean(task);
-  document.getElementById('computer-solar-transfer').disabled = !ready || !downloaded || installed || Boolean(task) || !computerUsbConnected;
-  const connectButton = document.getElementById('computer-usb-open');
-  connectButton.disabled = !computerUsbAvailable() || computerUsbConnected;
-  connectButton.textContent = computerUsbConnected ? 'USB 연결됨' : '휴대폰 연결';
-  for (const kind of ['download', 'transfer']) {
-    const progress = document.getElementById(`computer-solar-${kind}-progress`);
-    progress.hidden = task?.kind !== kind;
-    progress.value = percent;
-  }
-  document.getElementById('computer-solar-status').textContent = task?.kind === 'download' ? `다운로드 ${percent}%` :
-    downloaded || installed ? '다운로드 완료 · 파일 전송 앱에서 설치' : '';
-  document.getElementById('computer-transfer-file').hidden = !downloaded && !installed;
-  document.getElementById('computer-transfer-status').textContent = installed ? '등록 완료 · 휴대폰에서 전력 제어 가능' :
-    task?.kind === 'transfer' ? `설치 ${percent}%` :
-    !ready ? '17층 전력 필요' : !downloaded ? '블로그에서 앱 다운로드 필요' :
-    phoneDock ? '충전하던 책상에서 휴대폰을 가져오세요.' : phoneBattery <= 0 ? '휴대폰 충전 필요' :
-    !computerUsbConnected ? '휴대폰 연결 필요' :
-    '';
 }
-
-function startSolarFileTask(kind) {
-  const transfer = kind === 'transfer';
-  if (!usingComputer || transitioning || !computerUsbPanel.hidden || computerWindow.hidden || document.getElementById(`computer-${transfer ? 'transfer' : 'browser'}`).hidden ||
-      !floorHasPower(17) || (!transfer && document.getElementById('blog-post-solar').hidden) || computerSolarTask || collectedItems.has('solar-app-installed') ||
-      (transfer ? !collectedItems.has('solar-app-downloaded') || !computerUsbConnected || !computerUsbAvailable() : collectedItems.has('solar-app-downloaded'))) return;
-  const task = { kind, elapsed: 0, duration: transfer ? solarTransferMs : solarDownloadMs, started: Date.now(), timer: null };
-  computerSolarTask = task;
-  task.timer = setInterval(() => {
-    task.elapsed = Math.min(Date.now() - task.started, task.duration);
-    refreshSolarDownload();
-    if (computerSolarTask !== task || task.elapsed < task.duration) return;
-    clearInterval(task.timer);
-    computerSolarTask = null;
-    collectedItems.add(transfer ? 'solar-app-installed' : 'solar-app-downloaded');
-    if (transfer) {
-      playGameSound('phone');
-      refreshPhone();
-    }
-    refreshSolarDownload();
-    saveProgress();
-  }, 100);
-  refreshSolarDownload();
-}
-
-document.getElementById('computer-solar-download').addEventListener('click', () => startSolarFileTask('download'));
-document.getElementById('computer-solar-transfer').addEventListener('click', () => startSolarFileTask('transfer'));
 
 function closeComputerApp() {
   if (computerActiveWindow) closeComputerWindow(computerActiveWindow);

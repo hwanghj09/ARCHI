@@ -84,15 +84,3 @@ Object.assign(officeCharger.element.style, { left: `${officeCharger.x}px`, top: 
 officeCharger.element.style.setProperty('--phone-top', `${officeCharger.phoneTop}px`);
 world.insertBefore(officeCharger.element, sprite);
 officeDoors.push(officeCharger);
-
-// 출입증 쌔비기 목표가 시작되면(story-badge-seen) 옆자리 책상(왼쪽, 컴퓨터 모니터 왼쪽 구석)에 생기는 포스트잇. 크기는 24px(처음의 절반).
-// 보이기·숨기기는 objective.js의 refreshObjective가 맡고, 숨겨진 동안은 조사 대상에서도 빠진다(interaction.js).
-const officePostit = { name: '포스트잇', type: 'inspect', room: 'office', x: 264, y: 444, width: 24,
-  message: "'16층 카페에서 커피 살 때마다 사원증을 두고오는 습관이 있다!!\n항상 확인하고 이제부턴 잊어버리지 말자!' 아래에 '— 조현아'라고 적혀있다." };
-officePostit.element = document.createElement('div');
-officePostit.element.className = 'office-postit';
-officePostit.element.setAttribute('role', 'img');
-officePostit.element.setAttribute('aria-label', '포스트잇');
-officePostit.element.hidden = true;
-Object.assign(officePostit.element.style, { left: `${officePostit.x}px`, top: `${officePostit.y}px`, width: `${officePostit.width}px`, height: '26px' });
-world.insertBefore(officePostit.element, sprite);

@@ -20,7 +20,7 @@ try {
   await page.clock.runFor(500);
   await page.evaluate(() => {
     collectedItems.add('story-robot-seen'); collectedItems.add('solar-app-installed'); sanity = 80; refreshSanity();
-    collectedItems.add('f7-external-connection-solved');
+    collectedItems.add('f7-external-connection-solved'); collectedItems.add('story-external-seen'); // 7층 → 13층 혼잣말은 본 것으로
     buildingBlackout = true; solarEnabled = true; solarPoweredFloors = []; updatePowerState();
     performFloorChange('f13-testbay', null, 'exit');
   });

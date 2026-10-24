@@ -321,8 +321,10 @@ function mountGuardPatrol() {
 }
 
 // 1층 R-01은 정비 패널에 0914를 넣으면(f1-robot-log) 꺼진다: 전력이 들어와도, B2 엔딩의 1층에서도 멈춰 있다. B2 로봇은 해당 없다.
+// R-01은 비상 UPS가 아니라 로비 조명 전력(휴대폰 전력 앱으로 1층 공급)이 들어와야 기동한다(floor-01.js 정비 기록).
 function guardPatrolPowered(robot) {
-  return world.dataset.powered === 'true' && !(robot === guardPatrol && collectedItems.has('f1-robot-log'));
+  return world.dataset.powered === 'true' &&
+    !(robot === guardPatrol && (collectedItems.has('f1-robot-log') || !floorHasLighting(1)));
 }
 
 function updateGuardPatrol(delta) {
@@ -360,7 +362,9 @@ function updateRobot(robot, delta) {
     }
   } else if (delta > 0) {
     const dx = body.position.x - robot.x;
-    const sameLevel = Math.abs(body.bounds.max.y - floorY) < 180;
+    // 밀 수 있는 상자(16층 인라면 박스) 위의 수호에게는 손이 닿지 않는다: 감지하지 않고, 쫓던 중이면 놓친 것으로 친다.
+    // 예전엔 상자 밑에 붙어 서서 끝까지 기다려, 내려오는 순간 붙잡혔다.
+    const sameLevel = Math.abs(body.bounds.max.y - floorY) < 180 && !playerOnPushable();
     // 전방 센서(720px, sensor)만 순찰 구간 밖(비상계단 왼쪽, left 미만)을 가리지 않는다 — 그 구역은 로봇이
     // 애초에 돌지 않는 곳이라, 저 멀리서 서성이는 수호를 센서 사거리만으로 감지해서 쫓아오는 것은
     // 담당 구역 밖 추격이라 부당하다. 바로 옆 근접 감지(130px)는 구간과 무관하게 그대로 둔다 —

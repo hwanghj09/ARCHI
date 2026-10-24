@@ -24,9 +24,7 @@ try {
     collectedItems.add('f17-emergency-linked');
     updatePowerState(); refreshObjective();
   });
-  assert.match(await page.evaluate(() => currentObjective.text), /17층 사무실.*내 자리 컴퓨터/);
-  await page.evaluate(() => { collectedItems.add('solar-app-downloaded'); refreshObjective(); });
-  assert.match(await page.evaluate(() => currentObjective.text), /파일 전송.*USB/);
+  assert.equal(await page.evaluate(() => currentObjective.text), '승강기가 다시 움직인다. 아래로 내려가자.');
 
   await page.evaluate(() => {
     collectedItems.delete('f17-manager-unlocked');

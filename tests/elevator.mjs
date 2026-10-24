@@ -1003,8 +1003,8 @@ try {
   };
   // 8F follows the lobby directory (ARCHI Data QA실·제품기획실) and uses the user's cutaway asset of the QA test room, the product
   // planning workspace and the shared product meeting room at 1:1 (floor line y=438 → 570). The corridor shows each room behind
-  // glass: QA 시험실 and 제품기획실 left of the elevators, 공용 제품 회의실 right of the restroom, and the dark release gate light
-  // in the middle zone. Each room is its own scene, the full painted room widened with repeated bays.
+  // glass: QA 시험실 and 제품기획실 left of the elevators, 공용 제품 회의실 right of the restroom; the middle zone is plain wall.
+  // Each room is its own scene, the full painted room widened with repeated bays.
   // Its mechanic is a reproduction procedure (sequences on painted fixtures): the QA bench prints its original record only after
   // its three conditions are set in the order written on the meeting room whiteboard (terminal clock → occupancy sensor →
   // observation camera, then the bench). A wrong or skipped step starts over, leaving the room resets the progress, and done
@@ -1039,14 +1039,13 @@ try {
     assert(meeting.room.x >= 4282 && meeting.room.x + meeting.room.width <= 4968 && meeting.door.x >= 4282 &&
       meeting.door.x + meeting.door.width <= 4940, 'The meeting room sits in the right zone');
     assert.deepEqual([qa.door.width, planning.door.width, meeting.door.width], [130, 130, 130]);
-    assert.equal(await page.locator('#dynamic-scene .fixture.art-spot').count(), 1, 'The release gate light in the middle zone');
+    assert.equal(await page.locator('#dynamic-scene .fixture.art-spot').count(), 0, 'No inspect spot in the corridor');
     softCount(await page.locator('#dynamic-scene .floor-prop').count(), 0);
     await page.clock.runFor(100);
     const startX = await playerX();
     near(startX, 1858, 'Arrive at elevator 1');
     await walkTo(1795);
     assert.equal(await hint(), 'E · 탑승', 'The planning room door leaves elevator 1 its whole zone');
-    await inspect(3308, 'E · 출시 판정 신호등 조사', /품질 게이트.*ARCHI 연동/);
     await walkTo(3084);
     assert.equal(await hint(), 'E · 비상계단 (잠김)');
     await page.keyboard.press('e');
