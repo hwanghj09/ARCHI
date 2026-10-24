@@ -306,8 +306,9 @@ function finishStoryScene() {
 // 짧은 대사: 컷씬과 같은 대사 모양이지만 검은 띠 없이 뜨고, 게임을 멈추지 않으며 잠시 뒤 저절로 사라진다.
 const suhoLine = document.getElementById('suho-line');
 let suhoLineTimer;
-function sayLine(text, duration = 3500) {
+function sayLine(text, duration = 3500, tone = '') { // tone: 'red'면 붉은 글씨(상황 묘사)
   suhoLine.textContent = text;
+  suhoLine.dataset.tone = tone;
   clearTimeout(suhoLineTimer);
   suhoLineTimer = setTimeout(() => { suhoLine.textContent = ''; }, duration);
 }

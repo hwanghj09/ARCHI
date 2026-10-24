@@ -345,8 +345,8 @@ const hallucinationSightingElements = ['1', '2', '3'].map(n => {
   return element;
 });
 let lastHallucinationSightingSound = -1;
-// 환각에게 삼켜져 쓰러질 때의 소리.
-const hallucinationDevouredElement = new Audio('assets/audio/hallucination-devoured.mp3');
+// 환각에게 삼켜져 쓰러질 때의 포효. 죽음 영상(hallucination-jumpscare.mp4, 소리 없음)에서 입을 벌리는 순간부터 소리 파일의 0.3초 지점을 들려준다.
+const hallucinationDevouredElement = new Audio('assets/audio/hallucination-roar.mp3');
 hallucinationDevouredElement.preload = 'auto';
 
 // B2 엘리베이터에서 경비 로봇이 문을 억지로 열기 시작할 때의 소리(b2-ending.js).
@@ -358,6 +358,85 @@ function playDoorPrySound() {
   doorPryElement.volume = Math.max(0, Math.min(1, gameVolume));
   doorPryElement.currentTime = 0;
   doorPryElement.play().catch(() => {});
+}
+
+// B2 2페이즈가 시작될 때 문이 열리는 소리(b2-ending.js). 파일의 12초 지점부터 틀고, 불러오기·새 게임이면 멈춘다.
+const b2PhaseDoorElement = new Audio('assets/audio/b2-phase2-door.mp3');
+b2PhaseDoorElement.preload = 'auto';
+const b2PhaseDoorStartS = 12;
+
+function playB2PhaseDoorSound() {
+  if (document.hidden || gameVolume <= 0 || mainMenuActive || !gameStarted) return;
+  b2PhaseDoorElement.volume = Math.max(0, Math.min(1, gameVolume));
+  const start = () => { b2PhaseDoorElement.currentTime = b2PhaseDoorStartS; b2PhaseDoorElement.play().catch(() => {}); };
+  if (b2PhaseDoorElement.readyState >= 1) start(); // 길이를 알아야 12초로 건너뛸 수 있다
+  else b2PhaseDoorElement.addEventListener('loadedmetadata', start, { once: true });
+}
+
+function stopB2PhaseDoorSound() {
+  b2PhaseDoorElement.pause();
+}
+
+// B2 2페이즈 보스의 발이 땅에 닿을 때마다 나는 발소리(b2-ending.js). 보스가 가까울수록 크다.
+const b2BossStepElement = new Audio('assets/audio/b2-boss-step.mp3');
+b2BossStepElement.preload = 'auto';
+
+function playB2BossStep(x) {
+  if (document.hidden || gameVolume <= 0 || mainMenuActive || !gameStarted) return;
+  const near = Math.max(.3, 1 - Math.abs(x - body.position.x) / 1200);
+  b2BossStepElement.volume = Math.max(0, Math.min(1, gameVolume * near));
+  b2BossStepElement.currentTime = 0;
+  b2BossStepElement.play().catch(() => {});
+}
+
+// B2 보스의 쇠공이 머리 위를 지나갈 때 공기를 가르는 "우웅" 소리(b2-ending.js). 파일 없이 바로 만든다:
+// 대역 필터를 건 잡음이 위로 올랐다 내려가고(지나가는 도플러), 낮은 음이 같이 울렸다 가라앉는다. 가장 센 순간이 peak초에 온다.
+function playB2BallWhoosh(peak = .25) {
+  if (!gameAudioContext || gameAudioContext.state !== 'running' || document.hidden || gameVolume <= 0 || mainMenuActive || !gameStarted) return;
+  if (gameAudioEffects.size >= 6) return;
+  const ctx = gameAudioContext, now = ctx.currentTime, length = peak + .55;
+  const noiseBuffer = ctx.createBuffer(1, Math.ceil(ctx.sampleRate * length), ctx.sampleRate);
+  const samples = noiseBuffer.getChannelData(0);
+  for (let i = 0; i < samples.length; i++) samples[i] = Math.random() * 2 - 1;
+  const noise = ctx.createBufferSource();
+  noise.buffer = noiseBuffer;
+  const band = ctx.createBiquadFilter();
+  band.type = 'bandpass';
+  band.Q.value = 1.4;
+  band.frequency.setValueAtTime(260, now);
+  band.frequency.exponentialRampToValueAtTime(900, now + peak);
+  band.frequency.exponentialRampToValueAtTime(220, now + length);
+  const hum = ctx.createOscillator();
+  hum.type = 'sine';
+  hum.frequency.setValueAtTime(110, now);
+  hum.frequency.exponentialRampToValueAtTime(150, now + peak);
+  hum.frequency.exponentialRampToValueAtTime(70, now + length);
+  const gain = ctx.createGain();
+  gain.gain.setValueAtTime(.0001, now);
+  gain.gain.exponentialRampToValueAtTime(.9, now + peak);
+  gain.gain.exponentialRampToValueAtTime(.0001, now + length);
+  const humGain = ctx.createGain();
+  humGain.gain.value = .35;
+  noise.connect(band).connect(gain);
+  hum.connect(humGain).connect(gain);
+  gain.connect(gameAudioMaster);
+  noise.start(now);
+  hum.start(now);
+  noise.stop(now + length);
+  hum.stop(now + length);
+  noise.onended = () => { gain.disconnect(); band.disconnect(); humGain.disconnect(); };
+}
+
+// B2 보스가 쇠공을 던지기 전 준비 동작(팔을 뻗고 떠는 때)이 시작될 때 나는 쇠 삐걱이는 소리(b2-ending.js).
+const b2BossWindupElement = new Audio('assets/audio/b2-boss-windup.mp3');
+b2BossWindupElement.preload = 'auto';
+
+function playB2BossWindup() {
+  if (document.hidden || gameVolume <= 0 || mainMenuActive || !gameStarted) return;
+  b2BossWindupElement.volume = Math.max(0, Math.min(1, gameVolume));
+  b2BossWindupElement.playbackRate = 1.3; // 전조 알림답게 조금 빠르고 날카롭게
+  b2BossWindupElement.currentTime = 0;
+  b2BossWindupElement.play().catch(() => {});
 }
 
 // B2 DELETE 뒤 삭제가 진행되는 동안 반복되는 사이렌(b2-ending.js). on이면 켜 두고(이미 돌고 있으면 볼륨만 맞춘다), 끄면 처음으로 되감는다.
@@ -392,7 +471,7 @@ function setB2Siren(on) {
 function playHallucinationDevouredSound() {
   if (document.hidden || gameVolume <= 0) return;
   hallucinationDevouredElement.volume = Math.max(0, Math.min(1, gameVolume));
-  hallucinationDevouredElement.currentTime = 0;
+  hallucinationDevouredElement.currentTime = .3;
   hallucinationDevouredElement.play().catch(() => {});
 }
 
@@ -447,7 +526,7 @@ function pauseGameAudio() {
   sanityMusicElement.pause();
   sanityMusicGain = sanityMusicTarget = 0;
   sanityMusicElement.volume = 0;
-  if (document.hidden || mainMenuActive || !gameStarted) for (const element of [hallucinationSoundElement, ...hallucinationSightingElements, hallucinationDevouredElement, redEyeBreakDragonElement, redEyeBreakUniversElement, doorPryElement, b2SirenElement]) element.pause();
+  if (document.hidden || mainMenuActive || !gameStarted) for (const element of [hallucinationSoundElement, ...hallucinationSightingElements, hallucinationDevouredElement, redEyeBreakDragonElement, redEyeBreakUniversElement, doorPryElement, b2PhaseDoorElement, b2BossStepElement, b2BossWindupElement, b2SirenElement]) element.pause();
   if (!gameAudioContext) return;
   for (const sound of gameAudioAmbience.values()) stopGameAudioSource(sound);
   gameAudioAmbience.clear();
@@ -492,7 +571,7 @@ function updateGameAudio(elapsed = step) {
   const wanted = new Map([[background, dread ? .42 : haunted ? .34 : roof ? .23 : lit ? .18 : .14]]);
   const fear = sanityTierOf(sanity);
   const musicAllowed = !dread && !haunted && !openingActive && !blackoutSceneActive && !storySceneActive && !cctvSceneActive && !b2CaptureActive && !solarRestoreActive && !playerCaught && !hallucinationCaught;
-  updateAuditoryHallucinations(elapsed, musicAllowed && fear >= 1 && !hallucinationEventBlocked() && !hallucinationMode &&
+  updateAuditoryHallucinations(elapsed, musicAllowed && !inB2MainRoom() && fear >= 1 && !hallucinationEventBlocked() && !hallucinationMode &&
     guardPatrol.mode !== 'chase' && roamer.mode !== 'chase' && b2Ending.phase !== 'running');
   const roomKey = `${room}:${dynamicFloorId}:${currentSceneFloor}:${selectingFloor}`;
   if (roomKey !== gameAudioRoomKey) {
@@ -511,7 +590,7 @@ function updateGameAudio(elapsed = step) {
     gameAudioRoomElapsed = 0;
     gameAudioRoomNext = 11000 + Math.random() * 13000;
   }
-  updateSanityMusic(musicAllowed ? fear * .06 : 0, elapsed);
+  updateSanityMusic(musicAllowed && !inB2MainRoom() ? fear * .06 : 0, elapsed); // B2 메인 서버실에서는 공포 음악이 나오지 않는다
   if (moving) wanted.set('motor', .25);
   for (const [name, sound] of gameAudioAmbience) {
     if (wanted.has(name)) continue;

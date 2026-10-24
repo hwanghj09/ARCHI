@@ -36,6 +36,7 @@ const b2CaptureShots = [
 let b2CaptureActive = false;
 let b2CaptureElapsed = 0;
 let b2CaptureShot = -1;
+let b2CaptureHold = 0; // 보스에게 맞은 뒤 검은 화면으로 기다리는 남은 시간(ms)
 let b2CaptureInLab = false;
 let b2CaptureBlocked = [];
 let b2CaptureOrigin = null;
@@ -53,9 +54,13 @@ function blockB2CaptureInput() {
   b2CaptureScene.inert = false;
 }
 
-function startB2CaptureScene() {
+function startB2CaptureScene(skipStrike = false, blackMs = 0) {
   if (b2CaptureActive || !b2CaptureScene.hidden) return;
   b2CaptureActive = true;
+  cancelPhoneLightDelay(); // 켜져 있던 플래시는 끈다
+  if (phoneLightOn) { phoneLightOn = false; refreshPhone(); }
+  sanity = 100; // 끌려가는 장면이 시작되면 정신력이 가득 찬다
+  refreshSanity();
   b2CaptureElapsed = 0;
   b2CaptureShot = -1;
   b2CaptureInLab = false;
@@ -68,7 +73,21 @@ function startB2CaptureScene() {
   releaseInput();
   blockB2CaptureInput();
   b2CaptureSkip.focus({ preventScroll: true });
+  if (skipStrike) { // 타격·암전 장면은 건너뛰고 첫 번째 끌려가는 장면(drag)부터. blackMs만큼은 검은 화면으로 먼저 둔다.
+    b2CaptureHold = blackMs;
+    b2CaptureScene.dataset.phase = 'black';
+    b2CaptureEyelids.style.setProperty('--eye-open', '0');
+    if (!blackMs) beginB2CaptureDrag();
+  }
   updateB2CaptureScene(0);
+}
+
+// 보스에게 당했을 때: 로봇의 타격 장면 없이 일반 로봇이 끌고 가는 첫 장면(drag)부터 시작한다.
+function beginB2CaptureDrag() {
+  const firstDrag = b2CaptureShots.findIndex(shot => shot.phase === 'drag');
+  setB2CaptureRoom(b2CaptureOrigin.scene);
+  b2CaptureShot = firstDrag - 1;
+  b2CaptureElapsed = b2CaptureShots[firstDrag].at;
 }
 
 function setB2CaptureRoom(id) {
@@ -152,6 +171,11 @@ function updateB2CaptureWorld(shot, age) {
 
 function updateB2CaptureScene(delta) {
   if (!b2CaptureActive) return;
+  if (b2CaptureHold > 0) { // 맞은 직후의 검은 화면
+    b2CaptureHold -= delta;
+    if (b2CaptureHold > 0) return;
+    beginB2CaptureDrag();
+  }
   b2CaptureElapsed += delta;
   while (b2CaptureShot + 1 < b2CaptureShots.length && b2CaptureElapsed >= b2CaptureShots[b2CaptureShot + 1].at) {
     const shot = b2CaptureShots[++b2CaptureShot];
@@ -185,7 +209,7 @@ function finishB2CaptureScene() {
 }
 
 function resetB2CaptureScene() {
-  b2CaptureActive = false; b2CaptureElapsed = 0; b2CaptureShot = -1; b2CaptureInLab = false;
+  b2CaptureActive = false; b2CaptureElapsed = 0; b2CaptureShot = -1; b2CaptureInLab = false; b2CaptureHold = 0;
   b2CaptureScene.hidden = true; b2CaptureScene.inert = false; b2CaptureScene.removeAttribute('aria-hidden');
   for (const element of b2CaptureBlocked) element.inert = false;
   b2CaptureBlocked = [];

@@ -92,13 +92,15 @@ function randomBetween([min, max]) { return min + Math.random() * (max - min); }
 function hallucinationSceneKey() { return room === 'dynamic' ? dynamicFloorId : room; }
 
 // 화면 가장자리나 벽 밖에서 출발하지 않도록 실제로 보이는 쪽에 둔다.
-function hallucinationSpawnX(distance) {
+function hallucinationSpawnX(distance, behind = false) {
   const left = Math.max(96, cameraX + 64);
   const right = Math.min(worldWidth - 96, cameraX + viewWidth - 64);
   // 보이는 범위 안에 자리가 있는 쪽(왼쪽·오른쪽) 중 무작위로 고른다. 수호가 화면 왼쪽에 서 있어 오른쪽에만 나타나던 것을 바로잡는다.
   const leftRoom = body.position.x - left, rightRoom = right - body.position.x, need = Math.min(distance, 160);
   const sides = [leftRoom >= need ? -1 : 0, rightRoom >= need ? 1 : 0].filter(Boolean);
-  const side = sides.length ? sides[Math.floor(Math.random() * sides.length)] : leftRoom > rightRoom ? -1 : 1;
+  // behind: 수호 뒤쪽(보는 방향의 반대)에 자리가 조금이라도 있으면(벽에 거의 붙어 있지 않으면) 항상 뒤쪽에서 나타난다.
+  const backSide = -facing, backRoom = backSide < 0 ? leftRoom : rightRoom;
+  const side = behind && backRoom >= 120 ? backSide : sides.length ? sides[Math.floor(Math.random() * sides.length)] : leftRoom > rightRoom ? -1 : 1;
   const target = Math.max(left, Math.min(right, body.position.x + side * distance));
   const doors = currentDoors.filter(door => ['elevator', 'room', 'stairs'].includes(door.type));
   const clear = x => doors.every(door => x <= door.x - 38 || x >= door.x + door.width + 38);
@@ -117,7 +119,7 @@ function startZeroCharge() {
   endHallucinationSighting();
   zeroEventPhase = 'charging';
   zeroEventTimer = zeroEventLightTime = zeroEventStepTimer = 0;
-  zeroEventGhostX = hallucinationSpawnX(zeroEventGhostStartGap);
+  zeroEventGhostX = hallucinationSpawnX(zeroEventGhostStartGap, true);
   zeroEventTravel = 0;
   zeroEventSide = Math.sign(zeroEventGhostX - body.position.x) || 1;
   beginHallucinationSighting('charge', zeroEventSide, Math.abs(zeroEventGhostX - body.position.x));
@@ -139,19 +141,30 @@ function resolveZeroEvasion() {
 }
 
 // 삼켜지는 순간 영상을 모든 화면 요소 앞에서 바로 재생하고, 끝나거나 재생에 실패하면 닫아 게임 오버 창을 보여 준다.
-function hideDevouredVideo() {
+const devouredMouthOpenMs = 1400; // 영상에서 입이 벌어지기 시작하는 시점(영상 길이 2.2초)
+const devouredTrimMs = 800; // 영상의 앞부분은 이만큼 건너뛰고 재생한다(파일은 그대로, 아래 시점들은 원본 영상 기준)
+const devouredRoarLeadMs = 350; // 소리 재생이 시작되기까지 걸리는 시간만큼 먼저 튼다
+let devouredRoarFrame = 0;
+function hideDevouredVideo(event) { // 영상이 끝난 것만으로는 포효를 끊지 않는다(게임 오버 창에서도 이어서 들린다)
+  if (event?.type !== 'ended') cancelAnimationFrame(devouredRoarFrame);
   devouredVideo.pause();
   devouredVideo.hidden = true;
-  hallucinationDevouredElement.pause();
+  if (event?.type !== 'ended') hallucinationDevouredElement.pause();
 }
 devouredVideo.addEventListener('ended', hideDevouredVideo);
 devouredVideo.addEventListener('error', hideDevouredVideo);
 function playDevouredVideo() {
-  devouredVideo.currentTime = 0;
-  devouredVideo.muted = gameVolume <= 0; // 영상에 소리가 들어 있으니 게임 음량을 따른다
-  devouredVideo.volume = Math.max(0, Math.min(1, gameVolume));
+  devouredVideo.currentTime = devouredTrimMs / 1000;
+  devouredVideo.muted = true; // 영상 소리는 쓰지 않고 포효를 따로 맞춰 튼다
   devouredVideo.hidden = false;
   devouredVideo.play().catch(hideDevouredVideo);
+  // 영상 재생 시간을 직접 보고 맞춘다(타이머는 영상이 실제로 시작하는 시간과 어긋난다).
+  const watchRoar = () => {
+    if (devouredVideo.hidden) return;
+    if (devouredVideo.currentTime * 1000 >= devouredMouthOpenMs - devouredRoarLeadMs) return playHallucinationDevouredSound();
+    devouredRoarFrame = requestAnimationFrame(watchRoar);
+  };
+  devouredRoarFrame = requestAnimationFrame(watchRoar);
 }
 
 function triggerDevoured() {
@@ -459,6 +472,7 @@ function shatterRedEye(eye) {
 
 // 매 프레임(render)에서 부른다: 장면이 바뀌었으면 눈을 지우고, 고정된 눈 안의 눈동자만 수호 쪽으로 옮긴다.
 function updateRedEyes() {
+  if (inB2MainRoom()) { redEyes.replaceChildren(); redEyeShards.replaceChildren(); return; }
   const key = room === 'dynamic' ? dynamicFloorId : room;
   if (key !== redEyeScene) { redEyes.replaceChildren(); redEyeShards.replaceChildren(); redEyeScene = key; }
   // 불이 켜지면 눈 전체가, 손전등을 켜면 빛 원뿔에 닿은 눈만 서서히 사라지고, 다시 어두워지면 같은 자리에 서서히 드러난다(css/sanity.css).
@@ -565,6 +579,12 @@ function debugTriggerJumpscare() {
 }
 
 function updateBlink(elapsed, fsmPaused) {
+  if (inB2MainRoom()) { // B2 메인 서버실에서는 눈 깜빡임·눈 플래시·벽의 눈이 전부 나오지 않는다
+    blinkFlash.dataset.active = 'false'; blinkFlashTimer = 0;
+    eyeFlash.dataset.active = 'false'; eyeFlashTimer = 0;
+    blinkTimer = 0;
+    return;
+  }
   if (blinkFlashTimer > 0) {
     blinkFlashTimer -= elapsed;
     if (blinkFlashTimer <= 0) blinkFlash.dataset.active = 'false';
@@ -583,6 +603,11 @@ function updateBlink(elapsed, fsmPaused) {
   if (sanity <= 0) { if (Math.random() < eyeFlashChance) showEyeFlash(); }
   else { blinkFlash.dataset.active = 'true'; blinkFlashTimer = 180; }
   if (fearTier >= 4) spawnRedEyes();
+}
+
+// B2 ARCHI 메인 서버실에서는 눈 연출(깜빡임·눈 플래시)만 남기고 정신력 환각(어둠 속 얼굴·멀리 보이는 형상·추격·환청·공포 음악)은 나오지 않는다.
+function inB2MainRoom() {
+  return room === 'dynamic' && dynamicFloorId === 'b2-main';
 }
 
 function updateSanity(elapsed) {
@@ -619,10 +644,20 @@ function updateSanity(elapsed) {
   document.body.dataset.weary = String(fearTier >= 3);
   updateComputerFear(fearTier >= 4);
   updateBlink(elapsed, fsmPaused);
-  updateDarkFace(elapsed, fsmPaused);
-  updateZeroEvent(elapsed, chaseHalt);
-  updateAmbientSighting(elapsed, fsmPaused);
-  updateHallucinationSighting(elapsed, fsmPaused);
+  if (inB2MainRoom()) {
+    // 이미 나와 있던 환각은 걷어 내고(눈 연출은 그대로), 새 환각은 시작하지 않는다.
+    if (hallucinationMode || zeroEventPhase !== 'idle' || !darkFace.hidden) {
+      endHallucinationSighting();
+      zeroEventPhase = 'idle'; zeroEventTimer = 0; zeroEventForced = false;
+      zeroEventLightTime = zeroEventStepTimer = 0;
+      darkFace.hidden = true; darkFaceForced = false; darkFaceTimer = darkFaceLife = 0;
+    }
+  } else {
+    updateDarkFace(elapsed, fsmPaused);
+    updateZeroEvent(elapsed, chaseHalt);
+    updateAmbientSighting(elapsed, fsmPaused);
+    updateHallucinationSighting(elapsed, fsmPaused);
+  }
   refreshSanity();
 }
 

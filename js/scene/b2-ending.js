@@ -160,8 +160,9 @@ function startB2Phase2() {
   playGameSound('blackout');
   b2Log('sys', 'ARCHI-MAIN 보조 개체 가동 · 서버실 조명이 비상 모드로 전환됐다');
   b2Log('archi', '삭제는 끝나지 않습니다. 제가 지키던 것이 문 안쪽에 있으니까요.');
-  sayLine('불이 붉게 바뀌었어… 저건 뭐지?', 5000);
-  Object.assign(b2Hook, { x: b2MonsterStartX, mode: 'wait', timer: b2HookGap[0], reach: 0 });
+  playB2PhaseDoorSound();
+  sayLine('왼쪽에서 무언가 열리는 소리가 들린다..', 5000, 'red');
+  Object.assign(b2Hook, { x: b2MonsterStartX, mode: 'wait', timer: b2HookGap[0], reach: 0, flight: null });
   refreshB2Phase2();
 }
 
@@ -170,16 +171,25 @@ function startB2Phase2() {
 // 쏘기 직전(예고)에는 터미널이 닫히니 그때 웅크려야 한다. 공이 수호에게 닿으면 붙잡힌다.
 // 수호가 손이 닿는 거리까지 가까워지면 던지지 않고 쇠공을 크게 휘두른다(근접 공격, phase2-boss-melee.png 9컷).
 const b2MonsterStartX = 220; // 문(x 135~491)의 가운데 앞
-const b2MonsterSpeed = 30; // px/s
+const b2MonsterSpeed = 15; // px/s
 const b2MonsterWidth = { walk: 187, aim: 342 }; // 그림 폭(css의 #b2-monster·.b2-boss와 같다). 이 안에 수호가 들어오면 붙잡힌다
+const b2WalkCycleMs = 14000; // css의 b2-boss-walk 한 바퀴(12컷)와 같다
+const b2StepFrames = [3, 9]; // 걷는 컷 중 앞발이 땅에 닿는 컷(0부터 센다)
 const b2HookAimMs = 800;
+const b2HookWarnMs = 300; // 준비 동작보다 이만큼 먼저 전조 알림이 뜬다
 const b2HookFlySpeed = 2550; // px/s
 const b2HookBackSpeed = 1100;
 const b2HookGap = [5000, 7000]; // 다음 발사까지(ms)
 // 쇠공: radius는 그림 반지름, hit는 판정 반지름. 공 중심이 수호 위치를 지나는 높이는 웅크린 머리 윗면(floorY - 96)보다 공 아래쪽이 clearance만큼 위가 되게 한다.
 const b2BallSize = { radius: 90, hit: 86, clearance: 24 };
 const b2HookRopeHeight = 24;
-const b2HookHand = { x: 322, y: 73 }; // 손을 뻗은 그림(phase2-boss-aim.png)에서 손의 위치(괴물 왼쪽·위 기준)
+const b2WalkHand = { x: 120, y: 185 }; // 걷는 그림에서 손(주먹)의 대략적인 위치(괴물 왼쪽·위 기준)
+const b2BallChain = 263; // 공을 끌고 올 때·휘두를 때 사슬 길이
+const b2BallDragBack = 255; // 걸을 때 손에서 공까지 뒤쪽 거리(공은 바닥에 닿아 있다)
+const b2RecoverMs = 450; // 던진 뒤 자세를 거두는 시간
+const b2HookSwingMs = 140; // 머리 위에서 앞으로 휘둘러 던지는 시간
+const b2HookSwingArc = 60; // 휘두르는 동안 사슬이 도는 각도(도)
+const b2HookHand = { x: 296, y: 99 }; // 던지기 준비 자세(근접 그림 5번째 컷)에서 손의 위치(괴물 왼쪽·위 기준)
 const b2Hook = { x: b2MonsterStartX, mode: 'wait', timer: 0, reach: 0, elapsed: 0 };
 // 서 있는 머리 윗면(floorY - 162)과 웅크린 머리 윗면(floorY - 96) 사이로 공 중심이 지나가는 높이(수호의 위치에서)
 const b2BallAimY = () => floorY - 96 - b2BallSize.radius - b2BallSize.clearance;
@@ -188,7 +198,7 @@ const b2BallAimY = () => floorY - 96 - b2BallSize.radius - b2BallSize.clearance;
 const b2MeleeMs = 1000;
 const b2MeleeShift = -40; // 걷는 그림과 허리판 위치를 맞추려고 근접 그림을 왼쪽으로 옮긴 양
 const b2MeleeChain = 230;
-const b2MeleeReach = 160; // 손에서 이만큼 안에 수호가 들어오면 휘두른다. 휘두른 공이 4번째 컷에 닿을 때 아직 이 안이면 웅크려도 맞는다
+const b2MeleeReach = 80; // 손에서 이만큼 안에 수호가 들어오면 휘두른다. 휘두른 공이 4번째 컷에 닿을 때 아직 이 안이면 웅크려도 맞는다
 const b2MeleeHands = [[95, 185], [334, 81], [311, 90], [315, 87], [336, 99], [311, 163], [286, 157], [291, 172], [232, 128]];
 const b2MeleeAngles = [-150, -110, -60, -20, 25, 10, -50, -110, -150, -160];
 
@@ -197,87 +207,144 @@ function updateB2Monster(delta) {
   if (!monster) return;
   const hook = dynamicScene.querySelector('#b2-hook');
   const rope = dynamicScene.querySelector('#b2-hook-rope');
+  const { radius } = b2BallSize;
   let melee = b2Hook.mode === 'melee';
   // 멈추지 않고 수호 쪽으로 걸어온다(예고·던지기·휘두르는 동안은 서 있다). 그림 전체 범위 안에 수호가 들어오면 붙잡힌다.
   const toPlayer = body.position.x - b2MonsterWidth.walk / 2 - b2Hook.x;
   if (b2Hook.mode === 'wait') b2Hook.x += Math.sign(toPlayer) * Math.min(Math.abs(toPlayer), b2MonsterSpeed * delta / 1000);
-  const boxWidth = b2Hook.mode === 'aim' ? b2MonsterWidth.aim : b2MonsterWidth.walk;
+  const boxWidth = b2MonsterWidth.walk; // 걷는 그림·준비 그림 모두 몸 폭이 같다
   if (!playerCaught && body.bounds.max.x > b2Hook.x && body.bounds.min.x < b2Hook.x + boxWidth) {
     playGameSound('robot-grab', { x: body.position.x });
-    showB2BadEnding();
+    showB2BossBadEnding();
     return;
   }
-  // hand: 줄이 나가는 손, ball: 공 중심, spin: 공이 도는 각(rad). 공이 보이는 동안만 쓴다.
+  // hand: 줄이 나가는 손, ball: 공 중심, spin: 공이 도는 각(rad). 걷는 동안 공은 손 뒤 바닥에 끌린다.
+  const walkHand = { x: b2Hook.x + b2WalkHand.x, y: floorY - 339 + b2WalkHand.y };
+  const dragBall = { x: walkHand.x - b2BallDragBack, y: floorY - radius };
   let hand = { x: b2Hook.x + b2HookHand.x, y: floorY - 339 + b2HookHand.y };
-  let ball = { x: hand.x, y: b2BallAimY(), spin: 0 };
+  let ball = { ...dragBall, spin: 0 };
   let frame = 0;
   // 수호가 손이 닿는 거리 안에 있으면 던지는 중이든 아니든 언제나 근접 공격(휘두르기)을 한다.
   if (b2Hook.mode !== 'melee' && b2InMeleeRange()) {
-    Object.assign(b2Hook, { mode: 'melee', elapsed: 0, reach: 0 });
+    if (b2Hook.warned) sayLine('', 0); // 던지기 전조 알림이 떠 있으면 거둔다(근접 공격에는 알림이 없다)
+    Object.assign(b2Hook, { mode: 'melee', elapsed: 0, reach: 0, whooshed: false, warned: false, flight: null });
     melee = true;
     closeB2Terminal();
-    playGameSound('cctv-beep');
-    if (performance.now() - (b2Hook.said ?? -1e9) > 4000) sayLine('쇠공을 휘두른다! 웅크려!', 2200);
-    b2Hook.said = performance.now();
   }
   if (b2Hook.mode === 'wait') {
-    b2Hook.timer -= delta;
-    if (b2Hook.timer <= 0) {
-      Object.assign(b2Hook, { mode: 'aim', timer: b2HookAimMs });
+    hand = walkHand;
+    if (!b2Hook.flight) b2Hook.timer -= delta; // 공이 돌아오기 전에는 다음 던지기를 준비하지 않는다
+    // 전조 알림은 준비 동작이 시작하기 b2HookWarnMs 전에 먼저 뜬다.
+    if (b2Hook.timer <= b2HookWarnMs && !b2Hook.warned) {
+      b2Hook.warned = true;
+      playB2BossWindup(); // 삐 경고음 대신 쇠 삐걱이는 소리가 전조 알림과 함께 난다
       closeB2Terminal();
-      playGameSound('cctv-beep');
-      sayLine('쇠공이 날아온다! 웅크려!', 2200);
+      sayLine('쇠공이 날아온다! 웅크려!', 2200 + b2HookWarnMs);
+    }
+    if (b2Hook.timer <= 0) {
+      Object.assign(b2Hook, { mode: 'aim', timer: b2HookAimMs, warned: false });
+      closeB2Terminal();
     }
   } else if (b2Hook.mode === 'aim') {
+    // 바닥에 끌리던 공이 손 뒤쪽에서 위로 끌려 올라가 머리 위로 간다.
     b2Hook.timer -= delta;
-    if (b2Hook.timer <= 0) {
-      b2Hook.mode = 'fly'; b2Hook.reach = 0;
-    }
-  } else if (b2Hook.mode === 'fly') {
-    b2Hook.reach += b2HookFlySpeed * delta / 1000;
-    ball.x = hand.x + b2Hook.reach; // 공은 수호 쪽이 아니라 오른쪽으로 일직선(고정 높이)
+    // 올라가는 속도는 점점 빨라져, 머리 위에서 멈추지 않고 그대로 휘두르는 동작으로 이어진다.
+    const p = 1 - Math.max(0, b2Hook.timer) / b2HookAimMs, ease = p * p;
+    frame = Math.min(4, Math.floor(p * 5)); // 서 있다가 앞으로 기울며 팔을 뻗는 5컷
+    hand = { x: b2Hook.x + b2MeleeShift + b2MeleeHands[frame][0], y: floorY - 339 + b2MeleeHands[frame][1] };
+    const fromX = dragBall.x - hand.x, fromY = dragBall.y - hand.y;
+    const from = Math.atan2(fromY, fromX) * 180 / Math.PI, length = Math.hypot(fromX, fromY);
+    ball = b2BallArc(hand, from + (270 - from) * ease, length + (b2BallChain - length) * ease);
+    b2Hook.omega = 2 * (270 - from) / b2HookAimMs; // 올라가기가 끝나는 순간의 각속도(도/ms)
+    if (b2Hook.timer <= 0) Object.assign(b2Hook, { mode: 'swing', elapsed: 0 });
+  } else if (b2Hook.mode === 'swing') {
+    // 머리 위에서 앞으로 휘둘러 던진다. 각속도는 올라가던 속도에서 시작해 놓는 순간 날아가는 속도와 같아진다.
+    if (!b2Hook.elapsed) playB2BallWhoosh(.25); // 휘두르는 순간부터 소리를 키워, 공이 머리 위를 지날 때 가장 세다
+    b2Hook.elapsed += delta;
+    const p = Math.min(1, b2Hook.elapsed / b2HookSwingMs);
+    const a = b2Hook.omega * b2HookSwingMs, b = b2HookSwingArc - a; // 각도 = 270 + a·p + b·p²
+    const angle = 270 + a * p + b * p * p;
+    ball = b2BallArc(hand, angle, b2BallChain);
     if (hitB2Ball(ball)) return;
-    if (ball.x > body.position.x + 260) b2Hook.mode = 'back'; // 수호보다 오른쪽까지 날아간 뒤 돌아온다
-  } else if (b2Hook.mode === 'back') {
-    b2Hook.reach -= b2HookBackSpeed * delta / 1000;
-    if (b2Hook.reach <= 0) {
+    if (p >= 1) {
+      // 놓는 순간의 속도(원의 접선 방향)를 그대로 가지고 공이 날아가기 시작하고, 보스는 공이 돌아오기를 기다리지 않고 바로 자세를 거둔다.
+      const rate = (a + 2 * b) / b2HookSwingMs * Math.PI / 180 * 1000 * b2BallChain; // px/s
+      const rad = angle * Math.PI / 180;
       const [min, max] = b2HookGap;
-      Object.assign(b2Hook, { mode: 'wait', reach: 0, timer: min + Math.random() * (max - min) });
+      Object.assign(b2Hook, { mode: 'recover', elapsed: 0, timer: min + Math.random() * (max - min), flight: 'fly', reach: 0,
+        startX: ball.x, pos: { x: ball.x, y: ball.y }, vx: -Math.sin(rad) * rate, vy: Math.cos(rad) * rate });
     }
+  } else if (b2Hook.mode === 'recover') {
+    // 던진 뒤 뻗은 팔을 거두고 똑바로 서는 4컷(근접 그림 6~9번째). 다 서면 걷는 그림으로 넘어간다.
+    b2Hook.elapsed += delta;
+    frame = 5 + Math.min(3, Math.floor(b2Hook.elapsed / b2RecoverMs * 4));
+    hand = { x: b2Hook.x + b2MeleeShift + b2MeleeHands[frame][0], y: floorY - 339 + b2MeleeHands[frame][1] };
+    if (b2Hook.elapsed >= b2RecoverMs) b2Hook.mode = 'wait';
   } else if (melee) {
     b2Hook.elapsed += delta;
     const u = Math.min(b2Hook.elapsed / b2MeleeMs, .9999) * 9;
     frame = Math.floor(u);
+    if (frame >= 3 && !b2Hook.whooshed) { b2Hook.whooshed = true; playB2BallWhoosh(.2); } // 공이 내려오기 직전에 시작
     const angle = (b2MeleeAngles[frame] + (b2MeleeAngles[frame + 1] - b2MeleeAngles[frame]) * (u - frame)) * Math.PI / 180;
     hand = { x: b2Hook.x + b2MeleeShift + b2MeleeHands[frame][0], y: floorY - 339 + b2MeleeHands[frame][1] };
     ball = { x: hand.x + Math.cos(angle) * b2MeleeChain, y: hand.y + Math.sin(angle) * b2MeleeChain, spin: angle };
     if (hitB2Ball(ball)) return;
     if (u >= 4 && !playerCaught && b2InMeleeRange()) { // 공이 내려온 순간 아직 범위 안이면 웅크려도 맞는다
       playGameSound('robot-grab', { x: body.position.x });
-      showB2BadEnding();
+      showB2BossBadEnding(1000);
       return;
     }
     if (b2Hook.elapsed >= b2MeleeMs) Object.assign(b2Hook, { mode: 'wait', timer: Math.max(b2Hook.timer, 1500) });
   }
+  // 던져진 공의 비행: 보스가 자세를 거두고 다시 걷는 동안에도 공은 사슬에 매달려 따로 날아갔다 돌아온다.
+  if (b2Hook.flight === 'fly') {
+    // 놓은 속도에서 출발해 앞으로는 일정한 속도로, 위아래로는 수호 높이를 향해 부드럽게 맞춰 간다(멈추거나 꺾이지 않는다).
+    const dt = delta / 1000;
+    b2Hook.vx += (b2HookFlySpeed - b2Hook.vx) * Math.min(1, delta / 90);
+    const wantVy = Math.max(-3000, Math.min(3000, (b2BallAimY() - b2Hook.pos.y) * 9));
+    b2Hook.vy += (wantVy - b2Hook.vy) * Math.min(1, delta / 70);
+    b2Hook.pos.x += b2Hook.vx * dt;
+    b2Hook.pos.y += b2Hook.vy * dt;
+    b2Hook.reach = b2Hook.pos.x - b2Hook.startX;
+    ball = { x: b2Hook.pos.x, y: b2Hook.pos.y };
+    if (hitB2Ball(ball)) return;
+    if (!playerCaught && !crouching && grounded && ball.x >= body.bounds.min.x) { // 서 있으면 공이 닿는 높이와 상관없이 반드시 맞는다
+      playGameSound('robot-grab', { x: body.position.x });
+      showB2BossBadEnding(1000);
+      return;
+    }
+    if (ball.x > body.position.x + 260) Object.assign(b2Hook, { flight: 'back', reachMax: b2Hook.reach, end: { x: ball.x, y: ball.y } }); // 수호보다 오른쪽까지 날아간 뒤 돌아온다
+  } else if (b2Hook.flight === 'back') {
+    // 사슬에 끌려 보스 머리 위를 넘어 다시 뒤쪽 바닥으로 돌아온다.
+    b2Hook.reach -= b2HookBackSpeed * delta / 1000;
+    const p = Math.max(0, b2Hook.reach / b2Hook.reachMax);
+    ball = { x: dragBall.x + (b2Hook.end.x - dragBall.x) * p, y: dragBall.y + (b2Hook.end.y - dragBall.y) * p - 160 * Math.sin(Math.PI * (1 - p)) };
+    if (b2Hook.reach <= 0) b2Hook.flight = null;
+  }
   monster.style.left = `${b2Hook.x}px`;
-  monster.dataset.pose = b2Hook.mode === 'wait' ? 'walk' : b2Hook.mode === 'melee' ? 'melee' : 'aim';
-  monster.dataset.aim = String(b2Hook.mode === 'aim');
+  if (b2Hook.mode === 'swing') frame = 4; // 휘두르는 동안은 팔을 뻗은 자세 그대로
+  monster.dataset.pose = b2Hook.mode === 'wait' ? 'walk' : 'melee';
+  monster.dataset.aim = 'false';
   monster.dataset.walk = String(b2Hook.mode === 'wait'); // 던지는 동안에는 걷는 컷을 멈춘다
   monster.style.setProperty('--melee-frame', frame);
-  const shown = b2Hook.mode === 'fly' || b2Hook.mode === 'back' || b2Hook.mode === 'melee';
-  hook.hidden = rope.hidden = !shown;
-  if (!shown) return;
-  const { radius } = b2BallSize;
-  // 공은 굴러가듯 돌고, 사슬은 손에서 공 중심까지 이어진다(공 뒤에 깔린다).
-  let scale = 1;
-  if (!melee) { // 던질 때·돌아올 때: 손 가까이에서는 공이 손으로 빨려 들어가듯 작아지며 손 높이로 모인다
-    const k = Math.min(1, b2Hook.reach / 180);
-    ball = { x: hand.x + b2Hook.reach, y: hand.y + (b2BallAimY() - hand.y) * k, spin: 0 };
-    scale = .4 + .6 * k;
-  }
-  const spin = melee ? ball.spin : b2Hook.reach / (radius * 1.7);
-  Object.assign(hook.style, { left: `${ball.x - radius}px`, top: `${ball.y - radius}px`, transform: `rotate(${spin}rad) scale(${scale})` });
+  // 걷는 동안 발이 땅에 닿는 컷(12컷 중 4번째·10번째)이 나올 때마다 발소리. CSS 걷기 애니메이션의 재생 시간으로 지금 컷을 읽는다.
+  const walkAnimation = b2Hook.mode === 'wait' ? monster.firstElementChild.getAnimations()[0] : null;
+  if (walkAnimation) {
+    const walkFrame = Math.floor((walkAnimation.currentTime % b2WalkCycleMs) / b2WalkCycleMs * 12);
+    if (walkFrame !== b2Hook.stepFrame && b2StepFrames.includes(walkFrame)) playB2BossStep(b2Hook.x + b2MonsterWidth.walk / 2);
+    b2Hook.stepFrame = walkFrame;
+  } else b2Hook.stepFrame = -1;
+  // 쇠공은 언제나 손에 사슬로 매달려 있다(공 뒤에 사슬이 깔린다). 걷는 동안은 손 뒤 바닥에서 굴러 끌려온다.
+  hook.hidden = rope.hidden = false;
+  const spin = melee ? ball.spin : ball.x / radius; // 월드를 따라 굴러가듯 돈다
+  Object.assign(hook.style, { left: `${ball.x - radius}px`, top: `${ball.y - radius}px`, transform: `rotate(${spin}rad)` });
   Object.assign(rope.style, { left: `${hand.x}px`, top: `${hand.y - b2HookRopeHeight / 2}px`, width: `${Math.hypot(ball.x - hand.x, ball.y - hand.y)}px`, transform: `rotate(${Math.atan2(ball.y - hand.y, ball.x - hand.x)}rad)` });
+}
+
+// 손에서 angle도(화면 좌표: 0은 앞, 90은 아래, 270은 위) 방향으로 length만큼 떨어진 공 중심.
+function b2BallArc(hand, angle, length) {
+  const rad = angle * Math.PI / 180;
+  return { x: hand.x + Math.cos(rad) * length, y: hand.y + Math.sin(rad) * length };
 }
 
 // 수호의 몸이 보스 손에서 앞쪽 b2MeleeReach 안에 있는가
@@ -292,7 +359,7 @@ function hitB2Ball(ball) {
   const nearY = Math.max(min.y, Math.min(ball.y, max.y));
   if (playerCaught || Math.hypot(ball.x - nearX, ball.y - nearY) > b2BallSize.hit) return false;
   playGameSound('robot-grab', { x: body.position.x });
-  showB2BadEnding();
+  showB2BossBadEnding(1000);
   return true;
 }
 
@@ -333,7 +400,7 @@ function updateB2Ending(delta) {
   if (b2Ending.phase !== 'running' || b2Ending.offline) return;
   setB2Siren(true); // 메뉴·창으로 멈췄다가 돌아와도 이어서 울린다
   if (!b2Ending.barricaded) {
-    b2Ending.progress = Math.min(b2EarlyCap, b2Ending.progress + b2EarlyRate * delta / 1000);
+    b2Ending.progress = Math.max(b2Ending.progress, Math.min(b2EarlyCap, b2Ending.progress + b2EarlyRate * delta / 1000)); // 콘솔 버튼으로 올린 값은 깎지 않는다
     // 로봇이 이미 들어왔으면 늦었다(문을 막아도 안의 로봇이 붙잡는다).
     if (b2DoorCovered() && !b2Robots.some(robot => robot.where === 'b2-main')) barricadeB2Door();
   }
@@ -695,6 +762,13 @@ function endB2Ending() {
 }
 
 // 붙잡기 연출(1.1초)이 끝나면 타격 뒤 실제 월드에서 끌고 가 연결하는 컷씬으로 이어진다.
+// 보스에게 당했을 때: 로봇의 타격 장면은 건너뛰고 일반 로봇이 끌고 가는 장면부터 시작한다.
+function showB2BossBadEnding(blackMs = 0) { // blackMs: 쇠공에 맞은 직후 컷씬 전에 두는 검은 화면 시간
+  endB2Ending();
+  for (const id of ['b2-monster', 'b2-hook', 'b2-hook-rope']) dynamicScene.querySelector('#' + id)?.remove(); // 끌려가는 장면에 보스는 나오지 않는다
+  startB2CaptureScene(true, blackMs);
+}
+
 function showB2BadEnding() {
   endB2Ending();
   startB2CaptureScene();
@@ -764,6 +838,7 @@ b2Escape.addEventListener('keydown', event => {
 
 // 불러오기·새 게임(save.js restoreProgress)이 장면을 다시 짓기 전에 엔딩 상태를 모두 지운다.
 function resetB2Ending() {
+  stopB2PhaseDoorSound();
   resetB2CaptureScene();
   setB2Siren(false);
   Object.assign(b2Ending, { phase: 'idle', barricaded: false, progress: 0, barricade: 100, offline: false, bang: 0, phase2: false });
@@ -815,7 +890,8 @@ function debugB2Progress60() {
     startArchiDelete();
   }
   if (b2Ending.phase !== 'running' || b2Ending.offline) return false;
-  b2Ending.progress = Math.max(b2Ending.progress, b2Phase2At);
+  if (!b2Ending.barricaded && b2Crate()) barricadeB2Door(); // 문을 자동으로 막아 바로 콘솔을 열 수 있게 한다
+  b2Ending.progress = Math.max(b2Ending.progress, b2Phase2At); // 게이지도 바로 60%
   if (!b2Ending.phase2) startB2Phase2();
   refreshB2Bar();
   return true;
