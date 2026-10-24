@@ -92,7 +92,7 @@ function mountRobot(robot, className, patrol) {
   const sprite = document.createElement('div');
   sprite.className = 'guard-robot-sprite';
   const image = new Image();
-  image.src = 'assets/objects/guard-robot/guard-humanoid-v2-walk.png';
+  image.src = 'assets/objects/guard-robot/guard-humanoid-v2-idle.png';
   image.alt = ''; image.draggable = false;
   sprite.append(image);
   element.append(sprite);
@@ -314,7 +314,7 @@ function mountGuardPatrol() {
   const window = document.createElement('div');
   window.className = 'guard-robot-sprite';
   const image = new Image();
-  image.src = 'assets/objects/guard-robot/guard-humanoid-v2-walk.png';
+  image.src = 'assets/objects/guard-robot/guard-humanoid-v2-idle.png';
   image.alt = ''; image.draggable = false;
   window.append(image);
   guardPatrol.door.element.replaceChildren(window);
@@ -441,9 +441,10 @@ function updateRobot(robot, delta) {
   const attack = powered && !['patrol', 'dock', 'return'].includes(robot.mode);
   const grabbing = powered && ['grab', 'caught'].includes(robot.mode);
   const running = powered && robot.mode === 'chase';
-  const frames = grabbing ? 4 : 8;
+  const idle = !grabbing && (!powered || robot.mode === 'dock' || robot.wait > 0);
+  const frames = grabbing ? 4 : idle ? 1 : 8;
   const frame = grabbing ? Math.min(3, Math.floor(robot.captureTime / 275)) :
-    !powered || robot.mode === 'dock' || robot.wait > 0 ? 0 : Math.floor(robot.elapsed / (running ? 90 : 120)) % 8;
+    idle ? 0 : Math.floor(robot.elapsed / (running ? 90 : 120)) % 8;
   const { door } = robot;
   door.x = robot.x - door.width / 2;
   door.y = floorY - 198;
@@ -456,7 +457,7 @@ function updateRobot(robot, delta) {
     width: grabbing ? '336px' : '224px', left: grabbing ? '-56px' : '0px',
     transformOrigin: grabbing ? '168px center' : '112px center'
   });
-  const src = `assets/objects/guard-robot/guard-humanoid-v2-${grabbing ? 'grab' : running ? 'run' : 'walk'}.png`;
+  const src = `assets/objects/guard-robot/guard-humanoid-v2-${grabbing ? 'grab' : idle ? 'idle' : running ? 'run' : 'walk'}.png`;
   if (robot.image.getAttribute('src') !== src) robot.image.src = src;
   robot.image.style.width = `${frames * 100}%`;
   robot.image.style.transform = `translateX(${-frame * 100 / frames}%)`;

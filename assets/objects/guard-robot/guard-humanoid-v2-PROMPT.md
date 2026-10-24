@@ -105,3 +105,27 @@ TRUE transparent RGBA background, binary sharp edges, no floor, no shadow, no sc
 Precise-object-edit of the supplied 4-pose robot sprite sheet. CHANGE ONLY THE ORIENTATION OF THE FOUR HEADS. Every robot is reaching LEFT, but its face erroneously looks RIGHT. Make ALL FOUR HEADS LOOK LEFT toward the grasp target. The narrow black front faceplate and its thin red eye slit must sit at the LEFTMOST edge of each head, with the small circular ear pivot at the RIGHT/back of the head. The hooked chin points DOWN AND LEFT. Cable neck connects correctly. Do not leave the red eye on rightmost edge. Preserve the robot's exact head size, design, silver-gray shell and small dark-red slit. Preserve EVERYTHING ELSE pixel-for-pixel as far as possible: the body, two arms/two hands/two legs/two feet, all4poses, armor, 2x2 arrangement, figure scale and grounded baseline. No extra red marks. Transparent background. No text, shadows or floor.
 ```
 
+
+
+## Idle 정지 자세 추가 — 2026-10-24
+
+최종 걷기 시트의 0번 셀을 디자인·픽셀 기준으로 사용하고 내장 `image_gen`으로 전신 정지 자세를 생성했다. 출력은 `guard-humanoid-v2-idle.png`, 256×256 RGBA 1장이다. 원본 걷기 시트의 실제 9개 RGB에만 맞추고 알파는 0/255로 정리했다. 전체 높이는 221px, 아래 발 기준선은 y=244다. 준비·생성 원본은 검토용 `.local/`에 두며 최종 PNG만 게임에서 사용한다.
+
+게임의 전원 꺼짐·도크·순찰 끝 대기 상태와 B2 정지 로봇에 사용한다. 미리보기의 `Idle · 1 frame` 항목에서 확인한다. 팔다리를 분리해 조립하지 않았다.
+
+### 최초 생성
+
+```text
+Use case: precise-object-edit. Asset type: ARCHI game robot IDLE sprite.
+Edit the supplied finished walking sprite into ONE stationary IDLE pose. The input is the exact final in-game robot DESIGN AND PIXEL STYLE reference: preserve its small narrow sideways black/silver faceplate, tiny thin dark-red eye slit, long exposed cable neck, swept shoulder fins, narrow side-on silver-gray chest, very narrow segmented waist, circular joints and long slim angular armor. Do not redesign or broaden the torso. Preserve same head-to-body ratio, hand/foot size and slender menacing appearance.
+Change only the full-body POSE: facing RIGHT with same slight three-quarter visibility. Stand STILL and alert, upright, both feet planted flat near shoulder width, one foot only very slightly ahead of the other. Both knees almost straight with a slight relaxed bend. BOTH ARMS hang DOWN naturally on opposite sides of the torso; elbows only slightly bent, hands relaxed in loose mechanical fists around mid-thigh level. Keep near and far forearms visibly separate and shoulder-to-hand chains clear. No arm swinging, no stepping, no raised foot, no leaning into a run. Exactly TWO arms, TWO hands, TWO legs, TWO feet. No extra cables resembling limbs.
+Render a fully assembled hand-drawn pixel-art sprite, not separate parts. Match input’s deliberate compact clusters, thin charcoal outlines and flat3-4step gray cel shading. No extra intricate detail, gradients, noise, stipple, blur, glow or soft edges. Colors stay the same neutral silver-gray/charcoal and dark red ONLY in the single eye slit.
+Square1024x1024 transparent canvas, conceived as exact4x nearest-neighbor enlargement of a256x256 logical sprite. Figure about220logicalpixels tall, pelvis centered horizontally atx128logical, head aroundx148logical, foot sole baseliney244logical. All head/hands/feet/fins fully within transparentpadding. TRUE transparent RGBA background, no floor or shadow, no scene, no text or the wordIDLE inside the image, no border, no extra figures. Output only one complete stationary right-facing robot.
+```
+
+### 발 접지 보정
+
+```text
+Precise-object-edit of this ONE finished IDLE robot sprite. ONE correction only: both feet must stand on the SAME horizontal ground baseline. Currently the LEFTMOST/rear foot's sole is a little higher than the RIGHTMOST/front foot. Lower the LEFTMOST/rear ankle and full foot very slightly (about20sourcepixels), with the connected shin/knee adjusting naturally, until the bottoms of BOTH soles line up horizontally at the current RIGHTMOST foot sole height. Do NOT add a ground line or shadow. Do NOT move the rightmost/front foot. Preserve the same complete idle pose, exact head/neck/chest/waist/arms/hands, smallhead, narrowtorso, two legs, twofeet, armor, gray/redpalette, pixelstyle and transparentpadding. No step or raised heel, both feet flat and grounded. EXACTLY2arms2hands2legs2feet. Wholefigure on REAL transparent background. No text, floor, shadow, blur, glow or extrafigure.
+```
+

@@ -21,6 +21,10 @@ try {
   const robot = page.locator('.fixture.guard-bot');
   const state = () => page.evaluate(() => ({ x: guardPatrol.x, facing: guardPatrol.facing, wait: guardPatrol.wait,
     phase: guardPatrol.door?.element.dataset.patrol, frame: guardPatrol.door?.element.dataset.frame }));
+  const assertIdle = async () => assert.deepEqual(await page.evaluate(() => ({
+    src: guardPatrol.image.getAttribute('src'), width: guardPatrol.image.style.width,
+    frame: guardPatrol.door.element.dataset.frame
+  })), { src: 'assets/objects/guard-robot/guard-humanoid-v2-idle.png', width: '100%', frame: '0' });
   const source = `data:image/png;base64,${(await readFile('assets/objects/guard-robot/guard-humanoid-v2-walk.png')).toString('base64')}`;
   const frames = await page.evaluate(async src => {
     const image = new Image(); image.src = src; await image.decode();
@@ -40,6 +44,7 @@ try {
   assert.deepEqual(frames.size, [2048, 256]);
   assert(frames.bounds.every(b => b.edge === 0 && Math.abs(b.bottom - 244) <= 1 && b.top > 0), 'All eight cells have intact margins and the same foot baseline');
   assert.equal((await state()).phase, 'off');
+  await assertIdle();
   const stopped = await state(); await page.clock.runFor(2000); assert.deepEqual(await state(), stopped);
   await page.locator('#dynamic-scene img').evaluateAll(imgs => Promise.all(imgs.map(img => img.decode())));
   await page.screenshot({ path: '.local/guard-off.png' });
@@ -71,6 +76,10 @@ try {
   // 수호를 순찰 구간(3040~) 밖 감지 거리 바깥에 두고 잰다.
   await page.evaluate(() => {
     collectedItems.add("f17-emergency-linked"); solarEnabled = true; solarPoweredFloors = [1]; updatePowerState();
+    guardPatrol.mode = 'dock'; Body.setPosition(body, { x: 1500, y: floorY - 81 }); updateGuardPatrol(0);
+  });
+  await assertIdle();
+  await page.evaluate(() => {
     guardPatrol.mode = 'patrol'; Body.setPosition(body, { x: 1500, y: floorY - 81 });
   });
   const before = await state(); await page.clock.runFor(1000);
@@ -84,6 +93,7 @@ try {
   await page.evaluate(() => { guardPatrol.x = 3042; });
   await page.clock.runFor(100); assert.equal((await state()).phase, 'scan');
   assert.equal((await state()).x, 3040);
+  await assertIdle();
   const scanFrames = new Set();
   for (let i = 0; i < 12; i++) { scanFrames.add((await state()).frame); await page.clock.runFor(100); }
   assert.deepEqual([...scanFrames].sort(), ['0']);

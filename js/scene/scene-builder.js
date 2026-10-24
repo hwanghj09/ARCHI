@@ -283,9 +283,9 @@ function buildDynamicScene(config) {
         robot.setAttribute('aria-hidden', 'true');
         robot.style.left = `${index * 60 - 82}px`;
         const image = new Image();
-        image.src = 'assets/objects/guard-robot/guard-humanoid-v2-walk.png';
+        image.src = 'assets/objects/guard-robot/guard-humanoid-v2-idle.png';
         image.alt = ''; image.draggable = false;
-        image.style.transform = 'translateX(0%)';
+        image.style.width = '100%';
         robot.append(image); element.append(robot);
       }
     }
