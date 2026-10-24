@@ -71,7 +71,8 @@ try {
   await page.locator('#debug-puzzle-select').selectOption({ index: 0 });
   await page.locator('#debug-puzzle button').click();
   await finishSceneTransition(page);
-  assert.deepEqual(await page.evaluate(() => [room, realBuildingBlackout(), solarEnabled, [...collectedItems]]), ['office', false, false, ['f17-badge']]);
+  // 바로 앞 단계가 1층(안내 데스크 PC)이라 옮기기 전 목표 갱신이 f1-reached를 남길 수 있다(objective.js). 그 하나는 빼고 본다.
+  assert.deepEqual(await page.evaluate(() => [room, realBuildingBlackout(), solarEnabled, [...collectedItems].filter(item => item !== 'f1-reached')]), ['office', false, false, ['f17-badge']]);
   await page.evaluate(() => triggerBuildingBlackout());
   await page.locator('#debug-floor-select').selectOption('f2');
   await page.locator('#debug-floor button').click();
