@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 300">
+  <!-- 1층 로비 ARCHI 사내 공개 포스터. QR은 게임 밖 ARCHI 소개 페이지(https://hwanghj09.github.io/ARCHI/archi.html). -->
+  <defs>
+    <radialGradient id="glow" cx="100" cy="72" r="70" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#ffffff"/><stop offset=".12" stop-color="#bcd2ff"/><stop offset=".45" stop-color="#3d63c9" stop-opacity=".45"/><stop offset="1" stop-color="#05081a" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="200" height="300" rx="3" fill="#c9ced6"/>
+  <rect x="5" y="5" width="190" height="290" fill="#05081a"/>
+  <circle cx="100" cy="72" r="70" fill="url(#glow)"/>
+  <g stroke="#9cbcff" stroke-opacity=".55" stroke-width=".6" fill="none">
+    <path d="M100 72L30 40L58 98L100 72L150 32L176 86L132 104L100 72M30 40L22 82L58 98M150 32L118 18L70 22L30 40M176 86L186 50L150 32M132 104L92 116L58 98"/>
+  </g>
+  <g fill="#e4edff">
+    <circle cx="30" cy="40" r="1.6"/><circle cx="58" cy="98" r="1.4"/><circle cx="150" cy="32" r="1.8"/><circle cx="176" cy="86" r="1.4"/>
+    <circle cx="132" cy="104" r="1.5"/><circle cx="22" cy="82" r="1.1"/><circle cx="118" cy="18" r="1.2"/><circle cx="70" cy="22" r="1.1"/>
+    <circle cx="186" cy="50" r="1.1"/><circle cx="92" cy="116" r="1.2"/>
+  </g>
+  <text x="100" y="80" text-anchor="middle" fill="#ffffff" font-family="Arial, sans-serif" font-size="27" font-weight="600" letter-spacing="5">ARCHI</text>
+  <text x="100" y="128" text-anchor="middle" fill="#9cbcff" font-family="'Malgun Gothic', sans-serif" font-size="10">무엇이든 묻고, 맡기세요.</text>
+  <rect x="44" y="140" width="112" height="112" rx="4" fill="#ffffff"/>
+  <g transform="translate(46 142) scale(2.634)"><path stroke="#111111" d="M4 4.5h7m2 0h1m1 0h10m2 0h1m2 0h7M4 5.5h1m5 0h1m3 0h8m4 0h1m3 0h1m5 0h1M4 6.5h1m1 0h3m1 0h1m1 0h1m2 0h3m1 0h1m1 0h2m1 0h1m2 0h1m2 0h1m1 0h3m1 0h1M4 7.5h1m1 0h3m1 0h1m1 0h1m3 0h1m1 0h3m3 0h3m1 0h1m1 0h1m1 0h3m1 0h1M4 8.5h1m1 0h3m1 0h1m1 0h5m2 0h1m1 0h2m5 0h1m1 0h1m1 0h3m1 0h1M4 9.5h1m5 0h1m1 0h1m1 0h1m2 0h1m1 0h2m1 0h1m1 0h2m2 0h1m1 0h1m5 0h1M4 10.5h7m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h7M12 11.5h1m1 0h3m2 0h1m2 0h1m2 0h1M4 12.5h1m1 0h5m4 0h1m2 0h2m1 0h1m2 0h1m1 0h3m1 0h5M5 13.5h4m3 0h2m2 0h1m2 0h2m2 0h3m1 0h1m2 0h2m1 0h2m1 0h1M4 14.5h2m1 0h1m2 0h5m1 0h1m2 0h2m1 0h1m1 0h2m2 0h1m1 0h1m1 0h1m1 0h1M4 15.5h4m1 0h1m1 0h1m2 0h3m1 0h1m1 0h1m4 0h3m1 0h1m2 0h4M4 16.5h1m1 0h1m2 0h3m2 0h1m1 0h1m5 0h2m1 0h1m1 0h2m2 0h3m2 0h1M5 17.5h1m5 0h2m1 0h3m1 0h3m3 0h1m1 0h2m2 0h1m2 0h1m1 0h2M4 18.5h1m2 0h1m1 0h3m5 0h1m5 0h1m5 0h3m1 0h1m1 0h1M4 19.5h2m2 0h1m2 0h8m1 0h1m2 0h3m3 0h6M4 20.5h1m5 0h2m2 0h1m6 0h1m1 0h1m3 0h3m1 0h2m3 0h1M4 21.5h3m2 0h1m4 0h2m2 0h1m2 0h4m1 0h2m2 0h2m1 0h2M4 22.5h2m2 0h4m1 0h1m1 0h7m2 0h1m1 0h1m2 0h4m1 0h2M5 23.5h1m1 0h3m2 0h1m1 0h1m1 0h3m1 0h5m3 0h1m1 0h5M4 24.5h1m2 0h1m1 0h2m4 0h1m2 0h1m1 0h1m3 0h3m1 0h2m1 0h3m2 0h1M4 25.5h2m1 0h1m1 0h1m1 0h1m2 0h2m2 0h2m2 0h1m2 0h1m1 0h1m2 0h1m3 0h1m1 0h1M4 26.5h1m2 0h1m1 0h2m5 0h1m1 0h5m1 0h2m2 0h1m1 0h1m1 0h4M4 27.5h1m4 0h1m1 0h1m1 0h2m1 0h2m1 0h1m2 0h1m2 0h1m5 0h1m1 0h2M4 28.5h1m4 0h2m3 0h1m2 0h3m1 0h2m5 0h6m1 0h2M12 29.5h3m2 0h2m1 0h1m1 0h5m1 0h1m3 0h1m1 0h1M4 30.5h7m3 0h7m1 0h1m2 0h1m1 0h2m1 0h1m1 0h1m1 0h2M4 31.5h1m5 0h1m1 0h2m2 0h2m1 0h1m3 0h6m3 0h5M4 32.5h1m1 0h3m1 0h1m1 0h1m2 0h1m2 0h1m3 0h2m1 0h1m2 0h6M4 33.5h1m1 0h3m1 0h1m1 0h2m2 0h1m1 0h4m2 0h1m1 0h2m1 0h1m2 0h1m1 0h1m1 0h1M4 34.5h1m1 0h3m1 0h1m1 0h1m1 0h2m5 0h1m1 0h1m1 0h1m1 0h5M4 35.5h1m5 0h1m4 0h1m4 0h1m1 0h6m2 0h1m1 0h3M4 36.5h7m1 0h1m5 0h1m2 0h1m1 0h1m3 0h2m2 0h1m3 0h1"/></g>
+  <text x="100" y="270" text-anchor="middle" fill="#dbe4f7" font-family="'Malgun Gothic', sans-serif" font-size="10">ARCHI 소개 페이지</text>
+  <text x="100" y="285" text-anchor="middle" fill="#7f8db0" font-family="Arial, sans-serif" font-size="8" letter-spacing="2">VMAX</text>
+</svg>

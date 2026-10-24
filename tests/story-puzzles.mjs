@@ -194,7 +194,7 @@ try {
   assert(await page.locator('#backup-tabs button').nth(3).isEnabled(), 'Solving opens the today tab');
   assert.match(await page.locator('#backup-status').textContent(), /10\/05 03시: 성능 상승과 B2 전력 집중/);
   assert.equal(await objective(), 'ARCHI의 흔적');
-  assert.match(await page.evaluate(() => currentObjective.text), /archi\.html/, 'The objective names the homepage address');
+  assert.match(await page.evaluate(() => currentObjective.text), /포스터의 QR을 휴대폰으로 찍어/, 'The objective points to the 1F QR poster');
   await page.clock.runFor(4500);
   assert.equal(await page.evaluate(() => backupTab), '오늘', 'The puzzle moves on to the today tab by itself');
   // [오늘] 탭은 문제 없이 기록 상태만 보여 준다: 오늘 원본은 ARCHI-MAIN에만 있고, 23:58에 회사 홈페이지에 들렀다.
@@ -216,6 +216,11 @@ try {
   await site.close();
   const ssh = await page.evaluate(() => ARCHI_SSH);
   for (const value of Object.values(ssh)) assert(draft.includes(value), `The homepage draft shows ${value}`);
+  // 1층 로비 ARCHI 포스터를 조사하면 소개 페이지 QR이 크게 뜬다.
+  await use('f1', 'ARCHI 포스터');
+  assert.equal(await page.locator('#inspection-title').textContent(), 'ARCHI 포스터');
+  assert.equal(await page.locator('#inspection-sheet img').getAttribute('src'), 'assets/objects/floor01/archi-qr-poster.svg');
+  await page.evaluate(() => closeInspection());
   // 1층 안내 데스크 PC(사내망 UPS)에서 컴퓨터 화면을 연다.
   await use('f1', '안내 데스크');
   await page.clock.runFor(1500);

@@ -58,7 +58,7 @@ const OBJECTIVES = [
   { when: () => collectedItems.has('f7-external-connection-solved'), title: '지하에서 무슨 일이?', text: '모든 기록이 지하를 가리킨다. 승강기를 타고 B2로 내려가 보자.' },
   // 7층 시간 퍼즐 뒤: 게임 밖 ARCHI 소개 페이지(archi.html)에서 SSH 정보를 찾아 컴퓨터 터미널로 접속한다(terminal.js).
   { when: () => collectedItems.has('f7-training-time-solved'), title: 'ARCHI의 흔적',
-    text: `오늘 밤 기록은 B2 ARCHI-MAIN 서버에만 있다. ARCHI가 자정 직전에 들른 회사 홈페이지(${ARCHI_SITE_URL})를 확인하고, 1층 안내 데스크 PC의 터미널로 서버에 접속하자.` },
+    text: '오늘 밤 기록은 B2 ARCHI-MAIN에만 있다. 1층 로비 ARCHI 포스터의 QR을 휴대폰으로 찍어 ARCHI가 들른 소개 페이지를 확인하고, 안내 데스크 PC 터미널로 서버에 접속하자.' },
   { when: () => collectedItems.has('f12-evaluation-solved') && !collectedItems.has('goal-f5-note'), title: '데이터 수집',
     text: 'ARCHI가 기록을 지운 이유는 뭘까? 5층 연구개발실을 조사해보자.' },
   { when: () => collectedItems.has('f12-evaluation-solved') && !collectedItems.has('f8-repro-record'), title: '기록 재현',

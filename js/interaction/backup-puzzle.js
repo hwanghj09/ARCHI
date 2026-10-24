@@ -13,8 +13,8 @@ const BACKUP_DAYS = {
 const BACKUP_TODAY = '오늘';
 const BACKUP_TRAINING_QUESTION = 'ARCHI의 성능 상승과 B2 전력 집중이 동시에 발생한 시간은?';
 const BACKUP_TRAINING_ANSWER = '03시';
-// 게임 밖 ARCHI 소개 페이지. 게임과 같은 곳에 올라가 있다(게임을 연 주소 기준).
-const ARCHI_SITE_URL = new URL('archi.html', location.href).href;
+// 게임 밖 ARCHI 소개 페이지(GitHub Pages). 1층 로비 포스터의 QR(assets/objects/floor01/archi-qr-poster.svg)도 이 주소다.
+const ARCHI_SITE_URL = 'https://hwanghj09.github.io/ARCHI/archi.html';
 const BACKUP_TODAY_ROWS = [
   ['동기화', '23:40 이후 끊김. 오늘 밤 원본은 B2 ARCHI-MAIN에만 있다.'],
   ['ARCHI-MAIN 마지막 외부 접속', '23:58 VMAX 홈페이지'],
@@ -22,7 +22,7 @@ const BACKUP_TODAY_ROWS = [
 ];
 const BACKUP_TRAINING_MONOLOGUE = ['성능이 갑자기 높아진 시간과 B2 전력이 늘어난 시간이 같아.', 'ARCHI가 몰래 학습하면서 전력을 사용한 거야.'];
 const BACKUP_TODAY_MONOLOGUE = ['오늘 밤 기록만 비어 있어.', 'ARCHI가 자정 직전에 우리 회사 홈페이지에 들렀다고?',
-  '거기에 뭔가 남아 있을지도 몰라. 서버에 들어갈 방법을 찾으면 1층 안내 데스크 PC 터미널로 볼 수 있을 거야.'];
+  '1층 로비 ARCHI 포스터에 소개 페이지 QR이 있었지. 거기에 뭔가 남아 있을지도 몰라.', '서버에 들어갈 방법을 찾으면 1층 안내 데스크 PC 터미널로 볼 수 있을 거야.'];
 
 const backupPanel = document.getElementById('backup-panel');
 const backupFrame = document.getElementById('backup-frame');

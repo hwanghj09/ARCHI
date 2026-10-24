@@ -105,6 +105,11 @@ const FLOOR1_LAYOUT = {
     // 휴대폰이 꺼진 채 1층에 갇혀도(승강기는 1층만 눌린다) 여기서 충전해 전력 앱을 쓴다.
     // 데스크(3149~3471) 왼쪽 끝에 두어, 데스크 가운데·오른쪽에 서면 컴퓨터(deskComputer)가 잡힌다.
     { ...phoneChargerFixture(3190, floorY - (256 - 8 - 127) * 322 / 512), floor: 1 },
+    // ARCHI 사내 공개 포스터(assets/objects/floor01/archi-qr-poster.svg): 화장실 오른쪽 넓은 벽, 대기 소파(x 4080 중심) 위 가운데.
+    // QR은 게임 밖 ARCHI 소개 페이지(archi.html)로, 플레이어가 실제 휴대폰으로 찍어 들어간다. 7층 다음 터미널 퍼즐의 SSH 정보가 그 페이지에 있다(terminal.js).
+    { name: 'ARCHI 포스터', style: 'archi-qr-poster', x: 4025, y: 260, width: 110, height: 165, selfPowered: true,
+      message: 'ARCHI 사내 공개 포스터다. "무엇이든 묻고, 맡기세요." 아래에 소개 페이지 QR 코드가 크게 찍혀 있다. 휴대폰 카메라로 찍으면 열릴 것 같다.',
+      surface: 'card', image: 'assets/objects/floor01/archi-qr-poster.svg' },
   ],
   props: [
     { file: 'waiting-sofa', size: [512, 256], worldWidth: 240, x: 4080 },
