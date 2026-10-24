@@ -56,7 +56,7 @@ try {
   assert.equal(await page.locator('#world').getAttribute('data-room'), 'corridor', 'Airborne entry stays blocked');
   await page.clock.runFor(1000);
   await enter();
-  assert.equal(await page.locator('header span').textContent(), '17F · 화장실');
+  assert.equal(await page.locator('header > span').textContent(), '17F · 화장실');
   assert(await page.locator('#floor17-extension').isHidden());
   await page.locator('#dynamic-scene img').evaluateAll(images => Promise.all(images.map(img => img.decode())));
   assert.equal(await page.locator('#dynamic-scene .room-door').count(), 1);
@@ -115,7 +115,7 @@ try {
   await page.keyboard.press('e');
   await page.getByRole('button', { name: '열쇠 사용하기', exact: true }).click();
   await finishSceneTransition(page);
-  assert.equal(await page.locator('header span').textContent(), 'RF · 옥상');
+  assert.equal(await page.locator('header > span').textContent(), 'RF · 옥상');
   await enter();
   assert.equal(await page.locator('#world').evaluate(el => el.style.width), '5000px');
   assert.equal(await page.locator('#floor17-extension .room-door').count(), 2, 'Stair round trip does not duplicate extension doors');
@@ -127,7 +127,7 @@ try {
   await page.locator('#keypad-input').press('Enter');
   assert.equal(await hint(), 'E · 관리자 외 출입금지 들어가기');
   await enter();
-  assert.equal(await page.locator('header span').textContent(), '17F · 관리자실');
+  assert.equal(await page.locator('header > span').textContent(), '17F · 관리자실');
   assert.equal(await page.locator('#dynamic-scene .floor-prop').count(), 4); // 분배반·안내도 책상 + 장식 사물함·청소 카트(984b34f)
   await page.locator('#dynamic-scene img').evaluateAll(images => Promise.all(images.map(img => img.decode())));
   const managerExit = await exitDoor(page);

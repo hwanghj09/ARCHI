@@ -110,7 +110,7 @@ function hallucinationSpawnX(distance) {
 
 function startZeroCharge() {
   // 추격이 시작되면 켜져 있던(켜는 중이던) 플래시는 꺼진다.
-  if (phoneLightDelay) { clearTimeout(phoneLightDelay); phoneLightDelay = 0; phoneRaising = false; }
+  cancelPhoneLightDelay();
   if (phoneLightOn) { phoneLightOn = false; phoneAwayTime = usingPhone ? 0 : 360; playGameSound('phone'); }
   refreshPhone();
   endHallucinationSighting();
@@ -140,6 +140,7 @@ function resolveZeroEvasion() {
 function hideDevouredVideo() {
   devouredVideo.pause();
   devouredVideo.hidden = true;
+  hallucinationDevouredElement.pause();
 }
 devouredVideo.addEventListener('ended', hideDevouredVideo);
 devouredVideo.addEventListener('error', hideDevouredVideo);
@@ -150,6 +151,7 @@ function playDevouredVideo() {
 }
 
 function triggerDevoured() {
+  cancelPhoneLightDelay();
   zeroEventForced = false;
   zeroEventPhase = 'idle';
   zeroEventTimer = 0;

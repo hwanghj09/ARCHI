@@ -45,7 +45,7 @@ try {
   near((await state()).x, 656);
   near((await state()).feet, 570);
   assert.equal(await page.locator('#world').evaluate(el => el.style.width), '2400px');
-  assert.equal(await page.locator('header span').textContent(), '17F · 사무실');
+  assert.equal(await page.locator('header > span').textContent(), '17F · 사무실');
   assert.match(await page.locator('#stage').getAttribute('aria-label'), /17층 사무실/);
   assert(await page.locator('#office-background').isVisible());
   assert(await page.locator('#background').isHidden());

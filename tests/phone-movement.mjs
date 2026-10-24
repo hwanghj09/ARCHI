@@ -81,7 +81,13 @@ try {
     for (const light of ['on', 'off']) {
       const activeMotion = motion;
       await page.keyboard.press('f');
-      await page.clock.runFor(await page.evaluate(() => phoneLightDelay ? phoneLightDelayMs + 34 : 34));
+      if (light === 'on') {
+        await page.clock.runFor(100);
+        assert.equal((await state()).state, activeMotion, 'Raising the phone preserves the moving gait');
+        assert.equal((await state()).phoneHeld, 'true', 'The moving raising pose uses the phone sheet');
+        assert.equal(await page.evaluate(() => phoneLightOn), false, 'Movement does not skip the raising delay');
+      }
+      await page.clock.runFor(await page.evaluate(() => phoneLightDelay ? phoneLightDelayMs + 100 : 34));
       await active().evaluate(img => img.decode());
       assert.equal(await active().count(), 1, 'Exactly one character sheet is displayed');
       assert.equal((await state()).state, activeMotion, 'Flashlight ON preserves the requested walk or sprint');

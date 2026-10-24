@@ -35,7 +35,7 @@ try {
   await page.keyboard.press('Tab');
   assert.equal(await keyButton('right').getAttribute('aria-pressed'), 'false', 'Tab cancels capture and keeps navigation');
 
-  const custom = { left: 'j', right: 'l', jump: 'k', run: 'r', crouch: 'c', interact: 'q', phone: 'o', light: 'g', inventory: 'i' };
+  const custom = { left: 'j', right: 'm', jump: 'k', run: 'r', crouch: 'c', interact: 'q', phone: 'o', light: 'g', inventory: 'i' };
   for (const [action, key] of Object.entries(custom)) await bind(action, key);
   const saved = await bindings();
   assert.equal(await page.locator('#interact').textContent(), 'Q');
@@ -62,16 +62,17 @@ try {
   let before = await x();
   await hold('d'); await hold('ArrowRight');
   assert.equal(await x(), before, 'Rebinding removes both original right movement aliases');
-  await hold('l');
+  await hold('m');
   assert((await x()) > before + 20, 'Custom movement reaches the physics loop');
+  assert(await page.locator('#map-window').isHidden(), 'A rebound M belongs to its assigned action');
   before = await x();
   await hold('j');
   assert((await x()) < before - 20);
   await page.keyboard.down('r');
-  await page.keyboard.down('l');
+  await page.keyboard.down('m');
   await page.clock.runFor(100);
   assert.equal(await page.locator('#player').getAttribute('data-state'), 'run');
-  await page.keyboard.up('l'); await page.keyboard.up('r');
+  await page.keyboard.up('m'); await page.keyboard.up('r');
   await page.keyboard.down('c');
   await page.clock.runFor(100);
   assert(await page.evaluate(() => crouching));
@@ -92,7 +93,7 @@ try {
   await page.keyboard.press('o');
   assert(await page.evaluate(() => usingPhone));
   await page.keyboard.press('g');
-  await page.clock.runFor(await page.evaluate(() => phoneLightDelayMs) + 20);
+  await page.clock.runFor(await page.evaluate(() => phoneLightDelayMs) + 100);
   assert(await page.evaluate(() => phoneLightOn));
   await page.evaluate(() => openPhoneApp('notes'));
   await page.locator('#phone-note').fill('qoilg');
@@ -109,10 +110,10 @@ try {
   await page.keyboard.press('q');
   assert.equal(await page.evaluate(() => usingInspection), false);
 
-  await page.keyboard.down('l');
+  await page.keyboard.down('m');
   await page.clock.runFor(50);
   await page.keyboard.press('Escape');
-  await page.keyboard.up('l');
+  await page.keyboard.up('m');
   assert.equal(await page.evaluate(() => keys.size), 0, 'Opening settings releases held keys');
   await page.locator('#menu-exit').click();
   await page.locator('#menu-settings-button').click();
@@ -132,6 +133,13 @@ try {
   await page.screenshot({ path: '.local/keybindings-desktop.png' });
   await page.reload(); await page.clock.runFor(100);
   assert.deepEqual(await bindings(), await page.evaluate(() => defaultKeyBindings), 'Reset survives reload');
+  await page.locator('#menu-continue').click();
+  await page.clock.runFor(100);
+  await page.keyboard.press('m');
+  assert(await page.locator('#map-window').isVisible(), 'Reset restores the unassigned M map shortcut');
+  await page.keyboard.press('Escape');
+  await page.evaluate(() => openGameMenu());
+  await page.locator('#menu-exit').click();
 
   for (const invalid of ['{', JSON.stringify({ right: ['Escape'] }), JSON.stringify({ ...saved, right: saved.left }),
     JSON.stringify({ ...saved, right: ['<script>'] }), JSON.stringify({ ...saved, inventory: [] })]) {

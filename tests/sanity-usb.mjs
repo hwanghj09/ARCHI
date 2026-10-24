@@ -95,6 +95,16 @@ try {
   await page.locator('[data-computer-task-app="usbdrive"]').click();
   await page.locator('#usb-drive-plug').click();
   await page.clock.runFor(4000);
+  await page.evaluate(() => {
+    Object.defineProperty(document, 'hidden', { configurable: true, value: true });
+    document.dispatchEvent(new Event('visibilitychange'));
+  });
+  await page.clock.runFor(8000);
+  assert.equal(await page.evaluate(() => collectedItems.has('f17-usb-played')), false, 'A hidden browser tab cannot complete the viewing requirement');
+  assert(await page.locator('#usb-video').isHidden(), 'Backgrounding interrupts playback like minimizing the window');
+  await page.evaluate(() => { delete document.hidden; document.dispatchEvent(new Event('visibilitychange')); });
+  await page.locator('#usb-drive-plug').click();
+  await page.clock.runFor(4000);
   await page.evaluate(() => { collectedItems.delete('f17-emergency-linked'); updatePowerState(); });
   await page.clock.runFor(8000);
   assert.equal(await page.evaluate(() => collectedItems.has('f17-usb-played')), false, 'Unpowered playback cannot complete');

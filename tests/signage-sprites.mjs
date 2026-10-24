@@ -58,7 +58,8 @@ try {
       labels++;
     }
   }
-  assert(fixtures >= 15 && labels >= 70, 'All notice fixtures, room labels and floor plates are covered');
+  assert.equal(fixtures, 11, 'All remaining notice fixtures are covered after the side-story cleanup');
+  assert(labels >= 70, 'Room labels and floor plates are covered');
   await mkdir('.local', { recursive: true });
   for (const [id, x] of [['b1', 3100], ['f7', 3100], ['f3', 3100]]) {
     await page.evaluate(({ id, x }) => {

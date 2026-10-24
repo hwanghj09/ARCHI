@@ -47,13 +47,13 @@ try {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.locator('#phone-button').tap();
   await page.locator('#phone-light').tap();
-  await page.clock.runFor(await page.evaluate(() => phoneLightDelay ? phoneLightDelayMs : 0));
+  await page.clock.runFor(await page.evaluate(() => phoneLightDelay ? phoneLightDelayMs + 100 : 0));
   await page.locator('#phone-close').tap();
   assert(await glow.isHidden());
   assert.equal(await badge.textContent(), '플래시 꺼짐');
   await page.locator('#phone-button').tap();
   await page.locator('#phone-light').tap();
-  await page.clock.runFor(await page.evaluate(() => phoneLightDelay ? phoneLightDelayMs : 0));
+  await page.clock.runFor(await page.evaluate(() => phoneLightDelay ? phoneLightDelayMs + 100 : 0));
   await page.locator('#phone-close').tap();
   assert(await glow.isVisible());
   assert.equal(await badge.textContent(), '플래시 켜짐');

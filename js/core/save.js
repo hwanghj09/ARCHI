@@ -31,7 +31,7 @@ function progressSnapshot() {
     x: body.position.x, y: body.position.y - (crouching ? 33 : 0), velocity: { ...body.velocity }, facing, returnX,
     arrivalKey: currentDoors.find(door => door.key === 'exit')?.key || currentDoors.find(door => door.key)?.key };
   if (openingActive) Object.assign(scene, { id: 'office', x: 656, y: floorY - 81, velocity: { x: 0, y: 0 } });
-  if (playerCaught) Object.assign(scene, { id: 'f1', x: BUILDING_CORE.elevators[0].x + 40, y: floorY - 81, velocity: { x: 0, y: 0 } });
+  if (playerCaught) Object.assign(scene, { id: caughtBy === roamer ? floorId(currentSceneFloor) : 'f1', x: BUILDING_CORE.elevators[0].x + 40, y: floorY - 81, velocity: { x: 0, y: 0 } });
   return { version: 1, powerCircuitVersion: 1, storyPuzzleVersion: 1, savedAt: Date.now(), scene, items: [...collectedItems], clues: clueSnapshot(), photos: photoSnapshot(),
     battery: phoneBattery, sanity, logPuzzle: { ...logPuzzle }, light: phoneLightOn, dock: phoneDock && { ...phoneDock },
     phoneChargeAccumulator, phoneDrainAccumulator,
@@ -67,7 +67,7 @@ const slotKeys = [1, 2, 3, 4, 5].map(n => `archi.slot.${n}.v1`);
 let objectiveSaveSkip = false;
 
 function writeSlot(index, kind) {
-  if (!gameStarted || restoringProgress || b2Ending.phase !== 'idle') return false;
+  if (!gameStarted || restoringProgress || playerCaught || hallucinationCaught || b2Ending.phase !== 'idle') return false;
   try {
     localStorage.setItem(slotKeys[index], JSON.stringify({ ...progressSnapshot(), slotKind: kind, objective: currentObjective?.title ?? '' }));
     return true;
@@ -84,6 +84,8 @@ function restoreProgress(data) {
   try {
     resetSolarRestoreScene();
     itemUseTime = 0;
+    cancelPhoneLightDelay();
+    hideDevouredVideo();
     cancelPhotoCapture();
     closeComputerUsbConnection();
     resetComputerDesktop();

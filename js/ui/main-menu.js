@@ -120,7 +120,7 @@ function closeMainMenu() {
 }
 
 function openGameMenu() {
-  if (!gameStarted || mainMenuActive || photoCaptureTime > 0 || openingActive || blackoutSceneActive || cctvSceneActive || solarRestoreActive || playerCaught || hallucinationCaught || transitioning ||
+  if (!gameStarted || mainMenuActive || photoCaptureTime > 0 || openingActive || blackoutSceneActive || cctvSceneActive || solarRestoreActive || b2Ending.offline || b2Ending.phase === 'over' || playerCaught || hallucinationCaught || transitioning ||
       usingPhone || usingComputer || usingKeypad || usingControl || usingInspection || usingPowerPanel) return;
   saveProgress();
   mainMenuActive = true;
@@ -299,9 +299,9 @@ for (const button of document.querySelectorAll('.game-over-load')) button.addEve
 });
 
 document.getElementById('menu-slots-button').addEventListener('click', event => {
-  slotsLoadOnly = false;
+  slotsLoadOnly = playerCaught || hallucinationCaught;
   menuReturnButton = event.currentTarget;
-  menuSlotsStatus.textContent = gameStarted ? '목표가 바뀔 때마다 가장 오래된 칸에 자동으로 저장됩니다.' : '게임을 시작한 뒤에 저장할 수 있습니다. 저장된 칸은 불러올 수 있습니다.';
+  menuSlotsStatus.textContent = slotsLoadOnly ? '불러올 칸을 고르세요. 붙잡힌 지금 상태는 저장하지 않습니다.' : gameStarted ? '목표가 바뀔 때마다 가장 오래된 칸에 자동으로 저장됩니다.' : '게임을 시작한 뒤에 저장할 수 있습니다. 저장된 칸은 불러올 수 있습니다.';
   renderSlots();
   showMenuView('slots');
 });

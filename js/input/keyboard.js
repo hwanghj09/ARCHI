@@ -21,8 +21,8 @@ window.addEventListener('keydown', event => {
   }
   // 지도 창(map.js)은 게임을 멈추지 않는다: Esc만 지도를 닫고 나머지 입력은 그대로 게임에 간다.
   if (!mapWindow.hidden && event.code === 'Escape') { if (!event.repeat) closeMap(); event.preventDefault(); return; }
-  // M: 지도 버튼을 누른 것과 같다. 글을 쓰는 칸에서는 글자로 입력된다.
-  if (event.code === 'KeyM' && !event.repeat && !event.ctrlKey && !event.metaKey && !event.altKey && !event.target.closest?.('textarea, input, select')) { event.preventDefault(); toggleMap(); return; }
+  // 다른 동작에 지정하지 않은 M은 지도를 연다. 글을 쓰는 칸에서는 글자로 입력된다.
+  if (event.code === 'KeyM' && !Object.values(keyBindings).some(codes => codes.includes(event.code)) && !event.repeat && !event.ctrlKey && !event.metaKey && !event.altKey && !event.target.closest?.('textarea, input, select')) { event.preventDefault(); toggleMap(); return; }
   if (storySceneActive) return handleSceneKey(event, storyScene, skipStoryScene);
   if (blackoutSceneActive) return handleSceneKey(event, blackoutScene, finishBlackoutScene);
   if (cctvSceneActive) return handleSceneKey(event, cctvScene, finishCctvScene);

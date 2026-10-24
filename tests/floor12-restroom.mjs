@@ -28,7 +28,7 @@ try {
     assert.equal(await page.locator('#interaction-hint').textContent(), 'E · 화장실 들어가기');
     await page.keyboard.press('e');
     await finishSceneTransition(page);
-    assert.equal(await page.locator('header span').textContent(), '12F · 화장실');
+    assert.equal(await page.locator('header > span').textContent(), '12F · 화장실');
     const exit = await page.evaluate(() => {
       const door = currentDoors.find(door => door.key === 'exit');
       const config = floorById.get('f12-restroom');

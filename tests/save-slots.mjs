@@ -47,6 +47,32 @@ try {
   await page.waitForFunction(() => currentObjective?.title === '로그 분석');
   await page.waitForTimeout(300);
   assert.deepEqual((await slots()).map(slot => slot?.title), ['ARCHI 멈추기', '비상 전력 켜기', '로그 분석', '지하에서 무슨 일이?', 'ARCHI 멈추기'], '불러오기 직후의 목표 표시는 슬롯을 덮어쓰지 않는다');
+  for (const kind of ['robot', 'hallucination']) {
+    await page.evaluate(kind => {
+      if (kind === 'robot') {
+        collectedItems.add('f17-emergency-linked'); solarEnabled = true; solarPoweredFloors = [1];
+        performFloorChange('f1'); catchPlayer(); updateRobot(guardPatrol, 1200);
+      }
+      else triggerDevoured();
+    }, kind);
+    const capture = page.locator(kind === 'robot' ? '#guard-capture' : '#hallucination-caught');
+    await capture.waitFor({ state: 'visible' });
+    const stored = await page.evaluate(() => slotKeys.map(key => localStorage.getItem(key)));
+    await capture.locator('.game-over-load').click();
+    assert.equal(await page.locator('[data-slot-save]:enabled').count(), 0, `${kind}: game over only allows loading`);
+    await page.keyboard.press('Escape');
+    await page.locator('#menu-slots-button').click();
+    assert.equal(await page.locator('[data-slot-save]:enabled').count(), 0, `${kind}: returning through home preserves the save restriction`);
+    assert.equal(await page.evaluate(() => writeSlot(0, 'manual')), false, `${kind}: the shared writer also rejects caught states`);
+    assert.deepEqual(await page.evaluate(() => slotKeys.map(key => localStorage.getItem(key))), stored, `${kind}: saved slots remain intact`);
+    await page.locator('[data-slot-load="2"]').click();
+    assert(await page.evaluate(() => !playerCaught && !hallucinationCaught && !mainMenuActive), 'Loading leaves game over');
+  }
+  await page.evaluate(() => openGameMenu());
+  await page.locator('#menu-exit').click();
+  await page.locator('#menu-slots-button').click();
+  await page.locator('[data-slot-save="4"]').click();
+  assert.equal((await slots())[4].kind, 'manual', 'Normal saving works after loading out of game over');
   assert.deepEqual(errors, []);
   console.log('save-slots: ok');
 } finally {

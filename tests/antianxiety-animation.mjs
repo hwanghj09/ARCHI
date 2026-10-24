@@ -49,6 +49,7 @@ function element(id) {
   if (!elements.has(id)) elements.set(id, {
     id, dataset: {}, style: {}, hidden: false, naturalWidth: id === 'antianxiety-sheet' ? 1536 : 0, naturalHeight: 256,
     addEventListener() {}, classList: { remove() {}, toggle() {} }, getAttribute() {}, setAttribute() {}, focus() {},
+    querySelector(selector) { return element(`${id} ${selector}`); },
   });
   return elements.get(id);
 }

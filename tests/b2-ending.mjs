@@ -201,11 +201,16 @@ try {
   assert.equal((await page.locator('#b2-delete-bar').textContent()).replace(/\s+/g, ' ').trim().startsWith('ARCHI — OFFLINE 100%'), true);
   assert.match(await page.locator('#b2-terminal-log').textContent(), /ARCHI — OFFLINE/);
   assert.equal(await page.evaluate(() => b2Robots.every(robot => !robot.banging)), true, 'Robots stop pounding');
+  await page.keyboard.press('Escape');
+  await page.keyboard.press('Escape');
+  assert.equal(await page.evaluate(() => mainMenuActive), false, 'OFFLINE is an ending transition, so Escape cannot open a conflicting pause menu');
   await page.clock.runFor(4100);
   assert(!(await visible('#b2-terminal')), 'The terminal closes for the finale');
   assert(await visible('#b2-escape'), 'OFFLINE leads to the TRUE END');
   const step = () => page.evaluate(() => document.getElementById('b2-escape').dataset.step);
   assert.equal(await step(), 'white');
+  await page.keyboard.press('Escape');
+  assert.equal(await page.evaluate(() => mainMenuActive), false, 'The credits cannot open an overlapping game menu');
   await page.clock.runFor(3000);
   assert.equal(await step(), 'title');
   assert.equal(await page.locator('#b2-escape-title').textContent(), 'TRUE END — ARCHI OFFLINE');

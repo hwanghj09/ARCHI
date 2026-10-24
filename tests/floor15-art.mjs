@@ -84,7 +84,7 @@ try {
   const enter = async name => {
     const front = await roomFront(page, name);
     await use(front.door.x + front.door.width / 2);
-    assert.equal(await page.locator('header span').textContent(), '15F · ' + name);
+    assert.equal(await page.locator('header > span').textContent(), '15F · ' + name);
     const door = await exitDoor(page);
     assertMirroredDoor(front.room, front.door, await worldWidth(page), door, name);
     return door.x + door.width / 2;
@@ -111,7 +111,7 @@ try {
   assert.equal(await page.locator('.access-gate[data-open="true"]').count(), 2);
   assert((await checkArt()).some(p => p.file === 'research-news-board.png'));
   await use(4730);
-  assert.match(await interactionMessage(page), /야간 사용 권한/);
+  assert.equal(await interactionMessage(page), '', 'The removed night-permission side story stays absent');
   await walk(650);
   await capture('doors');
 
@@ -136,7 +136,7 @@ try {
     })));
   assert.deepEqual(crates, [[110, 50, 'gpu-shipping-crate.png'], [90, 60, 'gpu-shipping-crate.png']]);
   await use(420);
-  assert.match(await interactionMessage(page), /B2 서버실 이관 2차분/);
+  assert.equal(await interactionMessage(page), '', 'The cart no longer starts the removed transfer side story');
   await walk(730);
   await page.keyboard.down('d');
   await page.clock.runFor(500);
@@ -150,7 +150,7 @@ try {
   await jump('d');
   assert(await position() > 1470, 'Jump clears second crate');
   await use(1800);
-  assert.match(await interactionMessage(page), /승인: 대기/);
+  assert.equal(await interactionMessage(page), '', 'The removed approval side story stays absent');
   await capture('seminar');
   await walk(1520);
   await jump('a');
@@ -161,14 +161,14 @@ try {
   const directorExit = await enter('연구본부장실');
   assert((await checkArt()).some(p => p.file === 'research-director-desk.png'));
   await use(900);
-  assert.match(await interactionMessage(page), /자동 승인/);
+  assert.equal(await interactionMessage(page), '', 'The director desk no longer repeats the removed approval story');
   await capture('director');
   await page.setViewportSize({ width: 390, height: 844 });
   await page.clock.runFor(100);
   await checkArt();
   await capture('mobile');
   await use(directorExit);
-  assert.equal(await page.locator('header span').textContent(), '15F · 연구본부');
+  assert.equal(await page.locator('header > span').textContent(), '15F · 연구본부');
   await page.setViewportSize({ width: 1280, height: 720 });
   await jumpFloor('f14');
   assert.equal(await page.locator('#dynamic-scene').getAttribute('data-theme'), 'dataset');

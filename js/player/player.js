@@ -140,14 +140,13 @@ function animate(distance, sprinting = false, elapsed = 0) {
   const pushing = !crouching && grounded && playerPushing && distance > .1 && pushSheet.naturalWidth === 256 * pushFrames; // 상자를 미는 동안은 밀기 모션
   const running = !crouching && grounded && sprinting && !pushing && distance > .1 && runSheet.naturalWidth === 256 * runFrames && runSheet.naturalHeight === 256;
   const walking = grounded && walkReady && distance > .1 && !running && !pushing;
-  const holdingPhone = usingPhone || phoneLightOn;
+  const holdingPhone = usingPhone || phoneLightOn || phoneRaising;
   walkDistance = walking ? (walkDistance + distance) % (frameDistance * walkFrames) : 0;
   runDistance = running ? (runDistance + distance) % (runFrameDistance * runFrames) : 0;
   if (distance > .1 || !grounded) phoneAwayTime = 0;
   else phoneAwayTime = Math.max(0, phoneAwayTime - elapsed);
   // 휴대폰을 켠 채 서 있을 때만 휴대폰 자세이고, 움직이거나 뛰면 휴대폰을 든 걷기·달리기·점프 그림을 쓴다.
-  // 웅크린 채 플래시를 켜면 휴대폰 드는 0.5초 동안에도 웅크린 자세를 그대로 둔다(선 자세로 튀지 않게).
-  const phoneStill = grounded && ((phoneRaising && !crouching) || (usingPhone && !walking && !running && !pushing));
+  const phoneStill = grounded && !crouching && !walking && !running && !pushing && (phoneRaising || usingPhone);
   const state = phoneStill ? (phoneLightOn ? 'phone-light' : 'phone') : !grounded ? (body.velocity.y < 0 ? 'jump' : 'fall') :
     crouching ? 'crouch' : interactionTime > 0 && !holdingPhone ? 'interact' : pushing ? 'push' : running ? 'run' : walking ? 'walk' :
     phoneLightOn ? 'phone-light' : phoneAwayTime > 0 ? 'phone-away' : 'idle';

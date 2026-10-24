@@ -17,11 +17,11 @@ try {
   await page.clock.pauseAt(new Date('2026-09-19T00:01:00Z'));
   await page.clock.runFor(100);
   await reachInitialCorridor(page);
-  // This suite checks powered movement; outage and recovery have their own regression routes.
+  // This suite checks powered movement after the first departure; outage, app installation and first-departure gates have their own regression routes.
   await page.evaluate(() => triggerBuildingBlackout());
   // 태양광은 전등만 켠다. 승강기는 17층 비상 UPS 회선(f17-emergency-linked)으로 움직인다(elevators.js).
   // 순찰 로봇 R-03은 정전 중 승강기를 타고 층을 옮긴다(roaming-guard.mjs). 칸 배정을 흔들지 않게 9층에 머물게 한다.
-  await page.evaluate(() => { collectedItems.add('f17-emergency-linked'); solarEnabled = true; updatePowerState(); roamer.stay = Infinity; });
+  await page.evaluate(() => { collectedItems.add('f17-emergency-linked'); collectedItems.add('solar-app-installed'); collectedItems.add('story-robot-seen'); solarEnabled = true; updatePowerState(); roamer.stay = Infinity; });
   await page.locator('#power-floor-grid [data-floor="17"]').dispatchEvent('click');
   const state = () => page.locator('#player').evaluate(el => {
     const player = new DOMMatrix(getComputedStyle(el).transform);
@@ -304,7 +304,7 @@ try {
   await finishSceneTransition(page);
   assert.equal(await page.locator('#world').getAttribute('data-room'), 'dynamic', 'Boarding must move the player to a dynamically built floor');
   assert.equal(await page.evaluate(() => document.getElementById('world').style.width), '5000px', 'Every floor shares the 17F width');
-  assert.equal(await page.locator('header span').textContent(), '12F · 기술본부 ARCHI 개발팀');
+  assert.equal(await page.locator('header > span').textContent(), '12F · 기술본부 ARCHI 개발팀');
   assert.equal(await page.locator('#dynamic-scene .solid:not(.floor):not(.boundary)').count(), 0, 'The 12F corridor has no extra box obstacles');
   assert.equal(await page.locator('#elevator-cabin').isHidden(), true, 'Exiting must close the cabin view');
   await page.screenshot({ path: '.local/floor-12.png' });
@@ -317,7 +317,7 @@ try {
   await page.locator('#cabin-exit').click();
   await finishSceneTransition(page);
   assert.equal(await page.locator('#world').getAttribute('data-room'), 'corridor', 'Boarding must return the player to floor 17');
-  assert.equal(await page.locator('header span').textContent(), '17F · 복도');
+  assert.equal(await page.locator('header > span').textContent(), '17F · 복도');
 
   assert.deepEqual(errors, []);
   console.log('PASS: delayed elevator calls, gradual floor indicators, independent travel, automatic arrival opening, repeated-call guards, multi-floor boarding across structurally distinct floors; doors, player animations, movement, collisions, camera and resize.');

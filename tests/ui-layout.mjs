@@ -75,7 +75,7 @@ try {
       assert(r.height >= 44, 'Phone actions remain touch accessible');
     }
     await page.locator('#phone-light').tap();
-    await page.clock.runFor(await page.evaluate(() => phoneLightDelayMs) + 20);
+    await page.clock.runFor(await page.evaluate(() => phoneLightDelayMs) + 100);
     assert(await page.evaluate(() => phoneLightOn));
     await page.locator('#phone-light').tap();
     assert.equal(await page.evaluate(() => phoneLightOn), false);

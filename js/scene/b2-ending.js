@@ -564,9 +564,8 @@ document.getElementById('b2-restart').addEventListener('click', () => {
   startNewGame();
 });
 document.getElementById('b2-checkpoint').addEventListener('click', () => {
-  let data = null;
-  try { data = JSON.parse(localStorage.getItem(b2CheckpointKey)); } catch { /* 아래에서 그냥 돌아간다. */ }
-  if (!data?.scene) return;
+  const data = readProgress(b2CheckpointKey);
+  if (!data) return;
   restoreProgress(data);
   saveProgress();
 });
