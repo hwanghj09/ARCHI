@@ -52,6 +52,8 @@
 .usb-drive-connect[hidden], .usb-video[hidden] { display: none; }
 .usb-video { position: relative; height: 290px; min-height: 200px; flex-shrink: 1; margin: 8px 0; overflow: hidden; background: #07090b; color: #e9eef0; font: 14px/1.5 monospace;
   background-image: repeating-linear-gradient(0deg, #ffffff0a 0 1px, transparent 1px 3px), radial-gradient(ellipse at 50% 40%, #2b3438 0, #07090b 70%); }
+/* 창을 최대화하면 영상이 남은 높이를 모두 채운다. */
+[data-maximized="true"] .usb-video { flex-grow: 1; }
 .usb-video-footage { position: absolute; inset: 0; background: #07090b url('../assets/background/floor02/floor02-hall-interior.png') left center / auto 100% no-repeat;
   filter: grayscale(.8) brightness(1.7); animation: usb-camera 9s linear both; }
 @keyframes usb-camera { to { background-position: 40% center; } }

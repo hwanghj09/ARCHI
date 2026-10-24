@@ -55,7 +55,7 @@ panelFloors.forEach((floor, index) => {
       return;
     }
     if (button.dataset.restricted && selectedFloor !== floor && !collectedItems.has(restrictionItem)) {
-      // 7층에서 B2가 목적지라는 걸 안 뒤에 눌러 보면 B1 시설관리실로 가는 목표가 열린다(objective.js).
+      // 7층에서 B2가 목적지라는 걸 안 뒤에 눌러 보면 운행 제한 해제 목표가 열린다(objective.js).
       if (collectedItems.has('f7-external-connection-solved')) {
         collectedItems.add('b2-restricted-seen');
         playGameSound('deny');
@@ -100,7 +100,7 @@ function showCabin(carIndex) {
   cabinCarIndex = carIndex;
   selectedFloor = null;
   cabinArrivalOpen = false;
-  cabinAutoClose = 0;
+  cabinAutoClose = elevatorAutoCloseMs; // 탄 채로 가만히 있으면 밖에서 부른 칸과 같은 시간 뒤에 문이 닫힌다(elevators.js)
   cabinDoorAmount = 1;
   cabinScene.style.setProperty('--door-open', '1');
   selectingFloor = true;
@@ -204,7 +204,10 @@ function updateCabin() {
   if (cabinScene.dataset.door === 'opening' || cabinScene.dataset.door === 'closing') {
     cabinDoorAmount = Math.max(0, Math.min(1, cabinDoorAmount + (car.open ? 1 : -1) * step / 1100));
     cabinScene.style.setProperty('--door-open', cabinDoorAmount);
-    if (cabinDoorAmount === (car.open ? 1 : 0)) cabinScene.dataset.door = car.open ? 'open' : 'closed';
+    if (cabinDoorAmount === (car.open ? 1 : 0)) {
+      cabinScene.dataset.door = car.open ? 'open' : 'closed';
+      if (car.open) cabinAutoClose = elevatorAutoCloseMs; // 도착하거나 열림 버튼으로 문이 다 열리면 다시 센다
+    }
   }
   if (selectedFloor !== null && cabinScene.dataset.door === 'open') setCabinDoor(false);
   if (cabinArrivalOpen && !transitioning) {

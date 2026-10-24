@@ -29,10 +29,10 @@ try {
   });
   let s = await state();
   assert.equal(s.where, 'f5'); assert(s.mounted); assert.equal(s.sprites, 1);
-  assert.equal(s.next, 'elevator', 'Unlit floor: corridor only');
+  assert.equal(s.next, 'left', 'Unlit floor: corridor only, left end first');
   assert.equal(await page.evaluate(() => world.dataset.powered), 'false');
   const startX = s.x; await page.clock.runFor(1000);
-  assert(Math.abs((await state()).x - startX - 70) < 3, 'Self-powered patrol rolls at 70 px/s on an unpowered floor');
+  assert(Math.abs((await state()).x - startX - 140) < 3, 'Self-powered patrol rolls at 140 px/s on an unpowered floor');
 
   // 엘리베이터 도착음은 수호가 멀리 있어도(같은 층 방 안에서도) 들린다. 다른 층이면 안 들린다.
   const chimes = await page.evaluate(() => {
@@ -51,7 +51,7 @@ try {
   assert.deepEqual(chimes, [null, null], 'The arrival chime plays at full volume on Suho\'s floor only');
 
   // 승강기 전력이 없으면 엘리베이터를 못 타고 이 층을 계속 돈다.
-  await page.evaluate(() => { roamer.stay = 0; });
+  await page.evaluate(() => { Object.assign(roamer, { next: 'elevator', stay: 0 }); });
   await page.clock.runFor(100);
   s = await state();
   assert.equal(s.where, 'f5'); assert.equal(s.mode, 'patrol', 'Without elevator power R-03 keeps patrolling');
@@ -66,7 +66,7 @@ try {
   await page.evaluate(() => {
     collectedItems.add('f17-emergency-linked'); updatePowerState();
     elevatorCars.forEach((car, index) => Object.assign(car, { floor: index ? 12 : 1, travelling: false, destination: null, open: false, rider: false }));
-    Object.assign(roamer, { next: 'elevator', stay: 0, mode: 'patrol', wait: 0 });
+    Object.assign(roamer, { next: 'elevator', stay: 0, endsLeft: [], mode: 'patrol', wait: 0 });
   });
   await page.clock.runFor(100);
   assert.equal((await state()).mode, 'return', 'Heads to the elevator');
@@ -130,14 +130,35 @@ try {
   assert.equal((await trip()).travelling, true, 'The rerouted car then departs');
   await page.clock.runFor(3000);
 
-  // 전등이 켜진 층: 복도 다음 방을 둘러본다. 다른 장면이면 바로 옮긴다.
-  await page.evaluate(() => {
+  // 전등이 켜진 층: 엘리베이터에서 왼쪽으로 가며 그쪽 방을 차례로 들르고 왼쪽 끝, 이어서 오른쪽 방들과 오른쪽 끝을 본 뒤
+  // 엘리베이터로 간다. 다른 장면이면 걸어갈 시간만큼 지나 옮긴다.
+  const round = await page.evaluate(() => {
     collectedItems.add('f17-emergency-linked'); solarEnabled = true; solarPoweredFloors = [5]; updatePowerState();
-    Math.random = () => 0; roamerEnter('f5', 'elevator');
+    performFloorChange('f17'); roamer.car = null; roamerEnter('f5', 'elevator');
+    const start = roamer.x;
+    const doors = floorById.get('f5').rooms.filter(entry => floorById.has(entry.target) && !floorById.get(entry.target).exitLock)
+      .map(entry => ({ id: entry.target, x: sceneDoorX('f5', entry.target) }));
+    const expected = [...doors.filter(door => door.x <= start).sort((a, b) => b.x - a.x).map(door => door.id), 'left',
+      ...doors.filter(door => door.x > start).sort((a, b) => a.x - b.x).map(door => door.id), 'right', 'elevator'];
+    const visited = [roamer.next];
+    for (let i = 0; i < 500 && !(roamer.where === 'f5' && roamer.next === 'elevator'); i++) {
+      updateRoamer(500);
+      if (roamer.where === 'f5' && roamer.next !== visited.at(-1)) visited.push(roamer.next);
+    }
+    return { expected, visited: visited.filter(id => id !== 'f5') };
   });
-  s = await state();
-  assert.equal(s.next, 'f5-rnd', 'Lit floor: visits a room');
-  await page.evaluate(() => { performFloorChange('f17'); roamer.stay = 0; });
+  assert.deepEqual(round.visited, round.expected, 'Left side rooms, left end, right side rooms, right end, then the elevator');
+  // 같은 복도에 있으면 복도 끝까지 걸어가서 둘러본 뒤 다음 목적지로 간다.
+  const walked = await page.evaluate(() => {
+    performFloorChange('f5'); Body.setPosition(body, { x: 4700, y: floorY - 81 }); // 감지되지 않게 멀리 둔다
+    Object.assign(roamer, { next: 'left', endsLeft: ['left', 'right'], stay: 0, mode: 'patrol', wait: 0, x: 300 });
+    updateRoamer(16);
+    const heading = [roamer.mode, roamer.chaseOriginX];
+    for (let i = 0; i < 20 && roamer.next === 'left'; i++) updateRoamer(100);
+    return { heading, x: roamer.x, ends: roamer.endsLeft };
+  });
+  assert.deepEqual(walked, { heading: ['return', 80], x: 80, ends: ['right'] }, 'Walks to the left end before turning right');
+  await page.evaluate(() => { performFloorChange('f17'); roamer.next = 'f5-rnd'; roamer.stay = 0; });
   await page.clock.runFor(100);
   s = await state();
   assert.equal(s.where, 'f5-rnd'); assert.equal(s.next, 'f5', 'Rooms lead back to the corridor');
