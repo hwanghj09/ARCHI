@@ -52,7 +52,8 @@ function openComputerApp(app, documentId) {
 const computerBlogPosts = [...document.querySelectorAll('[data-blog-article]')];
 function openComputerBlogPost(id) {
   const selected = computerBlogPosts.find(post => post.dataset.blogArticle === id);
-  if (!usingComputer || transitioning || !floorHasPower(17) || !selected) return;
+  // 블로그는 1층 안내 데스크 PC(사내망 UPS로 늘 켜져 있다)에서 본다. 켜진 컴퓨터를 쓰는 중이면 글을 바꾼다.
+  if (!usingComputer || transitioning || !selected) return;
   for (const post of computerBlogPosts) post.hidden = post !== selected;
   for (const button of document.querySelectorAll('[data-blog-post]')) {
     if (button.dataset.blogPost === id) button.setAttribute('aria-current', 'true');
