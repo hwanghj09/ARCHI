@@ -4,9 +4,9 @@
 
 | 설정 | 기본 이름 | 표시 위치 |
 | --- | --- | --- |
-| `softwareCompany` | ARCHI Soft | 회사명·층별 안내 |
-| `databaseCompany` | ARCHI Data | 회사명·층별 안내 |
-| `databaseProduct` | ARCHI DB | DB 제품명 |
+| `softwareCompany` | VMAX | 회사명·층별 안내 |
+| `databaseCompany` | VMAX Data | 회사명·층별 안내 |
+| `databaseProduct` | VMAX DB | DB 제품명 |
 | `store` | VU | 편의점 간판·영수증·설명 |
 | `ramen` | 인라면 | 밀기 상자 측면·아이템 설명 |
 | `ramenEnglish` | IN RAMEN | 상자의 영문 표기 |

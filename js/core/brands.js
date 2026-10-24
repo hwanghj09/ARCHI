@@ -1,8 +1,8 @@
 // 브랜드를 바꾸려면 이 두 설정만 수정한 뒤 새로고침하세요. 그림 속 글자도 함께 바뀝니다.
 const BRAND_NAMES = {
-  softwareCompany: 'ARCHI Soft',
-  databaseCompany: 'ARCHI Data',
-  databaseProduct: 'ARCHI DB',
+  softwareCompany: 'VMAX',
+  databaseCompany: 'VMAX Data',
+  databaseProduct: 'VMAX DB',
   store: 'VU',
   ramen: '인라면',
   ramenEnglish: 'IN RAMEN',

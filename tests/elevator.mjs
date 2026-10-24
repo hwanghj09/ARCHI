@@ -1001,7 +1001,7 @@ try {
     await walkTo(startX);
     await page.clock.runFor(100);
   };
-  // 8F follows the lobby directory (ARCHI Data QA실·제품기획실) and uses the user's cutaway asset of the QA test room, the product
+  // 8F follows the lobby directory (VMAX Data QA실·제품기획실) and uses the user's cutaway asset of the QA test room, the product
   // planning workspace and the shared product meeting room at 1:1 (floor line y=438 → 570). The corridor shows each room behind
   // glass: QA 시험실 and 제품기획실 left of the elevators, 공용 제품 회의실 right of the restroom; the middle zone is plain wall.
   // Each room is its own scene, the full painted room widened with repeated bays.
@@ -1333,12 +1333,12 @@ try {
         ['fixture revolving-door', '정문']]);
     const directory = await page.locator('#dynamic-scene .fixture.directory-board span').allTextContents();
     assert.equal(directory.length, 15, 'The directory lists 17F to B2 with minor floors grouped as "···"');
-    assert.equal(directory[0], '17F  ARCHI Soft 사업테스트본부');
+    assert.equal(directory[0], '17F  VMAX 사업테스트본부');
     assert.equal(directory.at(-1), 'B2  AI 서버실', 'The game ends at B2, so the directory has no B3 line');
     // The nth-child rules in index.html highlight exactly the three clue lines.
     assert.deepEqual(await page.locator('#dynamic-scene .fixture.directory-board span').evaluateAll(spans =>
       spans.filter(span => getComputedStyle(span).color === 'rgb(246, 230, 188)').map(span => span.textContent)),
-    ['12F  ARCHI Soft 기술본부 · ARCHI 개발팀', '7F  Lounge / VIP Room · AI 테스트·검증실', 'B2  AI 서버실']);
+    ['12F  VMAX 기술본부 · ARCHI 개발팀', '7F  Lounge / VIP Room · AI 테스트·검증실', 'B2  AI 서버실']);
     // corridor.png paints the gold frame; its inner edge is x 1323..1644, y 229..505. Every line stays inside it.
     assert.deepEqual(await page.locator('#dynamic-scene .fixture.directory-board').evaluate(board => {
       const frame = board.getBoundingClientRect();
@@ -1542,7 +1542,7 @@ try {
     await page.clock.runFor(100);
   };
   const checkFloor6 = () => checkExplorationFloor(6);
-  // 5F is the second ARCHI Data 연구본부 floor (DB 보안 연구) and uses the user's cutaway asset of the R&D room, the security
+  // 5F is the second VMAX Data 연구본부 floor (DB 보안 연구) and uses the user's cutaway asset of the R&D room, the security
   // research lab and the meeting room at 1:1 (floor line y=438 → 570). The corridor shows each room behind glass: 연구개발실 and
   // 기술연구실 left of the elevators, 회의실 right of the restroom. Each room is its own scene, the full painted room widened with
   // repeated bays. Its mechanic: the key notebook lies on the tallest painted shelf (186px, a solid with a message, inspectable
@@ -1550,7 +1550,7 @@ try {
   // (movables, its own sprite; the painted one was erased from the art) has to be pushed against it first.
   const checkFloor5 = async () => {
     roomScales.length = 0;
-    const corridorHeader = '5F · ARCHI Data 연구본부';
+    const corridorHeader = '5F · VMAX Data 연구본부';
     const status = () => interactionMessage(page);
     const playerBottom = () => page.locator('#player').evaluate(el => new DOMMatrix(getComputedStyle(el).transform).m42 + 178);
     assert.equal(await header(), corridorHeader);

@@ -42,7 +42,6 @@
 #backup-question { margin: 4px 0 0; color: #ffe3a6; font-weight: bold; }
 #backup-question[hidden], #backup-options[hidden], #backup-monologue[hidden] { display: none; }
 #backup-options { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 8px; }
-#backup-source { margin: 0; color: #ff7a52; font-weight: bold; letter-spacing: .08em; }
 #backup-monologue p { margin: 0; color: #f6e2c0; animation: log-line-in .4s ease-out; }
 #backup-status { margin: 0; min-height: 1.4em; color: #d9a24a; }
 #backup-close { align-self: center; }

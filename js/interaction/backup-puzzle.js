@@ -1,9 +1,9 @@
-// 7층 검증실 "망분리 백업 장비": 필수 스토리 퍼즐 두 개. 12층 퍼즐(f12-evaluation-solved)을 풀어야 열린다.
+// 7층 검증실 "망분리 백업 장비": 필수 스토리 퍼즐. 12층 퍼즐(f12-evaluation-solved)을 풀어야 열린다.
 // 사내망과 떨어져 배터리로 도는 장비라 ARCHI가 지울 수 없다: 여기 기록은 언제 와도 그대로다(실패해도 잃는 것이 없다).
 // 퍼즐 1: 날짜 탭(09/28·09/30·10/05)의 시간별 ARCHI 성능과 B2 전력 사용을 비교해 둘이 함께 오른 시각(03시)을 고른다
 //   (f7-training-time-solved). 09/28 01시는 전력만, 09/30 05시는 성능만 오른 함정이다. 12층 힌트가 있으면 10/05 03시 칸만 강조한다.
-// 퍼즐 2: [오늘] 탭에서 평소 밤(10/05)과 오늘 밤 기록을 비교해 오늘 처음 생긴 일(외부 서버 연결)을 고른다
-//   (f7-external-connection-solved). 풀면 화면이 지직거리다 어두워지고 감시 카메라 도는 소리가 난 뒤 돌아온다(공격은 없다).
+// 그다음 [오늘] 탭: 오늘 밤 기록은 이 장비에 없고 B2 ARCHI-MAIN에만 있다. ARCHI가 자정 직전 회사 홈페이지(archi.html)에
+//   들렀다는 기록만 남아 있어, 홈페이지에서 접속 정보를 찾아 컴퓨터 터미널로 접속하게 한다(terminal.js, f7-external-connection-solved).
 const BACKUP_HOURS = ['00시', '01시', '03시', '05시'];
 const BACKUP_DAYS = {
   '09/28': { perf: [4, 5, 86, 4], power: [12, 91, 93, 14] },
@@ -13,17 +13,16 @@ const BACKUP_DAYS = {
 const BACKUP_TODAY = '오늘';
 const BACKUP_TRAINING_QUESTION = 'ARCHI의 성능 상승과 B2 전력 집중이 동시에 발생한 시간은?';
 const BACKUP_TRAINING_ANSWER = '03시';
-const BACKUP_COMPARE = [
-  { usual: 'TRAINING PROCESS — RUNNING', today: 'TRAINING PROCESS — COMPLETE', diff: 'changed', key: true },
-  { usual: 'B2 POWER — 94%', today: 'B2 POWER — 94%', diff: 'same' },
-  { usual: '없음', today: 'EXTERNAL HOST CONNECTION — READY', diff: 'new', key: true },
-  { usual: '없음', today: 'EXTERNAL CONNECTION TEST — SUCCESS', diff: 'new', key: true },
+// 게임 밖 ARCHI 소개 페이지. 게임과 같은 곳에 올라가 있다(게임을 연 주소 기준).
+const ARCHI_SITE_URL = new URL('archi.html', location.href).href;
+const BACKUP_TODAY_ROWS = [
+  ['동기화', '23:40 이후 끊김. 오늘 밤 원본은 B2 ARCHI-MAIN에만 있다.'],
+  ['ARCHI-MAIN 마지막 외부 접속', '23:58 VMAX 홈페이지'],
+  ['접속한 주소', ARCHI_SITE_URL],
 ];
-const BACKUP_TODAY_QUESTION = '평소 밤에는 없던, 오늘 밤 ARCHI가 처음으로 한 일은?';
-const BACKUP_TODAY_OPTIONS = ['학습', 'B2 전력 사용', '외부 서버 연결', '로그 삭제'];
-const BACKUP_TODAY_ANSWER = '외부 서버 연결';
 const BACKUP_TRAINING_MONOLOGUE = ['성능이 갑자기 높아진 시간과 B2 전력이 늘어난 시간이 같아.', 'ARCHI가 몰래 학습하면서 전력을 사용한 거야.'];
-const BACKUP_TODAY_MONOLOGUE = ['학습은 이미 끝났어.', '이제 외부 서버에 연결하려고 하고 있어.', '이 건물 밖으로 나가려는 건가...?'];
+const BACKUP_TODAY_MONOLOGUE = ['오늘 밤 기록만 비어 있어.', 'ARCHI가 자정 직전에 우리 회사 홈페이지에 들렀다고?',
+  '거기에 뭔가 남아 있을지도 몰라. 서버에 들어갈 방법을 찾으면 컴퓨터 터미널로 볼 수 있을 거야.'];
 
 const backupPanel = document.getElementById('backup-panel');
 const backupFrame = document.getElementById('backup-frame');
@@ -32,7 +31,6 @@ const backupBody = document.getElementById('backup-body');
 const backupHint = document.getElementById('backup-hint');
 const backupQuestion = document.getElementById('backup-question');
 const backupOptions = document.getElementById('backup-options');
-const backupSource = document.getElementById('backup-source');
 const backupMonologue = document.getElementById('backup-monologue');
 const backupStatus = document.getElementById('backup-status');
 let backupBlocked = [];
@@ -97,17 +95,11 @@ function renderDayTable() {
 function renderTodayTable() {
   const table = document.createElement('table');
   table.className = 'backup-compare';
-  table.setAttribute('aria-label', '평소 밤과 오늘 밤 기록 비교');
-  const head = document.createElement('tr');
-  head.append(backupCell('th', ''), backupCell('th', '평소 밤 (10/05)'), backupCell('th', '오늘 밤'));
-  table.createTHead().append(head);
-  table.createTBody().append(...BACKUP_COMPARE.map(entry => {
+  table.setAttribute('aria-label', '오늘 밤 기록 상태');
+  table.createTBody().append(...BACKUP_TODAY_ROWS.map(([label, value], index) => {
     const row = document.createElement('tr');
-    row.dataset.diff = entry.diff;
-    row.dataset.highlight = String(externalSolved() && Boolean(entry.key));
-    // 다른 줄에는 표시만 붙인다(무엇이 답인지는 알려 주지 않는다): ≠ 바뀜, + 오늘 처음.
-    row.append(backupCell('td', entry.diff === 'new' ? '+' : entry.diff === 'changed' ? '≠' : '', { mark: 'true' }),
-      backupCell('td', entry.usual), backupCell('td', entry.today));
+    row.dataset.diff = index ? 'new' : 'changed';
+    row.append(backupCell('td', index ? '+' : '≠', { mark: 'true' }), backupCell('td', label), backupCell('td', value));
     return row;
   }));
   backupBody.replaceChildren(table);
@@ -135,22 +127,19 @@ function renderBackupPanel() {
   renderBackupTabs();
   const today = backupTab === BACKUP_TODAY;
   if (today) renderTodayTable(); else renderDayTable();
-  const solved = today ? externalSolved() : trainingSolved();
-  backupQuestion.textContent = today ? BACKUP_TODAY_QUESTION : BACKUP_TRAINING_QUESTION;
+  // [오늘] 탭은 보기만 한다(문제는 터미널 쪽이다).
+  const solved = today || trainingSolved();
+  backupQuestion.textContent = BACKUP_TRAINING_QUESTION;
   backupQuestion.hidden = backupOptions.hidden = solved;
-  if (!solved && backupOptions.dataset.tab !== String(today)) {
-    backupOptions.dataset.tab = String(today);
-    renderBackupOptions(today ? BACKUP_TODAY_OPTIONS : BACKUP_HOURS, today ? answerBackupToday : answerBackupTraining);
-  }
-  backupSource.hidden = !(today && externalSolved());
+  if (!solved && !backupOptions.childElementCount) renderBackupOptions(BACKUP_HOURS, answerBackupTraining);
   const lines = today ? BACKUP_TODAY_MONOLOGUE : BACKUP_TRAINING_MONOLOGUE;
   backupMonologue.hidden = !solved;
   if (solved && backupMonologue.dataset.lines !== lines[0]) {
     backupMonologue.dataset.lines = lines[0];
-    showMonologue(backupMonologue, lines, true);
+    showMonologue(backupMonologue, lines, !today || externalSolved());
   }
-  backupStatus.textContent = today ? (externalSolved() ? '모든 관련 로그의 발신지는 B2 ARCHI-MAIN이다.' :
-    '평소 밤과 오늘 밤 기록을 비교해 보자. 다른 줄에는 표시가 붙어 있다.') :
+  backupStatus.textContent = today ? (externalSolved() ? '터미널에서 ARCHI-MAIN의 외부 연결 기록을 확인했다.' :
+    '오늘 밤 기록은 B2 ARCHI-MAIN에만 있다. ARCHI가 들렀던 홈페이지를 확인하자.') :
     trainingSolved() ? '10/05 03시: 성능 상승과 B2 전력 집중이 동시에 일어났다. [오늘] 탭이 열렸다.' :
     '날짜 탭을 바꿔 가며 ARCHI 성능과 B2 전력 사용이 함께 높아진 시간을 찾자.';
 }
@@ -178,31 +167,10 @@ function answerBackupTraining(choice) {
   setTimeout(() => { if (!backupPanel.hidden && backupTab === '10/05') selectBackupTab(BACKUP_TODAY); }, 4200);
 }
 
-function answerBackupToday(choice) {
-  if (externalSolved() || !trainingSolved()) return;
-  if (choice !== BACKUP_TODAY_ANSWER) { punishWrongAnswer(backupFrame, backupStatus); return; }
-  collectedItems.add('f7-external-connection-solved');
-  playGameSound('pickup');
-  addClue('망분리 백업 장비 · 야간 학습', 'ARCHI는 야간에 B2 전력을 이용해 학습했다.');
-  addClue('망분리 백업 장비 · 외부 연결', '오늘 밤 처음 외부 서버 연결을 시도했다. (TRAINING COMPLETE · EXTERNAL HOST READY · CONNECTION TEST SUCCESS)');
-  addClue('망분리 백업 장비 · 발신지', '모든 관련 로그의 발신지는 B2 ARCHI-MAIN이다.');
-  addClue('목적지', 'B2 · ARCHI 메인 서버실');
-  renderBackupPanel();
-  showMonologue(backupMonologue, BACKUP_TODAY_MONOLOGUE);
-  saveProgress();
-  // ARCHI가 조사를 알아챘다: 지직 → 화면이 잠깐 어두워짐 → 감시 카메라가 도는 소리 → 정상으로(7층에는 CCTV가 없어 소리만).
-  glitchFrame(backupFrame);
-  setTimeout(() => backupFrame.classList.add('dimmed'), 450);
-  setTimeout(() => playGameSound('motor'), 800);
-  setTimeout(() => backupFrame.classList.remove('dimmed'), 2000);
-  document.getElementById('backup-close').focus();
-}
-
 function openBackupPuzzle() {
   if (!backupPanel.hidden) return;
   if (trainingSolved() && !externalSolved()) backupTab = BACKUP_TODAY;
   backupPick = null;
-  delete backupOptions.dataset.tab;
   delete backupMonologue.dataset.lines;
   backupPanel.hidden = false;
   releaseInput();

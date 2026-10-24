@@ -5,7 +5,7 @@ const context = createContext({});
 runInContext(readFileSync('js/core/brands.js', 'utf8'), context);
 const run = code => runInContext(code, context);
 assert.equal(run("brandText('CU / VU 편의점 · 신라면 · 진라면 · TmaxSoft · TmaxTibero · Tibero')"),
-  'VU / VU 편의점 · 인라면 · 인라면 · ARCHI Soft · ARCHI Data · ARCHI DB');
+  'VU / VU 편의점 · 인라면 · 인라면 · VMAX · VMAX Data · VMAX DB');
 run("Object.assign(BRAND_NAMES, { store: '마음상점', ramen: '$&라면', softwareCompany: '내 회사', databaseCompany: '새 DB사', databaseProduct: '새 DB' })");
 assert.equal(run("brandText('VU가 · CU에 · 인라면 박스 · TmaxSoft · TmaxTibero · Tibero')"),
   '마음상점가 · 마음상점에 · $&라면 박스 · 내 회사 · 새 DB사 · 새 DB');

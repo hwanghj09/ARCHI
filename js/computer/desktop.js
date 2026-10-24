@@ -7,6 +7,7 @@ const COMPUTER_APPS = {
   building: { title: '시설 안내', icon: 'building' },
   browser: { title: '블로그', icon: 'blog', width: 950, height: 580 },
   usbdrive: { title: '외부 저장 장치', icon: 'files', width: 660, height: 480 }, // 13층 백업 장치 영상(usb-video.js)
+  terminal: { title: '터미널', icon: 'terminal', width: 720, height: 460 }, // B2 ARCHI-MAIN SSH 접속(terminal.js)
   document: { title: '문서', icon: 'notes' }
 };
 const computerWindows = new Map();

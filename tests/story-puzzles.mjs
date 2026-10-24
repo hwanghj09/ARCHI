@@ -144,7 +144,7 @@ try {
   await continueGame();
   await checkRackFrame(1);
 
-  // ---- 7층: 학습 시간(힌트 있음) → 오늘 기록 ----
+  // ---- 7층: 학습 시간(힌트 있음) → [오늘] 탭 → 홈페이지 → 터미널 ----
   await use('f7-verify', '망분리 백업 장비');
   assert(await page.locator('#backup-panel').isVisible());
   assert.deepEqual(await page.locator('#backup-tabs button').allTextContents(), ['[09/28]', '[09/30]', '[10/05]', '[오늘 · 잠김]']);
@@ -170,32 +170,61 @@ try {
   assert.equal(await page.locator('#backup-body td[data-solved="true"]').count(), 2);
   assert(await page.locator('#backup-tabs button').nth(3).isEnabled(), 'Solving opens the today tab');
   assert.match(await page.locator('#backup-status').textContent(), /10\/05 03시: 성능 상승과 B2 전력 집중/);
-  assert.equal(await objective(), '오늘만 다른 기록');
+  assert.equal(await objective(), 'ARCHI의 흔적');
+  assert.match(await page.evaluate(() => currentObjective.text), /archi\.html/, 'The objective names the homepage address');
   await page.clock.runFor(4500);
   assert.equal(await page.evaluate(() => backupTab), '오늘', 'The puzzle moves on to the today tab by itself');
-  assert.deepEqual(await page.locator('#backup-body tbody tr').allTextContents(), ['≠TRAINING PROCESS — RUNNINGTRAINING PROCESS — COMPLETE',
-    'B2 POWER — 94%B2 POWER — 94%', '+없음EXTERNAL HOST CONNECTION — READY', '+없음EXTERNAL CONNECTION TEST — SUCCESS']);
-  assert(await page.locator('#backup-source').isHidden(), 'The source line is not shown before solving');
-  assert.match(await page.locator('#backup-question').textContent(), /오늘 밤 ARCHI가 처음으로 한 일/);
-  await page.locator('#backup-options button', { hasText: '학습' }).click();
-  assert.equal(await sanity(), 60);
-  await page.locator('#backup-options button', { hasText: '외부 서버 연결' }).click();
-  assert(await has('f7-external-connection-solved'));
-  assert(await page.locator('#backup-source').isVisible());
-  assert.equal(await page.locator('#backup-body tr[data-highlight="true"]').count(), 3);
-  await page.clock.runFor(600);
-  assert(await page.locator('#backup-frame').evaluate(element => element.classList.contains('dimmed')), 'The screen dims for a moment');
-  await page.clock.runFor(2000);
-  assert(!(await page.locator('#backup-frame').evaluate(element => element.classList.contains('dimmed'))), 'The screen comes back');
-  assert.match(await page.locator('#backup-status').textContent(), /발신지는 B2 ARCHI-MAIN/);
-  assert.match(await page.locator('#backup-source').textContent(), /B2/);
-  assert.match(await page.locator('#backup-monologue').textContent(), /외부 서버에 연결하려고/);
-  assert.equal((await clues()).length, 0, 'The solved puzzle does not recreate an automatic journal');
-  await page.screenshot({ path: '.local/story-f7-solved.png' });
+  // [오늘] 탭은 문제 없이 기록 상태만 보여 준다: 오늘 원본은 ARCHI-MAIN에만 있고, 23:58에 회사 홈페이지에 들렀다.
+  const todayRows = await page.locator('#backup-body tbody tr').allTextContents();
+  assert.equal(todayRows.length, 3);
+  assert.match(todayRows[1], /23:58 VMAX 홈페이지/);
+  assert.match(todayRows[2], /archi\.html/);
+  assert(await page.locator('#backup-question').isHidden(), 'The today tab asks nothing');
+  assert(await page.locator('#backup-options').isHidden());
+  assert.equal(await has('f7-external-connection-solved'), false);
   await page.keyboard.press('Escape');
-  // 패널을 닫으면 13층으로 가는 이유를 혼잣말로 먼저 말한다(story-scene.js).
+
+  // ---- 홈페이지 → 17층 컴퓨터 터미널 SSH ----
+  // 홈페이지(archi.html)의 임시 저장 글과 터미널 계정이 같아야 한다.
+  const site = await browser.newPage();
+  await site.goto(new URL('../archi.html', import.meta.url).href);
+  await site.locator('.draft summary').click();
+  const draft = await site.locator('.draft pre').textContent();
+  await site.close();
+  const ssh = await page.evaluate(() => ARCHI_SSH);
+  for (const value of Object.values(ssh)) assert(draft.includes(value), `The homepage draft shows ${value}`);
+  await page.evaluate(() => {
+    collectedItems.add('story-blackout-seen'); // 17층 첫 정전 혼잣말은 본 것으로
+    collectedItems.add('f17-emergency-linked');
+    solarEnabled = true; solarPoweredFloors = [17]; updatePowerState();
+    performFloorChange('f17'); performRoomChange();
+    usingComputer = true; computer.hidden = false; resetComputerDesktop();
+  });
+  await page.locator('#computer .computer-shortcuts [data-computer-app="terminal"]').dblclick();
+  const terminal = async line => { await page.locator('#terminal-input').fill(line); await page.locator('#terminal-input').press('Enter'); };
+  const terminalText = () => page.locator('#terminal-output').textContent();
+  await terminal('ssh archi_svc@10.0.0.1');
+  assert.match(await terminalText(), /Connection timed out/, 'A wrong address does not answer');
+  await terminal(`ssh ${ssh.user}@${ssh.host}`);
+  assert.equal(await page.locator('#terminal-input').getAttribute('type'), 'password');
+  await terminal('wrong');
+  assert.match(await terminalText(), /Permission denied, please try again/);
+  await terminal(ssh.password);
+  assert.equal(await page.locator('#terminal-prompt').textContent(), 'archi_svc@archi-main:~$');
+  await terminal('ls');
+  assert.match(await terminalText(), /external\.log/);
+  await terminal('cat external.log');
+  assert.match(await terminalText(), /EXTERNAL CONNECTION TEST — SUCCESS/);
+  assert(await has('f7-external-connection-solved'), 'Reading the external log solves the step');
+  assert.equal((await clues()).length, 0, 'The solved puzzle does not recreate an automatic journal');
+  await page.clock.runFor(3000);
+  assert.match(await terminalText(), /closed by remote host/, 'ARCHI cuts the session');
+  assert.equal(await page.locator('#terminal-prompt').textContent(), 'suho@office-pc:~$');
+  await page.screenshot({ path: '.local/story-terminal-solved.png' });
+  await page.evaluate(() => { usingComputer = false; computer.hidden = true; resetComputerDesktop(); });
+  // 컴퓨터를 나오면 13층으로 가는 이유를 혼잣말로 먼저 말한다(story-scene.js).
   await page.clock.runFor(1200);
-  assert.equal(await page.locator('#story-caption').textContent(), '오늘 밤 처음으로 외부 서버에 연결했다고..?', 'The 7F → 13F monologue plays');
+  assert.equal(await page.locator('#story-caption').textContent(), '오늘 밤 처음으로 외부 서버에 연결했다고..?', 'The terminal → 13F monologue plays');
   await page.keyboard.press('Escape');
   // 7층 다음은 13층 보안 자료실의 백업 장치(tests/vault-puzzle.mjs). 그 전에는 B1 제어반이 풀리지 않는다.
   assert.equal(await objective(), '외부 연결 통로 찾기');

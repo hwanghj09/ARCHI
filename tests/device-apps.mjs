@@ -47,7 +47,7 @@ try {
   await page.keyboard.press('e');
   await finishSceneTransition(page);
   assert(await pc.isVisible());
-  assert.equal(await pc.locator('.computer-shortcuts button').count(), 7);
+  assert.equal(await pc.locator('.computer-shortcuts button').count(), 6);
   await pcApp('mail').click();
   assert.equal(await pc.locator('[data-computer-mail]').count(), 5);
   assert.equal(await pc.locator('#computer-mail-count').textContent(), '5개 메일 · 안 읽음 5개');

@@ -172,7 +172,7 @@ try {
   assert.equal(await titleAfter(() => collectedItems.add('f12-evaluation-solved')), '데이터 수집');
   assert.equal(await titleAfter(() => collectedItems.add('goal-f5-note')), '기록 재현');
   assert.equal(await titleAfter(() => collectedItems.add('f8-repro-record')), '로그 분석');
-  assert.equal(await titleAfter(() => collectedItems.add('f7-training-time-solved')), '오늘만 다른 기록');
+  assert.equal(await titleAfter(() => collectedItems.add('f7-training-time-solved')), 'ARCHI의 흔적');
   assert.equal(await titleAfter(() => collectedItems.add('f7-external-connection-solved')), '외부 연결 통로 찾기');
   assert.equal(await titleAfter(() => collectedItems.add('f13-backup-device')), '장치 확인하기');
   assert.match(await page.evaluate(() => currentObjective.text), /17층 내 자리 컴퓨터의 외부 저장 장치/);

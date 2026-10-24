@@ -15,6 +15,7 @@ try {
 
   await page.evaluate(() => {
     buildingBlackout = true; collectedItems.add('f17-emergency-linked');
+    solarEnabled = true; solarPoweredFloors = [1]; // R-01은 로비 조명 전력이 있어야 기동한다(guard-patrol.js)
     for (const scene of STORY_SCENES) collectedItems.add(scene.flag);
     performFloorChange('f1');
     Body.setPosition(body, { x: 1500, y: floorY - 81 }); Body.setVelocity(body, { x: 0, y: 0 });

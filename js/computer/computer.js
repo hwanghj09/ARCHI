@@ -37,13 +37,14 @@ function openComputerApp(app, documentId) {
   }
   if (app === 'mail' && wasClosed) showComputerMailInbox();
   if (app === 'usbdrive' && wasClosed) resetUsbVideo();
+  if (app === 'terminal' && wasClosed) resetTerminal();
   if (app === 'building') {
     refreshBuildingGuides();
     collectedItems.add('goal-facilities-read');
   }
   refreshSolarDownload();
   if (app === 'browser' && wasClosed) document.getElementById('computer-browser').scrollTop = 0;
-  (app === 'notes' ? computerNote : app === 'mail' ? computerMailSearch : app === 'calculator' ?
+  (app === 'notes' ? computerNote : app === 'terminal' ? document.getElementById('terminal-input') : app === 'mail' ? computerMailSearch : app === 'calculator' ?
     document.querySelector('#computer-calculator [data-calculator-key]') : app === 'browser' && !document.getElementById('computer-solar-page').hidden ?
     document.getElementById('computer-blog-list-title') : document.getElementById('computer-window-close')).focus({ preventScroll: true });
 }

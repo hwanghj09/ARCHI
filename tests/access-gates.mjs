@@ -47,8 +47,9 @@ try {
   await page.evaluate(() => { performRoomChange(); performRoomChange(); });
   assert.equal(await page.locator('#office-badge').count(), 0, 'Returning to the desk does not create a pickup');
   // 정전 뒤 엘리베이터는 17층 비상 회선(f17-emergency-linked)으로만 움직이고, 출입 게이트는 불이 들어온 층(태양광)에서만 반응한다(power.js).
-  // 목표('퇴근하기' 중에는 1층만)도 바로 맞춘다.
-  await page.evaluate(() => { triggerBuildingBlackout(); solarEnabled = true; solarPoweredFloors = [15]; collectedItems.add('f17-emergency-linked'); performFloorChange('f17'); showCabin(0); elevatorCars[0].floor = 17; refreshCabin(); refreshObjective(); });
+  // 목표('퇴근하기' 중에는 1층만)도 바로 맞춘다. 비상 회선만 이은 상태는 '퇴근하기'라, 게이트 컷씬을 이미 본 '출입증 쌔비기' 단계로 둔다
+  // (본 기록이 있으면 거부·사원증 획득 뒤 컷씬이 다시 나오지 않는다).
+  await page.evaluate(() => { triggerBuildingBlackout(); solarEnabled = true; solarPoweredFloors = [15]; ['f17-emergency-linked', 'story-badge-seen', 'story-badge-got-seen'].forEach(item => collectedItems.add(item)); performFloorChange('f17'); showCabin(0); elevatorCars[0].floor = 17; refreshCabin(); refreshObjective(); });
   // All formerly restricted floor buttons work with no badge at all; keep B2 restriction.
   await page.evaluate(() => collectedItems.delete('f17-badge'));
   for (const floor of [12, 13, 14, 15]) {
