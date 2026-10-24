@@ -153,8 +153,10 @@ menuContinue.addEventListener('click', () => {
   if (!mainMenuActive) return;
   const saved = readProgress();
   if (!gameStarted && !saved) return refreshContinue();
+  // 게임 오버(로봇·환각·B2 배드 엔딩) 중이면 창으로 돌아가지 않고 이어하기 저장을 불러온다.
+  const gameOver = playerCaught || hallucinationCaught || b2Ending.phase === 'over';
   closeMainMenu();
-  if (!gameStarted) {
+  if (!gameStarted || gameOver && saved) {
     try { restoreProgress(saved); }
     catch {
       mainMenuActive = true;
@@ -286,7 +288,7 @@ function renderSlots() {
 }
 
 // 게임 오버 창(로봇·환각)의 [불러오기]도 이 창을 연다. 그때는 붙잡힌 상태를 저장하지 않게 저장 버튼을 막는다(slotsLoadOnly).
-// '← 메인으로'를 누르면 메인 메뉴로, 거기서 '계속하기'를 누르면 게임 오버 창으로 돌아간다.
+// '← 메인으로'를 누르면 메인 메뉴로, 거기서 '계속하기'를 누르면 이어하기 저장을 불러온다(저장이 없으면 게임 오버 창으로 돌아간다).
 let slotsLoadOnly = false;
 for (const button of document.querySelectorAll('.game-over-load')) button.addEventListener('click', () => {
   slotsLoadOnly = true;
