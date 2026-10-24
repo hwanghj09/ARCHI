@@ -111,21 +111,38 @@ function startArchiDelete() {
   sayLine('로봇들이 깨어났어! 저 장비 상자를 밀어서 문을 막아야 해.', 5000);
 }
 
-// 장면을 새로 그릴 때(floor-change.js) 같은 장면에 있는 로봇만 스프라이트를 붙이고, B2 전체를 비상 모드로 그린다.
-// 장비 운반 상자는 삭제가 시작된 뒤, 문을 막기 전까지만 밀린다.
+function refreshB2TransferScreen() {
+  const screen = dynamicScene.querySelector('.transfer-screen');
+  if (!screen) return;
+  const state = b2Ending.offline ? 'offline' : collectedItems.has('b2-transfer-cut') ? 'cut' : 'active';
+  const status = state === 'offline' ? 'ARCHI OFFLINE' : state === 'cut' ? '전송 차단됨' : '61%';
+  screen.dataset.transferState = state;
+  screen.lastElementChild.textContent = status;
+  screen.style.setProperty('--transfer-progress', state === 'active' ? '61%' : '0%');
+  screen.setAttribute('aria-label', `외부 전송 현황 · ${status}`);
+  const door = currentDoors.find(entry => entry.element === screen);
+  if (!door) return;
+  const original = floorById.get('b2-main').fixtures.find(fixture => fixture.style === 'transfer-screen');
+  door.message = state === 'active' ? original.message : `${status}. ARC-FULL-041에서 DR-EXT로 향하는 외부 전송은 중단되어 있다.`;
+  door.caption = state === 'active' ? original.caption : status;
+  door.writing = state === 'active' ? original.writing : [...original.writing.slice(0, -1), { text: status, ink: state === 'offline' ? 'green' : 'red' }];
+}
+
+// 장면을 새로 그릴 때(floor-change.js) 같은 장면에 있는 로봇만 붙인다. 상자는 삭제 시작 뒤 문을 막기 전까지 밀린다.
 function mountB2Robots() {
+  refreshB2TransferScreen();
   for (const robot of b2Robots) robot.door = robot.image = null;
   for (const part of movingParts) {
     if (!part.pushable?.barricade && !part.barricadeSpec) continue;
     part.barricadeSpec ??= part.pushable;
     part.pushable = b2Ending.phase === 'running' && !b2Ending.barricaded ? part.barricadeSpec : null;
   }
+  const dock = dynamicScene.querySelector('.fixture.dormant-bots');
+  if (dock) dock.dataset.active = String(b2Ending.phase !== 'idle');
   if (b2Ending.phase === 'idle' || room !== 'dynamic' || floorById.get(dynamicFloorId).floor !== -2) return;
   // 화면 전체를 어둡게 하는 data-alarm은 쓰지 않는다(관제실 소등 조명 전용).
   const stairs = currentDoors.find(door => door.type === 'stairs');
   if (stairs) stairs.message = 'ARCHI가 비상계단을 잠갔다. 문 위 표시등이 붉게 깜빡인다.';
-  const dock = dynamicScene.querySelector('.fixture.dormant-bots');
-  if (dock) dock.style.visibility = 'hidden';
   for (const robot of b2Robots) if (robot.where === dynamicFloorId) mountB2Robot(robot);
 }
 
@@ -439,6 +456,7 @@ function refreshB2Terminal() {
 // 삭제 완료: ARCHI — OFFLINE. 로봇이 멈추고, 잠시 뒤 TRUE END.
 function finishArchiDelete() {
   Object.assign(b2Ending, { offline: true, progress: 100 });
+  refreshB2TransferScreen();
   b2Battle.threat = null;
   setB2Siren(false);
   delete world.dataset.alarm;
@@ -545,6 +563,7 @@ function resetB2Ending() {
   b2FinaleTimers = [];
   for (const element of b2EscapeBlocked) element.inert = false;
   b2EscapeBlocked = [];
+  refreshB2TransferScreen();
 }
 
 document.getElementById('b2-restart').addEventListener('click', () => {

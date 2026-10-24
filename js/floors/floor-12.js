@@ -60,6 +60,7 @@ const FLOOR12_ROOMS = interiorRooms(12, [
     backgroundImage: { src: 'assets/background/floor12/office-finished.png', height: 760, top: 0 }, props: [
     { file: 'large-planter', size: [256, 512], worldWidth: 78, x: 100 },
     { file: 'filing-cabinet', size: [256, 512], worldWidth: 72, x: 220, name: '맨 왼쪽 서랍',
+      sprite: 'assets/objects/floor12/card-cabinet-states.png', stateBy: 'f12-eval-keycard',
       message: '서랍 안에 여러 장의 종이가 겹쳐 있다. 종이를 들어내 바닥을 살펴보자.' },
     { file: 'filing-cabinet', size: [256, 512], worldWidth: 72, x: 300 },
     { file: 'office-desk', size: [512, 256], worldWidth: 252, x: 520 },
@@ -76,6 +77,7 @@ const FLOOR12_ROOMS = interiorRooms(12, [
     { file: 'office-desk', size: [512, 256], worldWidth: 252, x: 1640 },
     { file: 'office-desk', size: [512, 256], worldWidth: 252, x: 2700 },
     { file: 'office-desk', size: [512, 256], worldWidth: 252, x: 3000, name: '책상 서랍', gives: 'f12-lead-key',
+      sprite: 'assets/objects/floor12/key-desk-states.png', stateBy: 'f12-lead-key',
       message: '맨 아래 서랍에 "팀장실 보조키" 꼬리표가 달린 열쇠가 있다. 챙겼다.',
       surface: 'label', look: 'tag', writing: ['팀장실 보조키'], caption: '맨 아래 서랍에 꼬리표가 달린 열쇠가 있다. 챙겼다.',
       takenMessage: '서랍은 비어 있다. 팀장실 보조키는 이미 챙겼다.' },
@@ -87,6 +89,7 @@ const FLOOR12_ROOMS = interiorRooms(12, [
     backgroundImage: { src: 'assets/background/floor12/eval-finished.png', height: 760, top: 0 }, props: [
     { file: 'server-rack', size: [256, 512], worldWidth: 96, x: 100 },
     { file: 'network-rack', size: [256, 512], worldWidth: 96, x: 200, name: '네트워크 랙',
+      sprite: 'assets/objects/floor12/network-rack-lan-states.png', stateBy: 'f12-network-isolated',
       // 야간 로그가 지워지는 동안(다 지워진 뒤에도 뽑기 전까지) B2 직결 LAN 케이블을 직접 끌어 뽑는다(log-puzzle.js).
       control: { kind: 'plug', dir: 'out', label: 'B2 직결 LAN 케이블을 포트에서 뽑자!', socket: 'B2 직결', item: 'LAN', when: () => logDeleting() },
       message: '정전인데 스위치 한 대의 포트 표시등만 깜빡인다. 케이블 라벨: "B2 직결 · UPS".',

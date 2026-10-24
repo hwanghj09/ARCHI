@@ -71,6 +71,7 @@ function openDrawerPuzzle() {
   const collect = () => {
     if (remaining.length || collectedItems.has(item)) return;
     collectedItems.add(item);
+    refreshReady();
     playGameSound('item-get');
     refreshInventoryCount();
     refresh();

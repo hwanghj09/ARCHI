@@ -679,10 +679,14 @@ body { margin: 0; overflow: hidden; background: #27292b; color: #eee; font: 14px
 #dynamic-scene .fixture.core-pillar { border-left: 4px solid #0a0e12; border-right: 4px solid #0a0e12; background: linear-gradient(90deg, #1a2229, #2c3844 45%, #1a2229); }
 #dynamic-scene .fixture.core-plaque { padding: 12px; border: 2px solid #4a9ac8; background: #070a0d; color: #8fc8e8; font: bold 13px Arial, sans-serif; text-align: center; letter-spacing: 1px; }
 #dynamic-scene .fixture.core-plaque span:first-child { margin-bottom: 6px; font-size: 18px; color: #d8f0ff; letter-spacing: 3px; }
-#dynamic-scene .fixture.dormant-bots { background: radial-gradient(circle at 30px 22px, #5ab0ff 0 3px, transparent 4px) 0 0 / 60px 40px repeat-x, linear-gradient(90deg, transparent 14px, #2a3036 14px 46px, transparent 46px) 0 8px / 60px 30px repeat-x, linear-gradient(90deg, transparent 8px, #d8dde2 8px 52px, transparent 52px) 0 42px / 60px 98px repeat-x, linear-gradient(90deg, transparent 20px, #2a3036 20px 40px, transparent 40px) 0 70px / 60px 12px repeat-x, linear-gradient(#1a2026, #1a2026) 0 100% / 100% 20px no-repeat; }
+#dynamic-scene .fixture.dormant-bots { background: url('../assets/objects/floor-kit/robot-charging-dock.png') 0 100% / 60px 60px repeat-x; image-rendering: pixelated; }
+.dormant-bots .docked-robot { position: absolute; top: 12px; }
+.dormant-bots[data-active="true"] .docked-robot { visibility: hidden; }
 #dynamic-scene .fixture.transfer-screen { padding: 18px 20px; border: 8px solid #1a2229; background: #04080b; color: #5ad0ff; font: bold 16px monospace; box-shadow: 0 0 30px #4a9ac833; }
 #dynamic-scene .fixture.transfer-screen span:last-child { margin-top: 10px; font-size: 42px; color: #ff8a6a; }
-#dynamic-scene .fixture.transfer-screen::after { content: ''; position: absolute; left: 20px; right: 20px; bottom: 16px; height: 8px; background: linear-gradient(90deg, #ff8a6a 0 61%, #1a2229 61%); }
+#dynamic-scene .fixture.transfer-screen::after { content: ''; position: absolute; left: 20px; right: 20px; bottom: 16px; height: 8px; background: linear-gradient(90deg, #ff8a6a 0 var(--transfer-progress, 61%), #1a2229 var(--transfer-progress, 61%)); }
+#dynamic-scene .fixture.transfer-screen[data-transfer-state="cut"] span:last-child { font-size: 30px; color: #e5c775; }
+#dynamic-scene .fixture.transfer-screen[data-transfer-state="offline"] span:last-child { font-size: 30px; color: #8fe0b0; }
 #dynamic-scene .fixture.link-bed { background: linear-gradient(#5a6268, #5a6268) 30% 100% / 14px 60px no-repeat, linear-gradient(170deg, transparent 30%, #3a4148 30% 55%, transparent 55%) 0 60px / 100% 80px no-repeat, repeating-linear-gradient(transparent 0 4px, #d85a4a 4px 6px) 100% 0 / 60px 24px no-repeat; }
 #dynamic-scene .fixture.link-bed::before { content: ''; position: absolute; left: 0; top: 30px; width: 60px; height: 60px; border-radius: 50%; background: radial-gradient(circle, #c9d2da 0 4px, transparent 5px) 10px 10px / 20px 20px, #3a4148; }
 #dynamic-scene .fixture.link-bed::after { content: ''; position: absolute; left: 50px; right: 0; top: 10px; height: 3px; background: #d85a4a; box-shadow: 0 8px 0 #d85a4a, 0 16px 0 #d85a4a; }

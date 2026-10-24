@@ -112,6 +112,7 @@ const B1_ROOMS = interiorRooms(-1, [
           { as: 'field', label: '관리자 계정', text: '읽기 전용' }] },
       { file: 'office-desk', size: [512, 256], worldWidth: 252, x: 1327 },
       { file: 'elevator-control-panel', size: [256, 512], worldWidth: 89, x: 1700, name: '승강기 제어반', gives: 'b1-elevator',
+        sprite: 'assets/objects/b1/elevator-override-states.png', stateBy: 'b1-elevator',
         // 7층 원본 로그 분석(backup-puzzle.js)으로 B2가 목적지라는 걸 알고, 13층 보안 자료실에서 외부 송신 경로 백업(vault-puzzle.js)을
         // 챙기고, 2층 리허설 영상(f2-projected)으로 CCTV·방송 서버가 B2로 옮겨진 걸 보고, 이 방의 CCTV 모니터 벽(소등 컷씬, b1-lights-out)까지
         // 보기 전에는 운행 제한을 풀지 않는다.

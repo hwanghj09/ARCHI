@@ -89,6 +89,7 @@ function unplugNetworkRack() {
   const deleted = new Set(LOG_DELETE_ORDER.slice(0, logDeletedCount()));
   logPuzzle.outcome = deleted.size === LOG_PUZZLE_ROWS.length ? 'erased' : deleted.has(LOG_KEY_ROW) ? 'too-late' : 'in-time';
   collectedItems.add('f12-network-isolated');
+  refreshReady();
   playGameSound('switch');
   if (!logPanel.hidden) renderLogPanel();
   saveProgress();

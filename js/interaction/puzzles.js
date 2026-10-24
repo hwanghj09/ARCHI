@@ -91,6 +91,7 @@ function refreshReady() {
     element.dataset.spriteFrame = frame;
     element.querySelector('img').style.transform = `translateX(${-frame * 100 / Number(element.dataset.spriteFrames)}%)`;
   }
+  if (scene?.id === 'b2-main') refreshB2TransferScreen();
 }
 
 // 짧은 출력·인사·셔터 동작 뒤에는 현재 게임 상태의 정지 그림으로 돌아간다.

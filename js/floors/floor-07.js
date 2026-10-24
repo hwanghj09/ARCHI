@@ -126,6 +126,7 @@ const FLOOR7_ROOMS = interiorRooms(7, [
     ],
     props: [
       { file: 'electrical-panel', size: [256, 512], worldWidth: 89, x: 100, name: '인터록 제어반', selfPowered: true, gives: 'f7-release',
+        sprite: 'assets/objects/floor07/interlock-panel-states.png', stateBy: 'f7-release',
         control: { kind: 'lever', dir: 'down', label: '비상 해제 레버를 끝까지 내리자.', ends: ['잠금', '해제'] },
         message: '제어반은 정전 중에도 B2 직결 비상 회선으로 살아 있다. 화면: "세션 요청 ARCHI · 00:14 입실자 1명 감지 · 정수호(17F)". 비상 해제 레버가 내려가자 문 쪽에서 잠금 풀리는 소리가 난다.',
         surface: 'screen', look: 'lcd',

@@ -110,5 +110,7 @@ const FLOOR2_ROOMS = interiorRooms(2, [
       '항온항습기가 꺼져 있다. 기록지: 랙 대부분을 B2로 옮긴 뒤에도 이 방만 정전 직전까지 18℃로 유지됐다. 남은 것은 녹화 NAS 한 대뿐인데.'),
     floor2Spot('환경 패널', [2054, 2088], [212, 238],
       '환경 패널의 출입 기록: "23:58 · 카드 없음 · 문 열림 · 원격 SYSTEM." 누군가 정전 2분 전에 이 방 문을 열었다.'),
-  ], { windowless: true, exitX: 126, exitBay: 322 }),
+  ], { windowless: true, exitX: 126, exitBay: 322,
+    props: [{ sprite: 'assets/objects/floor02/nas-disc-tray-states.png', frames: 2, size: [256, 128],
+      worldWidth: 76, x: 1576, base: floorY - floor2Y(322), stateBy: 'f2-reel' }] }),
 ]);

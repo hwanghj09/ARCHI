@@ -42,6 +42,17 @@ try {
   const objective = async () => { await page.clock.runFor(100); return page.evaluate(() => currentObjective.title); };
   const sanity = () => page.evaluate(() => sanity);
   const rowTexts = () => page.locator('#log-rows .log-row:not(.log-head)').allTextContents();
+  const checkRackFrame = async frame => {
+    const rack = page.locator('.floor-prop[aria-label="네트워크 랙"]');
+    assert.equal(await rack.getAttribute('data-sprite-frame'), String(frame));
+    assert(await rack.evaluate(async (element, frame) => {
+      const image = element.querySelector('img');
+      await image.decode();
+      return image.getAttribute('src') === 'assets/objects/floor12/network-rack-lan-states.png' &&
+        image.naturalWidth === 512 && image.naturalHeight === 512 &&
+        Math.abs(new DOMMatrix(getComputedStyle(image).transform).m41 + frame * element.clientWidth) < 1;
+    }, frame), 'The LAN state sheet aligns exactly one frame');
+  };
   const clues = () => page.evaluate(() => collectedClues.map(clue => clue.text));
   const unplugWithMouse = async () => {
     const handle = await page.locator('#manual-control-device .control-handle').boundingBox();
@@ -60,6 +71,7 @@ try {
   await newGame();
   assert.deepEqual(await use('f12-eval', '네트워크 랙'), { control: false, inspection: true, log: false, backup: false },
     'Before the log opens the rack is a plain inspection');
+  await checkRackFrame(0);
   assert.equal((await use('f12-eval', '야간 로그 단말기')).log, true, 'The terminal opens the log screen');
   assert.deepEqual(await rowTexts(), ['09/28    낮  3.9%    밤 87.1%', '09/30    낮  4.4%    밤 88.5%',
     '10/05    낮  3.6%    밤 89.2%', '10/07    낮  3.7%    밤  4.2%']);
@@ -85,6 +97,7 @@ try {
   await unplugWithMouse();
   assert.equal(await page.evaluate(() => usingControl), false);
   assert(await has('f12-network-isolated'));
+  await checkRackFrame(1);
   assert.equal(await page.evaluate(() => logPuzzle.outcome), 'in-time');
   await page.clock.runFor(30000);
   assert.equal(await page.evaluate(() => logDeletedCount()), 1, 'Unplugging stops the deletion at once');
@@ -125,6 +138,9 @@ try {
   // 이미 뽑은 랙은 다시 삭제를 시작하지 않는다.
   assert.deepEqual(await use('f12-eval', '네트워크 랙'), { control: false, inspection: true, log: false, backup: false });
   assert.match(await page.locator('#inspection-description').textContent(), /포트에서 빠져 있다/);
+  await page.evaluate(() => closeInspection());
+  await continueGame();
+  await checkRackFrame(1);
 
   // ---- 7층: 학습 시간(힌트 있음) → 오늘 기록 ----
   await use('f7-verify', '망분리 백업 장비');
@@ -220,6 +236,8 @@ try {
   for (const item of ['f12-network-isolated', 'f12-evaluation-solved', 'f7-training-time-solved', 'f7-external-connection-solved']) assert(await has(item), item);
   assert.equal(await page.evaluate(() => logPuzzle.outcome), 'in-time');
   assert.equal(await page.evaluate(() => logDeleting()), false, 'Loading never restarts the deletion');
+  await use('f12-eval', '네트워크 랙');
+  await checkRackFrame(1);
 
   // ---- B. 늦게 뽑기(키보드) + 삭제 도중 저장·불러오기 + 힌트 없는 7층 ----
   await newGame();
