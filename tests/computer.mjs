@@ -171,7 +171,7 @@ try {
   assert.deepEqual(errors, []);
   await page.close();
 
-  // 17층 전력: 정전 중에는 켜지지 않고, 태양광 비상 전력을 17층에 보내면 다시 쓸 수 있다.
+  // 17층 전력: 조명과 별개로 UPS 회선이 연결되어야 컴퓨터를 사용할 수 있다.
   const powerPage = await browser.newPage({ viewport: { width: 1280, height: 720 } });
   const powerErrors = [];
   powerPage.on('pageerror', error => powerErrors.push(error.message));
@@ -196,17 +196,20 @@ try {
     await finishSceneTransition(powerPage);
     assert(await desktop.isHidden());
   };
-  // 조명도 없는 층에서는 전자 장치가 힌트 없이 꺼져 있고(power.js deviceUnpowered), 조명만 있으면 '전원 없음'을 보여 준다.
-  const assertBlocked = async (message, hint = null) => {
+  // 정전 중에도 장치를 찾을 수 있도록 전원 안내를 표시하되 사용은 막는다.
+  const assertBlocked = async message => {
     await powerPage.clock.runFor(50);
-    if (hint) assert.equal(await hintText(), hint, `${message}: hint shows no power`);
-    else assert(await powerPage.locator('#interaction-hint').isHidden(), `${message}: the unlit computer shows no hint`);
+    assert.equal(await hintText(), 'E · 컴퓨터 · 전원 없음', `${message}: hint shows no power`);
     await powerPage.keyboard.press('e');
     assert.equal(await powerPage.locator('#room-transition').getAttribute('data-phase'), 'idle', `${message}: no fade starts`);
     await powerPage.clock.runFor(800);
     assert(await desktop.isHidden(), `${message}: the computer UI stays closed`);
     assert.equal(await powerPage.evaluate(() => usingComputer), false);
     assert.equal(await monitor.getAttribute('data-power'), 'off', `${message}: the monitor stays dark`);
+    assert(await powerPage.locator('#inspection').isVisible(), `${message}: interaction explains the missing power`);
+    assert.equal(await powerPage.locator('#inspection-title').textContent(), '컴퓨터');
+    assert.match(await powerPage.locator('#inspection-description').textContent(), /UPS 비상 회선/);
+    await powerPage.keyboard.press('Escape');
   };
 
   assert.equal(await monitor.getAttribute('data-power'), 'off', 'The opening leaves the computer shut down');
@@ -227,11 +230,11 @@ try {
   await powerPage.evaluate(() => { openPowerPanel(); powerLever.click(); });
   await powerPage.locator('#power-floor-grid [data-floor="17"]').click();
   await powerPage.keyboard.press('Escape');
-  await assertBlocked('Solar lights do not power the computer', 'E · 전원 없음');
+  await assertBlocked('Solar lights do not power the computer');
   await powerPage.evaluate(() => { collectedItems.add('f17-emergency-linked'); updatePowerState(); });
   assert.equal(await monitor.getAttribute('data-power'), 'off', 'Restored power does not boot the computer by itself');
   await powerPage.clock.runFor(50);
-  assert.equal(await hintText(), 'E · 컴퓨터 사용', 'Solar power to 17F makes the computer usable again');
+  assert.equal(await hintText(), 'E · 컴퓨터 사용', 'Connecting the UPS makes the computer usable again');
   await useComputer();
   await openApp(powerPage, 'files');
   await desktop.locator('[data-computer-document="controls"]').dblclick();

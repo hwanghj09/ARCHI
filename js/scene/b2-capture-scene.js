@@ -143,7 +143,8 @@ function updateB2CaptureWorld(shot, age) {
   }
   const center = body.position.x + 45;
   cameraZoom = Math.min(matchMedia('(prefers-reduced-motion: reduce)').matches ? 1.35 : 1.65, viewWidth / 410);
-  cameraFocus.x = center; cameraFocus.y = floorY - 60;
+  // 확대한 화면 위 끝에 엘리베이터 층 표시가 반쯤 걸려 잘려 보이지 않도록 초점을 조금 내려 표시를 화면 밖으로 뺀다.
+  cameraFocus.x = center; cameraFocus.y = floorY - 35;
   cameraX = Math.max(0, Math.min(worldWidth - viewWidth, center - viewWidth / 2));
   const shake = shot.phase === 'drag' && !matchMedia('(prefers-reduced-motion: reduce)').matches ? 1.1 : 0;
   cameraShake.x = shake * Math.sin(age * .018); cameraShake.y = shake * Math.sin(age * .027);

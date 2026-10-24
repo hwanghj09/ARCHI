@@ -1,6 +1,7 @@
 #wire-panel { position: fixed; inset: 0; z-index: 13; overflow: auto; background: #020709dc; display: grid; place-items: center; padding: 12px 8px; }
 #wire-panel[hidden] { display: none; }
-.wire-box { position: relative; width: min(480px, calc(100vw - 16px)); aspect-ratio: 480 / 626; flex-shrink: 0; color: #e5ded0; }
+/* 낮은 화면(1024×576, 휴대폰 가로)에서도 판 전체(맨 아래 전선과 [나중에])가 한 화면에 들어오게 높이에도 맞춘다. */
+.wire-box { position: relative; width: min(480px, calc(100vw - 16px), calc((100dvh - 24px) * 480 / 626)); aspect-ratio: 480 / 626; flex-shrink: 0; color: #e5ded0; }
 .wire-art { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
 .wire-art img { display: block; width: 100%; height: 100%; image-rendering: pixelated; }
 #wire-panel button { font: inherit; cursor: pointer; }
@@ -37,7 +38,9 @@
 #wire-panel[data-mode="elevator"] #wire-left { left: 23.5%; }
 #wire-panel[data-mode="elevator"] #wire-right { left: 79.5%; }
 #wire-panel[data-mode="elevator"] .wire-column button { min-width: 44px; min-height: 44px; color: #fff; text-shadow: 0 1px 3px #000; font-size: 12px; font-weight: bold; }
-#wire-panel[data-mode="elevator"] #wire-right button { background: #343c40; }
+/* 오른쪽 E 단자: 그림 속 원형 단자를 다 덮을 만큼 크고 불투명하게 해서 E1~E4 글자가 단자 그림과 겹쳐 보이지 않게 한다. */
+#wire-panel[data-mode="elevator"] #wire-right button { width: 9%; background: #1d2326; border-color: #8e989b; }
+#wire-panel[data-mode="elevator"] #wire-right button:disabled { opacity: 1; } /* 연결돼도 반투명으로 그림이 비쳐 글자를 덮지 않게 */
 #wire-panel[data-mode="elevator"] .wire-column button:nth-child(1) { top: 29%; }
 #wire-panel[data-mode="elevator"] .wire-column button:nth-child(2) { top: 40.2%; }
 #wire-panel[data-mode="elevator"] .wire-column button:nth-child(3) { top: 51.5%; }

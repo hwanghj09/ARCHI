@@ -155,27 +155,24 @@ function closePhone() {
   (selectingFloor ? cabin : stage).focus();
 }
 
-let phoneLightDelay = 0; // 플래시를 켜기까지 대기 중인 타이머(0.5초 뒤 켜진다)
+let phoneLightDelay = 0; // 플래시 점등까지 남은 게임 시간(ms)
 const phoneLightDelayMs = 500;
 
+function cancelPhoneLightDelay() {
+  phoneLightDelay = 0;
+  phoneRaising = false;
+}
+
 function togglePhoneLight() {
-  if (phoneLightDelay) { clearTimeout(phoneLightDelay); phoneLightDelay = 0; phoneRaising = false; animate(0); return; } // 켜지는 중에 다시 누르면 취소
+  if (phoneLightDelay) { cancelPhoneLightDelay(); animate(0); return; } // 켜지는 중에 다시 누르면 취소
   if (photoCaptureTime > 0 || itemUseTime > 0 || playerCaught || hallucinationCaught || blackoutSceneActive || cctvSceneActive) return;
   if (phoneDock) return sayLine('아, 휴대폰은 충전기에 두고 왔지.');
   if (!phoneLightOn && phoneBattery <= 0) return sayLine('배터리가 다 됐어… 충전할 데를 찾아야 해.');
   if (!phoneLightOn) {
     playGameSound('phone');
     phoneRaising = true;
+    phoneLightDelay = phoneLightDelayMs;
     animate(0);
-    phoneLightDelay = setTimeout(() => {
-      phoneRaising = false;
-      phoneLightDelay = 0;
-      if (phoneDock || phoneBattery <= 0 || phoneLightOn) return;
-      phoneLightOn = true;
-      phoneAwayTime = 0;
-      if (usingPhone || Math.abs(body.velocity.x) < .01) animate(0);
-      refreshPhone();
-    }, phoneLightDelayMs);
     return;
   }
   phoneLightOn = false;
@@ -198,6 +195,7 @@ function chargePhone(door) {
   if (phoneDock) return;
   if (!floorHasPower(currentSceneFloor)) return;
   if (phoneBattery >= 100) return sayLine('휴대폰 배터리는 이미 100%야. 충전할 필요는 없겠어.');
+  cancelPhoneLightDelay();
   phoneDock = { floor: door.floor, scene: door.scene, x: door.x };
   playGameSound('charger');
   sayLine('충전하는 동안 여기 두고… 나중에 꼭 챙기자.');
@@ -219,6 +217,18 @@ function updatePhoneCharging(elapsed) {
 }
 
 function updatePhone(elapsed) {
+  if (phoneLightDelay > 0) {
+    const raisingTime = Math.min(elapsed, phoneLightDelay);
+    phoneLightDelay = Math.max(0, phoneLightDelay - elapsed);
+    if (phoneLightDelay > 0) return;
+    phoneRaising = false;
+    if (phoneDock || phoneBattery <= 0 || phoneLightOn) return;
+    phoneLightOn = true;
+    phoneAwayTime = 0;
+    if (usingPhone || Math.abs(body.velocity.x) < .01) animate(0);
+    refreshPhone();
+    elapsed -= raisingTime;
+  }
   if (!phoneLightOn) return;
   phoneDrainAccumulator += elapsed;
   if (phoneDrainAccumulator < 1000) return;

@@ -30,6 +30,7 @@ try {
   await page.locator('#menu-start').click();
   if (await page.locator('#menu-new-confirm').isVisible()) await page.locator('#menu-new-confirm').click();
   await page.locator('#opening-skip').click();
+  await page.clock.pauseAt(new Date('2026-10-17T00:01:00Z'));
   await page.clock.runFor(100);
   await page.locator('#crouch-sheet').evaluate(image => image.decode());
   const state = () => page.evaluate(() => ({ x: body.position.x, feet: body.bounds.max.y,
@@ -89,6 +90,9 @@ try {
   assert.equal((await state()).animation, 'crouch', 'Holding Ctrl crouches on landing');
   await page.keyboard.press('f');
   await page.clock.runFor(100);
+  assert.equal((await state()).animation, 'crouch', 'Raising the phone preserves the crouching pose');
+  assert.equal((await state()).flash, 'off');
+  await page.clock.runFor(await page.evaluate(() => phoneLightDelayMs));
   assert.equal((await state()).animation, 'crouch');
   assert.equal((await state()).flash, 'on');
   await page.keyboard.press('f');

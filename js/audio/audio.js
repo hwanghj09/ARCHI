@@ -441,7 +441,7 @@ function pauseGameAudio() {
   sanityMusicElement.pause();
   sanityMusicGain = sanityMusicTarget = 0;
   sanityMusicElement.volume = 0;
-  if (document.hidden || mainMenuActive || !gameStarted) for (const element of [hallucinationSoundElement, ...hallucinationSightingElements, hallucinationDevouredElement, doorPryElement, b2SirenElement]) element.pause();
+  if (document.hidden || mainMenuActive || !gameStarted) for (const element of [hallucinationSoundElement, ...hallucinationSightingElements, hallucinationDevouredElement, redEyeBreakDragonElement, redEyeBreakUniversElement, doorPryElement, b2SirenElement]) element.pause();
   if (!gameAudioContext) return;
   for (const sound of gameAudioAmbience.values()) stopGameAudioSource(sound);
   gameAudioAmbience.clear();

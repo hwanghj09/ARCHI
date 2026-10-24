@@ -49,8 +49,8 @@ const zeroEventReachGap = 30; // 이 거리 안으로 오면 닿은 것으로 �
 let hallucinationBlocked = [];
 
 function sanityExposure() {
-  // 1인칭 엘리베이터 안에는 플레이어의 손전등 빛이 표시되지 않는다.
-  if (selectingFloor) return buildingBlackout ? 'dark' : 'bright';
+  // 1인칭 엘리베이터 안은 비상 회선으로 천장 조명이 켜져 있어 정전 중에도 밝은 곳으로 친다.
+  if (selectingFloor) return 'bright';
   const dark = world.dataset.localLight !== 'true' && (world.dataset.blackout === 'true' ||
     (currentSceneFloor === 17 && world.dataset.lights === 'off') ||
     (room === 'dynamic' && world.dataset.dark === 'true'));
@@ -110,7 +110,7 @@ function hallucinationSpawnX(distance) {
 
 function startZeroCharge() {
   // 추격이 시작되면 켜져 있던(켜는 중이던) 플래시는 꺼진다.
-  if (phoneLightDelay) { clearTimeout(phoneLightDelay); phoneLightDelay = 0; phoneRaising = false; }
+  cancelPhoneLightDelay();
   if (phoneLightOn) { phoneLightOn = false; phoneAwayTime = usingPhone ? 0 : 360; playGameSound('phone'); }
   refreshPhone();
   endHallucinationSighting();
@@ -140,6 +140,7 @@ function resolveZeroEvasion() {
 function hideDevouredVideo() {
   devouredVideo.pause();
   devouredVideo.hidden = true;
+  hallucinationDevouredElement.pause();
 }
 devouredVideo.addEventListener('ended', hideDevouredVideo);
 devouredVideo.addEventListener('error', hideDevouredVideo);
@@ -150,6 +151,7 @@ function playDevouredVideo() {
 }
 
 function triggerDevoured() {
+  cancelPhoneLightDelay();
   zeroEventForced = false;
   zeroEventPhase = 'idle';
   zeroEventTimer = 0;

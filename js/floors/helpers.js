@@ -21,13 +21,14 @@ const restroomInterior = { name: '화장실', width: 1800, windowless: true, exi
     { name: '화장실 칸', x: 1190, y: 185, width: 90, height: 385, outline: [1072, 185, 228, 385],
       message: '칸문은 반쯤 열려 있고 안은 비어 있다. 문 안쪽에 오래된 순찰 시간표가 붙어 있다.' },
     { name: '비상 호출 버튼', x: 1376, y: 372, width: 22, height: 36,
-      message: '비상 호출 버튼의 표시등이 꺼져 있다. 정전 중에는 작동하지 않는다.' },
+      message: '비상 호출 버튼의 표시등이 꺼져 있다. 정전 중에는 작동하지 않는다.',
+      poweredMessage: '비상 호출 버튼의 표시등이 초록색으로 켜져 있다. 누르면 방재실로 연결된다.' },
   ],
   props: [
     { file: 'restroom-supply-cabinet', size: [256, 512], worldWidth: 80, x: 90, name: '위생용품 수납장',
       message: '종이타월과 여분의 휴지가 가지런히 놓여 있다.' },
     { file: 'restroom-bin', size: [256, 256], worldWidth: 55, x: 380, name: '휴지통',
-      message: '휴지통에는 종이타월과 빈 커피쾌 하나뿐이다. 커피쾌 밑면에 16층 카페 스티커가 붙어 있다.' },
+      message: '휴지통에는 종이타월과 빈 커피컵 하나뿐이다. 커피컵 밑면에 16층 카페 스티커가 붙어 있다.' },
     { file: 'wet-floor-sign', size: [256, 256], worldWidth: 72, x: 1130, name: '미끄럼 주의 표지',
       message: '세면대와 칸막이 사이에 미끄럼 주의 표지가 세워져 있다. 바닥은 이미 말라 있다.' },
   ] };

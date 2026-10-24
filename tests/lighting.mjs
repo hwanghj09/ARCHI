@@ -77,7 +77,7 @@ try {
   await page.keyboard.press('e');
   await page.getByRole('button', { name: '열쇠 사용하기', exact: true }).click();
   await finishSceneTransition(page);
-  assert.equal(await page.locator('header span').textContent(), 'RF · 옥상');
+  assert.equal(await page.locator('header > span').textContent(), 'RF · 옥상');
   assert(await page.locator('#floor17-light-switch').isHidden());
   assert(await darkness.isHidden(), 'Rooftop is not covered by 17F darkness');
   assert.equal(await filter('#dynamic-scene > img'), 'none');

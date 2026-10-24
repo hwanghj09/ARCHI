@@ -72,7 +72,7 @@ try {
     }
     await page.screenshot({ path: `.local/phone-ui-${name}-off.png` });
     await page.locator('#phone-light').tap();
-    await page.clock.runFor(await page.evaluate(() => phoneLightDelayMs) + 20);
+    await page.clock.runFor(await page.evaluate(() => phoneLightDelayMs) + 100);
     assert.equal((await state()).light, true);
     assert.equal(await page.locator('#phone-light').getAttribute('aria-pressed'), 'true');
     assert.equal(await page.locator('#phone-light-state').textContent(), '켜짐');
@@ -83,7 +83,7 @@ try {
     assert.equal((await state()).held, 'false'); assert.equal((await state()).state, 'idle');
   }
   await page.keyboard.press('p'); await page.keyboard.press('Space');
-  await page.clock.runFor(await page.evaluate(() => phoneLightDelayMs) + 20);
+  await page.clock.runFor(await page.evaluate(() => phoneLightDelayMs) + 100);
   assert.equal((await state()).light, true, 'Space activates the focused flashlight button');
   await page.evaluate(() => { phoneBattery = 1; phoneDrainAccumulator = 0; refreshPhone(); });
   await page.clock.runFor(1100);

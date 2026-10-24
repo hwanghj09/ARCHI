@@ -72,6 +72,25 @@ try {
     }
   }
 
+  for (const id of ['f12', 'f13-testbay']) {
+    await page.evaluate(id => {
+      buildingBlackout = true; collectedItems.add('f17-emergency-linked');
+      const config = floorById.get(id);
+      performFloorChange(id, config.interior ? null : 0, config.interior ? 'exit' : null);
+      roamerEnter(id, config.interior ? floorId(config.floor) : 'elevator');
+      Object.assign(roamer, { x: body.position.x + 50, facing: -1, mode: 'chase', stay: 60000, lostTime: 0 });
+    }, id);
+    await page.clock.runFor(2500);
+    const expected = id === 'f12' ? 'f12' : 'f13';
+    assert(await page.evaluate(() => playerCaught && caughtBy === roamer), 'The patrol robot reaches a real capture');
+    assert.equal(await page.evaluate(() => readProgress().scene.id), expected, 'Autosave keeps the captured floor');
+    await page.reload();
+    await page.locator('#menu-continue').click();
+    assert.equal(await page.evaluate(() => dynamicFloorId), expected, 'Continue returns to that floor corridor');
+    assert.equal(await page.evaluate(() => playerCaught), false);
+    assert(await page.evaluate(() => Math.abs(body.position.x - (BUILDING_CORE.elevators[0].x + 40)) < 1), 'Continue uses the elevator checkpoint');
+  }
+
   await page.evaluate(() => {
     Object.assign(roamer, { where: null, car: 0, trip: { phase: 'close', time: 1400 } });
     startNewGame(); finishOpening();

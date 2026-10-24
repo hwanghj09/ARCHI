@@ -99,7 +99,7 @@ try {
   await walk(1100);
   await capture('storefront');
   await use(1635);
-  assert.equal(await page.locator('header span').textContent(), '16F · 편의시설', 'VU is still locked from the corridor');
+  assert.equal(await page.locator('header > span').textContent(), '16F · 편의시설', 'VU is still locked from the corridor');
   const front = await roomFront(page, 'The Kitchen');
   await use(594);
   await checkArt(1);
@@ -112,7 +112,7 @@ try {
   await walk(3410);
   await capture('service-door');
   await use(3515);
-  assert.equal(await page.locator('header span').textContent(), '16F · VU 편의점');
+  assert.equal(await page.locator('header > span').textContent(), '16F · VU 편의점');
   await checkArt(1);
   assert.equal(await page.locator('.fixture.pill-item').count(), 1, 'The medicine is on the upper shelf');
   assert.equal(await page.evaluate(() => movingParts[0].body.position.x), 415, 'The ramen box starts in front of the shelves');
@@ -155,7 +155,7 @@ try {
   assert.equal(await hintText(), 'E · 복도 (잠김)');
   await page.keyboard.press('e');
   assert.match(await interactionMessage(page), /셔터 제어함 수동 레버/);
-  assert.equal(await page.locator('header span').textContent(), '16F · VU 편의점', 'The lowered shutter does not open');
+  assert.equal(await page.locator('header > span').textContent(), '16F · VU 편의점', 'The lowered shutter does not open');
   // Raising is its own step: the lever rattles the shutter, which rolls up in place while the player stays inside.
   // The CSS roll runs on real time, not the test clock: hold it at its start so the checks below see it in progress.
   const holdRoll = await page.addStyleTag({ content: '.room-door.shutter[data-rolling]::after { animation-play-state: paused !important; }' });
@@ -163,7 +163,7 @@ try {
   assert.equal(await hintText(), 'E · 셔터 올리기');
   await page.evaluate(() => { soundLog.length = 0; });
   await page.keyboard.press('e');
-  assert.equal(await page.locator('header span').textContent(), '16F · VU 편의점', 'Raising the shutter does not leave the store');
+  assert.equal(await page.locator('header > span').textContent(), '16F · VU 편의점', 'Raising the shutter does not leave the store');
   assert(await page.evaluate(() => collectedItems.has('f16-cu') && progressSnapshot().items.includes('f16-cu')), 'The raised shutter is recorded at once');
   assert.deepEqual(await page.evaluate(() => soundLog), ['shutter']);
   assert.equal(await rolling(), 'up');
@@ -189,7 +189,7 @@ try {
   await page.evaluate(() => { soundLog.length = 0; });
   await page.keyboard.press('e');
   await finishSceneTransition(page);
-  assert.equal(await page.locator('header span').textContent(), '16F · 편의시설');
+  assert.equal(await page.locator('header > span').textContent(), '16F · 편의시설');
   assert.deepEqual(await page.evaluate(() => soundLog), ['door'], 'Leaving by the raised shutter is an ordinary door');
   assert.equal(await page.locator('.room-door.shutter').getAttribute('aria-label'), 'VU 편의점 출입문');
   await checkDoors();
@@ -216,7 +216,7 @@ try {
   assert.equal(await hintText(), 'E · 복도 (잠김)');
   await page.keyboard.press('e');
   assert.match(await interactionMessage(page), /셔터 제어함 수동 레버/);
-  assert.equal(await page.locator('header span').textContent(), '16F · VU 편의점');
+  assert.equal(await page.locator('header > span').textContent(), '16F · VU 편의점');
   // A shutter lowered from inside is drawn shut and locked in the corridor too.
   await page.evaluate(() => performFloorChange('f16', null, 'room:f16-cu'));
   await page.clock.runFor(100);

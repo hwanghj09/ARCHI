@@ -464,8 +464,10 @@
       <div id="b2-terminal-threat" role="alert" hidden><span id="b2-terminal-threat-text"></span><span class="b2-delete-track" aria-hidden="true"><span id="b2-terminal-threat-fill"></span></span></div>
       <form id="b2-terminal-form"><label for="b2-terminal-input">root@archi-main:~#</label><input id="b2-terminal-input" type="text" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="send" lang="en" /></form>
     </section>
-    <section id="b2-bad-ending" class="b2-ending-dialog" role="dialog" aria-modal="true" aria-label="결말 이후 선택" hidden>
-      <div class="b2-ending-actions"><button id="b2-restart" type="button">처음부터 다시하기</button><button id="b2-checkpoint" type="button">체크포인트로 이동</button></div>
+    <section id="b2-bad-ending" class="b2-ending-dialog" role="dialog" aria-modal="true" aria-labelledby="b2-bad-ending-title" hidden>
+      <h2 id="b2-bad-ending-title">BAD END — 연결</h2>
+      <p>경비 로봇에게 붙잡혀 연결 실험실로 끌려갔다. ARCHI 삭제는 끝나지 않았다.</p>
+      <div class="b2-ending-actions"><button id="b2-checkpoint" type="button">체크포인트로 이동</button><button class="game-over-load" type="button">불러오기</button><button id="b2-bad-menu" type="button">메인 메뉴</button><button id="b2-restart" type="button">처음부터 다시하기</button></div>
     </section>
     <section id="b2-capture-scene" role="dialog" aria-modal="true" aria-label="경비로봇에게 제압된 수호의 이송과 실험실 연결" tabindex="-1" hidden>
       <div class="b2-capture-frame" aria-hidden="true">

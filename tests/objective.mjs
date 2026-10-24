@@ -37,24 +37,28 @@ try {
   assert(Date.now() - started >= (steps.length - 2) * 100 + 400 - 50, 'Each character waits about 0.1s, and the text waits 0.4s after the title');
   assert.deepEqual(await typed(), ['정전', '정전이 발생했다. 전력을 확보하기 위한 수단을 찾아보자.']);
 
-  // 제목은 내용 위에 있고 2pt(≈2.67px) 크다.
+  // 공통 UI의 목표 제목(16px)은 내용(12px) 위에 놓인다.
   const sizes = await page.evaluate(() => ['objective-title', 'objective-text'].map(id => {
     const element = document.getElementById(id);
     return { size: parseFloat(getComputedStyle(element).fontSize), top: element.getBoundingClientRect().top };
   }));
-  assert(Math.abs(sizes[0].size - sizes[1].size - 8 / 3) < .05, `title ${sizes[0].size}px vs text ${sizes[1].size}px`);
+  assert.deepEqual(sizes.map(entry => entry.size), [16, 12]);
   assert(sizes[0].top < sizes[1].top);
 
-  // 목표 창은 오른쪽 위, 현재 위치는 지도 버튼 왼쪽(오른쪽 위), 가방 버튼은 가운데 아래에 있다.
+  // 공통 HUD: 위치·목표는 왼쪽 위, 지도·일시정지는 오른쪽 위, 도구는 오른쪽 아래에 있다.
   const box = await objective.boundingBox();
   const viewport = page.viewportSize();
-  assert(box.x + box.width > viewport.width - 40 && box.y < 140, 'The objective sits at the top right');
-  const place = await page.locator('header span').boundingBox();
+  assert(box.x < 40 && box.y < 140, 'The objective sits at the top left');
+  const place = await page.locator('header > span').boundingBox();
   const mapButton = await page.locator('#map-button').boundingBox();
-  assert(mapButton.x + mapButton.width > viewport.width - 40 && mapButton.y < 40, 'The map button sits at the top right');
+  const pauseButton = await page.locator('#pause-button').boundingBox();
+  assert(mapButton.x + mapButton.width <= pauseButton.x && pauseButton.x + pauseButton.width > viewport.width - 40 && mapButton.y < 40,
+    'The map button sits beside pause at the top right');
   assert(place.x + place.width <= mapButton.x && place.y < 70, 'The current place sits left of the map button');
   const bag = await page.locator('#inventory-button').boundingBox();
-  assert(Math.abs(bag.x + bag.width / 2 - viewport.width / 2) < 2 && bag.y + bag.height > viewport.height - 40, 'The bag button sits at the bottom center');
+  const phoneButton = await page.locator('#phone-button').boundingBox();
+  assert(bag.x > viewport.width / 2 && bag.x + bag.width <= phoneButton.x && bag.y + bag.height > viewport.height - 40,
+    'The bag button sits beside the phone at the bottom right');
   await page.screenshot({ path: '.local/objective.png' });
 
   const titleAfter = async change => {

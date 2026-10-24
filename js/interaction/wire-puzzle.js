@@ -9,8 +9,9 @@ const WIRE_COLORS = [
 ];
 // wire-cable.png는 빨강 한 장만 있다(assets/ui/wire-puzzle/CABLE-PROMPT.md) — 나머지 색은 그 빨강의
 // 실측 색상각(≈4°) 기준 상대 회전각만큼 CSS hue-rotate()로 우려낸다. 소켓 색(WIRE_COLORS의 hex)과
-// 어울리도록 그 색들의 HSL 색상각 차이로 계산했다.
-const WIRE_HUE_ROTATE = { red: 0, yellow: 40, blue: 212, green: 132 };
+// 어울리도록 그 색들의 HSL 색상각 차이로 계산했다. 노랑은 색상각만 돌리면 어두운 빨강이 주황·갈색으로
+// 남아서 조금 더 돌리고 밝기를 올려 소켓 노랑(#d9b03a)에 맞춘다.
+const WIRE_CABLE_FILTER = { red: 'none', yellow: 'hue-rotate(58deg) brightness(2)', blue: 'hue-rotate(212deg)', green: 'hue-rotate(132deg)' };
 const wirePanel = document.getElementById('wire-panel');
 const wireBoard = document.getElementById('wire-board');
 const wireLeft = document.getElementById('wire-left');
@@ -131,7 +132,7 @@ function drawWireLine(id, from, to, colorId) {
   cable.style.left = `${from.x}px`;
   cable.style.top = `${from.y}px`;
   cable.style.transform = `rotate(${Math.atan2(dy, dx) * 180 / Math.PI}deg)`;
-  cable.style.filter = `hue-rotate(${WIRE_HUE_ROTATE[colorId] ?? 0}deg)`;
+  cable.style.filter = WIRE_CABLE_FILTER[colorId] ?? 'none';
 }
 
 function removeWireLine(id) {

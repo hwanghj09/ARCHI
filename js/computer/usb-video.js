@@ -44,7 +44,7 @@ function usbDriveAvailable() {
 
 function usbVideoWatching() {
   const state = computerWindows.get('usbdrive');
-  return usbDriveAvailable() && state?.open && !state.minimized && !state.element.hidden && !state.view.hidden;
+  return !document.hidden && usbDriveAvailable() && state?.open && !state.minimized && !state.element.hidden && !state.view.hidden;
 }
 
 function stopUsbVideo() {
@@ -102,3 +102,4 @@ function playUsbVideo() {
 
 usbVideoReplay.addEventListener('click', playUsbVideo);
 usbDrivePlug.addEventListener('click', playUsbVideo);
+document.addEventListener('visibilitychange', () => { if (document.hidden) resetUsbVideo(); });

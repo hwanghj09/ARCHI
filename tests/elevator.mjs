@@ -133,13 +133,13 @@ try {
   assert.equal(await page.locator('#cabin-scene').getAttribute('data-door'), 'open', 'The arrival door opens after fade-in');
   await page.locator('#cabin-exit').click();
   assert(await cabin.isVisible(), 'Cabin remains visible until departure fade reaches black');
-  assert.equal(await page.locator('header span').textContent(), '엘리베이터 · 16F', 'The header follows the car while riding');
+  assert.equal(await page.locator('header > span').textContent(), '엘리베이터 · 16F', 'The header follows the car while riding');
   await page.clock.runFor(150);
   assert(await cabin.isVisible());
   assert(await page.evaluate(() => document.elementFromPoint(innerWidth / 2, innerHeight / 2).id === 'room-transition'));
   await page.keyboard.press('Escape');
   await finishSceneTransition(page);
-  const header = () => page.locator('header span').textContent();
+  const header = () => page.locator('header > span').textContent();
   const near = (actual, expected, message) => assert(Math.abs(actual - expected) < 1, `${message}: ${actual}`);
   const playerX = () => page.locator('#player').evaluate(el => new DOMMatrix(getComputedStyle(el).transform).m41 + 96);
   const sprintSpeed = await page.evaluate(() => runSpeed);
@@ -1083,12 +1083,12 @@ try {
     // With the order: terminal clock, occupancy sensor, camera, then the bench. Skipping ahead still resets.
     const qaAgain = await enterThroughSpriteDoor('QA 시험실', '8F');
     assert.equal(await done(), 0, 'Leaving the room (which latches its id) does not count as the record');
-    await inspect(186, 'E · 시험 단말 조사');
+    await inspect(384, 'E · 시험 단말 조사');
     assert.equal(await done(), 1);
     await inspect(100, 'E · 재현 벤치 조사');
     assert.equal(await done(), 0, 'Skipping to the bench starts over');
-    await inspect(186, 'E · 시험 단말 조사');
-    await inspect(240, 'E · 재실 센서 제어함 조사');
+    await inspect(384, 'E · 시험 단말 조사');
+    await inspect(499, 'E · 재실 센서 제어함 조사');
     await inspect(292, 'E · 관찰 카메라 조사');
     assert.equal(await done(), 3);
     const doneDevice = await page.locator('#dynamic-scene .fixture.art-spot[data-done="true"]').evaluateAll(els => els.map(el =>
@@ -1126,6 +1126,7 @@ try {
   const checkExplorationFloor = async floor => {
     roomScales.length = 0;
     const corridorHeader = await header();
+    const startX = await playerX();
     await checkCore();
     const names = await page.evaluate(floor => FLOOR_LAYOUTS[floor].rooms.map(room => room.name), floor);
     for (const name of names) {
@@ -1350,7 +1351,7 @@ try {
     near(startX, 1988, 'Arrive at the adjusted 1F elevator 1');
     await walkTo(1925);
     assert.equal(await hint(), 'E · 탑승', 'The directory leaves elevator 1 its whole zone');
-    await inspect(1560, 'E · 층별 안내판 조사', /12F 기술본부 · ARCHI 개발팀, 7F AI 테스트·검증실, B2 AI 서버실/);
+    await inspect(1560, 'E · 층별 안내판 조사', /16F VU 편의점, 12F 기술본부 · ARCHI 개발팀, 7F AI 테스트·검증실, B2 AI 서버실/);
     await walkTo(2970);
     assert.equal(await hint(), 'E · 비상계단 (잠김)', 'The info desk leaves the stair door its whole zone');
     await page.keyboard.press('e');
@@ -1924,7 +1925,7 @@ try {
     } else if (floor === 1) {
       await checkFloor1();
     } else {
-      assert.equal(await page.locator('header span').textContent(), `${floor}F · 빈 층`);
+      assert.equal(await page.locator('header > span').textContent(), `${floor}F · 빈 층`);
       assert.equal(await page.locator('#dynamic-scene .solid').count(), 3, 'Only floor and boundary walls');
       await checkCore();
       assert.equal(await page.locator('#dynamic-scene .solid:not(.floor):not(.boundary), #dynamic-scene .panel').count(), 0);

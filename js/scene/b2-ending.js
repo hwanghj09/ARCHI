@@ -35,7 +35,7 @@ const b2WrongProgress = 2;
 const b2FinaleDelay = 4000; // OFFLINE 뒤 TRUE END까지
 
 const b2AwakeDelay = 2000; // 깨어난 로봇이 움직이기 시작하기까지의 지연(ms)
-const b2CrateChaseRatio = 1.25; // 문 막기 동안 로봇은 수호보다 이만큼 빠르다
+const b2CrateChaseRatio = 1.05; // 문 막기 동안 로봇은 수호보다 이만큼 빠르다(달려서 밀면 여유 있게, 걸어서 밀면 아슬아슬하게 늦는다)
 
 function b2ChaseSpeed() {
   const suho = (sanity > 0 ? runSpeed : speed) * sanitySpeedFactor();
@@ -77,6 +77,7 @@ let b2EscapeBlocked = [];
 function offerArchiDelete(door) {
   if (b2Ending.phase !== 'idle' || dynamicFloorId !== 'b2-main' || door.name !== 'ARCHI 메인 콘솔') return;
   const ready = collectedItems.has('b2-transfer-cut');
+  if (!ready) collectedItems.add('b2-console-locked'); // 목표가 외부 회선 패널을 가리킨다(objective.js)
   b2DeleteButton.disabled = !ready;
   b2DeleteButton.textContent = ready ? 'DELETE' : 'DELETE · 외부 전송 회선 연결 중 · 회선 패널에서 먼저 차단하십시오';
   b2DeleteButton.hidden = false;
@@ -224,6 +225,17 @@ function updateB2Robots(delta) {
 // 문을 막는 상자와 서버실 출구. 상자가 출구 폭을 다 가리면 막힌 것이다.
 function b2Crate() {
   return movingParts.find(part => part.barricadeSpec);
+}
+
+// 문 막기 동안 상자 왼쪽(콘솔 쪽)에 있으면 상자 위에 달리며 밀라는 안내를 띄운다(interaction.js가 그린다). 걸어서 밀면 늦는다.
+function b2CrateHint() {
+  if (b2Ending.phase !== 'running' || b2Ending.barricaded || dynamicFloorId !== 'b2-main') return null;
+  const crate = b2Crate();
+  if (!crate) return null;
+  const gap = crate.body.bounds.min.x - body.position.x;
+  if (gap < -60 || gap > 700) return null;
+  const run = keyLabel(keyBindings.run[0]);
+  return { x: crate.body.position.x, y: crate.body.bounds.min.y - 42, text: `${run}를 누른 채 달리면서 밀어라!` };
 }
 
 function b2ExitDoor() {
@@ -571,13 +583,14 @@ document.getElementById('b2-restart').addEventListener('click', () => {
   startNewGame();
 });
 document.getElementById('b2-checkpoint').addEventListener('click', () => {
-  let data = null;
-  try { data = JSON.parse(localStorage.getItem(b2CheckpointKey)); } catch { /* 아래에서 그냥 돌아간다. */ }
-  if (!data?.scene) return;
+  const data = readProgress(b2CheckpointKey);
+  if (!data) return;
   restoreProgress(data);
   saveProgress();
 });
-document.getElementById('b2-escape-menu').addEventListener('click', () => {
+// TRUE END의 [메인 메뉴로]와 배드 엔딩의 [메인 메뉴]. 배드 엔딩에서는 DELETE 직전의 이어하기 저장이 남아 있어 '계속하기'로 돌아온다.
+// ([불러오기]는 .game-over-load라 main-menu.js가 저장 칸 창을 연다.)
+for (const id of ['b2-escape-menu', 'b2-bad-menu']) document.getElementById(id).addEventListener('click', () => {
   // TRUE END에서 이어하기 저장을 지웠으므로 메뉴에는 '계속하기' 대신 클리어 표시가 보인다(main-menu.js). 저장 칸은 그대로 불러올 수 있다.
   resetB2Ending();
   gameStarted = false;
