@@ -81,6 +81,13 @@ try {
     const board = await page.locator('#computer-usb-board').boundingBox();
     await drag(await center('#computer-usb-plug'), { x: board.x + 30, y: board.y + 30 });
     assert.equal(await page.evaluate(() => computerUsbConnected), false, 'A wrong drop keeps the cable loose');
+    await drag(await center('#computer-usb-plug'), await center('#computer-usb-phone'));
+    geometry = await page.evaluate(() => computerUsbGeometry);
+    const phoneBox = await page.locator('#computer-usb-phone').boundingBox(), plugBox = await page.locator('#computer-usb-plug-art').boundingBox();
+    assert(geometry.plug.y >= geometry.port.y - 1 || plugBox.x + plugBox.width <= phoneBox.x + 1 || plugBox.x >= phoneBox.x + phoneBox.width - 1, 'The connector cannot rest over the phone, so its cable never crosses it');
+    assert.equal(await page.evaluate(() => computerUsbConnected), false);
+    await page.locator('#computer-usb-close').click();
+    await page.locator('#computer-usb-open').click();
     assert(await page.locator('#computer-solar-transfer').isDisabled());
     from = await center('#computer-usb-plug');
     geometry = await page.evaluate(() => computerUsbGeometry);

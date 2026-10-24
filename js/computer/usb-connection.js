@@ -56,10 +56,21 @@ function drawComputerUsb() {
   phone.y = clamp(phone.y * height, phoneHeight / 2 + 8, height - phoneHeight / 2 - 8) / height;
   plug.x = clamp(plug.x * width, Math.max(22, plugWidth / 2) + 8, width - Math.max(22, plugWidth / 2) - 8) / width;
   plug.y = clamp(plug.y * height, 8, height - plugHeight - 8) / height;
+  // 드래그는 stopComputerUsbAtPhone이 막는다. 화면 크기 변경 등으로 겹쳤을 때만 가장 가까운 아래·옆 자리로 밀어낸다.
+  const portY = phone.y * height + phoneHeight * .485, reach = (phoneWidth + plugWidth) / 2, plugEdge = Math.max(22, plugWidth / 2) + 8;
+  if (Math.abs(plug.x * width - phone.x * width) < reach && plug.y * height < portY) {
+    const from = [plug.x * width, plug.y * height], gap = ([x, y]) => Math.hypot(x - from[0], y - from[1]);
+    const spots = [[from[0], portY], [phone.x * width - reach, from[1]], [phone.x * width + reach, from[1]]]
+      .filter(([x, y]) => x >= plugEdge && x <= width - plugEdge && y <= height - plugHeight - 8);
+    if (spots.length) {
+      const [x, y] = spots.reduce((best, spot) => gap(spot) < gap(best) ? spot : best);
+      plug.x = x / width; plug.y = y / height;
+    }
+  }
   Object.assign(computerUsbPhone.parentElement.style, { left: `${phone.x * width}px`, top: `${phone.y * height}px`, width: `${phoneWidth}px`, height: `${phoneHeight}px` });
   // 스프라이트 아래 중앙의 실제 소켓과 금속 단자 끝을 맞춘다.
   Object.assign(computerUsbPort.style, { top: `${phoneHeight * .985 - 22}px`, bottom: 'auto', height: '44px' });
-  const port = { x: phone.x * width, y: phone.y * height + phoneHeight * .485 };
+  const port = { x: phone.x * width, y: portY };
   const tip = { x: plug.x * width, y: plug.y * height };
   const hitWidth = Math.max(44, plugWidth + 12), hitHeight = Math.max(44, plugHeight);
   Object.assign(computerUsbPlug.style, { left: `${tip.x}px`, top: `${tip.y}px`, width: `${hitWidth}px`, height: `${hitHeight}px` });
@@ -67,8 +78,36 @@ function drawComputerUsb() {
   const cordWidth = plugWidth * .3, cordTop = tip.y + plugHeight - 1;
   Object.assign(document.getElementById('computer-usb-cable').style, { left: `${tip.x - cordWidth / 2}px`, top: `${cordTop}px`, width: `${cordWidth}px`, height: `${window.innerHeight - top - cordTop}px` });
   const aligned = Math.abs(tip.x - port.x) <= 14 && Math.abs(tip.y - port.y) <= 14;
-  computerUsbGeometry = { phone: { x: phone.x * width, y: phone.y * height }, plug: tip, port, aligned };
+  computerUsbGeometry = { phone: { x: phone.x * width, y: phone.y * height }, plug: tip, port, aligned, reach, portOffset: portY - phone.y * height };
   computerUsbBoard.dataset.aligned = String(aligned);
+}
+
+// 단자가 포트보다 위에서 휴대폰과 겹치면 선이 휴대폰을 뚫어 보인다. 휴대폰을 벽처럼 두고, 닿은 면에서 멈춘 채 면을 따라서만 미끄러지게 한다.
+function stopComputerUsbAtPhone(kind, x, y) {
+  const g = computerUsbGeometry, other = kind === 'plug' ? g.phone : g.plug, sign = kind === 'plug' ? 1 : -1;
+  const [ox, oy] = [sign * (g[kind].x - other.x), sign * (g[kind].y - other.y)];
+  let [dx, dy] = [sign * (x - other.x), sign * (y - other.y)];
+  if (Math.abs(dx) < g.reach && dy < g.portOffset) {
+    const stops = [];
+    if (oy >= g.portOffset - .5) stops.push([dx, g.portOffset]);
+    if (Math.abs(ox) >= g.reach - .5) stops.push([Math.sign(ox) * g.reach, dy]);
+    if (!stops.length) stops.push([ox, oy]);
+    [dx, dy] = stops.reduce((best, stop) => Math.hypot(stop[0] - dx, stop[1] - dy) < Math.hypot(best[0] - dx, best[1] - dy) ? stop : best);
+  }
+  return { x: other.x + sign * dx, y: other.y + sign * dy };
+}
+
+function moveComputerUsb(kind, x, y) {
+  // 커서가 휴대폰 반대편으로 넘어가도 건너뛰지 않게, 현재 자리에서 4px씩 따라가며 닿는 곳에서 멈춘다.
+  const board = computerUsbBoard.getBoundingClientRect(), start = computerUsbGeometry[kind];
+  const steps = Math.max(1, Math.ceil(Math.hypot(x - start.x, y - start.y) / 4));
+  let next = start;
+  for (let i = 1; i <= steps; i++) {
+    computerUsbGeometry[kind] = next;
+    next = stopComputerUsbAtPhone(kind, start.x + (x - start.x) * i / steps, start.y + (y - start.y) * i / steps);
+  }
+  computerUsbPositions[kind] = { x: next.x / board.width, y: next.y / board.height };
+  drawComputerUsb();
 }
 
 function cancelComputerUsbDrag() {
@@ -120,8 +159,7 @@ for (const [kind, element] of [['phone', computerUsbPhone], ['plug', computerUsb
     computerUsbArmed = false;
     computerUsbBoard.dataset.armed = 'false';
     const board = computerUsbBoard.getBoundingClientRect();
-    computerUsbPositions[kind] = { x: (event.clientX - board.left - drag.offsetX) / board.width, y: (event.clientY - board.top - drag.offsetY) / board.height };
-    drawComputerUsb();
+    moveComputerUsb(kind, event.clientX - board.left - drag.offsetX, event.clientY - board.top - drag.offsetY);
   });
   element.addEventListener('pointerup', event => {
     if (!computerUsbDrag || computerUsbDrag.id !== event.pointerId) return;
@@ -138,10 +176,8 @@ for (const [kind, element] of [['phone', computerUsbPhone], ['plug', computerUsb
     const moves = { ArrowLeft: [-12, 0], ArrowRight: [12, 0], ArrowUp: [0, -12], ArrowDown: [0, 12] };
     if (!moves[event.key]) return;
     event.preventDefault();
-    const board = computerUsbBoard.getBoundingClientRect();
-    computerUsbPositions[kind].x += moves[event.key][0] / board.width;
-    computerUsbPositions[kind].y += moves[event.key][1] / board.height;
-    drawComputerUsb();
+    const point = computerUsbGeometry[kind];
+    moveComputerUsb(kind, point.x + moves[event.key][0], point.y + moves[event.key][1]);
     if (computerUsbGeometry.aligned) connectComputerUsb();
   });
 }
