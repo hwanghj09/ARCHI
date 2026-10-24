@@ -274,7 +274,7 @@ function startAmbientSighting() {
 // 콘솔 창 버튼용. 컷씬·전환·포획·창이 열려 있는 동안은 정신력 진행처럼 실행하지 않는다.
 function hallucinationEventBlocked() {
   return !gameStarted || mainMenuActive || openingActive || blackoutSceneActive || storySceneActive || cctvSceneActive || b2CaptureActive || solarRestoreActive || playerCaught || hallucinationCaught ||
-    transitioning || selectingFloor || usingComputer || usingKeypad || usingControl || usingPhone || usingPowerPanel || usingInspection || !wirePanel.hidden || !logPanel.hidden || !backupPanel.hidden;
+    transitioning || selectingFloor || usingComputer || usingKeypad || usingControl || usingPhone || usingPowerPanel || usingInspection || !wirePanel.hidden || !logPanel.hidden;
 }
 
 function debugTriggerChaseHallucination() {
@@ -588,7 +588,7 @@ function updateBlink(elapsed, fsmPaused) {
 function updateSanity(elapsed) {
   // 컷씬·장면 전환·포획과 문서를 읽는 동안은 공포 진행을 멈춘다.
   const paused = storySceneActive || b2CaptureActive || solarRestoreActive || openingActive || blackoutSceneActive || cctvSceneActive || playerCaught || hallucinationCaught || transitioning ||
-    usingComputer || usingKeypad || usingControl || usingPowerPanel || usingInspection || !wirePanel.hidden || !logPanel.hidden || !backupPanel.hidden;
+    usingComputer || usingKeypad || usingControl || usingPowerPanel || usingInspection || !wirePanel.hidden || !logPanel.hidden;
   const fsmPaused = paused || selectingFloor || usingPhone;
   // 휴대폰을 연 것만으로는 진행 중인 추격 환각을 지우지 않는다(추격은 휴대폰을 연 채로도 이어진다).
   const chaseHalt = paused || selectingFloor;

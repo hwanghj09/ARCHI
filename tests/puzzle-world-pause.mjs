@@ -12,18 +12,17 @@ try {
   await page.locator('#opening-skip').click();
   await page.clock.pauseAt(new Date('2026-10-24T00:01:00Z'));
   const saved = await page.evaluate(() => progressSnapshot());
-  for (const type of ['log', 'backup']) {
+  for (const type of ['log']) {
     await page.evaluate(({ saved, type }) => {
       restoreProgress(saved);
       buildingBlackout = true; collectedItems.add('f17-emergency-linked');
       for (const scene of STORY_SCENES) collectedItems.add(scene.flag);
-      const id = type === 'log' ? 'f12-eval' : 'f7-verify';
+      const id = 'f12-eval';
       solarEnabled = true; solarPoweredFloors = [floorById.get(id).floor];
-      if (type === 'backup') collectedItems.add('f12-evaluation-solved');
       performFloorChange(id, null, 'exit');
       roamerEnter(id, floorId(currentSceneFloor));
       Object.assign(roamer, { x: body.position.x + 240, facing: -1, mode: 'chase', stay: 60000, lostTime: 0 });
-      if (type === 'log') openLogPuzzle(); else openBackupPuzzle();
+      openLogPuzzle();
     }, { saved, type });
     const before = await page.evaluate(() => ({ robot: roamer.x, player: body.position.x, elapsed: logPuzzle.elapsed }));
     await page.clock.runFor(2000);
@@ -35,8 +34,8 @@ try {
     await page.clock.runFor(2500);
     assert(await page.evaluate(() => playerCaught), `${type}: closing the panel resumes the pursuing robot`);
     await page.evaluate(() => retryGuardCapture());
-    assert(await page.evaluate(() => !playerCaught && logPanel.hidden && backupPanel.hidden && !stage.inert), 'Retry remains usable after the panel has closed');
+    assert(await page.evaluate(() => !playerCaught && logPanel.hidden && !stage.inert), 'Retry remains usable after the panel has closed');
   }
   assert.deepEqual(errors, []);
-  console.log('PASS: log/backup world pause, live deletion timer, resumed pursuit and usable retry.');
+  console.log('PASS: log world pause, live deletion timer, resumed pursuit and usable retry.');
 } finally { await browser.close(); }

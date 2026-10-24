@@ -1738,7 +1738,7 @@ try {
     await page.keyboard.press('Escape');
     assert.equal(await page.locator('#world').getAttribute('data-alarm'), 'true');
     // CCTV 소등까지 봤어도 7층·13층·2층 조사가 남아 있으면 남은 준비를 알려 준다.
-    await inspect(1700, 'E · 승강기 제어반 조사', /B2 진입 준비가 아직 끝나지 않았다.*7층 원본 로그 분석.*13층 게이트웨이 백업 장치.*2층 리허설 영상/);
+    await inspect(1700, 'E · 승강기 제어반 조사', /B2 진입 준비가 아직 끝나지 않았다.*ARCHI-MAIN 외부 연결 기록.*13층 게이트웨이 백업 장치.*2층 리허설 영상/);
     await page.evaluate(() => { // 7층·13층·2층 퍼즐(story-puzzles, vault-puzzle)
       collectedItems.add('f7-external-connection-solved'); collectedItems.add('f13-backup-device'); collectedItems.add('f2-projected');
       // 그 층들에서 퍼즐을 풀며 이미 봤을 이동 혼잣말(story-scene.js)이 여기서 뒤늦게 시작되지 않게 본 것으로 둔다.

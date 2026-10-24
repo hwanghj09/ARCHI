@@ -142,7 +142,6 @@ function restoreProgress(data) {
     // 2층 리허설 영상도 같은 이유로 친다.
     if (collectedItems.has('b1-elevator')) ['f13-backup-device', 'f17-usb-played', 'f2-projected'].forEach(item => collectedItems.add(item));
     restoreLogPuzzle(data.logPuzzle);
-    closeBackupPuzzle();
     restoreClues(data.clues);
     restorePhotos(data.photos);
     allPowerOverride = false; // 불러오거나 새로 시작하면 콘솔의 전력 활성화는 꺼진다

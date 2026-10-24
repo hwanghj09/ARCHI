@@ -14,7 +14,6 @@ const PUZZLE_STEPS = [
   { label: '12F 로그 파일 찾기', at: 'f12', items: ['f12-log-hint', 'f12-evaluation-solved'] },
   { label: '5F 서가 꼭대기 노트', at: 'f5', items: ['goal-f5-note'] },
   { label: '8F 재현 기록', at: 'f8', items: ['f8-repro-record'] },
-  { label: '7F 백업 장비 · 학습 시간', at: 'f7', items: ['f7-training-time-solved'] },
   { label: '1F 안내 데스크 PC 터미널 · ARCHI-MAIN 외부 연결 로그', at: 'f1', items: ['f7-external-connection-solved'] },
   { label: '13F 보안 자료실 백업 장치', at: 'f13', items: ['f13-backup-device'] },
   { label: '17F 백업 장치 영상', at: 'f17', items: ['f17-usb-played'] },

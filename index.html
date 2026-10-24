@@ -17,7 +17,6 @@
     <link rel="stylesheet" href="css/wire-puzzle.css" />
     <link rel="stylesheet" href="css/manual-control.css" />
     <link rel="stylesheet" href="css/log-puzzle.css" />
-    <link rel="stylesheet" href="css/backup-puzzle.css" />
     <link rel="stylesheet" href="css/vault-puzzle.css" />
     <link rel="stylesheet" href="css/guard-patrol.css" />
     <link rel="stylesheet" href="css/b2-ending.css" />
@@ -90,7 +89,6 @@
     <script src="js/interaction/manual-control.js" defer></script>
     <script src="js/interaction/wire-puzzle.js" defer></script>
     <script src="js/interaction/log-puzzle.js" defer></script>
-    <script src="js/interaction/backup-puzzle.js" defer></script>
     <script src="js/interaction/vault-puzzle.js" defer></script>
     <script src="js/interaction/outline.js" defer></script>
     <script src="js/interaction/interaction.js" defer></script>
@@ -437,19 +435,6 @@
           <p class="log-memo-foot">화면에 나온 이름은 클릭하면 열린다!</p>
         </aside>
         <button id="log-close" type="button">나가기 · Esc</button>
-      </div>
-    </section>
-    <section id="backup-panel" role="dialog" aria-modal="true" aria-labelledby="backup-title" aria-describedby="backup-status" hidden>
-      <div id="backup-frame">
-        <div class="backup-head"><h2 id="backup-title">VERIFY-BK07 · 원본 로그 분석기</h2><span>OFFLINE · BATTERY 62%</span></div>
-        <div id="backup-tabs" role="tablist" aria-label="기록 날짜"></div>
-        <div id="backup-body" role="tabpanel"></div>
-        <p id="backup-hint" hidden>12층 B2 전력 할당 기록 · 03:00~04:00 · B2</p>
-        <p id="backup-question"></p>
-        <div id="backup-options" role="group" aria-label="보기"></div>
-        <div id="backup-monologue" aria-live="polite" hidden></div>
-        <p id="backup-status" role="status" aria-live="polite"></p>
-        <button id="backup-close" type="button">나가기 · Esc</button>
       </div>
     </section>
     <section id="inspection" class="device-dialog" role="dialog" aria-modal="true" aria-labelledby="inspection-title" aria-describedby="inspection-description" hidden>

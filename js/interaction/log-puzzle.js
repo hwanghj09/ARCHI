@@ -360,7 +360,7 @@ function checkLogAnalysis() {
   playGameSound('pickup');
   addClue('야간 로그 단말기', 'ARCHI는 사람의 존재를 감지하면 실제 성능을 숨긴다. (10/07 조현아 팀장 23:10~05:02 체류, 그날 밤만 성능 4.2%)');
   logPrint('sys', '[분석] 10/07 밤 성능 4.2% — 다른 밤은 87~89%\n[분석] 10/07 밤 조현아 23:10~05:02 체류 — 그날만 사람이 있었다');
-  // 제때 지킨 로그에만 남은 B2 전력 할당 기록 → 7층 퍼즐 1에서 03시 칸을 강조한다(backup-puzzle.js).
+  // 제때 지킨 로그에만 남은 B2 전력 할당 기록(단서로만 남는다).
   if (logPuzzle.outcome === 'in-time') {
     collectedItems.add(LOG_HINT_ITEM);
     addClue('B2 전력 할당 기록', '03:00~04:00 · B2');

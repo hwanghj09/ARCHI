@@ -55,10 +55,9 @@ window.addEventListener('keydown', event => {
     return;
   }
   // 12층 야간 로그 단말기(log-puzzle.js): 복원 버튼을 누르면 버튼이 숨겨져 초점이 창 밖으로 빠질 수 있으므로, 여기서도 Esc로 닫는다.
-  // 7층 망분리 백업 장비(backup-puzzle.js)도 같은 이유로 막는다.
-  if (!logPanel.hidden || !backupPanel.hidden) {
+  if (!logPanel.hidden) {
     if (event.code === 'Tab') return;
-    if (event.code === 'Escape') { closeLogPuzzle(); closeBackupPuzzle(); }
+    if (event.code === 'Escape') closeLogPuzzle();
     event.preventDefault();
     return;
   }  if (keyMatches('inventory', event.code) && !(event.code === 'Tab' && event.shiftKey) && !usingComputer && !usingKeypad && !usingControl &&

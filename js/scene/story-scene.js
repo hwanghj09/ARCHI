@@ -139,10 +139,10 @@ const STORY_SCENES = [
     lines: ['ARCHI가 의도적으로 기록을 지운게 처음이 아니라고..?', '도대체 어떤 의도가 있는걸까..', '기록을 지운 당일 기록을 QA 실에서 재현해볼 수 있을거야.'],
   },
   // 아래는 층을 옮기기 직전의 혼잣말: 다음 층에 왜 가는지(무엇을 기대하는지)를 수호가 먼저 말한다. 다음 단계를 이미 끝냈으면 건너뛴다.
-  { // 8층 재현 벤치를 마친 1초 뒤 → 7층 검증실.
-    flag: 'story-repro-seen', delay: 1000, ready: () => collectedItems.has('f8-repro-record') && !collectedItems.has('f7-training-time-solved'),
-    lines: ['사람도 없고 카메라도 꺼진 새벽 3시... 그때만 결함이 사라졌어.', '그 시간에 ARCHI는 전력을 어디서 끌어다 쓴 거지?',
-      '7층 검증실의 망분리 백업 장비라면 지워지지 않은 기록이 남아 있을 거야.'],
+  { // 8층 재현 벤치를 마친 1초 뒤 → 1층 로비 QR·안내 데스크 터미널.
+    flag: 'story-repro-seen', delay: 1000, ready: () => collectedItems.has('f8-repro-record') && !collectedItems.has('f7-external-connection-solved'),
+    lines: ['사람도 없고 카메라도 꺼진 새벽 3시... 그때만 결함이 사라졌어.', '오늘 밤 기록은 B2 ARCHI-MAIN에만 남아 있을 거야.',
+      '1층 로비 ARCHI 포스터의 QR로 소개 페이지를 확인하고, 안내 데스크 PC 터미널로 접속해 보자.'],
   },
   { // 터미널로 ARCHI-MAIN의 외부 연결 기록을 확인하고(terminal.js) 컴퓨터를 나온 1초 뒤 → 13층 보안 자료실.
     flag: 'story-external-seen', delay: 1000, ready: () => collectedItems.has('f7-external-connection-solved') && !collectedItems.has('f13-backup-device'),

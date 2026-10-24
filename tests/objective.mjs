@@ -172,8 +172,7 @@ try {
   assert.equal(await titleAfter(() => collectedItems.add('goal-f12-memo')), '나갈 방법 찾기', 'Reading a memo does not bypass the authored evaluation puzzle');
   assert.equal(await titleAfter(() => collectedItems.add('f12-evaluation-solved')), '데이터 수집');
   assert.equal(await titleAfter(() => collectedItems.add('goal-f5-note')), '기록 재현');
-  assert.equal(await titleAfter(() => collectedItems.add('f8-repro-record')), '로그 분석');
-  assert.equal(await titleAfter(() => collectedItems.add('f7-training-time-solved')), 'ARCHI의 흔적');
+  assert.equal(await titleAfter(() => collectedItems.add('f8-repro-record')), 'ARCHI의 흔적');
   assert.equal(await titleAfter(() => collectedItems.add('f7-external-connection-solved')), '외부 연결 통로 찾기');
   assert.equal(await titleAfter(() => collectedItems.add('f13-backup-device')), '장치 확인하기');
   assert.match(await page.evaluate(() => currentObjective.text), /13층.*원격지원 PC.*1층 안내 데스크 PC/);

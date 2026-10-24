@@ -113,12 +113,12 @@ const B1_ROOMS = interiorRooms(-1, [
       { file: 'office-desk', size: [512, 256], worldWidth: 252, x: 1327 },
       { file: 'elevator-control-panel', size: [256, 512], worldWidth: 89, x: 1700, name: '승강기 제어반', gives: 'b1-elevator',
         sprite: 'assets/objects/b1/elevator-override-states.png', stateBy: 'b1-elevator',
-        // 7층 원본 로그 분석(backup-puzzle.js)으로 B2가 목적지라는 걸 알고, 13층 보안 자료실에서 외부 송신 경로 백업(vault-puzzle.js)을
+        // 1층 안내 데스크 PC 터미널의 ARCHI-MAIN 외부 연결 기록(terminal.js)으로 B2가 목적지라는 걸 알고, 13층 보안 자료실에서 외부 송신 경로 백업(vault-puzzle.js)을
         // 챙기고, 2층 리허설 영상(f2-projected)으로 CCTV·방송 서버가 B2로 옮겨진 걸 보고, 이 방의 CCTV 모니터 벽(소등 컷씬, b1-lights-out)까지
         // 보기 전에는 운행 제한을 풀지 않는다.
         requires: ['f7-external-connection-solved', 'f13-backup-device', 'f2-projected', 'b1-lights-out'],
-        partialMessage: 'B2 진입 준비가 아직 끝나지 않았다. 필요한 조사: 7층 원본 로그 분석 · 13층 게이트웨이 백업 장치 · 2층 리허설 영상 · 이 방의 CCTV 모니터 벽. 준비를 마친 뒤 꽂힌 관리 키로 운행 제한을 해제하자.',
-        missingMessage: '승강기 제어반: "B2 운행 제한 · 설정 SYSTEM 23:59". 관리 키는 꽂혀 있다. 7층 원본 로그, 13층 백업 장치, 2층 리허설 영상과 관제실 CCTV를 확인한 뒤 B2로 내려갈 준비를 마치자.',
+        partialMessage: 'B2 진입 준비가 아직 끝나지 않았다. 필요한 조사: ARCHI-MAIN 외부 연결 기록 · 13층 게이트웨이 백업 장치 · 2층 리허설 영상 · 이 방의 CCTV 모니터 벽. 준비를 마친 뒤 꽂힌 관리 키로 운행 제한을 해제하자.',
+        missingMessage: '승강기 제어반: "B2 운행 제한 · 설정 SYSTEM 23:59". 관리 키는 꽂혀 있다. ARCHI-MAIN 외부 연결 기록, 13층 백업 장치, 2층 리허설 영상과 관제실 CCTV를 확인한 뒤 B2로 내려갈 준비를 마치자.',
         control: { kind: 'key', label: '꽂혀 있는 관리 키를 "해제"로 돌리자.', ends: ['제한', '해제'] },
         message: '승강기 제어반: "B2 운행 제한 · 설정 SYSTEM 23:59". 수동 해제는 열쇠 스위치라 SYSTEM이 건드리지 못했다. 관리 키가 "해제"에 걸리자 B2 표시등이 초록으로 바뀐다.',
         surface: 'screen', look: 'lcd',
