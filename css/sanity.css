@@ -21,7 +21,7 @@
 #hallucination-shadow[data-form="ghost"] { width: 380px; height: 418px; transition: opacity .12s linear; }
 /* 스프라이트 시트(가로 10칸, 칸 300×330). ghost-chase.png: 0번 칸이 똑바로 선 자세, 1~9번 칸이 처음 달려오는 동안. ghost-run.png: 그 뒤 반복해서 쓰는 달리기. */
 #hallucination-shadow[data-form="ghost"]::before, #hallucination-shadow[data-form="ghost"]::after { background: url(../assets/ui/hallucination/ghost-chase.png) no-repeat; background-size: 1000% 100%;
-  clip-path: none; filter: brightness(.55) blur(var(--ghost-blur, 0px)) drop-shadow(0 0 5px #9aa4b044); image-rendering: auto; }
+  clip-path: none; filter: brightness(.36) contrast(1.1) blur(var(--ghost-blur, 0px)) drop-shadow(0 0 6px #000d); image-rendering: auto; }
 /* ::before는 지금 칸, ::after는 다음 칸이고 투명도(--blend)만큼 섞어 칸 사이를 부드럽게 잇는다. */
 #hallucination-shadow[data-form="ghost"]::before { background-position: calc(var(--frame, 0) * 100% / 9) 0; }
 #hallucination-shadow[data-form="ghost"]::after { left: 0; top: 0; width: 100%; height: 100%; border-radius: 0; opacity: var(--blend, 0);
