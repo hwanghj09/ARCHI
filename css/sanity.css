@@ -37,6 +37,8 @@ body:has(#world[data-opening]) #fear-overlay, body:has(#world[data-opening]) #fe
 body:has(#world[data-blackout-scene]) #fear-overlay, body:has(#world[data-blackout-scene]) #fear-overlay-red,
 body:has(#world[data-opening]) :is(#blink-flash, #eye-flash), body:has(#world[data-blackout-scene]) :is(#blink-flash, #eye-flash),
 body:has(#world[data-opening]) :is(#red-eyes, #red-eye-shards), body:has(#world[data-blackout-scene]) :is(#red-eyes, #red-eye-shards) { visibility: hidden; }
+/* 컷씬(수호의 혼잣말 장면, B2 TRUE END·배드 엔딩 창)에서는 정신력 표시를 숨긴다. */
+body:has(#story-scene:not([hidden]), #b2-escape:not([hidden]), #b2-bad-ending:not([hidden])) #sanity-hud { visibility: hidden; }
 @media (max-width: 480px) { #sanity-hud { width: 136px; padding: 8px 10px; } }
 @media (max-height: 480px) { #sanity-hud { top: 56px; } }
 

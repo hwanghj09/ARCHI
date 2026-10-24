@@ -263,7 +263,22 @@ function slotSummary(saved) {
   return `${name} · ${time} · ${saved.slotKind === 'manual' ? '직접 저장' : '자동 저장'}${saved.objective ? ` · 목표: ${saved.objective}` : ''}`;
 }
 
+// 가장 최근에 저장한 칸(저장 시각이 가장 늦은 칸)의 번호. 저장된 칸이 없으면 -1.
+function latestSlotIndex() {
+  let best = -1, bestTime = -Infinity;
+  slotKeys.forEach((key, index) => {
+    const saved = readProgress(key);
+    const time = Number.isFinite(saved?.savedAt) ? saved.savedAt : saved ? 0 : -Infinity;
+    if (time > bestTime) { best = index; bestTime = time; }
+  });
+  return best;
+}
+
 function renderSlots() {
+  const latest = document.getElementById('menu-slot-latest');
+  const latestIndex = latestSlotIndex();
+  latest.disabled = latestIndex < 0;
+  latest.textContent = latestIndex < 0 ? '가장 최근 저장으로 불러오기' : `가장 최근 저장으로 불러오기 · 슬롯 ${latestIndex + 1}`;
   menuSlotList.replaceChildren(...slotKeys.map((key, index) => {
     const saved = readProgress(key);
     const item = document.createElement('li');
@@ -308,6 +323,24 @@ document.getElementById('menu-slots-button').addEventListener('click', event => 
   showMenuView('slots');
 });
 
+// 고른 저장 칸을 불러온다(칸의 [불러오기]와 [가장 최근 저장으로 불러오기]가 같이 쓴다).
+function loadSlotProgress(saved) {
+  if (!saved) return renderSlots();
+  closeMainMenu();
+  try { restoreProgress(saved); saveProgress(); }
+  catch {
+    mainMenuActive = true;
+    document.body.dataset.mainMenu = 'true';
+    showMainMenu();
+    document.getElementById('menu-save-info').textContent = '저장한 진행 상황을 불러오지 못했습니다.';
+  }
+}
+
+document.getElementById('menu-slot-latest').addEventListener('click', () => {
+  const index = latestSlotIndex();
+  if (index >= 0) loadSlotProgress(readProgress(slotKeys[index]));
+});
+
 menuSlotList.addEventListener('click', event => {
   const save = event.target.closest('[data-slot-save]');
   const load = event.target.closest('[data-slot-load]');
@@ -317,16 +350,7 @@ menuSlotList.addEventListener('click', event => {
     renderSlots();
     menuSlotList.querySelector(`[data-slot-save="${index}"]`)?.focus({ preventScroll: true });
   } else if (load) {
-    const saved = readProgress(slotKeys[Number(load.dataset.slotLoad)]);
-    if (!saved) return renderSlots();
-    closeMainMenu();
-    try { restoreProgress(saved); saveProgress(); }
-    catch {
-      mainMenuActive = true;
-      document.body.dataset.mainMenu = 'true';
-      showMainMenu();
-      document.getElementById('menu-save-info').textContent = '저장한 진행 상황을 불러오지 못했습니다.';
-    }
+    loadSlotProgress(readProgress(slotKeys[Number(load.dataset.slotLoad)]));
   }
 });
 
