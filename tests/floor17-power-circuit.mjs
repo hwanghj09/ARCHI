@@ -155,7 +155,7 @@ try {
   assert.equal(await page.locator('.writing-memo').textContent(), memo, 'Inventory opens the same written memo');
   await page.keyboard.press('Escape');
   assert.equal(await page.locator('#inspection').getAttribute('data-surface'), 'inventory');
-  await approach('소화전');
+  await approach('비상 열쇠함');
   await page.getByRole('button', { name: '낡은 열쇠 줍기' }).click();
   await approach('비상계단');
   await page.getByRole('button', { name: '열쇠 사용하기', exact: true }).click();
@@ -186,14 +186,11 @@ try {
   assert.equal(await page.evaluate(() => worldWidth), 1040, 'Manager room is compact');
   await page.locator('#dynamic-scene img').evaluateAll(images => Promise.all(images.map(image => image.decode())));
   await page.screenshot({ path: '.local/floor17-power-room.png' });
-  await approach('비상 전력 분배반');
-  assert(await page.locator('#wire-panel').isHidden(), 'Read the circuit diagram before touching terminals');
-  assert.match(await page.locator('#inspection-description').textContent(), /안내도를 먼저/);
   await approach('비상 전력 회로 안내도');
-  assert.equal(await page.evaluate(() => collectedItems.has('f17-circuit-guide-read')), true);
-  assert.match(await page.locator('#inspection-sheet').textContent(), /중계 릴레이/);
+  assert.match(await page.locator('#inspection-sheet').textContent(), /중계 릴레이/, 'The desk diagram is still readable');
+  await page.evaluate(() => collectedItems.delete('f17-circuit-guide-read'));
   await approach('비상 전력 분배반');
-  assert.equal(await page.locator('#wire-panel').getAttribute('data-mode'), 'elevator');
+  assert.equal(await page.locator('#wire-panel').getAttribute('data-mode'), 'elevator', 'The panel opens without a desk trip; its own 회로 안내도 shows the routes');
   await page.locator('.wire-art img').evaluate(image => image.decode());
   await page.locator('#wire-reference summary').click();
   assert.equal(await page.locator('#wire-reference tr').count(), 8, 'Two-stage relay diagram has no direct S-to-E answer table');

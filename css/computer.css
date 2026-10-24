@@ -79,7 +79,16 @@
 .blog-post .blog-post-meta { margin: 0 0 28px; padding-bottom: 20px; border-bottom: 1px solid #eef1ef; color: #88938c; font-size: 11px; }
 .blog-post h3 { margin: 26px 0 8px; font-size: 15px; }
 .blog-post :is(ul, ol) { padding-left: 22px; }
+.blog-attachment { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; padding: 16px; margin-top: 20px; border: 1px solid #d7e6dc; border-radius: 4px; background: #f6fbf8; }
+.blog-file-icon { color: #03a94c; font-size: 28px; }
+.blog-attachment > div { flex: 1; min-width: 0; }
+.blog-attachment strong, .blog-attachment > div span { display: block; }
+.blog-attachment strong { font-size: 13px; }
+.blog-attachment > div span { color: #849188; font-size: 11px; }
+#computer #computer-solar-download { border: 1px solid #b8d8c3; background: white; color: #14873f; font-size: 12px; }
+.solar-file-progress { display: block; width: 100%; height: 16px; margin-top: 16px; accent-color: #03a94c; }
 #computer .naver-blog button:disabled { opacity: .5; cursor: default; }
+.blog-install-status { display: block; margin-top: 12px; color: #64766a; font-size: 12px; }
 .blog-post .blog-post-footer { margin: 28px 0 0; padding-top: 18px; border-top: 1px solid #eef1ef; color: #678873; font-size: 12px; }
 @media (max-width: 800px) {
   .blog-layout { grid-template-columns: minmax(0, 1fr); gap: 16px; padding: 16px; }
@@ -198,4 +207,19 @@
   #computer .computer-shortcuts .app-art { width: 38px; height: 38px; }
 }
 
+:is(#computer-solar-status, #computer-transfer-status):empty { display: none; }
+
 #computer-files button[data-selected="true"] { background: #e5f1ff; border-color: #99c7ef; }
+
+/* SSH 터미널(terminal.js) */
+#computer-terminal { display: flex; flex-direction: column; padding: 12px 14px; background: #0b0f14; color: #c9e6d2; font: 14px/1.55 Consolas, 'D2Coding', monospace; cursor: text; }
+#computer-terminal[hidden] { display: none; }
+#terminal-output { margin: 0; white-space: pre-wrap; word-break: break-all; font: inherit; }
+#terminal-form { display: flex; gap: 8px; }
+#terminal-prompt { flex-shrink: 0; color: #7fd6a0; }
+#terminal-input { flex: 1; min-width: 0; padding: 0; border: 0; outline: 0; background: none; color: inherit; font: inherit; caret-color: #7fd6a0; }
+#terminal-input:focus, #terminal-input:focus-visible { outline: none; box-shadow: none; }
+#computer-terminal.terminal-alarm { animation: terminal-alarm .9s steps(2) 2; }
+@keyframes terminal-alarm { 50% { background: #2a0b0b; color: #ff9a8a; } }
+.app-art[data-app-icon="terminal"] { position: relative; border-radius: 22%; background: #0b0f14; box-shadow: inset 0 0 0 2px #3c5566; }
+.app-art[data-app-icon="terminal"]::after { content: '>_'; position: absolute; inset: 0; display: grid; place-content: center; color: #7fd6a0; font: bold 13px/1 Consolas, monospace; }

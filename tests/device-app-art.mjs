@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { mkdir, readFile } from 'node:fs/promises';
 import { chromium } from 'playwright';
-import { finishSceneTransition } from './scene-transition.mjs';
+import { finishSceneTransition, goToDeskComputer } from './scene-transition.mjs';
 
 const browser = await chromium.launch();
 try {
@@ -71,6 +71,7 @@ try {
     assert(cell.top >= top && cell.bottom < top + cellWidth, `${visual.name} artwork fits the vertical sprite crop`);
   };
 
+  await goToDeskComputer(page);
   await page.keyboard.press('e');
   await finishSceneTransition(page);
   for (const viewport of [{ width: 1280, height: 720 }, { width: 390, height: 844 }, { width: 568, height: 320 }]) {

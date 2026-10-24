@@ -55,6 +55,8 @@ try {
     assert(sound.rms > .005 && sound.rms < .2, `${sound.name} has an audible, restrained level`);
   }
 
+  // 헤드리스 오디오 시계는 늦게 출발한다. 0에 머문 채로 재생하면 같은 소리 0.08초 반복 금지에 막힌다.
+  await page.waitForFunction(() => gameAudioContext.currentTime > 0);
   const heard = [];
   for (let i = 0; i < 6; i++) {
     const cue = await page.evaluate(() => {

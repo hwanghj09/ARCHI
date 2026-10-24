@@ -824,7 +824,7 @@
     {
       "id": "f4",
       "floor": 4,
-      "header": "4F · ARCHI Data 연구본부",
+      "header": "4F · VMAX Data 연구본부",
       "width": 5000,
       "scale": 1,
       "broken": [],
@@ -950,7 +950,7 @@
     {
       "id": "f5",
       "floor": 5,
-      "header": "5F · ARCHI Data 연구본부",
+      "header": "5F · VMAX Data 연구본부",
       "width": 5000,
       "scale": 1,
       "broken": [],
@@ -1076,7 +1076,7 @@
     {
       "id": "f6",
       "floor": 6,
-      "header": "6F · ARCHI Data 기술본부",
+      "header": "6F · VMAX Data 기술본부",
       "width": 5000,
       "scale": 1,
       "broken": [],
@@ -1457,7 +1457,7 @@
     {
       "id": "f9",
       "floor": 9,
-      "header": "9F · ARCHI Data 사업본부",
+      "header": "9F · VMAX Data 사업본부",
       "width": 5000,
       "scale": 1,
       "broken": [],

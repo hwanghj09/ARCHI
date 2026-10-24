@@ -16,7 +16,7 @@ const INVENTORY_ITEMS = {
   'f12-lead-key': { name: '팀장실 보조키', description: '12층 책상 서랍에서 챙긴 열쇠. 꼬리표에 "팀장실 보조키"라고 적혀 있다.', image: 'assets/objects/items/lead-key.png' },
   'f12-eval-keycard': { name: '모델 평가실 카드키', description: '12층 개발실 맨 왼쪽 서랍의 종이 더미 밑에서 찾은 카드키. 모델 평가실 문을 열 수 있다.',
     image: 'assets/objects/items/eval-keycard.png', hint: '12층 개발실 맨 왼쪽 서랍 확인' },
-  'f13-backup-device': { name: '원격지원 게이트웨이 백업 장치', description: '13층 보안 자료실에서 가져온 USB 백업 장치. 라벨: "03:05 외부 송신 경로 원본 · 원격 접속 에이전트 배포 계정 archi_svc · 2F 03:00 리허설 사본". 17층 내 자리 컴퓨터에 꽂으면 안을 볼 수 있을 것 같다.',
+  'f13-backup-device': { name: '원격지원 게이트웨이 백업 장치', description: '13층 보안 자료실에서 가져온 USB 백업 장치. 라벨: "03:05 외부 송신 경로 원본 · 원격 접속 에이전트 배포 계정 archi_svc · 2F 03:00 리허설 사본". 컴퓨터에 꽂으면 안을 볼 수 있을 것 같다.',
     image: 'assets/objects/items/backup-device.png', hint: '13층 보안 자료실 백업 장치 보관함' },
   'rooftop-key': { name: '낡은 열쇠', description: '옥상문을 열 수 있을 것만 같다… 조금 더럽다.' },
   'f17-manager-memo': { name: '관리실 비상 출입 메모', image: 'assets/ui/floor17/manager-memo.png',
@@ -81,12 +81,21 @@ function openHydrant() {
   image.src = 'assets/ui/hydrant-interior.png';
   image.alt = '붉은 철문이 열린 소화전. 내부에 천 호스, 황동 밸브와 금속 관창이 있고 아래에 선반이 있다.';
   image.draggable = false;
-  const description = writingNode('p', 'item-description', '호스와 관창이 정리되어 있다. 아래 선반에 낡은 열쇠가 놓여 있다.');
+  const description = writingNode('p', 'item-description', '호스와 관창이 정리되어 있다.');
   description.id = 'item-description';
-  description.setAttribute('role', 'status');
   cabinet.append(image);
   const content = writingNode('div', 'item-panel');
   content.append(cabinet, description);
+  openItemPanel('17층 소화전', description.textContent, 'hydrant', content);
+}
+
+// 옥상문 옆 비상 열쇠함(corridor17.js). 옥상문 열쇠를 여기서 줍는다.
+function openKeyBox() {
+  const description = writingNode('p', 'item-description', '걸이에 낡은 열쇠가 하나 걸려 있다.');
+  description.id = 'item-description';
+  description.setAttribute('role', 'status');
+  const content = writingNode('div', 'item-panel inventory-content');
+  content.append(description);
   if (!collectedItems.has('rooftop-key')) {
     const key = itemButton('rooftop-key');
     key.setAttribute('aria-label', '낡은 열쇠 줍기');
@@ -101,12 +110,12 @@ function openHydrant() {
       refreshInventoryCount();
       showItemAcquired('rooftop-key');
     });
-    cabinet.append(key);
+    content.append(key);
   } else {
-    description.textContent = '호스와 관창은 그대로다. 열쇠는 이미 챙겼다.';
+    description.textContent = '열쇠 걸이가 비어 있다. 열쇠는 이미 챙겼다.';
   }
-  openItemPanel('17층 소화전', description.textContent, 'hydrant', content);
-  cabinet.querySelector('button')?.focus({ preventScroll: true });
+  openItemPanel('비상 열쇠함', description.textContent, 'key-box', content);
+  content.querySelector('button')?.focus({ preventScroll: true });
 }
 
 function openCleaningCart() {
@@ -194,7 +203,7 @@ function openCleaningCart() {
 
 function openRooftopLock() {
   const content = writingNode('div', 'item-panel inventory-content');
-  const description = writingNode('p', 'item-description', '비상문이 잠겨 있다. 소화전에서 찾은 열쇠로 문을 열 수 있을 것 같다.');
+  const description = writingNode('p', 'item-description', '비상문이 잠겨 있다. 비상 열쇠함에서 찾은 열쇠로 문을 열 수 있을 것 같다.');
   description.id = 'item-description';
   const useKey = itemButton('rooftop-key');
   useKey.querySelector('.item-name').textContent = '열쇠 사용하기';

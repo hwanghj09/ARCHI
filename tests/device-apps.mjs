@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { chromium } from 'playwright';
-import { finishSceneTransition } from './scene-transition.mjs';
+import { finishSceneTransition, goToDeskComputer } from './scene-transition.mjs';
 
 const browser = await chromium.launch();
 try {
@@ -44,10 +44,11 @@ try {
     await page.clock.runFor(50);
   };
 
+  await goToDeskComputer(page);
   await page.keyboard.press('e');
   await finishSceneTransition(page);
   assert(await pc.isVisible());
-  assert.equal(await pc.locator('.computer-shortcuts button').count(), 7);
+  assert.equal(await pc.locator('.computer-shortcuts button').count(), 8); // 파일 전송·터미널(terminal.js) 포함
   await pcApp('mail').click();
   assert.equal(await pc.locator('[data-computer-mail]').count(), 5);
   assert.equal(await pc.locator('#computer-mail-count').textContent(), '5개 메일 · 안 읽음 5개');

@@ -607,3 +607,5 @@
   #inspection[data-surface] .writing-label-stack { padding: 10px 0; }
 }
 .writing-card img[src^="assets/objects/items/"], .writing-card img[src$="/disc.png"] { image-rendering: pixelated; }
+/* 1층 로비 ARCHI 포스터: 휴대폰으로 QR을 찍기 쉽게 기울이지 않는다. */
+.writing-card img[src$="archi-qr-poster.svg"] { transform: none; }

@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { chromium } from 'playwright';
-import { finishSceneTransition } from './scene-transition.mjs';
+import { finishSceneTransition, goToDeskComputer } from './scene-transition.mjs';
 
 const browser = await chromium.launch();
 try {
@@ -12,6 +12,7 @@ try {
     await page.goto(new URL('../index.html', import.meta.url).href);
     await page.locator('#menu-start').click(); await page.locator('#opening-skip').click();
     await page.clock.pauseAt(new Date(Date.now() + 1000));
+    await goToDeskComputer(page);
     await page.keyboard.press('e'); await finishSceneTransition(page);
     const state = app => page.locator(`.computer-app-window[data-app="${app}"]`);
     const task = app => page.locator(`[data-computer-task-app="${app}"]`);
@@ -92,6 +93,15 @@ try {
       const window = await state('document').boundingBox();
       assert(window.x >= 0 && window.y >= 0 && window.x + window.width <= width + 1 && window.y + window.height <= height - 55, 'Mobile windows fit above the taskbar');
     }
+    await page.evaluate(() => { collectedItems.add('solar-app-downloaded'); refreshSolarDownload(); });
+    await launch('transfer');
+    await page.locator('#computer-usb-open').click();
+    await page.locator('#computer-usb-plug').click(); await page.locator('#computer-usb-port').click();
+    await page.locator('#computer-solar-transfer').click();
+    await state('transfer').locator('[data-window-minimize]').click();
+    await launch('notes');
+    await page.clock.runFor(8000);
+    assert.equal(await page.evaluate(() => collectedItems.has('solar-app-installed')), true, 'A minimized transfer finishes while another app is open');
     assert.deepEqual(await page.evaluate(() => ({ x: body.position.x, battery: phoneBattery, sanity })), initial, 'Desktop input stays isolated from the player and paused survival timers');
     await page.evaluate(data => restoreProgress(data), await page.evaluate(() => progressSnapshot()));
     assert.equal(await page.evaluate(() => [...computerWindows.values()].some(state => state.open)), false, 'Restore clears transient desktop windows');

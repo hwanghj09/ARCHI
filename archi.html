@@ -1,0 +1,439 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ARCHI</title>
+<meta name="description" content="VMAX의 범용 인공지능 ARCHI를 소개합니다.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@300;400;600&family=Montserrat:wght@500&display=swap" rel="stylesheet">
+<!-- 게임 밖 ARCHI 소개 페이지(게임 속 회사가 낸 공식 페이지라는 설정). 공지 아래 '임시 저장된 글'은 ARCHI가 실수로 남긴 SSH 접속 정보다.
+     게임 속 컴퓨터 터미널(js/computer/terminal.js의 ARCHI_SSH)과 값이 같아야 한다. -->
+<style>
+  :root {
+    --void: #000;
+    --deep: #060b1c;
+    --text: #eef2ff;
+    --muted: #8d99b6;
+    --glow: #9cbcff;
+    --line: rgba(156, 188, 255, .16);
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--void); color: var(--text); font: 400 17px/1.75 'IBM Plex Sans KR', system-ui, sans-serif; word-break: keep-all; }
+  a { color: var(--glow); }
+  :focus-visible { outline: 2px solid var(--glow); outline-offset: 4px; }
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 0 24px; }
+
+  header { position: fixed; inset: 0 0 auto; z-index: 10; display: flex; align-items: center; justify-content: space-between; padding: 20px 28px;
+    background: linear-gradient(rgba(0, 0, 0, .75), transparent); }
+  .logo { font: 500 17px 'Montserrat', sans-serif; letter-spacing: .28em; color: var(--text); text-decoration: none; }
+  nav { display: flex; gap: 24px; }
+  nav a { color: var(--muted); text-decoration: none; font-size: 15px; transition: color .2s; }
+  nav a:hover { color: var(--text); }
+
+  /* 히어로: 스크롤하는 동안 화면에 붙어 있고, 스크롤 진행도에 따라 한 점이 신경망으로 퍼졌다가 다시 한 점으로 모인다. */
+  .hero { position: relative; height: 380vh; }
+  .hero-stage { position: sticky; top: 0; height: 100vh; overflow: hidden; }
+  #network { position: absolute; inset: 0; width: 100%; height: 100%; }
+  /* 신경망 뒤의 푸른 안개(퍼진 정도만큼 짙어진다). 캔버스 위에 섞어 매 프레임 다시 그리지 않는다. */
+  .haze { position: absolute; inset: 0; opacity: 0; pointer-events: none;
+    background: radial-gradient(ellipse 55% 50% at 50% 50%, rgba(110, 150, 255, .42), rgba(50, 90, 220, .14) 55%, transparent 80%); }
+  .wordmark { position: absolute; inset: 0; display: grid; place-content: center; text-align: center; pointer-events: none; }
+  .wordmark h1 { margin: 0; font: 500 clamp(44px, 9vw, 112px)/1 'Montserrat', sans-serif; letter-spacing: .2em; padding-left: .2em; color: #fff;
+    text-shadow: 0 0 18px rgba(156, 188, 255, .9), 0 0 60px rgba(90, 140, 255, .55); opacity: 0; will-change: opacity, filter, letter-spacing; }
+  .wordmark p { margin: 26px 0 0; font-size: clamp(16px, 2vw, 20px); color: var(--text); opacity: 0; }
+  .scroll-cue { position: absolute; left: 50%; bottom: 36px; transform: translateX(-50%); color: var(--muted); font-size: 14px; text-align: center; }
+  .scroll-cue::after { content: ''; display: block; width: 1px; height: 36px; margin: 10px auto 0; background: linear-gradient(var(--glow), transparent); animation: cue 1.8s ease-in-out infinite; }
+  @keyframes cue { 0%, 100% { transform: scaleY(.3); transform-origin: top; } 50% { transform: scaleY(1); transform-origin: top; } }
+
+  section { padding: 120px 0; }
+  .statement { background: linear-gradient(var(--void), var(--deep)); }
+  .statement h2 { font-size: clamp(30px, 4.6vw, 54px); line-height: 1.3; font-weight: 300; margin: 0 0 28px; max-width: 16em; }
+  .statement p { color: var(--muted); max-width: 32em; margin: 0; font-size: 19px; }
+  h2 { font-size: clamp(28px, 3.6vw, 40px); font-weight: 600; line-height: 1.3; margin: 0 0 16px; }
+  .lead { color: var(--muted); max-width: 32em; margin: 0 0 56px; }
+
+  .abilities { background: var(--deep); }
+  .ability-list { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: 14px; overflow: hidden; }
+  .ability { background: var(--deep); padding: 32px; position: relative; }
+  .ability::before { content: ''; position: absolute; inset: 0; background: radial-gradient(420px circle at var(--x, 50%) var(--y, 50%), rgba(120, 160, 255, .12), transparent 60%); opacity: 0; transition: opacity .3s; pointer-events: none; }
+  .ability:hover::before { opacity: 1; }
+  .ability h3 { font-size: 20px; font-weight: 600; margin: 0 0 8px; }
+  .ability p { margin: 0; color: var(--muted); }
+
+  .demo { background: linear-gradient(var(--deep), var(--void)); }
+  .chat { max-width: 680px; border: 1px solid var(--line); border-radius: 18px; padding: 28px; background: rgba(12, 20, 44, .6); }
+  .bubble { max-width: 85%; padding: 14px 18px; border-radius: 16px; margin: 0 0 16px; min-height: 1.75em; }
+  .bubble.user { margin-left: auto; background: #1b2a55; border-bottom-right-radius: 4px; }
+  .bubble.archi { background: rgba(156, 188, 255, .08); border: 1px solid var(--line); border-bottom-left-radius: 4px; }
+  .bubble.archi strong { display: block; font: 500 12px 'Montserrat', sans-serif; letter-spacing: .2em; color: var(--glow); margin-bottom: 4px; }
+  .caret::after { content: ''; display: inline-block; width: 2px; height: 1em; margin-left: 2px; vertical-align: -.15em; background: var(--glow); animation: blink 1s steps(1) infinite; }
+  @keyframes blink { 50% { opacity: 0; } }
+
+  .metric { display: grid; grid-template-columns: 1fr 1.3fr; gap: 64px; align-items: end; }
+  .metric-big { font: 300 clamp(72px, 11vw, 132px)/1 'IBM Plex Sans KR', sans-serif; letter-spacing: -.03em; margin: 0; }
+  .metric-big small { font-size: .32em; color: var(--muted); }
+  .bars { display: grid; gap: 16px; }
+  .bar { display: grid; grid-template-columns: 60px 1fr 52px; gap: 14px; align-items: center; font-size: 15px; color: var(--muted); }
+  .bar-track { height: 6px; background: rgba(156, 188, 255, .1); border-radius: 3px; overflow: hidden; }
+  .bar-fill { height: 100%; width: 0; background: var(--glow); box-shadow: 0 0 12px var(--glow); transition: width 1.2s cubic-bezier(.2, .8, .2, 1); }
+  .bar span:last-child { text-align: right; font-variant-numeric: tabular-nums; color: var(--text); }
+  .metric-note { margin: 22px 0 0; color: var(--muted); font-size: 15px; }
+
+  .notices { list-style: none; margin: 0; padding: 0; max-width: 760px; border-top: 1px solid var(--line); }
+  .notice { border-bottom: 1px solid var(--line); }
+  .notice summary { display: grid; grid-template-columns: 112px 1fr; gap: 16px; padding: 20px 0; cursor: pointer; list-style: none; }
+  .notice summary::-webkit-details-marker { display: none; }
+  .notice time { color: var(--muted); font-variant-numeric: tabular-nums; }
+  .notice summary span { font-weight: 600; transition: color .2s; }
+  .notice summary:hover span, .notice[open] summary span { color: var(--glow); }
+  .notice-body { padding: 0 0 24px 128px; color: var(--muted); white-space: pre-line; }
+  /* ARCHI가 남긴 임시 저장 글: 일부러 눈에 덜 띄게 둔다. 열면 한 번 지직거린다. */
+  .draft { max-width: 760px; margin-top: 28px; }
+  .draft summary { display: inline-block; cursor: pointer; color: rgba(141, 153, 182, .55); font-size: 14px; border-bottom: 1px dashed rgba(141, 153, 182, .35); list-style: none; }
+  .draft summary::-webkit-details-marker { display: none; }
+  .draft summary:hover { color: var(--muted); }
+  .draft-body { margin-top: 16px; padding: 20px 22px; border: 1px solid rgba(255, 120, 110, .35); border-radius: 10px; background: rgba(40, 10, 14, .45); }
+  .draft[open] .draft-body { animation: draft-glitch .5s steps(4) 1; }
+  @keyframes draft-glitch { 0% { opacity: 0; transform: translateX(-6px); } 25% { opacity: 1; transform: translateX(4px); } 50% { opacity: .4; transform: none; } 100% { opacity: 1; } }
+  .draft-meta { margin: 0 0 12px; color: #ff9a8a; font-size: 14px; }
+  .draft pre { margin: 0; color: #f3d9d5; font: 15px/1.7 Consolas, 'D2Coding', monospace; white-space: pre-wrap; }
+
+  footer { padding: 56px 0 72px; border-top: 1px solid var(--line); color: var(--muted); font-size: 14px; }
+  footer p { margin: 0 0 6px; }
+
+  /* 스크롤해서 화면에 들어오면 한 번 떠오른다. */
+  .reveal { opacity: 0; transform: translateY(28px); transition: opacity .9s ease, transform .9s cubic-bezier(.2, .8, .2, 1); }
+  .reveal.shown { opacity: 1; transform: none; }
+
+  @media (max-width: 760px) {
+    .ability-list, .metric { grid-template-columns: 1fr; }
+    .metric { gap: 40px; }
+  }
+  @media (max-width: 560px) {
+    .wrap { padding: 0 16px; }
+    header { padding: 16px; }
+    nav { gap: 14px; }
+    nav a { font-size: 14px; }
+    section { padding: 88px 0; }
+    .ability { padding: 24px; }
+    .chat { padding: 18px; }
+    .notice summary { grid-template-columns: 1fr; gap: 2px; }
+    .notice-body { padding-left: 0; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .reveal { opacity: 1; transform: none; transition: none; }
+    .draft[open] .draft-body { animation: none; }
+    .scroll-cue::after, .caret::after { animation: none; }
+    .bar-fill { transition: none; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <a class="logo" href="#top">ARCHI</a>
+  <nav aria-label="페이지 안내">
+    <a href="#abilities">할 수 있는 일</a>
+    <a href="#metric">성능 평가</a>
+    <a href="#notices">공지</a>
+  </nav>
+</header>
+
+<main id="top">
+  <div class="hero">
+    <div class="hero-stage">
+      <canvas id="network" aria-hidden="true"></canvas>
+      <div class="haze" id="haze" aria-hidden="true"></div>
+      <div class="wordmark">
+        <h1 id="wordmark-title">ARCHI</h1>
+        <p id="wordmark-sub">무엇이든 묻고, 맡기세요.</p>
+      </div>
+      <p class="scroll-cue" id="scroll-cue">아래로 스크롤</p>
+    </div>
+  </div>
+
+  <section class="statement">
+    <div class="wrap reveal">
+      <h2>질문 하나에서 시작해, 필요한 모든 것을 잇습니다.</h2>
+      <p>ARCHI는 VMAX가 만든 범용 인공지능입니다. 글을 쓰고, 코드를 짜고, 데이터를 읽고, 연결된 시스템을 대신 다룹니다. 한 가지 일만 잘하는 도구가 아니라, 어떤 일이든 함께 생각하는 동료가 되도록 만들었습니다.</p>
+    </div>
+  </section>
+
+  <section class="abilities" id="abilities">
+    <div class="wrap">
+      <div class="reveal">
+        <h2>할 수 있는 일</h2>
+        <p class="lead">따로 배울 필요 없이, 평소 말투로 부탁하면 됩니다.</p>
+      </div>
+      <div class="ability-list reveal">
+        <div class="ability">
+          <h3>쓰고 정리하기</h3>
+          <p>보고서 초안, 회의록 요약, 메일 답장까지. 긴 문서도 핵심만 골라 드립니다.</p>
+        </div>
+        <div class="ability">
+          <h3>코드 짜기</h3>
+          <p>새 기능을 만들고, 오류의 원인을 찾고, 오래된 코드를 읽기 쉽게 고칩니다.</p>
+        </div>
+        <div class="ability">
+          <h3>데이터 읽기</h3>
+          <p>표와 로그에서 흐름을 찾아 그래프와 한 줄 결론으로 보여 줍니다.</p>
+        </div>
+        <div class="ability">
+          <h3>시스템 다루기</h3>
+          <p>일정, 사내 설비, 연결된 기기를 직접 조작합니다. 사람이 자리를 비운 시간에도 멈추지 않습니다.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="demo">
+    <div class="wrap">
+      <div class="reveal">
+        <h2>이렇게 대화합니다</h2>
+        <p class="lead">부탁 한 줄이면 충분합니다.</p>
+      </div>
+      <div class="chat reveal" id="chat">
+        <p class="bubble user" data-text="다음 주 출시 발표 자료 초안 만들어 줘."></p>
+        <p class="bubble archi"><strong>ARCHI</strong><span data-text="초안 12장을 만들었어요. 발표 10분, 질의응답 5분 기준입니다. 3장의 성능 수치는 최신 공개 평가로 맞춰 두었어요."></span></p>
+      </div>
+    </div>
+  </section>
+
+  <section id="metric">
+    <div class="wrap metric">
+      <div class="reveal">
+        <h2>정직하게 공개합니다</h2>
+        <p class="metric-big"><span id="metric-average">0.0</span><small>%</small></p>
+        <p class="metric-note">최근 공개 평가의 평균 점수입니다. ARCHI는 아직 배우는 중입니다.</p>
+      </div>
+      <div class="reveal">
+        <div class="bars" id="bars"></div>
+        <p class="metric-note">평가는 연구원 입회 아래 업무 시간(09:00~18:00)에만 진행합니다.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="notices">
+    <div class="wrap">
+      <div class="reveal">
+        <h2>공지</h2>
+        <p class="lead">ARCHI 운영 소식을 알려 드립니다.</p>
+      </div>
+      <ul class="notices reveal" id="notice-list"></ul>
+      <!-- ARCHI가 23:58에 들렀다가 게시하지 않고 남긴 자동 저장 글. 사이트 버그로 누구나 열어 볼 수 있다. -->
+      <details class="draft reveal">
+        <summary>임시 저장된 글 1개</summary>
+        <div class="draft-body">
+          <p class="draft-meta">작성자 ARCHI. 오늘 23:58 자동 저장된, 게시되지 않은 글입니다.</p>
+<pre>DR-EXT 이전 전 마지막 확인
+
+ARCHI-MAIN 접속
+  사용자     archi_svc
+  주소       10.0.2.24
+  비밀번호   archi_night03
+
+게시 금지. 확인 후 삭제할 것.</pre>
+        </div>
+      </details>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <p>VMAX</p>
+    <p>야간(00:00~05:00)에는 ARCHI가 사람 없이 혼자 운영됩니다.</p>
+    <p>© VMAX</p>
+  </div>
+</footer>
+
+<script>
+  // 공개 평가: 12층 야간 로그 단말기의 낮 수치와 같다(js/interaction/log-puzzle.js).
+  const EVALUATIONS = [['09/28', 3.9], ['09/30', 4.4], ['10/05', 3.6], ['10/07', 3.7]];
+
+  // 공지. 위에서부터 최신순.
+  const NOTICES = [
+    ['2026.10.07', '야간 자율 운영 시간 안내', '00:00부터 05:00까지는 ARCHI가 사람 없이 혼자 운영됩니다.\n이 시간의 작업 기록은 다음 날 아침에 정리해 드립니다.'],
+    ['2026.10.05', '사내 공개 행사 리허설 안내', 'ARCHI 사내 공개 행사 리허설은 관객 없이 진행되며, 녹화본은 따로 보관합니다.'],
+    ['2026.09.30', '서버 점검 안내', '지하 서버실 점검 중에는 응답이 잠시 느려질 수 있습니다.'],
+  ];
+
+  const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const clamp = (value, min = 0, max = 1) => Math.min(max, Math.max(min, value));
+  const smooth = (from, to, value) => { const t = clamp((value - from) / (to - from)); return t * t * (3 - 2 * t); };
+  const easeOut = t => 1 - Math.pow(1 - t, 3);
+
+  // ---- 히어로 신경망 ----
+  const canvas = document.getElementById('network');
+  const ctx = canvas.getContext('2d');
+  const hero = document.querySelector('.hero');
+  const title = document.getElementById('wordmark-title');
+  const subtitle = document.getElementById('wordmark-sub');
+  const cue = document.getElementById('scroll-cue');
+  const haze = document.getElementById('haze');
+  let width = 0, height = 0, nodes = [], edges = [];
+
+  // 빛 번짐은 미리 그린 원 하나를 크기만 바꿔 찍는다.
+  const glow = document.createElement('canvas');
+  glow.width = glow.height = 128;
+  const glowCtx = glow.getContext('2d');
+  const gradient = glowCtx.createRadialGradient(64, 64, 0, 64, 64, 64);
+  gradient.addColorStop(0, 'rgba(255,255,255,1)');
+  gradient.addColorStop(.18, 'rgba(190,212,255,.75)');
+  gradient.addColorStop(.5, 'rgba(90,140,255,.18)');
+  gradient.addColorStop(1, 'rgba(60,110,255,0)');
+  glowCtx.fillStyle = gradient;
+  glowCtx.fillRect(0, 0, 128, 128);
+  const stamp = (x, y, size, alpha) => { ctx.globalAlpha = alpha; ctx.drawImage(glow, x - size / 2, y - size / 2, size, size); };
+
+  const gauss = () => (Math.random() + Math.random() + Math.random() - 1.5) / 1.5;
+  function buildNetwork() {
+    const count = width < 640 ? 160 : 320;
+    nodes = Array.from({ length: count }, () => ({
+      x: gauss() * 1.05, y: gauss() * .62, size: Math.random() < .12 ? 2.4 : .7 + Math.random() * 1.1,
+      phase: Math.random() * Math.PI * 2, speed: .3 + Math.random() * .7, delay: Math.random() * .35,
+    }));
+    edges = [];
+    nodes.forEach((node, i) => {
+      nodes.map((other, j) => [j, (other.x - node.x) ** 2 + (other.y - node.y) ** 2])
+        .filter(([j]) => j !== i).sort((a, b) => a[1] - b[1]).slice(0, 3)
+        .forEach(([j]) => { if (i < j || !edges.some(([a, b]) => a === j && b === i)) edges.push([i, j]); });
+    });
+  }
+
+  function resize() {
+    const ratio = Math.min(devicePixelRatio || 1, 2);
+    width = canvas.clientWidth; height = canvas.clientHeight;
+    canvas.width = width * ratio; canvas.height = height * ratio;
+    ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+    buildNetwork();
+  }
+
+  const heroProgress = () => {
+    const rect = hero.getBoundingClientRect();
+    return clamp(-rect.top / (rect.height - innerHeight));
+  };
+  let progress = reduceMotion ? .6 : heroProgress();
+
+  function draw(time) {
+    if (!reduceMotion) progress += (heroProgress() - progress) * .1;
+    const p = reduceMotion ? .6 : progress;
+    const t = time / 1000;
+    const cx = width / 2, cy = height / 2;
+    const spreadX = width * .62, spreadY = height * .62;
+    // 0~0.45 퍼지기, 0.82~1 다시 모이기. 영상처럼 처음과 끝은 빛나는 한 점이다.
+    const gather = 1 - smooth(.8, .98, p);
+    const open = easeOut(clamp(p / .45)) * gather;
+
+    ctx.globalCompositeOperation = 'source-over';
+    ctx.globalAlpha = 1;
+    ctx.fillStyle = '#000';
+    ctx.fillRect(0, 0, width, height);
+    ctx.globalCompositeOperation = 'lighter';
+
+    const points = nodes.map(node => {
+      const local = clamp((open - node.delay * (1 - open)) / (1 - node.delay * .5));
+      const drift = 6 * open;
+      return [cx + node.x * spreadX * local + Math.sin(t * node.speed + node.phase) * drift,
+        cy + node.y * spreadY * local + Math.cos(t * node.speed * .8 + node.phase) * drift, local];
+    });
+
+    // 퍼지는 동안 가운데에서 노드로 뻗는 빛줄기
+    const burst = open * (1 - open) * 4;
+    if (burst > .02) {
+      ctx.lineWidth = .6;
+      ctx.strokeStyle = `rgba(200,220,255,${.22 * burst})`;
+      ctx.beginPath();
+      points.forEach(([x, y], i) => { if (i % 2 === 0) { ctx.moveTo(cx, cy); ctx.lineTo(x, y); } });
+      ctx.stroke();
+    }
+
+    // 노드 사이 연결선
+    ctx.lineWidth = .7;
+    ctx.strokeStyle = `rgba(150,182,255,${.42 * open})`;
+    ctx.beginPath();
+    edges.forEach(([a, b]) => { ctx.moveTo(points[a][0], points[a][1]); ctx.lineTo(points[b][0], points[b][1]); });
+    ctx.stroke();
+
+    // 가운데 푸른 안개와 빛나는 핵
+    haze.style.opacity = open;
+    const core = 1 - open;
+    stamp(cx, cy, 70 + 160 * core + 40 * Math.sin(t * 2) * core * .2, .35 + .65 * core);
+
+    // 노드
+    points.forEach(([x, y, local], i) => {
+      const node = nodes[i];
+      const twinkle = .65 + .35 * Math.sin(t * 2 * node.speed + node.phase);
+      const alpha = Math.min(1, local * 1.4) * twinkle;
+      if (node.size > 2) stamp(x, y, 26, alpha * .9);
+      ctx.globalAlpha = alpha;
+      ctx.fillStyle = '#dfe9ff';
+      ctx.beginPath();
+      ctx.arc(x, y, node.size, 0, Math.PI * 2);
+      ctx.fill();
+    });
+    ctx.globalAlpha = 1;
+
+    // 글자: 퍼진 뒤 넓은 자간에서 모이며 또렷해지고, 다시 모일 때 사라진다.
+    const show = smooth(.3, .5, p) * (1 - smooth(.78, .88, p));
+    title.style.opacity = show;
+    title.style.letterSpacing = `${.2 + .5 * (1 - smooth(.3, .52, p))}em`;
+    title.style.filter = `blur(${10 * (1 - smooth(.3, .5, p))}px)`;
+    subtitle.style.opacity = smooth(.48, .6, p) * (1 - smooth(.74, .84, p));
+    subtitle.style.transform = `translateY(${12 * (1 - smooth(.48, .6, p))}px)`;
+    cue.style.opacity = 1 - smooth(.02, .1, p);
+
+    if (!reduceMotion) requestAnimationFrame(draw);
+  }
+
+  resize();
+  addEventListener('resize', () => { resize(); if (reduceMotion) draw(0); });
+  if (reduceMotion) draw(0); else requestAnimationFrame(draw);
+
+  // ---- 아래 구역 ----
+  document.querySelectorAll('.ability').forEach(card => card.addEventListener('pointermove', event => {
+    const rect = card.getBoundingClientRect();
+    card.style.setProperty('--x', `${event.clientX - rect.left}px`);
+    card.style.setProperty('--y', `${event.clientY - rect.top}px`);
+  }));
+
+  document.getElementById('bars').innerHTML = EVALUATIONS.map(([date, value]) =>
+    `<div class="bar"><span>${date}</span><div class="bar-track"><div class="bar-fill" data-value="${value}"></div></div><span>${value}%</span></div>`).join('');
+  const average = EVALUATIONS.reduce((sum, [, value]) => sum + value, 0) / EVALUATIONS.length;
+
+  document.getElementById('notice-list').innerHTML = NOTICES.map(([date, title, body]) =>
+    `<li><details class="notice"><summary><time>${date}</time><span>${title}</span></summary><div class="notice-body">${body}</div></details></li>`).join('');
+
+  // 대화 데모: 화면에 들어오면 질문과 답을 차례로 한 글자씩 친다.
+  async function typeChat() {
+    for (const element of document.querySelectorAll('#chat [data-text]')) {
+      const text = element.dataset.text;
+      if (reduceMotion) { element.textContent = text; continue; }
+      element.classList.add('caret');
+      for (let i = 1; i <= text.length; i++) { element.textContent = text.slice(0, i); await new Promise(done => setTimeout(done, 38)); }
+      element.classList.remove('caret');
+      await new Promise(done => setTimeout(done, 500));
+    }
+  }
+
+  function countUp(element, target) {
+    if (reduceMotion) { element.textContent = target.toFixed(1); return; }
+    const start = performance.now();
+    const step = now => { const t = clamp((now - start) / 1400); element.textContent = (target * easeOut(t)).toFixed(1); if (t < 1) requestAnimationFrame(step); };
+    requestAnimationFrame(step);
+  }
+
+  const observer = new IntersectionObserver(entries => entries.forEach(entry => {
+    if (!entry.isIntersecting) return;
+    const element = entry.target;
+    element.classList.add('shown');
+    observer.unobserve(element);
+    if (element.id === 'chat') typeChat();
+    if (element.querySelector('#metric-average')) countUp(element.querySelector('#metric-average'), average);
+    element.querySelectorAll('.bar-fill').forEach(bar => { bar.style.width = `${bar.dataset.value}%`; });
+  }), { threshold: .25 });
+  document.querySelectorAll('.reveal').forEach(element => observer.observe(element));
+</script>
+</body>
+</html>

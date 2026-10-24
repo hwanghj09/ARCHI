@@ -36,9 +36,11 @@ try {
   await page.clock.runFor(2100); assert.equal((await state()).battery, 24);
   await page.keyboard.press('e'); assert.equal((await state()).dock, null);
   await page.evaluate(() => { triggerBuildingBlackout(); world.dataset.lights = 'on'; });
-  assert(await page.evaluate(() => [...ALL_FLOORS, ROOFTOP].every(config => !(config.fixtures || []).some(item => item.phoneCharger))), 'Corridors and the rooftop have no charging stations');
+  // 예외는 1층 로비 안내 데스크 하나: 승강기가 1층만 눌리는 퇴근 구간에 휴대폰이 꺼져도 충전할 수 있게 둔다(floor-01.js).
+  assert(await page.evaluate(() => [...ALL_FLOORS, ROOFTOP].every(config => !(config.fixtures || []).some(item => item.phoneCharger && config.floor !== 1))), 'Corridors and the rooftop have no charging stations except the 1F lobby desk');
+  // 방 안 충전기만 돈다(1층 로비 데스크 예외는 위에서 따로 확인).
   const chargingRooms = await page.evaluate(() => [{ id: 'office', floor: 17 }, ...[...floorById.values()]
-    .filter(config => config.fixtures?.some(item => item.phoneCharger)).map(config => ({ id: config.id, floor: config.floor }))]);
+    .filter(config => config.interior && config.fixtures?.some(item => item.phoneCharger)).map(config => ({ id: config.id, floor: config.floor }))]);
   assert(chargingRooms.some(config => config.id === 'f16-cafe'), 'The cafe has a charging outlet');
   for (const { id, floor } of chargingRooms) {
     await page.evaluate(id => {

@@ -1,4 +1,4 @@
-// 17층 사무실(고정 장면): 배경, 조명 스위치, 사무실 출입문, 켜진 컴퓨터.
+// 17층 사무실(고정 장면): 배경, 조명 스위치, 사무실 출입문, 내 자리 컴퓨터(오프닝 연출용 장식. 조사는 안 된다, interaction.js).
 // 테두리(outline)는 모니터 상자(#office-computer)에서 3px 띄운다.
 const officeComputer = { type: 'computer', name: '컴퓨터', x: 612, y: 392, width: 88, element: document.getElementById('office-computer'),
   outline: [609, 389, 94, 70] };

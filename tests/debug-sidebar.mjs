@@ -63,15 +63,16 @@ try {
   await finishSceneTransition(page);
   assert.equal(await page.evaluate(() => room), 'office');
   assert.deepEqual(await page.evaluate(() => PUZZLE_STEPS.filter(step => step.at !== 'office' && !floorById.has(step.at))), []);
-  await page.locator('#debug-puzzle-select').selectOption({ label: '7F 백업 장비 · 오늘 기록' });
+  await page.locator('#debug-puzzle-select').selectOption({ label: '1F 안내 데스크 PC 터미널 · ARCHI-MAIN 외부 연결 로그' });
   await page.locator('#debug-puzzle button').click();
   await finishSceneTransition(page);
   assert.deepEqual(await page.evaluate(() => [currentSceneFloor, realBuildingBlackout(), solarEnabled,
-    collectedItems.has('f7-training-time-solved'), collectedItems.has('f7-external-connection-solved')]), [7, true, true, true, false]);
+    collectedItems.has('f7-training-time-solved'), collectedItems.has('f7-external-connection-solved')]), [1, true, true, true, false]);
   await page.locator('#debug-puzzle-select').selectOption({ index: 0 });
   await page.locator('#debug-puzzle button').click();
   await finishSceneTransition(page);
-  assert.deepEqual(await page.evaluate(() => [room, realBuildingBlackout(), solarEnabled, [...collectedItems]]), ['office', false, false, ['f17-badge']]);
+  // 바로 앞 단계가 1층(안내 데스크 PC)이라 옮기기 전 목표 갱신이 f1-reached를 남길 수 있다(objective.js). 그 하나는 빼고 본다.
+  assert.deepEqual(await page.evaluate(() => [room, realBuildingBlackout(), solarEnabled, [...collectedItems].filter(item => item !== 'f1-reached')]), ['office', false, false, ['f17-badge']]);
   await page.evaluate(() => triggerBuildingBlackout());
   await page.locator('#debug-floor-select').selectOption('f2');
   await page.locator('#debug-floor button').click();

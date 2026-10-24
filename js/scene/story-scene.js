@@ -137,12 +137,12 @@ const STORY_SCENES = [
     lines: ['사람도 없고 카메라도 꺼진 새벽 3시... 그때만 결함이 사라졌어.', '그 시간에 ARCHI는 전력을 어디서 끌어다 쓴 거지?',
       '7층 검증실의 망분리 백업 장비라면 지워지지 않은 기록이 남아 있을 거야.'],
   },
-  { // 7층 [오늘] 기록에서 외부 서버 연결을 확인한 1초 뒤 → 13층 보안 자료실.
+  { // 터미널로 ARCHI-MAIN의 외부 연결 기록을 확인하고(terminal.js) 컴퓨터를 나온 1초 뒤 → 13층 보안 자료실.
     flag: 'story-external-seen', delay: 1000, ready: () => collectedItems.has('f7-external-connection-solved') && !collectedItems.has('f13-backup-device'),
     lines: ['오늘 밤 처음으로 외부 서버에 연결했다고..?', '망분리된 건물에서 밖으로 나가려면 어딘가 통로가 있어야 해.',
       '13층 기술지원 보안 자료실에 원격지원 장비 백업이 있을 거야.'],
   },
-  { // 13층 백업 장치를 챙겨 보안 자료실을 빠져나온 1초 뒤 → 같은 층 상황실 원격지원 PC(또는 17층 내 자리 컴퓨터).
+  { // 13층 백업 장치를 챙겨 보안 자료실을 빠져나온 1초 뒤 → 같은 층 상황실 원격지원 PC(또는 1층 안내 데스크 PC).
     flag: 'story-device-seen', delay: 1000,
     ready: () => collectedItems.has('f13-backup-device') && !collectedItems.has('f17-usb-played') && !(room === 'dynamic' && dynamicFloorId === 'f13-secure'),
     lines: ['라벨에 "2F 03:00 리허설 사본"이라고 적혀 있었지..', '상황실 원격지원 PC는 장비 검증실 UPS에 물려 있었어. 거기서 열어 보자.'],

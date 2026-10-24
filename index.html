@@ -6,6 +6,7 @@
     <title>ARCHI</title>
     <link rel="stylesheet" href="css/elevator.css" />
     <link rel="stylesheet" href="css/computer.css" />
+    <link rel="stylesheet" href="css/usb-connection.css" />
     <link rel="stylesheet" href="css/writing.css" />
     <link rel="stylesheet" href="css/inventory.css" />
     <link rel="stylesheet" href="css/drawer-puzzle.css" />
@@ -103,9 +104,11 @@
     <script src="js/ui/objective.js" defer></script>
     <script src="js/ui/device-apps.js" defer></script>
     <script src="js/computer/documents.js" defer></script>
+    <script src="js/computer/usb-connection.js" defer></script>
     <script src="js/computer/computer.js" defer></script>
     <script src="js/computer/desktop.js" defer></script>
     <script src="js/computer/usb-video.js" defer></script>
+    <script src="js/computer/terminal.js" defer></script>
     <script src="js/elevator/cabin.js" defer></script>
     <script src="js/elevator/cabin-pry.js" defer></script>
     <script src="js/scene/b2-ending.js" defer></script>
@@ -413,21 +416,26 @@
         <div id="log-screen">
           <h2 id="log-title">평가실 PC · 야간 자동 평가 로그</h2>
           <p id="log-network" data-connected="true"></p>
-          <div id="log-rows"></div>
-          <p id="log-access" hidden></p>
           <pre id="log-alert" role="alert" hidden></pre>
           <p id="log-status" role="status" aria-live="polite"></p>
           <div id="log-recovery" role="group" aria-label="로그 복구" hidden>
             <button id="log-remaining" type="button">[남은 로그 확인]</button>
             <button id="log-restore" type="button">[종이 기록 대조 및 복원]</button>
           </div>
-          <div id="log-quiz" hidden>
-            <p id="log-quiz-question"></p>
-            <div id="log-quiz-options" role="group" aria-label="10/07 밤 성능 저하 원인"></div>
-          </div>
-          <div id="log-monologue" aria-live="polite" hidden></div>
+          <ol id="log-term" aria-live="polite" aria-label="터미널 출력"></ol>
+          <form id="log-term-form"><label id="log-term-prompt" for="log-term-input">eval@eval-pc:~$</label><input id="log-term-input" type="text" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="send" lang="en" /></form>          <div id="log-monologue" aria-live="polite" hidden></div>
           <p id="log-hint-record" hidden>03:41 · B2 전력 할당 기록 — 야간 학습 관련 로그 보존</p>
         </div>
+        <aside id="log-memo" aria-label="모니터에 붙은 메모">
+          <p class="log-memo-title">신입용 리눅스 메모</p>
+          <dl>
+            <dt>ls /</dt><dd>맨 위 폴더 보기</dd>
+            <dt>find 단어</dt><dd>이름에 단어가 든 파일 찾기</dd>
+            <dt>grep 단어</dt><dd>내용에 단어가 든 줄 찾기</dd>
+            <dt>cat 파일</dt><dd>파일 읽기</dd>
+          </dl>
+          <p class="log-memo-foot">화면에 나온 이름은 클릭하면 열린다!</p>
+        </aside>
         <button id="log-close" type="button">나가기 · Esc</button>
       </div>
     </section>
@@ -439,7 +447,6 @@
         <p id="backup-hint" hidden>12층 B2 전력 할당 기록 · 03:00~04:00 · B2</p>
         <p id="backup-question"></p>
         <div id="backup-options" role="group" aria-label="보기"></div>
-        <p id="backup-source" hidden>SOURCE: B2 ARCHI-MAIN</p>
         <div id="backup-monologue" aria-live="polite" hidden></div>
         <p id="backup-status" role="status" aria-live="polite"></p>
         <button id="backup-close" type="button">나가기 · Esc</button>
@@ -571,6 +578,8 @@
         <button type="button" data-computer-app="calculator"><span class="app-art" data-app-icon="calculator" aria-hidden="true"></span><span>계산기</span></button>
         <button type="button" data-computer-app="building"><span class="app-art" data-app-icon="building" aria-hidden="true"></span><span>시설 안내</span></button>
         <button type="button" data-computer-app="browser"><span class="app-art" data-app-icon="blog" aria-hidden="true"></span><span>블로그</span></button>
+        <button type="button" data-computer-app="transfer"><span class="app-art" data-app-icon="transfer" aria-hidden="true"></span><span>파일 전송</span></button>
+        <button type="button" data-computer-app="terminal"><span class="app-art" data-app-icon="terminal" aria-hidden="true"></span><span>터미널</span></button>
       </div>
       <div id="computer-window" hidden>
         <template id="computer-window-frame">
@@ -603,6 +612,11 @@
             <output id="computer-save-status" role="status" aria-live="polite">저장됨</output>
           </div>
           <textarea id="computer-note" aria-label="업무 메모 내용" spellcheck="false"></textarea>
+        </div>
+        <!-- SSH 터미널(terminal.js): 홈페이지에 남은 계정으로 B2 ARCHI-MAIN에 접속한다. -->
+        <div id="computer-terminal" class="computer-content" hidden>
+          <pre id="terminal-output" aria-live="polite"></pre>
+          <form id="terminal-form" autocomplete="off"><label id="terminal-prompt" for="terminal-input"></label><input id="terminal-input" type="text" spellcheck="false" autocapitalize="off" aria-label="터미널 명령" /></form>
         </div>
         <!-- 13층 USB를 연결하면 2층 03:00 리허설 녹화 사본이 재생된다. -->
         <div id="computer-usbdrive" class="computer-content" hidden>
@@ -682,15 +696,16 @@
                 <div class="blog-avatar" aria-hidden="true">A</div>
                 <strong>ARCHI 시설관리팀</strong><p>안녕하세요.<br>시설 점검과 비상 전력<br>사용법을 공유합니다.</p>
                 <span>archi_facility<br>시설관리 · 17F</span>
-                <div class="blog-categories"><strong>카테고리</strong><p>전체보기 (4)<br>시설 점검 (2)<br>사용 안내 (1)<br>일상 기록 (1)</p></div>
+                <div class="blog-categories"><strong>카테고리</strong><p>전체보기 (5)<br>시설 점검 (2)<br>사용 안내 (2)<br>일상 기록 (1)</p></div>
                 <p class="blog-visitors">TODAY 12 · TOTAL 1,248</p>
               </aside>
               <div class="blog-main">
                 <section class="blog-post-list" aria-labelledby="computer-blog-list-title">
-                  <h2 id="computer-blog-list-title" tabindex="-1">전체보기 <span>4개의 글</span></h2>
+                  <h2 id="computer-blog-list-title" tabindex="-1">전체보기 <span>5개의 글</span></h2>
                   <div class="blog-list-columns"><span>글 제목</span><span>작성일</span></div>
                   <button type="button" data-blog-post="night" aria-current="true"><span>야간 점검을 마치고, 오늘의 기록</span><time datetime="2026-10-09">2026. 10. 9.</time></button>
                   <button type="button" data-blog-post="charging"><span>휴대폰 충전함 이용 안내</span><time datetime="2026-10-08">2026. 10. 8.</time></button>
+                  <button type="button" data-blog-post="solar"><span>정전 대비 전력 조종 앱 공유 <small>첨부파일 1</small></span><time datetime="2026-10-07">2026. 10. 7.</time></button>
                   <button type="button" data-blog-post="stairs"><span>비상계단 문 점검 기록</span><time datetime="2026-10-06">2026. 10. 6.</time></button>
                   <button type="button" data-blog-post="rooftop"><span>옥상 태양광 장치 점검 메모</span><time datetime="2026-10-05">2026. 10. 5.</time></button>
                   <p class="blog-list-page">1</p>
@@ -701,6 +716,7 @@
                   <p class="blog-post-meta">ARCHI 시설관리팀 · 2026. 10. 9. 18:30</p>
                   <p>낮에는 바쁘게 오가는 사람들로 가득한 건물인데, 퇴근 시간이 지나면 복도가 조용해집니다. 오늘도 사무실 조명과 공용 설비를 확인하고 점검을 마쳤습니다.</p>
                   <p>작업용 컴퓨터의 전원과 와이파이는 정상입니다. 필요한 사용 안내는 이 블로그에 정리해 두었으니, 글 목록에서 찾아보세요.</p>
+                  <p>정전에 대비한 전력 조종 앱도 앞선 글에 올려 두었습니다. 시간이 있을 때 미리 받아 두면 좋겠습니다.</p>
                   <p class="blog-post-footer">#시설관리 #야간점검 #일상기록</p>
                 </article>
                 <article class="blog-post" data-blog-article="charging" aria-labelledby="blog-charging-title" hidden>
@@ -708,8 +724,25 @@
                   <h2 id="blog-charging-title" tabindex="-1">휴대폰 충전함 이용 안내</h2>
                   <p class="blog-post-meta">ARCHI 시설관리팀 · 2026. 10. 8. 09:20</p>
                   <p>배터리가 부족하면 전력이 공급되는 충전함에 휴대폰을 맡겨 주세요. 충전함에 맡겨 둔 동안에는 휴대폰 앱과 플래시를 사용할 수 없습니다.</p>
+                  <p>컴퓨터에서 파일을 전송하려면 휴대폰을 먼저 찾아와야 합니다. 충전이 끝난 뒤 휴대폰을 가져오는 것도 잊지 마세요.</p>
                   <p class="blog-post-footer">#충전함 #휴대폰 #사용안내</p>
                 </article>
+              <article id="blog-post-solar" class="blog-post" data-blog-article="solar" aria-labelledby="solar-blog-title" hidden>
+                <p class="blog-category">비상 전력 / 사용 안내</p>
+                <h2 id="solar-blog-title" tabindex="-1">정전 때 쓰는 태양광 제어 앱<br>다운로드 및 설치 방법</h2>
+                <p class="blog-post-meta">ARCHI 시설관리팀 · 2026. 10. 7. 14:10 · 첨부파일 1개</p>
+                <p>휴대폰에서 옥상 비상 전력을 제어하는 앱입니다. 한 번에 한 층에 전력을 공급할 수 있습니다.</p>
+                <p>휴대폰 배터리가 필요합니다. 로비 안내 데스크 PC는 사내망 UPS로 정전 중에도 켜져 있습니다.</p>
+                <ol><li>첨부파일 다운로드</li><li>‘파일 전송’에서 휴대폰 연결 후 설치</li><li>휴대폰의 ‘비상 전력 제어’ 실행</li></ol>
+                <div class="blog-attachment">
+                  <span class="blog-file-icon" aria-hidden="true">↓</span>
+                  <div><strong>ARCHI_태양광_제어앱.apk</strong><span>휴대폰용 · 비상 전력 제어</span></div>
+                  <button id="computer-solar-download" type="button">첨부파일 다운로드</button>
+                </div>
+                <progress id="computer-solar-download-progress" class="solar-file-progress" max="100" value="0" aria-label="앱 다운로드 진행률" hidden></progress>
+                <output id="computer-solar-status" class="blog-install-status" role="status" aria-live="polite"></output>
+                <p class="blog-post-footer">#태양광 #비상전력 #ARCHI #시설관리</p>
+              </article>
                 <article class="blog-post" data-blog-article="stairs" aria-labelledby="blog-stairs-title" hidden>
                   <p class="blog-category">시설 점검</p>
                   <h2 id="blog-stairs-title" tabindex="-1">비상계단 문 점검 기록</h2>
@@ -729,6 +762,15 @@
                 <button id="computer-blog-list-back" type="button">목록으로</button>
               </div>
             </div>
+          </div>
+        </div>
+        <div id="computer-transfer" class="computer-content" hidden>
+          <div class="solar-download-page">
+            <button id="computer-usb-open" type="button">휴대폰 연결</button>
+            <p id="computer-transfer-file" hidden><strong>ARCHI_태양광_제어앱.apk</strong><br>내 컴퓨터 → 정수호의 휴대폰</p>
+            <button id="computer-solar-transfer" type="button" disabled>휴대폰으로 전송·설치</button>
+            <progress id="computer-solar-transfer-progress" class="solar-file-progress" max="100" value="0" aria-label="휴대폰 전송·설치 진행률" hidden></progress>
+            <output id="computer-transfer-status" role="status" aria-live="polite"></output>
           </div>
         </div>
       </div>
@@ -752,6 +794,22 @@
         <div class="computer-tray"><span class="computer-network" title="사내 네트워크">◉</span><time id="computer-clock"></time><button id="computer-exit" type="button" aria-label="컴퓨터 사용 종료" title="컴퓨터 사용 종료"><img src="assets/vendor/lucide/log-out.svg" alt="" /></button></div>
         <button id="computer-show-desktop" type="button" aria-label="바탕 화면 보기" title="바탕 화면 보기"></button>
       </div>
+    </div>
+    <div id="computer-usb-panel" role="dialog" aria-modal="true" aria-labelledby="computer-usb-title" hidden>
+      <section class="usb-desk">
+        <h2 id="computer-usb-title">휴대폰 USB 연결</h2>
+        <p id="computer-usb-instructions">휴대폰이나 단자를 끌어 연결하세요.</p>
+        <div id="computer-usb-board" data-connected="false" aria-label="데스크 위 휴대폰과 USB-C 단자">
+          <div id="computer-usb-cable" aria-hidden="true"></div>
+          <div class="usb-phone">
+            <button id="computer-usb-phone" type="button" aria-label="정수호의 휴대폰 · 끌어서 이동" aria-describedby="computer-usb-instructions"><img id="computer-usb-phone-art" src="assets/ui/usb-connection/phone.png" alt="" draggable="false" /></button>
+            <button id="computer-usb-port" type="button" aria-label="휴대폰 USB-C 포트" aria-describedby="computer-usb-instructions"></button>
+          </div>
+          <button id="computer-usb-plug" type="button" aria-label="USB-C 케이블 단자 · 끌어서 이동" aria-pressed="false" aria-describedby="computer-usb-instructions"><img id="computer-usb-plug-art" src="assets/ui/usb-connection/plug.png" alt="" draggable="false" /></button>
+        </div>
+        <output id="computer-usb-status" role="status" aria-live="polite"></output>
+        <button id="computer-usb-close" type="button">돌아가기</button>
+      </section>
     </div>
     <div id="elevator-cabin" role="dialog" aria-modal="true" aria-label="엘리베이터 내부" tabindex="-1" hidden>
       <div id="cabin-scene" data-door="closed">

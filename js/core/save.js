@@ -87,6 +87,7 @@ function restoreProgress(data) {
     cancelPhoneLightDelay();
     hideDevouredVideo();
     cancelPhotoCapture();
+    closeComputerUsbConnection();
     resetComputerDesktop();
     releaseInput();
     // 재개할 때 조사·휴대폰 등의 창은 닫는다. 퍼즐 진행과 실제 게임 상태는 복원한다.

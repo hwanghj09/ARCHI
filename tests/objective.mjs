@@ -72,8 +72,7 @@ try {
   await waitTyped('17층 전등 켜기', '전력은 돌아왔지만 17층은 아직 어둡다.');
   assert.equal(await titleAfter(() => supplySolarFloor(17)), '관리실 비밀번호 찾기');
   assert.equal(await titleAfter(() => collectedItems.add('f17-manager-memo')), '관리실 열기');
-  assert.equal(await titleAfter(() => collectedItems.add('f17-manager-unlocked')), '회로 안내도 확인');
-  assert.equal(await titleAfter(() => collectedItems.add('f17-circuit-guide-read')), '승강기 비상 회선 연결');
+  assert.equal(await titleAfter(() => collectedItems.add('f17-manager-unlocked')), '승강기 비상 회선 연결');
   assert.equal(await titleAfter(() => { collectedItems.add('f17-emergency-linked'); updatePowerState(); }), '퇴근하기');
   await waitTyped('퇴근하기', '승강기가 다시 움직인다. 아래로 내려가자.');
 
@@ -97,11 +96,12 @@ try {
   await page.keyboard.press('Escape');
   await waitTyped('퇴근하기', '정문에 전기가 없다. 안내 데스크에 로비 전원을 켤 방법이 있을지도.');
 
-  // 안내 데스크 QR로 전력 앱이 설치된다.
+  // 안내 데스크 PC를 켜서 블로그 앱을 받고 USB로 설치한다(다운로드·전송 화면은 solar-app.mjs·usb-connection.mjs가 다룬다).
   await inspectNamed('안내 데스크');
-  assert.equal(await page.locator('#inspection-title').textContent(), '안내 데스크');
-  assert.equal(await page.evaluate(() => collectedItems.has('solar-app-installed')), true, 'The lobby desk installs the power app');
-  await page.keyboard.press('Escape');
+  await page.clock.runFor(1200);
+  assert.equal(await page.evaluate(() => usingComputer && !computer.hidden), true, 'The lobby desk opens the computer');
+  await page.evaluate(() => { ['solar-app-downloaded', 'solar-app-installed'].forEach(item => collectedItems.add(item)); refreshSolarDownload(); exitComputer(); });
+  await page.clock.runFor(1200);
   await waitTyped('퇴근하기', '휴대폰 전력 앱으로 1층에 전력을 보내자.');
 
   // 1층에 전력을 넣으면 1초 뒤 컷씬: 정문 화면에 내 이름이 뜨고, 깨어난 경비 로봇에게 쫓겨 1번 엘리베이터 앞까지 달아나고, 혼잣말을 한다.
@@ -173,7 +173,7 @@ try {
   assert.equal(await titleAfter(() => collectedItems.add('f12-evaluation-solved')), '데이터 수집');
   assert.equal(await titleAfter(() => collectedItems.add('goal-f5-note')), '기록 재현');
   assert.equal(await titleAfter(() => collectedItems.add('f8-repro-record')), '로그 분석');
-  assert.equal(await titleAfter(() => collectedItems.add('f7-training-time-solved')), '오늘만 다른 기록');
+  assert.equal(await titleAfter(() => collectedItems.add('f7-training-time-solved')), 'ARCHI의 흔적');
   assert.equal(await titleAfter(() => collectedItems.add('f7-external-connection-solved')), '외부 연결 통로 찾기');
   assert.equal(await titleAfter(() => collectedItems.add('f13-backup-device')), '장치 확인하기');
   assert.match(await page.evaluate(() => currentObjective.text), /17층 내 자리 컴퓨터의 외부 저장 장치/);
