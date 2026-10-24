@@ -18,7 +18,7 @@ try {
   await page.clock.pauseAt(new Date('2026-10-20T00:01:00Z'));
 
   // A. 어두운 17층 복도에서 플래시를 끄고 잰다.
-  await page.evaluate(() => { triggerBuildingBlackout(); performFloorChange('f17'); phoneLightOn = false; refreshPhone(); });
+  await page.evaluate(() => { triggerBuildingBlackout(); solarEnabled = true; performFloorChange('f17'); phoneLightOn = false; refreshPhone(); });
   const sample = async ms => {
     const before = await page.evaluate(() => sanity);
     await page.clock.runFor(ms);
