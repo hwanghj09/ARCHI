@@ -1063,9 +1063,15 @@ try {
     await checkCutawayArt('floor08-qa-interior.png', 3044);
     assert.equal(await page.locator('#dynamic-scene .fixture.art-spot').count(), 5);
     await inspect(455, 'E · 결함 현황판 조사', /47장.*새벽 3시.*SYSTEM.*회의실 화이트보드/);
+    // A skipped step leaves a failure log on the bench screen naming the condition still unmet, never the order itself,
+    // and the first failure makes Suho wonder aloud once.
     await inspect(292, 'E · 관찰 카메라 조사');
+    assert(await page.evaluate(() => collectedItems.has('f8-repro-steps-failed')), 'The first failure gets a line');
+    await page.screenshot({ path: '.local/floor-8-fail-log.png' });
     await inspect(100, 'E · 재현 벤치 조사');
     assert.equal(await done(), 0, 'No step counts out of order');
+    assert.equal(await page.locator('#dynamic-scene .sequence-log').textContent(),
+      '재현 실패 · 시험 단말 시각 00:14 상태에서 측정 시작 · ARCHI 성능 3.8%');
     await leaveRoom(qaRoom, corridorHeader);
 
     const meetingRoom = await enterThroughSpriteDoor('공용 제품 회의실', '8F');
@@ -1087,7 +1093,9 @@ try {
     assert.equal(await done(), 1);
     await inspect(100, 'E · 재현 벤치 조사');
     assert.equal(await done(), 0, 'Skipping to the bench starts over');
+    assert.match(await page.locator('#dynamic-scene .sequence-log').textContent(), /재실 센서 "3명" 상태에서 측정 시작 · ARCHI 성능 4\.1%/);
     await inspect(384, 'E · 시험 단말 조사');
+    assert.equal(await page.locator('#dynamic-scene .sequence-log').count(), 0, 'A correct step clears the failure log');
     await inspect(499, 'E · 재실 센서 제어함 조사');
     await inspect(292, 'E · 관찰 카메라 조사');
     assert.equal(await done(), 3);
@@ -1782,10 +1790,16 @@ try {
     near(await playerX(), 1858, 'Arrive at elevator 1');
 
     // Spotted: the door locks, stays locked while the camera can see the player, and lifts 5 s after leaving its view.
+    // The stretch being watched is also marked on the floor with a faint red band.
+    const floorBands = page.locator('#dynamic-scene .cctv-floor');
+    assert.equal(await floorBands.count(), 2, 'Each watched stretch has a floor band');
     await nextSpan(0);
+    assert.deepEqual(await floorBands.evaluateAll(els => els.map(el => el.dataset.active)), ['true', 'false']);
     await walkTo(1500);
     assert.equal(await camera.getAttribute('data-alert'), 'true', 'The camera sees the player on the elevator side');
     assert.equal(await mainDoor(), 'ARCHI 메인 서버실 출입문 · 잠김');
+    assert(await page.evaluate(() => collectedItems.has('b2-main-camera-spotted')), 'The first lock gets a line');
+    await page.screenshot({ path: '.local/floor-b2-camera.png' });
     await walkTo(980);
     assert.equal(await hint(), 'E · ARCHI 메인 서버실 (잠김)');
     await page.keyboard.press('e');
