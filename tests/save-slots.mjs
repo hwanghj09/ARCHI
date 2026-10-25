@@ -20,6 +20,8 @@ try {
   const step = async (change, title) => {
     await page.waitForTimeout(20);
     await page.evaluate(change);
+    // 진행 플래그를 한 번에 넣으면 그 사이의 혼잣말 컷씬이 대기한다. 본 것으로 처리해 목표만 확인한다.
+    await page.evaluate(() => { STORY_SCENES.filter(entry => entry.ready()).forEach(entry => collectedItems.add(entry.flag)); refreshObjective(); });
     await page.waitForFunction(title => currentObjective?.title === title, title);
   };
   await step(() => { buildingBlackout = true; }, '정전');
@@ -47,6 +49,11 @@ try {
   await page.waitForFunction(() => currentObjective?.title === 'ARCHI의 흔적');
   await page.waitForTimeout(300);
   assert.deepEqual((await slots()).map(slot => slot?.title), ['ARCHI 멈추기', '비상 전력 켜기', 'ARCHI의 흔적', '지하에서 무슨 일이?', 'ARCHI 멈추기'], '불러오기 직후의 목표 표시는 슬롯을 덮어쓰지 않는다');
+  // 자동 저장은 직접 저장한 칸(슬롯 5)을 건너뛰고 남은 자동 칸 중 가장 오래된 칸에 쓴다.
+  await step(() => ['f7-external-connection-solved', 'f13-backup-device', 'f2-projected'].forEach(item => collectedItems.add(item)), '지하에서 무슨 일이?');
+  saved = await slots();
+  assert.equal(saved[4].kind, 'manual', '직접 저장한 칸은 자동 저장이 덮어쓰지 않는다');
+  assert.equal(saved[1].title, '지하에서 무슨 일이?', '가장 오래된 자동 칸을 덮어쓴다');
   for (const kind of ['robot', 'hallucination']) {
     await page.evaluate(kind => {
       if (kind === 'robot') {

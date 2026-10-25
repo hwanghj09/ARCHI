@@ -143,7 +143,7 @@ try {
   await page.clock.runFor(750);
   await page.evaluate(() => { phoneBattery = 1; phoneDrainAccumulator = 0; });
   await page.keyboard.down('d');
-  await page.clock.runFor(1100);
+  await page.clock.runFor(2100); // 플래시는 2초에 1% 닳는다
   assert.equal(await page.locator('#world').getAttribute('data-flashlight'), 'off');
   assert.equal(await active().getAttribute('id'), 'walk-sheet', 'Battery exhaustion restores empty-handed movement');
   await page.keyboard.up('d');

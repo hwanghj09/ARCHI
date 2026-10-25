@@ -86,7 +86,7 @@ try {
   await page.clock.runFor(await page.evaluate(() => phoneLightDelayMs) + 100);
   assert.equal((await state()).light, true, 'Space activates the focused flashlight button');
   await page.evaluate(() => { phoneBattery = 1; phoneDrainAccumulator = 0; refreshPhone(); });
-  await page.clock.runFor(1100);
+  await page.clock.runFor(2100); // 플래시는 2초에 1% 닳는다
   assert.equal((await state()).light, false); assert.equal((await state()).state, 'phone');
   assert.equal(await page.locator('#phone-battery').textContent(), '0%');
   assert(await page.locator('#phone-light').isDisabled());

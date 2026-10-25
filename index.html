@@ -127,6 +127,7 @@
     <script src="js/debug/sidebar.js" defer></script>
     <script src="js/debug/floor-select.js" defer></script>
     <script src="js/debug/puzzle-skip.js" defer></script>
+    <script src="js/debug/puzzle-open.js" defer></script>
     <script src="js/debug/sanity-debug.js" defer></script>
     <script src="js/debug/item-give.js" defer></script>
     <script src="js/scene/scene-gate.js" defer></script>
@@ -407,9 +408,9 @@
         <output id="power-status" aria-live="polite">비상 전력 꺼짐</output>
         <button id="power-lever" type="button" aria-pressed="false" aria-label="레버 내리기 · 비상 전력 켜기"><span id="power-lever-label">OFF · 내려서 켜기</span></button>
         <div id="power-floor-grid" role="group" aria-label="전력 공급층 선택"></div>
-        <p id="power-note">B1 · B2 별도 전력</p>
+        <p id="power-note">B1·B2<br />별도 전력</p>
         <p id="power-help">태양광은 전등 전용 · 승강기는 17층 관리실 비상 회선</p>
-        <button id="power-close" type="button">닫기 · Esc</button>
+        <button id="power-close" type="button">닫기 · E / Esc</button>
       </div>
     </section>
     <section id="wire-panel" role="dialog" aria-modal="true" aria-labelledby="wire-title" aria-describedby="wire-status" hidden>
@@ -549,6 +550,11 @@
       <section><h3>퍼즐 건너뛰기</h3>
         <form id="debug-puzzle" aria-label="테스트용 퍼즐 건너뛰기">
           <label for="debug-puzzle-select">퍼즐</label><select id="debug-puzzle-select"></select><button type="submit">건너뛰기</button>
+        </form>
+      </section>
+      <section><h3>퍼즐 열기 (F3 · F4 · F5)</h3>
+        <form id="debug-open" aria-label="시연용 퍼즐 열기">
+          <label for="debug-open-select">퍼즐</label><select id="debug-open-select"></select><button type="submit">열기</button>
         </form>
       </section>
       <section><h3>플레이어</h3>

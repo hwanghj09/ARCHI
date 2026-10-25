@@ -45,17 +45,7 @@ for (const entry of FLOOR17.rooms) {
 }
 doors.push({ name: '소화전', type: 'inspect', x: 4023, y: 248, width: 145,
   element: document.getElementById('floor17-hydrant'), container: 'hydrant',
-  message: '소화전 안에 호스와 관창이 정리되어 있다.' });
-
-// 옥상문 바로 옆 벽의 붉은 비상 열쇠함(배경 그림). 옥상문 열쇠가 여기 있어 잠긴 문 앞에서 되돌아가지 않는다.
-const keyBox = document.createElement('div');
-keyBox.id = 'floor17-key-box';
-keyBox.setAttribute('role', 'img');
-keyBox.setAttribute('aria-label', '비상 열쇠함');
-Object.assign(keyBox.style, { position: 'absolute', left: '2812px', top: '437px', width: '44px', height: '70px', pointerEvents: 'none' });
-world.insertBefore(keyBox, sprite);
-doors.push({ name: '비상 열쇠함', type: 'inspect', x: 2812, y: 437, width: 44, element: keyBox,
-  container: 'key-box', message: '옥상문 옆 비상 열쇠함이다.' });
+  message: '소화전 안에 호스와 관창, 옥상문 열쇠가 있다.' });
 
 // 관리자실 문 바로 왼쪽 청소 카트(배경 그림). 복도를 따라가면 카트를 먼저 지나고 관리자실에 닿는다.
 // 메모를 가린 양동이를 치우면 관리실 비상 출입 메모를 챙길 수 있다.

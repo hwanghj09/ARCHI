@@ -52,7 +52,7 @@ const FLOOR13_ROOMS = interiorRooms(13, [
     backgroundWallsOnly: true, backgroundImage: floor13Scene('ops', 2622), props: [
     { file: 'filing-cabinet', size: [256, 512], worldWidth: 72, x: 120 },
     { file: 'filing-cabinet', size: [256, 512], worldWidth: 72, x: 200 },
-    { file: 'support-workstation', size: [512, 256], worldWidth: 270, x: 480, name: '교대 근무 일지',
+    { file: 'support-workstation', size: [512, 256], worldWidth: 270, x: 1300, name: '교대 근무 일지',
       message: '야간 당직 일지: "이번 달부터 야간 장애 대응은 자동 종결 시스템이 맡음. 당직 폐지." 마지막 장의 낙서: "B2 알림은 뜨자마자 닫힘. 사람은 볼 틈도 없음."',
       surface: 'notebook',
       writing: [{ as: 'title', text: '야간 당직 일지' }, '이번 달부터 야간 장애 대응은', '자동 종결 시스템이 맡음.', '당직 폐지.',
@@ -88,7 +88,7 @@ const FLOOR13_ROOMS = interiorRooms(13, [
       sprite: 'assets/objects/floor13/testbay-ups-states.png', stateBy: 'f13-ups',
       message: 'UPS 비상 출력이 켜졌다. 팬이 돌기 시작하고 초록 불이 들어온다. 비상 회선으로 전기가 나간다.',
       takenMessage: 'UPS가 돌아가고 있다. 배터리 잔량 71%.' },
-    { file: 'server-validation-bench', size: [512, 256], worldWidth: 260, x: 800, name: '검증 벤치',
+    { file: 'server-validation-bench', size: [512, 256], worldWidth: 260, x: 700, name: '검증 벤치',
       message: '검증 결과지: "고객사 납품 서버 3대 · 원격 접속 에이전트 발견 · 설치 기록 없음". 담당자 메모: "어디서 들어온 거지? 보안팀 문의."',
       surface: 'document',
       writing: [{ as: 'title', text: '검증 결과지' }, '고객사 납품 서버 3대', '원격 접속 에이전트 발견', '설치 기록 없음', { as: 'rule' },

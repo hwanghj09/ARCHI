@@ -40,6 +40,8 @@ function openComputerApp(app, documentId) {
   if (app === 'usbdrive' && wasClosed) resetUsbVideo();
   if (app === 'terminal' && wasClosed) resetTerminal();
   if (app === 'building') {
+    // 새로 열 때는 지금 서 있는 층을 보여 준다(처음 불러온 17층에 머물지 않게).
+    if (wasClosed) for (const select of document.querySelectorAll('[data-building-floor]')) select.value = String(currentSceneFloor);
     refreshBuildingGuides();
     collectedItems.add('goal-facilities-read');
   }

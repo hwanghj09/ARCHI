@@ -155,7 +155,7 @@ try {
   assert.equal(await page.locator('.writing-memo').textContent(), memo, 'Inventory opens the same written memo');
   await page.keyboard.press('Escape');
   assert.equal(await page.locator('#inspection').getAttribute('data-surface'), 'inventory');
-  await approach('비상 열쇠함');
+  await approach('소화전');
   await page.getByRole('button', { name: '낡은 열쇠 줍기' }).click();
   await approach('비상계단');
   await page.getByRole('button', { name: '열쇠 사용하기', exact: true }).click();

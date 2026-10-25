@@ -16,7 +16,7 @@ function finishInspectionText() {
   inspectionTypingTimer = null;
   inspectionText.textContent = inspectionDescription.textContent;
   inspectionClose.textContent = '닫기 ▾';
-  inspectionHelp.textContent = `${bindingLabel('interact')} / Esc`;
+  inspectionHelp.textContent = inspectionPanel.dataset.photoOnly === 'true' ? `${bindingLabel('interact')} · 사진 찍기` : `${bindingLabel('interact')} / Esc`;
 }
 
 // 한 단계 뒤로: 가방에서 연 카드(returnTo: 'inventory')는 가방 목록으로 돌아가고, 나머지는 닫는다.
@@ -32,7 +32,8 @@ function stepBackInspection() {
 }
 
 function advanceInspection() {
-  if (inspectionPanel.dataset.photoOnly === 'true') return;
+  // 층별 안내판을 처음 볼 때는 닫는 대신 E로 사진을 찍는다(photos.js). 안내 문구도 그렇게 바뀐다.
+  if (inspectionPanel.dataset.photoOnly === 'true') { document.getElementById('inspection-photo').click(); return; }
   if (inspectionTypingTimer !== null) finishInspectionText();
   else stepBackInspection();
 }

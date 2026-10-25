@@ -41,7 +41,8 @@ try {
   const saved = await reloadContinue();
   const resumed = await state();
   assert.equal(resumed.id, 'f12-dev'); assert(Math.abs(resumed.x - saved.scene.x) < 1);
-  assert.equal(resumed.battery, saved.battery); assert.equal(resumed.sanity, saved.sanity);
+  assert.equal(resumed.battery, saved.battery); assert.equal(saved.sanity, 15);
+  assert.equal(resumed.sanity, await page.evaluate(() => loadSanityFloor), 'A save made at low sanity resumes at the load floor');
   assert.deepEqual(resumed.dock, saved.dock); assert.deepEqual(resumed.items, saved.items);
   assert.deepEqual(saved.solarPoweredFloors, [12]); assert.deepEqual(resumed.solarPoweredFloors, [12], 'The supplied floor resumes');
   assert(await page.evaluate(() => floorHasLighting(12) && !floorHasLighting(7) && !floorHasLighting(13) && floorHasPower(17))); assert.equal(resumed.blackout, true);
@@ -214,6 +215,19 @@ try {
     assert.equal((await state()).battery, 40);
     assert.equal(await page.locator('.docked-phone:visible').count(), 0);
   }
+  // A phone left on the 13F desk before it moved clear of the exit stays on that desk after loading.
+  const relocatedDock = await page.evaluate(() => {
+    const saved = { ...progressSnapshot(), scene: { id: 'f13-ops', x: 1300, y: floorY - 81 },
+      battery: 20, dock: { floor: 13, scene: 'f13-ops', x: 543 } };
+    restoreProgress(saved);
+    const charger = currentDoors.find(door => door.phoneCharger);
+    return { matches: isPhoneDock(charger), battery: phoneBattery,
+      visible: charger.element.querySelectorAll('.docked-phone').length, saved: progressSnapshot().dock, x: charger.x };
+  });
+  assert(relocatedDock.matches, 'Legacy charging follows the relocated desk');
+  assert.equal(relocatedDock.battery, 20);
+  assert.equal(relocatedDock.visible, 1);
+  assert.deepEqual(relocatedDock.saved, { floor: 13, scene: 'f13-ops', x: relocatedDock.x });
   // Invalid saves are ignored, and blocked storage cannot prevent a fresh game.
   await page.evaluate(() => {
     const saved = localStorage.getItem(progressKey);

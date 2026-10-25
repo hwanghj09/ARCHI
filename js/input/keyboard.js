@@ -95,7 +95,8 @@ window.addEventListener('keydown', event => {
     // 층 버튼과 레버는 누를 때마다 켜고 끄므로, Enter를 꾹 눌러 반복 입력이 들어와도 한 번만 누른 것으로 친다.
     if (event.repeat && ['Enter', 'Space'].includes(event.code)) { event.preventDefault(); return; }
     if (event.code === 'Tab' || (['Enter', 'Space'].includes(event.code) && event.target.closest('#power-panel button'))) return;
-    if (event.code === 'Escape') closePowerPanel();
+    // 다른 조사창처럼 E(상호작용 키)로도 닫는다.
+    if ((event.code === 'Escape' || keyMatches('interact', event.code)) && !event.repeat) closePowerPanel();
     event.preventDefault();
     return;
   }

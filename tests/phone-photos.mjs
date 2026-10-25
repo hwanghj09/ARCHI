@@ -57,7 +57,9 @@ try {
   assert.equal(await count(), 0, 'Inspecting the directory does not automatically take a photo');
   await page.locator('#phone-sheet').evaluate(image => image.decode());
   await page.locator('#phone-away-sheet').evaluate(image => image.decode());
-  await page.locator('#inspection-photo').click();
+  // 처음 볼 때는 닫기 대신 사진 찍기만 남는다. 안내 문구가 그렇게 바뀌고 E가 사진을 찍는다.
+  assert.match(await page.locator('.inspection-help').textContent(), /E · 사진 찍기/);
+  await page.keyboard.press('e');
   const x = await page.evaluate(() => body.position.x);
   assert.equal(await page.locator('#player').getAttribute('data-state'), 'photo');
   assert(await page.locator('#inspection').isHidden());

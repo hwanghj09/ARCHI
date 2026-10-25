@@ -41,7 +41,8 @@
 /* 크레딧 시간(16초)은 b2-ending.js의 b2FinaleSteps('credits'→'done')와 맞춘다. 건너뛰면(data-skipped) 크레딧을 치우고 메뉴 버튼만 둔다. */
 #b2-escape:is([data-step="credits"], [data-step="done"]) .b2-credits-roll, #b2-bad-ending .b2-credits-roll { animation: b2-credits 16s linear forwards; }
 #b2-escape[data-skipped] .b2-credits-roll { visibility: hidden; }
-@keyframes b2-credits { to { transform: translateY(calc(-50vh - 50%)); } }
+/* 끝나면 크레딧 맨 아래 줄이 화면 아래 25vh 위에 멈춘다. 가운데에 멈추면 긴 크레딧이 [메인 메뉴로] 버튼(아래 8%) 뒤에 깔린다. */
+@keyframes b2-credits { to { transform: translateY(calc(-100% - 25vh)); } }
 .b2-credits-skip { position: absolute; right: 24px; bottom: 16px; margin: 0; color: #9fb0a8; font: 13px Arial, sans-serif; visibility: hidden; }
 #b2-escape[data-step="credits"] { cursor: pointer; }
 #b2-escape[data-step="credits"] .b2-credits-skip { visibility: visible; }

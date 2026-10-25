@@ -2,7 +2,7 @@
 // 순서는 objective.js의 본편 목표 순서를 따른다. items는 그 퍼즐을 풀면 남는 플래그다.
 const PUZZLE_STEPS = [
   { label: '17F 정전 컷씬', at: 'office' },
-  { label: '17F 비상 열쇠함 열쇠·옥상문', at: 'f17', items: ['rooftop-key', 'rooftop-unlocked'] },
+  { label: '17F 소화전 열쇠·옥상문', at: 'f17', items: ['rooftop-key', 'rooftop-unlocked'] },
   { label: 'RF 태양광 비밀번호·전선', at: 'rooftop', items: ['roof-wires-fixed'], solar: [17] },
   { label: '17F 관리실 비밀번호·비상 회선', at: 'f17', items: ['f17-manager-memo', 'f17-manager-unlocked', 'f17-circuit-guide-read', 'f17-emergency-linked'] },
   { label: '1F 정문·안내 데스크 전력 앱', at: 'f1', items: ['f1-reached', 'f1-door-checked', 'story-f1-door-seen', 'solar-app-downloaded', 'solar-app-installed'], solar: [1] },
@@ -32,14 +32,18 @@ function debugGoTo(id) {
   else performFloorChange(id, id === 'rooftop' ? null : 0);
 }
 
-function skipToPuzzle(index) {
-  const step = PUZZLE_STEPS[index];
+// extra: 그 단계 안의 앞선 퍼즐까지 푼 상태로 더 챙길 플래그. power: 이 층에 태양광 조명을 보낸다.
+function restoreBeforeStep(index, extra = [], power = null) {
   const done = PUZZLE_STEPS.slice(0, index);
   const solar = done.findLast(entry => entry.solar);
   // 앞으로도 뒤로도 갈 수 있게 소지품은 이 퍼즐 직전 상태로 덮어쓴다. 단서·사진·배터리·정신력은 그대로 둔다.
-  restoreProgress({ ...progressSnapshot(), items: done.flatMap(entry => entry.items || []), blackout: index > 0,
-    solarEnabled: Boolean(solar), solarPoweredFloors: solar?.solar || [], logPuzzle: null, cabin: null, runtime: {} });
-  transitionScene(() => debugGoTo(step.at));
+  restoreProgress({ ...progressSnapshot(), items: [...done.flatMap(entry => entry.items || []), ...extra], blackout: index > 0,
+    solarEnabled: Boolean(solar), solarPoweredFloors: solar && power ? [power] : solar?.solar || [], logPuzzle: null, cabin: null, runtime: {} });
+}
+
+function skipToPuzzle(index) {
+  restoreBeforeStep(index);
+  transitionScene(() => debugGoTo(PUZZLE_STEPS[index].at));
 }
 
 document.getElementById('debug-puzzle').addEventListener('submit', event => {
