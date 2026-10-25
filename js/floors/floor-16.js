@@ -74,7 +74,7 @@ const FLOOR16_ROOMS = interiorRooms(16, [
     // 반입문은 주방 쪽에서만 열린다: 들어온 뒤에는 셔터 제어함 레버로 셔터를 올려야 나간다(필수 퍼즐).
     links: [{ target: 'f16-kitchen', x: 56, width: 110, style: 'backdoor', locked: true,
       message: '반입문은 주방 쪽에서만 열리게 걸려 있다. 셔터 제어함의 수동 레버로 셔터를 올리고 나가자.' }], props: [
-    { file: 'instrument-cart', size: [256, 256], worldWidth: 113, x: 290 },
+    { file: 'instrument-cart', size: [256, 256], worldWidth: 113, x: 245 },
     { file: 'food-checkout', size: [512, 256], worldWidth: 312, x: 1150, name: '계산대',
       message: 'POS 화면은 꺼져 있다. 계산대에 영수증 한 장이 걸려 있다: "23:47 · 컵라면 1 · 삼각김밥 1 · 사원증 결제 · 17층 정수호". 아까 야근하다 사 간 야식이다.',
       surface: 'receipt', writing: [{ as: 'title', text: 'VU' }, { as: 'rule' }, '23:47', { as: 'field', label: '컵라면', text: '1' },

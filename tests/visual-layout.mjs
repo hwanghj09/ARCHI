@@ -4,6 +4,8 @@ import { chromium } from 'playwright';
 const browser = await chromium.launch();
 const overlap = (a, b) => Math.min(a[0] + a[2], b[0] + b[2]) - Math.max(a[0], b[0]) > 2 &&
   Math.min(a[1] + a[3], b[1] + b[3]) - Math.max(a[1], b[1]) > 2;
+// Authored layers: the lobby PC stands on its counter; lounge tables sit in front of sofas, with a remote on one table.
+const layeredProps = { f1: [[2, 3]], 'f2-lounge': [[0, 2], [0, 4], [1, 3], [2, 4]] };
 try {
   const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
   const errors = [];
@@ -34,12 +36,19 @@ try {
           correctSize: image.naturalWidth === prop.size[0] * (prop.sprite ? prop.frames || 2 : 1) && image.naturalHeight === prop.size[1] };
       });
       const doors = currentDoors.filter(door => ['room', 'stairs', 'elevator'].includes(door.type)).map(outlineBox);
+      // Painted inspection regions and desk outlets share their supporting art; link-bed is an invisible inspection region.
+      const fixtures = (config.fixtures || []).filter(fixture => fixture.style &&
+        !['art-spot', 'phone-charger', 'link-bed'].includes(fixture.style))
+        .map(fixture => ({ name: fixture.name, rect: fixture.outline ||
+          [fixture.x, fixture.y, fixture.width, fixture.height ?? floorY - fixture.y] }));
+      const obstacles = [...(config.solids || []), ...(config.movables || [])]
+        .map(solid => ({ name: solid.name || solid.kind || 'crate', rect: [solid.x, floorY - solid.height, solid.width, solid.height] }));
       const windows = [...dynamicScene.querySelectorAll('.exterior-window')].map(element => {
         const style = getComputedStyle(element);
         return { rect: ['left', 'top', 'width', 'height'].map(key => parseFloat(style[key])),
           image: style.backgroundImage, position: style.backgroundPosition, filter: style.filter };
       });
-      return { width: worldWidth, props, doors, windows, windowless: Boolean(config.windowless) };
+      return { width: worldWidth, props, doors, fixtures, obstacles, windows, windowless: Boolean(config.windowless) };
     }, id);
     for (const prop of scene.props) {
       assert(prop.correctSize, `${id}: ${prop.file} uses its natural aspect ratio`);
@@ -47,11 +56,15 @@ try {
       assert(prop.rect[0] >= 32 && prop.rect[0] + prop.rect[2] <= scene.width - 32,
         `${id}: ${prop.file} stays within the room walls`);
       for (const door of scene.doors) assert(!overlap(prop.rect, door), `${id}: ${prop.file} leaves the doorway clear`);
+      for (const other of [...scene.fixtures, ...scene.obstacles]) assert(!overlap(prop.rect, other.rect),
+        `${id}: ${prop.file} leaves ${other.name} clear`);
     }
-    // The lounge's low tables sit in front of its sofas; the remote rests on a table.
-    if (id !== 'f2-lounge') for (let i = 0; i < scene.props.length; i++) {
-      for (const other of scene.props.slice(i + 1)) assert(!overlap(scene.props[i].rect, other.rect),
-        `${id}: ${scene.props[i].file} and ${other.file} do not intersect`);
+    for (let i = 0; i < scene.props.length; i++) {
+      for (let j = i + 1; j < scene.props.length; j++) {
+        if (layeredProps[id]?.some(([a, b]) => a === i && b === j)) continue;
+        assert(!overlap(scene.props[i].rect, scene.props[j].rect),
+          `${id}: ${scene.props[i].file} and ${scene.props[j].file} do not intersect`);
+      }
     }
     for (const window of scene.windows) {
       assert(!scene.windowless, `${id}: observation rooms and windowless rooms keep their original walls`);

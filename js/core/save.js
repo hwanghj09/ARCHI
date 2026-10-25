@@ -165,7 +165,10 @@ function restoreProgress(data) {
     phoneDock = null;
     if (data.dock && Number.isFinite(data.dock.x)) {
       const chargers = data.dock.scene === 'office' ? [officeCharger] : floorById.get(data.dock.scene)?.fixtures;
-      const charger = chargers?.find(fixture => fixture.phoneCharger && fixture.floor === data.dock.floor && fixture.x === data.dock.x);
+      // 상황실 책상을 출구 밖으로 옮기기 전 콘센트에 둔 휴대폰도 같은 책상에서 계속 충전한다.
+      const movedOpsDesk = data.dock.scene === 'f13-ops' && data.dock.x === 543;
+      const charger = chargers?.find(fixture => fixture.phoneCharger && fixture.floor === data.dock.floor &&
+        (fixture.x === data.dock.x || movedOpsDesk));
       // 사라진 복도 충전함의 휴대폰은 소지 상태로 돌려준다.
       if (charger) phoneDock = { floor: charger.floor, scene: charger.scene, x: charger.x };
     }

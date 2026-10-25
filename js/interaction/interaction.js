@@ -165,7 +165,6 @@ function interact() {
       openHydrant();
       return;
     }
-    if (nearbyDoor.container === 'key-box') { openKeyBox(); return; }
     if (nearbyDoor.container === 'cleaning-cart') { openCleaningCart(); return; }
     if (nearbyDoor.powerCircuit) { openEmergencyCircuit(); return; }
     if (handleB2Console(nearbyDoor)) return; // B2 삭제 중 메인 콘솔: 문을 막은 뒤면 루트 터미널(b2-ending.js)
@@ -281,7 +280,7 @@ function interact() {
     const destId = currentSceneFloor === 18 ? 'f17' : 'rooftop';
     if (destId === 'rooftop' && !collectedItems.has('rooftop-unlocked')) {
       if (collectedItems.has('rooftop-key')) openRooftopLock();
-      else openInspection('옥상문', '문 위 표지판: "옥상 · 태양광 비상전원 설비". 문이 잠겨 있다. 비상용 열쇠라면… 비상 장비 근처에 두지 않았을까?');
+      else openInspection('옥상문', '문 위 표지판: "옥상 · 태양광 비상전원 설비". 문이 잠겨 있다. 비상용 열쇠라면… 17층 소화전 안을 확인해 보자.');
       return;
     }
     if (destId === 'rooftop' && [rooftopCity, rooftopBackground].some(image => !image.complete || !image.naturalWidth)) {

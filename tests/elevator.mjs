@@ -963,7 +963,7 @@ try {
     softCount(await page.locator('#dynamic-scene .floor-prop').count(), 9);
     await assertHumanScale();
     await inspect(1060, 'E · 장애 알림 프린터 조사', /UPS 비상 회선/);
-    await inspect(480, 'E · 교대 근무 일지 조사', /당직 폐지/);
+    await inspect(1300, 'E · 교대 근무 일지 조사', /당직 폐지/);
     await leaveRoom(opsRoom, corridorHeader);
 
     const bay = await enterRoom('장비 검증실 - 보안 자료실', '13F');
@@ -978,7 +978,7 @@ try {
     await page.clock.runFor(600);
     await page.keyboard.press('e');
     assert.match(await status(), /배터리 잔량/, 'The UPS is switched on only once');
-    await inspect(800, 'E · 검증 벤치 조사', /설치 기록 없음/);
+    await inspect(700, 'E · 검증 벤치 조사', /설치 기록 없음/);
     await page.screenshot({ path: '.local/floor-13-testbay.png' });
     await leaveRoom(bay, corridorHeader);
 

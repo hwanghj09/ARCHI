@@ -113,7 +113,7 @@ const FLOOR1_LAYOUT = {
   ],
   props: [
     { file: 'waiting-sofa', size: [512, 256], worldWidth: 240, x: 4080 },
-    { file: 'large-planter', size: [256, 512], worldWidth: 78, x: 1300 },
+    { file: 'large-planter', size: [256, 512], worldWidth: 78, x: 1260 },
     // 안내 데스크: 정문이 안 열린 뒤 로비 전원을 켤 앱을 여기서 받는다. 데스크 PC는 사내망 UPS로 켜져 있어 정전 중에도 쓴다.
     // 조사하면 컴퓨터 화면이 열린다(interaction.js deskComputer): 블로그에서 앱 다운로드 → 파일 전송에서 USB 연결 → 설치.
     { file: 'reception-counter', size: [512, 256], worldWidth: 322, x: 3310, name: '안내 데스크', deskComputer: true, selfPowered: true,
