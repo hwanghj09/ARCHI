@@ -234,8 +234,8 @@ function updatePhone(elapsed) {
     elapsed -= raisingTime;
   }
   if (phoneDock || phoneBattery <= 0) return;
-  // 1%가 닳는 시간: 플래시 1초, 화면 보기 1분, 그냥 들고 다니기 3분.
-  phoneDrainAccumulator += elapsed / (phoneLightOn ? 1000 : usingPhone ? 60000 : 180000);
+  // 1%가 닳는 시간: 플래시 2초, 화면 보기 1분, 그냥 들고 다니기 3분.
+  phoneDrainAccumulator += elapsed / (phoneLightOn ? 2000 : usingPhone ? 60000 : 180000);
   if (phoneDrainAccumulator < 1) return;
   phoneBattery = Math.max(0, phoneBattery - Math.floor(phoneDrainAccumulator));
   phoneDrainAccumulator %= 1;

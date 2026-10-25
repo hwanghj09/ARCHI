@@ -63,7 +63,7 @@ try {
   assert(rect.x >= 0 && rect.y >= 0 && rect.x + rect.width <= 390 && rect.y + rect.height <= 844);
   await page.screenshot({ path: '.local/phone-flash-bright-mobile.png' });
 
-  await page.evaluate(() => { phoneBattery = 1; phoneDrainAccumulator = 0; updatePhone(1000); });
+  await page.evaluate(() => { phoneBattery = 1; phoneDrainAccumulator = 0; updatePhone(2000); });
   assert(await glow.isHidden(), 'Battery exhaustion removes the glow');
   assert.equal(await badge.textContent(), '플래시 꺼짐');
   await page.evaluate(() => {

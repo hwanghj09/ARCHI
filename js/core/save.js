@@ -75,9 +75,11 @@ function writeSlot(index, kind) {
   } catch { return false; }
 }
 
+// 직접 저장한 칸은 건드리지 않는다. 빈 칸이나 자동 저장 칸 중 가장 오래된 칸에만 쓴다(모두 직접 저장이면 쓰지 않는다).
 function saveObjectiveSlot() {
-  const times = slotKeys.map(key => readProgress(key)?.savedAt ?? 0);
-  writeSlot(times.indexOf(Math.min(...times)), 'auto');
+  const times = slotKeys.map(key => { const data = readProgress(key); return data?.slotKind === 'manual' ? Infinity : data?.savedAt ?? 0; });
+  const oldest = Math.min(...times);
+  if (oldest !== Infinity) writeSlot(times.indexOf(oldest), 'auto');
 }
 
 function restoreProgress(data) {
@@ -119,7 +121,7 @@ function restoreProgress(data) {
     inspectionTypingTimer = null;
     delete inspectionPanel.dataset.returnTo;
     inventoryButton.setAttribute('aria-expanded', 'false');
-    roomTransition.classList.remove('visible');
+    roomTransition.classList.remove('visible'); roomLoading.classList.remove('visible');
     roomTransition.dataset.phase = 'idle';
     for (const key of ['opening', 'blackoutScene', 'powerFlicker', 'cctvScene']) delete world.dataset[key];
     collectedItems.clear();
@@ -158,7 +160,8 @@ function restoreProgress(data) {
     document.getElementById('floor17-lights').checked = world.dataset.lights === 'on';
     phoneBattery = savedNumber(data.battery, 100, 0, 100);
     gameClock = savedNumber(data.clock, 0, 0, 864e7);
-    sanity = savedNumber(data.sanity, 100, 0, 100);
+    // 불러온 직후 바로 다시 쓰러지지 않게, 정신력이 바닥난 시점의 저장도 최소 loadSanityFloor로 재개한다.
+    sanity = Math.max(loadSanityFloor, savedNumber(data.sanity, 100, 0, 100));
     phoneDock = null;
     if (data.dock && Number.isFinite(data.dock.x)) {
       const chargers = data.dock.scene === 'office' ? [officeCharger] : floorById.get(data.dock.scene)?.fixtures;

@@ -22,6 +22,7 @@
   0%, 100% { box-shadow: 0 2px 0 #070b0c; }
   50% { box-shadow: 0 2px 0 #070b0c, 0 0 10px 3px #f2d689aa; }
 }
-#power-note { position: absolute; left: 18%; top: 14.5%; width: 64%; margin: 0; color: #f2d689; text-align: center; font-size: clamp(10px, 3vw, 14px); font-weight: bold; white-space: nowrap; }
+/* 층 버튼 격자의 빈 마지막 칸(1F 오른쪽)에 두 줄로 넣는다. 제목판 아래에 두면 제목판과 겹친다. */
+#power-note { position: absolute; left: calc(46% + 37% * 2 / 3 + 3px); top: calc(32.5% + 45% * 5 / 6 + 3px); width: calc(37% / 3 - 4px); height: calc(45% / 6 - 4px); margin: 0; display: grid; place-content: center; color: #f2d689; text-align: center; font-size: clamp(8px, 2vw, 11px); font-weight: bold; line-height: 1.15; word-break: keep-all; }
 #power-help { position: absolute; left: 22%; top: 83.4%; width: 56%; height: 4.5%; margin: 0; display: grid; align-content: center; color: #393126; text-align: center; font-size: clamp(7px, 2.1vw, 10px); line-height: 1.05; white-space: nowrap; }
 #power-close { position: absolute; left: 38%; top: 93%; width: 24%; min-height: 32px; padding: 5px; border: 1px solid #7f8e84; border-radius: 2px; background: #18211f; color: #e7e3d2; font-size: 12px !important; }
