@@ -18,7 +18,8 @@
 #cabin-exit { position: absolute; left: 73%; top: 80%; width: 12.3%; height: 5%; border: 1px solid #909c97; border-radius: 4px; background: #242c29; color: #f2f3ed; font: 16px Arial, sans-serif; cursor: pointer; }
 #cabin-exit:disabled { opacity: .4; cursor: default; }
 #cabin-exit:focus-visible { outline: 2px solid #f4ce72; outline-offset: 3px; }
-#cabin-status { position: absolute; left: 68%; top: 86%; width: 23%; margin: 0; padding: 8px; color: #f1f1e5; background: #111719e8; text-align: center; font: 14px/1.5 Arial, sans-serif; overflow-wrap: anywhere; }
+/* 오른쪽 아래 HUD(플래시·가방·휴대폰 버튼)에 가리지 않게 '나가기' 버튼 폭에 맞춰 좁게 둔다. */
+#cabin-status { position: absolute; left: 70%; top: 86%; width: 15.5%; box-sizing: border-box; margin: 0; padding: 6px 8px; color: #f1f1e5; background: #111719e8; text-align: center; font: 14px/1.5 Arial, sans-serif; overflow-wrap: anywhere; }
 /* Leave only enough emergency light on the controls to choose a floor and exit. */
 #cabin-scene[data-blackout="true"]::after { content: ''; position: absolute; inset: 0; z-index: 1; pointer-events: none; background: linear-gradient(90deg, #0007 0 65%, #0002 70% 89%, #0007 94%); }
 /* 객실 조명이 열린 문틈으로 새어 나가 문 밖 복도가 보인다: 문이 열린 만큼(--door-open) 문틈 쪽 어둠 막을 걷어 내고, 바닥 쪽에 은은한 빛을 더한다. */

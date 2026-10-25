@@ -41,7 +41,8 @@ try {
   const saved = await reloadContinue();
   const resumed = await state();
   assert.equal(resumed.id, 'f12-dev'); assert(Math.abs(resumed.x - saved.scene.x) < 1);
-  assert.equal(resumed.battery, saved.battery); assert.equal(resumed.sanity, saved.sanity);
+  assert.equal(resumed.battery, saved.battery); assert.equal(saved.sanity, 15);
+  assert.equal(resumed.sanity, await page.evaluate(() => loadSanityFloor), 'A save made at low sanity resumes at the load floor');
   assert.deepEqual(resumed.dock, saved.dock); assert.deepEqual(resumed.items, saved.items);
   assert.deepEqual(saved.solarPoweredFloors, [12]); assert.deepEqual(resumed.solarPoweredFloors, [12], 'The supplied floor resumes');
   assert(await page.evaluate(() => floorHasLighting(12) && !floorHasLighting(7) && !floorHasLighting(13) && floorHasPower(17))); assert.equal(resumed.blackout, true);

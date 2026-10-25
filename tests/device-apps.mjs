@@ -90,6 +90,7 @@ try {
   assert(await pc.locator('#computer-calculator').isVisible(), 'Unknown app leaves the active window intact');
 
   await pcApp('building').click();
+  assert.equal(await pcGuide.locator('[data-building-floor]').inputValue(), String(await page.evaluate(() => currentSceneFloor)), 'The guide opens on the current floor');
   await pcGuide.locator('[data-building-floor]').selectOption('12');
   const floor12 = await page.evaluate(() => {
     return { powered: floorHasPower(12), chargerCount: [...floorById.values()]

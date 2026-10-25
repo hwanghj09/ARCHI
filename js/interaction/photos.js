@@ -50,6 +50,7 @@ function offerInspectionPhoto(door, message) {
   inspectionClose.hidden = photoOnly;
   if (photoOnly) { inspectionPanel.dataset.photoOnly = 'true'; inspectionPhotoButton.focus(); }
   else delete inspectionPanel.dataset.photoOnly;
+  if (inspectionTypingTimer === null) finishInspectionText(); // 아래 안내를 'E · 사진 찍기' 또는 'E / Esc'로 맞춘다
 }
 
 function renderPhonePhoto(photo) {
@@ -133,7 +134,7 @@ function startPhotoCapture() {
   if (phoneDock || phoneBattery <= 0) return;
   if (hasPhoto(phoneCameraSubject.photo)) return;
   if (!phoneSheet.complete || !phoneSheet.naturalWidth || !phoneAwaySheet.complete || !phoneAwaySheet.naturalWidth) {
-    delete inspectionPanel.dataset.photoOnly; inspectionClose.hidden = false; // 찍지 못하면 닫을 수 있게
+    delete inspectionPanel.dataset.photoOnly; inspectionClose.hidden = false; finishInspectionText(); // 찍지 못하면 닫을 수 있게
     return;
   }
   pendingPhoto = { ...phoneCameraSubject.photo };
