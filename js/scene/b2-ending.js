@@ -259,7 +259,7 @@ function updateB2Monster(delta) {
     if (b2Hook.timer <= 0) Object.assign(b2Hook, { mode: 'swing', elapsed: 0 });
   } else if (b2Hook.mode === 'swing') {
     // 머리 위에서 앞으로 휘둘러 던진다. 각속도는 올라가던 속도에서 시작해 놓는 순간 날아가는 속도와 같아진다.
-    if (!b2Hook.elapsed) playB2BallWhoosh(.25); // 휘두르는 순간부터 소리를 키워, 공이 머리 위를 지날 때 가장 세다
+    if (!b2Hook.elapsed) playB2BallSwoosh(); // 휘두르는 순간부터 공이 머리 위를 지나 날아가는 동안의 휙 소리
     b2Hook.elapsed += delta;
     const p = Math.min(1, b2Hook.elapsed / b2HookSwingMs);
     const a = b2Hook.omega * b2HookSwingMs, b = b2HookSwingArc - a; // 각도 = 270 + a·p + b·p²
@@ -284,7 +284,7 @@ function updateB2Monster(delta) {
     b2Hook.elapsed += delta;
     const u = Math.min(b2Hook.elapsed / b2MeleeMs, .9999) * 9;
     frame = Math.floor(u);
-    if (frame >= 3 && !b2Hook.whooshed) { b2Hook.whooshed = true; playB2BallWhoosh(.2); } // 공이 내려오기 직전에 시작
+    if (frame >= 3 && !b2Hook.whooshed) { b2Hook.whooshed = true; playB2BallSwoosh(); } // 공이 내려오기 직전에 시작
     const angle = (b2MeleeAngles[frame] + (b2MeleeAngles[frame + 1] - b2MeleeAngles[frame]) * (u - frame)) * Math.PI / 180;
     hand = { x: b2Hook.x + b2MeleeShift + b2MeleeHands[frame][0], y: floorY - 339 + b2MeleeHands[frame][1] };
     ball = { x: hand.x + Math.cos(angle) * b2MeleeChain, y: hand.y + Math.sin(angle) * b2MeleeChain, spin: angle };

@@ -126,6 +126,7 @@ function startZeroCharge() {
   const side = zeroEventSide < 0 ? '왼쪽' : '오른쪽';
   flashPrompt.textContent = side + '에서 발소리 · ' + side + '을 비추세요 (F)';
   playGameSound('step', { x: zeroEventGhostX });
+  playHallucinationChaseSound();
 }
 
 function resolveZeroEvasion() {
@@ -142,7 +143,7 @@ function resolveZeroEvasion() {
 
 // 삼켜지는 순간 영상을 모든 화면 요소 앞에서 바로 재생하고, 끝나거나 재생에 실패하면 닫아 게임 오버 창을 보여 준다.
 const devouredMouthOpenMs = 1400; // 영상에서 입이 벌어지기 시작하는 시점(영상 길이 2.2초)
-const devouredTrimMs = 800; // 영상의 앞부분은 이만큼 건너뛰고 재생한다(파일은 그대로, 아래 시점들은 원본 영상 기준)
+const devouredTrimMs = 1210; // 영상의 앞부분(얼굴로 클로즈업되기 전 전신)은 건너뛰고 재생한다(파일은 그대로, 아래 시점들은 원본 영상 기준)
 const devouredRoarLeadMs = 350; // 소리 재생이 시작되기까지 걸리는 시간만큼 먼저 튼다
 let devouredRoarFrame = 0;
 function hideDevouredVideo(event) { // 영상이 끝난 것만으로는 포효를 끊지 않는다(게임 오버 창에서도 이어서 들린다)
@@ -161,7 +162,9 @@ function playDevouredVideo() {
   // 영상 재생 시간을 직접 보고 맞춘다(타이머는 영상이 실제로 시작하는 시간과 어긋난다).
   const watchRoar = () => {
     if (devouredVideo.hidden) return;
-    if (devouredVideo.currentTime * 1000 >= devouredMouthOpenMs - devouredRoarLeadMs) return playHallucinationDevouredSound();
+    // 시작 지점이 이미 틀 시점을 지났으면 늦은 만큼 소리도 앞으로 건너뛰어 입이 벌어지는 순간에 맞춘다.
+    const late = devouredVideo.currentTime * 1000 - (devouredMouthOpenMs - devouredRoarLeadMs);
+    if (late >= 0) return playHallucinationDevouredSound(late / 1000);
     devouredRoarFrame = requestAnimationFrame(watchRoar);
   };
   devouredRoarFrame = requestAnimationFrame(watchRoar);
@@ -318,6 +321,7 @@ function beginHallucinationSighting(mode, side, distance) {
 }
 
 function endHallucinationSighting() {
+  if (hallucinationMode === 'charge') stopHallucinationChaseSound(); // 회피·잡힘·장소 이동 모두 여기를 지난다
   hallucinationMode = null;
   ambientTimer = 0;
   ambientNextIn = randomBetween(ambientSightingIntervalRange);
@@ -508,47 +512,72 @@ function updateRedEyes() {
   }
 }
 
-// ---- 15% 미만, 불이 꺼진 어둠 속(플래시 없음): 9초마다 얼굴 하나가 2초 동안 흐릿 → 선명 → 흐릿하게 나타난다 ----
-// 직전에 나온 얼굴은 다음에 제외하고 그다음부터 다시 나올 수 있다. 플래시·조명·엘리베이터 조명으로 밝아지거나 창·컷씬으로 멈추면 즉시 사라진다.
+// ---- 15% 미만, 불이 꺼진 어둠 속(플래시 없음): 9초마다 얼굴 하나가 수호가 바라보는 쪽 조금 앞 어둠 속에 나타난다 ----
+// 얼굴은 월드 안(#world)에서 수호와 같은 높이에 그 자리에 머문다. 어둠 막 아래에 있어 플래시 없이 수호 둘레의 좁은 시야(어둠 속 밝은 원)에
+// 들어와야 보이고, 수호가 거의 닿을 만큼 다가오면 빠르게 서서히 사라진다. 플래시·조명·엘리베이터 조명 등으로 밝아지거나 창·컷씬으로 멈추면 즉시 사라진다.
+// 직전에 나온 얼굴은 다음에 제외하고 그다음부터 다시 나올 수 있다.
 const darkFace = document.getElementById('dark-face');
 // 그림을 늘리려면 번호를 추가한다(dark-face-<번호>.png). 직전에 나온 그림은 빼고 무작위로 고른다.
 const DARK_FACE_IMAGES = [3, 4, 5, 6, 7, 8, 9].map(n => `assets/ui/hallucination/dark-face-${n}.png`);
+const darkFaceAhead = 300; // 수호가 바라보는 쪽으로 이만큼 앞(시야 원 바깥이라 처음에는 어둠에 가려 보이지 않는다)에 나타난다
+const darkFaceSightPx = 45; // 수호가 얼굴에 거의 닿을 만큼(이 거리 안으로) 다가오면 사라지기 시작한다(그 전까지 시야 원 안에서 어둠 사이로 비친다)
+const darkFacePeak = .85, darkFaceFadeInMs = 450, darkFaceFadeOutMs = 350, darkFaceMaxLifeMs = 8000;
 let darkFaceTimer = 0;
 let darkFaceLife = 0;
 let darkFaceLast = -1;
+let darkFaceX = 0;
+let darkFaceOpacity = 0;
+let darkFaceLeaving = false;
 
-let darkFaceForced = false; // 콘솔의 점프스케어 버튼으로 낸 얼굴: 체력·쿨타임과 상관없이 2초 동안 보이지만, 불이 꺼진 어둠 속이 아니면 나오지 않는다
+let darkFaceForced = false; // 콘솔의 점프스케어 버튼으로 낸 얼굴: 체력·쿨타임과 상관없이 나오지만, 불이 꺼진 어둠 속이 아니면 나오지 않는다
 
-// 얼굴 하나를 왼쪽이나 오른쪽 가장자리에 띄운다(직전 얼굴은 제외).
+// 얼굴 하나를 수호가 바라보는 쪽 조금 앞, 수호와 같은 높이에 둔다(직전 얼굴은 제외).
 function showDarkFace() {
   darkFaceTimer = darkFaceLife = 0;
   const others = DARK_FACE_IMAGES.map((_, index) => index).filter(index => index !== darkFaceLast);
   const choices = others.length ? others : [0]; // 그림이 하나뿐이면 계속 같은 얼굴이다
   darkFaceLast = choices[Math.floor(Math.random() * choices.length)];
   darkFace.src = DARK_FACE_IMAGES[darkFaceLast];
-  darkFace.style.left = Math.random() < .5 ? '16%' : '84%'; // 왼쪽·오른쪽 가장자리에 50%씩
+  darkFaceX = Math.max(60, Math.min(worldWidth - 60, body.position.x + facing * darkFaceAhead));
+  darkFace.style.left = `${darkFaceX}px`;
+  darkFace.style.top = `${body.position.y}px`;
+  darkFaceOpacity = 0;
+  darkFaceLeaving = false;
+  darkFace.style.opacity = '0';
   darkFace.hidden = false;
-  darkFace.style.animation = 'none'; void darkFace.offsetWidth; darkFace.style.animation = ''; // 애니메이션을 처음부터 다시
+}
+
+function hideDarkFace() {
+  darkFace.hidden = true;
+  darkFaceForced = darkFaceLeaving = false;
+  darkFaceOpacity = 0;
+}
+
+// 떠 있는 얼굴: 어둠 속에 서서히 나타나 기다리다가, 시야 안쪽으로 들어오거나 오래 머물면 빠르게 사라진다. 밝아지면 즉시 사라진다.
+function updateShownDarkFace(elapsed) {
+  if (sanityExposure() !== 'dark' || phoneLightOn) return hideDarkFace();
+  darkFaceLife += elapsed;
+  if (Math.abs(darkFaceX - body.position.x) < darkFaceSightPx || darkFaceLife >= darkFaceMaxLifeMs) darkFaceLeaving = true;
+  darkFaceOpacity = darkFaceLeaving ? darkFaceOpacity - darkFacePeak * elapsed / darkFaceFadeOutMs
+    : Math.min(darkFacePeak, darkFaceOpacity + darkFacePeak * elapsed / darkFaceFadeInMs);
+  if (darkFaceOpacity <= 0) return hideDarkFace();
+  darkFace.style.opacity = darkFaceOpacity.toFixed(3);
 }
 
 function updateDarkFace(elapsed, fsmPaused) {
-  if (darkFaceForced && sanityExposure() !== 'dark') { darkFace.hidden = true; darkFaceForced = false; return; }
   if (darkFaceForced) {
-    darkFaceLife += elapsed;
-    if (darkFaceLife >= 2000) { darkFace.hidden = true; darkFaceForced = false; }
+    if (darkFace.hidden) darkFaceForced = false;
+    else updateShownDarkFace(elapsed);
     return;
   }
   if (fsmPaused || sanity >= 15 || sanityExposure() !== 'dark') {
-    darkFace.hidden = true;
+    hideDarkFace();
     darkFaceTimer = darkFaceLife = 0;
     return;
   }
+  if (!darkFace.hidden) return updateShownDarkFace(elapsed);
   darkFaceTimer += elapsed;
-  if (!darkFace.hidden) {
-    darkFaceLife += elapsed;
-    if (darkFaceLife >= 2000) darkFace.hidden = true;
-  }
-  if (darkFaceTimer >= 9000) showDarkFace();
+  if (darkFaceTimer >= 9000 && !phoneLightOn) showDarkFace();
 }
 
 // 정신력 0%의 눈 연출: 깜빡일 때마다 30% 확률로 눈 그림 넷 중 하나가 화면 전체를 0.1초 덮는다(깜빡임 화면 대신).

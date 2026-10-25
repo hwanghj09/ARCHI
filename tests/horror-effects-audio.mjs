@@ -48,7 +48,7 @@ try {
     for (const sample of samples) { if (!Number.isFinite(sample)) throw new Error('Non-finite audio'); peak = Math.max(peak, Math.abs(sample)); energy += sample * sample; }
     return { name, duration: buffer.duration, peak, rms: Math.sqrt(energy / samples.length), cached: gameAudioBuffer(name) === buffer };
   }));
-  assert.equal(waveforms.length, 3);
+  assert.equal(waveforms.length, 1, 'Only the footsteps remain as an auditory hallucination');
   for (const sound of waveforms) {
     assert(sound.cached && sound.duration >= 1.5);
     assert(sound.peak > .08 && sound.peak < .8, `${sound.name} has audible peaks with headroom`);
@@ -67,14 +67,13 @@ try {
       return out;
     });
     assert(Math.abs(cue.pan) >= .29 && Math.abs(cue.pan) <= .67, 'Hallucination is placed to the left or right');
-    assert(cue.gain > 0 && cue.gain < .6);
-    if (heard.length) assert.notEqual(cue.name, heard.at(-1), 'Consecutive hallucinations differ');
+    assert(cue.gain > 0 && cue.gain < .9);
     heard.push(cue.name);
     await new Promise(resolve => setTimeout(resolve, 120));
   }
 
   const scheduled = await page.evaluate(() => {
-    auditoryHallucinationRoom = ''; updateGameAudio(0);
+    sanity = 25; auditoryHallucinationRoom = ''; updateGameAudio(0); // 환청은 정신력 30% 미만부터
     auditoryHallucinationElapsed = 0; auditoryHallucinationNext = 1000;
     for (let i = 0; i < 9; i++) updateGameAudio(100);
     const early = [...gameAudioEffects].some(sound => auditoryHallucinationSounds.includes(sound.name) && !sound.stopping);
@@ -91,7 +90,7 @@ try {
 
   for (const reason of ['inspection', 'phone', 'story', 'chase', 'wire', 'elevator', 'transition', 'muted', 'menu']) {
     const stopped = await page.evaluate(reason => {
-      sanity = 35; updateSanity(0); clearHallucinationEvents();
+      sanity = 25; updateSanity(0); clearHallucinationEvents();
       if (!debugTriggerAuditoryHallucination()) throw new Error('No cue before ' + reason);
       const previousVolume = gameVolume;
       if (reason === 'inspection') usingInspection = true;
@@ -114,7 +113,7 @@ try {
   }
 
   await page.evaluate(() => {
-    sanity = 35; clearHallucinationEvents();
+    sanity = 25; clearHallucinationEvents();
     debugTriggerAuditoryHallucination();
     document.__audioHidden = Object.getOwnPropertyDescriptor(document, 'hidden');
     Object.defineProperty(document, 'hidden', { configurable: true, value: true });

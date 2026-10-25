@@ -10,7 +10,7 @@ const gameAudioLastVariant = new Map();
 let gameAudioRoomKey = '';
 let gameAudioRoomElapsed = 0;
 let gameAudioRoomNext = 10000;
-const auditoryHallucinationSounds = ['hallucination-footsteps', 'hallucination-knock', 'hallucination-whisper'];
+const auditoryHallucinationSounds = ['hallucination-footsteps']; // 환청은 발소리 하나뿐이다(정신력 30% 미만, updateGameAudio)
 let auditoryHallucinationLast = null;
 let auditoryHallucinationRoom = '';
 let auditoryHallucinationElapsed = 0;
@@ -103,7 +103,7 @@ function gameAudioBuffer(name, variant = 0) {
     'door-metal': .65, 'door-wood': .72, 'door-glass': .52, 'door-slide': .9,
     paper: .42, 'bag-zip': .48, drawer: .62, lever: .3, plug: .26, 'card-scan': .34, dial: .18,
     keyboard: .09, 'mouse-click': .075, 'power-relay': .65, 'water-drop': .5, 'pipe-tick': .55,
-    'hallucination-footsteps': 1.6, 'hallucination-knock': 1.5, 'hallucination-whisper': 2.8, 'ending-true': 7, 'ending-bad': 7 };
+    'hallucination-footsteps': 1.6, 'ending-true': 7, 'ending-bad': 7 };
   const loop = ['office', 'dark', 'wind', 'motor', 'cctv-bgm', 'cctv-dread',
     'server-room', 'electrical-room', 'plumbing', 'hall-room'].includes(name);
   const duration = loop ? 8 : durations[name];
@@ -117,9 +117,6 @@ function gameAudioBuffer(name, variant = 0) {
   const hit = (t, at, decay) => t >= at ? Math.exp(-(t - at) * decay) : 0;
   // 버저·삑 소리처럼 일정하게 이어지는 음은 at부터 length 동안만 켜고 양끝을 짧게 다듬는다.
   const gate = (t, at, length) => t >= at && t < at + length ? Math.min(1, (t - at) / .006, (at + length - t) / .02) : 0;
-  // 잡음에 성도 공명을 입혀 말뜻을 알아들을 수 없는 숨 섞인 속삭임을 만든다.
-  const whisperFormants = name === 'hallucination-whisper' ? [550, 1450, 2600].map(frequency =>
-    ({ a: 1.92 * Math.cos(2 * Math.PI * frequency * pitch / rate), first: 0, second: 0 })) : null;
   for (let i = 0; i < samples.length; i++) {
     const t = i / rate;
     seed = (Math.imul(seed, 1664525) + 1013904223) >>> 0;
@@ -130,17 +127,6 @@ function gameAudioBuffer(name, variant = 0) {
     switch (name) {
       case 'hallucination-footsteps': sample = (.34 * low + .12 * sin(86, t)) * (hit(t, .02, 28) + .75 * hit(t, .48, 30) + .5 * hit(t, 1.03, 32)) +
         .1 * soft * (hit(t, .07, 40) + .7 * hit(t, .53, 40) + .45 * hit(t, 1.08, 40)); break;
-      case 'hallucination-knock': sample = (.2 * sin(108, t) + .23 * low + .08 * soft) * (hit(t, .04, 22) + .65 * hit(t, .62, 25)); break;
-      case 'hallucination-whisper': {
-        let voice = 0;
-        for (const formant of whisperFormants) {
-          const next = .04 * noise + formant.a * formant.first - .9216 * formant.second;
-          formant.second = formant.first; formant.first = next; voice += next;
-        }
-        const syllables = Math.exp(-(((t - .45) / .2) ** 2)) + .65 * Math.exp(-(((t - 1.1) / .18) ** 2)) + .85 * Math.exp(-(((t - 1.85) / .35) ** 2));
-        sample = (.35 * voice + .045 * (noise - soft)) * syllables;
-        break;
-      }
       case 'step': sample = .42 * low * hit(t, 0, 25) + .18 * sin(92, t) * hit(t, 0, 34) + .22 * soft * hit(t, .045, 38); break;
       case 'door': sample = .18 * low * Math.sin(Math.PI * t / duration) + (.22 * sin(74, t) + .2 * soft) * hit(t, .47, 28); break;
       case 'elevator-door': sample = (.1 * sin(138, t) + .3 * low) * Math.sin(Math.PI * t / duration) + .2 * soft * hit(t, .88, 36); break;
@@ -272,7 +258,7 @@ function playGameSound(name, options = {}) {
   source.buffer = buffer;
   source.playbackRate.value = name === 'step' || name === 'robot-step' ? .94 + Math.random() * .12 : 1;
   gain.gain.value = (name === 'step' ? (options.landing ? .65 : options.running ? .6 : .42) : name === 'blackout' ? .7 : name === 'cctv-hit' ? .85 : name === 'cctv-rise' ? .7 :
-    name === 'robot-servo' ? .35 : name === 'robot-step' ? .52 :
+    name === 'robot-servo' ? .35 : name === 'robot-step' ? .52 : name === 'hallucination-footsteps' ? 1.1 :
     ['paper', 'keyboard', 'mouse-click', 'bag-zip', 'water-drop', 'pipe-tick'].includes(cue) ? .32 : .6) * (1 - distance / 800);
   const pan = Number.isFinite(options.x) ? gameAudioContext.createStereoPanner?.() : null;
   source.connect(gain);
@@ -289,7 +275,8 @@ function playGameSound(name, options = {}) {
 
 function playAuditoryHallucination() {
   if (!gameAudioContext || gameAudioContext.state !== 'running' || document.hidden || mainMenuActive || !gameStarted || gameVolume <= 0 || restoringProgress) return false;
-  const choices = auditoryHallucinationSounds.filter(sound => sound !== auditoryHallucinationLast);
+  const others = auditoryHallucinationSounds.filter(sound => sound !== auditoryHallucinationLast);
+  const choices = others.length ? others : auditoryHallucinationSounds; // 소리가 하나뿐이면 같은 소리를 다시 쓴다
   const name = choices[Math.floor(Math.random() * choices.length)];
   const x = body.position.x + (Math.random() < .5 ? -1 : 1) * (180 + Math.random() * 220);
   if (!playGameSound(name, { x })) return false;
@@ -348,6 +335,9 @@ let lastHallucinationSightingSound = -1;
 // 환각에게 삼켜져 쓰러질 때의 포효. 죽음 영상(hallucination-jumpscare.mp4, 소리 없음)에서 입을 벌리는 순간부터 소리 파일의 0.3초 지점을 들려준다.
 const hallucinationDevouredElement = new Audio('assets/audio/hallucination-roar.mp3');
 hallucinationDevouredElement.preload = 'auto';
+// 환각 추격(0% 돌진)이 시작될 때 시작 효과음과 함께 깔리는 피아노. 추격이 어떻게 끝나든(회피·잡힘·장소 이동) 멈춘다(sanity.js).
+const hallucinationChaseElement = new Audio('assets/audio/hallucination-chase-piano.mp3');
+hallucinationChaseElement.preload = 'auto';
 
 // B2 엘리베이터에서 경비 로봇이 문을 억지로 열기 시작할 때의 소리(b2-ending.js).
 const doorPryElement = new Audio('assets/audio/b2-door-pry.mp3');
@@ -410,42 +400,23 @@ function playRobotStepFile(distance) {
   return true;
 }
 
-// B2 보스의 쇠공이 머리 위를 지나갈 때 공기를 가르는 "우웅" 소리(b2-ending.js). 파일 없이 바로 만든다:
-// 대역 필터를 건 잡음이 위로 올랐다 내려가고(지나가는 도플러), 낮은 음이 같이 울렸다 가라앉는다. 가장 센 순간이 peak초에 온다.
-function playB2BallWhoosh(peak = .25) {
-  if (!gameAudioContext || gameAudioContext.state !== 'running' || document.hidden || gameVolume <= 0 || mainMenuActive || !gameStarted) return;
-  if (gameAudioEffects.size >= 6) return;
-  const ctx = gameAudioContext, now = ctx.currentTime, length = peak + .55;
-  const noiseBuffer = ctx.createBuffer(1, Math.ceil(ctx.sampleRate * length), ctx.sampleRate);
-  const samples = noiseBuffer.getChannelData(0);
-  for (let i = 0; i < samples.length; i++) samples[i] = Math.random() * 2 - 1;
-  const noise = ctx.createBufferSource();
-  noise.buffer = noiseBuffer;
-  const band = ctx.createBiquadFilter();
-  band.type = 'bandpass';
-  band.Q.value = 1.4;
-  band.frequency.setValueAtTime(260, now);
-  band.frequency.exponentialRampToValueAtTime(900, now + peak);
-  band.frequency.exponentialRampToValueAtTime(220, now + length);
-  const hum = ctx.createOscillator();
-  hum.type = 'sine';
-  hum.frequency.setValueAtTime(110, now);
-  hum.frequency.exponentialRampToValueAtTime(150, now + peak);
-  hum.frequency.exponentialRampToValueAtTime(70, now + length);
-  const gain = ctx.createGain();
-  gain.gain.setValueAtTime(.0001, now);
-  gain.gain.exponentialRampToValueAtTime(.9, now + peak);
-  gain.gain.exponentialRampToValueAtTime(.0001, now + length);
-  const humGain = ctx.createGain();
-  humGain.gain.value = .35;
-  noise.connect(band).connect(gain);
-  hum.connect(humGain).connect(gain);
-  gain.connect(gameAudioMaster);
-  noise.start(now);
-  hum.start(now);
-  noise.stop(now + length);
-  hum.stop(now + length);
-  noise.onended = () => { gain.disconnect(); band.disconnect(); humGain.disconnect(); };
+// 2페이즈 보스의 쇠공 휙 소리(b2-ending.js): 던질 때는 휘두르기 시작부터 공이 머리 위로 지나가는 동안, 근접 공격은 공이 내려오기 직전에 재생한다.
+const b2BallSwooshElement = new Audio('assets/audio/b2-ball-swoosh.mp3');
+b2BallSwooshElement.preload = 'auto';
+const b2BallSwooshBoost = 2.2; // 원본이 작아 게임 볼륨보다 크게 키운다(오디오 볼륨은 1이 최대라 게임 믹서의 gain으로 키운다)
+let b2BallSwooshGain = null;
+
+function playB2BallSwoosh() {
+  if (document.hidden || gameVolume <= 0 || mainMenuActive || !gameStarted) return;
+  // 게임 믹서(gameAudioMaster, 게임 볼륨을 이미 반영)에 한 번 연결해 두면 그 뒤로는 gain으로 크기를 정한다.
+  if (!b2BallSwooshGain && gameAudioContext && gameAudioMaster) {
+    b2BallSwooshGain = gameAudioContext.createGain();
+    b2BallSwooshGain.gain.value = b2BallSwooshBoost;
+    gameAudioContext.createMediaElementSource(b2BallSwooshElement).connect(b2BallSwooshGain).connect(gameAudioMaster);
+  }
+  b2BallSwooshElement.volume = b2BallSwooshGain ? 1 : Math.max(0, Math.min(1, gameVolume));
+  b2BallSwooshElement.currentTime = 0;
+  b2BallSwooshElement.play().catch(() => {});
 }
 
 // B2 보스가 쇠공을 던지기 전 준비 동작(팔을 뻗고 떠는 때)이 시작될 때 나는 쇠 삐걱이는 소리(b2-ending.js).
@@ -489,10 +460,22 @@ function setB2Siren(on) {
   if (b2SirenElement.paused && !b2SirenWaiting) b2SirenElement.play().catch(() => {});
 }
 
-function playHallucinationDevouredSound() {
+function playHallucinationChaseSound() {
+  if (document.hidden || gameVolume <= 0 || mainMenuActive || !gameStarted || restoringProgress) return;
+  hallucinationChaseElement.volume = Math.max(0, Math.min(1, gameVolume));
+  hallucinationChaseElement.currentTime = 0;
+  hallucinationChaseElement.play().catch(() => {});
+}
+
+function stopHallucinationChaseSound() {
+  hallucinationChaseElement.pause();
+  hallucinationChaseElement.currentTime = 0;
+}
+
+function playHallucinationDevouredSound(skip = 0) { // skip: 늦게 트는 만큼(초) 소리도 그만큼 건너뛴다
   if (document.hidden || gameVolume <= 0) return;
   hallucinationDevouredElement.volume = Math.max(0, Math.min(1, gameVolume));
-  hallucinationDevouredElement.currentTime = .3;
+  hallucinationDevouredElement.currentTime = .3 + skip;
   hallucinationDevouredElement.play().catch(() => {});
 }
 
@@ -547,7 +530,7 @@ function pauseGameAudio() {
   sanityMusicElement.pause();
   sanityMusicGain = sanityMusicTarget = 0;
   sanityMusicElement.volume = 0;
-  if (document.hidden || mainMenuActive || !gameStarted) for (const element of [hallucinationSoundElement, ...hallucinationSightingElements, hallucinationDevouredElement, redEyeBreakDragonElement, redEyeBreakUniversElement, doorPryElement, b2PhaseDoorElement, b2BossStepElement, ...robotStepElements, b2BossWindupElement, b2SirenElement]) element.pause();
+  if (document.hidden || mainMenuActive || !gameStarted) for (const element of [hallucinationSoundElement, ...hallucinationSightingElements, hallucinationDevouredElement, hallucinationChaseElement, redEyeBreakDragonElement, redEyeBreakUniversElement, doorPryElement, b2PhaseDoorElement, b2BossStepElement, ...robotStepElements, b2BossWindupElement, b2BallSwooshElement, b2SirenElement]) element.pause();
   if (!gameAudioContext) return;
   for (const sound of gameAudioAmbience.values()) stopGameAudioSource(sound);
   gameAudioAmbience.clear();
@@ -592,7 +575,7 @@ function updateGameAudio(elapsed = step) {
   const wanted = new Map([[background, dread ? .42 : haunted ? .34 : roof ? .23 : lit ? .18 : .14]]);
   const fear = sanityTierOf(sanity);
   const musicAllowed = !dread && !haunted && !openingActive && !blackoutSceneActive && !storySceneActive && !cctvSceneActive && !b2CaptureActive && !solarRestoreActive && !playerCaught && !hallucinationCaught;
-  updateAuditoryHallucinations(elapsed, musicAllowed && !inB2MainRoom() && fear >= 1 && !hallucinationEventBlocked() && !hallucinationMode &&
+  updateAuditoryHallucinations(elapsed, musicAllowed && !inB2MainRoom() && sanity < 30 && !hallucinationEventBlocked() && !hallucinationMode &&
     guardPatrol.mode !== 'chase' && roamer.mode !== 'chase' && b2Ending.phase !== 'running');
   const roomKey = `${room}:${dynamicFloorId}:${currentSceneFloor}:${selectingFloor}`;
   if (roomKey !== gameAudioRoomKey) {
