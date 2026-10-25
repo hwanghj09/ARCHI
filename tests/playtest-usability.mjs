@@ -17,7 +17,7 @@ try {
 
   for (const viewport of [{ width: 1280, height: 720 }, { width: 390, height: 844 }]) {
     await page.setViewportSize(viewport);
-    await page.evaluate(() => { collectedItems.delete('rooftop-key'); openKeyBox(); });
+    await page.evaluate(() => { collectedItems.delete('rooftop-key'); openHydrant(); });
     const key = page.getByRole('button', { name: '낡은 열쇠 줍기', exact: true });
     assert(await key.evaluate(element => document.activeElement === element));
     assert.match(await key.innerText(), /줍기.*Enter/);
