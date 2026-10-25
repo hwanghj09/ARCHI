@@ -32,14 +32,18 @@ function debugGoTo(id) {
   else performFloorChange(id, id === 'rooftop' ? null : 0);
 }
 
-function skipToPuzzle(index) {
-  const step = PUZZLE_STEPS[index];
+// extra: 그 단계 안의 앞선 퍼즐까지 푼 상태로 더 챙길 플래그. power: 이 층에 태양광 조명을 보낸다.
+function restoreBeforeStep(index, extra = [], power = null) {
   const done = PUZZLE_STEPS.slice(0, index);
   const solar = done.findLast(entry => entry.solar);
   // 앞으로도 뒤로도 갈 수 있게 소지품은 이 퍼즐 직전 상태로 덮어쓴다. 단서·사진·배터리·정신력은 그대로 둔다.
-  restoreProgress({ ...progressSnapshot(), items: done.flatMap(entry => entry.items || []), blackout: index > 0,
-    solarEnabled: Boolean(solar), solarPoweredFloors: solar?.solar || [], logPuzzle: null, cabin: null, runtime: {} });
-  transitionScene(() => debugGoTo(step.at));
+  restoreProgress({ ...progressSnapshot(), items: [...done.flatMap(entry => entry.items || []), ...extra], blackout: index > 0,
+    solarEnabled: Boolean(solar), solarPoweredFloors: solar && power ? [power] : solar?.solar || [], logPuzzle: null, cabin: null, runtime: {} });
+}
+
+function skipToPuzzle(index) {
+  restoreBeforeStep(index);
+  transitionScene(() => debugGoTo(PUZZLE_STEPS[index].at));
 }
 
 document.getElementById('debug-puzzle').addEventListener('submit', event => {

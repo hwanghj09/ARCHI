@@ -51,11 +51,7 @@ function submitKeypad() {
     keypadTarget = null;
     closeKeypad();
     sayLine('비밀번호는 맞았는데… 레버를 당기자마자 전선이 끊어져 버렸어. 다시 이어야 해.', 5000);
-    openWirePanel(() => {
-      collectedItems.add('roof-wires-fixed');
-      setSolarPower(true);
-      sayLine('태양광 장치가 켜졌다. 배전반에서 17층을 고르자. 승강기 전기는 관리실에서 따로 연결해야 해.', 5000);
-    });
+    openRoofWirePanel();
   } else if (target.type === 'room') {
     unlockRoomDoor(target); // 먼저 열어야 closeKeypad의 updateInteraction이 "들어가기" 안내를 바로 띄운다
     closeKeypad();
@@ -65,6 +61,15 @@ function submitKeypad() {
     // 열린 소품의 내용은 조사 창으로 보인다(1층 경비 로봇 정비 패널은 writing이 있으면 그 화면으로).
     openInspection(target.name, target.message, target);
   }
+}
+
+// 옥상 태양광 전선 퍼즐(개발 도구의 퍼즐 열기도 쓴다).
+function openRoofWirePanel() {
+  openWirePanel(() => {
+    collectedItems.add('roof-wires-fixed');
+    setSolarPower(true);
+    sayLine('태양광 장치가 켜졌다. 배전반에서 17층을 고르자. 승강기 전기는 관리실에서 따로 연결해야 해.', 5000);
+  });
 }
 
 // 맞는 번호를 누르거나 카드키를 대면(manual-control.js) 그 자리에서 문이 열린다. 다음에 층을 그릴 때는 unlockedBy를 챙긴 것으로 열린 채 그린다.
