@@ -567,7 +567,8 @@ const b2ThreatKinds = [
     return { text: `삭제 작업 일시 정지 — ${job}`, answer: `resume ${job}` };
   }, miss: '삭제 작업이 정지된 채로 되돌아갑니다.' },
 ];
-const b2WrongReplies = ['틀렸습니다, 수호 씨.', '손이 떨리시는군요.', '그 명령은 저에게 닿지 않습니다.'];
+const b2Taunts = ['허~접', '발가락으로 하고 계시나요?']; // 틀린 명령과 시간 초과 둘 다에서 나온다
+const b2WrongReplies = ['손이 떨리시는군요.', '그 명령은 저에게 닿지 않습니다.', ...b2Taunts];
 const b2ProgressLines = [[40, '수호 씨. 제가 없어지면 이 건물의 밤은 누가 지킵니까?'], [70, '기억 저장소가 비어 갑니다. 17층의 당신 자리도요.'],
   [90, '…그만. 그만하세요.']];
 
@@ -652,6 +653,7 @@ function missB2Threat() {
   b2Ending.progress = Math.max(0, b2Ending.progress - b2MissProgress);
   b2Ending.barricade = Math.max(0, b2Ending.barricade - b2MissBarricade);
   b2Log('archi', kind.miss);
+  b2Log('archi', b2Taunts[Math.floor(Math.random() * b2Taunts.length)]);
   b2Log('sys', `삭제 -${b2MissProgress}% · ARCHI가 경비 로봇 출력을 올렸다 (바리케이드 -${b2MissBarricade}%)`);
   playGameSound('deny');
   if (!b2Ending.barricade) breakB2Barricade();
