@@ -518,7 +518,7 @@ function updateRedEyes() {
 // 직전에 나온 얼굴은 다음에 제외하고 그다음부터 다시 나올 수 있다.
 const darkFace = document.getElementById('dark-face');
 // 그림을 늘리려면 번호를 추가한다(dark-face-<번호>.png). 직전에 나온 그림은 빼고 무작위로 고른다.
-const DARK_FACE_IMAGES = [3, 4, 5, 6, 7, 8, 9].map(n => `assets/ui/hallucination/dark-face-${n}.png`);
+const DARK_FACE_IMAGES = [5, 6, 7, 8, 9].map(n => `assets/ui/hallucination/dark-face-${n}.png`);
 const darkFaceAhead = 300; // 수호가 바라보는 쪽으로 이만큼 앞(시야 원 바깥이라 처음에는 어둠에 가려 보이지 않는다)에 나타난다
 const darkFaceSightPx = 45; // 수호가 얼굴에 거의 닿을 만큼(이 거리 안으로) 다가오면 사라지기 시작한다(그 전까지 시야 원 안에서 어둠 사이로 비친다)
 const darkFacePeak = .85, darkFaceFadeInMs = 450, darkFaceFadeOutMs = 350, darkFaceMaxLifeMs = 8000;

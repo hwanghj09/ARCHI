@@ -13,7 +13,32 @@ function setDebugSanity(value) {
 debugSanityRange.addEventListener('input', () => setDebugSanity(debugSanityRange.value));
 debugSanityNumber.addEventListener('input', () => setDebugSanity(debugSanityNumber.value));
 
-function syncDebugSanity() {
+// +/-를 꾹 누르면 정신력이 초당 debugSanityKeyRate씩 오르내린다. 글자 입력 칸에서는 동작하지 않는다.
+const debugSanityKeyRate = 30;
+const debugSanityKeys = { Equal: 1, NumpadAdd: 1, Minus: -1, NumpadSubtract: -1 };
+const debugSanityHeld = new Set();
+let debugSanityLastTime = 0;
+addEventListener('keydown', event => {
+  if (event.ctrlKey || event.altKey || event.metaKey || !(event.code in debugSanityKeys) || event.target.closest?.('input, textarea, [contenteditable]')) return;
+  event.preventDefault();
+  event.stopPropagation();
+  debugSanityHeld.add(event.code);
+}, true);
+addEventListener('keyup', event => debugSanityHeld.delete(event.code), true);
+addEventListener('blur', () => debugSanityHeld.clear());
+
+// K: 환각 추격, L: 점프스케어(콘솔 창 버튼과 같은 함수). 글자 입력 칸에서는 동작하지 않는다.
+const debugEventKeys = { KeyK: debugTriggerChaseHallucination, KeyL: debugTriggerJumpscare };
+addEventListener('keydown', event => {
+  if (!(event.code in debugEventKeys) || event.repeat || event.ctrlKey || event.altKey || event.metaKey ||
+    event.target.closest?.('input, textarea, [contenteditable]')) return;
+  debugEventKeys[event.code]();
+});
+
+function syncDebugSanity(time = 0) {
+  const direction = [...debugSanityHeld].reduce((sum, code) => sum + debugSanityKeys[code], 0);
+  if (direction) setDebugSanity(sanity + Math.sign(direction) * debugSanityKeyRate * Math.min(100, time - debugSanityLastTime) / 1000);
+  debugSanityLastTime = time;
   // 두 입력 중 포커스가 없는 쪽만 맞춘다 — 슬라이더를 끄는 동안에도 숫자 칸은 실시간으로 따라와야 한다.
   const rounded = String(Math.round(sanity));
   if (document.activeElement !== debugSanityRange && debugSanityRange.value !== rounded) debugSanityRange.value = rounded;
